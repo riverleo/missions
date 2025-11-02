@@ -41,7 +41,7 @@
 				{#each col as square}
 					<Square />
 				{/each}
-		</div>
+			</div>
 		{/each}
 	</div>
 	
@@ -49,7 +49,7 @@
 		{#each items as item(item.id)}
 			<div animate:flip={{ duration: flipDurationMs }}>
 				<Tile letter={item.letter} />
-		</div>
+			</div>
 		{/each}
 </div>
 	
@@ -80,7 +80,8 @@
 		display: flex;
 		justify-content: flex-start;
 		flex-grow: 0;
-		width: calc((min(5vmin, 50px) + 4px) * 7)
+		width: calc((min(5vmin, 50px) + 4px) * 7);
+        height: calc(2px + min(5vmin, 50px));
 	}
 
 	.rack > * {

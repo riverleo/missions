@@ -16,10 +16,9 @@
 	};
 </script>
 
-
-<div class="square" style="{items.find(tile => tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]) ? 'background: rgba(255, 255, 255, 0.2)': ''}" use:dndzone={options} on:consider={handleDnd} on:finalize={handleDnd}>
+<div class="square" style="{items.find(tile => tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]) ? 'background: rgba(255, 255, 255, 0.2)': ''}" use:dndzone={options} onconsider={handleDnd} onfinalize={handleDnd}>
 	{#each items as tile(tile.id)}
-	  <Tile letter={tile.letter} />
+        <Tile letter={tile.letter} />
 	{/each}
 </div>
 
