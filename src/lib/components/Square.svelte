@@ -1,0 +1,36 @@
+<script lang="ts">
+	import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, type DndEvent } from 'svelte-dnd-action';
+	import Tile from './Tile.svelte';
+
+	let items: any[] | null | undefined = [];
+	
+	function handleDnd(e: CustomEvent<DndEvent>) {
+		items = e.detail.items;
+	}
+	
+	$: options = {
+		dropFromOthersDisabled: items?.length,
+		items,
+		dropTargetStyle: {},
+		flipDurationMs: 100
+	};
+
+</script>
+
+
+<div class="square" style="{items?.find(tile => tile[SHADOW_ITEM_MARKER_PROPERTY_NAME]) ? 'background: rgba(255, 255, 255, 0.2)': ''}" use:dndzone={options} on:consider={handleDnd} on:finalize={handleDnd}>
+	{#each items as tile(tile.id)}
+	  <Tile letter={tile.letter} />
+	{/each}
+</div>
+
+<style>
+  .square {
+		border: 2px solid #272727;
+    height: calc(2px + min(5vmin, 50px));
+    width: calc(2px + min(5vmin, 50px));
+    border-radius: calc(min(5vmin, 50px) / 6.25);
+    background-color: #393939;
+	}
+</style>
+
