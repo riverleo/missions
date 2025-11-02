@@ -9,6 +9,6 @@
 
 	<div class="flex gap-4">
 		<Button variant="outline">Button</Button>
-		<Button onclick={toggleMode}>다크 모드 토글</Button>
+		<Button href="#" onclick={toggleMode}>다크 모드 토글</Button>
 	</div>
 </div>
