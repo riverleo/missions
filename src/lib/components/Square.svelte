@@ -12,7 +12,7 @@
 		dropFromOthersDisabled: items.length > 0,
 		items,
 		dropTargetStyle: {},
-		flipDurationMs: 100
+		flipDurationMs: 100,
 	};
 </script>
 
@@ -26,10 +26,10 @@
 <style>
   .square {
 		border: 2px solid #272727;
-    height: calc(2px + min(5vmin, 50px));
-    width: calc(2px + min(5vmin, 50px));
-    border-radius: calc(min(5vmin, 50px) / 6.25);
-    background-color: #393939;
+        height: calc(2px + min(5vmin, 50px));
+        width: calc(2px + min(5vmin, 50px));
+        border-radius: calc(min(5vmin, 50px) / 6.25);
+        background-color: #393939;
 	}
 </style>
 

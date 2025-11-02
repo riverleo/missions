@@ -8,7 +8,7 @@
 	<h1 class="text-4xl font-bold">Welcome to SvelteKit</h1>
 	<p>Visit <a href="https://svelte.dev/docs/kit" class="text-primary underline">svelte.dev/docs/kit</a> to read the documentation</p>
 
-	<div class="flex gap-4">
+	<div class="gap-4">
 		<Button variant="outline">Button</Button>
 		<Button href="#" onclick={toggleMode}>다크 모드 토글</Button>
 	</div>

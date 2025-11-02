@@ -22,17 +22,17 @@
 	}
 	
 	// of type { id: number }[][];
-  const boardGrid = Array.from({ length: 15 }, (_, i) =>
-    Array.from({ length: 15 }, (_, j) => ({ id: i * 15 + j }))
-  );
+	const boardGrid = Array.from({ length: 15 }, (_, i) =>
+		Array.from({ length: 15 }, (_, j) => ({ id: i * 15 + j }))
+	);
 	
-	const flipDurationMs = 300;
+	const flipDurationMs = 10;
 	
-$: options = {
-	items,
-	flipDurationMs,
-	morphDisabled: true
-};
+	$: options = {
+		items,
+		flipDurationMs,
+		morphDisabled: true
+	};
 </script>
 <div class="game-container">
 	<div class="grid">
@@ -56,11 +56,6 @@ $: options = {
 </div>
 
 <style>
-	:global(body *) {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-	}
 	.game-container {
 		display: flex;
 		height: 100%;
@@ -75,6 +70,7 @@ $: options = {
 		flex-direction: row;
 		justify-content: center;
 	}
+
 	.col {
 		display: flex;
 		flex-direction: column;
@@ -86,6 +82,7 @@ $: options = {
 		flex-grow: 0;
 		width: calc((min(5vmin, 50px) + 4px) * 7)
 	}
+
 	.rack > * {
 		margin: 2px;
 	}

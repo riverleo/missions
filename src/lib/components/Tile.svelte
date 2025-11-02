@@ -10,17 +10,17 @@
 
 <style>
   .square {
-    height: calc(min(5vmin, 50px));
-    width: calc(min(5vmin, 50px));
-    border-radius: calc(min(5vmin, 50px) / 6.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #FFF6EB;
+        height: calc(min(5vmin, 50px));
+        width: calc(min(5vmin, 50px));
+        border-radius: calc(min(5vmin, 50px) / 6.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #FFF6EB;
 	}
 
 	.letter {
-    font-size: 2vmin;
-    color: #707070;
-  }
+        font-size: 2vmin;
+        color: #707070;
+    }
 </style>
