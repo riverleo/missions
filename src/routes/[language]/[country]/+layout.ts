@@ -23,6 +23,5 @@ export const load: LayoutLoad = ({ params }) => {
 	return {
 		language,
 		country,
-		locale: `${language}-${country.toUpperCase()}`
 	};
 };
