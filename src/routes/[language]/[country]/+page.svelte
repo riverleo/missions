@@ -4,11 +4,10 @@
 	import DndExample from '$lib/components/dnd-example.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { House, Settings, Users, FileText } from 'lucide-svelte';
-	import type { PageData } from './$types';
 	import * as m from '$lib/paraglide/messages.js';
 
-	let { data }: { data: PageData } = $props();
-	const { language, country, locale } = data;
+	let { data } = $props();
+	const { locale } = data;
 </script>
 
 <Sidebar.Provider>
@@ -22,6 +21,7 @@
 						M
 					</div>
 					<div class="flex flex-col">
+						<span>{m['page.hello']({ name: '강동욱' })}</span>
 						<span class="text-sm font-semibold">{m['app.title']()}</span>
 						<span class="text-xs text-muted-foreground">{m['app.subtitle']()}</span>
 					</div>

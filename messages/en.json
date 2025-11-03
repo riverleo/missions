@@ -1,12 +1,21 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"app.title": "Missions",
-	"app.subtitle": "Your workspace",
-	"nav.menu": "Menu",
-	"nav.home": "Home",
-	"nav.documents": "Documents",
-	"nav.team": "Team",
-	"nav.settings": "Settings",
-	"ui.darkModeToggle": "Toggle Dark Mode",
-	"page.dashboard": "Dashboard"
+	"app": {
+		"title": "Missions",
+		"subtitle": "Your workspace"
+	},
+	"nav": {
+		"menu": "Menu",
+		"home": "Home",
+		"documents": "Documents",
+		"team": "Team",
+		"settings": "Settings"
+	},
+	"ui": {
+		"darkModeToggle": "Toggle Dark Mode"
+	},
+	"page": {
+		"dashboard": "Dashboard",
+		"hello": "Hello, {name}!"
+	}
 }

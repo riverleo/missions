@@ -30,6 +30,9 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(tailwind-merge@3.3.1)(tailwindcss@4.1.16)
     devDependencies:
+      '@inlang/cli':
+        specifier: ^3.0.12
+        version: 3.0.12
       '@inlang/paraglide-js':
         specifier: ^2.4.0
         version: 2.4.0
@@ -248,6 +251,11 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@inlang/cli@3.0.12':
+    resolution: {integrity: sha512-0FZJtgrt1Ol4iwKtA0VICrsHcA3stWTSP2jq8mpTgjTlFU63gr5JcyFljUT8Dp5nDIJYmdh3kJ0a8PhW0X8clQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   '@inlang/paraglide-js@2.4.0':
     resolution: {integrity: sha512-T/m9uoev574/1JrhCnPcgK1xnAwkVMgaDev4LFthnmID8ubX2xjboSGO3IztwXWwO0aJoT1UJr89JCwjbwgnJQ==}
@@ -654,6 +662,11 @@ packages:
   enhanced-resolve@5.18.3:
     resolution: {integrity: sha512-d4lC8xfavMeBjzGr2vECC3fsGXziXZQyJxD868h2M/mBI3PwAuODxAkLkq5HYuvrPYcUtiLzsTo8U3PgX3Ocww==}
     engines: {node: '>=10.13.0'}
+
+  esbuild-wasm@0.19.12:
+    resolution: {integrity: sha512-Zmc4hk6FibJZBcTx5/8K/4jT3/oG1vkGTEeKJUQFCUQKimD6Q7+adp/bdVQyYJFolMKaXkQnVZdV4O5ZaTYmyQ==}
+    engines: {node: '>=12'}
+    hasBin: true
 
   esbuild@0.25.11:
     resolution: {integrity: sha512-KohQwyzrKTQmhXDW1PjCv3Tyspn9n5GcY2RTDqeORIdIJY8yKIF7sTSopFmn/wpMPW4rdPXI0UE5LJLuq3bx0Q==}
@@ -1201,6 +1214,13 @@ snapshots:
 
   '@floating-ui/utils@0.2.10': {}
 
+  '@inlang/cli@3.0.12':
+    dependencies:
+      '@inlang/sdk': 2.4.9
+      esbuild-wasm: 0.19.12
+    transitivePeerDependencies:
+      - babel-plugin-macros
+
   '@inlang/paraglide-js@2.4.0':
     dependencies:
       '@inlang/recommend-sherlock': 0.2.1
@@ -1541,6 +1561,8 @@ snapshots:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.0
+
+  esbuild-wasm@0.19.12: {}
 
   esbuild@0.25.11:
     optionalDependencies:
