@@ -1,0 +1,12 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"app.title": "Missions",
+	"app.subtitle": "您的工作区",
+	"nav.menu": "菜单",
+	"nav.home": "主页",
+	"nav.documents": "文档",
+	"nav.team": "团队",
+	"nav.settings": "设置",
+	"ui.darkModeToggle": "切换深色模式",
+	"page.dashboard": "仪表板"
+}

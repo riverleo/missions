@@ -1,0 +1,12 @@
+{
+	"$schema": "https://inlang.com/schema/inlang-message-format",
+	"app.title": "Missions",
+	"app.subtitle": "ワークスペース",
+	"nav.menu": "メニュー",
+	"nav.home": "ホーム",
+	"nav.documents": "ドキュメント",
+	"nav.team": "チーム",
+	"nav.settings": "設定",
+	"ui.darkModeToggle": "ダークモード切替",
+	"page.dashboard": "ダッシュボード"
+}
