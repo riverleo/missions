@@ -5,7 +5,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { House, Settings, Users, FileText } from 'lucide-svelte';
 	import * as m from '$lib/paraglide/messages.js';
-	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
+	import { getLocale } from '$lib/paraglide/runtime';
 </script>
 
 <Sidebar.Provider>

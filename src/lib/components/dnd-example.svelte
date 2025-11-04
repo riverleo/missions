@@ -39,7 +39,7 @@
 	<div class="grid">
 		{#each boardGrid as col}
 			<div class="col">
-				{#each col as square}
+				{#each col as _square}
 					<Square />
 				{/each}
 			</div>
