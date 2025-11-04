@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { toggleMode } from 'mode-watcher';
-	import DndExample from '$lib/components/dnd-example.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { House, Settings, Users, FileText } from 'lucide-svelte';
 	import * as m from '$lib/paraglide/messages.js';
 	import { getLocale } from '$lib/paraglide/runtime';
+	import { Avatar, AvatarFallback } from '$lib/components/ui/avatar';
 </script>
 
 <Sidebar.Provider open={false}>
@@ -13,13 +13,10 @@
 		<Sidebar.Root collapsible="icon">
 			<Sidebar.Header>
 				<div class="flex items-center gap-2 px-4 py-2">
-					<div
-						class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
-					>
-						M
-					</div>
+					<Avatar>
+						<AvatarFallback>M</AvatarFallback>
+					</Avatar>
 					<div class="flex flex-col">
-						<span>{m['page.hello']({ name: '강동욱' })}</span>
 						<span class="text-sm font-semibold">{m['app.title']()}</span>
 						<span class="text-xs text-muted-foreground">{m['app.subtitle']()}</span>
 					</div>
@@ -78,9 +75,7 @@
 				</div>
 			</header>
 
-			<div class="flex flex-col gap-4 p-8">
-				<DndExample />
-			</div>
+			<div class="flex flex-col gap-4 p-8">hello world</div>
 		</main>
 	</div>
 </Sidebar.Provider>
