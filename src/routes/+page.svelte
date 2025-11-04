@@ -5,10 +5,7 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import { House, Settings, Users, FileText } from 'lucide-svelte';
 	import * as m from '$lib/paraglide/messages.js';
-	import { getLocale } from '$lib/paraglide/runtime';
-	import { localizeHref, localizeHrefTo } from '$lib/i18n';
-
-	let { data } = $props();
+	import { getLocale, localizeHref } from '$lib/paraglide/runtime';
 </script>
 
 <Sidebar.Provider>
@@ -77,7 +74,7 @@
 				<Sidebar.Trigger />
 				<h1 class="text-lg font-semibold">{m['page.dashboard']()}</h1>
 				<div class="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-					<span>{localizeHref('/home')}, {getLocale()}</span>
+					<span>{getLocale()}</span>
 				</div>
 			</header>
 
