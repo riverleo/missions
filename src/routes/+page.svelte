@@ -8,9 +8,9 @@
 	import { getLocale } from '$lib/paraglide/runtime';
 </script>
 
-<Sidebar.Provider>
+<Sidebar.Provider open={false}>
 	<div class="flex min-h-screen w-full">
-		<Sidebar.Root>
+		<Sidebar.Root collapsible="icon">
 			<Sidebar.Header>
 				<div class="flex items-center gap-2 px-4 py-2">
 					<div
