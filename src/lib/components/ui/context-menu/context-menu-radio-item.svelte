@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ContextMenu as ContextMenuPrimitive } from 'bits-ui';
-	import { IconCircle } from '@tabler/icons-svelte';
+	import IconCircle from '@tabler/icons-svelte/icons/circle';
 	import { cn, type WithoutChild } from '$lib/utils.js';
 
 	let {

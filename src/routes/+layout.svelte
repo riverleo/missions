@@ -7,7 +7,10 @@
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
-	import { IconHome2, IconFileText, IconUsers, IconSettings } from '@tabler/icons-svelte';
+	import IconHome2 from '@tabler/icons-svelte/icons/home-2';
+	import IconFileText from '@tabler/icons-svelte/icons/file-text';
+	import IconUsers from '@tabler/icons-svelte/icons/users';
+	import IconSettings from '@tabler/icons-svelte/icons/settings';
 
 	let { children, data } = $props();
 </script>
