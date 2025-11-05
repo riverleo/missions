@@ -1,13 +1,13 @@
 <script lang="ts">
 	import '../app.css';
 	import * as Sidebar from '$lib/components/ui/sidebar';
-	import { House, Settings, Users, FileText } from 'lucide-svelte';
 	import * as m from '$lib/paraglide/messages.js';
 	import { Avatar, AvatarFallback } from '$lib/components/ui/avatar';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher, toggleMode } from 'mode-watcher';
+	import { IconHome2, IconFileText, IconUsers, IconSettings } from '@tabler/icons-svelte';
 
 	let { children, data } = $props();
 </script>
@@ -42,25 +42,25 @@
 				<Sidebar.Menu>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
-							<House class="h-4 w-4" />
+							<IconHome2 class="h-4 w-4" />
 							<span>{m['nav.home']()}</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
-							<FileText class="h-4 w-4" />
+							<IconFileText class="h-4 w-4" />
 							<span>{m['nav.documents']()}</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
-							<Users class="h-4 w-4" />
+							<IconUsers class="h-4 w-4" />
 							<span>{m['nav.team']()}</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
-							<Settings class="h-4 w-4" />
+							<IconSettings class="h-4 w-4" />
 							<span>{m['nav.settings']()}</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>

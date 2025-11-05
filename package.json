@@ -21,7 +21,6 @@
 		"@inlang/cli": "^3.0.12",
 		"@inlang/paraglide-js": "^2.4.0",
 		"@internationalized/date": "^3.10.0",
-		"@lucide/svelte": "^0.544.0",
 		"@playwright/test": "^1.56.1",
 		"@svelte-put/shortcut": "^4.1.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
@@ -46,9 +45,9 @@
 	},
 	"packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
 	"dependencies": {
+		"@tabler/icons-svelte": "^3.35.0",
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
-		"lucide-svelte": "^0.552.0",
 		"mode-watcher": "^1.1.0",
 		"svelte-dnd-action": "^0.9.67",
 		"tailwind-merge": "^3.3.1",
