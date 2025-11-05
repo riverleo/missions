@@ -4,11 +4,13 @@
 	import { Avatar, AvatarFallback } from '$lib/components/ui/avatar';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { toggleMode } from 'mode-watcher';
 	import IconHome2 from '@tabler/icons-svelte/icons/home-2';
 	import IconFileText from '@tabler/icons-svelte/icons/file-text';
 	import IconUsers from '@tabler/icons-svelte/icons/users';
 	import IconSettings from '@tabler/icons-svelte/icons/settings';
+	import IconDoorExit from '@tabler/icons-svelte/icons/door-exit';
 	import { wasLoggedIn } from '$lib/stores';
 
 	let { children, open } = $props();
@@ -69,20 +71,27 @@
 	</Sidebar.Root>
 
 	<Sidebar.Inset>
-		<header class="flex h-16 shrink-0 items-center gap-2 border-b p-4">
-			<Sidebar.Trigger class="-ml-1" />
-			<Separator orientation="vertical" class="mr-2 h-4" />
-			<Breadcrumb.Root>
-				<Breadcrumb.List>
-					<Breadcrumb.Item class="hidden md:block">
-						<Breadcrumb.Link onclick={toggleMode}>Home</Breadcrumb.Link>
-					</Breadcrumb.Item>
-					<Breadcrumb.Separator class="hidden md:block" />
-					<Breadcrumb.Item>
-						<Breadcrumb.Page>Sweet Home</Breadcrumb.Page>
-					</Breadcrumb.Item>
-				</Breadcrumb.List>
-			</Breadcrumb.Root>
+		<header class="flex h-16 shrink-0 items-center justify-between gap-2 border-b p-4">
+			<div class="flex h-6 items-center">
+				<Sidebar.Trigger class="-ml-1" />
+				<Separator orientation="vertical" class="mr-2 ml-2" />
+				<Breadcrumb.Root>
+					<Breadcrumb.List>
+						<Breadcrumb.Item class="hidden md:block">
+							<Breadcrumb.Link onclick={toggleMode}>Home</Breadcrumb.Link>
+						</Breadcrumb.Item>
+						<Breadcrumb.Separator class="hidden md:block" />
+						<Breadcrumb.Item>
+							<Breadcrumb.Page>Sweet Home</Breadcrumb.Page>
+						</Breadcrumb.Item>
+					</Breadcrumb.List>
+				</Breadcrumb.Root>
+			</div>
+			<div>
+				<Button size="icon" variant="ghost" onclick={() => ($wasLoggedIn = false)}
+					><IconDoorExit /></Button
+				>
+			</div>
 		</header>
 		<div class="flex flex-col gap-4 p-4">
 			{@render children()}
