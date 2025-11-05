@@ -37,14 +37,14 @@
 <div class="flex min-h-[80vh] flex-col items-center justify-center px-4 text-center">
 	<div class="mx-auto max-w-3xl space-y-6">
 		<h1 class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-			Build Amazing Web Apps with
+			우주 최초 롤플레잉 투두 리스트
 			<span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-				SvelteKit
+				당신의 하찮은 인생, 당장 진행시켜!
 			</span>
 		</h1>
 		<p class="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
-			A modern web framework that combines the best developer experience with optimal performance.
-			Get started in minutes and ship faster.
+			우리의 제품을 사용하는 즉시 당신의 인생은 성공한 것이나 다름 없을 겁니다! 망설이지 말고 지금
+			바로 시작하세요.
 		</p>
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
 			<Button size="lg" class="gap-2" href={localizeHref('/signin')}>

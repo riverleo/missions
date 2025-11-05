@@ -74,7 +74,7 @@
 		<header class="flex h-16 shrink-0 items-center justify-between gap-2 border-b p-4">
 			<div class="flex h-6 items-center">
 				<Sidebar.Trigger class="-ml-1" />
-				<Separator orientation="vertical" class="mr-2 ml-2" />
+				<Separator orientation="vertical" class="mr-4 ml-3" />
 				<Breadcrumb.Root>
 					<Breadcrumb.List>
 						<Breadcrumb.Item class="hidden md:block">
