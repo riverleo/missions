@@ -14,7 +14,7 @@
 			value: 'launching',
 		},
 		{
-			title: '제품을 시장에 내놓았고 얼리어답터 고객을 모았습니다.',
+			title: '제품을 시장에 내놓았고 충성도 있는 고객을 모았습니다.',
 			description: '로드맵을 작성하고 실행 가능한 계획을 세웠습니다',
 			value: 'penentrate',
 		},
