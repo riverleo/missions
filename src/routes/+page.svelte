@@ -1,10 +1,11 @@
 <script lang="ts">
-	import LandingPage from '$lib/components/LandingPage.svelte';
+	import Landing from '$lib/components/Landing.svelte';
+	import Onboarding from '$lib/components/onboarding/Onboarding.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 </script>
 
 {#if $wasLoggedIn}
-	HAHAHAH
+	<Onboarding />
 {:else}
-	<LandingPage />
+	<Landing />
 {/if}

@@ -39,7 +39,7 @@
 		<h1 class="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
 			우주 최초 롤플레잉 투두 리스트
 			<span class="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-				당신의 하찮은 인생, 당장 진행시켜!
+				당신의 인생, 당장 진행시켜
 			</span>
 		</h1>
 		<p class="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
