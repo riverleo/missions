@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
 	import Sidebar from '$lib/components/Sidebar.svelte';
+	import { wasLoggedIn } from '$lib/stores';
 
 	let { children, data } = $props();
 </script>
@@ -13,6 +14,10 @@
 
 <ModeWatcher />
 
-<Sidebar open={data.sidebarCookieState}>
+{#if $wasLoggedIn}
+	<Sidebar open={data.sidebarCookieState}>
+		{@render children()}
+	</Sidebar>
+{:else}
 	{@render children()}
-</Sidebar>
+{/if}
