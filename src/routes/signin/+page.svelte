@@ -42,8 +42,8 @@
 		<Card.Footer class="flex-col gap-2">
 			<Button type="submit" class="w-full" onclick={() => ($wasLoggedIn = true)}>Login</Button>
 			<Button variant="outline" class="w-full" onclick={() => ($wasLoggedIn = true)}>
-				Login with Google</Button
-			>
+				Login with Google
+			</Button>
 		</Card.Footer>
 	</Card.Root>
 </div>

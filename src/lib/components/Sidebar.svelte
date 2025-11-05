@@ -88,9 +88,9 @@
 				</Breadcrumb.Root>
 			</div>
 			<div>
-				<Button size="icon" variant="ghost" onclick={() => ($wasLoggedIn = false)}
-					><IconDoorExit /></Button
-				>
+				<Button size="icon" variant="ghost" onclick={() => ($wasLoggedIn = false)}>
+					<IconDoorExit />
+				</Button>
 			</div>
 		</header>
 		<div class="flex flex-col gap-4 p-4">
