@@ -47,7 +47,7 @@
 			바로 시작하세요.
 		</p>
 		<div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
-			<Button size="lg" class="gap-2" href={localizeHref('/signin')}>
+			<Button size="lg" class="gap-2" href={localizeHref('/get-started')}>
 				Get Started
 				<IconArrowRight class="size-4" />
 			</Button>
@@ -90,7 +90,7 @@
 					Join thousands of developers building the next generation of web applications.
 				</p>
 			</div>
-			<Button size="lg" class="gap-2" href={localizeHref('/signin')}>
+			<Button size="lg" class="gap-2" href={localizeHref('/get-started')}>
 				Start Building Now
 				<IconArrowRight class="size-4" />
 			</Button>
