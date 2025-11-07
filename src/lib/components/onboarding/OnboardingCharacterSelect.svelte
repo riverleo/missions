@@ -132,6 +132,6 @@
 
 	<div class="flex justify-between">
 		<Button variant="outline" onclick={onBack}>뒤로</Button>
-		<Button disabled={!selectedCharacter || !characterName.trim()} onclick={onNext}>다음</Button>
+		<Button onclick={onNext}>다음</Button>
 	</div>
 </div>

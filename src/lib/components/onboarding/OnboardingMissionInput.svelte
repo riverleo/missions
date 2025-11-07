@@ -52,7 +52,7 @@
 
 	<div class="flex justify-between">
 		<Button variant="outline" onclick={onBack}>뒤로</Button>
-		<Button disabled={!mission.trim()} onclick={onComplete} class="gap-2">
+		<Button onclick={onComplete} class="gap-2">
 			<IconRocket class="size-4" />
 			시작하기
 		</Button>
