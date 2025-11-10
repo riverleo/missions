@@ -11,8 +11,11 @@
 	import IconUsers from '@tabler/icons-svelte/icons/users';
 	import IconSettings from '@tabler/icons-svelte/icons/settings';
 	import IconDoorExit from '@tabler/icons-svelte/icons/door-exit';
+	import IconPlus from '@tabler/icons-svelte/icons/plus';
 	import { wasLoggedIn } from '$lib/stores';
 	import PlayerSheet from '$lib/components/player/PlayerSheet.svelte';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as Kbd from '$lib/components/ui/kbd';
 
 	let { children, open } = $props();
 </script>
@@ -60,7 +63,7 @@
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
 							<IconSettings class="h-4 w-4" />
-							<span>{m['nav.settings']()}</span>
+							<span>완료됨</span>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
 				</Sidebar.Menu>
@@ -74,7 +77,26 @@
 	<Sidebar.Inset>
 		<header class="flex h-16 shrink-0 items-center justify-between gap-2 border-b p-4">
 			<div class="flex h-6 items-center">
-				<Sidebar.Trigger class="-ml-1" />
+				<div class="-ml-1">
+					<Sidebar.Trigger />
+
+					<Tooltip.Provider delayDuration={0}>
+						<Tooltip.Root open={true}>
+							<Tooltip.Trigger>
+								<Button size="icon" variant="ghost">
+									<IconPlus />
+								</Button>
+							</Tooltip.Trigger>
+							<Tooltip.Content class="flex items-center gap-2">
+								새로운 미션
+								<Kbd.Group>
+									<Kbd.Root>⌘</Kbd.Root>
+									<Kbd.Root>N</Kbd.Root>
+								</Kbd.Group>
+							</Tooltip.Content>
+						</Tooltip.Root>
+					</Tooltip.Provider>
+				</div>
 				<Separator orientation="vertical" class="mr-4 ml-3" />
 				<Breadcrumb.Root>
 					<Breadcrumb.List>
