@@ -12,12 +12,13 @@
 	import IconSettings from '@tabler/icons-svelte/icons/settings';
 	import IconDoorExit from '@tabler/icons-svelte/icons/door-exit';
 	import { wasLoggedIn } from '$lib/stores';
+	import PlayerSheet from '$lib/components/player/PlayerSheet.svelte';
 
 	let { children, open } = $props();
 </script>
 
 <Sidebar.Provider {open}>
-	<Sidebar.Root collapsible="icon" class="opacity-100">
+	<Sidebar.Root>
 		<Sidebar.Header>
 			<Sidebar.Menu>
 				<Sidebar.MenuItem>
@@ -87,7 +88,8 @@
 					</Breadcrumb.List>
 				</Breadcrumb.Root>
 			</div>
-			<div>
+			<div class="flex items-center gap-2">
+				<PlayerSheet />
 				<Button size="icon" variant="ghost" onclick={() => ($wasLoggedIn = false)}>
 					<IconDoorExit />
 				</Button>
