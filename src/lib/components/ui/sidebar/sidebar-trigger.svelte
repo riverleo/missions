@@ -1,13 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { cn } from '$lib/utils.js';
 	import { IconLayoutSidebar } from '@tabler/icons-svelte';
 	import type { ComponentProps } from 'svelte';
 	import { useSidebar } from './context.svelte.js';
 
 	let {
 		ref = $bindable(null),
-		class: className,
 		onclick,
 		...restProps
 	}: ComponentProps<typeof Button> & {

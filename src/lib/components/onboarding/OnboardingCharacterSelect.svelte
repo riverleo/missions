@@ -12,13 +12,14 @@
 	let {
 		onBack,
 		onNext,
+		selectedCharacter = $bindable(),
+		characterName = $bindable(),
 	}: {
 		onBack: () => void;
 		onNext: () => void;
+		selectedCharacter: string | null;
+		characterName: string;
 	} = $props();
-
-	let selectedCharacter = $state<string | null>(null);
-	let characterName = $state('');
 
 	const characters = [
 		{

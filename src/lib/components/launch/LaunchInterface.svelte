@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Progress } from '$lib/components/ui/progress';
-	import { onMount } from 'svelte';
 
 	interface TelemetryData {
 		altitude: number;

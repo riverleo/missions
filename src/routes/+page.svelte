@@ -1,38 +1,23 @@
 <script lang="ts">
-	import EmptyMissions from '$lib/components/EmptyMissions.svelte';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import Landing from '$lib/components/Landing.svelte';
-	import LaunchInterface from '$lib/components/launch/LaunchInterface.svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Button } from '$lib/components/ui/button';
-	import { wasLoggedIn, hasMissions } from '$lib/stores';
+	import { wasLoggedIn } from '$lib/stores';
+
+	// localStorage에서 온보딩 데이터 확인하여 자동 로그인 및 리다이렉트
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			const onboardingData = localStorage.getItem('missions-onboarding');
+			if (onboardingData) {
+				wasLoggedIn.set(true);
+				goto('/visions');
+			}
+		}
+	});
 </script>
 
 {#if $wasLoggedIn}
-	<div class="p-4 pb-48">
-		{#if $hasMissions}
-			<div class="grid grid-cols-4 gap-4">
-				<div class="h-72 p-4">
-					<Badge>Active</Badge>
-					<h1>mission 1</h1>
-				</div>
-				<div class="h-72 p-4">
-					<Badge variant="outline">Inactive</Badge>
-					<h1>mission 2</h1>
-				</div>
-				<div class="h-72 p-4">
-					<Badge variant="outline">Inactive</Badge>
-					<h1>mission 3</h1>
-				</div>
-				<div class="h-72 p-4">
-					<Badge variant="outline">Inactive</Badge>
-					<h1>mission 4</h1>
-				</div>
-			</div>
-		{:else}
-			<EmptyMissions />
-		{/if}
-	</div>
-	<LaunchInterface />
+	<!-- Redirecting to /visions -->
 {:else}
 	<Landing />
 {/if}

@@ -7,12 +7,12 @@
 	let {
 		onBack,
 		onComplete,
+		mission = $bindable(),
 	}: {
 		onBack: () => void;
 		onComplete: () => void;
+		mission: string;
 	} = $props();
-
-	let mission = $state('');
 </script>
 
 <div class="mx-auto max-w-2xl space-y-6">
