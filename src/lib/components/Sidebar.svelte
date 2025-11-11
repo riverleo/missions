@@ -94,7 +94,7 @@
 		}> = [];
 
 		// Mission is always first
-		segments.push({ label: mission || 'Mission', href: '/visions' });
+		segments.push({ label: mission || 'Mission', href: '/dashboard' });
 
 		// Check if we're on a vision detail page
 		if (pathname.startsWith('/visions/')) {
@@ -212,6 +212,14 @@
 			<Sidebar.Group>
 				<Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
 				<Sidebar.Menu>
+					<Sidebar.MenuItem>
+						<Sidebar.MenuButton>
+							<IconTarget class="h-4 w-4" />
+							<a href="/dashboard">
+								<span>Dashboard</span>
+							</a>
+						</Sidebar.MenuButton>
+					</Sidebar.MenuItem>
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
 							<IconTarget class="h-4 w-4" />

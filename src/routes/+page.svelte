@@ -10,7 +10,7 @@
 			const onboardingData = localStorage.getItem('missions-onboarding');
 			if (onboardingData) {
 				wasLoggedIn.set(true);
-				goto('/visions');
+				goto('/dashboard');
 			}
 		}
 	});
