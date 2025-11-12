@@ -8,6 +8,7 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+.histoire
 
 # OS
 .DS_Store
@@ -25,3 +26,6 @@ vite.config.ts.timestamp-*
 
 # Paraglide (auto-generated)
 /src/lib/paraglide
+
+*storybook.log
+storybook-static
