@@ -1,8 +1,8 @@
 <script lang="ts">
-	import OnboardingWelcome from './OnboardingWelcome.svelte';
-	import OnboardingMissionStage from './OnboardingMissionStage.svelte';
-	import OnboardingCharacterSelect from './OnboardingCharacterSelect.svelte';
-	import OnboardingMissionInput from './OnboardingMissionInput.svelte';
+	import OnboardingWelcome from './OnboardingWelcomeClaude.svelte';
+	import OnboardingMissionStage from './OnboardingMissionStageClaude.svelte';
+	import OnboardingCharacterSelect from './OnboardingCharacterSelectClaude.svelte';
+	import OnboardingMissionInput from './OnboardingMissionInputClaude.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 
 	let step = $state(0);

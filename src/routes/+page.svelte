@@ -8,7 +8,7 @@
 	import IconBulb from '@tabler/icons-svelte/icons/bulb';
 	import { ResizablePaneGroup, ResizablePane, ResizableHandle } from '$lib/components/ui/resizable';
 	import { wasLoggedIn } from '$lib/stores';
-	import Landing from '$lib/components/Landing.svelte';
+	import Landing from '$lib/components/LandingClaude.svelte';
 
 	type Thought = {
 		id: string;

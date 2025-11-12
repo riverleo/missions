@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
-	import Sidebar from '$lib/components/Sidebar.svelte';
+	import Sidebar from '$lib/components/SidebarClaude.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 

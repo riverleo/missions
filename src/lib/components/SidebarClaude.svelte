@@ -14,7 +14,7 @@
 	import IconPlus from '@tabler/icons-svelte/icons/plus';
 	import IconChevronDown from '@tabler/icons-svelte/icons/chevron-down';
 	import { wasLoggedIn } from '$lib/stores';
-	import PlayerSheet from '$lib/components/player/PlayerSheet.svelte';
+	import PlayerSheet from '$lib/components/player/PlayerSheetClaude.svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import * as Kbd from '$lib/components/ui/kbd';
 	import { page } from '$app/stores';
@@ -94,7 +94,12 @@
 		}> = [];
 
 		// Mission is always first
-		segments.push({ label: mission || 'Mission', href: '/' });
+		segments.push({
+			label:
+				mission ||
+				'우리는 기술의 발전 속에서 고립되어가는 인류를 도와 건강하고 지속가능한 삶의 방향을 제시합니다.',
+			href: '/',
+		});
 
 		// Check if we're on a vision detail page
 		if (pathname.startsWith('/visions/')) {
@@ -212,7 +217,6 @@
 		</Sidebar.Header>
 
 		<Sidebar.Content>
-			한국어
 			<Sidebar.Group>
 				<Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
 				<Sidebar.Menu>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Onboarding from '$lib/components/onboarding/Onboarding.svelte';
+	import Onboarding from '$lib/components/onboarding/OnboardingClaude.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 	import { goto } from '$app/navigation';
 
