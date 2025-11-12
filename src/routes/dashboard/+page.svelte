@@ -202,7 +202,7 @@
 								</button>
 							</div>
 						{/each}
-						{#each Array(4 - visions.length) as _}
+						{#each Array(Math.max(0, 4 - visions.length)) as _}
 							<button
 								onclick={createVision}
 								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
@@ -247,7 +247,7 @@
 								</button>
 							</div>
 						{/each}
-						{#each Array(4 - tasks.length) as _}
+						{#each Array(Math.max(0, 4 - tasks.length)) as _}
 							<button
 								onclick={createTask}
 								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
@@ -292,7 +292,7 @@
 								</button>
 							</div>
 						{/each}
-						{#each Array(4 - actions.length) as _}
+						{#each Array(Math.max(0, 4 - actions.length)) as _}
 							<button
 								onclick={createAction}
 								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
