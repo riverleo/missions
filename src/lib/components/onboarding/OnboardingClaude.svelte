@@ -1,8 +1,6 @@
 <script lang="ts">
 	import OnboardingWelcome from './OnboardingWelcomeClaude.svelte';
-	import OnboardingMissionStage from './OnboardingMissionStageClaude.svelte';
 	import OnboardingCharacterSelect from './OnboardingCharacterSelectClaude.svelte';
-	import OnboardingMissionInput from './OnboardingMissionInputClaude.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 
 	let step = $state(0);
@@ -38,14 +36,10 @@
 {#if step === 0}
 	<OnboardingWelcome onNext={goToNext} />
 {:else if step === 1}
-	<OnboardingMissionStage onBack={goToBack} onNext={goToNext} />
-{:else if step === 2}
 	<OnboardingCharacterSelect
 		onBack={goToBack}
-		onNext={goToNext}
+		onNext={handleComplete}
 		bind:selectedCharacter
 		bind:characterName
 	/>
-{:else if step === 3}
-	<OnboardingMissionInput onBack={goToBack} onComplete={handleComplete} bind:mission />
 {/if}

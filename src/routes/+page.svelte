@@ -26,10 +26,10 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
@@ -39,7 +39,7 @@
 	let thoughts = $state<Thought[]>([]);
 	let visions = $state<Vision[]>([]);
 	let foundations = $state<Foundation[]>([]);
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
@@ -52,13 +52,13 @@
 			const savedThoughts = localStorage.getItem('missions-thoughts');
 			const savedVisions = localStorage.getItem('missions-visions');
 			const savedFoundations = localStorage.getItem('missions-foundations');
-			const savedActions = localStorage.getItem('missions-actions');
+			const savedQuests = localStorage.getItem('missions-quests');
 
 			if (savedMission) mission = savedMission;
 			if (savedThoughts) thoughts = JSON.parse(savedThoughts);
 			if (savedVisions) visions = JSON.parse(savedVisions);
 			if (savedFoundations) foundations = JSON.parse(savedFoundations);
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 		}
 	});
 
@@ -81,23 +81,23 @@
 			id: crypto.randomUUID(),
 			title: '',
 			linkedVisions: [],
-			linkedActions: [],
+			linkedQuests: [],
 		};
 		foundations = [...foundations, newFoundation];
 		localStorage.setItem('missions-foundations', JSON.stringify(foundations));
 		goto(`/foundations/${newFoundation.id}`);
 	}
 
-	function createAction() {
-		if (actions.length >= 4) return;
-		const newAction: Action = {
+	function createQuest() {
+		if (quests.length >= 4) return;
+		const newQuest: Quest = {
 			id: crypto.randomUUID(),
 			title: '',
 			linkedFoundations: [],
 		};
-		actions = [...actions, newAction];
-		localStorage.setItem('missions-actions', JSON.stringify(actions));
-		goto(`/actions/${newAction.id}`);
+		quests = [...quests, newQuest];
+		localStorage.setItem('missions-quests', JSON.stringify(quests));
+		goto(`/quests/${newQuest.id}`);
 	}
 
 	function createThought() {
@@ -125,7 +125,7 @@
 
 	let draggedVision: Vision | null = null;
 	let draggedFoundation: Foundation | null = null;
-	let draggedAction: Action | null = null;
+	let draggedQuest: Quest | null = null;
 
 	function handleDropToVision() {
 		// Placeholder for future implementation
@@ -135,7 +135,7 @@
 		// Placeholder for future implementation
 	}
 
-	function handleDropToAction() {
+	function handleDropToQuest() {
 		// Placeholder for future implementation
 	}
 
@@ -159,13 +159,13 @@
 			localStorage.setItem('missions-thoughts', JSON.stringify(thoughts));
 			localStorage.setItem('missions-foundations', JSON.stringify(foundations));
 			draggedFoundation = null;
-		} else if (draggedAction) {
-			const newThought: Thought = { id: draggedAction.id, title: draggedAction.title };
+		} else if (draggedQuest) {
+			const newThought: Thought = { id: draggedQuest.id, title: draggedQuest.title };
 			thoughts = [...thoughts, newThought];
-			actions = actions.filter((a) => a.id !== draggedAction!.id);
+			quests = quests.filter((a) => a.id !== draggedQuest!.id);
 			localStorage.setItem('missions-thoughts', JSON.stringify(thoughts));
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
-			draggedAction = null;
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
+			draggedQuest = null;
 		}
 	}
 </script>
@@ -252,7 +252,7 @@
 										<span
 											class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
 										>
-											{foundation.linkedActions.length}
+											{foundation.linkedQuests.length}
 										</span>
 									</button>
 								</div>
@@ -270,41 +270,41 @@
 
 					<!-- Action Cards -->
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToAction}>
+					<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToQuest}>
 						<div class="mb-2 flex items-center gap-2">
 							<IconRocket class="h-4 w-4 text-primary" />
-							<span class="font-mono text-xs tracking-wider text-primary uppercase">Actions</span>
+							<span class="font-mono text-xs tracking-wider text-primary uppercase">Quests</span>
 						</div>
 						<div class="grid grid-cols-4 gap-2">
-							{#each actions as action (action.id)}
+							{#each quests as quest (quest.id)}
 								<div
 									draggable="true"
 									ondragstart={() => {
-										draggedAction = action;
+										draggedQuest = quest;
 									}}
 									ondragend={() => {
-										draggedAction = null;
+										draggedQuest = null;
 									}}
 									class="group relative cursor-move"
 								>
 									<button
-										onclick={() => goto(`/actions/${action.id}`)}
+										onclick={() => goto(`/quests/${quest.id}`)}
 										class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
 									>
 										<p class="w-full truncate text-center text-xs font-medium text-foreground">
-											{action.title || 'Untitled'}
+											{quest.title || 'Untitled'}
 										</p>
 										<span
 											class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
 										>
-											{action.linkedFoundations.length}
+											{quest.linkedFoundations.length}
 										</span>
 									</button>
 								</div>
 							{/each}
-							{#each Array(Math.max(0, 4 - actions.length)) as _}
+							{#each Array(Math.max(0, 4 - quests.length)) as _}
 								<button
-									onclick={createAction}
+									onclick={createQuest}
 									class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
 								>
 									<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
@@ -378,8 +378,8 @@
 				</div>
 				<div class="flex items-center gap-2">
 					<IconRocket class="h-4 w-4 text-muted-foreground" />
-					<span class="font-mono text-xs text-muted-foreground">actions</span>
-					<span class="font-mono text-sm font-medium">{actions.length}/4</span>
+					<span class="font-mono text-xs text-muted-foreground">quests</span>
+					<span class="font-mono text-sm font-medium">{quests.length}/4</span>
 				</div>
 			</div>
 		</div>

@@ -11,52 +11,52 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
 	};
 
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 	let tasks = $state<Task[]>([]);
-	let action = $state<Action | null>(null);
+	let quest = $state<Quest | null>(null);
 
 	$effect(() => {
 		const id = $page.params.id;
-		action = actions.find((a) => a.id === id) || null;
-		if (!action && actions.length > 0) {
+		quest = quests.find((a) => a.id === id) || null;
+		if (!quest && quests.length > 0) {
 			goto('/visions');
 		}
 	});
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
-			const savedActions = localStorage.getItem('missions-actions');
+			const savedQuests = localStorage.getItem('missions-quests');
 			const savedTasks = localStorage.getItem('missions-tasks');
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 			if (savedTasks) tasks = JSON.parse(savedTasks);
 		}
 	});
 
-	function saveAction() {
-		if (!action) return;
-		const currentAction = action;
+	function saveQuest() {
+		if (!quest) return;
+		const currentAction = quest;
 		if (typeof window !== 'undefined') {
-			const index = actions.findIndex((a) => a.id === currentAction.id);
+			const index = quests.findIndex((a) => a.id === currentAction.id);
 			if (index !== -1) {
-				actions[index] = currentAction;
-				localStorage.setItem('missions-actions', JSON.stringify(actions));
+				quests[index] = currentAction;
+				localStorage.setItem('missions-quests', JSON.stringify(quests));
 			}
 		}
 	}
 
 	function toggleTaskLink(taskId: string) {
-		if (!action) return;
+		if (!quest) return;
 
-		const currentAction = action;
+		const currentAction = quest;
 		const isLinked = currentAction.linkedFoundations.includes(taskId);
 
 		if (isLinked) {
@@ -64,29 +64,29 @@
 			currentAction.linkedFoundations = currentAction.linkedFoundations.filter((id) => id !== taskId);
 			const task = tasks.find((t) => t.id === taskId);
 			if (task) {
-				task.linkedActions = task.linkedActions.filter((id) => id !== currentAction.id);
+				task.linkedQuests = task.linkedQuests.filter((id) => id !== currentAction.id);
 			}
 		} else {
 			// Add link
 			currentAction.linkedFoundations = [...currentAction.linkedFoundations, taskId];
 			const task = tasks.find((t) => t.id === taskId);
 			if (task) {
-				task.linkedActions = [...task.linkedActions, currentAction.id];
+				task.linkedQuests = [...task.linkedQuests, currentAction.id];
 			}
 		}
 
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 			localStorage.setItem('missions-tasks', JSON.stringify(tasks));
 		}
 
-		saveAction();
+		saveQuest();
 	}
 
-	function deleteAction() {
-		if (!action) return;
+	function deleteQuest() {
+		if (!quest) return;
 
-		const currentAction = action;
+		const currentAction = quest;
 
 		if (
 			!confirm('Are you sure you want to delete this action? All linked tasks will be unlinked.')
@@ -96,16 +96,16 @@
 
 		// Unlink from all tasks
 		tasks.forEach((task) => {
-			if (task.linkedActions.includes(currentAction.id)) {
-				task.linkedActions = task.linkedActions.filter((id) => id !== currentAction.id);
+			if (task.linkedQuests.includes(currentAction.id)) {
+				task.linkedQuests = task.linkedQuests.filter((id) => id !== currentAction.id);
 			}
 		});
 
 		// Remove action
-		actions = actions.filter((a) => a.id !== currentAction.id);
+		quests = quests.filter((a) => a.id !== currentAction.id);
 
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 			localStorage.setItem('missions-tasks', JSON.stringify(tasks));
 		}
 
@@ -113,7 +113,7 @@
 	}
 </script>
 
-{#if action}
+{#if quest}
 	<div class="mx-auto w-full max-w-4xl space-y-6 p-6">
 		<!-- Breadcrumb & Delete -->
 		<div class="flex items-center justify-between">
@@ -127,7 +127,7 @@
 				Back
 			</a>
 			<Button
-				onclick={deleteAction}
+				onclick={deleteQuest}
 				variant="ghost"
 				size="sm"
 				class="h-7 text-destructive hover:text-destructive"
@@ -139,8 +139,8 @@
 		<!-- Action Editor -->
 		<div class="space-y-4">
 			<input
-				bind:value={action.title}
-				onblur={saveAction}
+				bind:value={quest.title}
+				onblur={saveQuest}
 				placeholder="Action title..."
 				class="w-full bg-transparent text-3xl font-bold text-foreground outline-none placeholder:text-muted-foreground/30"
 			/>
@@ -158,7 +158,7 @@
 					</div>
 				{:else}
 					{#each tasks as task (task.id)}
-						{@const isLinked = action.linkedFoundations.includes(task.id)}
+						{@const isLinked = quest.linkedFoundations.includes(task.id)}
 						<button
 							onclick={() => toggleTaskLink(task.id)}
 							class="group block w-full rounded-md border text-left transition-all {isLinked

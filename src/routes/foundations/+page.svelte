@@ -10,7 +10,7 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
 	type Vision = {
@@ -43,7 +43,7 @@
 			id: crypto.randomUUID(),
 			title: '',
 			linkedVisions: [],
-			linkedActions: [],
+			linkedQuests: [],
 		};
 		foundations = [...foundations, newFoundation];
 		if (typeof window !== 'undefined') {
@@ -99,9 +99,9 @@
 								</p>
 							{/if}
 						</div>
-						{#if foundation.linkedActions.length > 0}
+						{#if foundation.linkedQuests.length > 0}
 							<span class="font-mono text-xs text-muted-foreground/50">
-								{foundation.linkedActions.length} action{foundation.linkedActions.length !== 1 ? 's' : ''}
+								{foundation.linkedQuests.length} quest{foundation.linkedQuests.length !== 1 ? 's' : ''}
 							</span>
 						{/if}
 						<IconChevronRight

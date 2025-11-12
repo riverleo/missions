@@ -11,7 +11,7 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
 	type Vision = {
@@ -61,7 +61,7 @@
 			id: crypto.randomUUID(),
 			title: '',
 			linkedVisions: [vision.id],
-			linkedActions: [],
+			linkedQuests: [],
 		};
 		tasks = [...tasks, newTask];
 		vision.linkedFoundations = [...vision.linkedFoundations, newTask.id];

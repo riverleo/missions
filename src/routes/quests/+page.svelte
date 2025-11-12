@@ -6,7 +6,7 @@
 	import IconPlus from '@tabler/icons-svelte/icons/plus';
 	import { Button } from '$lib/components/ui/button';
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
@@ -16,38 +16,38 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 	let foundations = $state<Foundation[]>([]);
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
-			const savedActions = localStorage.getItem('missions-actions');
+			const savedQuests = localStorage.getItem('missions-quests');
 			const savedFoundations = localStorage.getItem('missions-foundations');
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 			if (savedFoundations) foundations = JSON.parse(savedFoundations);
 		}
 	});
 
-	function getLinkedFoundationTitles(action: Action): string {
-		return action.linkedFoundations
+	function getLinkedFoundationTitles(quest: Quest): string {
+		return quest.linkedFoundations
 			.map((fId) => foundations.find((f) => f.id === fId)?.title || 'Untitled')
 			.join(', ');
 	}
 
-	function createAction() {
-		const newAction: Action = {
+	function createQuest() {
+		const newQuest: Quest = {
 			id: crypto.randomUUID(),
 			title: '',
 			linkedFoundations: [],
 		};
-		actions = [...actions, newAction];
+		quests = [...quests, newQuest];
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 		}
-		goto(`/actions/${newAction.id}`);
+		goto(`/quests/${newQuest.id}`);
 	}
 </script>
 
@@ -60,7 +60,7 @@
 			<p class="mt-1 text-sm text-muted-foreground">All your actions across foundations</p>
 		</div>
 		<Button
-			onclick={createAction}
+			onclick={createQuest}
 			variant="outline"
 			size="sm"
 			class="font-mono text-xs tracking-wider uppercase"
@@ -71,7 +71,7 @@
 	</div>
 
 	<div class="space-y-2">
-		{#if actions.length === 0}
+		{#if quests.length === 0}
 			<div class="rounded-lg border border-dashed border-border/50 py-16 text-center">
 				<IconRocket class="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
 				<p class="font-mono text-sm text-muted-foreground/50">No actions yet</p>
@@ -80,20 +80,20 @@
 				</p>
 			</div>
 		{:else}
-			{#each actions as action (action.id)}
+			{#each quests as quest (quest.id)}
 				<a
-					href="/actions/{action.id}"
+					href="/quests/{quest.id}"
 					class="notion-item group block w-full rounded-md border border-transparent text-left transition-all hover:border-border/50 hover:bg-muted/30"
 				>
 					<div class="flex items-center gap-3 px-3 py-2">
 						<IconRocket class="h-4 w-4 flex-shrink-0 text-muted-foreground" />
 						<div class="flex-1 overflow-hidden">
 							<p class="truncate font-medium text-foreground">
-								{action.title || 'Untitled Action'}
+								{quest.title || 'Untitled Action'}
 							</p>
-							{#if action.linkedFoundations.length > 0}
+							{#if quest.linkedFoundations.length > 0}
 								<p class="truncate text-xs text-muted-foreground">
-									{getLinkedFoundationTitles(action)}
+									{getLinkedFoundationTitles(quest)}
 								</p>
 							{/if}
 						</div>

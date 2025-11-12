@@ -35,10 +35,10 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
@@ -46,33 +46,33 @@
 
 	let visions = $state<Vision[]>([]);
 	let foundations = $state<Foundation[]>([]);
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 	let mission = $state<string>('');
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
 			const savedVisions = localStorage.getItem('missions-visions');
 			const savedFoundations = localStorage.getItem('missions-foundations');
-			const savedActions = localStorage.getItem('missions-actions');
+			const savedQuests = localStorage.getItem('missions-quests');
 			const savedMission = localStorage.getItem('missions-mission');
 			if (savedVisions) visions = JSON.parse(savedVisions);
 			if (savedFoundations) foundations = JSON.parse(savedFoundations);
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 			if (savedMission) mission = savedMission;
 		}
 	});
 
-	function createNewAction() {
-		const newAction: Action = {
+	function createNewQuest() {
+		const newQuest: Quest = {
 			id: crypto.randomUUID(),
 			title: '',
 			linkedFoundations: [],
 		};
-		actions = [...actions, newAction];
+		quests = [...quests, newQuest];
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 		}
-		goto(`/actions/${newAction.id}`);
+		goto(`/quests/${newQuest.id}`);
 	}
 
 	function handleShortcut(event: CustomEvent<ShortcutEventDetail>) {
@@ -81,7 +81,7 @@
 		keyboardEvent.preventDefault();
 		keyboardEvent.stopPropagation();
 
-		createNewAction();
+		createNewQuest();
 	}
 
 	// Derive breadcrumb data based on current route
@@ -132,13 +132,13 @@
 				segments.push({ label: foundation.title || 'Untitled Foundation' });
 			}
 		}
-		// Check if we're on an action detail page
-		else if (pathname.startsWith('/actions/')) {
-			const actionId = pathname.split('/')[2];
-			const action = actions.find((a) => a.id === actionId);
-			if (action) {
+		// Check if we're on a quest detail page
+		else if (pathname.startsWith('/quests/')) {
+			const questId = pathname.split('/')[2];
+			const quest = quests.find((a) => a.id === questId);
+			if (quest) {
 				// Add linked foundations
-				const linkedFoundations = action.linkedFoundations
+				const linkedFoundations = quest.linkedFoundations
 					.map((fId) => foundations.find((f) => f.id === fId))
 					.filter(Boolean) as Foundation[];
 
@@ -180,7 +180,7 @@
 					});
 				}
 
-				segments.push({ label: action.title || 'Untitled Action' });
+				segments.push({ label: quest.title || 'Untitled Quest' });
 			}
 		}
 
@@ -247,8 +247,8 @@
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
 							<IconRocket class="h-4 w-4" />
-							<a href="/actions">
-								<span>Actions</span>
+							<a href="/quests">
+								<span>Quests</span>
 							</a>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
@@ -269,7 +269,7 @@
 					<Tooltip.Provider delayDuration={0}>
 						<Tooltip.Root open={true}>
 							<Tooltip.Trigger>
-								<Button size="icon" variant="ghost" onclick={createNewAction}>
+								<Button size="icon" variant="ghost" onclick={createNewQuest}>
 									<IconPlus />
 								</Button>
 							</Tooltip.Trigger>

@@ -12,7 +12,7 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
 	type Vision = {
@@ -22,7 +22,7 @@
 		linkedFoundations: string[];
 	};
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
@@ -30,7 +30,7 @@
 
 	let tasks = $state<Task[]>([]);
 	let visions = $state<Vision[]>([]);
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 	let task = $state<Task | null>(null);
 
 	$effect(() => {
@@ -45,10 +45,10 @@
 		if (typeof window !== 'undefined') {
 			const savedTasks = localStorage.getItem('missions-tasks');
 			const savedVisions = localStorage.getItem('missions-visions');
-			const savedActions = localStorage.getItem('missions-actions');
+			const savedQuests = localStorage.getItem('missions-quests');
 			if (savedTasks) tasks = JSON.parse(savedTasks);
 			if (savedVisions) visions = JSON.parse(savedVisions);
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 		}
 	});
 
@@ -95,22 +95,22 @@
 	}
 
 	function addAction() {
-		if (!task || task.linkedActions.length >= 16) return;
+		if (!task || task.linkedQuests.length >= 16) return;
 
-		const newAction: Action = {
+		const newQuest: Quest = {
 			id: crypto.randomUUID(),
 			title: '',
 			linkedFoundations: [task.id],
 		};
-		actions = [...actions, newAction];
-		task.linkedActions = [...task.linkedActions, newAction.id];
+		quests = [...quests, newQuest];
+		task.linkedQuests = [...task.linkedQuests, newQuest.id];
 
 		if (typeof window !== 'undefined') {
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 			localStorage.setItem('missions-tasks', JSON.stringify(tasks));
 		}
 
-		goto(`/actions/${newAction.id}`);
+		goto(`/quests/${newQuest.id}`);
 	}
 
 	function deleteTask() {
@@ -134,9 +134,9 @@
 		});
 
 		// Unlink from all actions
-		actions.forEach((action) => {
-			if (action.linkedFoundations.includes(currentTask.id)) {
-				action.linkedFoundations = action.linkedFoundations.filter((id) => id !== currentTask.id);
+		quests.forEach((quest) => {
+			if (quest.linkedFoundations.includes(currentTask.id)) {
+				quest.linkedFoundations = quest.linkedFoundations.filter((id) => id !== currentTask.id);
 			}
 		});
 
@@ -146,7 +146,7 @@
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('missions-tasks', JSON.stringify(tasks));
 			localStorage.setItem('missions-visions', JSON.stringify(visions));
-			localStorage.setItem('missions-actions', JSON.stringify(actions));
+			localStorage.setItem('missions-quests', JSON.stringify(quests));
 		}
 
 		goto('/visions');
@@ -230,11 +230,11 @@
 		<div class="space-y-3 border-t border-border/50 pt-6">
 			<div class="flex items-center justify-between">
 				<h2 class="font-mono text-xs font-semibold tracking-wider text-foreground/60 uppercase">
-					Linked Actions ({task.linkedActions.length}/16)
+					Linked Actions ({task.linkedQuests.length}/16)
 				</h2>
 				<Button
 					onclick={addAction}
-					disabled={task.linkedActions.length >= 16}
+					disabled={task.linkedQuests.length >= 16}
 					variant="ghost"
 					size="sm"
 					class="h-7 font-mono text-xs"
@@ -245,22 +245,22 @@
 			</div>
 
 			<div class="space-y-2">
-				{#if task.linkedActions.length === 0}
+				{#if task.linkedQuests.length === 0}
 					<div class="rounded-lg border border-dashed border-border/50 py-8 text-center">
 						<p class="font-mono text-xs text-muted-foreground/50">No linked actions</p>
 					</div>
 				{:else}
-					{#each task.linkedActions as actionId (actionId)}
-						{@const action = actions.find((a) => a.id === actionId)}
-						{#if action}
+					{#each task.linkedQuests as questId (questId)}
+						{@const quest = quests.find((a) => a.id === questId)}
+						{#if quest}
 							<a
-								href="/actions/{action.id}"
+								href="/quests/{quest.id}"
 								class="group block w-full rounded-md border border-transparent text-left transition-all hover:border-border/50 hover:bg-muted/30"
 							>
 								<div class="flex items-center gap-2 px-3 py-2">
 									<div class="h-1.5 w-1.5 rounded-full bg-muted-foreground/50"></div>
 									<p class="flex-1 truncate text-sm text-foreground">
-										{action.title || 'Untitled Action'}
+										{quest.title || 'Untitled Action'}
 									</p>
 									<IconChevronRight
 										class="h-3.5 w-3.5 text-muted-foreground/30 transition-transform group-hover:translate-x-1"

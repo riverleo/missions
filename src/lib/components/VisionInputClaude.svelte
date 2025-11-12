@@ -10,10 +10,10 @@
 		id: string;
 		title: string;
 		linkedVisions: string[];
-		linkedActions: string[];
+		linkedQuests: string[];
 	};
 
-	type Action = {
+	type Quest = {
 		id: string;
 		title: string;
 		linkedFoundations: string[];
@@ -31,7 +31,7 @@
 	const STORAGE_KEYS = {
 		visions: 'missions-visions',
 		tasks: 'missions-tasks',
-		actions: 'missions-actions',
+		actions: 'missions-quests',
 	};
 
 	let currentView = $state<View>('visions');
@@ -41,18 +41,18 @@
 
 	let visions = $state<Vision[]>([]);
 	let tasks = $state<Task[]>([]);
-	let actions = $state<Action[]>([]);
+	let quests = $state<Quest[]>([]);
 
 	// Load from localStorage on mount
 	onMount(() => {
 		if (typeof window !== 'undefined') {
 			const savedVisions = localStorage.getItem(STORAGE_KEYS.visions);
 			const savedTasks = localStorage.getItem(STORAGE_KEYS.tasks);
-			const savedActions = localStorage.getItem(STORAGE_KEYS.actions);
+			const savedQuests = localStorage.getItem(STORAGE_KEYS.actions);
 
 			if (savedVisions) visions = JSON.parse(savedVisions);
 			if (savedTasks) tasks = JSON.parse(savedTasks);
-			if (savedActions) actions = JSON.parse(savedActions);
+			if (savedQuests) quests = JSON.parse(savedQuests);
 		}
 	});
 
@@ -71,7 +71,7 @@
 
 	$effect(() => {
 		if (typeof window !== 'undefined') {
-			localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(actions));
+			localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(quests));
 		}
 	});
 
@@ -106,7 +106,7 @@
 			id: crypto.randomUUID(),
 			title: '',
 			linkedVisions: [visionId],
-			linkedActions: [],
+			linkedQuests: [],
 		};
 		tasks = [...tasks, newTask];
 		vision.linkedFoundations = [...vision.linkedFoundations, newTask.id];
@@ -124,18 +124,18 @@
 
 	function addActionToTask(taskId: string) {
 		const task = tasks.find((t) => t.id === taskId);
-		if (!task || task.linkedActions.length >= 12) return;
+		if (!task || task.linkedQuests.length >= 12) return;
 
-		const newAction: Action = {
+		const newQuest: Quest = {
 			id: crypto.randomUUID(),
 			title: '',
 			linkedFoundations: [taskId],
 		};
-		actions = [...actions, newAction];
-		task.linkedActions = [...task.linkedActions, newAction.id];
+		quests = [...quests, newQuest];
+		task.linkedQuests = [...task.linkedQuests, newQuest.id];
 	}
 
-	function selectAction(id: string) {
+	function selectQuest(id: string) {
 		selectedActionId = id;
 		currentView = 'action-detail';
 	}
@@ -150,7 +150,7 @@
 	);
 	const selectedTask = $derived(selectedTaskId ? tasks.find((t) => t.id === selectedTaskId) : null);
 	const selectedAction = $derived(
-		selectedActionId ? actions.find((a) => a.id === selectedActionId) : null
+		selectedActionId ? quests.find((a) => a.id === selectedActionId) : null
 	);
 
 	const canAddMoreVisions = $derived(visions.length < 4);
@@ -347,11 +347,11 @@
 		<div class="space-y-3 border-t border-border/50 pt-6">
 			<div class="flex items-center justify-between">
 				<h2 class="font-mono text-xs font-semibold tracking-wider text-foreground/60 uppercase">
-					Linked Actions ({selectedTask.linkedActions.length}/12)
+					Linked Actions ({selectedTask.linkedQuests.length}/12)
 				</h2>
 				<Button
 					onclick={() => addActionToTask(selectedTask.id)}
-					disabled={selectedTask.linkedActions.length >= 12}
+					disabled={selectedTask.linkedQuests.length >= 12}
 					variant="ghost"
 					size="sm"
 					class="h-7 font-mono text-xs"
@@ -362,22 +362,22 @@
 			</div>
 
 			<div class="space-y-2">
-				{#if selectedTask.linkedActions.length === 0}
+				{#if selectedTask.linkedQuests.length === 0}
 					<div class="rounded-lg border border-dashed border-border/50 py-8 text-center">
 						<p class="font-mono text-xs text-muted-foreground/50">No linked actions</p>
 					</div>
 				{:else}
-					{#each selectedTask.linkedActions as actionId (actionId)}
-						{@const action = actions.find((a) => a.id === actionId)}
-						{#if action}
+					{#each selectedTask.linkedQuests as questId (questId)}
+						{@const quest = quests.find((a) => a.id === questId)}
+						{#if quest}
 							<button
-								onclick={() => selectAction(action.id)}
+								onclick={() => selectQuest(quest.id)}
 								class="notion-item group w-full text-left"
 							>
 								<div class="flex items-center gap-2 px-3 py-2">
 									<div class="h-1.5 w-1.5 rounded-full bg-muted-foreground/50"></div>
 									<p class="flex-1 truncate text-sm text-foreground">
-										{action.title || 'Untitled Action'}
+										{quest.title || 'Untitled Quest'}
 									</p>
 									<IconChevronRight
 										class="h-3.5 w-3.5 text-muted-foreground/30 transition-transform group-hover:translate-x-1"
