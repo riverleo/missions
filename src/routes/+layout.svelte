@@ -4,6 +4,9 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import { wasLoggedIn } from '$lib/stores';
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
+	injectSpeedInsights();
 
 	let { children, data } = $props();
 </script>

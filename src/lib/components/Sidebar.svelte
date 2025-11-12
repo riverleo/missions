@@ -28,10 +28,10 @@
 		id: string;
 		title: string;
 		description: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
-	type Task = {
+	type Foundation = {
 		id: string;
 		title: string;
 		linkedVisions: string[];
@@ -41,22 +41,22 @@
 	type Action = {
 		id: string;
 		title: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	let visions = $state<Vision[]>([]);
-	let tasks = $state<Task[]>([]);
+	let foundations = $state<Foundation[]>([]);
 	let actions = $state<Action[]>([]);
 	let mission = $state<string>('');
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
 			const savedVisions = localStorage.getItem('missions-visions');
-			const savedTasks = localStorage.getItem('missions-tasks');
+			const savedFoundations = localStorage.getItem('missions-foundations');
 			const savedActions = localStorage.getItem('missions-actions');
 			const savedMission = localStorage.getItem('missions-mission');
 			if (savedVisions) visions = JSON.parse(savedVisions);
-			if (savedTasks) tasks = JSON.parse(savedTasks);
+			if (savedFoundations) foundations = JSON.parse(savedFoundations);
 			if (savedActions) actions = JSON.parse(savedActions);
 			if (savedMission) mission = savedMission;
 		}
@@ -66,7 +66,7 @@
 		const newAction: Action = {
 			id: crypto.randomUUID(),
 			title: '',
-			linkedTasks: [],
+			linkedFoundations: [],
 		};
 		actions = [...actions, newAction];
 		if (typeof window !== 'undefined') {
@@ -94,7 +94,7 @@
 		}> = [];
 
 		// Mission is always first
-		segments.push({ label: mission || 'Mission', href: '/dashboard' });
+		segments.push({ label: mission || 'Mission', href: '/' });
 
 		// Check if we're on a vision detail page
 		if (pathname.startsWith('/visions/')) {
@@ -104,13 +104,13 @@
 				segments.push({ label: vision.title || 'Untitled Vision' });
 			}
 		}
-		// Check if we're on a task detail page
-		else if (pathname.startsWith('/tasks/')) {
-			const taskId = pathname.split('/')[2];
-			const task = tasks.find((t) => t.id === taskId);
-			if (task) {
+		// Check if we're on a foundation detail page
+		else if (pathname.startsWith('/foundations/')) {
+			const foundationId = pathname.split('/')[2];
+			const foundation = foundations.find((f) => f.id === foundationId);
+			if (foundation) {
 				// Add linked visions
-				const linkedVisions = task.linkedVisions
+				const linkedVisions = foundation.linkedVisions
 					.map((vId) => visions.find((v) => v.id === vId))
 					.filter(Boolean) as Vision[];
 				if (linkedVisions.length === 1) {
@@ -124,7 +124,7 @@
 						items: linkedVisions.map((v) => ({ id: v.id, title: v.title || 'Untitled Vision' })),
 					});
 				}
-				segments.push({ label: task.title || 'Untitled Task' });
+				segments.push({ label: foundation.title || 'Untitled Foundation' });
 			}
 		}
 		// Check if we're on an action detail page
@@ -132,15 +132,15 @@
 			const actionId = pathname.split('/')[2];
 			const action = actions.find((a) => a.id === actionId);
 			if (action) {
-				// Add linked tasks
-				const linkedTasks = action.linkedTasks
-					.map((tId) => tasks.find((t) => t.id === tId))
-					.filter(Boolean) as Task[];
+				// Add linked foundations
+				const linkedFoundations = action.linkedFoundations
+					.map((fId) => foundations.find((f) => f.id === fId))
+					.filter(Boolean) as Foundation[];
 
-				// Get unique visions from linked tasks
+				// Get unique visions from linked foundations
 				const visionIds = new Set<string>();
-				linkedTasks.forEach((task) => {
-					task.linkedVisions.forEach((vId) => visionIds.add(vId));
+				linkedFoundations.forEach((foundation) => {
+					foundation.linkedVisions.forEach((vId) => visionIds.add(vId));
 				});
 				const linkedVisions = Array.from(visionIds)
 					.map((vId) => visions.find((v) => v.id === vId))
@@ -159,16 +159,16 @@
 					});
 				}
 
-				// Add task breadcrumb
-				if (linkedTasks.length === 1) {
+				// Add foundation breadcrumb
+				if (linkedFoundations.length === 1) {
 					segments.push({
-						label: linkedTasks[0].title || 'Untitled Task',
-						href: `/tasks/${linkedTasks[0].id}`,
+						label: linkedFoundations[0].title || 'Untitled Foundation',
+						href: `/foundations/${linkedFoundations[0].id}`,
 					});
-				} else if (linkedTasks.length > 1) {
+				} else if (linkedFoundations.length > 1) {
 					segments.push({
-						label: `${linkedTasks.length} Tasks`,
-						items: linkedTasks.map((t) => ({ id: t.id, title: t.title || 'Untitled Task' })),
+						label: `${linkedFoundations.length} Foundations`,
+						items: linkedFoundations.map((f) => ({ id: f.id, title: f.title || 'Untitled Foundation' })),
 					});
 				}
 
@@ -215,8 +215,8 @@
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
 							<IconTarget class="h-4 w-4" />
-							<a href="/dashboard">
-								<span>Dashboard</span>
+							<a href="/">
+								<span>Home</span>
 							</a>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
@@ -231,8 +231,8 @@
 					<Sidebar.MenuItem>
 						<Sidebar.MenuButton>
 							<IconCircleCheck class="h-4 w-4" />
-							<a href="/tasks">
-								<span>Tasks</span>
+							<a href="/foundations">
+								<span>Foundations</span>
 							</a>
 						</Sidebar.MenuButton>
 					</Sidebar.MenuItem>
@@ -302,7 +302,7 @@
 											{#each segment.items as item}
 												<DropdownMenu.Item
 													onclick={() => {
-														const type = segment.label.includes('Vision') ? 'visions' : 'tasks';
+														const type = segment.label.includes('Vision') ? 'visions' : 'foundations';
 														goto(`/${type}/${item.id}`);
 													}}
 												>

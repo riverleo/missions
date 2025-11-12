@@ -19,13 +19,13 @@
 		id: string;
 		title: string;
 		description: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	type Action = {
 		id: string;
 		title: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	let tasks = $state<Task[]>([]);
@@ -75,14 +75,14 @@
 			currentTask.linkedVisions = currentTask.linkedVisions.filter((id) => id !== visionId);
 			const vision = visions.find((v) => v.id === visionId);
 			if (vision) {
-				vision.linkedTasks = vision.linkedTasks.filter((id) => id !== currentTask.id);
+				vision.linkedFoundations = vision.linkedFoundations.filter((id) => id !== currentTask.id);
 			}
 		} else {
 			// Add link
 			currentTask.linkedVisions = [...currentTask.linkedVisions, visionId];
 			const vision = visions.find((v) => v.id === visionId);
 			if (vision) {
-				vision.linkedTasks = [...vision.linkedTasks, currentTask.id];
+				vision.linkedFoundations = [...vision.linkedFoundations, currentTask.id];
 			}
 		}
 
@@ -100,7 +100,7 @@
 		const newAction: Action = {
 			id: crypto.randomUUID(),
 			title: '',
-			linkedTasks: [task.id],
+			linkedFoundations: [task.id],
 		};
 		actions = [...actions, newAction];
 		task.linkedActions = [...task.linkedActions, newAction.id];
@@ -128,15 +128,15 @@
 
 		// Unlink from all visions
 		visions.forEach((vision) => {
-			if (vision.linkedTasks.includes(currentTask.id)) {
-				vision.linkedTasks = vision.linkedTasks.filter((id) => id !== currentTask.id);
+			if (vision.linkedFoundations.includes(currentTask.id)) {
+				vision.linkedFoundations = vision.linkedFoundations.filter((id) => id !== currentTask.id);
 			}
 		});
 
 		// Unlink from all actions
 		actions.forEach((action) => {
-			if (action.linkedTasks.includes(currentTask.id)) {
-				action.linkedTasks = action.linkedTasks.filter((id) => id !== currentTask.id);
+			if (action.linkedFoundations.includes(currentTask.id)) {
+				action.linkedFoundations = action.linkedFoundations.filter((id) => id !== currentTask.id);
 			}
 		});
 

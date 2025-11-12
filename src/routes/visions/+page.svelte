@@ -10,7 +10,7 @@
 		id: string;
 		title: string;
 		description: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	let visions = $state<Vision[]>([]);
@@ -28,7 +28,7 @@
 				id: crypto.randomUUID(),
 				title: '',
 				description: '',
-				linkedTasks: [],
+				linkedFoundations: [],
 			};
 			visions = [...visions, newVision];
 			localStorage.setItem('missions-visions', JSON.stringify(visions));
@@ -82,9 +82,9 @@
 								<p class="truncate text-xs text-muted-foreground">{vision.description}</p>
 							{/if}
 						</div>
-						{#if vision.linkedTasks.length > 0}
+						{#if vision.linkedFoundations.length > 0}
 							<span class="font-mono text-xs text-muted-foreground/50">
-								{vision.linkedTasks.length} task{vision.linkedTasks.length !== 1 ? 's' : ''}
+								{vision.linkedFoundations.length} foundation{vision.linkedFoundations.length !== 1 ? 's' : ''}
 							</span>
 						{/if}
 						<IconChevronRight

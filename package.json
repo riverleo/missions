@@ -49,6 +49,7 @@
 	"dependencies": {
 		"@supabase/supabase-js": "^2.79.0",
 		"@tabler/icons-svelte": "^3.35.0",
+		"@vercel/speed-insights": "^1.2.0",
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
 		"mode-watcher": "^1.1.0",

@@ -17,7 +17,7 @@
 	type Action = {
 		id: string;
 		title: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	let actions = $state<Action[]>([]);
@@ -57,18 +57,18 @@
 		if (!action) return;
 
 		const currentAction = action;
-		const isLinked = currentAction.linkedTasks.includes(taskId);
+		const isLinked = currentAction.linkedFoundations.includes(taskId);
 
 		if (isLinked) {
 			// Remove link
-			currentAction.linkedTasks = currentAction.linkedTasks.filter((id) => id !== taskId);
+			currentAction.linkedFoundations = currentAction.linkedFoundations.filter((id) => id !== taskId);
 			const task = tasks.find((t) => t.id === taskId);
 			if (task) {
 				task.linkedActions = task.linkedActions.filter((id) => id !== currentAction.id);
 			}
 		} else {
 			// Add link
-			currentAction.linkedTasks = [...currentAction.linkedTasks, taskId];
+			currentAction.linkedFoundations = [...currentAction.linkedFoundations, taskId];
 			const task = tasks.find((t) => t.id === taskId);
 			if (task) {
 				task.linkedActions = [...task.linkedActions, currentAction.id];
@@ -158,7 +158,7 @@
 					</div>
 				{:else}
 					{#each tasks as task (task.id)}
-						{@const isLinked = action.linkedTasks.includes(task.id)}
+						{@const isLinked = action.linkedFoundations.includes(task.id)}
 						<button
 							onclick={() => toggleTaskLink(task.id)}
 							class="group block w-full rounded-md border text-left transition-all {isLinked

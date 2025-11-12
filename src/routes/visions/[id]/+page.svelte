@@ -18,7 +18,7 @@
 		id: string;
 		title: string;
 		description: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	let visions = $state<Vision[]>([]);
@@ -55,7 +55,7 @@
 	}
 
 	function addTask() {
-		if (!vision || vision.linkedTasks.length >= 8) return;
+		if (!vision || vision.linkedFoundations.length >= 8) return;
 
 		const newTask: Task = {
 			id: crypto.randomUUID(),
@@ -64,7 +64,7 @@
 			linkedActions: [],
 		};
 		tasks = [...tasks, newTask];
-		vision.linkedTasks = [...vision.linkedTasks, newTask.id];
+		vision.linkedFoundations = [...vision.linkedFoundations, newTask.id];
 
 		if (typeof window !== 'undefined') {
 			localStorage.setItem('missions-tasks', JSON.stringify(tasks));
@@ -148,11 +148,11 @@
 		<div class="space-y-3 border-t border-border/50 pt-6">
 			<div class="flex items-center justify-between">
 				<h2 class="font-mono text-xs font-semibold tracking-wider text-foreground/60 uppercase">
-					Linked Tasks ({vision.linkedTasks.length}/8)
+					Linked Tasks ({vision.linkedFoundations.length}/8)
 				</h2>
 				<Button
 					onclick={addTask}
-					disabled={vision.linkedTasks.length >= 8}
+					disabled={vision.linkedFoundations.length >= 8}
 					variant="ghost"
 					size="sm"
 					class="h-7 font-mono text-xs"
@@ -163,12 +163,12 @@
 			</div>
 
 			<div class="space-y-2">
-				{#if vision.linkedTasks.length === 0}
+				{#if vision.linkedFoundations.length === 0}
 					<div class="rounded-lg border border-dashed border-border/50 py-8 text-center">
 						<p class="font-mono text-xs text-muted-foreground/50">No linked tasks</p>
 					</div>
 				{:else}
-					{#each vision.linkedTasks as taskId (taskId)}
+					{#each vision.linkedFoundations as taskId (taskId)}
 						{@const task = tasks.find((t) => t.id === taskId)}
 						{#if task}
 							<a

@@ -16,14 +16,14 @@
 	type Action = {
 		id: string;
 		title: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	type Vision = {
 		id: string;
 		title: string;
 		description: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
 	type View = 'visions' | 'vision-detail' | 'task-detail' | 'action-detail';
@@ -81,7 +81,7 @@
 				id: crypto.randomUUID(),
 				title: '',
 				description: '',
-				linkedTasks: [],
+				linkedFoundations: [],
 			};
 			visions = [...visions, newVision];
 			selectVision(newVision.id);
@@ -100,7 +100,7 @@
 
 	function addTaskToVision(visionId: string) {
 		const vision = visions.find((v) => v.id === visionId);
-		if (!vision || vision.linkedTasks.length >= 4) return;
+		if (!vision || vision.linkedFoundations.length >= 4) return;
 
 		const newTask: Task = {
 			id: crypto.randomUUID(),
@@ -109,7 +109,7 @@
 			linkedActions: [],
 		};
 		tasks = [...tasks, newTask];
-		vision.linkedTasks = [...vision.linkedTasks, newTask.id];
+		vision.linkedFoundations = [...vision.linkedFoundations, newTask.id];
 	}
 
 	function selectTask(id: string) {
@@ -129,7 +129,7 @@
 		const newAction: Action = {
 			id: crypto.randomUUID(),
 			title: '',
-			linkedTasks: [taskId],
+			linkedFoundations: [taskId],
 		};
 		actions = [...actions, newAction];
 		task.linkedActions = [...task.linkedActions, newAction.id];
@@ -201,9 +201,9 @@
 									<p class="truncate text-xs text-muted-foreground">{vision.description}</p>
 								{/if}
 							</div>
-							{#if vision.linkedTasks.length > 0}
+							{#if vision.linkedFoundations.length > 0}
 								<span class="font-mono text-xs text-muted-foreground/50">
-									{vision.linkedTasks.length} task{vision.linkedTasks.length !== 1 ? 's' : ''}
+									{vision.linkedFoundations.length} task{vision.linkedFoundations.length !== 1 ? 's' : ''}
 								</span>
 							{/if}
 							<IconChevronRight
@@ -250,11 +250,11 @@
 		<div class="space-y-3 border-t border-border/50 pt-6">
 			<div class="flex items-center justify-between">
 				<h2 class="font-mono text-xs font-semibold tracking-wider text-foreground/60 uppercase">
-					Linked Tasks ({selectedVision.linkedTasks.length}/4)
+					Linked Tasks ({selectedVision.linkedFoundations.length}/4)
 				</h2>
 				<Button
 					onclick={() => addTaskToVision(selectedVision.id)}
-					disabled={selectedVision.linkedTasks.length >= 4}
+					disabled={selectedVision.linkedFoundations.length >= 4}
 					variant="ghost"
 					size="sm"
 					class="h-7 font-mono text-xs"
@@ -265,12 +265,12 @@
 			</div>
 
 			<div class="space-y-2">
-				{#if selectedVision.linkedTasks.length === 0}
+				{#if selectedVision.linkedFoundations.length === 0}
 					<div class="rounded-lg border border-dashed border-border/50 py-8 text-center">
 						<p class="font-mono text-xs text-muted-foreground/50">No linked tasks</p>
 					</div>
 				{:else}
-					{#each selectedVision.linkedTasks as taskId (taskId)}
+					{#each selectedVision.linkedFoundations as taskId (taskId)}
 						{@const task = tasks.find((t) => t.id === taskId)}
 						{#if task}
 							<button
@@ -421,7 +421,7 @@
 				Linked Tasks
 			</h2>
 			<div class="space-y-2">
-				{#each selectedAction.linkedTasks as taskId (taskId)}
+				{#each selectedAction.linkedFoundations as taskId (taskId)}
 					{@const task = tasks.find((t) => t.id === taskId)}
 					{#if task}
 						<button onclick={() => selectTask(task.id)} class="notion-item group w-full text-left">

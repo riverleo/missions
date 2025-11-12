@@ -9,10 +9,10 @@
 	type Action = {
 		id: string;
 		title: string;
-		linkedTasks: string[];
+		linkedFoundations: string[];
 	};
 
-	type Task = {
+	type Foundation = {
 		id: string;
 		title: string;
 		linkedVisions: string[];
@@ -20,20 +20,20 @@
 	};
 
 	let actions = $state<Action[]>([]);
-	let tasks = $state<Task[]>([]);
+	let foundations = $state<Foundation[]>([]);
 
 	onMount(() => {
 		if (typeof window !== 'undefined') {
 			const savedActions = localStorage.getItem('missions-actions');
-			const savedTasks = localStorage.getItem('missions-tasks');
+			const savedFoundations = localStorage.getItem('missions-foundations');
 			if (savedActions) actions = JSON.parse(savedActions);
-			if (savedTasks) tasks = JSON.parse(savedTasks);
+			if (savedFoundations) foundations = JSON.parse(savedFoundations);
 		}
 	});
 
-	function getLinkedTaskTitles(action: Action): string {
-		return action.linkedTasks
-			.map((tId) => tasks.find((t) => t.id === tId)?.title || 'Untitled')
+	function getLinkedFoundationTitles(action: Action): string {
+		return action.linkedFoundations
+			.map((fId) => foundations.find((f) => f.id === fId)?.title || 'Untitled')
 			.join(', ');
 	}
 
@@ -41,7 +41,7 @@
 		const newAction: Action = {
 			id: crypto.randomUUID(),
 			title: '',
-			linkedTasks: [],
+			linkedFoundations: [],
 		};
 		actions = [...actions, newAction];
 		if (typeof window !== 'undefined') {
@@ -57,7 +57,7 @@
 			<h1 class="font-mono text-sm font-semibold tracking-wider text-foreground/60 uppercase">
 				Actions
 			</h1>
-			<p class="mt-1 text-sm text-muted-foreground">All your actions across tasks</p>
+			<p class="mt-1 text-sm text-muted-foreground">All your actions across foundations</p>
 		</div>
 		<Button
 			onclick={createAction}
@@ -76,7 +76,7 @@
 				<IconRocket class="mx-auto mb-3 h-12 w-12 text-muted-foreground/30" />
 				<p class="font-mono text-sm text-muted-foreground/50">No actions yet</p>
 				<p class="mt-1 text-xs text-muted-foreground/40">
-					Create actions from your tasks to get started
+					Create actions from your foundations to get started
 				</p>
 			</div>
 		{:else}
@@ -91,9 +91,9 @@
 							<p class="truncate font-medium text-foreground">
 								{action.title || 'Untitled Action'}
 							</p>
-							{#if action.linkedTasks.length > 0}
+							{#if action.linkedFoundations.length > 0}
 								<p class="truncate text-xs text-muted-foreground">
-									{getLinkedTaskTitles(action)}
+									{getLinkedFoundationTitles(action)}
 								</p>
 							{/if}
 						</div>
