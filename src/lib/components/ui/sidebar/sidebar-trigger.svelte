@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { IconLayoutSidebar } from '@tabler/icons-svelte';
+	import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-svelte';
 	import type { ComponentProps } from 'svelte';
 	import { useSidebar } from './context.svelte.js';
 
@@ -19,7 +19,7 @@
 	data-sidebar="trigger"
 	data-slot="sidebar-trigger"
 	variant="ghost"
-	size="icon"
+	size="sm"
 	type="button"
 	onclick={(e: MouseEvent) => {
 		onclick?.(e);
@@ -27,6 +27,10 @@
 	}}
 	{...restProps}
 >
-	<IconLayoutSidebar />
+	{#if sidebar.open}
+		<IconLayoutSidebarLeftCollapse />
+	{:else}
+		<IconLayoutSidebarLeftExpand />
+	{/if}
 	<span class="sr-only">Toggle Sidebar</span>
 </Button>

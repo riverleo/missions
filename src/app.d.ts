@@ -10,4 +10,9 @@ declare global {
 	}
 }
 
+// Storybook type declarations
+declare module '@storybook/addon-svelte-csf' {
+	export function defineMeta(config: any): any;
+}
+
 export {};

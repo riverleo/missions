@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
-	import Sidebar from '$lib/components/SidebarClaude.svelte';
+	import AppSidebar from '$lib/components/app-sidebar/app-sidebar.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 
@@ -18,9 +18,9 @@
 <ModeWatcher />
 
 {#if $wasLoggedIn}
-	<Sidebar open={data.sidebarCookieState}>
+	<AppSidebar open={data.sidebarCookieState}>
 		{@render children()}
-	</Sidebar>
+	</AppSidebar>
 {:else}
 	{@render children()}
 {/if}
