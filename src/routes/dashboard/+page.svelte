@@ -116,73 +116,25 @@
 		}
 	}
 
-	let draggedThought: Thought | null = null;
 	let draggedVision: Vision | null = null;
 	let draggedTask: Task | null = null;
 	let draggedAction: Action | null = null;
 
-	function handleDragStart(thought: Thought) {
-		draggedThought = thought;
-	}
-
-	function handleDragEnd() {
-		draggedThought = null;
-	}
-
 	function handleDropToVision() {
-		if (!draggedThought || visions.length >= 4) return;
-
-		const newVision: Vision = {
-			id: draggedThought.id,
-			title: draggedThought.title,
-			description: '',
-			linkedTasks: [],
-		};
-
-		visions = [...visions, newVision];
-		thoughts = thoughts.filter((t) => t.id !== draggedThought!.id);
-
-		localStorage.setItem('missions-visions', JSON.stringify(visions));
-		localStorage.setItem('missions-thoughts', JSON.stringify(thoughts));
-
-		draggedThought = null;
+		// Placeholder for future implementation
 	}
 
 	function handleDropToTask() {
-		if (!draggedThought || tasks.length >= 4) return;
-
-		const newTask: Task = {
-			id: draggedThought.id,
-			title: draggedThought.title,
-			linkedVisions: [],
-			linkedActions: [],
-		};
-
-		tasks = [...tasks, newTask];
-		thoughts = thoughts.filter((t) => t.id !== draggedThought!.id);
-
-		localStorage.setItem('missions-tasks', JSON.stringify(tasks));
-		localStorage.setItem('missions-thoughts', JSON.stringify(thoughts));
-
-		draggedThought = null;
+		// Placeholder for future implementation
 	}
 
 	function handleDropToAction() {
-		if (!draggedThought || actions.length >= 4) return;
+		// Placeholder for future implementation
+	}
 
-		const newAction: Action = {
-			id: draggedThought.id,
-			title: draggedThought.title,
-			linkedTasks: [],
-		};
-
-		actions = [...actions, newAction];
-		thoughts = thoughts.filter((t) => t.id !== draggedThought!.id);
-
-		localStorage.setItem('missions-actions', JSON.stringify(actions));
-		localStorage.setItem('missions-thoughts', JSON.stringify(thoughts));
-
-		draggedThought = null;
+	function handleThoughtsAreaDrop(e: DragEvent) {
+		e.preventDefault();
+		handleDropToThoughts();
 	}
 
 	function handleDropToThoughts() {
@@ -215,138 +167,141 @@
 	<ResizablePaneGroup direction="horizontal" class="h-[calc(100vh-4rem)] bg-background">
 		<!-- Left Panel - Drop Zones -->
 		<ResizablePane defaultSize={25} minSize={20} maxSize={40}>
-			<div class="space-y-6 overflow-y-auto p-4 h-full">
-			<!-- Vision Cards -->
-			<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToVision}>
-				<div class="mb-2 flex items-center gap-2">
-					<IconTarget class="h-4 w-4 text-primary" />
-					<span class="font-mono text-xs tracking-wider text-primary uppercase">Visions</span>
-				</div>
-				<div class="grid grid-cols-4 gap-2">
-					{#each visions as vision (vision.id)}
-						<div
-							draggable="true"
-							ondragstart={() => {
-								draggedVision = vision;
-							}}
-							ondragend={() => {
-								draggedVision = null;
-							}}
-							class="group relative cursor-move"
-						>
-							<button
-								onclick={() => goto(`/visions/${vision.id}`)}
-								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
+			<div class="h-full space-y-6 overflow-y-auto p-4">
+				<!-- Vision Cards -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToVision}>
+					<div class="mb-2 flex items-center gap-2">
+						<IconTarget class="h-4 w-4 text-primary" />
+						<span class="font-mono text-xs tracking-wider text-primary uppercase">Visions</span>
+					</div>
+					<div class="grid grid-cols-4 gap-2">
+						{#each visions as vision (vision.id)}
+							<div
+								draggable="true"
+								ondragstart={() => {
+									draggedVision = vision;
+								}}
+								ondragend={() => {
+									draggedVision = null;
+								}}
+								class="group relative cursor-move"
 							>
-								<p class="w-full truncate text-center text-xs font-medium text-foreground">
-									{vision.title || 'Untitled'}
-								</p>
-								<span
-									class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+								<button
+									onclick={() => goto(`/visions/${vision.id}`)}
+									class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
 								>
-									{vision.linkedTasks.length}
-								</span>
+									<p class="w-full truncate text-center text-xs font-medium text-foreground">
+										{vision.title || 'Untitled'}
+									</p>
+									<span
+										class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+									>
+										{vision.linkedTasks.length}
+									</span>
+								</button>
+							</div>
+						{/each}
+						{#each Array(4 - visions.length) as _}
+							<button
+								onclick={createVision}
+								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
+							>
+								<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
 							</button>
-						</div>
-					{/each}
-					{#each Array(4 - visions.length) as _}
-						<button
-							onclick={createVision}
-							class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
-						>
-							<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
-						</button>
-					{/each}
+						{/each}
+					</div>
 				</div>
-			</div>
 
-			<!-- Task Cards -->
-			<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToTask}>
-				<div class="mb-2 flex items-center gap-2">
-					<IconCircleCheck class="h-4 w-4 text-primary" />
-					<span class="font-mono text-xs tracking-wider text-primary uppercase">Tasks</span>
-				</div>
-				<div class="grid grid-cols-4 gap-2">
-					{#each tasks as task (task.id)}
-						<div
-							draggable="true"
-							ondragstart={() => {
-								draggedTask = task;
-							}}
-							ondragend={() => {
-								draggedTask = null;
-							}}
-							class="group relative cursor-move"
-						>
-							<button
-								onclick={() => goto(`/tasks/${task.id}`)}
-								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
+				<!-- Task Cards -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToTask}>
+					<div class="mb-2 flex items-center gap-2">
+						<IconCircleCheck class="h-4 w-4 text-primary" />
+						<span class="font-mono text-xs tracking-wider text-primary uppercase">Tasks</span>
+					</div>
+					<div class="grid grid-cols-4 gap-2">
+						{#each tasks as task (task.id)}
+							<div
+								draggable="true"
+								ondragstart={() => {
+									draggedTask = task;
+								}}
+								ondragend={() => {
+									draggedTask = null;
+								}}
+								class="group relative cursor-move"
 							>
-								<p class="w-full truncate text-center text-xs font-medium text-foreground">
-									{task.title || 'Untitled'}
-								</p>
-								<span
-									class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+								<button
+									onclick={() => goto(`/tasks/${task.id}`)}
+									class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
 								>
-									{task.linkedActions.length}
-								</span>
+									<p class="w-full truncate text-center text-xs font-medium text-foreground">
+										{task.title || 'Untitled'}
+									</p>
+									<span
+										class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+									>
+										{task.linkedActions.length}
+									</span>
+								</button>
+							</div>
+						{/each}
+						{#each Array(4 - tasks.length) as _}
+							<button
+								onclick={createTask}
+								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
+							>
+								<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
 							</button>
-						</div>
-					{/each}
-					{#each Array(4 - tasks.length) as _}
-						<button
-							onclick={createTask}
-							class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
-						>
-							<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
-						</button>
-					{/each}
+						{/each}
+					</div>
 				</div>
-			</div>
 
-			<!-- Action Cards -->
-			<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToAction}>
-				<div class="mb-2 flex items-center gap-2">
-					<IconRocket class="h-4 w-4 text-primary" />
-					<span class="font-mono text-xs tracking-wider text-primary uppercase">Actions</span>
-				</div>
-				<div class="grid grid-cols-4 gap-2">
-					{#each actions as action (action.id)}
-						<div
-							draggable="true"
-							ondragstart={() => {
-								draggedAction = action;
-							}}
-							ondragend={() => {
-								draggedAction = null;
-							}}
-							class="group relative cursor-move"
-						>
-							<button
-								onclick={() => goto(`/actions/${action.id}`)}
-								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
+				<!-- Action Cards -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div ondragover={(e) => e.preventDefault()} ondrop={handleDropToAction}>
+					<div class="mb-2 flex items-center gap-2">
+						<IconRocket class="h-4 w-4 text-primary" />
+						<span class="font-mono text-xs tracking-wider text-primary uppercase">Actions</span>
+					</div>
+					<div class="grid grid-cols-4 gap-2">
+						{#each actions as action (action.id)}
+							<div
+								draggable="true"
+								ondragstart={() => {
+									draggedAction = action;
+								}}
+								ondragend={() => {
+									draggedAction = null;
+								}}
+								class="group relative cursor-move"
 							>
-								<p class="w-full truncate text-center text-xs font-medium text-foreground">
-									{action.title || 'Untitled'}
-								</p>
-								<span
-									class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+								<button
+									onclick={() => goto(`/actions/${action.id}`)}
+									class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-2 transition-colors hover:bg-muted/10"
 								>
-									{action.linkedTasks.length}
-								</span>
+									<p class="w-full truncate text-center text-xs font-medium text-foreground">
+										{action.title || 'Untitled'}
+									</p>
+									<span
+										class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-muted text-[10px] font-medium"
+									>
+										{action.linkedTasks.length}
+									</span>
+								</button>
+							</div>
+						{/each}
+						{#each Array(4 - actions.length) as _}
+							<button
+								onclick={createAction}
+								class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
+							>
+								<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
 							</button>
-						</div>
-					{/each}
-					{#each Array(4 - actions.length) as _}
-						<button
-							onclick={createAction}
-							class="flex h-20 w-full flex-col items-center justify-center rounded-lg border border-dashed border-border/50 bg-black p-2 transition-colors hover:bg-muted/10 [&>svg]:hover:opacity-100"
-						>
-							<IconPlus class="h-5 w-5 text-muted-foreground opacity-0 transition-opacity" />
-						</button>
-					{/each}
+						{/each}
+					</div>
 				</div>
-			</div>
 			</div>
 		</ResizablePane>
 
@@ -354,46 +309,44 @@
 
 		<!-- Right Grid Area - Thoughts -->
 		<ResizablePane defaultSize={75}>
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
 			<div
-				class="overflow-y-auto p-6 h-full"
+				class="h-full overflow-y-auto p-6"
 				ondragover={(e) => e.preventDefault()}
-				ondrop={handleDropToThoughts}
+				ondrop={handleThoughtsAreaDrop}
 			>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="font-mono text-xs tracking-wider text-primary uppercase">Thoughts</h2>
-				<button
-					onclick={createThought}
-					class="inline-flex items-center gap-1 rounded-md border border-dashed border-border/50 bg-black px-3 py-1.5 text-xs transition-colors hover:bg-muted/10"
-				>
-					<IconPlus class="h-3 w-3" />
-					New Thought
-				</button>
-			</div>
-			<div class="grid auto-rows-min grid-cols-4 gap-4">
-				{#each thoughts as thought (thought.id)}
-					<div
-						draggable="true"
-						ondragstart={() => handleDragStart(thought)}
-						ondragend={handleDragEnd}
-						class="group flex min-h-32 cursor-move flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-4 transition-colors hover:bg-muted/10"
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="font-mono text-xs tracking-wider text-primary uppercase">Thoughts</h2>
+					<button
+						onclick={createThought}
+						class="inline-flex items-center gap-1 rounded-md border border-dashed border-border/50 bg-black px-3 py-1.5 text-xs transition-colors hover:bg-muted/10"
 					>
-						<IconBulb class="mb-2 h-6 w-6 text-muted-foreground" />
-						<input
-							type="text"
-							value={thought.title}
-							oninput={(e) => updateThought(thought.id, e.currentTarget.value)}
-							placeholder="Enter thought..."
-							class="w-full bg-transparent text-center text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground/50"
-						/>
-						<button
-							onclick={() => deleteThought(thought.id)}
-							class="mt-2 text-xs text-destructive opacity-0 transition-opacity group-hover:opacity-100"
+						<IconPlus class="h-3 w-3" />
+						New Thought
+					</button>
+				</div>
+				<div class="grid auto-rows-min grid-cols-4 gap-4">
+					{#each thoughts as thought (thought.id)}
+						<div
+							class="group flex min-h-32 cursor-move flex-col items-center justify-center rounded-lg border border-border/50 bg-black p-4 transition-colors hover:bg-muted/10"
 						>
-							Delete
-						</button>
-					</div>
-				{/each}
-			</div>
+							<IconBulb class="mb-2 h-6 w-6 text-muted-foreground" />
+							<input
+								type="text"
+								value={thought.title}
+								oninput={(e) => updateThought(thought.id, e.currentTarget.value)}
+								placeholder="Enter thought..."
+								class="w-full bg-transparent text-center text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground/50"
+							/>
+							<button
+								onclick={() => deleteThought(thought.id)}
+								class="mt-2 text-xs text-destructive opacity-0 transition-opacity group-hover:opacity-100"
+							>
+								Delete
+							</button>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</ResizablePane>
 	</ResizablePaneGroup>

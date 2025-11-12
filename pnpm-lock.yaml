@@ -23,9 +23,6 @@ importers:
       mode-watcher:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.43.3)
-      svelte-dnd-action:
-        specifier: ^0.9.67
-        version: 0.9.67(svelte@5.43.3)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
@@ -1738,11 +1735,6 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
-  svelte-dnd-action@0.9.67:
-    resolution: {integrity: sha512-yEJQZ9SFy3O4mnOdtjwWyotRsWRktNf4W8k67zgiLiMtMNQnwCyJHBjkGMgZMDh8EGZ4gr88l+GebBWoHDwo+g==}
-    peerDependencies:
-      svelte: '>=3.23.0 || ^5.0.0-next.0'
-
   svelte-eslint-parser@1.4.0:
     resolution: {integrity: sha512-fjPzOfipR5S7gQ/JvI9r2H8y9gMGXO3JtmrylHLLyahEMquXI0lrebcjT+9/hNgDej0H7abTyox5HpHmW1PSWA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0, pnpm: 10.18.3}
@@ -3370,10 +3362,6 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - picomatch
-
-  svelte-dnd-action@0.9.67(svelte@5.43.3):
-    dependencies:
-      svelte: 5.43.3
 
   svelte-eslint-parser@1.4.0(svelte@5.43.3):
     dependencies:
