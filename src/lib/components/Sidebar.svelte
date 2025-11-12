@@ -168,7 +168,10 @@
 				} else if (linkedFoundations.length > 1) {
 					segments.push({
 						label: `${linkedFoundations.length} Foundations`,
-						items: linkedFoundations.map((f) => ({ id: f.id, title: f.title || 'Untitled Foundation' })),
+						items: linkedFoundations.map((f) => ({
+							id: f.id,
+							title: f.title || 'Untitled Foundation',
+						})),
 					});
 				}
 
@@ -209,6 +212,7 @@
 		</Sidebar.Header>
 
 		<Sidebar.Content>
+			한국어
 			<Sidebar.Group>
 				<Sidebar.GroupLabel>Navigation</Sidebar.GroupLabel>
 				<Sidebar.Menu>
@@ -302,7 +306,9 @@
 											{#each segment.items as item}
 												<DropdownMenu.Item
 													onclick={() => {
-														const type = segment.label.includes('Vision') ? 'visions' : 'foundations';
+														const type = segment.label.includes('Vision')
+															? 'visions'
+															: 'foundations';
 														goto(`/${type}/${item.id}`);
 													}}
 												>
