@@ -15,9 +15,6 @@
     "lint:fix": "prettier --write . && eslint --fix .",
     "test:e2e": "playwright test",
     "test": "npm run test:e2e",
-    "story:dev": "histoire dev",
-    "story:build": "histoire build",
-    "story:preview": "histoire preview",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
