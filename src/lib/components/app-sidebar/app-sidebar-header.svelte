@@ -11,7 +11,7 @@
 	} from '$lib/components/ui/tooltip';
 	import AppSidebarBreadcrumb from './app-sidebar-breadcrumb.svelte';
 
-	const { mission } = $props();
+	const { mission }: { mission: string } = $props();
 	const sidebar = useSidebar();
 </script>
 

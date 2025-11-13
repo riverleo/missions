@@ -15,7 +15,7 @@
 		DropdownMenuItem,
 	} from '../ui/dropdown-menu';
 
-	const { mission } = $props();
+	const { mission }: { mission: string } = $props();
 </script>
 
 <Breadcrumb>
