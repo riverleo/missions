@@ -47,7 +47,7 @@
 			<SidebarGroup>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton href="/quests">Quests</SidebarMenuButton>
+						<SidebarMenuButton>Quests</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarGroup>

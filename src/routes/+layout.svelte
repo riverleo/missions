@@ -6,7 +6,7 @@
 	import { wasLoggedIn } from '$lib/stores';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import { shortcut } from '@svelte-put/shortcut';
-	import { onshortcut } from '$lib/shortcut';
+	import { onkeyup, onkeydown } from '$lib/shortcut';
 
 	injectSpeedInsights();
 
@@ -17,7 +17,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<svelte:window use:shortcut={{ trigger: { key: 'q', modifier: false } }} {onshortcut} />
+<svelte:window {onkeyup} {onkeydown} use:shortcut={{ trigger: { key: 'q', modifier: false } }} />
 
 <ModeWatcher />
 

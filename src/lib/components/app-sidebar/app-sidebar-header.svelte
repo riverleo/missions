@@ -32,7 +32,7 @@
 			</Tooltip>
 		</TooltipProvider>
 
-		<Button size="sm" variant="outline" class="px-2 text-xs">
+		<Button size="sm" variant="outline" class="px-2 text-xs" shortcut="q">
 			새로운 퀘스트
 			<Kbd>Q</Kbd>
 		</Button>

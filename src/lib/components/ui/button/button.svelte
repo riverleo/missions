@@ -4,17 +4,20 @@
 	import { type VariantProps, tv } from 'tailwind-variants';
 
 	export const buttonVariants = tv({
-		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[shortcut-active]:scale-[0.97] data-[shortcut-active]:brightness-95 data-[shortcut-bounce]:scale-[1.05]",
 		variants: {
 			variant: {
-				default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 data-[active=true]:bg-primary/90',
+				default:
+					'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 data-[shortcut-active]:bg-primary/90',
 				destructive:
-					'bg-destructive shadow-xs hover:bg-destructive/90 data-[active=true]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
+					'bg-destructive shadow-xs hover:bg-destructive/90 data-[shortcut-active]:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 text-white',
 				outline:
-					'bg-background shadow-xs hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 dark:data-[active=true]:bg-input/50 border',
-				secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 data-[active=true]:bg-secondary/80',
-				ghost: 'hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground dark:hover:bg-accent/50 dark:data-[active=true]:bg-accent/50',
-				link: 'text-primary underline-offset-4 hover:underline data-[active=true]:underline',
+					'bg-background shadow-xs hover:bg-accent hover:text-accent-foreground data-[shortcut-active]:bg-accent data-[shortcut-active]:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 dark:data-[shortcut-active]:bg-input/50 border',
+				secondary:
+					'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 data-[shortcut-active]:bg-secondary/80',
+				ghost:
+					'hover:bg-accent hover:text-accent-foreground data-[shortcut-active]:bg-accent data-[shortcut-active]:text-accent-foreground dark:hover:bg-accent/50 dark:data-[shortcut-active]:bg-accent/50',
+				link: 'text-primary underline-offset-4 hover:underline data-[shortcut-active]:underline',
 			},
 			size: {
 				default: 'h-9 px-4 py-2 has-[>svg]:px-3',
@@ -38,6 +41,7 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			shortcut?: string;
 		};
 </script>
 
@@ -51,6 +55,7 @@
 		type = 'button',
 		disabled,
 		children,
+		shortcut,
 		...restProps
 	}: ButtonProps = $props();
 </script>
@@ -59,6 +64,7 @@
 	<a
 		bind:this={ref}
 		data-slot="button"
+		data-shortcut={shortcut}
 		class={cn(buttonVariants({ variant, size }), className)}
 		href={disabled ? undefined : href}
 		aria-disabled={disabled}
@@ -72,6 +78,7 @@
 	<button
 		bind:this={ref}
 		data-slot="button"
+		data-shortcut={shortcut}
 		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
 		{disabled}
