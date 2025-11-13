@@ -47,7 +47,7 @@
 			<SidebarGroup>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton>Quests</SidebarMenuButton>
+						<SidebarMenuButton>작업중</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarGroup>
