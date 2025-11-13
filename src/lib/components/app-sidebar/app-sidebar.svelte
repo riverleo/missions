@@ -12,7 +12,6 @@
 		SidebarGroup,
 	} from '$lib/components/ui/sidebar';
 	import { Avatar, AvatarFallback } from '$lib/components/ui/avatar';
-	import { shortcut } from '@svelte-put/shortcut';
 	import { m } from '$lib/paraglide/messages';
 	import AppSidebarHeader from './app-sidebar-header.svelte';
 
@@ -24,20 +23,7 @@
 		open?: boolean;
 		mission?: string;
 	} = $props();
-
-	const handleShortcut = (event: CustomEvent) => {
-		event.preventDefault();
-	};
 </script>
-
-<svelte:window
-	use:shortcut={{
-		trigger: {
-			key: 'q',
-		},
-	}}
-	onshortcut={handleShortcut}
-/>
 
 <SidebarProvider {open}>
 	<Sidebar>
@@ -61,9 +47,7 @@
 			<SidebarGroup>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton>
-							<a href="/quests">Quests</a>
-						</SidebarMenuButton>
+						<SidebarMenuButton href="/quests">Quests</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarGroup>

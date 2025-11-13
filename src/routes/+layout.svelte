@@ -5,6 +5,8 @@
 	import AppSidebar from '$lib/components/app-sidebar/app-sidebar.svelte';
 	import { wasLoggedIn } from '$lib/stores';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import { shortcut } from '@svelte-put/shortcut';
+	import { onshortcut } from '$lib/shortcut';
 
 	injectSpeedInsights();
 
@@ -14,6 +16,8 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
+
+<svelte:window use:shortcut={{ trigger: { key: 'q', modifier: false } }} {onshortcut} />
 
 <ModeWatcher />
 
