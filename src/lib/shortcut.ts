@@ -1,7 +1,9 @@
 export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
 	const { key: shortcut } = event;
 
-	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${shortcut}"]`);
+	const elements = document.querySelectorAll<HTMLElement>(
+		`[data-shortcut="${shortcut.toLowerCase()}"]`
+	);
 
 	elements.forEach((e) => {
 		if (e.dataset.shortcutActive) return;
@@ -13,7 +15,9 @@ export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & 
 export function onkeyup(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
 	const { key: shortcut } = event;
 
-	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${shortcut}"]`);
+	const elements = document.querySelectorAll<HTMLElement>(
+		`[data-shortcut="${shortcut.toLowerCase()}"]`
+	);
 
 	elements.forEach((e) => {
 		if (e.dataset.shortcutActive === undefined) return;
