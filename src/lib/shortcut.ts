@@ -1,30 +1,53 @@
+let audioContext: AudioContext | null = null;
+
+function getAudioContext() {
+	if (!audioContext) {
+		audioContext = new AudioContext();
+	}
+	return audioContext;
+}
+
 function playSound() {
 	try {
-		const audioContext = new AudioContext();
-		const oscillator = audioContext.createOscillator();
-		const gainNode = audioContext.createGain();
+		const ctx = getAudioContext();
+		const oscillator = ctx.createOscillator();
+		const gainNode = ctx.createGain();
 
 		oscillator.connect(gainNode);
-		gainNode.connect(audioContext.destination);
+		gainNode.connect(ctx.destination);
 
 		// 짧고 경쾌한 클릭 사운드
-		oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-		oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.05);
+		oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+		oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
 
-		gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-		gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+		gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+		gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
 
-		oscillator.start(audioContext.currentTime);
-		oscillator.stop(audioContext.currentTime + 0.05);
+		oscillator.start(ctx.currentTime);
+		oscillator.stop(ctx.currentTime + 0.05);
 	} catch (error) {
 		console.warn('Failed to play shortcut sound:', error);
 	}
 }
 
+const bounceTimeouts = new WeakMap<HTMLElement, NodeJS.Timeout>();
+
 function triggerButtonEffect(element: HTMLElement) {
+	// 이전 timeout이 있으면 취소
+	const existingTimeout = bounceTimeouts.get(element);
+	if (existingTimeout !== undefined) {
+		clearTimeout(existingTimeout);
+	}
+
 	element.dataset.shortcutBounce = '';
 	playSound();
-	setTimeout(() => delete element.dataset.shortcutBounce, 150);
+
+	const timeoutId = setTimeout(() => {
+		delete element.dataset.shortcutBounce;
+		bounceTimeouts.delete(element);
+	}, 150);
+
+	bounceTimeouts.set(element, timeoutId);
 }
 
 export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
