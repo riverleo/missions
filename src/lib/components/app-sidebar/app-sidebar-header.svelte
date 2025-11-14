@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { SidebarTrigger, useSidebar } from '$lib/components/ui/sidebar';
 	import { Separator } from '$lib/components/ui/separator';
-	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
 	import {
 		Tooltip,
@@ -10,6 +9,7 @@
 		TooltipContent,
 	} from '$lib/components/ui/tooltip';
 	import AppSidebarBreadcrumb from './app-sidebar-breadcrumb.svelte';
+	import { NewQuest } from '$lib/components/quest';
 
 	const { mission }: { mission: string } = $props();
 	const sidebar = useSidebar();
@@ -20,7 +20,9 @@
 		<TooltipProvider delayDuration={200}>
 			<Tooltip>
 				<TooltipTrigger>
-					<SidebarTrigger />
+					{#snippet child({ props })}
+						<SidebarTrigger {...props} />
+					{/snippet}
 				</TooltipTrigger>
 				<TooltipContent class="flex items-center gap-1.5">
 					사이드 메뉴 {sidebar.open ? '닫기' : '열기'}
@@ -32,10 +34,7 @@
 			</Tooltip>
 		</TooltipProvider>
 
-		<Button size="sm" variant="outline" class="px-2 text-xs" data-shortcut="q">
-			새로운 퀘스트
-			<Kbd>Q</Kbd>
-		</Button>
+		<NewQuest />
 	</div>
 	<div class="h-6">
 		<Separator orientation="vertical" />
