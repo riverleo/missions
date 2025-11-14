@@ -1,17 +1,13 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import type { NewQuestContext } from '.';
-	import { Button } from '../ui/button';
-	import { Kbd } from '../ui/kbd';
-
-	const ctx = getContext<NewQuestContext>('new-quest-context');
-
-	function handleClick() {
-		ctx.open = true;
-	}
+	import { Button } from '$lib/components/ui/button';
+	import { Kbd } from '$lib/components/ui/kbd';
+	import { shortcut } from '@svelte-put/shortcut';
+	import { open, toggleOpen } from './store';
 </script>
 
-<Button size="sm" variant="outline" class="px-2 text-xs" data-shortcut="q" onclick={handleClick}>
+<svelte:window use:shortcut={{ trigger: { key: 'KeyQ', modifier: false, callback: toggleOpen } }} />
+
+<Button size="sm" variant="outline" class="px-2 text-xs" data-shortcut="q" onclick={toggleOpen}>
 	새로운 퀘스트
 	<Kbd>Q</Kbd>
 </Button>
