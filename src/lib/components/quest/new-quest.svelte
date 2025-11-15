@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
+	import { iris } from '$lib/effects/iris';
 	import { open } from './store';
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -11,7 +11,7 @@
 
 {#if $open}
 	<div
-		transition:fade={{ duration: 100 }}
+		transition:iris={{ duration: 400 }}
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
 	>
 		<div class="text-white">
