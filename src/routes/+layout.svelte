@@ -5,7 +5,7 @@
 	import AppSidebar from '$lib/components/app-sidebar/app-sidebar.svelte';
 	import { NewQuest } from '$lib/components/quest';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
-	import { onkeyup, onkeydown, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/effects';
+	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/events';
 
 	injectSpeedInsights();
 
@@ -16,7 +16,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<svelte:window {onkeyup} {onkeydown} {onmousedown} {onmouseup} {onmouseleave} />
+<svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} {onmouseleave} />
 
 <ModeWatcher />
 

@@ -2,6 +2,7 @@
 	import { cn, type WithElementRef } from '$lib/utils.js';
 	import type { HTMLAnchorAttributes, HTMLButtonAttributes } from 'svelte/elements';
 	import { type VariantProps, tv } from 'tailwind-variants';
+	import type { KeyBindingId } from '$lib/shortcut/keymap.js';
 
 	export const buttonVariants = tv({
 		base: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[shortcut-active]:scale-[0.97] data-[shortcut-active]:brightness-95 data-[shortcut-bounce]:scale-[1.05]",
@@ -41,6 +42,7 @@
 		WithElementRef<HTMLAnchorAttributes> & {
 			variant?: ButtonVariant;
 			size?: ButtonSize;
+			keybinding?: KeyBindingId;
 		};
 </script>
 
@@ -53,6 +55,7 @@
 		href = undefined,
 		type = 'button',
 		disabled,
+		keybinding,
 		children,
 		...restProps
 	}: ButtonProps = $props();
@@ -67,6 +70,7 @@
 		aria-disabled={disabled}
 		role={disabled ? 'link' : undefined}
 		tabindex={disabled ? -1 : undefined}
+		data-keybinding={keybinding}
 		{...restProps}
 	>
 		{@render children?.()}
@@ -78,6 +82,7 @@
 		class={cn(buttonVariants({ variant, size }), className)}
 		{type}
 		{disabled}
+		data-keybinding={keybinding}
 		{...restProps}
 	>
 		{@render children?.()}
