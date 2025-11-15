@@ -1,34 +1,4 @@
-let audioContext: AudioContext | null = null;
-
-function getAudioContext() {
-	if (!audioContext) {
-		audioContext = new AudioContext();
-	}
-	return audioContext;
-}
-
-function playSound() {
-	try {
-		const ctx = getAudioContext();
-		const oscillator = ctx.createOscillator();
-		const gainNode = ctx.createGain();
-
-		oscillator.connect(gainNode);
-		gainNode.connect(ctx.destination);
-
-		// 짧고 경쾌한 클릭 사운드
-		oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-		oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
-
-		gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-		gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
-
-		oscillator.start(ctx.currentTime);
-		oscillator.stop(ctx.currentTime + 0.05);
-	} catch (error) {
-		console.warn('Failed to play shortcut sound:', error);
-	}
-}
+import sounds from './sounds.js';
 
 const bounceTimeouts = new WeakMap<HTMLElement, NodeJS.Timeout>();
 
@@ -40,7 +10,7 @@ function triggerButtonEffect(element: HTMLElement) {
 	}
 
 	element.dataset.shortcutBounce = '';
-	playSound();
+	sounds.play('warp');
 
 	const timeoutId = setTimeout(() => {
 		delete element.dataset.shortcutBounce;
@@ -51,9 +21,7 @@ function triggerButtonEffect(element: HTMLElement) {
 }
 
 export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
-	const { code } = event;
-	const shortcut = code.substring(3).toLowerCase();
-	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${shortcut}"]`);
+	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${event.code}"]`);
 
 	elements.forEach((e) => {
 		if (e.dataset.shortcutActive) return;
@@ -63,9 +31,7 @@ export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & 
 }
 
 export function onkeyup(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
-	const { code } = event;
-	const shortcut = code.substring(3).toLowerCase();
-	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${shortcut}"]`);
+	const elements = document.querySelectorAll<HTMLElement>(`[data-shortcut="${event.code}"]`);
 
 	elements.forEach((e) => {
 		if (e.dataset.shortcutActive === undefined) return;

@@ -1,18 +1,4 @@
-import Root from './new-quest.svelte';
 import Trigger from './new-quest-trigger.svelte';
-import Content from './new-quest-content.svelte';
-import type { Writable } from 'svelte/store';
+import Root from './new-quest.svelte';
 
-export type NewQuestContext = Writable<{
-	open: boolean;
-}>;
-
-export {
-	Root,
-	Trigger,
-	Content,
-	//
-	Root as NewQuest,
-	Trigger as NewQuestTrigger,
-	Content as NewQuestContent,
-};
+export { Trigger as NewQuestTrigger, Root as NewQuest };

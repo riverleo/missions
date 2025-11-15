@@ -1,6 +1,6 @@
 <script module>
 	import { defineMeta } from '@storybook/addon-svelte-csf';
-	import { NewQuest } from '.';
+	import { NewQuestTrigger, NewQuest } from '.';
 
 	const { Story } = defineMeta({
 		title: 'Components/Quest/NewQuest',
@@ -23,8 +23,9 @@
 				{/each}
 			</div>
 			<div class="mt-8">
-				<NewQuest />
+				<NewQuestTrigger />
 			</div>
 		</div>
 	</div>
+	<NewQuest />
 </Story>

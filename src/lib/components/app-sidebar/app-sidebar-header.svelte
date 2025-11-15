@@ -9,7 +9,7 @@
 		TooltipContent,
 	} from '$lib/components/ui/tooltip';
 	import AppSidebarBreadcrumb from './app-sidebar-breadcrumb.svelte';
-	import { NewQuest } from '$lib/components/quest';
+	import { NewQuestTrigger } from '$lib/components/quest';
 
 	const { mission }: { mission: string } = $props();
 	const sidebar = useSidebar();
@@ -34,7 +34,7 @@
 			</Tooltip>
 		</TooltipProvider>
 
-		<NewQuest />
+		<NewQuestTrigger />
 	</div>
 	<div class="h-6">
 		<Separator orientation="vertical" />

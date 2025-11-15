@@ -1,8 +1,21 @@
 <script lang="ts">
-	import NewQuestTrigger from './new-quest-trigger.svelte';
-	import NewQuestContent from './new-quest-content.svelte';
+	import { fade } from 'svelte/transition';
+	import { open } from './store';
+
+	function handleKeydown(e: KeyboardEvent) {
+		if ($open && e.code === 'Escape') $open = false;
+	}
 </script>
 
-<NewQuestTrigger />
+<svelte:window onkeydown={handleKeydown} />
 
-<NewQuestContent />
+{#if $open}
+	<div
+		transition:fade={{ duration: 100 }}
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
+	>
+		<div class="text-white">
+			<h1 class="text-4xl font-bold">New Quest</h1>
+		</div>
+	</div>
+{/if}

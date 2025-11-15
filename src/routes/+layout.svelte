@@ -3,8 +3,9 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
 	import AppSidebar from '$lib/components/app-sidebar/app-sidebar.svelte';
+	import { NewQuest } from '$lib/components/quest';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
-	import { onkeyup, onkeydown, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut';
+	import { onkeyup, onkeydown, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/effects';
 
 	injectSpeedInsights();
 
@@ -22,3 +23,5 @@
 <AppSidebar open={data.sidebarCookieState}>
 	{@render children()}
 </AppSidebar>
+
+<NewQuest />
