@@ -32,13 +32,7 @@ export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & 
 		const binding = keymap[bindingId as keyof typeof keymap];
 		if (!binding) return;
 
-		if (
-			binding.code === event.code &&
-			(binding.meta ?? false) === event.metaKey &&
-			(binding.ctrl ?? false) === event.ctrlKey &&
-			(binding.shift ?? false) === event.shiftKey &&
-			(binding.alt ?? false) === event.altKey
-		) {
+		if (binding.match(event)) {
 			if (e.dataset.shortcutActive) return;
 			e.dataset.shortcutActive = '';
 		}
@@ -48,13 +42,7 @@ export function onkeydown(event: KeyboardEvent & { currentTarget: EventTarget & 
 export function onkeyup(event: KeyboardEvent & { currentTarget: EventTarget & Window }) {
 	// 글로벌 단축키 처리
 	for (const binding of Object.values(keymap)) {
-		if (
-			binding.code === event.code &&
-			(binding.meta ?? false) === event.metaKey &&
-			(binding.ctrl ?? false) === event.ctrlKey &&
-			(binding.shift ?? false) === event.shiftKey &&
-			(binding.alt ?? false) === event.altKey
-		) {
+		if (binding.match(event)) {
 			event.preventDefault();
 			binding.action();
 			break;
@@ -71,13 +59,7 @@ export function onkeyup(event: KeyboardEvent & { currentTarget: EventTarget & Wi
 		const binding = keymap[bindingId as keyof typeof keymap];
 		if (!binding) return;
 
-		if (
-			binding.code === event.code &&
-			(binding.meta ?? false) === event.metaKey &&
-			(binding.ctrl ?? false) === event.ctrlKey &&
-			(binding.shift ?? false) === event.shiftKey &&
-			(binding.alt ?? false) === event.altKey
-		) {
+		if (binding.match(event)) {
 			if (e.dataset.shortcutActive === undefined) return;
 
 			delete e.dataset.shortcutActive;
