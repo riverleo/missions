@@ -5,9 +5,11 @@
 	import AppSidebar from '$lib/components/app-sidebar/app-sidebar.svelte';
 	import { NewQuest } from '$lib/components/quest';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/events';
 
 	injectSpeedInsights();
+	injectAnalytics();
 
 	let { children, data } = $props();
 </script>
