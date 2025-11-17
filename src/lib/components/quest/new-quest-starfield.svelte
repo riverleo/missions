@@ -6,108 +6,88 @@
 		x: number;
 		y: number;
 		size: number;
-		opacity: number;
-		interval: number;
+		speed: number;
+		angle: number;
+		distance: number;
 	}
 
 	let starIdCounter = 0;
+	const centerX = 50;
+	const centerY = 50;
 
-	function generateStar({ size, interval }: { size: number; interval: number }): Star {
+	function generateStar(speed: number): Star {
+		const angle = Math.random() * Math.PI * 2;
+		const distance = Math.random() * 20; // 시작 거리 랜덤
+
 		return {
 			id: starIdCounter++,
-			x: Math.random() * 100,
-			y: Math.random() * 100,
-			size,
-			opacity: 1,
-			interval,
+			x: centerX + Math.cos(angle) * distance,
+			y: centerY + Math.sin(angle) * distance,
+			size: 1,
+			speed,
+			angle,
+			distance,
 		};
 	}
 
-	function generateStars({
-		size,
-		count,
-		interval,
-	}: {
-		size: number;
-		count: number;
-		interval: number;
-	}): Star[] {
-		return Array.from({ length: count }, () => generateStar({ size, interval }));
+	function generateStars(count: number, speed: number): Star[] {
+		return Array.from({ length: count }, () => generateStar(speed));
 	}
 
-	// 작은 별 9개, 중간 별 5개, 큰 별 11개
 	let stars = $state<Star[]>([
-		...generateStars({ size: 1, count: 9, interval: 2000 }),
-		...generateStars({ size: 1.5, count: 5, interval: 2500 }),
-		...generateStars({ size: 3, count: 11, interval: 3000 }),
+		...generateStars(150, 0.1),
+		...generateStars(100, 0.2),
+		...generateStars(50, 0.3),
 	]);
 
-	function transitionStar(index: number) {
-		// 서서히 사라지기
-		stars[index].opacity = 0;
+	let animationFrame: number;
 
-		// 완전히 사라진 후 위치 변경
-		setTimeout(() => {
-			const star = stars[index];
-			stars[index] = generateStar({ size: star.size, interval: star.interval });
-			stars[index].opacity = 0;
-			// 새 위치에서 서서히 나타나기
-			setTimeout(() => {
-				stars[index].opacity = 1;
-			}, 50);
-		}, 1500);
-	}
+	function animate() {
+		stars = stars.map((star) => {
+			let newDistance = star.distance + star.speed;
 
-	function scheduleStarTransition(index: number, timeouts: NodeJS.Timeout[]) {
-		const star = stars[index];
-		const randomDelay = Math.random() * star.interval;
-		const timeoutId: NodeJS.Timeout = setTimeout(() => {
-			transitionStar(index);
-			const intervalId = setInterval(() => {
-				transitionStar(index);
-			}, star.interval);
-			timeouts.push(intervalId);
-		}, randomDelay);
-		timeouts.push(timeoutId);
+			// 화면 밖으로 나가면 중앙에서 다시 시작
+			if (newDistance > 100) {
+				return generateStar(star.speed);
+			}
+
+			return {
+				...star,
+				distance: newDistance,
+				x: centerX + Math.cos(star.angle) * newDistance,
+				y: centerY + Math.sin(star.angle) * newDistance,
+				size: 1 + (newDistance / 100) * 2, // 거리에 따라 크기 증가
+			};
+		});
+
+		animationFrame = requestAnimationFrame(animate);
 	}
 
 	onMount(() => {
-		const timeouts: NodeJS.Timeout[] = [];
-
-		stars.forEach((_, i) => {
-			scheduleStarTransition(i, timeouts);
-		});
+		animate();
 
 		return () => {
-			timeouts.forEach((id) => {
-				clearTimeout(id);
-				clearInterval(id);
-			});
+			if (animationFrame) {
+				cancelAnimationFrame(animationFrame);
+			}
 		};
 	});
 </script>
 
-<div class="starfield">
+<div class="absolute inset-0 z-0 overflow-hidden">
 	{#each stars as star (star.id)}
 		<div
-			class="star"
-			style="left: {star.x}%; top: {star.y}%; width: {star.size}px; height: {star.size}px; opacity: {star.opacity}"
+			class="star pointer-none absolute rounded-full"
+			style="left: {star.x}%; top: {star.y}%; width: {star.size}px; height: {star.size}px; opacity: {Math.min(
+				star.distance / 50,
+				1
+			)}"
 		></div>
 	{/each}
 </div>
 
 <style>
-	.starfield {
-		position: absolute;
-		inset: 0;
-		overflow: hidden;
-	}
-
 	.star {
-		position: absolute;
 		background: radial-gradient(circle, white, transparent);
-		border-radius: 50%;
-		pointer-events: none;
-		transition: opacity 1.5s ease-in-out;
 	}
 </style>

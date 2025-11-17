@@ -4,7 +4,13 @@
 	import { toggleOpen } from './store';
 </script>
 
-<Button size="sm" variant="outline" class="px-2 text-xs" keybinding="quest-toggle" onclick={toggleOpen}>
+<Button
+	size="sm"
+	variant="outline"
+	class="px-2 text-xs"
+	keybinding="new-quest-toggle"
+	onclick={toggleOpen}
+>
 	새로운 퀘스트
 	<Kbd>Q</Kbd>
 </Button>
