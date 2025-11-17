@@ -7,7 +7,7 @@ function getAudioContext() {
 	return audioContext;
 }
 
-type SoundType = 'warp';
+type SoundType = 'warp' | 'hover';
 
 const configs: Record<
 	SoundType,
@@ -21,6 +21,11 @@ const configs: Record<
 		frequency: { start: 200, end: 1200 },
 		gain: { start: 0.2, end: 0.01 },
 		duration: 0.12,
+	},
+	hover: {
+		frequency: { start: 600, end: 800 },
+		gain: { start: 0.08, end: 0.01 },
+		duration: 0.08,
 	},
 };
 

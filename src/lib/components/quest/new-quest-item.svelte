@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import sounds from '$lib/shortcut/sounds';
 
 	interface Props {
 		icon?: Component;
@@ -15,6 +16,10 @@
 		description = '퀘스트 설명이 들어갑니다.',
 		delay = 0,
 	}: Props = $props();
+
+	function handleMouseEnter() {
+		sounds.play('hover');
+	}
 
 	// 애니메이션 속도 설정 (값이 클수록 느림)
 	const ANIMATION_SPEED = 1;
@@ -45,7 +50,10 @@
 	let descAnimation = $state(generateAnimation(1.5, 3, 3, 6));
 </script>
 
-<div class="quest-item flex w-[500px] items-center gap-4 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:bg-white/5 cursor-pointer">
+<div
+	class="quest-item flex w-[500px] items-center gap-4 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:bg-white/5 cursor-pointer"
+	onmouseenter={handleMouseEnter}
+>
 	<!-- 아이콘 영역 -->
 	<div
 		class="floating-element flex h-16 w-16 shrink-0 items-center justify-center rounded"
