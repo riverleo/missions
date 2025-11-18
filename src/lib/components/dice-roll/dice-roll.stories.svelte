@@ -17,9 +17,11 @@
 			difficultyClass,
 			silent: false,
 			success: {
+				type: 'dialogNode',
 				dialogNodeId: 'success-node',
 			},
 			failure: {
+				type: 'dialogNode',
 				dialogNodeId: 'failure-node',
 			},
 		});

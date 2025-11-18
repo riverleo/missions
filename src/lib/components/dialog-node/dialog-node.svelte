@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { open, close, dialogNode } from './store';
+	import { dialogNode, exec } from './store';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import type { DiceRoll } from '$lib/components/dice-roll';
@@ -11,15 +11,7 @@
 		// Dice roll is not silent, so we wait for the result
 		if (diceRolled === undefined) return;
 
-		const { action } = diceRolled;
-
-		if (action.type === 'exit') {
-			return close();
-		}
-
-		if (action.type === 'dialogNode') {
-			return open(action.dialogNodeId);
-		}
+		exec(diceRolled);
 	}
 </script>
 

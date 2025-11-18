@@ -5,14 +5,10 @@ export interface DiceRoll {
 	failure: DiceRollAction;
 }
 
-export type DiceRollAction =
-	| {
-			type: 'dialogNode';
-			dialogNodeId: string;
-	  }
-	| {
-			type: 'exit';
-	  };
+export type DiceRollAction = {
+	type: 'dialogNode';
+	dialogNodeId?: string;
+};
 
 export interface DiceRolled {
 	rolled: number;

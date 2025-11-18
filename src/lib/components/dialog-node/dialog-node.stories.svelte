@@ -83,10 +83,10 @@
 				difficultyClass: 0,
 				silent: true,
 				success: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 				failure: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 			},
 		},
@@ -99,10 +99,10 @@
 				difficultyClass: 0,
 				silent: true,
 				success: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 				failure: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 			},
 		},
@@ -115,10 +115,10 @@
 				difficultyClass: 0,
 				silent: true,
 				success: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 				failure: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 			},
 		},
@@ -131,10 +131,10 @@
 				difficultyClass: 0,
 				silent: true,
 				success: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 				failure: {
-					type: 'exit',
+					type: 'dialogNode',
 				},
 			},
 		},

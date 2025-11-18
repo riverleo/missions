@@ -1,19 +1,12 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { diceRoll, diceRolled, roll, clear } from './store';
-	import { open as openDialog, close as closeDialog } from '$lib/components/dialog-node/store';
+	import { exec } from '$lib/components/dialog-node/store';
 
 	function next() {
 		if ($diceRolled === undefined) return;
 
-		const { action } = $diceRolled;
-
-		if (action.type === 'exit') {
-			closeDialog();
-		} else if (action.type === 'dialogNode') {
-			openDialog(action.dialogNodeId);
-		}
-
+		exec($diceRolled);
 		clear();
 	}
 </script>
