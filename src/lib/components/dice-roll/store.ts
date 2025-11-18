@@ -5,16 +5,18 @@ import { Dice } from './dice';
 export const diceRoll = writable<DiceRoll | undefined>();
 export const diceRolled = writable<DiceRolled | undefined>();
 
-export function setDiceRoll(targetDiceRoll: DiceRoll) {
+function setDiceRoll(targetDiceRoll?: DiceRoll) {
 	diceRoll.set(targetDiceRoll);
 	diceRolled.set(undefined);
 }
 
-export function roll(targetDiceRoll?: DiceRoll): DiceRolled {
+export function roll(targetDiceRoll?: DiceRoll): DiceRolled | undefined {
 	const $diceRoll = targetDiceRoll || get(diceRoll);
 
 	if (targetDiceRoll) {
 		setDiceRoll(targetDiceRoll);
+
+		if (!targetDiceRoll.silent) return;
 	}
 
 	if (!$diceRoll) throw new Error('Dice roll is not ready.');
@@ -35,6 +37,5 @@ export function roll(targetDiceRoll?: DiceRoll): DiceRolled {
 }
 
 export function clear() {
-	diceRoll.set(undefined);
-	diceRolled.set(undefined);
+	setDiceRoll(undefined);
 }

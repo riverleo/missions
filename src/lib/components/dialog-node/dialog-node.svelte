@@ -6,7 +6,12 @@
 	import { roll } from '$lib/components/dice-roll/store';
 
 	function next(diceRoll: DiceRoll) {
-		const { action } = roll(diceRoll);
+		const diceRolled = roll(diceRoll);
+
+		// Dice roll is not silent, so we wait for the result
+		if (diceRolled === undefined) return;
+
+		const { action } = diceRolled;
 
 		if (action.type === 'exit') {
 			return close();
