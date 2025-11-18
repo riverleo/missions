@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { iris } from '$lib/effects/iris';
 	import { open } from './store';
-	import NewQuestStarfieldPixi from '$lib/components/quest/new-quest-starfield-pixi.svelte';
+	import NewQuestStarfield from '$lib/components/quest/new-quest-starfield.svelte';
 	import NewQuestItem from './new-quest-item.svelte';
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -16,7 +16,7 @@
 		transition:iris={{ duration: 200 }}
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md"
 	>
-		<NewQuestStarfieldPixi />
+		<NewQuestStarfield />
 
 		<div class="relative z-10 flex flex-col gap-4">
 			<NewQuestItem

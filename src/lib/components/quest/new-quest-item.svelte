@@ -51,6 +51,7 @@
 </script>
 
 <div
+	role="presentation"
 	class="quest-item flex w-[500px] items-center gap-4 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:bg-white/5 cursor-pointer"
 	onmouseenter={handleMouseEnter}
 >
