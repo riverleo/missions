@@ -1,38 +1,40 @@
 import { get, writable } from 'svelte/store';
 import type { DiceRoll, DiceRolled } from '.';
 import { Dice } from './dice';
+import { activate, deactivate } from '$lib/shortcut/layers';
 
 export const current = writable<DiceRoll | undefined>();
 export const diceRolled = writable<DiceRolled | undefined>();
 
-export function roll(targetDiceRoll?: DiceRoll): DiceRolled | undefined {
-	const $diceRoll = targetDiceRoll || get(current);
+export function roll(): DiceRolled | undefined {
+	const $diceRoll = get(current);
+	const $diceRolled = get(diceRolled);
 
-	if (targetDiceRoll) {
-		current.set(targetDiceRoll);
-		diceRolled.set(undefined);
-
-		if (!targetDiceRoll.silent) return;
-	}
-
-	if (!$diceRoll) throw new Error('Dice roll is not ready.');
+	if ($diceRoll === undefined) return console.warn('There is no dice roll.') ?? undefined;
+	if ($diceRolled !== undefined) return console.warn('Dice already rolled.') ?? undefined;
 
 	const value = Dice.D20.roll();
 	const success = value >= $diceRoll.difficultyClass;
 
-	const $diceRolled = {
+	const newDiceRolled = {
 		value,
 		success,
 		action: success ? $diceRoll.success : $diceRoll.failure,
 		diceRoll: $diceRoll,
 	};
 
-	diceRolled.set($diceRolled);
+	diceRolled.set(newDiceRolled);
 
-	return $diceRolled;
+	return newDiceRolled;
 }
 
-export function clear() {
+export function open(diceRoll: DiceRoll) {
+	current.set(diceRoll);
+	activate('dice-roll');
+}
+
+export function terminate() {
 	current.set(undefined);
 	diceRolled.set(undefined);
+	deactivate('dice-roll');
 }

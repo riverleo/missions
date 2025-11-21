@@ -19,7 +19,7 @@ export type DialogNode = {
 			diceRoll: DiceRoll;
 	  }
 	| {
-			type: 'choices';
+			type: 'choice';
 			choices: DialogNodeChoice[];
 	  }
 );

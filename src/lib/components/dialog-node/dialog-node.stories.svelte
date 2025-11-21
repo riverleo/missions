@@ -13,6 +13,7 @@
 	import { source, open, terminate } from './store';
 	import type { DialogNode as DialogNodeType } from '.';
 	import DiceRoll from '../dice-roll/dice-roll.svelte';
+	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/events';
 
 	// 스토리용 다이얼로그 노드 데이터
 	const newSource: Record<string, DialogNodeType> = {
@@ -36,7 +37,7 @@
 		},
 		'intro-2': {
 			id: 'intro-2',
-			type: 'choices',
+			type: 'choice',
 			speaker: '여행자',
 			text: '어떻게 하시겠습니까?',
 			choices: [
@@ -147,6 +148,8 @@
 		open(nodeId);
 	}
 </script>
+
+<svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} {onmouseleave} />
 
 <Story name="기본 - 스토어 함수 사용">
 	<div class="flex flex-col gap-2">

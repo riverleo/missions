@@ -2,9 +2,11 @@ import { get, writable } from 'svelte/store';
 import type { DialogNode } from '.';
 import type { DiceRolled } from '../dice-roll';
 import * as diceRoll from '../dice-roll/store';
+import { activate, deactivate } from '$lib/shortcut/layers';
 
 export const source = writable<Record<string, DialogNode>>({});
 export const current = writable<DialogNode | undefined>();
+export const highlightedIndex = writable<number | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
 	const $diceRolled = targetDiceRolled || get(diceRoll.diceRolled);
@@ -24,15 +26,7 @@ export function next(targetDiceRolled?: DiceRolled) {
 		}
 	}
 
-	diceRoll.clear();
-}
-
-/**
- * 대화를 종료한다.
- */
-export function terminate() {
-	current.set(undefined);
-	diceRoll.clear();
+	diceRoll.terminate();
 }
 
 export function open(dialogNodeId: string) {
@@ -43,4 +37,16 @@ export function open(dialogNodeId: string) {
 	}
 
 	current.set($dialogNode);
+	highlightedIndex.set(undefined);
+
+	diceRoll.terminate();
+	activate('dialog-node');
+}
+
+export function terminate() {
+	current.set(undefined);
+	highlightedIndex.set(undefined);
+
+	diceRoll.terminate();
+	deactivate('dialog-node');
 }
