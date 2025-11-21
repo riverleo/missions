@@ -29,9 +29,7 @@ export function onkeydown(event: KeyboardEvent) {
 	if (currentId) {
 		event.preventDefault();
 
-		const config = get(layers)[currentId];
-		config.onkeydown?.(event);
-		console.log(currentId, 'onkeydown');
+		get(layers)[currentId].onkeydown?.(event);
 	}
 
 	// data-keybinding 속성을 가진 요소들의 시각적 피드백 처리
@@ -57,9 +55,7 @@ export function onkeyup(event: KeyboardEvent) {
 	if (currentId) {
 		event.preventDefault();
 
-		const config = get(layers)[currentId];
-		config.onkeyup?.(event);
-		console.log(currentId, 'onkeyup');
+		get(layers)[currentId].onkeyup?.(event);
 	}
 
 	// 글로벌 단축키 처리

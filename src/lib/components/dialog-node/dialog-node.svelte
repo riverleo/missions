@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { debounce } from 'radash';
+	import { throttle } from 'radash';
 	import { current, next, highlightedIndex } from './store';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
-	import type { DiceRoll } from '$lib/components/dice-roll';
-	import { open, roll } from '$lib/components/dice-roll/store';
-	import { register } from '$lib/shortcut/layers';
+	import { open, roll, type DiceRoll } from '$lib/components/dice-roll/store';
+	import { register, current as currentLayer } from '$lib/shortcut/layers';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
 		open(newDiceRoll);
@@ -13,45 +12,54 @@
 		if (newDiceRoll.silent) next(roll());
 	}
 
-	const onkeyup = debounce({ delay: 100 }, (event: KeyboardEvent) => {
+	const onkeydown = throttle({ interval: 100 }, (event: KeyboardEvent) => {
 		if ($current === undefined) return;
 
-		if ($current.type === 'narrative') {
+		const { type } = $current;
+
+		if (type !== 'choice') return;
+
+		const choicesCount = $current.choices.length;
+
+		if (
+			event.code === 'ArrowDown' ||
+			event.code === 'KeyS' ||
+			event.code === 'ArrowUp' ||
+			event.code === 'KeyW'
+		) {
+			if ($highlightedIndex === undefined) {
+				$highlightedIndex = 0;
+			} else if (event.code === 'ArrowDown' || event.code === 'KeyS') {
+				// Arrow Down or S key
+				$highlightedIndex = ($highlightedIndex + 1) % choicesCount;
+			} else if (event.code === 'ArrowUp' || event.code === 'KeyW') {
+				// Arrow Up or W key
+				$highlightedIndex = ($highlightedIndex - 1 + choicesCount) % choicesCount;
+			}
+		}
+	});
+
+	const onkeyup = (event: KeyboardEvent) => {
+		if ($current === undefined) return;
+
+		const { type } = $current;
+
+		if (type === 'narrative') {
 			if (event.code === 'Space' || event.code === 'Enter') {
 				handleRoll($current.diceRoll);
 			}
 		}
 
-		if ($current.type === 'choice') {
-			const choicesCount = $current.choices.length;
-
-			if (
-				event.code === 'ArrowDown' ||
-				event.code === 'KeyS' ||
-				event.code === 'ArrowUp' ||
-				event.code === 'KeyW'
-			) {
-				if ($highlightedIndex === undefined) {
-					$highlightedIndex = 0;
-				} else if (event.code === 'ArrowDown' || event.code === 'KeyS') {
-					// Arrow Down or S key
-					$highlightedIndex = ($highlightedIndex + 1) % choicesCount;
-				} else if (event.code === 'ArrowUp' || event.code === 'KeyW') {
-					// Arrow Up or W key
-					$highlightedIndex = ($highlightedIndex - 1 + choicesCount) % choicesCount;
-				}
-			} else if (
-				$highlightedIndex !== undefined &&
-				(event.code === 'Enter' || event.code === 'Space')
-			) {
+		if (type === 'choice') {
+			if ($highlightedIndex !== undefined && (event.code === 'Enter' || event.code === 'Space')) {
 				// Enter or Space to select highlighted choice
 				handleRoll($current.choices[$highlightedIndex].diceRoll);
 			}
 		}
-	});
+	};
 
 	// 레이어 등록
-	register({ id: 'dialog-node', onkeyup });
+	register({ id: 'dialog-node', onkeyup, onkeydown });
 </script>
 
 {#if $current}

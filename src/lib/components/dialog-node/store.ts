@@ -1,15 +1,39 @@
 import { get, writable } from 'svelte/store';
-import type { DialogNode } from '.';
-import type { DiceRolled } from '../dice-roll';
-import * as diceRoll from '../dice-roll/store';
-import { activate, deactivate } from '$lib/shortcut/layers';
+import {
+	type DiceRoll,
+	type DiceRolled,
+	diceRolled,
+	terminate as terminateDiceRoll,
+} from '$lib/components/dice-roll/store';
+import { activate as activateLayer, deactivate as deactivateLayer } from '$lib/shortcut/layers';
+
+export interface DialogNodeChoice {
+	id: string;
+	text: string;
+	diceRoll: DiceRoll;
+}
+
+export type DialogNode = {
+	id: string;
+	speaker: string;
+	text: string;
+} & (
+	| {
+			type: 'narrative';
+			diceRoll: DiceRoll;
+	  }
+	| {
+			type: 'choice';
+			choices: DialogNodeChoice[];
+	  }
+);
 
 export const source = writable<Record<string, DialogNode>>({});
 export const current = writable<DialogNode | undefined>();
 export const highlightedIndex = writable<number | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
-	const $diceRolled = targetDiceRolled || get(diceRoll.diceRolled);
+	const $diceRolled = targetDiceRolled || get(diceRolled);
 
 	if ($diceRolled === undefined) {
 		console.warn('Dice rolled does not exist.');
@@ -26,7 +50,7 @@ export function next(targetDiceRolled?: DiceRolled) {
 		}
 	}
 
-	diceRoll.terminate();
+	terminateDiceRoll();
 }
 
 export function open(dialogNodeId: string) {
@@ -39,14 +63,14 @@ export function open(dialogNodeId: string) {
 	current.set($dialogNode);
 	highlightedIndex.set(undefined);
 
-	diceRoll.terminate();
-	activate('dialog-node');
+	terminateDiceRoll();
+	activateLayer('dialog-node');
 }
 
 export function terminate() {
 	current.set(undefined);
 	highlightedIndex.set(undefined);
 
-	diceRoll.terminate();
-	deactivate('dialog-node');
+	terminateDiceRoll();
+	deactivateLayer('dialog-node');
 }
