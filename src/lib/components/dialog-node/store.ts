@@ -1,35 +1,46 @@
 import { get, writable } from 'svelte/store';
 import type { DialogNode } from '.';
 import type { DiceRolled } from '../dice-roll';
+import * as diceRoll from '../dice-roll/store';
 
-export const dialogNode = writable<DialogNode | undefined>();
-export const dialogNodes = writable<Record<string, DialogNode>>({});
+export const source = writable<Record<string, DialogNode>>({});
+export const current = writable<DialogNode | undefined>();
 
-export function exec(diceRolled: DiceRolled) {
-	const { action } = diceRolled;
+export function next(targetDiceRolled?: DiceRolled) {
+	const $diceRolled = targetDiceRolled || get(diceRoll.diceRolled);
 
-	if (action.type === 'dialogNode') {
-		if (action.dialogNodeId === undefined) {
-			return close();
+	if ($diceRolled === undefined) {
+		console.warn('Dice rolled does not exist.');
+	} else {
+		const { action } = $diceRolled;
+
+		switch (action.type) {
+			case 'dialogNode':
+				open(action.dialogNodeId);
+				break;
+			case 'terminate':
+				terminate();
+				break;
 		}
-
-		return open(action.dialogNodeId);
 	}
 
-	console.error('Dice rolled does not executed.', diceRolled);
+	diceRoll.clear();
 }
 
-export function close() {
-	dialogNode.set(undefined);
+/**
+ * 대화를 종료한다.
+ */
+export function terminate() {
+	current.set(undefined);
+	diceRoll.clear();
 }
 
 export function open(dialogNodeId: string) {
-	const $dialogNodes = get(dialogNodes);
-	const $dialogNode = $dialogNodes[dialogNodeId];
+	const $dialogNode = get(source)[dialogNodeId];
 
 	if ($dialogNode === undefined) {
-		throw new Error(`Dialog node with ID "${dialogNodeId}" not found.`);
+		return console.warn(`Dialog node "${dialogNodeId}" not found.`);
 	}
 
-	dialogNode.set($dialogNode);
+	current.set($dialogNode);
 }

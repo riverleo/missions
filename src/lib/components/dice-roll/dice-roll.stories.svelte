@@ -10,10 +10,10 @@
 <script lang="ts">
 	import DiceRoll from './dice-roll.svelte';
 	import Button from '../ui/button/button.svelte';
-	import { diceRoll } from './store';
+	import { current } from './store';
 
 	function setupDiceRoll(difficultyClass: number) {
-		diceRoll.set({
+		current.set({
 			difficultyClass,
 			silent: false,
 			success: {
