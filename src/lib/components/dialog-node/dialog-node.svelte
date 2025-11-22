@@ -4,7 +4,7 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { open, roll, type DiceRoll } from '$lib/components/dice-roll/store';
-	import { register, current as currentLayer } from '$lib/shortcut/layers';
+	import { register } from '$lib/shortcut/layers';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
 		open(newDiceRoll);
