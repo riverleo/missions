@@ -56,8 +56,6 @@ function play(type: SoundType) {
 	}
 }
 
-const sounds = {
-	play: play,
-};
+const sounds = { play };
 
 export default sounds;

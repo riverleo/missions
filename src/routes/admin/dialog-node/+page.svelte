@@ -2,13 +2,13 @@
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import type { DialogNode, DialogNodeChoice } from '$lib/components/dialog-node/store';
-	import { Card } from '$lib/components/ui/card';
+	import { Card, CardHeader, CardContent, CardFooter } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import * as Popover from '$lib/components/ui/popover';
-	import * as ToggleGroup from '$lib/components/ui/toggle-group';
+	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
+	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import DiceRollEditor from '$lib/components/dice-roll-editor.svelte';
 	import IconBook from '@tabler/icons-svelte/icons/book';
 	import IconList from '@tabler/icons-svelte/icons/list';
@@ -175,8 +175,8 @@
 
 <div class="flex h-screen flex-col">
 	<!-- Toolbar -->
-	<div class="flex items-center gap-2 border-b p-4">
-		<h1 class="text-2xl font-bold">DialogNode Source Generator</h1>
+	<div class="flex items-center gap-2 p-4">
+		<h1 class="text-2xl font-bold">대화 생성 및 편집</h1>
 		<div class="ml-auto flex gap-2">
 			<Button onclick={createNewNode}>
 				새 노드 추가
@@ -191,122 +191,112 @@
 
 	<!-- Node List -->
 	<ScrollArea class="flex-1">
-		<div class="grid grid-cols-4 gap-4 p-6">
+		<div class="grid grid-cols-4 gap-2 p-4">
 			{#each Object.values($nodes) as node (node.id)}
-				<Card class="p-6">
-					<div class="space-y-4">
-						<!-- Header: Node ID + Type + Settings + Delete -->
-						<div class="flex items-center justify-between gap-2">
-							<div class="truncate font-mono text-xs whitespace-nowrap text-muted-foreground">
-								{node.id}
-							</div>
-							<div class="flex items-center gap-2">
-								<ToggleGroup.Root
-									type="single"
-									value={node.type}
-									onValueChange={(value) => {
-										if (value) toggleType(node.id, value as 'narrative' | 'choice');
-									}}
-									variant="outline"
-									size="sm"
-								>
-									<ToggleGroup.Item value="narrative" class="size-8 p-0">
-										<IconBook class="size-4" />
-									</ToggleGroup.Item>
-									<ToggleGroup.Item value="choice" class="size-8 p-0">
-										<IconList class="size-4" />
-									</ToggleGroup.Item>
-								</ToggleGroup.Root>
-								<Popover.Root>
-									<Popover.Trigger>
-										{#snippet child({ props })}
-											<Button {...props} variant="ghost" size="sm" class="size-8 p-0">
-												<IconSettings class="size-4" />
-											</Button>
-										{/snippet}
-									</Popover.Trigger>
-									<Popover.Content class="w-80">
-										<div class="space-y-4">
-											<!-- Narrative Type Fields -->
-											{#if node.type === 'narrative'}
-												<div class="space-y-2">
-													<div class="text-sm font-medium">주사위 굴림</div>
-													<DiceRollEditor
-														diceRoll={node.diceRoll!}
-														{nodeIdOptions}
-														size="sm"
-														onUpdate={(diceRoll) => {
-															updateNode(node.id, { diceRoll });
-														}}
-													/>
+				<Card class="gap-4 py-4">
+					<CardHeader class="flex items-center justify-between px-4">
+						<div class="flex items-center gap-2">
+							<ToggleGroup
+								type="single"
+								value={node.type}
+								onValueChange={(value) => {
+									if (value) toggleType(node.id, value as 'narrative' | 'choice');
+								}}
+								variant="outline"
+								size="sm"
+							>
+								<ToggleGroupItem value="narrative">
+									<IconBook />
+								</ToggleGroupItem>
+								<ToggleGroupItem value="choice">
+									<IconList />
+								</ToggleGroupItem>
+							</ToggleGroup>
+							<Popover>
+								<PopoverTrigger>
+									{#snippet child({ props })}
+										<Button {...props} variant="ghost" size="icon">
+											<IconSettings />
+										</Button>
+									{/snippet}
+								</PopoverTrigger>
+								<PopoverContent class="w-80">
+									<div class="space-y-4">
+										<!-- Narrative Type Fields -->
+										{#if node.type === 'narrative'}
+											<div class="space-y-2">
+												<div class="text-sm font-medium">주사위 굴림</div>
+												<DiceRollEditor
+													diceRoll={node.diceRoll!}
+													{nodeIdOptions}
+													size="sm"
+													onUpdate={(diceRoll) => {
+														updateNode(node.id, { diceRoll });
+													}}
+												/>
+											</div>
+										{/if}
+
+										<!-- Choice Type Fields -->
+										{#if node.type === 'choice'}
+											<div class="space-y-4">
+												<div class="flex items-center justify-between">
+													<div class="text-sm font-medium">선택지</div>
+													<Button size="sm" onclick={() => addChoice(node.id)}>추가</Button>
 												</div>
-											{/if}
 
-											<!-- Choice Type Fields -->
-											{#if node.type === 'choice'}
-												<div class="space-y-4">
-													<div class="flex items-center justify-between">
-														<div class="text-sm font-medium">선택지</div>
-														<Button size="sm" onclick={() => addChoice(node.id)}>추가</Button>
-													</div>
-
-													<div class="space-y-3">
-														{#each (node as any).choices || [] as choice, index (choice.id)}
-															<Card class="p-3">
-																<div class="space-y-2">
-																	<div class="flex items-center justify-between">
-																		<div class="text-xs font-medium text-muted-foreground">
-																			선택지 {index + 1}
-																		</div>
-																		<Button
-																			size="sm"
-																			variant="ghost"
-																			class="h-6 px-2 text-xs"
-																			onclick={() => removeChoice(node.id, choice.id)}
-																		>
-																			삭제
-																		</Button>
+												<div class="space-y-3">
+													{#each (node as any).choices || [] as choice, index (choice.id)}
+														<Card class="p-3">
+															<div class="space-y-2">
+																<div class="flex items-center justify-between">
+																	<div class="text-xs font-medium text-muted-foreground">
+																		선택지 {index + 1}
 																	</div>
-
-																	<Input
-																		value={choice.text}
-																		placeholder="선택지"
-																		oninput={(e) => {
-																			const target = e.target as HTMLInputElement;
-																			updateChoice(node.id, choice.id, { text: target.value });
-																		}}
-																		class="h-8 text-xs"
-																	/>
-
-																	<DiceRollEditor
-																		diceRoll={choice.diceRoll}
-																		{nodeIdOptions}
+																	<Button
 																		size="sm"
-																		onUpdate={(diceRoll) => {
-																			updateChoice(node.id, choice.id, { diceRoll });
-																		}}
-																	/>
+																		variant="ghost"
+																		class="h-6 px-2 text-xs"
+																		onclick={() => removeChoice(node.id, choice.id)}
+																	>
+																		삭제
+																	</Button>
 																</div>
-															</Card>
-														{/each}
-													</div>
-												</div>
-											{/if}
-										</div>
-									</Popover.Content>
-								</Popover.Root>
-								<Button
-									variant="ghost"
-									size="sm"
-									class="size-8 p-0"
-									onclick={() => deleteNode(node.id)}
-								>
-									<IconTrash class="size-4" />
-								</Button>
-							</div>
-						</div>
 
-						<!-- Text Content -->
+																<Input
+																	value={choice.text}
+																	placeholder="선택지"
+																	oninput={(e) => {
+																		const target = e.target as HTMLInputElement;
+																		updateChoice(node.id, choice.id, { text: target.value });
+																	}}
+																	class="h-8 text-xs"
+																/>
+
+																<DiceRollEditor
+																	diceRoll={choice.diceRoll}
+																	{nodeIdOptions}
+																	size="sm"
+																	onUpdate={(diceRoll) => {
+																		updateChoice(node.id, choice.id, { diceRoll });
+																	}}
+																/>
+															</div>
+														</Card>
+													{/each}
+												</div>
+											</div>
+										{/if}
+									</div>
+								</PopoverContent>
+							</Popover>
+						</div>
+						<Button variant="ghost" size="icon" onclick={() => deleteNode(node.id)}>
+							<IconTrash class="size-4" />
+						</Button>
+					</CardHeader>
+
+					<CardContent class="px-4">
 						<Textarea
 							value={node.text}
 							placeholder="대사 내용을 입력하세요"
@@ -314,10 +304,13 @@
 								const target = e.target as HTMLTextAreaElement;
 								updateNode(node.id, { text: target.value });
 							}}
-							rows={6}
-							class="h-24 resize-none"
+							class="h-12 resize-none"
 						/>
-					</div>
+					</CardContent>
+
+					<CardFooter class="px-4">
+						<span class="text-xs text-neutral-400">{node.id}</span>
+					</CardFooter>
 				</Card>
 			{:else}
 				<div class="p-8 text-center text-muted-foreground">
