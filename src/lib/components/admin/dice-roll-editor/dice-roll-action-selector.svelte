@@ -16,17 +16,25 @@
 	interface Props {
 		action: DiceRollAction;
 		icon: Snippet;
-		nodeIdOptions: { value: string; label: string }[];
+		dialogNodeIdOptions: { value: string; label: string }[];
+		currentDialogNodeId?: string;
 		onUpdate: (action: DiceRollAction) => void;
 	}
 
-	let { action, icon, nodeIdOptions, onUpdate }: Props = $props();
+	let { action, icon, dialogNodeIdOptions, currentDialogNodeId, onUpdate }: Props = $props();
+
+	// Filter out current node to prevent infinite loops
+	const filteredDialogNodeIdOptions = $derived(
+		currentDialogNodeId
+			? dialogNodeIdOptions.filter((opt) => opt.value !== currentDialogNodeId)
+			: dialogNodeIdOptions
+	);
 
 	// Helper function to get node display text
 	function getDisplayText(action: DiceRollAction): string {
 		if (action.type === 'terminate') return '종료';
 
-		const option = nodeIdOptions.find((opt) => opt.value === action.dialogNodeId);
+		const option = dialogNodeIdOptions.find((opt) => opt.value === action.dialogNodeId);
 		return option?.label || action.dialogNodeId;
 	}
 </script>
@@ -39,15 +47,17 @@
 					{@render icon()}
 					<span class="truncate">{getDisplayText(action)}</span>
 				</span>
-				<IconChevronDown class="size-4 shrink-0" />
+				<IconChevronDown />
 			</Button>
 		{/snippet}
 	</DropdownMenuTrigger>
 	<DropdownMenuContent>
 		<DropdownMenuSub>
-			<DropdownMenuSubTrigger>다음 선택</DropdownMenuSubTrigger>
+			<DropdownMenuSubTrigger disabled={filteredDialogNodeIdOptions.length === 0}>
+				다음
+			</DropdownMenuSubTrigger>
 			<DropdownMenuSubContent>
-				{#each nodeIdOptions as option (option.value)}
+				{#each filteredDialogNodeIdOptions as option (option.value)}
 					<DropdownMenuItem
 						onclick={() => {
 							onUpdate({ type: 'dialogNode', dialogNodeId: option.value });

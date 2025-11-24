@@ -15,7 +15,7 @@
 
 	interface Props {
 		node: DialogNode;
-		nodeIdOptions: { value: string; label: string }[];
+		dialogNodeIdOptions: { value: string; label: string }[];
 		onUpdate: (updates: Partial<DialogNode>) => void;
 		onDelete: () => void;
 		onToggleType: (newType: DialogNode['type']) => void;
@@ -26,7 +26,7 @@
 
 	let {
 		node,
-		nodeIdOptions,
+		dialogNodeIdOptions,
 		onUpdate,
 		onDelete,
 		onToggleType,
@@ -59,7 +59,8 @@
 			{#if node.type === 'narrative'}
 				<DiceRollEditor
 					diceRoll={node.diceRoll!}
-					{nodeIdOptions}
+					{dialogNodeIdOptions}
+					currentDialogNodeId={node.id}
 					onUpdate={(diceRoll) => {
 						onUpdate({ diceRoll });
 					}}
@@ -82,7 +83,8 @@
 								<DialogNodeChoiceItem
 									{choice}
 									{index}
-									{nodeIdOptions}
+									{dialogNodeIdOptions}
+									currentDialogNodeId={node.id}
 									onUpdate={(updates) => {
 										onUpdateChoice(choice.id, updates);
 									}}

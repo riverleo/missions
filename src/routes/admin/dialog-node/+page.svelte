@@ -4,7 +4,7 @@
 	import type { DialogNode, DialogNodeChoice } from '$lib/components/app/dialog-node/store';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { DialogNodeCard } from '$lib/components/admin/dialog-node';
+	import { DialogNodeEditor } from '$lib/components/admin/dialog-node-editor';
 
 	// State
 	const nodes = writable<Record<string, DialogNode>>({});
@@ -137,8 +137,8 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// Get available node IDs for select
-	const nodeIdOptions = $derived(
+	// Get available dialog node IDs for select
+	const dialogNodeIdOptions = $derived(
 		Object.values($nodes).map((node) => ({
 			value: node.id,
 			label: node.text ? `${node.text} (${node.id})` : node.id,
@@ -184,9 +184,9 @@
 	<ScrollArea class="flex-1">
 		<div class="grid grid-cols-4 gap-4 p-4">
 			{#each Object.values($nodes) as node (node.id)}
-				<DialogNodeCard
+				<DialogNodeEditor
 					{node}
-					{nodeIdOptions}
+					{dialogNodeIdOptions}
 					onUpdate={(updates) => {
 						updateNode(node.id, updates);
 					}}

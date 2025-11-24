@@ -13,12 +13,14 @@
 	interface Props {
 		choice: DialogNodeChoice;
 		index: number;
-		nodeIdOptions: { value: string; label: string }[];
+		dialogNodeIdOptions: { value: string; label: string }[];
+		currentDialogNodeId?: string;
 		onUpdate: (updates: Partial<DialogNodeChoice>) => void;
 		onRemove: () => void;
 	}
 
-	let { choice, index, nodeIdOptions, onUpdate, onRemove }: Props = $props();
+	let { choice, index, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onRemove }: Props =
+		$props();
 </script>
 
 <InputGroup>
@@ -36,7 +38,8 @@
 	<InputGroupAddon align="inline-end">
 		<DiceRollEditor
 			diceRoll={choice.diceRoll}
-			{nodeIdOptions}
+			{dialogNodeIdOptions}
+			{currentDialogNodeId}
 			onUpdate={(diceRoll) => {
 				onUpdate({ diceRoll });
 			}}

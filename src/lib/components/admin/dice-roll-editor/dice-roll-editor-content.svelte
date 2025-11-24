@@ -15,11 +15,12 @@
 
 	interface Props {
 		diceRoll: DiceRoll;
-		nodeIdOptions: { value: string; label: string }[];
+		dialogNodeIdOptions: { value: string; label: string }[];
+		currentDialogNodeId?: string;
 		onUpdate: (diceRoll: DiceRoll) => void;
 	}
 
-	let { diceRoll, nodeIdOptions, onUpdate }: Props = $props();
+	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate }: Props = $props();
 </script>
 
 <div class="space-y-2">
@@ -69,7 +70,8 @@
 	<!-- Success Action -->
 	<DiceRollActionSelector
 		action={diceRoll.success}
-		{nodeIdOptions}
+		{dialogNodeIdOptions}
+		{currentDialogNodeId}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, success: action });
 		}}
@@ -82,7 +84,8 @@
 	<!-- Failure Action -->
 	<DiceRollActionSelector
 		action={diceRoll.failure}
-		{nodeIdOptions}
+		{dialogNodeIdOptions}
+		{currentDialogNodeId}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, failure: action });
 		}}
