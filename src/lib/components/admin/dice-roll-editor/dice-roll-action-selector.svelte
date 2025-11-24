@@ -11,6 +11,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
 	import IconChevronDown from '@tabler/icons-svelte/icons/chevron-down';
+	import IconPlus from '@tabler/icons-svelte/icons/plus';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -19,9 +20,11 @@
 		dialogNodeIdOptions: { value: string; label: string }[];
 		currentDialogNodeId?: string;
 		onUpdate: (action: DiceRollAction) => void;
+		onCreateNode?: () => string; // Returns new node ID
 	}
 
-	let { action, icon, dialogNodeIdOptions, currentDialogNodeId, onUpdate }: Props = $props();
+	let { action, icon, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode }: Props =
+		$props();
 
 	// Filter out current node to prevent infinite loops
 	const filteredDialogNodeIdOptions = $derived(
@@ -53,10 +56,19 @@
 	</DropdownMenuTrigger>
 	<DropdownMenuContent>
 		<DropdownMenuSub>
-			<DropdownMenuSubTrigger disabled={filteredDialogNodeIdOptions.length === 0}>
-				다음
-			</DropdownMenuSubTrigger>
+			<DropdownMenuSubTrigger>다음</DropdownMenuSubTrigger>
 			<DropdownMenuSubContent>
+				{#if onCreateNode}
+					<DropdownMenuItem
+						onclick={() => {
+							const newNodeId = onCreateNode();
+							onUpdate({ type: 'dialogNode', dialogNodeId: newNodeId });
+						}}
+					>
+						<IconPlus class="size-4" />
+						새 노드 추가
+					</DropdownMenuItem>
+				{/if}
 				{#each filteredDialogNodeIdOptions as option (option.value)}
 					<DropdownMenuItem
 						onclick={() => {

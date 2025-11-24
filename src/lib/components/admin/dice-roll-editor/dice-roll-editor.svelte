@@ -11,10 +11,12 @@
 		dialogNodeIdOptions: { value: string; label: string }[];
 		currentDialogNodeId?: string;
 		onUpdate: (diceRoll: DiceRoll) => void;
+		onCreateNode?: () => string;
 		children?: Snippet<[any]>;
 	}
 
-	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate, children }: Props = $props();
+	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode, children }: Props =
+		$props();
 </script>
 
 <Popover>
@@ -30,6 +32,12 @@
 		{/snippet}
 	</PopoverTrigger>
 	<PopoverContent>
-		<DiceRollEditorContent {diceRoll} {dialogNodeIdOptions} {currentDialogNodeId} {onUpdate} />
+		<DiceRollEditorContent
+			{diceRoll}
+			{dialogNodeIdOptions}
+			{currentDialogNodeId}
+			{onUpdate}
+			{onCreateNode}
+		/>
 	</PopoverContent>
 </Popover>

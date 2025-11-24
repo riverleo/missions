@@ -18,9 +18,11 @@
 		dialogNodeIdOptions: { value: string; label: string }[];
 		currentDialogNodeId?: string;
 		onUpdate: (diceRoll: DiceRoll) => void;
+		onCreateNode?: () => string;
 	}
 
-	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate }: Props = $props();
+	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode }: Props =
+		$props();
 </script>
 
 <div class="space-y-2">
@@ -72,6 +74,7 @@
 		action={diceRoll.success}
 		{dialogNodeIdOptions}
 		{currentDialogNodeId}
+		{onCreateNode}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, success: action });
 		}}
@@ -86,6 +89,7 @@
 		action={diceRoll.failure}
 		{dialogNodeIdOptions}
 		{currentDialogNodeId}
+		{onCreateNode}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, failure: action });
 		}}

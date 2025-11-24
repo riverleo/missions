@@ -17,6 +17,7 @@ export type DialogNode = {
 	id: string;
 	speaker: string;
 	text: string;
+	root: boolean;
 } & (
 	| {
 			type: 'narrative';

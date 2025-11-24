@@ -1,216 +1,138 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
-	import type { DialogNode, DialogNodeChoice } from '$lib/components/app/dialog-node/store';
+	import { debounce } from 'radash';
+	import type { DialogNode } from '$lib/components/app/dialog-node/store';
 	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import {
+		AlertDialog,
+		AlertDialogTrigger,
+		AlertDialogContent,
+		AlertDialogHeader,
+		AlertDialogTitle,
+		AlertDialogFooter,
+		AlertDialogAction,
+		AlertDialogCancel,
+	} from '$lib/components/ui/alert-dialog';
 	import { DialogNodeEditor } from '$lib/components/admin/dialog-node-editor';
+	import IconDownload from '@tabler/icons-svelte/icons/download';
+	import Aside from './aside.svelte';
 
-	// State
-	const nodes = writable<Record<string, DialogNode>>({});
+	interface DialogRoot {
+		id: string;
+		name: string;
+		dialogNodes: Record<string, DialogNode>;
+	}
 
-	// Initialize with one node if empty
+	const LOCAL_STORAGE_KEY = 'dialog-roots';
+
+	// Load from localStorage
+	let dialogRoots = $state<DialogRoot[]>([]);
+	let selectedRootId = $state<string | null>(null);
+	let filename = $state('');
+	let isExportDialogOpen = $state(false);
+
+	// Load from localStorage on mount
 	onMount(() => {
-		const currentNodes = Object.keys($nodes);
-		if (currentNodes.length === 0) {
-			createNewNode();
+		const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+		if (stored) {
+			dialogRoots = JSON.parse(stored);
+			if (dialogRoots.length > 0 && !selectedRootId) {
+				selectedRootId = dialogRoots[0].id;
+			}
 		}
 	});
 
-	// Create new node
-	function createNewNode() {
-		const id = crypto.randomUUID();
-		const newNode: DialogNode = {
-			id,
-			speaker: '',
-			text: '',
-			type: 'narrative',
-			diceRoll: {
-				difficultyClass: 10,
-				silent: false,
-				success: { type: 'terminate' },
-				failure: { type: 'terminate' },
-			},
-		};
-
-		nodes.update((n) => ({ ...n, [id]: newNode }));
-	}
-
-	// Update node
-	function updateNode(id: string, updates: Partial<DialogNode>) {
-		nodes.update((n) => ({
-			...n,
-			[id]: { ...n[id], ...updates } as DialogNode,
-		}));
-	}
-
-	// Delete node
-	function deleteNode(id: string) {
-		nodes.update((n) => {
-			const newNodes = { ...n };
-			delete newNodes[id];
-			return newNodes;
-		});
-	}
-
-	// Toggle type and convert fields
-	function toggleType(id: string, newType: 'narrative' | 'choice') {
-		const node = $nodes[id];
-		if (newType === 'narrative') {
-			// Convert to narrative
-			const { choices, ...rest } = node as any;
-			updateNode(id, {
-				...rest,
-				type: 'narrative',
-				diceRoll: {
-					difficultyClass: 10,
-					silent: false,
-					success: { type: 'terminate' },
-					failure: { type: 'terminate' },
-				},
-			});
+	// Save to localStorage
+	function saveToLocalStorage() {
+		if (dialogRoots.length > 0) {
+			localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dialogRoots));
 		} else {
-			// Convert to choice
-			const { diceRoll, ...rest } = node as any;
-			updateNode(id, {
-				...rest,
-				type: 'choice',
-				choices: [],
-			});
+			localStorage.removeItem(LOCAL_STORAGE_KEY);
 		}
 	}
 
-	// Add choice
-	function addChoice(nodeId: string) {
-		const node = $nodes[nodeId];
-		if (node.type !== 'choice') return;
+	const selectedRoot = $derived(dialogRoots.find((root) => root.id === selectedRootId) || null);
 
-		const choices = (node as any).choices || [];
-		updateNode(nodeId, {
-			choices: [
-				...choices,
-				{
-					id: crypto.randomUUID(),
-					text: '',
-					diceRoll: {
-						difficultyClass: 10,
-						silent: false,
-						success: { type: 'terminate' },
-						failure: { type: 'terminate' },
-					},
-				},
-			],
-		});
-	}
-
-	// Remove choice
-	function removeChoice(nodeId: string, choiceId: string) {
-		const node = $nodes[nodeId];
-		if (node.type !== 'choice') return;
-
-		const choices = (node as any).choices || [];
-		updateNode(nodeId, {
-			choices: choices.filter((c: DialogNodeChoice) => c.id !== choiceId),
-		});
-	}
-
-	// Update choice
-	function updateChoice(nodeId: string, choiceId: string, updates: Partial<DialogNodeChoice>) {
-		const node = $nodes[nodeId];
-		if (node.type !== 'choice') return;
-
-		const choices = (node as any).choices || [];
-		updateNode(nodeId, {
-			choices: choices.map((c: DialogNodeChoice) => (c.id === choiceId ? { ...c, ...updates } : c)),
-		});
+	// Handle aside changes
+	function handleAsideChange() {
+		saveToLocalStorage();
 	}
 
 	// Export to JSON
 	function exportToJSON() {
-		const dataStr = JSON.stringify($nodes, null, 2);
+		if (!selectedRoot) return;
+
+		const dataStr = JSON.stringify(selectedRoot.dialogNodes, null, 2);
 		const dataBlob = new Blob([dataStr], { type: 'application/json' });
 		const url = URL.createObjectURL(dataBlob);
 		const link = document.createElement('a');
 		link.href = url;
-		link.download = `dialog-nodes-${Date.now()}.json`;
+		link.download = `${filename || selectedRoot.name}.json`;
 		link.click();
 		URL.revokeObjectURL(url);
+		filename = '';
+		isExportDialogOpen = false;
 	}
 
-	// Get available dialog node IDs for select
-	const dialogNodeIdOptions = $derived(
-		Object.values($nodes).map((node) => ({
-			value: node.id,
-			label: node.text ? `${node.text} (${node.id})` : node.id,
-		}))
-	);
-
-	// Keyboard shortcuts
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.ctrlKey || event.metaKey) {
-			switch (event.code) {
-				case 'KeyN':
-					event.preventDefault();
-					createNewNode();
-					break;
-				case 'KeyS':
-					event.preventDefault();
-					exportToJSON();
-					break;
-			}
-		}
-	}
+	// Handle dialog nodes change with debounce
+	const handleDialogNodesChange = debounce({ delay: 300 }, () => {
+		saveToLocalStorage();
+	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<div class="flex h-screen">
+	<!-- Aside -->
+	<Aside bind:dialogRoots bind:selectedRootId onChange={handleAsideChange} />
 
-<div class="flex h-screen flex-col">
-	<!-- Toolbar -->
-	<div class="flex items-center gap-2 p-4">
-		<h1 class="text-2xl font-bold">대화 생성 및 편집</h1>
-		<div class="ml-auto flex gap-2">
-			<Button onclick={createNewNode}>
-				새 노드 추가
-				<span class="ml-2 text-xs opacity-60">Ctrl+N</span>
-			</Button>
-			<Button onclick={exportToJSON} variant="outline">
-				JSON 다운로드
-				<span class="ml-2 text-xs opacity-60">Ctrl+S</span>
-			</Button>
-		</div>
-	</div>
-
-	<!-- Node List -->
-	<ScrollArea class="flex-1">
-		<div class="grid grid-cols-4 gap-4 p-4">
-			{#each Object.values($nodes) as node (node.id)}
-				<DialogNodeEditor
-					{node}
-					{dialogNodeIdOptions}
-					onUpdate={(updates) => {
-						updateNode(node.id, updates);
-					}}
-					onDelete={() => {
-						deleteNode(node.id);
-					}}
-					onToggleType={(newType) => {
-						toggleType(node.id, newType);
-					}}
-					onAddChoice={() => {
-						addChoice(node.id);
-					}}
-					onRemoveChoice={(choiceId) => {
-						removeChoice(node.id, choiceId);
-					}}
-					onUpdateChoice={(choiceId, updates) => {
-						updateChoice(node.id, choiceId, updates);
-					}}
-				/>
-			{:else}
-				<div class="p-8 text-center text-muted-foreground">
-					노드가 없습니다. Ctrl+N으로 추가하세요.
+	<!-- Main: Editor -->
+	<div class="flex flex-1 flex-col">
+		{#if selectedRoot}
+			<!-- Toolbar -->
+			<div class="flex items-center gap-2 border-b p-4">
+				<h1 class="text-2xl font-bold">{selectedRoot.name}</h1>
+				<div class="ml-auto flex gap-2">
+					<AlertDialog bind:open={isExportDialogOpen}>
+						<AlertDialogTrigger>
+							{#snippet child({ props })}
+								<Button {...props} variant="outline">
+									<IconDownload class="size-4" />
+									JSON 다운로드
+								</Button>
+							{/snippet}
+						</AlertDialogTrigger>
+						<AlertDialogContent>
+							<AlertDialogHeader>
+								<AlertDialogTitle>파일 이름 입력</AlertDialogTitle>
+							</AlertDialogHeader>
+							<Input
+								bind:value={filename}
+								placeholder={selectedRoot.name}
+								onkeydown={(e) => {
+									if (e.key === 'Enter') exportToJSON();
+								}}
+							/>
+							<AlertDialogFooter>
+								<AlertDialogCancel>취소</AlertDialogCancel>
+								<AlertDialogAction onclick={exportToJSON}>다운로드</AlertDialogAction>
+							</AlertDialogFooter>
+						</AlertDialogContent>
+					</AlertDialog>
 				</div>
-			{/each}
-		</div>
-	</ScrollArea>
+			</div>
+
+			<!-- Node List -->
+			<ScrollArea class="flex-1">
+				<DialogNodeEditor
+					bind:dialogNodes={selectedRoot.dialogNodes}
+					onChange={handleDialogNodesChange}
+				/>
+			</ScrollArea>
+		{:else}
+			<div class="flex flex-1 items-center justify-center text-neutral-400">
+				다이얼로그를 생성하거나 선택하세요
+			</div>
+		{/if}
+	</div>
 </div>
