@@ -116,11 +116,12 @@
 		{#if selectedRoot}
 			<!-- Toolbar -->
 			<div class="flex items-center gap-2 border-b p-4">
-				<Button variant="ghost" size="icon" onclick={playDialogNodes}>
-					<IconPlayerPlay class="size-4" />
-				</Button>
 				<h1 class="text-2xl font-bold">{selectedRoot.name}</h1>
 				<div class="ml-auto flex gap-2">
+					<Button variant="outline" onclick={playDialogNodes}>
+						<IconPlayerPlay class="size-4" />
+						재생
+					</Button>
 					<AlertDialog bind:open={isExportDialogOpen}>
 						<AlertDialogTrigger>
 							{#snippet child({ props })}
