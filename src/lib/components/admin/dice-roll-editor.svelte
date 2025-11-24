@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DiceRoll } from '$lib/components/dice-roll/store';
+	import type { DiceRoll } from '$lib/components/app/dice-roll/store';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Slider } from '$lib/components/ui/slider';
 	import { Button } from '$lib/components/ui/button';

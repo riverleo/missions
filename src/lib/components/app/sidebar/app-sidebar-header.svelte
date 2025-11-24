@@ -9,7 +9,7 @@
 		TooltipContent,
 	} from '$lib/components/ui/tooltip';
 	import AppSidebarBreadcrumb from './app-sidebar-breadcrumb.svelte';
-	import { NewQuestTrigger } from '$lib/components/quest';
+	import { NewQuestTrigger } from '$lib/components/app/quest';
 
 	const { mission }: { mission: string } = $props();
 	const sidebar = useSidebar();

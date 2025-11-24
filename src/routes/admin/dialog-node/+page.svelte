@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
-	import type { DialogNode, DialogNodeChoice } from '$lib/components/dialog-node/store';
+	import type { DialogNode, DialogNodeChoice } from '$lib/components/app/dialog-node/store';
 	import { Card, CardHeader, CardContent, CardFooter } from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -9,7 +9,7 @@
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
-	import DiceRollEditor from '$lib/components/dice-roll-editor.svelte';
+	import DiceRollEditor from '$lib/components/admin/dice-roll-editor.svelte';
 	import IconBook from '@tabler/icons-svelte/icons/book';
 	import IconList from '@tabler/icons-svelte/icons/list';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';

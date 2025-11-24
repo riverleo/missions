@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { iris } from '$lib/effects/iris';
 	import { open } from './store';
-	import NewQuestStarfield from '$lib/components/quest/new-quest-starfield.svelte';
+	import NewQuestStarfield from '$lib/components/app/quest/new-quest-starfield.svelte';
 	import NewQuestItem from './new-quest-item.svelte';
 
 	function handleKeydown(e: KeyboardEvent) {

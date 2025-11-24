@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import DiceRoll from './dice-roll.svelte';
-	import Button from '../ui/button/button.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import { current } from './store';
 
 	function setupDiceRoll(difficultyClass: number) {

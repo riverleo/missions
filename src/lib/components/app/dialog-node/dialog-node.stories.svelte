@@ -11,7 +11,7 @@
 	import DialogNode from './dialog-node.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { source, open, terminate, type DialogNode as DialogNodeType } from './store';
-	import DiceRoll from '$lib/components/dice-roll/dice-roll.svelte';
+	import DiceRoll from '$lib/components/app/dice-roll/dice-roll.svelte';
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseleave } from '$lib/shortcut/events';
 
 	// 스토리용 다이얼로그 노드 데이터

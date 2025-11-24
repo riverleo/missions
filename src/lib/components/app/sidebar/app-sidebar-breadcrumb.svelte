@@ -13,7 +13,7 @@
 		DropdownMenuTrigger,
 		DropdownMenuContent,
 		DropdownMenuItem,
-	} from '../ui/dropdown-menu';
+	} from '$lib/components/ui/dropdown-menu';
 
 	const { mission }: { mission: string } = $props();
 </script>

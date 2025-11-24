@@ -2,7 +2,7 @@
 	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
 	import { current, diceRolled, roll } from './store';
-	import { next } from '$lib/components/dialog-node/store';
+	import { next } from '$lib/components/app/dialog-node/store';
 	import { register } from '$lib/shortcut/layers';
 
 	const onkeyup = debounce({ delay: 100 }, (event: KeyboardEvent) => {

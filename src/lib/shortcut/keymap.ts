@@ -1,4 +1,4 @@
-import { toggleOpen } from '$lib/components/quest/store';
+import { toggleOpen } from '$lib/components/app/quest/store';
 
 export class KeyBinding {
 	public code: string;

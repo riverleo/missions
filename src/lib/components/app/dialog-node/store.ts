@@ -4,7 +4,7 @@ import {
 	type DiceRolled,
 	diceRolled,
 	terminate as terminateDiceRoll,
-} from '$lib/components/dice-roll/store';
+} from '$lib/components/app/dice-roll/store';
 import { activate as activateLayer, deactivate as deactivateLayer } from '$lib/shortcut/layers';
 
 export interface DialogNodeChoice {

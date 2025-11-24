@@ -3,7 +3,7 @@
 	import { current, next, highlightedIndex } from './store';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
-	import { open, roll, type DiceRoll } from '$lib/components/dice-roll/store';
+	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
 	import { register } from '$lib/shortcut/layers';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
