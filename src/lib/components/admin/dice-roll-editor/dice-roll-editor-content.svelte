@@ -7,6 +7,7 @@
 		InputGroupInput,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import IconDice from '@tabler/icons-svelte/icons/dice';
 	import IconPlus from '@tabler/icons-svelte/icons/plus';
 	import IconMinus from '@tabler/icons-svelte/icons/minus';
@@ -65,6 +66,15 @@
 				>
 					<IconMinus />
 				</InputGroupButton>
+				<label class="flex cursor-pointer items-center gap-1 px-2 text-xs">
+					<Checkbox
+						checked={diceRoll.silent}
+						onCheckedChange={(checked) => {
+							onUpdate({ ...diceRoll, silent: checked === true });
+						}}
+					/>
+					<span>무음</span>
+				</label>
 			</InputGroupAddon>
 		</InputGroup>
 	</div>

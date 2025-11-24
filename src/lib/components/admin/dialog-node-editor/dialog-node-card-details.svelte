@@ -78,7 +78,7 @@
 		{details}
 	</p>
 {:else if currentNode?.root}
-	<p class="text-xs text-foreground">최상위 노드</p>
+	<p class="text-xs text-foreground">처음</p>
 {:else}
 	<p class="text-xs text-foreground">부모 없음</p>
 {/if}

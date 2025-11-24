@@ -2,6 +2,12 @@
 	import { onMount } from 'svelte';
 	import { debounce } from 'radash';
 	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import {
+		source as dialogNodeSource,
+		open as openDialogNode,
+	} from '$lib/components/app/dialog-node/store';
+	import DialogNodeComponent from '$lib/components/app/dialog-node/dialog-node.svelte';
+	import DiceRollComponent from '$lib/components/app/dice-roll/dice-roll.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -17,6 +23,7 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { DialogNodeEditor } from '$lib/components/admin/dialog-node-editor';
 	import IconDownload from '@tabler/icons-svelte/icons/download';
+	import IconPlayerPlay from '@tabler/icons-svelte/icons/player-play';
 	import Aside from './aside.svelte';
 
 	interface DialogRoot {
@@ -80,6 +87,24 @@
 	const handleDialogNodesChange = debounce({ delay: 300 }, () => {
 		saveToLocalStorage();
 	});
+
+	// Play dialog nodes
+	function playDialogNodes() {
+		if (!selectedRoot) return;
+
+		// Set the source to current dialog nodes
+		dialogNodeSource.set(selectedRoot.dialogNodes);
+
+		// Find root node
+		const rootNode = Object.values(selectedRoot.dialogNodes).find((node) => node.root);
+		if (!rootNode) {
+			alert('루트 노드를 찾을 수 없습니다.');
+			return;
+		}
+
+		// Open the root node
+		openDialogNode(rootNode.id);
+	}
 </script>
 
 <div class="flex h-screen">
@@ -91,6 +116,9 @@
 		{#if selectedRoot}
 			<!-- Toolbar -->
 			<div class="flex items-center gap-2 border-b p-4">
+				<Button variant="ghost" size="icon" onclick={playDialogNodes}>
+					<IconPlayerPlay class="size-4" />
+				</Button>
 				<h1 class="text-2xl font-bold">{selectedRoot.name}</h1>
 				<div class="ml-auto flex gap-2">
 					<AlertDialog bind:open={isExportDialogOpen}>
@@ -136,3 +164,9 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Dialog Node Component -->
+<DialogNodeComponent />
+
+<!-- Dice Roll Component -->
+<DiceRollComponent />
