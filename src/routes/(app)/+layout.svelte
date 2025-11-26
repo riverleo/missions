@@ -4,7 +4,6 @@
 	import { NewQuest } from '$lib/components/app/quest';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
-	import { onkeydown, onkeyup, onmousedown, onmouseup } from '$lib/shortcut/events';
 	import DialogNode from '$lib/components/app/dialog-node/dialog-node.svelte';
 
 	injectSpeedInsights();
@@ -16,8 +15,6 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
-
-<svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} />
 
 <AppSidebar open={data.sidebarCookieState}>
 	{@render children()}

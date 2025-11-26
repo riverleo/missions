@@ -67,7 +67,7 @@
 		class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/50 text-white"
 	>
 		<div class="flex flex-col items-center gap-4">
-			<p>{$current.text}</p>
+			<p class="text-4xl font-bold">{$current.text}</p>
 			{#if $current.type === 'choice'}
 				{#each $current.choices as choice, index (choice.id)}
 					<Button
