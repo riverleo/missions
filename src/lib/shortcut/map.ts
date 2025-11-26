@@ -1,6 +1,6 @@
 import { toggleOpen } from '$lib/components/app/quest/store';
 
-export class KeyBinding {
+export class Shortcut {
 	public code: string;
 	public action: () => void;
 	public meta?: boolean;
@@ -42,13 +42,11 @@ export class KeyBinding {
 	}
 }
 
-export type KeyBindingId = 'new-quest-toggle';
-
-type Keymap = Record<KeyBindingId, KeyBinding>;
+export type ShortcutId = 'new-quest-toggle';
 
 /**
  * 글로벌 키보드 단축키 맵
  */
-export const keymap: Keymap = {
-	'new-quest-toggle': new KeyBinding({ code: 'KeyQ', action: toggleOpen }),
-};
+export default {
+	'new-quest-toggle': new Shortcut({ code: 'KeyQ', action: toggleOpen }),
+} as Record<ShortcutId, Shortcut>;

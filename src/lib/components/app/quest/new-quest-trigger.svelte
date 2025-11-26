@@ -8,7 +8,7 @@
 	size="sm"
 	variant="outline"
 	class="px-2 text-xs"
-	data-keybinding="new-quest-toggle"
+	data-shortcut="new-quest-toggle"
 	onclick={toggleOpen}
 >
 	새로운 퀘스트
