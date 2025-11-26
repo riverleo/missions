@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 
-
 @layer base {
 	:root {
 		--radius: 0.625rem;
@@ -30,7 +29,6 @@
 		--chart-5: oklch(0.769 0.188 70.08);
 	}
 
-
 	* {
 		border-color: var(--border);
 	}
@@ -50,7 +48,6 @@
 		--sidebar-border: oklch(0.922 0 0);
 		--sidebar-ring: oklch(0.708 0 0);
 	}
-
 }
 
 @theme inline {
@@ -79,7 +76,7 @@
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 
-	--font-sans: 'Sunflower', sans-serif;
+	--font-sans: 'Poor Story', sans-serif;
 }
 
 /* Shortcut active state */

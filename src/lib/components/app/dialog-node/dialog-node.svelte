@@ -6,6 +6,7 @@
 	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
 	import { bind } from '$lib/shortcut/layers';
 	import Message from './dialog-node-message.svelte';
+	import { blur } from 'svelte/transition';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
 		open(newDiceRoll);
@@ -62,33 +63,35 @@
 	});
 </script>
 
-{#if $current}
-	<div
-		class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/50 text-white backdrop-blur-sm"
-	>
-		<div class="flex flex-col items-center gap-8 px-8">
-			<Message />
-			{#if $current.type === 'choice'}
-				<div class="flex flex-col gap-3">
+<div
+	class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/10 text-white backdrop-blur-sm"
+	class:invisible={$current === undefined}
+>
+	<div class="flex flex-col items-center gap-8 px-8">
+		<Message />
+		{#if $current?.type === 'choice'}
+			<div class="flex flex-col items-center gap-8 px-8">
+				<div in:blur class="flex flex-col gap-3">
 					{#each $current.choices as choice, index (choice.id)}
 						<Button
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
-							class="choice-button {$highlightedIndex === index ? 'ring-2 ring-white' : ''}"
-							style="animation-delay: {($current.message.length +
-								($current.description?.length || 0)) *
-								15 +
-								index * 80}ms;"
 						>
 							{choice.text}
 						</Button>
 					{/each}
 				</div>
-			{:else}
-				<Button onclick={() => handleRoll($current.diceRoll)} class="next-button">
-					다음 <Kbd>Space</Kbd>
-				</Button>
-			{/if}
-		</div>
+			</div>
+		{/if}
+
+		{#if $current?.type === 'narrative'}
+			<div class="flex flex-col items-center gap-8 px-8">
+				<div in:blur>
+					<Button onclick={() => handleRoll($current.diceRoll)}>
+						다음 <Kbd>Space</Kbd>
+					</Button>
+				</div>
+			</div>
+		{/if}
 	</div>
-{/if}
+</div>
