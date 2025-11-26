@@ -16,7 +16,12 @@
 	const centerX = 0.5; // 비율로 저장 (50%)
 	const centerY = 0.5;
 
-	function generateStar(speed: number, width: number, height: number, initialDistance?: number): Star {
+	function generateStar(
+		speed: number,
+		width: number,
+		height: number,
+		initialDistance?: number
+	): Star {
 		const angle = Math.random() * Math.PI * 2;
 		const distance = initialDistance !== undefined ? initialDistance : Math.random() * 1.2; // 초기에는 화면 전체에 분포
 
@@ -56,13 +61,13 @@
 		const sin45 = Math.sin(Math.PI / 4);
 
 		// 대각선 1 (/)
-		graphics.moveTo(-diagLength / 2 * cos45, -diagLength / 2 * sin45);
-		graphics.lineTo(diagLength / 2 * cos45, diagLength / 2 * sin45);
+		graphics.moveTo((-diagLength / 2) * cos45, (-diagLength / 2) * sin45);
+		graphics.lineTo((diagLength / 2) * cos45, (diagLength / 2) * sin45);
 		graphics.stroke({ width: diagWidth, color: 0xffffff, alpha: opacity * 0.3 });
 
 		// 대각선 2 (\)
-		graphics.moveTo(-diagLength / 2 * cos45, diagLength / 2 * sin45);
-		graphics.lineTo(diagLength / 2 * cos45, -diagLength / 2 * sin45);
+		graphics.moveTo((-diagLength / 2) * cos45, (diagLength / 2) * sin45);
+		graphics.lineTo((diagLength / 2) * cos45, (-diagLength / 2) * sin45);
 		graphics.stroke({ width: diagWidth, color: 0xffffff, alpha: opacity * 0.3 });
 	}
 
@@ -96,7 +101,7 @@
 		await app.init({
 			resizeTo: canvasContainer,
 			backgroundColor: 0x000000,
-			backgroundAlpha: 0,
+			backgroundAlpha: 1,
 			antialias: true,
 			resolution: window.devicePixelRatio || 1,
 			autoDensity: true,
