@@ -2,6 +2,7 @@
 	import type { DialogNode } from '$lib/components/app/dialog-node/store';
 	import { Card, CardHeader, CardContent, CardFooter } from '$lib/components/ui/card';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
@@ -36,7 +37,7 @@
 	const dialogNodeIdOptions = $derived(
 		Object.values(ctx.dialogNodes).map((n) => ({
 			value: n.id,
-			label: n.text ? `${n.text} (${n.id})` : n.id,
+			label: n.message ? `${n.message} (${n.id})` : n.id,
 		}))
 	);
 
@@ -242,15 +243,23 @@
 		</div>
 	</CardHeader>
 
-	<CardContent class="px-4">
+	<CardContent class="flex flex-col gap-2 px-4">
+		<Input
+			value={node.message}
+			placeholder="메시지"
+			oninput={(e) => {
+				const target = e.target as HTMLInputElement;
+				updateNode({ message: target.value });
+			}}
+		/>
 		<Textarea
-			value={node.text}
-			placeholder="대사 내용을 입력하세요"
+			value={node.description || ''}
+			placeholder="설명 (선택사항)"
 			oninput={(e) => {
 				const target = e.target as HTMLTextAreaElement;
-				updateNode({ text: target.value });
+				updateNode({ description: target.value || undefined });
 			}}
-			class="h-12 resize-none"
+			class="h-24 resize-none"
 		/>
 	</CardContent>
 

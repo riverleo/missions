@@ -5,7 +5,7 @@
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
 	import { bind } from '$lib/shortcut/layers';
-	import Paragraph from './dialog-node-paragraph.svelte';
+	import Message from './dialog-node-message.svelte';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
 		open(newDiceRoll);
@@ -64,10 +64,10 @@
 
 {#if $current}
 	<div
-		class="dialog-overlay fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/50 text-white backdrop-blur-sm"
+		class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/50 text-white backdrop-blur-sm"
 	>
 		<div class="flex flex-col items-center gap-8 px-8">
-			<Paragraph text={$current.text} />
+			<Message />
 			{#if $current.type === 'choice'}
 				<div class="flex flex-col gap-3">
 					{#each $current.choices as choice, index (choice.id)}
@@ -75,7 +75,10 @@
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
 							class="choice-button {$highlightedIndex === index ? 'ring-2 ring-white' : ''}"
-							style="animation-delay: {$current.text.length * 15 + index * 80}ms;"
+							style="animation-delay: {($current.message.length +
+								($current.description?.length || 0)) *
+								15 +
+								index * 80}ms;"
 						>
 							{choice.text}
 						</Button>

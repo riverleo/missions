@@ -42,7 +42,7 @@
 	const dialogNodeIdOptions = $derived(
 		Object.values(ctx.dialogNodes).map((n: DialogNode) => ({
 			value: n.id,
-			label: n.text ? `${n.text} (${n.id})` : n.id,
+			label: n.message ? `${n.message} (${n.id})` : n.id,
 		}))
 	);
 

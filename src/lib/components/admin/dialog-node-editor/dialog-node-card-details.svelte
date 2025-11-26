@@ -53,13 +53,13 @@
 
 				if (isSuccess) {
 					details.push({
-						parentNodeText: parentNode.text || parentNode.id,
+						parentNodeText: parentNode.message || parentNode.id,
 						detail: '대화 성공',
 					});
 				}
 				if (isFailure) {
 					details.push({
-						parentNodeText: parentNode.text || parentNode.id,
+						parentNodeText: parentNode.message || parentNode.id,
 						detail: '대화 실패',
 					});
 				}
@@ -78,13 +78,13 @@
 
 					if (isSuccess) {
 						details.push({
-							parentNodeText: parentNode.text || parentNode.id,
+							parentNodeText: parentNode.message || parentNode.id,
 							detail: `${i + 1}번 성공`,
 						});
 					}
 					if (isFailure) {
 						details.push({
-							parentNodeText: parentNode.text || parentNode.id,
+							parentNodeText: parentNode.message || parentNode.id,
 							detail: `${i + 1}번 실패`,
 						});
 					}

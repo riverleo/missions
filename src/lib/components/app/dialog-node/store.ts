@@ -16,7 +16,8 @@ export interface DialogNodeChoice {
 export type DialogNode = {
 	id: string;
 	speaker: string;
-	text: string;
+	message: string;
+	description?: string;
 	root: boolean;
 } & (
 	| {

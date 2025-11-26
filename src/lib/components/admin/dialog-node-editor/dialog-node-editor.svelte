@@ -27,7 +27,7 @@
 		const newNode: DialogNodeType = {
 			id,
 			speaker: '',
-			text: '',
+			message: '',
 			root: false,
 			type: 'narrative',
 			diceRoll: {
@@ -67,7 +67,7 @@
 		const newNode: DialogNodeType = {
 			id,
 			speaker: '',
-			text: '',
+			message: '',
 			root: true,
 			type: 'narrative',
 			diceRoll: {

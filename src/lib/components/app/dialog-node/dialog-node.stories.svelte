@@ -20,7 +20,7 @@
 			id: 'intro-1',
 			type: 'narrative',
 			speaker: '나레이터',
-			text: '낯선 마을에 도착했다. 마을 입구에는 수상한 사람이 서있다.',
+			message: '낯선 마을에 도착했다. 마을 입구에는 수상한 사람이 서있다.',
 			root: true,
 			diceRoll: {
 				difficultyClass: 10,
@@ -39,7 +39,7 @@
 			id: 'intro-2',
 			type: 'choice',
 			speaker: '여행자',
-			text: '어떻게 하시겠습니까?',
+			message: '어떻게 하시겠습니까?',
 			root: false,
 			choices: [
 				{
@@ -80,7 +80,7 @@
 			id: 'talk-success',
 			type: 'narrative',
 			speaker: '수상한 사람',
-			text: '"반갑소, 여행자여. 이 마을에는 숨겨진 보물이 있다오."',
+			message: '"반갑소, 여행자여. 이 마을에는 숨겨진 보물이 있다오."',
 			root: false,
 			diceRoll: {
 				difficultyClass: 0,
@@ -97,7 +97,7 @@
 			id: 'talk-failure',
 			type: 'narrative',
 			speaker: '수상한 사람',
-			text: '"......" (그는 아무 말도 하지 않고 사라진다)',
+			message: '"......" (그는 아무 말도 하지 않고 사라진다)',
 			root: false,
 			diceRoll: {
 				difficultyClass: 0,
@@ -114,7 +114,7 @@
 			id: 'ignore-success',
 			type: 'narrative',
 			speaker: '나레이터',
-			text: '조용히 마을로 들어갔다. 아무 일도 일어나지 않았다.',
+			message: '조용히 마을로 들어갔다. 아무 일도 일어나지 않았다.',
 			root: false,
 			diceRoll: {
 				difficultyClass: 0,
@@ -131,7 +131,7 @@
 			id: 'ignore-failure',
 			type: 'narrative',
 			speaker: '나레이터',
-			text: '무시하려 했지만, 그 사람이 당신의 어깨를 붙잡는다...',
+			message: '무시하려 했지만, 그 사람이 당신의 어깨를 붙잡는다...',
 			root: false,
 			diceRoll: {
 				difficultyClass: 0,
