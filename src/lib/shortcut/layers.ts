@@ -18,7 +18,7 @@ export const layers = writable<Record<LayerId, LayerConfig>>({
 });
 
 // 레이어 이벤트 핸들러 등록
-export function register({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) {
+export function bind({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) {
 	layers.update((layer) => ({
 		...layer,
 		[id]: { onkeyup, onkeydown },
