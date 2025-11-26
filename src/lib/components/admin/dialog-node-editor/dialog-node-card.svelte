@@ -150,7 +150,7 @@
 					id: crypto.randomUUID(),
 					text: '',
 					diceRoll: {
-						difficultyClass: 10,
+						difficultyClass: 0,
 						silent: false,
 						success: { type: 'terminate' },
 						failure: { type: 'terminate' },
