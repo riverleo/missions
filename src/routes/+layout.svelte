@@ -2,7 +2,7 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { ModeWatcher } from 'mode-watcher';
-	import { onkeydown, onkeyup, onmousedown, onmouseup } from '$lib/shortcut/events';
+	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseover } from '$lib/shortcut/events';
 
 	const { children } = $props();
 </script>
@@ -11,7 +11,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} />
+<svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} {onmouseover} />
 
 <ModeWatcher />
 

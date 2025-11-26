@@ -1,7 +1,7 @@
 import map from './map.js';
 import sounds from './sounds.js';
 import { get } from 'svelte/store';
-import { current as currentLayer, layers } from './layers.js';
+import { current, layers } from './layers.js';
 
 const bounceTimeouts = new WeakMap<HTMLElement, NodeJS.Timeout>();
 
@@ -25,11 +25,12 @@ function triggerEffect(element: HTMLElement) {
 
 export function onkeydown(event: KeyboardEvent) {
 	// 레이어 단축키 처리
-	const currentId = get(currentLayer);
-	if (currentId) {
+	const currentLayerId = get(current);
+
+	if (currentLayerId) {
 		event.preventDefault();
 
-		get(layers)[currentId].onkeydown?.(event);
+		get(layers)[currentLayerId].onkeydown?.(event);
 	}
 
 	// 포커스된 요소가 data-shortcut을 가지고 있고 스페이스바나 엔터를 누르면 active 상태 추가
@@ -64,7 +65,7 @@ export function onkeydown(event: KeyboardEvent) {
 
 export function onkeyup(event: KeyboardEvent) {
 	// 레이어 단축키 처리
-	const currentId = get(currentLayer);
+	const currentId = get(current);
 	if (currentId) {
 		event.preventDefault();
 
@@ -137,4 +138,13 @@ export function onmouseup(event: MouseEvent) {
 			triggerEffect(element);
 		}
 	});
+}
+
+export function onmouseover(event: MouseEvent) {
+	const target = event.target as HTMLElement;
+	const element = target.closest<HTMLElement>('[data-shortcut]');
+
+	if (!element) return;
+
+	sounds.play('hover');
 }
