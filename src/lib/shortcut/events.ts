@@ -57,6 +57,9 @@ export function onkeydown(event: KeyboardEvent) {
 	const elements = document.querySelectorAll<HTMLElement>('[data-shortcut]');
 
 	elements.forEach((e) => {
+		// disabled 요소는 무시
+		if ((e as HTMLButtonElement).disabled) return;
+
 		const bindingId = e.dataset.shortcut;
 		if (!bindingId) return;
 
@@ -73,6 +76,9 @@ export function onkeydown(event: KeyboardEvent) {
 	const keyElements = document.querySelectorAll<HTMLElement>('[data-shortcut-key]');
 
 	keyElements.forEach((e) => {
+		// disabled 요소는 무시
+		if ((e as HTMLButtonElement).disabled) return;
+
 		const keys = e.dataset.shortcutKey;
 		if (!keys) return;
 
@@ -88,13 +94,57 @@ export function onkeydown(event: KeyboardEvent) {
 }
 
 export function onkeyup(event: KeyboardEvent) {
-	// 레이어 단축키 처리
-	const currentId = get(current);
+	// data-shortcut 속성을 가진 요소들의 시각적 피드백 처리
+	const elements = document.querySelectorAll<HTMLElement>('[data-shortcut-effect]');
 
-	if (currentId) {
+	elements.forEach((e) => {
+		// disabled 요소는 무시
+		if ((e as HTMLButtonElement).disabled) return;
+
+		const bindingId = e.dataset.shortcut;
+		if (!bindingId) return;
+
+		const binding = map[bindingId as keyof typeof map];
+		if (!binding) return;
+
+		if (binding.match(event)) {
+			if (e.dataset.shortcutEffectActive === undefined) return;
+
+			delete e.dataset.shortcutEffectActive;
+			triggerEffect(e);
+		}
+	});
+
+	// data-shortcut-key 속성을 가진 요소들의 시각적 피드백 처리
+	const keyElements = document.querySelectorAll<HTMLElement>('[data-shortcut-key]');
+
+	keyElements.forEach((e) => {
+		// disabled 요소는 무시
+		if ((e as HTMLButtonElement).disabled) return;
+
+		const keys = e.dataset.shortcutKey;
+		if (!keys) return;
+
+		// 공백으로 구분된 키들을 배열로 변환
+		const keyList = keys.split(/\s+/).filter((k) => k);
+
+		// 현재 이벤트 키가 목록에 있는지 확인
+		if (keyList.includes(event.code)) {
+			if (e.dataset.shortcutEffectActive === undefined) return;
+
+			delete e.dataset.shortcutEffectActive;
+			triggerEffect(e);
+		}
+	});
+
+	// 레이어 단축키 처리
+	const currentLayerId = get(current);
+
+	if (currentLayerId) {
 		event.preventDefault();
 
-		get(layers)[currentId].onkeyup?.(event);
+		get(layers)[currentLayerId].onkeyup?.(event);
+		return;
 	}
 
 	// 포커스된 요소가 data-shortcut-effect를 가지고 있고 스페이스바나 엔터를 떼면 active 제거 및 효과 실행
@@ -118,43 +168,6 @@ export function onkeyup(event: KeyboardEvent) {
 			break;
 		}
 	}
-
-	// data-shortcut 속성을 가진 요소들의 시각적 피드백 처리
-	const elements = document.querySelectorAll<HTMLElement>('[data-shortcut-effect]');
-
-	elements.forEach((e) => {
-		const bindingId = e.dataset.shortcut;
-		if (!bindingId) return;
-
-		const binding = map[bindingId as keyof typeof map];
-		if (!binding) return;
-
-		if (binding.match(event)) {
-			if (e.dataset.shortcutEffectActive === undefined) return;
-
-			delete e.dataset.shortcutEffectActive;
-			triggerEffect(e);
-		}
-	});
-
-	// data-shortcut-key 속성을 가진 요소들의 시각적 피드백 처리
-	const keyElements = document.querySelectorAll<HTMLElement>('[data-shortcut-key]');
-
-	keyElements.forEach((e) => {
-		const keys = e.dataset.shortcutKey;
-		if (!keys) return;
-
-		// 공백으로 구분된 키들을 배열로 변환
-		const keyList = keys.split(/\s+/).filter((k) => k);
-
-		// 현재 이벤트 키가 목록에 있는지 확인
-		if (keyList.includes(event.code)) {
-			if (e.dataset.shortcutEffectActive === undefined) return;
-
-			delete e.dataset.shortcutEffectActive;
-			triggerEffect(e);
-		}
-	});
 }
 
 export function onmousedown(event: MouseEvent) {

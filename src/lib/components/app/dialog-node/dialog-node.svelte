@@ -4,9 +4,15 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
-	import { bind } from '$lib/shortcut/layers';
+	import {
+		current as currentLayerId,
+		bind as bindLayerEvent,
+		type LayerId,
+	} from '$lib/shortcut/layers';
 	import Message from './dialog-node-message.svelte';
 	import { blur } from 'svelte/transition';
+
+	const layerId: LayerId = 'dialog-node';
 
 	function handleRoll(newDiceRoll: DiceRoll) {
 		open(newDiceRoll);
@@ -14,25 +20,23 @@
 		if (newDiceRoll.silent) next(roll());
 	}
 
-	bind({
-		id: 'dialog-node',
+	bindLayerEvent({
+		id: layerId,
 		onkeyup: (event: KeyboardEvent) => {
 			if ($current === undefined) return;
 
 			const { type } = $current;
 
-			if (type === 'narrative') {
-				if (event.code === 'Space' || event.code === 'Enter') {
-					handleRoll($current.diceRoll);
-				}
-			}
+			if (type === 'narrative' && (event.code === 'Space' || event.code === 'Enter'))
+				handleRoll($current.diceRoll);
 
-			if (type === 'choice') {
-				if ($highlightedIndex !== undefined && (event.code === 'Enter' || event.code === 'Space')) {
-					// Enter or Space to select highlighted choice
-					handleRoll($current.choices[$highlightedIndex].diceRoll);
-				}
-			}
+			// Enter or Space to select highlighted choice
+			if (
+				type === 'choice' &&
+				$highlightedIndex !== undefined &&
+				(event.code === 'Enter' || event.code === 'Space')
+			)
+				handleRoll($current.choices[$highlightedIndex].diceRoll);
 		},
 		onkeydown: throttle({ interval: 100 }, (event: KeyboardEvent) => {
 			if ($current === undefined) return;
@@ -79,6 +83,7 @@
 							data-shortcut-effect
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
+							disabled={$currentLayerId !== layerId}
 						>
 							{choice.text}
 						</Button>
@@ -95,6 +100,7 @@
 						data-shortcut-key="Space Enter"
 						data-shortcut-effect
 						onclick={() => handleRoll($current.diceRoll)}
+						disabled={$currentLayerId !== layerId}
 					>
 						다음 <Kbd>Space</Kbd>
 					</Button>
