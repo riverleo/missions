@@ -6,7 +6,7 @@
 </script>
 
 {#key $current?.message}
-	<div class="relative">
+	<div class="relative text-white">
 		<div
 			class="background absolute top-4 left-0 -z-10 h-full w-full rounded-[40%] bg-black px-8 py-4 blur-lg"
 		></div>

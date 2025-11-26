@@ -64,7 +64,7 @@
 </script>
 
 <div
-	class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/10 text-white backdrop-blur-sm"
+	class="fixed top-0 left-0 z-0 flex min-h-lvh w-full items-center justify-center bg-black/10 backdrop-blur-sm"
 	class:invisible={$current === undefined}
 >
 	<div class="flex flex-col items-center gap-8 px-8">
@@ -74,6 +74,7 @@
 				<div in:blur class="flex flex-col gap-3">
 					{#each $current.choices as choice, index (choice.id)}
 						<Button
+							variant="ghost"
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
 						>
@@ -87,7 +88,7 @@
 		{#if $current?.type === 'narrative'}
 			<div class="flex flex-col items-center gap-8 px-8">
 				<div in:blur>
-					<Button onclick={() => handleRoll($current.diceRoll)}>
+					<Button variant="ghost" onclick={() => handleRoll($current.diceRoll)}>
 						다음 <Kbd>Space</Kbd>
 					</Button>
 				</div>
