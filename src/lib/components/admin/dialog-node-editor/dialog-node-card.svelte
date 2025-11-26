@@ -17,13 +17,12 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { DiceRollEditor } from '$lib/components/admin/dice-roll-editor';
 	import { getContext } from './context';
-	import { getChildrenDialogNodes, getParentDialogNode } from './index';
+	import { getChildrenDialogNodes, getParentDialogNodes } from './index';
 	import DialogNodeChoiceItem from './dialog-node-choice-item.svelte';
 	import DialogNodeCardDetails from './dialog-node-card-details.svelte';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
 	import IconListNumbers from '@tabler/icons-svelte/icons/list-numbers';
 	import IconPlus from '@tabler/icons-svelte/icons/plus';
-	import IconFocus from '@tabler/icons-svelte/icons/focus';
 
 	interface Props {
 		nodeId: string;
@@ -40,7 +39,6 @@
 			label: n.text ? `${n.text} (${n.id})` : n.id,
 		}))
 	);
-	const focused = $derived(ctx.focusedDialogNodeId === dialogNodeId);
 
 	const highlighted = $derived.by(() => {
 		if (!ctx.focusedDialogNodeId) return true;
@@ -54,9 +52,10 @@
 			if (child.id === dialogNodeId) return true;
 		}
 
-		// Highlight if this is the parent of the focused node
-		const parent = getParentDialogNode(ctx.dialogNodes, ctx.focusedDialogNodeId);
-		if (parent?.id === dialogNodeId) return true;
+		const parents = getParentDialogNodes(ctx.dialogNodes, ctx.focusedDialogNodeId);
+		for (const parent of parents) {
+			if (parent.id === dialogNodeId) return true;
+		}
 
 		return false;
 	});
@@ -160,15 +159,6 @@
 			],
 		});
 	}
-
-	// Toggle focus
-	function toggleFocus() {
-		if (ctx.focusedDialogNodeId === dialogNodeId) {
-			ctx.focusedDialogNodeId = undefined;
-		} else {
-			ctx.focusedDialogNodeId = dialogNodeId;
-		}
-	}
 </script>
 
 <Card class="gap-4 py-4 transition-opacity" style="opacity: {highlighted ? 1 : 0.5}">
@@ -230,9 +220,6 @@
 				{/if}
 			</div>
 			<div class="flex items-center gap-1">
-				<Button variant={focused ? 'default' : 'ghost'} size="icon" onclick={toggleFocus}>
-					<IconFocus class="size-4" />
-				</Button>
 				<AlertDialog>
 					<AlertDialogTrigger>
 						{#snippet child({ props })}

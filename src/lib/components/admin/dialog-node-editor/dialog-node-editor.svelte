@@ -31,8 +31,8 @@
 			root: false,
 			type: 'narrative',
 			diceRoll: {
-				difficultyClass: 10,
-				silent: false,
+				difficultyClass: 0,
+				silent: true,
 				success: { type: 'terminate' },
 				failure: { type: 'terminate' },
 			},
@@ -72,7 +72,7 @@
 			type: 'narrative',
 			diceRoll: {
 				difficultyClass: 0,
-				silent: false,
+				silent: true,
 				success: { type: 'terminate' },
 				failure: { type: 'terminate' },
 			},

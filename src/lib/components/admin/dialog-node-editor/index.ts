@@ -39,12 +39,13 @@ export function getChildrenDialogNodes(
 }
 
 /**
- * Find parent dialog node of a target node
+ * Find all parent dialog nodes of a target node
  */
-export function getParentDialogNode(
+export function getParentDialogNodes(
 	dialogNodes: Record<string, DialogNode>,
 	targetDialogNodeId: string
-): DialogNode | undefined {
+): Set<DialogNode> {
+	const parents = new Set<DialogNode>();
 	const nodes = Object.values(dialogNodes);
 
 	for (const node of nodes) {
@@ -53,10 +54,11 @@ export function getParentDialogNode(
 		const children = getChildrenDialogNodes(dialogNodes, node.id);
 		for (const child of children) {
 			if (child.id === targetDialogNodeId) {
-				return node;
+				parents.add(node);
+				break;
 			}
 		}
 	}
 
-	return undefined;
+	return parents;
 }
