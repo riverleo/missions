@@ -75,6 +75,8 @@
 					{#each $current.choices as choice, index (choice.id)}
 						<Button
 							variant="ghost"
+							data-shortcut-key={$highlightedIndex === index ? 'Space Enter' : ''}
+							data-shortcut-effect
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
 						>
@@ -88,7 +90,12 @@
 		{#if $current?.type === 'narrative'}
 			<div class="flex flex-col items-center gap-8 px-8">
 				<div in:blur>
-					<Button variant="ghost" onclick={() => handleRoll($current.diceRoll)}>
+					<Button
+						variant="ghost"
+						data-shortcut-key="Space Enter"
+						data-shortcut-effect
+						onclick={() => handleRoll($current.diceRoll)}
+					>
 						다음 <Kbd>Space</Kbd>
 					</Button>
 				</div>

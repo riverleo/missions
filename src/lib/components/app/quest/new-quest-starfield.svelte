@@ -16,12 +16,7 @@
 	const centerX = 0.5; // 비율로 저장 (50%)
 	const centerY = 0.5;
 
-	function generateStar(
-		speed: number,
-		width: number,
-		height: number,
-		initialDistance?: number
-	): Star {
+	function generateStar(speed: number, initialDistance?: number): Star {
 		const angle = Math.random() * Math.PI * 2;
 		const distance = initialDistance !== undefined ? initialDistance : Math.random() * 1.2; // 초기에는 화면 전체에 분포
 
@@ -109,9 +104,6 @@
 
 		canvasContainer.appendChild(app.canvas);
 
-		const width = app.screen.width;
-		const height = app.screen.height;
-
 		// 별 생성 (150개 느림, 100개 중간, 50개 빠름)
 		const speeds = [
 			{ count: 150, speed: 0.15 },
@@ -121,7 +113,7 @@
 
 		speeds.forEach(({ count, speed }) => {
 			for (let i = 0; i < count; i++) {
-				const star = generateStar(speed, width, height);
+				const star = generateStar(speed);
 				stars.push(star);
 				app.stage.addChild(star.graphics);
 			}

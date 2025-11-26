@@ -9,6 +9,7 @@
 	variant="outline"
 	class="px-2 text-xs"
 	data-shortcut="new-quest-toggle"
+	data-shortcut-effect
 	onclick={toggleOpen}
 >
 	새로운 퀘스트
