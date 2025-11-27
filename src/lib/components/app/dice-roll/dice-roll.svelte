@@ -3,14 +3,15 @@
 	import { Button } from '$lib/components/ui/button';
 	import { current, diceRolled, roll } from './store';
 	import { next } from '$lib/components/app/dialog-node/store';
-	import { bind } from '$lib/shortcut/layers';
+	import { bindLayerEvent } from '$lib/shortcut/store';
+	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
-	bind({
+	bindLayerEvent({
 		id: 'dice-roll',
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
 			if ($current === undefined || $current.silent) return;
 
-			if (event.code === 'Enter' || event.code === 'Space') {
+			if (isEnterOrSpace(event)) {
 				if ($diceRolled) next();
 				else roll();
 			}
@@ -26,9 +27,18 @@
 			<div>최소 눈금: {$diceRolled.diceRoll.difficultyClass}</div>
 			<div>주사위 결과: {$diceRolled.value}</div>
 
-			<Button onclick={() => next()}>계속 진행하기</Button>
+			<Button onclick={() => next()} data-shortcut-key="Space Enter" data-shortcut-effect>
+				계속 진행하기
+			</Button>
 		{:else}
-			<Button onclick={() => roll()} variant="ghost">주사위 굴리기</Button>
+			<Button
+				onclick={() => roll()}
+				variant="ghost"
+				data-shortcut-key="Space Enter"
+				data-shortcut-effect="bounce"
+			>
+				주사위 굴리기
+			</Button>
 		{/if}
 	</div>
 {/if}

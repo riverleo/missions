@@ -47,6 +47,12 @@ export type ShortcutId = 'new-quest-toggle';
 /**
  * 글로벌 키보드 단축키 맵
  */
-export default {
+export const keymap = {
 	'new-quest-toggle': new Shortcut({ code: 'KeyQ', action: toggleOpen }),
 } as Record<ShortcutId, Shortcut>;
+
+export function getShortcut(targetShortcutId: string | undefined) {
+	if (targetShortcutId === undefined) return undefined;
+
+	return keymap[targetShortcutId as ShortcutId];
+}

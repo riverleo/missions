@@ -8,7 +8,7 @@ export interface LayerConfig {
 }
 
 // 현재 활성화된 레이어
-export const current = writable<LayerId | undefined>(undefined);
+export const currentLayerId = writable<LayerId | undefined>(undefined);
 
 // 각 레이어별 설정
 export const layers = writable<Record<LayerId, LayerConfig>>({
@@ -18,7 +18,7 @@ export const layers = writable<Record<LayerId, LayerConfig>>({
 });
 
 // 레이어 이벤트 핸들러 등록
-export function bind({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) {
+export function bindLayerEvent({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) {
 	layers.update((layer) => ({
 		...layer,
 		[id]: { onkeyup, onkeydown },
@@ -26,13 +26,13 @@ export function bind({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) 
 }
 
 // 레이어 활성화
-export function activate(id: LayerId) {
-	current.set(id);
+export function activateLayer(id: LayerId) {
+	currentLayerId.set(id);
 }
 
 // 레이어 비활성화
-export function deactivate(id: LayerId) {
-	if (get(current) !== id) return;
+export function deactivateLayer(id: LayerId) {
+	if (get(currentLayerId) !== id) return;
 
-	current.set(undefined);
+	currentLayerId.set(undefined);
 }

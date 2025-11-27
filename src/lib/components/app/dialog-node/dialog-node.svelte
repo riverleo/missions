@@ -4,13 +4,10 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
-	import {
-		current as currentLayerId,
-		bind as bindLayerEvent,
-		type LayerId,
-	} from '$lib/shortcut/layers';
 	import Message from './dialog-node-message.svelte';
 	import { blur } from 'svelte/transition';
+	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
+	import { bindLayerEvent, currentLayerId, type LayerId } from '$lib/shortcut/store';
 
 	const layerId: LayerId = 'dialog-node';
 
@@ -27,16 +24,18 @@
 
 			const { type } = $current;
 
-			if (type === 'narrative' && (event.code === 'Space' || event.code === 'Enter'))
-				handleRoll($current.diceRoll);
-
-			// Enter or Space to select highlighted choice
-			if (
-				type === 'choice' &&
-				$highlightedIndex !== undefined &&
-				(event.code === 'Enter' || event.code === 'Space')
-			)
-				handleRoll($current.choices[$highlightedIndex].diceRoll);
+			if (isEnterOrSpace(event)) {
+				switch (type) {
+					case 'narrative':
+						handleRoll($current.diceRoll);
+						break;
+					case 'choice':
+						// Enter or Space to select highlighted choice
+						if ($highlightedIndex !== undefined)
+							handleRoll($current.choices[$highlightedIndex].diceRoll);
+						break;
+				}
+			}
 		},
 		onkeydown: throttle({ interval: 100 }, (event: KeyboardEvent) => {
 			if ($current === undefined) return;
@@ -47,21 +46,14 @@
 
 			const choicesCount = $current.choices.length;
 
-			if (
-				event.code === 'ArrowDown' ||
-				event.code === 'KeyS' ||
-				event.code === 'ArrowUp' ||
-				event.code === 'KeyW'
-			) {
-				if ($highlightedIndex === undefined) {
-					$highlightedIndex = 0;
-				} else if (event.code === 'ArrowDown' || event.code === 'KeyS') {
-					// Arrow Down or S key
-					$highlightedIndex = ($highlightedIndex + 1) % choicesCount;
-				} else if (event.code === 'ArrowUp' || event.code === 'KeyW') {
-					// Arrow Up or W key
-					$highlightedIndex = ($highlightedIndex - 1 + choicesCount) % choicesCount;
-				}
+			if (isArrowUpOrDown(event) && $highlightedIndex === undefined) {
+				$highlightedIndex = 0;
+			} else if (isArrowDown(event)) {
+				// Arrow Down or S key
+				$highlightedIndex = (($highlightedIndex ?? 0) + 1) % choicesCount;
+			} else if (isArrowUp(event)) {
+				// Arrow Up or W key
+				$highlightedIndex = (($highlightedIndex ?? 0) - 1 + choicesCount) % choicesCount;
 			}
 		}),
 	});
@@ -79,11 +71,12 @@
 					{#each $current.choices as choice, index (choice.id)}
 						<Button
 							variant="ghost"
-							data-shortcut-key={$highlightedIndex === index ? 'Space Enter' : ''}
-							data-shortcut-effect
+							data-shortcut-key={$highlightedIndex === index ? 'Space Enter' : undefined}
+							data-shortcut-effect="bounce"
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
 							disabled={$currentLayerId !== layerId}
+							class={$highlightedIndex === index ? 'opacity-100' : 'opacity-20'}
 						>
 							{choice.text}
 						</Button>
@@ -98,7 +91,7 @@
 					<Button
 						variant="ghost"
 						data-shortcut-key="Space Enter"
-						data-shortcut-effect
+						data-shortcut-effect="bounce"
 						onclick={() => handleRoll($current.diceRoll)}
 						disabled={$currentLayerId !== layerId}
 					>

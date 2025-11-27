@@ -5,7 +5,10 @@ import {
 	diceRolled,
 	terminate as terminateDiceRoll,
 } from '$lib/components/app/dice-roll/store';
-import { activate as activateLayer, deactivate as deactivateLayer } from '$lib/shortcut/layers';
+import {
+	activateLayer as activateLayer,
+	deactivateLayer as deactivateLayer,
+} from '$lib/shortcut/store';
 
 export interface DialogNodeChoice {
 	id: string;
