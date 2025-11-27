@@ -36,3 +36,6 @@ export function deactivateLayer(id: LayerId) {
 
 	currentLayerId.set(undefined);
 }
+
+// 단축키 취소 상태
+export const isShortcutEscaped = writable<boolean>(false);

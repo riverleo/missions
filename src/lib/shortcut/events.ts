@@ -1,8 +1,8 @@
 import { getShortcut, keymap } from './keymap.js';
 import sounds from './sounds.js';
 import { get } from 'svelte/store';
-import { currentLayerId, layers } from './store.js';
-import { isEnterOrSpace } from './utils.js';
+import { currentLayerId, layers, isShortcutEscaped } from './store.js';
+import { isEnterOrSpace, isEscape } from './utils.js';
 
 const effectTimeouts = new WeakMap<HTMLElement, NodeJS.Timeout>();
 
@@ -50,6 +50,13 @@ function triggerKeyDownEffect(element: HTMLElement) {
 }
 
 export function onkeydown(event: KeyboardEvent) {
+	// ESC 키로 단축키 취소
+	if (isEscape(event)) {
+		isShortcutEscaped.set(true);
+
+		return clearAllEffects();
+	}
+
 	// 레이어 단축키 처리
 	const $currentLayerId = get(currentLayerId);
 
@@ -88,6 +95,13 @@ export function onkeydown(event: KeyboardEvent) {
 }
 
 export function onkeyup(event: KeyboardEvent) {
+	// 취소된 상태면 효과만 정리하고 action은 실행하지 않음
+	if (!isEscape(event) && get(isShortcutEscaped)) {
+		isShortcutEscaped.set(false);
+
+		return clearAllEffects();
+	}
+
 	// data-shortcut 속성을 가진 요소들의 시각적 피드백 처리
 	const elements = document.querySelectorAll<HTMLElement>('[data-shortcut-effect]');
 
