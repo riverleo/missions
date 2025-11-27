@@ -20,8 +20,11 @@ function clearAllEffects() {
 }
 
 function triggerKeyUpEffect(element: HTMLElement) {
-	if ((element as HTMLButtonElement).disabled) return;
 	if (element.dataset.shortcutEffect === undefined) return;
+
+	// data-shortcut-layer 체크
+	const layerId = element.dataset.shortcutLayer;
+	if (layerId && get(currentLayerId) !== layerId) return;
 
 	const { shortcutEffect = 'bounce' } = element.dataset;
 
@@ -38,8 +41,11 @@ function triggerKeyUpEffect(element: HTMLElement) {
 }
 
 function triggerKeyDownEffect(element: HTMLElement) {
-	if ((element as HTMLButtonElement).disabled) return;
 	if (element.dataset.shortcutEffect === undefined) return;
+
+	// data-shortcut-layer 체크
+	const layerId = element.dataset.shortcutLayer;
+	if (layerId && get(currentLayerId) !== layerId) return;
 
 	const { shortcutEffect = 'bounce' } = element.dataset;
 
@@ -135,7 +141,7 @@ export function onkeyup(event: KeyboardEvent) {
 	const focusedElement = document.activeElement as HTMLElement | null;
 
 	if (isEnterOrSpace(event) && focusedElement) {
-		return triggerKeyUpEffect(focusedElement);
+		triggerKeyUpEffect(focusedElement);
 	}
 
 	// 글로벌 단축키 처리

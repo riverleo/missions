@@ -6,8 +6,10 @@
 	import { bindLayerEvent } from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
+	const layerId = 'dice-roll';
+
 	bindLayerEvent({
-		id: 'dice-roll',
+		id: layerId,
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
 			if ($current === undefined || $current.silent) return;
 
@@ -27,7 +29,12 @@
 			<div>최소 눈금: {$diceRolled.diceRoll.difficultyClass}</div>
 			<div>주사위 결과: {$diceRolled.value}</div>
 
-			<Button onclick={() => next()} data-shortcut-key="Space Enter" data-shortcut-effect>
+			<Button
+				onclick={() => next()}
+				data-shortcut-key="Space Enter"
+				data-shortcut-effect="bounce"
+				data-shortcut-layer={layerId}
+			>
 				계속 진행하기
 			</Button>
 		{:else}
@@ -36,6 +43,7 @@
 				variant="ghost"
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"
+				data-shortcut-layer={layerId}
 			>
 				주사위 굴리기
 			</Button>

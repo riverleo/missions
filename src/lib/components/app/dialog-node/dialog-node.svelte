@@ -7,7 +7,7 @@
 	import Message from './dialog-node-message.svelte';
 	import { blur } from 'svelte/transition';
 	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
-	import { bindLayerEvent, currentLayerId, type LayerId } from '$lib/shortcut/store';
+	import { bindLayerEvent, type LayerId } from '$lib/shortcut/store';
 
 	const layerId: LayerId = 'dialog-node';
 
@@ -73,9 +73,9 @@
 							variant="ghost"
 							data-shortcut-key={$highlightedIndex === index ? 'Space Enter' : undefined}
 							data-shortcut-effect="bounce"
+							data-shortcut-layer={layerId}
 							onclick={() => handleRoll(choice.diceRoll)}
 							onmouseenter={() => ($highlightedIndex = index)}
-							disabled={$currentLayerId !== layerId}
 							class={$highlightedIndex === index ? 'opacity-100' : 'opacity-20'}
 						>
 							{choice.text}
@@ -92,10 +92,15 @@
 						variant="ghost"
 						data-shortcut-key="Space Enter"
 						data-shortcut-effect="bounce"
+						data-shortcut-layer={layerId}
 						onclick={() => handleRoll($current.diceRoll)}
-						disabled={$currentLayerId !== layerId}
 					>
-						다음 <Kbd>Space</Kbd>
+						{#if $current.diceRoll.difficultyClass > 0}
+							주사위 굴리기
+						{:else}
+							다음
+						{/if}
+						<Kbd>Space</Kbd>
 					</Button>
 				</div>
 			</div>
