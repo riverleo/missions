@@ -7,6 +7,16 @@
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
 	const layerId = 'dice-roll';
+	let throwing = $state(false);
+
+	function handleRoll() {
+		throwing = true;
+		// 애니메이션 완료 후 실제 roll 실행
+		setTimeout(() => {
+			roll();
+			throwing = false;
+		}, 500); // throw 애니메이션 duration
+	}
 
 	bindLayerEvent({
 		id: layerId,
@@ -15,7 +25,7 @@
 
 			if (isEnterOrSpace(event)) {
 				if ($diceRolled) next();
-				else roll();
+				else handleRoll();
 			}
 		}),
 	});
@@ -23,11 +33,12 @@
 
 {#if $current && !$current.silent}
 	<div
-		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center bg-black/50 text-white"
+		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
 	>
 		{#if $diceRolled}
+			<!-- 결과 표시 -->
+			<div class="text-8xl font-bold">{$diceRolled.value}</div>
 			<div>최소 눈금: {$diceRolled.diceRoll.difficultyClass}</div>
-			<div>주사위 결과: {$diceRolled.value}</div>
 
 			<Button
 				onclick={() => next()}
@@ -38,8 +49,11 @@
 				계속 진행하기
 			</Button>
 		{:else}
+			<!-- 주사위 애니메이션 -->
+			<div class="dice-sprite" class:throwing></div>
+
 			<Button
-				onclick={() => roll()}
+				onclick={handleRoll}
 				variant="ghost"
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"
@@ -50,3 +64,37 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.dice-sprite {
+		width: 168px;
+		height: 171px;
+		background-image: url('/dice-roll-sprite-sheet.png');
+		background-size: 840px 855px; /* 5x5 그리드 */
+		animation: dice-shake 1s steps(20) infinite;
+	}
+
+	/* Shake 애니메이션 (0-19 프레임) */
+	@keyframes dice-shake {
+		0% {
+			background-position: 0 0;
+		}
+		100% {
+			background-position: -3360px 0; /* 20프레임 * 168px */
+		}
+	}
+
+	/* Throw 애니메이션 (20-24 프레임) */
+	.dice-sprite.throwing {
+		animation: dice-throw 0.5s steps(5) forwards;
+	}
+
+	@keyframes dice-throw {
+		0% {
+			background-position: 0 -684px; /* 4번째 줄 시작 */
+		}
+		100% {
+			background-position: -840px -684px; /* 5프레임 * 168px */
+		}
+	}
+</style>
