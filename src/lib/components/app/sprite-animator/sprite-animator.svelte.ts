@@ -6,6 +6,7 @@ const DEFAULT_FRAME_COUNT = 1;
 export class SpriteAnimator {
 	private atlasName: string;
 	private metadata: SpriteMetadata | undefined = undefined;
+	private atlasUrl: string | undefined = undefined;
 	private animations = new Map<string, SpriteAnimation>();
 	private frameTimer: NodeJS.Timeout | undefined = undefined;
 	private direction: 1 | -1 = 1;
@@ -25,8 +26,12 @@ export class SpriteAnimator {
 
 	private async loadMetadata() {
 		try {
-			const metadataModule = await import(`$lib/assets/atlas/generated/${this.atlasName}.json`);
+			const [metadataModule, atlasModule] = await Promise.all([
+				import(`$lib/assets/atlas/generated/${this.atlasName}.json`),
+				import(`$lib/assets/atlas/generated/${this.atlasName}.png`)
+			]);
 			this.metadata = metadataModule.default;
+			this.atlasUrl = atlasModule.default;
 		} catch (error) {
 			console.error(`Failed to load metadata for ${this.atlasName}:`, error);
 		}
@@ -131,6 +136,6 @@ export class SpriteAnimator {
 	}
 
 	getAtlasUrl() {
-		return `/src/lib/assets/atlas/generated/${this.atlasName}.png`;
+		return this.atlasUrl;
 	}
 }
