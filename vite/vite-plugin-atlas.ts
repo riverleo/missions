@@ -54,7 +54,7 @@ function sortByNumber(files: string[]): string[] {
 /**
  * Sprite Sheet 생성 (동일 크기 이미지들)
  */
-function generateSpriteSheet(groupName: string, files: string[]) {
+async function generateSpriteSheet(groupName: string, files: string[]) {
 	const frameCount = files.length;
 	const gridSize = Math.ceil(Math.sqrt(frameCount));
 
@@ -64,8 +64,24 @@ function generateSpriteSheet(groupName: string, files: string[]) {
 	const command = `magick montage ${inputPaths} -tile ${gridSize}x${gridSize} -geometry +0+0 -background none ${outputPath}`;
 	execSync(command, { stdio: 'inherit' });
 
+	// 프레임 크기 확인 (첫 번째 이미지)
+	const { width: frameWidth, height: frameHeight } = getImageSize(files[0]);
+
+	// 메타데이터 생성
+	const metadata = {
+		type: 'sprite',
+		frameWidth,
+		frameHeight,
+		columns: gridSize,
+		rows: gridSize,
+		frameCount,
+	};
+
+	const metadataPath = join(GENERATED_DIR, `${groupName}.json`);
+	await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+
 	console.log(
-		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${gridSize}x${gridSize} grid)`
+		`✓ [Sprite Sheet] ${groupName}.png + ${groupName}.json (${frameCount} frames, ${gridSize}x${gridSize} grid)`
 	);
 }
 
@@ -103,16 +119,23 @@ async function generatePackedAtlas(groupName: string, files: string[]) {
 	}
 
 	// 4. 메타데이터 JSON 생성
-	const metadata: Record<string, { x: number; y: number; width: number; height: number }> = {};
+	const frames: Record<string, { x: number; y: number; width: number; height: number }> = {};
 	for (const box of boxes) {
 		const filename = box.filename.split('/').pop()!;
-		metadata[filename] = {
+		// 확장명 제거
+		const nameWithoutExt = filename.replace(/\.(png|webp|jpe?g)$/i, '');
+		frames[nameWithoutExt] = {
 			x: box.x!,
 			y: box.y!,
 			width: box.w,
 			height: box.h,
 		};
 	}
+
+	const metadata = {
+		type: 'packed',
+		frames,
+	};
 
 	const metadataPath = join(GENERATED_DIR, `${groupName}.json`);
 	await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
@@ -148,9 +171,9 @@ async function generateAtlas(groupName: string) {
 
 		if (hasSprite && hasPacked) {
 			console.warn(`⚠ [${groupName}] Both .sprite and .packed found, using .sprite`);
-			generateSpriteSheet(groupName, filePaths);
+			await generateSpriteSheet(groupName, filePaths);
 		} else if (hasSprite) {
-			generateSpriteSheet(groupName, filePaths);
+			await generateSpriteSheet(groupName, filePaths);
 		} else if (hasPacked) {
 			await generatePackedAtlas(groupName, filePaths);
 		} else {
