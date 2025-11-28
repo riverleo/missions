@@ -36,7 +36,17 @@ export class SpriteAnimator {
 		this.animations.set(name, { name, from, to, fps });
 	}
 
-	play({ name, loop = 'loop' }: { name: string; loop?: LoopMode }) {
+	play({
+		name,
+		loop = 'loop',
+		onLoop,
+		onComplete,
+	}: {
+		name: string;
+		loop?: LoopMode;
+		onLoop?: () => void;
+		onComplete?: () => void;
+	}) {
 		const animation = this.animations.get(name);
 		if (!animation) {
 			console.warn(`Animation "${name}" not found`);
@@ -51,10 +61,15 @@ export class SpriteAnimator {
 		this.direction = 1; // 항상 정방향으로 시작
 
 		// 프레임 업데이트 시작
-		this.startFrameUpdate(animation, loop);
+		this.startFrameUpdate(animation, loop, onLoop, onComplete);
 	}
 
-	private startFrameUpdate(animation: SpriteAnimation, loop: LoopMode) {
+	private startFrameUpdate(
+		animation: SpriteAnimation,
+		loop: LoopMode,
+		onLoop?: () => void,
+		onComplete?: () => void
+	) {
 		const fps = animation.fps ?? DEFAULT_FPS;
 		const frameDelay = 1000 / fps;
 		const from = animation.from ? animation.from - 1 : 0;
@@ -68,11 +83,13 @@ export class SpriteAnimator {
 			if (loop === 'loop') {
 				if (this.currentFrame > to) {
 					this.currentFrame = from;
+					onLoop?.();
 				}
 			} else if (loop === 'once') {
 				if (this.currentFrame > to) {
 					this.currentFrame = to;
 					this.stop();
+					onComplete?.();
 					return;
 				}
 			} else if (loop === 'ping-pong') {
@@ -82,6 +99,7 @@ export class SpriteAnimator {
 				} else if (this.currentFrame < from) {
 					this.currentFrame = from + 1;
 					this.direction = 1;
+					onLoop?.();
 				}
 			} else if (loop === 'ping-pong-once') {
 				if (this.direction === 1 && this.currentFrame > to) {
@@ -90,6 +108,7 @@ export class SpriteAnimator {
 				} else if (this.direction === -1 && this.currentFrame < from) {
 					this.currentFrame = from;
 					this.stop();
+					onComplete?.();
 					return;
 				}
 			}
