@@ -56,12 +56,13 @@ function sortByNumber(files: string[]): string[] {
  */
 async function generateSpriteSheet(groupName: string, files: string[]) {
 	const frameCount = files.length;
-	const gridSize = Math.ceil(Math.sqrt(frameCount));
+	const columns = Math.ceil(Math.sqrt(frameCount));
+	const rows = Math.ceil(frameCount / columns);
 
 	const inputPaths = files.join(' ');
 	const outputPath = join(GENERATED_DIR, `${groupName}.png`);
 
-	const command = `magick montage ${inputPaths} -tile ${gridSize}x${gridSize} -geometry +0+0 -background none ${outputPath}`;
+	const command = `magick montage ${inputPaths} -tile ${columns}x${rows} -geometry +0+0 -background none ${outputPath}`;
 	execSync(command, { stdio: 'inherit' });
 
 	// 프레임 크기 확인 (첫 번째 이미지)
@@ -72,8 +73,8 @@ async function generateSpriteSheet(groupName: string, files: string[]) {
 		type: 'sprite',
 		frameWidth,
 		frameHeight,
-		columns: gridSize,
-		rows: gridSize,
+		columns,
+		rows,
 		frameCount,
 	};
 
@@ -81,7 +82,7 @@ async function generateSpriteSheet(groupName: string, files: string[]) {
 	await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
 
 	console.log(
-		`✓ [Sprite Sheet] ${groupName}.png + ${groupName}.json (${frameCount} frames, ${gridSize}x${gridSize} grid)`
+		`✓ [Sprite Sheet] ${groupName}.png + ${groupName}.json (${frameCount} frames, ${columns}x${rows} grid)`
 	);
 }
 

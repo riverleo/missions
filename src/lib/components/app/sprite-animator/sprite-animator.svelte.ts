@@ -1,5 +1,8 @@
 import type { LoopMode, SpriteAnimation, SpriteMetadata } from './index';
 
+const DEFAULT_FPS = 24;
+const DEFAULT_FRAME_COUNT = 1;
+
 export class SpriteAnimator {
 	private atlasName: string;
 	private metadata: SpriteMetadata | undefined = undefined;
@@ -52,10 +55,10 @@ export class SpriteAnimator {
 	}
 
 	private startFrameUpdate(animation: SpriteAnimation, loop: LoopMode) {
-		const fps = animation.fps ?? 12;
+		const fps = animation.fps ?? DEFAULT_FPS;
 		const frameDelay = 1000 / fps;
 		const from = animation.from ? animation.from - 1 : 0;
-		const to = animation.to ? animation.to - 1 : (this.metadata?.frameCount ?? 1) - 1;
+		const to = animation.to ? animation.to - 1 : (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT) - 1;
 
 		const updateFrame = () => {
 			// 다음 프레임으로 이동
