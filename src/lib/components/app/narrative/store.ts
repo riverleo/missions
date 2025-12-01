@@ -35,7 +35,10 @@ export type Narrative = {
 
 export const source = writable<Record<string, Narrative>>({});
 export const current = writable<Narrative | undefined>();
-export const highlightedChoice = writable<NarrativeChoice | undefined>();
+
+export const messageComplete = writable<boolean>(false);
+export const narrativeActionHeight = writable<number>(0);
+export const focusedNarrativeChoice = writable<NarrativeChoice | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
 	const $diceRolled = targetDiceRolled || get(diceRolled);
@@ -66,7 +69,9 @@ export function open(narrativeId: string) {
 	}
 
 	current.set($narrative);
-	highlightedChoice.set(undefined);
+	messageComplete.set(false);
+	focusedNarrativeChoice.set(undefined);
+	narrativeActionHeight.set(0);
 
 	terminateDiceRoll();
 	activateLayer('narrative');
@@ -74,7 +79,7 @@ export function open(narrativeId: string) {
 
 export function terminate() {
 	current.set(undefined);
-	highlightedChoice.set(undefined);
+	focusedNarrativeChoice.set(undefined);
 
 	terminateDiceRoll();
 	deactivateLayer('narrative');

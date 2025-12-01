@@ -1,8 +1,25 @@
 <script lang="ts">
-	import { current } from './store';
+	import { current, messageComplete } from './store';
 
 	// 텍스트를 문자 배열로 변환 (공백 포함)
 	const messageCharacters = $derived($current?.message.split(''));
+
+	// 타이핑 애니메이션 완료 시간 계산
+	const typingDuration = $derived(() => {
+		const charCount = messageCharacters?.length || 0;
+		return charCount * 15 + 200; // delay per char + animation duration
+	});
+
+	// 타이핑 완료 타이머 (완료 후 300ms 추가 대기)
+	$effect(() => {
+		if ($current) {
+			const timer = setTimeout(() => {
+				$messageComplete = true;
+			}, typingDuration() + 300);
+
+			return () => clearTimeout(timer);
+		}
+	});
 </script>
 
 {#key $current?.message}
