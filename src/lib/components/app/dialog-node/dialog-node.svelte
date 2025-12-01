@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { throttle } from 'radash';
-	import { current, next, highlightedIndex } from './store';
+	import { current, highlightedChoice } from './store';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
-	import { open, roll, type DiceRoll } from '$lib/components/app/dice-roll/store';
+	import { open } from '$lib/components/app/dice-roll/store';
 	import Message from './dialog-node-message.svelte';
-	import { blur } from 'svelte/transition';
 	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
 	import { bindLayerEvent, type LayerId } from '$lib/shortcut/store';
+	import DialogNodeChoice from './dialog-node-choice.svelte';
 
 	const layerId: LayerId = 'dialog-node';
-
-	function handleRoll(newDiceRoll: DiceRoll) {
-		open(newDiceRoll);
-
-		if (newDiceRoll.silent) next(roll());
-	}
 
 	bindLayerEvent({
 		id: layerId,
@@ -27,12 +21,11 @@
 			if (isEnterOrSpace(event)) {
 				switch (type) {
 					case 'narrative':
-						handleRoll($current.diceRoll);
+						open($current.diceRoll);
 						break;
 					case 'choice':
 						// Enter or Space to select highlighted choice
-						if ($highlightedIndex !== undefined)
-							handleRoll($current.choices[$highlightedIndex].diceRoll);
+						if ($highlightedChoice !== undefined) open($highlightedChoice.diceRoll);
 						break;
 				}
 			}
@@ -44,16 +37,20 @@
 
 			if (type !== 'choice') return;
 
-			const choicesCount = $current.choices.length;
+			const choices = $current.choices;
 
-			if (isArrowUpOrDown(event) && $highlightedIndex === undefined) {
-				$highlightedIndex = 0;
+			if (isArrowUpOrDown(event) && $highlightedChoice === undefined) {
+				$highlightedChoice = choices[0];
 			} else if (isArrowDown(event)) {
-				// Arrow Down or S key
-				$highlightedIndex = (($highlightedIndex ?? 0) + 1) % choicesCount;
+				const currentIndex = choices.findIndex((c) => c.id === $highlightedChoice?.id);
+				const nextIndex = (currentIndex + 1) % choices.length;
+
+				$highlightedChoice = choices[nextIndex];
 			} else if (isArrowUp(event)) {
-				// Arrow Up or W key
-				$highlightedIndex = (($highlightedIndex ?? 0) - 1 + choicesCount) % choicesCount;
+				const currentIndex = choices.findIndex((c) => c.id === $highlightedChoice?.id);
+				const prevIndex = (currentIndex - 1 + choices.length) % choices.length;
+
+				$highlightedChoice = choices[prevIndex];
 			}
 		}),
 	});
@@ -66,43 +63,27 @@
 	<div class="flex flex-col items-center gap-8 px-8">
 		<Message />
 		{#if $current?.type === 'choice'}
-			<div class="flex flex-col items-center gap-8 px-8">
-				<div in:blur class="flex flex-col gap-3">
-					{#each $current.choices as choice, index (choice.id)}
-						<Button
-							variant="ghost"
-							data-shortcut-key={$highlightedIndex === index ? 'Space Enter' : undefined}
-							data-shortcut-effect="bounce"
-							data-shortcut-layer={layerId}
-							onclick={() => handleRoll(choice.diceRoll)}
-							onmouseenter={() => ($highlightedIndex = index)}
-							class={$highlightedIndex === index ? 'opacity-100' : 'opacity-20'}
-						>
-							{choice.text}
-						</Button>
-					{/each}
-				</div>
+			<div class="flex flex-col items-center gap-3 px-8">
+				{#each $current?.choices as choice, index (choice.id)}
+					<DialogNodeChoice {choice} {index} />
+				{/each}
 			</div>
-		{/if}
-
-		{#if $current?.type === 'narrative'}
+		{:else if $current?.type === 'narrative'}
 			<div class="flex flex-col items-center gap-8 px-8">
-				<div in:blur>
-					<Button
-						variant="ghost"
-						data-shortcut-key="Space Enter"
-						data-shortcut-effect="bounce"
-						data-shortcut-layer={layerId}
-						onclick={() => handleRoll($current.diceRoll)}
-					>
-						{#if $current.diceRoll.difficultyClass > 0}
-							주사위 굴리기
-						{:else}
-							다음
-						{/if}
-						<Kbd>Space</Kbd>
-					</Button>
-				</div>
+				<Button
+					variant="ghost"
+					data-shortcut-key="Space Enter"
+					data-shortcut-effect="bounce"
+					data-shortcut-layer={layerId}
+					onclick={() => open($current.diceRoll)}
+				>
+					{#if $current.diceRoll.difficultyClass > 0}
+						주사위 굴리기
+					{:else}
+						다음
+					{/if}
+					<Kbd>Space</Kbd>
+				</Button>
 			</div>
 		{/if}
 	</div>

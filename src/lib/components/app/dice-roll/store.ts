@@ -1,6 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { Dice } from './dice';
 import { activateLayer, deactivateLayer } from '$lib/shortcut/store';
+import { next } from '$lib/components/app/dialog-node/store';
 
 export interface DiceRoll {
 	difficultyClass: number;
@@ -51,6 +52,8 @@ export function open(diceRoll: DiceRoll) {
 	current.set(diceRoll);
 
 	activateLayer('dice-roll');
+
+	if (diceRoll.silent) next(roll());
 }
 
 export function terminate() {

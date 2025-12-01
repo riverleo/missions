@@ -61,7 +61,7 @@ export class SpriteAnimator {
 		// 이전 애니메이션 정지
 		this.stop();
 
-		this.currentAnimation = name;
+		  this.currentAnimation = name;
 		this.currentFrame = animation.from ? animation.from - 1 : 0; // 0-based로 변환
 		this.direction = 1; // 항상 정방향으로 시작
 

@@ -7,16 +7,6 @@
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
 	const layerId = 'dice-roll';
-	let throwing = $state(false);
-
-	function handleRoll() {
-		throwing = true;
-		// 애니메이션 완료 후 실제 roll 실행
-		setTimeout(() => {
-			roll();
-			throwing = false;
-		}, 500); // throw 애니메이션 duration
-	}
 
 	bindLayerEvent({
 		id: layerId,
@@ -25,7 +15,7 @@
 
 			if (isEnterOrSpace(event)) {
 				if ($diceRolled) next();
-				else handleRoll();
+				else roll();
 			}
 		}),
 	});
@@ -50,10 +40,10 @@
 			</Button>
 		{:else}
 			<!-- 주사위 애니메이션 -->
-			<div class="dice-sprite" class:throwing></div>
+			<div class="dice-sprite"></div>
 
 			<Button
-				onclick={handleRoll}
+				onclick={roll}
 				variant="ghost"
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"

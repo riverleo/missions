@@ -35,7 +35,7 @@ export type DialogNode = {
 
 export const source = writable<Record<string, DialogNode>>({});
 export const current = writable<DialogNode | undefined>();
-export const highlightedIndex = writable<number | undefined>();
+export const highlightedChoice = writable<DialogNodeChoice | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
 	const $diceRolled = targetDiceRolled || get(diceRolled);
@@ -66,7 +66,7 @@ export function open(dialogNodeId: string) {
 	}
 
 	current.set($dialogNode);
-	highlightedIndex.set(undefined);
+	highlightedChoice.set(undefined);
 
 	terminateDiceRoll();
 	activateLayer('dialog-node');
@@ -74,7 +74,7 @@ export function open(dialogNodeId: string) {
 
 export function terminate() {
 	current.set(undefined);
-	highlightedIndex.set(undefined);
+	highlightedChoice.set(undefined);
 
 	terminateDiceRoll();
 	deactivateLayer('dialog-node');
