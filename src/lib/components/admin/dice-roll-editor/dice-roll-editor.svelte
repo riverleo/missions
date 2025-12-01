@@ -8,15 +8,21 @@
 
 	interface Props {
 		diceRoll: DiceRoll;
-		dialogNodeIdOptions: { value: string; label: string }[];
-		currentDialogNodeId?: string;
+		narrativeIdOptions: { value: string; label: string }[];
+		currentNarrativeId?: string;
 		onUpdate: (diceRoll: DiceRoll) => void;
-		onCreateNode?: () => string;
+		onCreateNarrative?: () => string;
 		children?: Snippet<[any]>;
 	}
 
-	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode, children }: Props =
-		$props();
+	let {
+		diceRoll,
+		narrativeIdOptions,
+		currentNarrativeId,
+		onUpdate,
+		onCreateNarrative,
+		children,
+	}: Props = $props();
 </script>
 
 <Popover>
@@ -34,10 +40,10 @@
 	<PopoverContent>
 		<DiceRollEditorContent
 			{diceRoll}
-			{dialogNodeIdOptions}
-			{currentDialogNodeId}
+			{narrativeIdOptions}
+			{currentNarrativeId}
 			{onUpdate}
-			{onCreateNode}
+			{onCreateNarrative}
 		/>
 	</PopoverContent>
 </Popover>

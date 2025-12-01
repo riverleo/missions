@@ -2,7 +2,7 @@
 	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
 	import { current, diceRolled, roll } from './store';
-	import { next } from '$lib/components/app/dialog-node/store';
+	import { next } from '$lib/components/app/narrative/store';
 	import { bindLayerEvent } from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
@@ -72,11 +72,6 @@
 		100% {
 			background-position: -3360px 0; /* 20프레임 * 168px */
 		}
-	}
-
-	/* Throw 애니메이션 (20-24 프레임) */
-	.dice-sprite.throwing {
-		animation: dice-throw 0.5s steps(5) forwards;
 	}
 
 	@keyframes dice-throw {

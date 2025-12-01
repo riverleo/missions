@@ -2,23 +2,23 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 
 	const { Story } = defineMeta({
-		title: 'Components/DialogNode',
+		title: 'Components/Narrative',
 		tags: ['autodocs'],
 	});
 </script>
 
 <script lang="ts">
-	import DialogNode from './dialog-node.svelte';
+	import Narrative from './narrative.svelte';
 	import Button from '$lib/components/ui/button/button.svelte';
-	import { source, open, terminate, type DialogNode as DialogNodeType } from './store';
+	import { source, open, terminate, type Narrative as NarrativeType } from './store';
 	import DiceRoll from '$lib/components/app/dice-roll/dice-roll.svelte';
 	import { onkeydown, onkeyup, onmousedown, onmouseup } from '$lib/shortcut/events';
 
 	// 스토리용 다이얼로그 노드 데이터
-	const newSource: Record<string, DialogNodeType> = {
+	const newSource: Record<string, NarrativeType> = {
 		'intro-1': {
 			id: 'intro-1',
-			type: 'narrative',
+			type: 'text',
 			speaker: '나레이터',
 			message: '낯선 마을에 도착했다. 마을 입구에는 수상한 사람이 서있다.',
 			root: true,
@@ -26,12 +26,12 @@
 				difficultyClass: 10,
 				silent: true,
 				success: {
-					type: 'dialogNode',
-					dialogNodeId: 'intro-2',
+					type: 'narrative',
+					narrativeId: 'intro-2',
 				},
 				failure: {
-					type: 'dialogNode',
-					dialogNodeId: 'intro-2',
+					type: 'narrative',
+					narrativeId: 'intro-2',
 				},
 			},
 		},
@@ -49,12 +49,12 @@
 						difficultyClass: 12,
 						silent: false,
 						success: {
-							type: 'dialogNode',
-							dialogNodeId: 'talk-success',
+							type: 'narrative',
+							narrativeId: 'talk-success',
 						},
 						failure: {
-							type: 'dialogNode',
-							dialogNodeId: 'talk-failure',
+							type: 'narrative',
+							narrativeId: 'talk-failure',
 						},
 					},
 				},
@@ -65,12 +65,12 @@
 						difficultyClass: 8,
 						silent: false,
 						success: {
-							type: 'dialogNode',
-							dialogNodeId: 'ignore-success',
+							type: 'narrative',
+							narrativeId: 'ignore-success',
 						},
 						failure: {
-							type: 'dialogNode',
-							dialogNodeId: 'ignore-failure',
+							type: 'narrative',
+							narrativeId: 'ignore-failure',
 						},
 					},
 				},
@@ -78,7 +78,7 @@
 		},
 		'talk-success': {
 			id: 'talk-success',
-			type: 'narrative',
+			type: 'text',
 			speaker: '수상한 사람',
 			message: '"반갑소, 여행자여. 이 마을에는 숨겨진 보물이 있다오."',
 			root: false,
@@ -95,7 +95,7 @@
 		},
 		'talk-failure': {
 			id: 'talk-failure',
-			type: 'narrative',
+			type: 'text',
 			speaker: '수상한 사람',
 			message: '"......" (그는 아무 말도 하지 않고 사라진다)',
 			root: false,
@@ -112,7 +112,7 @@
 		},
 		'ignore-success': {
 			id: 'ignore-success',
-			type: 'narrative',
+			type: 'text',
 			speaker: '나레이터',
 			message: '조용히 마을로 들어갔다. 아무 일도 일어나지 않았다.',
 			root: false,
@@ -129,7 +129,7 @@
 		},
 		'ignore-failure': {
 			id: 'ignore-failure',
-			type: 'narrative',
+			type: 'text',
 			speaker: '나레이터',
 			message: '무시하려 했지만, 그 사람이 당신의 어깨를 붙잡는다...',
 			root: false,
@@ -166,7 +166,7 @@
 		<p class="text-sm text-gray-600">open() 함수와 dialogNodes 스토어 사용 예제</p>
 	</div>
 
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>
 
@@ -176,7 +176,7 @@
 		<p class="text-sm text-gray-600">연결된 여러 노드를 탐색할 수 있는 스토리</p>
 	</div>
 
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>
 
@@ -186,7 +186,7 @@
 		<Button onclick={terminate}>닫기</Button>
 	</div>
 
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>
 
@@ -196,7 +196,7 @@
 		<Button onclick={terminate}>닫기</Button>
 	</div>
 
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>
 
@@ -206,11 +206,11 @@
 		<Button onclick={terminate}>닫기</Button>
 	</div>
 
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>
 
 <Story name="닫힌 상태">
-	<DialogNode />
+	<Narrative />
 	<DiceRoll />
 </Story>

@@ -3,19 +3,19 @@
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { open } from '$lib/components/app/dice-roll/store';
-	import DialogNodeChoice from './dialog-node-choice.svelte';
+	import NarrativeChoice from './narrative-choice.svelte';
 	import type { LayerId } from '$lib/shortcut/store';
 
-	const layerId: LayerId = 'dialog-node';
+	const layerId: LayerId = 'narrative';
 </script>
 
 {#if $current?.type === 'choice'}
 	<div class="flex flex-col items-center gap-3 px-8">
 		{#each $current?.choices as choice, index (choice.id)}
-			<DialogNodeChoice {choice} {index} />
+			<NarrativeChoice {choice} {index} />
 		{/each}
 	</div>
-{:else if $current?.type === 'narrative'}
+{:else if $current?.type === 'text'}
 	<div class="flex flex-col items-center gap-8 px-8">
 		<Button
 			variant="ghost"

@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 
-export type LayerId = 'dialog-node' | 'dice-roll' | 'quest';
+export type LayerId = 'narrative' | 'dice-roll' | 'quest';
 
 export interface LayerConfig {
 	onkeyup?: (event: KeyboardEvent) => void;
@@ -12,7 +12,7 @@ export const currentLayerId = writable<LayerId | undefined>(undefined);
 
 // 각 레이어별 설정
 export const layers = writable<Record<LayerId, LayerConfig>>({
-	'dialog-node': {},
+	narrative: {},
 	'dice-roll': {},
 	quest: {},
 });

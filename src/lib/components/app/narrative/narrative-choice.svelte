@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from '$lib/utils';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import { highlightedChoice, type DialogNodeChoice } from './store';
+	import { highlightedChoice, type NarrativeChoice } from './store';
 	import { open } from '$lib/components/app/dice-roll/store';
 	import type { LayerId } from '$lib/shortcut/store';
 
-	const layerId: LayerId = 'dialog-node';
+	const layerId: LayerId = 'narrative';
 
 	type Props = WithElementRef<HTMLButtonAttributes> & {
-		choice: DialogNodeChoice;
+		choice: NarrativeChoice;
 		index: number;
 	};
 

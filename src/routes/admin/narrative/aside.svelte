@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import type { Narrative } from '$lib/components/app/narrative/store';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -29,7 +29,7 @@
 	interface DialogRoot {
 		id: string;
 		name: string;
-		dialogNodes: Record<string, DialogNode>;
+		narratives: Record<string, Narrative>;
 	}
 
 	interface Props {
@@ -68,7 +68,7 @@
 		const newRoot: DialogRoot = {
 			id: crypto.randomUUID(),
 			name: newRootName.trim(),
-			dialogNodes: {},
+			narratives: {},
 		};
 
 		dialogRoots = [...dialogRoots, newRoot];

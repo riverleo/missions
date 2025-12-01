@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import type { Narrative } from '$lib/components/app/narrative/store';
 	import { Toggle } from '$lib/components/ui/toggle';
 	import {
 		Tooltip,
@@ -7,11 +7,11 @@
 		TooltipContent,
 		TooltipProvider,
 	} from '$lib/components/ui/tooltip';
-	import { getParentDialogNodes } from '.';
+	import { getParentNarratives } from '.';
 	import { getContext } from './context';
 
 	interface Props {
-		dialogNodeId: string;
+		narrativeId: string;
 	}
 
 	interface ParentDetail {
@@ -19,72 +19,72 @@
 		detail: string;
 	}
 
-	let { dialogNodeId }: Props = $props();
+	let { narrativeId }: Props = $props();
 
 	const ctx = getContext();
 
-	const currentNode = $derived(ctx.dialogNodes[dialogNodeId]);
-	const focused = $derived(ctx.focusedDialogNodeId === dialogNodeId);
+	const currentNode = $derived(ctx.narratives[narrativeId]);
+	const focused = $derived(ctx.focusedNarrativeId === narrativeId);
 
 	// Toggle focus
 	function toggleFocus() {
-		ctx.focusedDialogNodeId = focused ? undefined : dialogNodeId;
+		ctx.focusedNarrativeId = focused ? undefined : narrativeId;
 	}
 
 	/**
 	 * Get all parent node connections as a list
 	 */
 	function getAllParentDetails(
-		dialogNodes: Record<string, DialogNode>,
-		targetDialogNodeId: string
+		narratives: Record<string, Narrative>,
+		targetNarrativeId: string
 	): ParentDetail[] {
 		const details: ParentDetail[] = [];
-		const parentNodes = getParentDialogNodes(dialogNodes, targetDialogNodeId);
+		const parentNarratives = getParentNarratives(narratives, targetNarrativeId);
 
-		for (const parentNode of parentNodes) {
+		for (const parentNarrative of parentNarratives) {
 			// Check narrative type
-			if (parentNode.type === 'narrative') {
+			if (parentNarrative.type === 'text') {
 				const isSuccess =
-					parentNode.diceRoll.success.type === 'dialogNode' &&
-					parentNode.diceRoll.success.dialogNodeId === targetDialogNodeId;
+					parentNarrative.diceRoll.success.type === 'narrative' &&
+					parentNarrative.diceRoll.success.narrativeId === targetNarrativeId;
 				const isFailure =
-					parentNode.diceRoll.failure.type === 'dialogNode' &&
-					parentNode.diceRoll.failure.dialogNodeId === targetDialogNodeId;
+					parentNarrative.diceRoll.failure.type === 'narrative' &&
+					parentNarrative.diceRoll.failure.narrativeId === targetNarrativeId;
 
 				if (isSuccess) {
 					details.push({
-						parentNodeText: parentNode.message || parentNode.id,
+						parentNodeText: parentNarrative.message || parentNarrative.id,
 						detail: '대화 성공',
 					});
 				}
 				if (isFailure) {
 					details.push({
-						parentNodeText: parentNode.message || parentNode.id,
+						parentNodeText: parentNarrative.message || parentNarrative.id,
 						detail: '대화 실패',
 					});
 				}
 			}
 
 			// Check choice type
-			if (parentNode.type === 'choice') {
-				for (let i = 0; i < parentNode.choices.length; i++) {
-					const choice = parentNode.choices[i];
+			if (parentNarrative.type === 'choice') {
+				for (let i = 0; i < parentNarrative.choices.length; i++) {
+					const choice = parentNarrative.choices[i];
 					const isSuccess =
-						choice.diceRoll.success.type === 'dialogNode' &&
-						choice.diceRoll.success.dialogNodeId === targetDialogNodeId;
+						choice.diceRoll.success.type === 'narrative' &&
+						choice.diceRoll.success.narrativeId === targetNarrativeId;
 					const isFailure =
-						choice.diceRoll.failure.type === 'dialogNode' &&
-						choice.diceRoll.failure.dialogNodeId === targetDialogNodeId;
+						choice.diceRoll.failure.type === 'narrative' &&
+						choice.diceRoll.failure.narrativeId === targetNarrativeId;
 
 					if (isSuccess) {
 						details.push({
-							parentNodeText: parentNode.message || parentNode.id,
+							parentNodeText: parentNarrative.message || parentNarrative.id,
 							detail: `${i + 1}번 성공`,
 						});
 					}
 					if (isFailure) {
 						details.push({
-							parentNodeText: parentNode.message || parentNode.id,
+							parentNodeText: parentNarrative.message || parentNarrative.id,
 							detail: `${i + 1}번 실패`,
 						});
 					}
@@ -95,7 +95,7 @@
 		return details;
 	}
 
-	const parentDetails = $derived(getAllParentDetails(ctx.dialogNodes, dialogNodeId));
+	const parentDetails = $derived(getAllParentDetails(ctx.narratives, narrativeId));
 </script>
 
 {#if currentNode?.root}

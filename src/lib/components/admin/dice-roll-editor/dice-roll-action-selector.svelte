@@ -17,28 +17,28 @@
 	interface Props {
 		action: DiceRollAction;
 		icon: Snippet;
-		dialogNodeIdOptions: { value: string; label: string }[];
-		currentDialogNodeId?: string;
+		narrativeIdOptions: { value: string; label: string }[];
+		currentNarrativeId?: string;
 		onUpdate: (action: DiceRollAction) => void;
 		onCreateNode?: () => string; // Returns new node ID
 	}
 
-	let { action, icon, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode }: Props =
+	let { action, icon, narrativeIdOptions, currentNarrativeId, onUpdate, onCreateNode }: Props =
 		$props();
 
 	// Filter out current node to prevent infinite loops
 	const filteredDialogNodeIdOptions = $derived(
-		currentDialogNodeId
-			? dialogNodeIdOptions.filter((opt) => opt.value !== currentDialogNodeId)
-			: dialogNodeIdOptions
+		currentNarrativeId
+			? narrativeIdOptions.filter((opt) => opt.value !== currentNarrativeId)
+			: narrativeIdOptions
 	);
 
 	// Helper function to get node display text
 	function getDisplayText(action: DiceRollAction): string {
 		if (action.type === 'terminate') return '종료';
 
-		const option = dialogNodeIdOptions.find((opt) => opt.value === action.dialogNodeId);
-		return option?.label || action.dialogNodeId;
+		const option = narrativeIdOptions.find((opt) => opt.value === action.narrativeId);
+		return option?.label || action.narrativeId;
 	}
 </script>
 
@@ -62,7 +62,7 @@
 					<DropdownMenuItem
 						onclick={() => {
 							const newNodeId = onCreateNode();
-							onUpdate({ type: 'dialogNode', dialogNodeId: newNodeId });
+							onUpdate({ type: 'narrative', narrativeId: newNodeId });
 						}}
 					>
 						<IconPlus class="size-4" />
@@ -72,7 +72,7 @@
 				{#each filteredDialogNodeIdOptions as option (option.value)}
 					<DropdownMenuItem
 						onclick={() => {
-							onUpdate({ type: 'dialogNode', dialogNodeId: option.value });
+							onUpdate({ type: 'narrative', narrativeId: option.value });
 						}}
 					>
 						{option.label}

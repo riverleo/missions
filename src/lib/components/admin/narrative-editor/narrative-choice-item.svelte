@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DialogNodeChoice } from '$lib/components/app/dialog-node/store';
+	import type { NarrativeChoice } from '$lib/components/app/narrative/store';
 	import {
 		InputGroup,
 		InputGroupAddon,
@@ -18,7 +18,7 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { DiceRollEditor } from '$lib/components/admin/dice-roll-editor';
 	import type { DiceRoll } from '$lib/components/app/dice-roll/store';
-	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import type { Narrative } from '$lib/components/app/narrative/store';
 	import { getContext } from './context';
 	import IconDice5 from '@tabler/icons-svelte/icons/dice-5';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
@@ -33,30 +33,30 @@
 
 	const ctx = getContext();
 
-	const node = $derived(ctx.dialogNodes[nodeId]);
+	const node = $derived(ctx.narratives[nodeId]);
 	const choice = $derived(
 		node?.type === 'choice'
-			? node.choices.find((c: DialogNodeChoice) => c.id === choiceId)
+			? node.choices.find((c: NarrativeChoice) => c.id === choiceId)
 			: undefined
 	);
-	const dialogNodeIdOptions = $derived(
-		Object.values(ctx.dialogNodes).map((n: DialogNode) => ({
+	const narrativeIdOptions = $derived(
+		Object.values(ctx.narratives).map((n: Narrative) => ({
 			value: n.id,
 			label: n.message ? `${n.message} (${n.id})` : n.id,
 		}))
 	);
 
 	// Update choice
-	function updateChoice(updates: Partial<DialogNodeChoice>) {
-		const node = ctx.dialogNodes[nodeId];
+	function updateChoice(updates: Partial<NarrativeChoice>) {
+		const node = ctx.narratives[nodeId];
 		if (node.type !== 'choice') return;
 
 		const choices = node.choices || [];
-		ctx.dialogNodes = {
-			...ctx.dialogNodes,
+		ctx.narratives = {
+			...ctx.narratives,
 			[nodeId]: {
 				...node,
-				choices: choices.map((c: DialogNodeChoice) =>
+				choices: choices.map((c: NarrativeChoice) =>
 					c.id === choiceId ? { ...c, ...updates } : c
 				),
 			},
@@ -65,15 +65,15 @@
 
 	// Remove choice
 	function removeChoice() {
-		const node = ctx.dialogNodes[nodeId];
+		const node = ctx.narratives[nodeId];
 		if (node.type !== 'choice') return;
 
 		const choices = node.choices || [];
-		ctx.dialogNodes = {
-			...ctx.dialogNodes,
+		ctx.narratives = {
+			...ctx.narratives,
 			[nodeId]: {
 				...node,
-				choices: choices.filter((c: DialogNodeChoice) => c.id !== choiceId),
+				choices: choices.filter((c: NarrativeChoice) => c.id !== choiceId),
 			},
 		};
 	}
@@ -95,12 +95,12 @@
 		<InputGroupAddon align="inline-end">
 			<DiceRollEditor
 				diceRoll={choice.diceRoll}
-				{dialogNodeIdOptions}
-				currentDialogNodeId={nodeId}
+				{narrativeIdOptions}
+				currentNarrativeId={nodeId}
 				onUpdate={(diceRoll: DiceRoll) => {
 					updateChoice({ diceRoll });
 				}}
-				onCreateNode={ctx.createDialogNode}
+				onCreateNarrative={ctx.createNarrative}
 			>
 				{#snippet children(props: any)}
 					<InputGroupButton {...props}>

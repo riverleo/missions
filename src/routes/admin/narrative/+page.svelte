@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { debounce } from 'radash';
-	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import type { Narrative } from '$lib/components/app/narrative/store';
 	import {
-		source as dialogNodeSource,
-		open as openDialogNode,
-	} from '$lib/components/app/dialog-node/store';
-	import DialogNodeComponent from '$lib/components/app/dialog-node/dialog-node.svelte';
+		source as narrativeSource,
+		open as openNarrative,
+	} from '$lib/components/app/narrative/store';
+	import NarrativeComponent from '$lib/components/app/narrative/narrative.svelte';
 	import DiceRollComponent from '$lib/components/app/dice-roll/dice-roll.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -21,21 +21,21 @@
 		AlertDialogAction,
 		AlertDialogCancel,
 	} from '$lib/components/ui/alert-dialog';
-	import { DialogNodeEditor } from '$lib/components/admin/dialog-node-editor';
+	import { NarrativeEditor } from '$lib/components/admin/narrative-editor';
 	import IconDownload from '@tabler/icons-svelte/icons/download';
 	import IconPlayerPlay from '@tabler/icons-svelte/icons/player-play';
 	import Aside from './aside.svelte';
 
-	interface DialogRoot {
+	interface NarrativeRoot {
 		id: string;
 		name: string;
-		dialogNodes: Record<string, DialogNode>;
+		narratives: Record<string, Narrative>;
 	}
 
-	const LOCAL_STORAGE_KEY = 'dialog-roots';
+	const LOCAL_STORAGE_KEY = 'narrative-roots';
 
 	// Load from localStorage
-	let dialogRoots = $state<DialogRoot[]>([]);
+	let narrativeRoots = $state<NarrativeRoot[]>([]);
 	let selectedRootId = $state<string | null>(null);
 	let filename = $state('');
 	let isExportDialogOpen = $state(false);
@@ -44,23 +44,23 @@
 	onMount(() => {
 		const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
 		if (stored) {
-			dialogRoots = JSON.parse(stored);
-			if (dialogRoots.length > 0 && !selectedRootId) {
-				selectedRootId = dialogRoots[0].id;
+			narrativeRoots = JSON.parse(stored);
+			if (narrativeRoots.length > 0 && !selectedRootId) {
+				selectedRootId = narrativeRoots[0].id;
 			}
 		}
 	});
 
 	// Save to localStorage
 	function saveToLocalStorage() {
-		if (dialogRoots.length > 0) {
-			localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dialogRoots));
+		if (narrativeRoots.length > 0) {
+			localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(narrativeRoots));
 		} else {
 			localStorage.removeItem(LOCAL_STORAGE_KEY);
 		}
 	}
 
-	const selectedRoot = $derived(dialogRoots.find((root) => root.id === selectedRootId) || null);
+	const selectedRoot = $derived(narrativeRoots.find((root) => root.id === selectedRootId) || null);
 
 	// Handle aside changes
 	function handleAsideChange() {
@@ -71,7 +71,7 @@
 	function exportToJSON() {
 		if (!selectedRoot) return;
 
-		const dataStr = JSON.stringify(selectedRoot.dialogNodes, null, 2);
+		const dataStr = JSON.stringify(selectedRoot.narratives, null, 2);
 		const dataBlob = new Blob([dataStr], { type: 'application/json' });
 		const url = URL.createObjectURL(dataBlob);
 		const link = document.createElement('a');
@@ -84,32 +84,32 @@
 	}
 
 	// Handle dialog nodes change with debounce
-	const handleDialogNodesChange = debounce({ delay: 300 }, () => {
+	const handleNarrativesChange = debounce({ delay: 300 }, () => {
 		saveToLocalStorage();
 	});
 
 	// Play dialog nodes
-	function playDialogNodes() {
+	function playNarratives() {
 		if (!selectedRoot) return;
 
 		// Set the source to current dialog nodes
-		dialogNodeSource.set(selectedRoot.dialogNodes);
+		narrativeSource.set(selectedRoot.narratives);
 
 		// Find root node
-		const rootNode = Object.values(selectedRoot.dialogNodes).find((node) => node.root);
+		const rootNode = Object.values(selectedRoot.narratives).find((node) => node.root);
 		if (!rootNode) {
-			alert('루트 노드를 찾을 수 없습니다.');
+			alert('최상위 대화를 찾을 수 없습니다.');
 			return;
 		}
 
 		// Open the root node
-		openDialogNode(rootNode.id);
+		openNarrative(rootNode.id);
 	}
 </script>
 
 <div class="flex h-screen">
 	<!-- Aside -->
-	<Aside bind:dialogRoots bind:selectedRootId onChange={handleAsideChange} />
+	<Aside bind:dialogRoots={narrativeRoots} bind:selectedRootId onChange={handleAsideChange} />
 
 	<!-- Main: Editor -->
 	<div class="flex flex-1 flex-col">
@@ -118,7 +118,7 @@
 			<div class="flex items-center gap-2 border-b p-4">
 				<h1 class="text-2xl font-bold">{selectedRoot.name}</h1>
 				<div class="ml-auto flex gap-2">
-					<Button variant="outline" onclick={playDialogNodes}>
+					<Button variant="outline" onclick={playNarratives}>
 						<IconPlayerPlay class="size-4" />
 						재생
 					</Button>
@@ -153,21 +153,21 @@
 
 			<!-- Node List -->
 			<ScrollArea class="flex-1">
-				<DialogNodeEditor
-					bind:dialogNodes={selectedRoot.dialogNodes}
-					onChange={handleDialogNodesChange}
+				<NarrativeEditor
+					bind:narratives={selectedRoot.narratives}
+					onChange={handleNarrativesChange}
 				/>
 			</ScrollArea>
 		{:else}
 			<div class="flex flex-1 items-center justify-center text-neutral-400">
-				다이얼로그를 생성하거나 선택하세요
+				대화를 생성하거나 선택하세요
 			</div>
 		{/if}
 	</div>
 </div>
 
 <!-- Dialog Node Component -->
-<DialogNodeComponent />
+<NarrativeComponent />
 
 <!-- Dice Roll Component -->
 <DiceRollComponent />

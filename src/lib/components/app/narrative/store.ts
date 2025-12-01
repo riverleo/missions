@@ -10,13 +10,13 @@ import {
 	deactivateLayer as deactivateLayer,
 } from '$lib/shortcut/store';
 
-export interface DialogNodeChoice {
+export interface NarrativeChoice {
 	id: string;
 	text: string;
 	diceRoll: DiceRoll;
 }
 
-export type DialogNode = {
+export type Narrative = {
 	id: string;
 	speaker: string;
 	message: string;
@@ -24,18 +24,18 @@ export type DialogNode = {
 	root: boolean;
 } & (
 	| {
-			type: 'narrative';
+			type: 'text';
 			diceRoll: DiceRoll;
 	  }
 	| {
 			type: 'choice';
-			choices: DialogNodeChoice[];
+			choices: NarrativeChoice[];
 	  }
 );
 
-export const source = writable<Record<string, DialogNode>>({});
-export const current = writable<DialogNode | undefined>();
-export const highlightedChoice = writable<DialogNodeChoice | undefined>();
+export const source = writable<Record<string, Narrative>>({});
+export const current = writable<Narrative | undefined>();
+export const highlightedChoice = writable<NarrativeChoice | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
 	const $diceRolled = targetDiceRolled || get(diceRolled);
@@ -46,8 +46,8 @@ export function next(targetDiceRolled?: DiceRolled) {
 		const { action } = $diceRolled;
 
 		switch (action.type) {
-			case 'dialogNode':
-				open(action.dialogNodeId);
+			case 'narrative':
+				open(action.narrativeId);
 				break;
 			case 'terminate':
 				terminate();
@@ -58,18 +58,18 @@ export function next(targetDiceRolled?: DiceRolled) {
 	terminateDiceRoll();
 }
 
-export function open(dialogNodeId: string) {
-	const $dialogNode = get(source)[dialogNodeId];
+export function open(narrativeId: string) {
+	const $narrative = get(source)[narrativeId];
 
-	if ($dialogNode === undefined) {
-		return console.warn(`Dialog node "${dialogNodeId}" not found.`);
+	if ($narrative === undefined) {
+		return console.warn(`Narrative "${narrativeId}" not found.`);
 	}
 
-	current.set($dialogNode);
+	current.set($narrative);
 	highlightedChoice.set(undefined);
 
 	terminateDiceRoll();
-	activateLayer('dialog-node');
+	activateLayer('narrative');
 }
 
 export function terminate() {
@@ -77,5 +77,5 @@ export function terminate() {
 	highlightedChoice.set(undefined);
 
 	terminateDiceRoll();
-	deactivateLayer('dialog-node');
+	deactivateLayer('narrative');
 }

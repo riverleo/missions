@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DialogNode } from '$lib/components/app/dialog-node/store';
+	import type { Narrative } from '$lib/components/app/narrative/store';
 	import { Card, CardHeader, CardContent, CardFooter } from '$lib/components/ui/card';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { Input } from '$lib/components/ui/input';
@@ -18,74 +18,70 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { DiceRollEditor } from '$lib/components/admin/dice-roll-editor';
 	import { getContext } from './context';
-	import { getChildrenDialogNodes, getParentDialogNodes } from './index';
-	import DialogNodeChoiceItem from './dialog-node-choice-item.svelte';
-	import DialogNodeCardDetails from './dialog-node-card-details.svelte';
+	import { getChildrenNarratives, getParentNarratives } from './index';
+	import NarrativeChoiceItem from './narrative-choice-item.svelte';
+	import NarrativeCardDetails from './narrative-card-details.svelte';
 	import IconTrash from '@tabler/icons-svelte/icons/trash';
 	import IconListNumbers from '@tabler/icons-svelte/icons/list-numbers';
 	import IconPlus from '@tabler/icons-svelte/icons/plus';
 
-	interface Props {
-		nodeId: string;
-	}
-
-	let { nodeId: dialogNodeId }: Props = $props();
+	let { narrativeId }: { narrativeId: string } = $props();
 
 	const ctx = getContext();
 
-	const node = $derived(ctx.dialogNodes[dialogNodeId]);
-	const dialogNodeIdOptions = $derived(
-		Object.values(ctx.dialogNodes).map((n) => ({
+	const narrative = $derived(ctx.narratives[narrativeId]);
+	const narrativeIdOptions = $derived(
+		Object.values(ctx.narratives).map((n) => ({
 			value: n.id,
 			label: n.message ? `${n.message} (${n.id})` : n.id,
 		}))
 	);
 
 	const highlighted = $derived.by(() => {
-		if (!ctx.focusedDialogNodeId) return true;
+		if (!ctx.focusedNarrativeId) return true;
 
 		// Highlight if this is the focused node
-		if (ctx.focusedDialogNodeId === dialogNodeId) return true;
+		if (ctx.focusedNarrativeId === narrativeId) return true;
 
 		// Highlight if this is a child of the focused node
-		const children = getChildrenDialogNodes(ctx.dialogNodes, ctx.focusedDialogNodeId);
+		const children = getChildrenNarratives(ctx.narratives, ctx.focusedNarrativeId);
 		for (const child of children) {
-			if (child.id === dialogNodeId) return true;
+			if (child.id === narrativeId) return true;
 		}
 
-		const parents = getParentDialogNodes(ctx.dialogNodes, ctx.focusedDialogNodeId);
+		const parents = getParentNarratives(ctx.narratives, ctx.focusedNarrativeId);
 		for (const parent of parents) {
-			if (parent.id === dialogNodeId) return true;
+			if (parent.id === narrativeId) return true;
 		}
 
 		return false;
 	});
 
 	// Update node
-	function updateNode(updates: Partial<DialogNode>) {
-		ctx.dialogNodes = {
-			...ctx.dialogNodes,
-			[dialogNodeId]: { ...ctx.dialogNodes[dialogNodeId], ...updates } as DialogNode,
+	function updateNarrative(updates: Partial<Narrative>) {
+		ctx.narratives = {
+			...ctx.narratives,
+			[narrativeId]: { ...ctx.narratives[narrativeId], ...updates } as Narrative,
 		};
 	}
 
 	// Delete node
-	function deleteNode() {
-		const newNodes = { ...ctx.dialogNodes };
+	function deleteNarrative() {
+		const newNodes = { ...ctx.narratives };
 
 		// Remove references to this node from all parent nodes
 		Object.values(newNodes).forEach((node) => {
-			if (node.type === 'narrative') {
+			if (node.type === 'text') {
 				// Check and clear narrative success/failure actions
 				if (
-					node.diceRoll.success.type === 'dialogNode' &&
-					node.diceRoll.success.dialogNodeId === dialogNodeId
+					node.diceRoll.success.type === 'narrative' &&
+					node.diceRoll.success.narrativeId === narrativeId
 				) {
 					node.diceRoll.success = { type: 'terminate' };
 				}
 				if (
-					node.diceRoll.failure.type === 'dialogNode' &&
-					node.diceRoll.failure.dialogNodeId === dialogNodeId
+					node.diceRoll.failure.type === 'narrative' &&
+					node.diceRoll.failure.narrativeId === narrativeId
 				) {
 					node.diceRoll.failure = { type: 'terminate' };
 				}
@@ -93,14 +89,14 @@
 				// Check and clear choice success/failure actions
 				node.choices.forEach((choice) => {
 					if (
-						choice.diceRoll.success.type === 'dialogNode' &&
-						choice.diceRoll.success.dialogNodeId === dialogNodeId
+						choice.diceRoll.success.type === 'narrative' &&
+						choice.diceRoll.success.narrativeId === narrativeId
 					) {
 						choice.diceRoll.success = { type: 'terminate' };
 					}
 					if (
-						choice.diceRoll.failure.type === 'dialogNode' &&
-						choice.diceRoll.failure.dialogNodeId === dialogNodeId
+						choice.diceRoll.failure.type === 'narrative' &&
+						choice.diceRoll.failure.narrativeId === narrativeId
 					) {
 						choice.diceRoll.failure = { type: 'terminate' };
 					}
@@ -109,28 +105,28 @@
 		});
 
 		// Delete the node itself
-		delete newNodes[dialogNodeId];
-		ctx.dialogNodes = newNodes;
+		delete newNodes[narrativeId];
+		ctx.narratives = newNodes;
 	}
 
 	// Toggle type
-	function toggleType(newType: 'narrative' | 'choice') {
-		const node = ctx.dialogNodes[dialogNodeId];
-		if (newType === 'narrative') {
+	function toggleType(newType: 'text' | 'choice') {
+		const node = ctx.narratives[narrativeId];
+		if (newType === 'text') {
 			const { choices, ...rest } = node as any;
-			updateNode({
+			updateNarrative({
 				...rest,
-				type: 'narrative',
+				type: 'text',
 				diceRoll: {
-					difficultyClass: 10,
-					silent: false,
+					difficultyClass: 0,
+					silent: true,
 					success: { type: 'terminate' },
 					failure: { type: 'terminate' },
 				},
 			});
 		} else {
 			const { diceRoll, ...rest } = node as any;
-			updateNode({
+			updateNarrative({
 				...rest,
 				type: 'choice',
 				choices: [],
@@ -140,11 +136,11 @@
 
 	// Add choice
 	function addChoice() {
-		const node = ctx.dialogNodes[dialogNodeId];
+		const node = ctx.narratives[narrativeId];
 		if (node.type !== 'choice') return;
 
 		const choices = (node as any).choices || [];
-		updateNode({
+		updateNarrative({
 			choices: [
 				...choices,
 				{
@@ -152,7 +148,7 @@
 					text: '',
 					diceRoll: {
 						difficultyClass: 0,
-						silent: false,
+						silent: true,
 						success: { type: 'terminate' },
 						failure: { type: 'terminate' },
 					},
@@ -164,40 +160,40 @@
 
 <Card class="gap-4 py-4 transition-opacity" style="opacity: {highlighted ? 1 : 0.5}">
 	<CardHeader class="flex-col gap-4 px-4">
-		<DialogNodeCardDetails {dialogNodeId} />
+		<NarrativeCardDetails {narrativeId} />
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<Select
 					type="single"
-					value={node.type}
+					value={narrative.type}
 					onValueChange={(value: string | undefined) => {
-						if (value) toggleType(value as typeof node.type);
+						if (value) toggleType(value as typeof narrative.type);
 					}}
 				>
 					<SelectTrigger class="w-32">
-						{node.type}
+						{narrative.type}
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="narrative" />
+						<SelectItem value="text" />
 						<SelectItem value="choice" />
 					</SelectContent>
 				</Select>
 
 				<!-- Narrative Type: DiceRollEditor with trigger -->
-				{#if node.type === 'narrative'}
+				{#if narrative.type === 'text'}
 					<DiceRollEditor
-						diceRoll={node.diceRoll!}
-						{dialogNodeIdOptions}
-						currentDialogNodeId={node.id}
+						diceRoll={narrative.diceRoll!}
+						{narrativeIdOptions}
+						currentNarrativeId={narrative.id}
 						onUpdate={(diceRoll) => {
-							updateNode({ diceRoll });
+							updateNarrative({ diceRoll });
 						}}
-						onCreateNode={ctx.createDialogNode}
+						onCreateNarrative={ctx.createNarrative}
 					/>
 				{/if}
 
 				<!-- Choice Type: Settings popover for managing choices -->
-				{#if node.type === 'choice'}
+				{#if narrative.type === 'choice'}
 					<Popover>
 						<PopoverTrigger>
 							{#snippet child({ props })}
@@ -208,8 +204,8 @@
 						</PopoverTrigger>
 						<PopoverContent class="w-80">
 							<div class="space-y-3">
-								{#each (node as any).choices || [] as choice, index (choice.id)}
-									<DialogNodeChoiceItem nodeId={dialogNodeId} choiceId={choice.id} {index} />
+								{#each (narrative as any).choices || [] as choice, index (choice.id)}
+									<NarrativeChoiceItem nodeId={narrativeId} choiceId={choice.id} {index} />
 								{/each}
 
 								<Button size="sm" onclick={addChoice} class="w-full">
@@ -235,7 +231,7 @@
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>취소</AlertDialogCancel>
-							<AlertDialogAction onclick={deleteNode}>삭제</AlertDialogAction>
+							<AlertDialogAction onclick={deleteNarrative}>삭제</AlertDialogAction>
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
@@ -245,25 +241,25 @@
 
 	<CardContent class="flex flex-col gap-2 px-4">
 		<Input
-			value={node.message}
+			value={narrative.message}
 			placeholder="메시지"
 			oninput={(e) => {
 				const target = e.target as HTMLInputElement;
-				updateNode({ message: target.value });
+				updateNarrative({ message: target.value });
 			}}
 		/>
 		<Textarea
-			value={node.description || ''}
+			value={narrative.description || ''}
 			placeholder="설명 (선택사항)"
 			oninput={(e) => {
 				const target = e.target as HTMLTextAreaElement;
-				updateNode({ description: target.value || undefined });
+				updateNarrative({ description: target.value || undefined });
 			}}
 			class="h-24 resize-none"
 		/>
 	</CardContent>
 
 	<CardFooter class="flex flex-col items-start gap-1 px-4">
-		<span class="text-xs text-muted-foreground">{node.id}</span>
+		<span class="text-xs text-muted-foreground">{narrative.id}</span>
 	</CardFooter>
 </Card>

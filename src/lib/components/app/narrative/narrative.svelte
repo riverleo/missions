@@ -2,12 +2,12 @@
 	import { throttle } from 'radash';
 	import { current, highlightedChoice } from './store';
 	import { open } from '$lib/components/app/dice-roll/store';
-	import Message from './dialog-node-message.svelte';
-	import DialogNodeAction from './dialog-node-action.svelte';
+	import Message from './narrative-message.svelte';
+	import NarrativeAction from './narrative-action.svelte';
 	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
 	import { bindLayerEvent, type LayerId } from '$lib/shortcut/store';
 
-	const layerId: LayerId = 'dialog-node';
+	const layerId: LayerId = 'narrative';
 
 	bindLayerEvent({
 		id: layerId,
@@ -18,7 +18,7 @@
 
 			if (isEnterOrSpace(event)) {
 				switch (type) {
-					case 'narrative':
+					case 'text':
 						open($current.diceRoll);
 						break;
 					case 'choice':
@@ -60,6 +60,6 @@
 >
 	<div class="flex flex-col items-center gap-8 px-8">
 		<Message />
-		<DialogNodeAction />
+		<NarrativeAction />
 	</div>
 </div>

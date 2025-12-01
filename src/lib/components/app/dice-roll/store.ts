@@ -1,7 +1,7 @@
 import { get, writable } from 'svelte/store';
 import { Dice } from './dice';
 import { activateLayer, deactivateLayer } from '$lib/shortcut/store';
-import { next } from '$lib/components/app/dialog-node/store';
+import { next } from '$lib/components/app/narrative/store';
 
 export interface DiceRoll {
 	difficultyClass: number;
@@ -12,8 +12,8 @@ export interface DiceRoll {
 
 export type DiceRollAction =
 	| {
-			type: 'dialogNode';
-			dialogNodeId: string;
+			type: 'narrative';
+			narrativeId: string;
 	  }
 	| { type: 'terminate' };
 

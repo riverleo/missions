@@ -14,16 +14,19 @@
 	import IconCheck from '@tabler/icons-svelte/icons/check';
 	import IconX from '@tabler/icons-svelte/icons/x';
 
-	interface Props {
+	const {
+		diceRoll,
+		narrativeIdOptions,
+		currentNarrativeId,
+		onUpdate,
+		onCreateNarrative,
+	}: {
 		diceRoll: DiceRoll;
-		dialogNodeIdOptions: { value: string; label: string }[];
-		currentDialogNodeId?: string;
+		narrativeIdOptions: { value: string; label: string }[];
+		currentNarrativeId?: string;
 		onUpdate: (diceRoll: DiceRoll) => void;
-		onCreateNode?: () => string;
-	}
-
-	let { diceRoll, dialogNodeIdOptions, currentDialogNodeId, onUpdate, onCreateNode }: Props =
-		$props();
+		onCreateNarrative?: () => string;
+	} = $props();
 </script>
 
 <div class="space-y-2">
@@ -82,9 +85,9 @@
 	<!-- Success Action -->
 	<DiceRollActionSelector
 		action={diceRoll.success}
-		{dialogNodeIdOptions}
-		{currentDialogNodeId}
-		{onCreateNode}
+		narrativeIdOptions={narrativeIdOptions}
+		currentNarrativeId={currentNarrativeId}
+		onCreateNode={onCreateNarrative}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, success: action });
 		}}
@@ -97,9 +100,9 @@
 	<!-- Failure Action -->
 	<DiceRollActionSelector
 		action={diceRoll.failure}
-		{dialogNodeIdOptions}
-		{currentDialogNodeId}
-		{onCreateNode}
+		narrativeIdOptions={narrativeIdOptions}
+		currentNarrativeId={currentNarrativeId}
+		onCreateNode={onCreateNarrative}
 		onUpdate={(action) => {
 			onUpdate({ ...diceRoll, failure: action });
 		}}

@@ -17,12 +17,12 @@
 			difficultyClass,
 			silent: false,
 			success: {
-				type: 'dialogNode',
-				dialogNodeId: 'success-node',
+				type: 'narrative',
+				narrativeId: 'success-node',
 			},
 			failure: {
-				type: 'dialogNode',
-				dialogNodeId: 'failure-node',
+				type: 'narrative',
+				narrativeId: 'failure-node',
 			},
 		});
 	}
