@@ -19,12 +19,13 @@ create unique index user_roles_uniq_user_id
 create or replace function is_admin()
 returns boolean as $$
   select exists (
-    select 1 from user_roles
-    where user_id = auth.uid()
+    select 1 from public.user_roles
+    where user_id = (select auth.uid())
     and type = 'admin'
     and deleted_at is null
   );
-$$ language sql security definer;
+$$ language sql security definer
+set search_path = '';
 
 -- RLS 활성화
 alter table user_roles enable row level security;
@@ -34,7 +35,7 @@ create policy "users can view their own role"
   on user_roles
   for select
   to authenticated
-  using (auth.uid() = user_id and deleted_at is null);
+  using ((select auth.uid()) = user_id and deleted_at is null);
 
 -- 관리자는 모든 사용자의 역할을 조회할 수 있음 (soft delete 제외)
 create policy "admins can view all roles"
