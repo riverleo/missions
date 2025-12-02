@@ -8,7 +8,7 @@ export interface FetchState<T> {
 	error: Error | undefined;
 }
 
-export interface LayoutPayload {
+export interface ServerPayload {
 	supabase: SupabaseClient;
-	user: User | null;
+	user: User | undefined;
 }

@@ -4,12 +4,29 @@
 	const { data } = $props();
 
 	const currentUser = useCurrentUser(data);
+
+	let isCreatingAnonymousUser = $state(false);
+
+	async function createAnonymousUser() {
+		isCreatingAnonymousUser = true;
+		try {
+			const { error } = await data.supabase.auth.signInAnonymously();
+			if (error) throw error;
+
+			// 페이지 새로고침하여 새 유저 정보 로드
+			window.location.reload();
+		} catch (error) {
+			console.error('Failed to create anonymous user:', error);
+			alert('익명 유저 생성에 실패했습니다.');
+		} finally {
+			isCreatingAnonymousUser = false;
+		}
+	}
 </script>
 
 <div class="container mx-auto p-8">
 	<h1 class="mb-4 text-2xl font-bold">Current User Test</h1>
 
-	{$currentUser.status}
 	{#if $currentUser.status === 'loading'}
 		<p>Loading user...</p>
 	{:else if $currentUser.error}
@@ -40,6 +57,15 @@
 			{/if}
 		</div>
 	{:else}
-		<p>No user found</p>
+		<div class="space-y-4">
+			<p>No user found</p>
+			<button
+				onclick={createAnonymousUser}
+				disabled={isCreatingAnonymousUser}
+				class="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
+			>
+				{isCreatingAnonymousUser ? '생성 중...' : '익명 유저 생성'}
+			</button>
+		</div>
 	{/if}
 </div>

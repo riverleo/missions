@@ -1,6 +1,6 @@
 import { writable, type Readable } from 'svelte/store';
 import type { Database } from '$lib/types/supabase';
-import type { FetchState, LayoutPayload } from '$lib/types/fetch';
+import type { FetchState, ServerPayload } from '$lib/types/fetch';
 import type { User } from '@supabase/supabase-js';
 
 type UserRole = Database['public']['Tables']['user_roles']['Row'];
@@ -10,7 +10,7 @@ export interface UserState {
 	role: UserRole | undefined;
 }
 
-export function useCurrentUser({ supabase, user: serverUser }: LayoutPayload) {
+export function useCurrentUser({ supabase, user: serverUser }: ServerPayload) {
 	const store = writable<FetchState<UserState>>({
 		status: 'idle',
 		data: undefined,
@@ -39,22 +39,23 @@ export function useCurrentUser({ supabase, user: serverUser }: LayoutPayload) {
 				} = await supabase.auth.getUser();
 
 				user = fetchedUser;
-
-				// 세션이 없을 때만 익명 유저 생성
-				if (!user) {
-					const { data: authData, error: signInError } = await supabase.auth.signInAnonymously();
-
-					if (signInError) throw signInError;
-
-					user = authData.user;
-				}
 			}
 
-			// user가 없으면 에러
-			if (!user) throw new Error('Failed to get user');
+			// user가 없으면 빈 상태로 반환
+			if (!user) {
+				store.set({
+					status: 'success',
+					data: {
+						user: undefined,
+						role: undefined,
+					},
+					error: undefined,
+				});
+				return;
+			}
 
 			// user_roles 정보 가져오기 (전체 row)
-			const { data: userRoleData } = await supabase
+			const { data: role } = await supabase
 				.from('user_roles')
 				.select('*')
 				.eq('user_id', user.id)
@@ -63,8 +64,8 @@ export function useCurrentUser({ supabase, user: serverUser }: LayoutPayload) {
 			store.set({
 				status: 'success',
 				data: {
-					user: user ?? undefined,
-					role: userRoleData ?? undefined,
+					user: user,
+					role: role ?? undefined,
 				},
 				error: undefined,
 			});
