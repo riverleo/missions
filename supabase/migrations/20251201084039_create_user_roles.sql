@@ -30,19 +30,15 @@ set search_path = '';
 -- RLS 활성화
 alter table user_roles enable row level security;
 
--- 모든 인증된 유저는 자신의 역할을 조회할 수 있음 (soft delete 제외)
-create policy "users can view their own role"
+-- 유저는 자신의 역할을 조회할 수 있고, 관리자는 모든 역할을 조회할 수 있음
+create policy "authenticated can view roles"
   on user_roles
   for select
   to authenticated
-  using ((select auth.uid()) = user_id and deleted_at is null);
-
--- 관리자는 모든 사용자의 역할을 조회할 수 있음 (soft delete 제외)
-create policy "admins can view all roles"
-  on user_roles
-  for select
-  to authenticated
-  using (deleted_at is null and is_admin());
+  using (
+    deleted_at is null
+    and (is_me(user_id) or is_admin())
+  );
 
 -- 관리자는 역할을 추가할 수 있음
 create policy "admins can insert roles"
