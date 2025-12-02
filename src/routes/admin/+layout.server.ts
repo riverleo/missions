@@ -2,10 +2,10 @@ import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-	const { session } = await locals.safeGetUser();
+	const { user } = await locals.safeGetUser();
 
 	// 로그인하지 않은 경우
-	if (!session) {
+	if (!user) {
 		throw redirect(303, '/');
 	}
 
