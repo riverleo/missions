@@ -3,11 +3,14 @@ create table players (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
+  bio text,                                       -- 자기소개
+  avatar_url text,                                -- 프로필 이미지 (storage path)
 
   -- 스탯
   health integer not null default 100,        -- 건강
   stress integer not null default 0,          -- 스트레스
-  muscle integer not null default 0,          -- 근육
+  strength integer not null default 0,        -- 근력
+  stamina integer not null default 0,         -- 지구력
   intelligence integer not null default 0,    -- 지능
   charm integer not null default 0,           -- 매력
   refinement integer not null default 0,      -- 교양
