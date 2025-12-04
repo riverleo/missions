@@ -25,7 +25,7 @@
 	import IconX from '@tabler/icons-svelte/icons/x';
 	import type { Snippet } from 'svelte';
 	import SheetOverlay from './sheet-overlay.svelte';
-	import { cn, type WithoutChildrenOrChild } from '$lib/utils.js';
+	import { cn, type WithoutChildrenOrChild } from '$lib/utils';
 
 	let {
 		ref = $bindable(null),
