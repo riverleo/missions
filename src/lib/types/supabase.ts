@@ -80,6 +80,75 @@ export type Database = {
         }
         Relationships: []
       }
+      player_quest_branch_narratives: {
+        Row: {
+          created_at: string
+          id: string
+          narrative_id: string
+          player_id: string
+          quest_branch_id: string
+          quest_branch_narrative_trigger_id: string
+          quest_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          narrative_id: string
+          player_id: string
+          quest_branch_id: string
+          quest_branch_narrative_trigger_id: string
+          quest_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          narrative_id?: string
+          player_id?: string
+          quest_branch_id?: string
+          quest_branch_narrative_trigger_id?: string
+          quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_quest_branch_narrative_quest_branch_narrative_trigg_fkey"
+            columns: ["quest_branch_narrative_trigger_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branch_narrative_triggers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branch_narratives_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branch_narratives_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branch_narratives_quest_branch_id_fkey"
+            columns: ["quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branch_narratives_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_quest_branches: {
         Row: {
           created_at: string
@@ -244,6 +313,55 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_branch_narrative_triggers: {
+        Row: {
+          created_at: string
+          id: string
+          narrative_bundle_id: string
+          priority: number
+          quest_branch_id: string
+          quest_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          narrative_bundle_id: string
+          priority?: number
+          quest_branch_id: string
+          quest_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          narrative_bundle_id?: string
+          priority?: number
+          quest_branch_id?: string
+          quest_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_branch_narrative_triggers_narrative_bundle_id_fkey"
+            columns: ["narrative_bundle_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_branch_narrative_triggers_quest_branch_id_fkey"
+            columns: ["quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_branch_narrative_triggers_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quest_branches: {
         Row: {
           created_at: string
@@ -381,6 +499,10 @@ export type Database = {
     Enums: {
       dice_roll_action_type: "narrative" | "terminate"
       narrative_type: "text" | "choice"
+      player_quest_branch_completion_status:
+        | "available"
+        | "in_progress"
+        | "completed"
       player_quest_status: "available" | "in_progress" | "completed"
       quest_status: "draft" | "published"
       quest_trigger_type: "todo_complete"
@@ -529,6 +651,11 @@ export const Constants = {
     Enums: {
       dice_roll_action_type: ["narrative", "terminate"],
       narrative_type: ["text", "choice"],
+      player_quest_branch_completion_status: [
+        "available",
+        "in_progress",
+        "completed",
+      ],
       player_quest_status: ["available", "in_progress", "completed"],
       quest_status: ["draft", "published"],
       quest_trigger_type: ["todo_complete"],
