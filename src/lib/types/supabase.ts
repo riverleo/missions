@@ -34,6 +34,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      player_quest_branches: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          player_quest_id: string
+          quest_branch_id: string
+          quest_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          player_quest_id: string
+          quest_branch_id: string
+          quest_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          player_quest_id?: string
+          quest_branch_id?: string
+          quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_quest_branches_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branches_player_quest_id_fkey"
+            columns: ["player_quest_id"]
+            isOneToOne: false
+            referencedRelation: "player_quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branches_quest_branch_id_fkey"
+            columns: ["quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quest_branches_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_quests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          in_progressed_at: string | null
+          player_id: string
+          quest_id: string
+          status: Database["public"]["Enums"]["player_quest_status"]
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          in_progressed_at?: string | null
+          player_id: string
+          quest_id: string
+          status?: Database["public"]["Enums"]["player_quest_status"]
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          in_progressed_at?: string | null
+          player_id?: string
+          quest_id?: string
+          status?: Database["public"]["Enums"]["player_quest_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_quests_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           appearance: number
@@ -91,6 +198,107 @@ export type Database = {
         }
         Relationships: []
       }
+      quest_branches: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          parent_quest_branch_id: string | null
+          quest_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          parent_quest_branch_id?: string | null
+          quest_id: string
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          parent_quest_branch_id?: string | null
+          quest_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_branches_parent_quest_branch_id_fkey"
+            columns: ["parent_quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_branches_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_triggers: {
+        Row: {
+          created_at: string
+          id: string
+          quest_id: string
+          type: Database["public"]["Enums"]["quest_trigger_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          quest_id: string
+          type: Database["public"]["Enums"]["quest_trigger_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          quest_id?: string
+          type?: Database["public"]["Enums"]["quest_trigger_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_triggers_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quests: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          priority: number
+          status: Database["public"]["Enums"]["quest_status"]
+          title: string
+          type: Database["public"]["Enums"]["quest_type"]
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          priority?: number
+          status?: Database["public"]["Enums"]["quest_status"]
+          title: string
+          type?: Database["public"]["Enums"]["quest_type"]
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          priority?: number
+          status?: Database["public"]["Enums"]["quest_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["quest_type"]
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -122,8 +330,13 @@ export type Database = {
     Functions: {
       is_admin: { Args: never; Returns: boolean }
       is_me: { Args: { check_user_id: string }; Returns: boolean }
+      is_my_player: { Args: { check_player_id: string }; Returns: boolean }
     }
     Enums: {
+      player_quest_status: "available" | "in_progress" | "completed"
+      quest_status: "draft" | "published"
+      quest_trigger_type: "todo_complete"
+      quest_type: "primary" | "secondary"
       user_role_type: "admin"
     }
     CompositeTypes: {
@@ -255,6 +468,10 @@ export const Constants = {
   },
   public: {
     Enums: {
+      player_quest_status: ["available", "in_progress", "completed"],
+      quest_status: ["draft", "published"],
+      quest_trigger_type: ["todo_complete"],
+      quest_type: ["primary", "secondary"],
       user_role_type: ["admin"],
     },
   },
