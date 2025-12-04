@@ -2,6 +2,7 @@ create type quest_trigger_type as enum ('todo_complete');
 create type quest_type as enum ('primary', 'secondary');
 create type quest_status as enum ('draft', 'published');
 create type player_quest_status as enum ('available', 'in_progress', 'completed');
+create type player_quest_branch_status as enum ('in_progress', 'completed');
 
 create table quests (
   id uuid primary key default gen_random_uuid(),
@@ -51,10 +52,12 @@ create table player_quest_branches (
   quest_branch_id uuid not null references quest_branches(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   player_quest_id uuid not null references player_quests(id) on delete cascade,
-  created_at timestamptz not null default now()
+  status player_quest_branch_status not null default 'in_progress',
+  created_at timestamptz not null default now(),
+  completed_at timestamptz
 );
 
--- player_quest status 변경 시 audit 시각 자동 기록 함수
+-- player_quests status 변경 시 audit 시각 자동 기록 함수
 create or replace function update_player_quest_status_timestamps()
 returns trigger as $$
 begin
@@ -78,6 +81,26 @@ create trigger player_quests_trig_update_status_timestamps
   before insert or update of status on player_quests
   for each row
   execute function update_player_quest_status_timestamps();
+
+-- player_quest_branches status 변경 시 audit 시각 자동 기록 함수
+create or replace function update_player_quest_branch_status_timestamps()
+returns trigger as $$
+begin
+  -- status가 'completed'로 변경되면 completed_at 기록
+  if new.status = 'completed' and (old.status is null or old.status != 'completed') then
+    new.completed_at = now();
+  end if;
+
+  return new;
+end;
+$$ language plpgsql
+set search_path = '';
+
+-- player_quest_branches 테이블에 트리거 설정
+create trigger player_quest_branches_trig_update_status_timestamps
+  before insert or update of status on player_quest_branches
+  for each row
+  execute function update_player_quest_branch_status_timestamps();
 
 -- RLS 활성화
 alter table quests enable row level security;
@@ -177,3 +200,9 @@ create policy "users can insert their own player_quest_branches"
   for insert
   to authenticated
   with check (is_me(user_id) and is_my_player(player_id));
+
+create policy "users can update their own player_quest_branches"
+  on player_quest_branches
+  for update
+  to authenticated
+  using (is_me(user_id));
