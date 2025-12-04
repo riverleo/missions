@@ -7,33 +7,79 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      narrative_bundles: {
+        Row: {
+          created_at: string
+          data: Database["public"]["Tables"]["narratives"]["Row"][]
+          id: string
+          narrative_ids: string[]
+          root_narrative_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Database["public"]["Tables"]["narratives"]["Row"][]
+          id?: string
+          narrative_ids?: string[]
+          root_narrative_id: string
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Database["public"]["Tables"]["narratives"]["Row"][]
+          id?: string
+          narrative_ids?: string[]
+          root_narrative_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "narrative_bundles_root_narrative_id_fkey"
+            columns: ["root_narrative_id"]
+            isOneToOne: false
+            referencedRelation: "narratives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      narratives: {
+        Row: {
+          choices:
+            | Database["public"]["CompositeTypes"]["narrative_choice"][]
+            | null
+          created_at: string
+          description: string | null
+          dice_roll: Database["public"]["CompositeTypes"]["dice_roll"] | null
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["narrative_type"]
+        }
+        Insert: {
+          choices?:
+            | Database["public"]["CompositeTypes"]["narrative_choice"][]
+            | null
+          created_at?: string
+          description?: string | null
+          dice_roll?: Database["public"]["CompositeTypes"]["dice_roll"] | null
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["narrative_type"]
+        }
+        Update: {
+          choices?:
+            | Database["public"]["CompositeTypes"]["narrative_choice"][]
+            | null
+          created_at?: string
+          description?: string | null
+          dice_roll?: Database["public"]["CompositeTypes"]["dice_roll"] | null
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["narrative_type"]
+        }
+        Relationships: []
+      }
       player_quest_branches: {
         Row: {
           created_at: string
@@ -333,6 +379,8 @@ export type Database = {
       is_my_player: { Args: { check_player_id: string }; Returns: boolean }
     }
     Enums: {
+      dice_roll_action_type: "narrative" | "terminate"
+      narrative_type: "text" | "choice"
       player_quest_status: "available" | "in_progress" | "completed"
       quest_status: "draft" | "published"
       quest_trigger_type: "todo_complete"
@@ -340,7 +388,21 @@ export type Database = {
       user_role_type: "admin"
     }
     CompositeTypes: {
-      [_ in never]: never
+      dice_roll: {
+        difficulty_class: number | null
+        silent: boolean | null
+        success: Database["public"]["CompositeTypes"]["dice_roll_action"] | null
+        failure: Database["public"]["CompositeTypes"]["dice_roll_action"] | null
+      }
+      dice_roll_action: {
+        type: Database["public"]["Enums"]["dice_roll_action_type"] | null
+        narrative_id: string | null
+      }
+      narrative_choice: {
+        id: string | null
+        text: string | null
+        dice_roll: Database["public"]["CompositeTypes"]["dice_roll"] | null
+      }
     }
   }
 }
@@ -463,11 +525,10 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
+      dice_roll_action_type: ["narrative", "terminate"],
+      narrative_type: ["text", "choice"],
       player_quest_status: ["available", "in_progress", "completed"],
       quest_status: ["draft", "published"],
       quest_trigger_type: ["todo_complete"],
