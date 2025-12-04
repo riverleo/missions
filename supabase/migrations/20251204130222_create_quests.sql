@@ -1,16 +1,8 @@
--- quest_trigger_type enum
 create type quest_trigger_type as enum ('todo_complete');
-
--- quest_type enum
 create type quest_type as enum ('primary', 'secondary');
-
--- quest_status enum
 create type quest_status as enum ('draft', 'published');
-
--- player_quest_status enum
 create type player_quest_status as enum ('available', 'in_progress', 'completed');
 
--- quests 테이블
 create table quests (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -21,7 +13,6 @@ create table quests (
   deleted_at timestamptz
 );
 
--- quest_triggers 테이블
 create table quest_triggers (
   id uuid primary key default gen_random_uuid(),
   quest_id uuid not null references quests(id) on delete cascade,
@@ -29,17 +20,16 @@ create table quest_triggers (
   created_at timestamptz not null default now()
 );
 
--- quest_branches 테이블
 create table quest_branches (
   id uuid primary key default gen_random_uuid(),
   quest_id uuid not null references quests(id) on delete cascade,
   parent_quest_branch_id uuid references quest_branches(id) on delete cascade,
   title text not null default '',
+  is_leaf boolean not null default true,
   display_order integer not null default 0,
   created_at timestamptz not null default now()
 );
 
--- player_quests 테이블
 create table player_quests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -54,7 +44,6 @@ create table player_quests (
   constraint player_quests_uniq_player_quest unique (player_id, quest_id)
 );
 
--- player_quest_branches 테이블
 create table player_quest_branches (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
