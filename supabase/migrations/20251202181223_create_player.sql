@@ -4,7 +4,7 @@ create table players (
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   bio text,                                       -- 자기소개
-  avatar_url text,                                -- 프로필 이미지 (storage path)
+  avatar text,                                    -- 프로필 이미지 파일명
 
   -- 스탯
   health integer not null default 100,        -- 건강

@@ -34,6 +34,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      players: {
+        Row: {
+          appearance: number
+          avatar: string | null
+          bio: string | null
+          charm: number
+          created_at: string
+          deleted_at: string | null
+          health: number
+          id: string
+          intelligence: number
+          name: string
+          refinement: number
+          stamina: number
+          strength: number
+          stress: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          appearance?: number
+          avatar?: string | null
+          bio?: string | null
+          charm?: number
+          created_at?: string
+          deleted_at?: string | null
+          health?: number
+          id?: string
+          intelligence?: number
+          name: string
+          refinement?: number
+          stamina?: number
+          strength?: number
+          stress?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          appearance?: number
+          avatar?: string | null
+          bio?: string | null
+          charm?: number
+          created_at?: string
+          deleted_at?: string | null
+          health?: number
+          id?: string
+          intelligence?: number
+          name?: string
+          refinement?: number
+          stamina?: number
+          strength?: number
+          stress?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -64,6 +121,7 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      is_me: { Args: { check_user_id: string }; Returns: boolean }
     }
     Enums: {
       user_role_type: "admin"

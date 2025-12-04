@@ -1,6 +1,12 @@
 -- avatars 버킷 생성
-insert into storage.buckets (id, name, public)
-values ('avatars', 'avatars', true);
+insert into storage.buckets (id, name, public, allowed_mime_types, file_size_limit)
+values (
+  'avatars',
+  'avatars',
+  true,
+  array['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+  5242880  -- 5MB
+);
 
 -- authenticated 유저는 자신의 아바타를 업로드할 수 있음
 create policy "authenticated can upload their own avatar"
@@ -8,26 +14,6 @@ create policy "authenticated can upload their own avatar"
   for insert
   to authenticated
   with check (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
-
--- authenticated 유저는 자신의 아바타를 업데이트할 수 있음
-create policy "authenticated can update their own avatar"
-  on storage.objects
-  for update
-  to authenticated
-  using (
-    bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = (select auth.uid())::text
-  );
-
--- authenticated 유저는 자신의 아바타를 삭제할 수 있음
-create policy "authenticated can delete their own avatar"
-  on storage.objects
-  for delete
-  to authenticated
-  using (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = (select auth.uid())::text
   );
