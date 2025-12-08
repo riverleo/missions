@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseover } from '$lib/shortcut/events';
 	import ServerPayloadProvider from '$lib/components/server-payload-provider.svelte';
+	import { ModeWatcher } from 'mode-watcher';
 	import type { ServerPayload } from '$lib/types/fetch';
 
 	const { data, children }: { data: ServerPayload; children: any } = $props();
@@ -13,6 +14,8 @@
 </svelte:head>
 
 <svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} {onmouseover} />
+
+<ModeWatcher />
 
 <ServerPayloadProvider {data}>
 	{@render children()}
