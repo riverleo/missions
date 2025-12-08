@@ -33,7 +33,7 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger set_player_narrative_dice_value
+create trigger insert_player_narrative_dice_value
   before insert on player_narrative_dice
   for each row
   execute function create_player_narrative_dice_value();
