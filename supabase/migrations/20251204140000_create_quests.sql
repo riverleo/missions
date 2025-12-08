@@ -1,4 +1,4 @@
-create type quest_trigger_type as enum ('quest', 'todo');
+create type quest_trigger_type as enum ('quest_completed');
 create type quest_type as enum ('primary', 'secondary');
 create type quest_status as enum ('draft', 'published');
 create type player_quest_status as enum ('available', 'in_progress', 'completed');
@@ -17,6 +17,7 @@ create table quest_triggers (
   id uuid primary key default gen_random_uuid(),
   quest_id uuid not null references quests(id) on delete cascade,
   type quest_trigger_type not null,
+  completed_quest_id uuid references quests(id) on delete cascade,
   created_at timestamptz not null default now(),
   deleted_at timestamptz
 );

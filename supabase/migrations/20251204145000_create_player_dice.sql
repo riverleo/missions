@@ -1,9 +1,10 @@
-create table player_narrative_dice (
+create table player_dice (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   narrative_id uuid not null references narratives(id) on delete cascade,
-  narrative_node_id uuid not null,
+  narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
+  narrative_node_choice_id uuid references narrative_node_choices(id) on delete cascade,
   quest_id uuid references quests(id) on delete cascade,
   quest_branch_id uuid references quest_branches(id) on delete cascade,
   player_quest_id uuid references player_quests(id) on delete cascade,
@@ -13,7 +14,7 @@ create table player_narrative_dice (
   created_at timestamptz not null default now()
 );
 
-create or replace function create_player_narrative_dice_value()
+create or replace function create_player_dice_value()
 returns trigger as $$
 declare
   dice_faces integer;
@@ -33,21 +34,21 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger insert_player_narrative_dice_value
-  before insert on player_narrative_dice
+create trigger insert_player_dice_value
+  before insert on player_dice
   for each row
-  execute function create_player_narrative_dice_value();
+  execute function create_player_dice_value();
 
-alter table player_narrative_dice enable row level security;
+alter table player_dice enable row level security;
 
-create policy "players can view their own player_narrative_dice"
-  on player_narrative_dice
+create policy "players can view their own player_dice"
+  on player_dice
   for select
   to authenticated
   using (is_own_player(user_id, player_id));
 
-create policy "players can insert their own player_narrative_dice"
-  on player_narrative_dice
+create policy "players can insert their own player_dice"
+  on player_dice
   for insert
   to authenticated
   with check (is_own_player(user_id, player_id));
