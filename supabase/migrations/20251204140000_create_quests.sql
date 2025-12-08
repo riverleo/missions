@@ -1,7 +1,6 @@
-create type quest_trigger_type as enum ('quest_completed');
 create type quest_type as enum ('primary', 'secondary');
 create type quest_status as enum ('draft', 'published');
-create type player_quest_status as enum ('available', 'in_progress', 'completed');
+create type player_quest_status as enum ('in_progress', 'completed', 'abandoned');
 
 create table quests (
   id uuid primary key default gen_random_uuid(),
@@ -9,15 +8,6 @@ create table quests (
   type quest_type not null default 'secondary',
   status quest_status not null default 'draft',
   priority integer not null default 0,
-  created_at timestamptz not null default now(),
-  deleted_at timestamptz
-);
-
-create table quest_triggers (
-  id uuid primary key default gen_random_uuid(),
-  quest_id uuid not null references quests(id) on delete cascade,
-  type quest_trigger_type not null,
-  completed_quest_id uuid references quests(id) on delete cascade,
   created_at timestamptz not null default now(),
   deleted_at timestamptz
 );
@@ -38,10 +28,11 @@ create table player_quests (
   user_id uuid not null references auth.users(id) on delete cascade,
   quest_id uuid not null references quests(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
-  status player_quest_status not null default 'available',
+  status player_quest_status not null default 'in_progress',
   created_at timestamptz not null default now(),
   completed_at timestamptz,
   in_progressed_at timestamptz,
+  abandoned_at timestamptz,
 
   -- player_id + quest_id는 유일해야 함
   constraint player_quests_uniq_player_id_quest_id unique (player_id, quest_id)
@@ -60,9 +51,7 @@ create table player_quest_branches (
   constraint player_quest_branches_uniq_player_id_quest_id_quest_branch_id unique (player_id, quest_id, quest_branch_id)
 );
 
--- RLS 활성화
 alter table quests enable row level security;
-alter table quest_triggers enable row level security;
 alter table quest_branches enable row level security;
 alter table player_quests enable row level security;
 alter table player_quest_branches enable row level security;
@@ -81,24 +70,6 @@ create policy "admins can insert quests"
 
 create policy "admins can update quests"
   on quests
-  for update
-  to authenticated
-  using (is_admin());
-
-create policy "authenticated can view quest_triggers"
-  on quest_triggers
-  for select
-  to authenticated
-  using (true);
-
-create policy "admins can insert quest_triggers"
-  on quest_triggers
-  for insert
-  to authenticated
-  with check (is_admin());
-
-create policy "admins can update quest_triggers"
-  on quest_triggers
   for update
   to authenticated
   using (is_admin());
