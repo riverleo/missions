@@ -9,16 +9,16 @@ import {
 	activateLayer as activateLayer,
 	deactivateLayer as deactivateLayer,
 } from '$lib/shortcut/store';
+import type { UUID } from 'crypto';
 
-export interface NarrativeChoice {
-	id: string;
+export interface NarrativeNodeChoice {
+	id: UUID;
 	text: string;
 	diceRoll: DiceRoll;
 }
 
-export type Narrative = {
-	id: string;
-	speaker: string;
+export type NarrativeNode = {
+	id: UUID;
 	message: string;
 	description?: string;
 	root: boolean;
@@ -29,16 +29,22 @@ export type Narrative = {
 	  }
 	| {
 			type: 'choice';
-			choices: NarrativeChoice[];
+			choices: NarrativeNodeChoice[];
 	  }
 );
 
-export const source = writable<Record<string, Narrative>>({});
-export const current = writable<Narrative | undefined>();
+export interface Narrative {
+	id: UUID;
+	name: string;
+	nodes: NarrativeNode[];
+}
+
+export const currentNarrative = writable<Narrative | undefined>();
+export const currentNarrativeNode = writable<NarrativeNode | undefined>();
 
 export const messageComplete = writable<boolean>(false);
 export const narrativeActionHeight = writable<number>(0);
-export const focusedNarrativeChoice = writable<NarrativeChoice | undefined>();
+export const focusedNarrativeNodeChoice = writable<NarrativeNodeChoice | undefined>();
 
 export function next(targetDiceRolled?: DiceRolled) {
 	const $diceRolled = targetDiceRolled || get(diceRolled);
@@ -50,7 +56,7 @@ export function next(targetDiceRolled?: DiceRolled) {
 
 		switch (action.type) {
 			case 'narrative':
-				open(action.narrativeId);
+				open(action.narrativeNodeId);
 				break;
 			case 'terminate':
 				terminate();
@@ -61,16 +67,22 @@ export function next(targetDiceRolled?: DiceRolled) {
 	terminateDiceRoll();
 }
 
-export function open(narrativeId: string) {
-	const $narrative = get(source)[narrativeId];
+export function open(narrativeNodeId: UUID) {
+	const $narrative = get(currentNarrative);
 
 	if ($narrative === undefined) {
-		return console.warn(`Narrative "${narrativeId}" not found.`);
+		return console.warn('Narrative bundle not loaded.');
 	}
 
-	current.set($narrative);
+	const node = $narrative.nodes.find((n) => n.id === narrativeNodeId);
+
+	if (node === undefined) {
+		return console.warn(`Narrative node "${narrativeNodeId}" not found.`);
+	}
+
+	currentNarrativeNode.set(node);
 	messageComplete.set(false);
-	focusedNarrativeChoice.set(undefined);
+	focusedNarrativeNodeChoice.set(undefined);
 	narrativeActionHeight.set(0);
 
 	terminateDiceRoll();
@@ -78,8 +90,8 @@ export function open(narrativeId: string) {
 }
 
 export function terminate() {
-	current.set(undefined);
-	focusedNarrativeChoice.set(undefined);
+	currentNarrativeNode.set(undefined);
+	focusedNarrativeNodeChoice.set(undefined);
 
 	terminateDiceRoll();
 	deactivateLayer('narrative');

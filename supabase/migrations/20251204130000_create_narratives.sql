@@ -1,0 +1,88 @@
+create type narrative_node_type as enum ('text', 'choice');
+
+create table narratives (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  created_at timestamptz not null default now(),
+
+  constraint narratives_uniq_title unique (title)
+);
+
+create table narrative_nodes (
+  id uuid primary key default gen_random_uuid(),
+  narrative_id uuid not null references narratives(id) on delete cascade,
+  title text not null,
+  description text not null,
+  root boolean not null default false,
+  type narrative_node_type not null,
+  dice_roll dice_roll,
+  created_at timestamptz not null default now()
+);
+
+create table narrative_node_choices (
+  id uuid primary key default gen_random_uuid(),
+  narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
+  title text not null,
+  description text not null,
+  dice_roll dice_roll,
+  display_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+alter table narratives enable row level security;
+alter table narrative_nodes enable row level security;
+alter table narrative_node_choices enable row level security;
+
+create policy "authenticated can view narratives"
+  on narratives
+  for select
+  to authenticated
+  using (true);
+
+create policy "admins can insert narratives"
+  on narratives
+  for insert
+  to authenticated
+  with check (is_admin());
+
+create policy "admins can update narratives"
+  on narratives
+  for update
+  to authenticated
+  using (is_admin());
+
+create policy "authenticated can view narrative_nodes"
+  on narrative_nodes
+  for select
+  to authenticated
+  using (true);
+
+create policy "admins can insert narrative_nodes"
+  on narrative_nodes
+  for insert
+  to authenticated
+  with check (is_admin());
+
+create policy "admins can update narrative_nodes"
+  on narrative_nodes
+  for update
+  to authenticated
+  using (is_admin());
+
+create policy "authenticated can view narrative_node_choices"
+  on narrative_node_choices
+  for select
+  to authenticated
+  using (true);
+
+create policy "admins can insert narrative_node_choices"
+  on narrative_node_choices
+  for insert
+  to authenticated
+  with check (is_admin());
+
+create policy "admins can update narrative_node_choices"
+  on narrative_node_choices
+  for update
+  to authenticated
+  using (is_admin());

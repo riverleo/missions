@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { cn, type WithElementRef } from '$lib/utils';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
-	import { focusedNarrativeChoice, type NarrativeChoice } from './store';
+	import { focusedNarrativeNodeChoice, type NarrativeNodeChoice } from './store';
 	import { open } from '$lib/components/app/dice-roll/store';
 	import type { LayerId } from '$lib/shortcut/store';
 
 	const layerId: LayerId = 'narrative';
 
 	type Props = WithElementRef<HTMLButtonAttributes> & {
-		narrativeChoice: NarrativeChoice;
+		narrativeChoice: NarrativeNodeChoice;
 		index: number;
 	};
 
@@ -16,13 +16,15 @@
 </script>
 
 <button
-	data-shortcut-key={$focusedNarrativeChoice?.id === narrativeChoice.id ? 'Space Enter' : undefined}
+	data-shortcut-key={$focusedNarrativeNodeChoice?.id === narrativeChoice.id
+		? 'Space Enter'
+		: undefined}
 	data-shortcut-effect="bounce"
 	data-shortcut-layer={layerId}
 	onclick={() => open(narrativeChoice.diceRoll)}
-	onmouseenter={() => ($focusedNarrativeChoice = narrativeChoice)}
+	onmouseenter={() => ($focusedNarrativeNodeChoice = narrativeChoice)}
 	class={cn('text-2xl blur-3xl', {
-		'opacity-20': $focusedNarrativeChoice?.id !== narrativeChoice.id,
+		'opacity-20': $focusedNarrativeNodeChoice?.id !== narrativeChoice.id,
 	})}
 	style="animation-delay: {index * 300}ms"
 	{...restProps}

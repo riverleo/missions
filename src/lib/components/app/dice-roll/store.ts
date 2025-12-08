@@ -2,10 +2,10 @@ import { get, writable } from 'svelte/store';
 import { Dice } from './dice';
 import { activateLayer, deactivateLayer } from '$lib/shortcut/store';
 import { next } from '$lib/components/app/narrative/store';
+import type { UUID } from 'crypto';
 
 export interface DiceRoll {
 	difficultyClass: number;
-	silent: boolean;
 	success: DiceRollAction;
 	failure: DiceRollAction;
 }
@@ -13,7 +13,7 @@ export interface DiceRoll {
 export type DiceRollAction =
 	| {
 			type: 'narrative';
-			narrativeId: string;
+			narrativeNodeId: UUID;
 	  }
 	| { type: 'terminate' };
 
@@ -53,7 +53,8 @@ export function open(diceRoll: DiceRoll) {
 
 	activateLayer('dice-roll');
 
-	if (diceRoll.silent) next(roll());
+	// difficultyClass가 0이면 자동으로 성공 처리
+	if (diceRoll.difficultyClass === 0) next(roll());
 }
 
 export function terminate() {

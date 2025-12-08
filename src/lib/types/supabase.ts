@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       narrative_bundles: {
@@ -80,127 +105,61 @@ export type Database = {
         }
         Relationships: []
       }
-      player_quest_branch_progresses: {
+      player_quest_branches: {
         Row: {
+          completed_at: string | null
           created_at: string
+          current_narrative_id: string | null
+          current_quest_branch_trigger_id: string | null
           id: string
-          narrative_id: string | null
           player_id: string
-          player_quest_branch_id: string
           player_quest_id: string
           quest_branch_id: string
-          quest_branch_trigger_id: string
           quest_id: string
           status: Database["public"]["Enums"]["player_quest_branch_status"]
           user_id: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
+          current_narrative_id?: string | null
+          current_quest_branch_trigger_id?: string | null
           id?: string
-          narrative_id?: string | null
           player_id: string
-          player_quest_branch_id: string
           player_quest_id: string
           quest_branch_id: string
-          quest_branch_trigger_id: string
           quest_id: string
           status?: Database["public"]["Enums"]["player_quest_branch_status"]
           user_id: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
+          current_narrative_id?: string | null
+          current_quest_branch_trigger_id?: string | null
           id?: string
-          narrative_id?: string | null
           player_id?: string
-          player_quest_branch_id?: string
           player_quest_id?: string
           quest_branch_id?: string
-          quest_branch_trigger_id?: string
           quest_id?: string
           status?: Database["public"]["Enums"]["player_quest_branch_status"]
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "player_quest_branch_progresses_narrative_id_fkey"
-            columns: ["narrative_id"]
+            foreignKeyName: "player_quest_branches_current_narrative_id_fkey"
+            columns: ["current_narrative_id"]
             isOneToOne: false
             referencedRelation: "narratives"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_quest_branch_progresses_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branch_progresses_player_quest_branch_id_fkey"
-            columns: ["player_quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "player_quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branch_progresses_player_quest_id_fkey"
-            columns: ["player_quest_id"]
-            isOneToOne: false
-            referencedRelation: "player_quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branch_progresses_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branch_progresses_quest_branch_trigger_id_fkey"
-            columns: ["quest_branch_trigger_id"]
+            foreignKeyName: "player_quest_branches_current_quest_branch_trigger_id_fkey"
+            columns: ["current_quest_branch_trigger_id"]
             isOneToOne: false
             referencedRelation: "quest_branch_triggers"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "player_quest_branch_progresses_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_quest_branches: {
-        Row: {
-          created_at: string
-          id: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          player_id?: string
-          player_quest_id?: string
-          quest_branch_id?: string
-          quest_id?: string
-          user_id?: string
-        }
-        Relationships: [
           {
             foreignKeyName: "player_quest_branches_player_id_fkey"
             columns: ["player_id"]
@@ -670,6 +629,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       dice_roll_action_type: ["narrative", "terminate"],

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { current, messageComplete } from './store';
+	import { currentNarrativeNode, messageComplete } from './store';
 
 	// 텍스트를 문자 배열로 변환 (공백 포함)
-	const messageCharacters = $derived($current?.message.split(''));
+	const messageCharacters = $derived($currentNarrativeNode?.message.split(''));
 
 	// 타이핑 애니메이션 완료 시간 계산
 	const typingDuration = $derived(() => {
@@ -12,7 +12,7 @@
 
 	// 타이핑 완료 타이머 (완료 후 300ms 추가 대기)
 	$effect(() => {
-		if ($current) {
+		if ($currentNarrativeNode) {
 			const timer = setTimeout(() => {
 				$messageComplete = true;
 			}, typingDuration() + 300);
@@ -22,7 +22,7 @@
 	});
 </script>
 
-{#key $current?.message}
+{#key $currentNarrativeNode?.message}
 	<div class="relative text-white">
 		<div
 			class="background absolute top-4 left-0 -z-10 h-full w-full rounded-[40%] bg-black px-8 py-4 blur-lg"
@@ -39,9 +39,9 @@
 					{/if}
 				{/each}
 			</p>
-			{#if $current?.description}
+			{#if $currentNarrativeNode?.description}
 				<p class="description inline-flex flex-wrap justify-center">
-					<span class="text-lg font-light opacity-60">{$current.description}</span>
+					<span class="text-lg font-light opacity-60">{$currentNarrativeNode.description}</span>
 				</p>
 			{/if}
 		</div>

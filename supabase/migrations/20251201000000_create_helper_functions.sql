@@ -1,7 +1,7 @@
 -- 현재 유저 확인 함수
-create or replace function is_me(check_user_id uuid)
+create or replace function is_me(target_user_id uuid)
 returns boolean as $$
-  select (select auth.uid()) = check_user_id;
+  select (select auth.uid()) = target_user_id;
 $$ language sql stable
 set search_path = '';
 
