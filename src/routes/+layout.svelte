@@ -2,8 +2,10 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseover } from '$lib/shortcut/events';
+	import ServerPayloadProvider from '$lib/components/server-payload-provider.svelte';
+	import type { ServerPayload } from '$lib/types/fetch';
 
-	const { children } = $props();
+	const { data, children }: { data: ServerPayload; children: any } = $props();
 </script>
 
 <svelte:head>
@@ -12,4 +14,6 @@
 
 <svelte:window {onkeydown} {onkeyup} {onmousedown} {onmouseup} {onmouseover} />
 
-{@render children()}
+<ServerPayloadProvider {data}>
+	{@render children()}
+</ServerPayloadProvider>

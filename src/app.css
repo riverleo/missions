@@ -77,5 +77,5 @@
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
 
-	--font-sans: 'Poor Story', sans-serif;
+	--font-sans: 'Pretendard', sans-serif;
 }
