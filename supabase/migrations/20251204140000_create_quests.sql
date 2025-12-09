@@ -7,9 +7,7 @@ create table quests (
   title text not null,
   type quest_type not null default 'secondary',
   status quest_status not null default 'draft',
-  priority integer not null default 0,
-  created_at timestamptz not null default now(),
-  deleted_at timestamptz
+  created_at timestamptz not null default now()
 );
 
 create table quest_branches (
@@ -17,10 +15,8 @@ create table quest_branches (
   quest_id uuid not null references quests(id) on delete cascade,
   parent_quest_branch_id uuid references quest_branches(id) on delete cascade,
   title text not null default '',
-  is_leaf boolean not null default true, -- 참이면 해당 퀘스트의 마지막을 의미
   display_order integer not null default 0, -- 부모 퀘스트 브랜치의 정렬 순서
-  created_at timestamptz not null default now(),
-  deleted_at timestamptz
+  created_at timestamptz not null default now()
 );
 
 create table player_quests (
@@ -74,6 +70,12 @@ create policy "admins can update quests"
   to authenticated
   using (is_admin());
 
+create policy "admins can delete quests"
+  on quests
+  for delete
+  to authenticated
+  using (is_admin());
+
 create policy "authenticated can view quest_branches"
   on quest_branches
   for select
@@ -89,6 +91,12 @@ create policy "admins can insert quest_branches"
 create policy "admins can update quest_branches"
   on quest_branches
   for update
+  to authenticated
+  using (is_admin());
+
+create policy "admins can delete quest_branches"
+  on quest_branches
+  for delete
   to authenticated
   using (is_admin());
 

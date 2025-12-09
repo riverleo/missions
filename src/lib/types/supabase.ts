@@ -328,6 +328,7 @@ export type Database = {
       }
       player_quests: {
         Row: {
+          abandoned_at: string | null
           completed_at: string | null
           created_at: string
           id: string
@@ -338,6 +339,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          abandoned_at?: string | null
           completed_at?: string | null
           created_at?: string
           id?: string
@@ -348,6 +350,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          abandoned_at?: string | null
           completed_at?: string | null
           created_at?: string
           id?: string
@@ -434,30 +437,24 @@ export type Database = {
       quest_branches: {
         Row: {
           created_at: string
-          deleted_at: string | null
           display_order: number
           id: string
-          is_leaf: boolean
           parent_quest_branch_id: string | null
           quest_id: string
           title: string
         }
         Insert: {
           created_at?: string
-          deleted_at?: string | null
           display_order?: number
           id?: string
-          is_leaf?: boolean
           parent_quest_branch_id?: string | null
           quest_id: string
           title?: string
         }
         Update: {
           created_at?: string
-          deleted_at?: string | null
           display_order?: number
           id?: string
-          is_leaf?: boolean
           parent_quest_branch_id?: string | null
           quest_id?: string
           title?: string
@@ -482,27 +479,21 @@ export type Database = {
       quests: {
         Row: {
           created_at: string
-          deleted_at: string | null
           id: string
-          priority: number
           status: Database["public"]["Enums"]["quest_status"]
           title: string
           type: Database["public"]["Enums"]["quest_type"]
         }
         Insert: {
           created_at?: string
-          deleted_at?: string | null
           id?: string
-          priority?: number
           status?: Database["public"]["Enums"]["quest_status"]
           title: string
           type?: Database["public"]["Enums"]["quest_type"]
         }
         Update: {
           created_at?: string
-          deleted_at?: string | null
           id?: string
-          priority?: number
           status?: Database["public"]["Enums"]["quest_status"]
           title?: string
           type?: Database["public"]["Enums"]["quest_type"]
@@ -548,7 +539,7 @@ export type Database = {
     Enums: {
       dice_roll_action_type: "narrative_node" | "terminate"
       narrative_node_type: "text" | "choice"
-      player_quest_status: "in_progress" | "completed"
+      player_quest_status: "in_progress" | "completed" | "abandoned"
       quest_status: "draft" | "published"
       quest_type: "primary" | "secondary"
       user_role_type: "admin"
@@ -692,7 +683,7 @@ export const Constants = {
     Enums: {
       dice_roll_action_type: ["narrative_node", "terminate"],
       narrative_node_type: ["text", "choice"],
-      player_quest_status: ["in_progress", "completed"],
+      player_quest_status: ["in_progress", "completed", "abandoned"],
       quest_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
       user_role_type: ["admin"],

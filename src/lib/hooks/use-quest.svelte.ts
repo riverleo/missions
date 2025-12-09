@@ -28,10 +28,7 @@ function createQuestStore() {
 		try {
 			const { data, error } = await supabase
 				.from('quests')
-				.select('*, quest_branches(*)')
-				.is('deleted_at', null)
-				.is('quest_branches.deleted_at', null)
-				.order('priority', { ascending: false });
+				.select('*, quest_branches(*)');
 
 			if (error) throw error;
 
@@ -83,10 +80,7 @@ function createQuestStore() {
 
 	async function remove(id: string) {
 		try {
-			const { error } = await supabase
-				.from('quests')
-				.update({ deleted_at: new Date().toISOString() })
-				.eq('id', id);
+			const { error } = await supabase.from('quests').delete().eq('id', id);
 
 			if (error) throw error;
 
@@ -138,10 +132,7 @@ function createQuestStore() {
 
 	async function removeBranch(id: string, shouldRefetch = true) {
 		try {
-			const { error } = await supabase
-				.from('quest_branches')
-				.update({ deleted_at: new Date().toISOString() })
-				.eq('id', id);
+			const { error } = await supabase.from('quest_branches').delete().eq('id', id);
 
 			if (error) throw error;
 
