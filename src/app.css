@@ -119,3 +119,10 @@
 
 	--font-sans: 'Pretendard', sans-serif;
 }
+
+/* Svelte Flow Handle 크기 조정 */
+.svelte-flow__handle {
+	width: 12px;
+	height: 12px;
+	border-width: 2px;
+}

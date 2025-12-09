@@ -7,7 +7,7 @@ export type PlayerQuestStatus = Enums<'player_quest_status'>;
 
 // Base types
 export type QuestRow = Tables<'quests'>;
-export type QuestBranchRow = Tables<'quest_branches'>;
+export type QuestBranch = Tables<'quest_branches'>;
 export type PlayerQuestRow = Tables<'player_quests'>;
 export type PlayerQuestBranchRow = Tables<'player_quest_branches'>;
 
@@ -23,5 +23,5 @@ export type PlayerQuestBranchUpdate = TablesUpdate<'player_quest_branches'>;
 
 // Extended types with joins
 export type Quest = QuestRow & {
-	quest_branches?: QuestBranchRow[];
+	quest_branches?: QuestBranch[];
 };

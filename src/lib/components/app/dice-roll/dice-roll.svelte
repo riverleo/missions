@@ -11,7 +11,7 @@
 	bindLayerEvent({
 		id: layerId,
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
-			if ($current === undefined || $current.silent) return;
+			if ($current === undefined || $current.difficultyClass === 0) return;
 
 			if (isEnterOrSpace(event)) {
 				if ($diceRolled) next();
@@ -21,7 +21,7 @@
 	});
 </script>
 
-{#if $current && !$current.silent}
+{#if $current && $current.difficultyClass !== 0}
 	<div
 		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
 	>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
 		DialogTrigger,
@@ -8,16 +9,24 @@
 		DialogDescription,
 		DialogFooter
 	} from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 
-	const { admin } = useQuest();
+	const { questId }: { questId: string } = $props();
+	const { quests, admin } = useQuest();
+
+	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
 
 	let open = $state(false);
 	let title = $state('');
 	let isSubmitting = $state(false);
+
+	$effect(() => {
+		if (open && currentQuest) {
+			title = currentQuest.title;
+		}
+	});
 
 	async function handleSubmit() {
 		if (!title.trim() || isSubmitting) return;
@@ -25,11 +34,10 @@
 		isSubmitting = true;
 
 		try {
-			await admin.create({ title: title.trim() });
-			title = '';
+			await admin.update(questId, { title: title.trim() });
 			open = false;
 		} catch (error) {
-			console.error('Failed to create quest:', error);
+			console.error('Failed to update quest:', error);
 		} finally {
 			isSubmitting = false;
 		}
@@ -39,13 +47,13 @@
 <Dialog bind:open>
 	<DialogTrigger>
 		{#snippet child({ props })}
-			<Button {...props} size="sm">새로운 퀘스트</Button>
+			<Button {...props} variant="outline">수정</Button>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 퀘스트 만들기</DialogTitle>
-			<DialogDescription>퀘스트의 기본 정보를 입력해주세요.</DialogDescription>
+			<DialogTitle>퀘스트 수정</DialogTitle>
+			<DialogDescription>퀘스트 정보를 수정합니다.</DialogDescription>
 		</DialogHeader>
 		<form
 			onsubmit={(e) => {
@@ -55,13 +63,13 @@
 		>
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label for="quest-name">퀘스트 이름</Label>
-					<Input id="quest-name" placeholder="퀘스트 이름을 입력하세요" bind:value={title} />
+					<Label for="quest-title">퀘스트 이름</Label>
+					<Input id="quest-title" bind:value={title} />
 				</div>
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>
 			</DialogFooter>
 		</form>

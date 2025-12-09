@@ -1,6 +1,13 @@
 import { writable, type Readable } from 'svelte/store';
 import type { FetchState } from '$lib/types/fetch';
-import type { Quest, QuestInsert, QuestUpdate } from '$lib/types/quest';
+import type {
+	Quest,
+	QuestInsert,
+	QuestUpdate,
+	QuestBranch,
+	QuestBranchInsert,
+	QuestBranchUpdate
+} from '$lib/types/quest';
 import { useServerPayload } from './use-server-payload.svelte';
 
 let instance: ReturnType<typeof createQuestStore> | null = null;
@@ -23,6 +30,7 @@ function createQuestStore() {
 				.from('quests')
 				.select('*, quest_branches(*)')
 				.is('deleted_at', null)
+				.is('quest_branches.deleted_at', null)
 				.order('priority', { ascending: false });
 
 			if (error) throw error;
@@ -92,6 +100,63 @@ function createQuestStore() {
 		}
 	}
 
+	async function createBranch(branch: QuestBranchInsert, shouldRefetch = true) {
+		try {
+			const { error } = await supabase.from('quest_branches').insert(branch);
+
+			if (error) throw error;
+
+			if (shouldRefetch) {
+				await fetchQuests();
+			}
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function updateBranch(id: string, branch: QuestBranchUpdate, shouldRefetch = false) {
+		try {
+			const { error } = await supabase.from('quest_branches').update(branch).eq('id', id);
+
+			if (error) throw error;
+
+			if (shouldRefetch) {
+				await fetchQuests();
+			}
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function removeBranch(id: string, shouldRefetch = true) {
+		try {
+			const { error } = await supabase
+				.from('quest_branches')
+				.update({ deleted_at: new Date().toISOString() })
+				.eq('id', id);
+
+			if (error) throw error;
+
+			if (shouldRefetch) {
+				await fetchQuests();
+			}
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
 	if (!initialized) {
 		initialized = true;
 		fetchQuests();
@@ -99,9 +164,14 @@ function createQuestStore() {
 
 	return {
 		quests: store as Readable<FetchState<Quest[]>>,
-		create,
-		update,
-		remove,
+		admin: {
+			create,
+			update,
+			remove,
+			createBranch,
+			updateBranch,
+			removeBranch,
+		},
 	};
 }
 
