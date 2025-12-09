@@ -4,7 +4,7 @@
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseover } from '$lib/shortcut/events';
 	import ServerPayloadProvider from '$lib/components/server-payload-provider.svelte';
 	import { ModeWatcher } from 'mode-watcher';
-	import type { ServerPayload } from '$lib/types/fetch';
+	import type { ServerPayload } from '$lib/types';
 
 	const { data, children }: { data: ServerPayload; children: any } = $props();
 </script>

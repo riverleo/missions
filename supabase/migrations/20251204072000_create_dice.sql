@@ -1,15 +1,4 @@
-create type dice_roll_action_type as enum ('narrative_node', 'terminate');
-
-create type dice_roll_action as (
-  type dice_roll_action_type,
-  narrative_node_id uuid
-);
-
-create type dice_roll as (
-  difficulty_class integer,
-  success dice_roll_action,
-  failure dice_roll_action
-);
+create type dice_roll_action as enum ('narrative_node', 'terminate');
 
 create table dice (
   id uuid primary key default gen_random_uuid(),

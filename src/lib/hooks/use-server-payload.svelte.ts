@@ -1,5 +1,5 @@
 import { getContext } from 'svelte';
-import type { ServerPayload } from '$lib/types/fetch';
+import type { ServerPayload } from '$lib/types';
 
 export function useServerPayload(): ServerPayload {
 	const context = getContext<ServerPayload>('serverPayload');

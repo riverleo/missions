@@ -15,7 +15,6 @@ create table narrative_nodes (
   description text not null,
   root boolean not null default false,
   type narrative_node_type not null,
-  dice_roll dice_roll,
   created_at timestamptz not null default now()
 );
 
@@ -24,7 +23,6 @@ create table narrative_node_choices (
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   title text not null,
   description text not null,
-  dice_roll dice_roll,
   display_order integer not null default 0,
   created_at timestamptz not null default now()
 );

@@ -1,4 +1,14 @@
-create table player_dice (
+create table dice_roll (
+  id uuid primary key default gen_random_uuid(),
+  difficulty_class integer not null,
+  success_action dice_roll_action not null,
+  success_narrative_node_id uuid references narrative_nodes(id) on delete cascade,
+  failure_action dice_roll_action not null,
+  failure_narrative_node_id uuid references narrative_nodes(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create table player_dice_rolled (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
@@ -10,11 +20,12 @@ create table player_dice (
   player_quest_id uuid references player_quests(id) on delete cascade,
   player_quest_branch_id uuid references player_quest_branches(id) on delete cascade,
   dice_id uuid references dice(id) on delete cascade,
+  dice_roll_id uuid not null references dice_roll(id) on delete cascade,
   value integer,
   created_at timestamptz not null default now()
 );
 
-create or replace function create_player_dice_value()
+create or replace function create_player_dice_rolled_value()
 returns trigger as $$
 declare
   dice_faces integer;
@@ -34,21 +45,21 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger insert_player_dice_value
-  before insert on player_dice
+create trigger insert_player_dice_rolled_value
+  before insert on player_dice_rolled
   for each row
-  execute function create_player_dice_value();
+  execute function create_player_dice_rolled_value();
 
-alter table player_dice enable row level security;
+alter table player_dice_rolled enable row level security;
 
-create policy "players can view their own player_dice"
-  on player_dice
+create policy "players can view their own player_dice_rolled"
+  on player_dice_rolled
   for select
   to authenticated
   using (is_own_player(user_id, player_id));
 
-create policy "players can insert their own player_dice"
-  on player_dice
+create policy "players can insert their own player_dice_rolled"
+  on player_dice_rolled
   for insert
   to authenticated
   with check (is_own_player(user_id, player_id));

@@ -1,13 +1,13 @@
 import { writable, type Readable } from 'svelte/store';
-import type { FetchState } from '$lib/types/fetch';
 import type {
+	FetchState,
 	Quest,
 	QuestInsert,
 	QuestUpdate,
 	QuestBranch,
 	QuestBranchInsert,
 	QuestBranchUpdate
-} from '$lib/types/quest';
+} from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 let instance: ReturnType<typeof createQuestStore> | null = null;

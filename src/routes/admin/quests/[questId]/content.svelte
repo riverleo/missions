@@ -13,7 +13,7 @@
 	import type { Node, Edge, Connection } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/stores';
-	import type { QuestBranch } from '$lib/types/quest';
+	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
 	import ELK from 'elkjs/lib/elk.bundled.js';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';

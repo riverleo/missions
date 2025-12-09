@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { QuestBranch } from '$lib/types/quest';
+	import type { QuestBranch } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 
 	type Props = {
