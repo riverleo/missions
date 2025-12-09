@@ -8,6 +8,32 @@ create table dice_roll (
   created_at timestamptz not null default now()
 );
 
+alter table dice_roll enable row level security;
+
+create policy "authenticated can view dice_roll"
+  on dice_roll
+  for select
+  to authenticated
+  using (true);
+
+create policy "admins can insert dice_roll"
+  on dice_roll
+  for insert
+  to authenticated
+  with check (is_admin());
+
+create policy "admins can update dice_roll"
+  on dice_roll
+  for update
+  to authenticated
+  using (is_admin());
+
+create policy "admins can delete dice_roll"
+  on dice_roll
+  for delete
+  to authenticated
+  using (is_admin());
+
 create table player_dice_rolled (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
