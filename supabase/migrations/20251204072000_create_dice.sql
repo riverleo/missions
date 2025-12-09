@@ -1,5 +1,3 @@
-create type dice_roll_action as enum ('narrative_node', 'terminate');
-
 create table dice (
   id uuid primary key default gen_random_uuid(),
   title text not null,
