@@ -29,7 +29,22 @@ function createNarrativeStore() {
 		store.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase.from('narratives').select('*');
+			const { data, error } = await supabase
+				.from('narratives')
+				.select(
+					`
+					*,
+					narrative_nodes (
+						*,
+						dice_roll (*),
+						narrative_node_choices (
+							*,
+							dice_roll (*)
+						)
+					)
+				`
+				)
+				.order('created_at', { ascending: false });
 
 			if (error) throw error;
 

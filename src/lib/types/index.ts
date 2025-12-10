@@ -48,15 +48,29 @@ export type Quest = QuestRow & {
 };
 
 // Narrative types
-export type Narrative = Tables<'narratives'>;
+export type NarrativeRow = Tables<'narratives'>;
 export type NarrativeInsert = TablesInsert<'narratives'>;
 export type NarrativeUpdate = TablesUpdate<'narratives'>;
-export type NarrativeNode = Tables<'narrative_nodes'>;
+export type NarrativeNodeRow = Tables<'narrative_nodes'>;
 export type NarrativeNodeInsert = TablesInsert<'narrative_nodes'>;
 export type NarrativeNodeUpdate = TablesUpdate<'narrative_nodes'>;
 export type NarrativeNodeChoice = Tables<'narrative_node_choices'>;
 export type NarrativeNodeChoiceInsert = TablesInsert<'narrative_node_choices'>;
 export type NarrativeNodeChoiceUpdate = TablesUpdate<'narrative_node_choices'>;
+
+// Extended Narrative with relations
+export type NarrativeNodeChoiceWithDiceRoll = NarrativeNodeChoice & {
+	dice_roll: DiceRoll;
+};
+
+export type NarrativeNode = NarrativeNodeRow & {
+	dice_roll: DiceRoll;
+	narrative_node_choices?: NarrativeNodeChoiceWithDiceRoll[];
+};
+
+export type Narrative = NarrativeRow & {
+	narrative_nodes?: NarrativeNode[];
+};
 
 // Dice types
 export type Dice = Tables<'dice'>;
