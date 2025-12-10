@@ -28,19 +28,22 @@
 		}
 	});
 
-	async function handleSubmit() {
+	function onsubmit(e: SubmitEvent) {
+		e.preventDefault();
 		if (!title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
-		try {
-			await admin.update(questId, { title: title.trim() });
-			open = false;
-		} catch (error) {
-			console.error('Failed to update quest:', error);
-		} finally {
-			isSubmitting = false;
-		}
+		admin.update(questId, { title: title.trim() })
+			.then(() => {
+				open = false;
+			})
+			.catch((error) => {
+				console.error('Failed to update quest:', error);
+			})
+			.finally(() => {
+				isSubmitting = false;
+			});
 	}
 </script>
 
@@ -55,12 +58,7 @@
 			<DialogTitle>퀘스트 수정</DialogTitle>
 			<DialogDescription>퀘스트 정보를 수정합니다.</DialogDescription>
 		</DialogHeader>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleSubmit();
-			}}
-		>
+		<form {onsubmit}>
 			<div class="space-y-4">
 				<div class="space-y-2">
 					<Label for="quest-title">퀘스트 이름</Label>

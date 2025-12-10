@@ -9,7 +9,7 @@
 
 	interface Props {
 		questBranch: QuestBranch | undefined;
-		onupdate?: (branch: QuestBranch) => void;
+		onupdate?: (questBranch: QuestBranch) => void;
 	}
 
 	let { questBranch, onupdate }: Props = $props();
@@ -34,49 +34,50 @@
 		}
 	});
 
-	async function handleCreate() {
+	function onclickCreate() {
 		if (isCreating || !questId) return;
 
 		isCreating = true;
 
-		try {
-			await admin.createBranch({
-				quest_id: questId,
-				title: '',
-				display_order: 0,
+		admin.createBranch({
+			quest_id: questId,
+			title: '',
+			display_order: 0,
+		})
+			.catch((error) => {
+				console.error('Failed to create quest branch:', error);
+			})
+			.finally(() => {
+				isCreating = false;
 			});
-		} catch (error) {
-			console.error('Failed to create quest branch:', error);
-		} finally {
-			isCreating = false;
-		}
 	}
 
-	async function handleUpdate() {
+	function onclickUpdate() {
 		if (!questBranch || isUpdating) return;
 
 		isUpdating = true;
 
-		try {
-			await admin.updateBranch(questBranch.id, {
-				title: editTitle,
-				display_order: editDisplayOrder,
+		admin.updateBranch(questBranch.id, {
+			title: editTitle,
+			display_order: editDisplayOrder,
+		})
+			.then(() => {
+				// 로컬 데이터 업데이트
+				questBranch.title = editTitle;
+				questBranch.display_order = editDisplayOrder;
+
+				// 부모 컴포넌트에 업데이트 알림
+				onupdate?.(questBranch);
+			})
+			.catch((error) => {
+				console.error('Failed to update branch:', error);
+			})
+			.finally(() => {
+				isUpdating = false;
 			});
-
-			// 로컬 데이터 업데이트
-			questBranch.title = editTitle;
-			questBranch.display_order = editDisplayOrder;
-
-			// 부모 컴포넌트에 업데이트 알림
-			onupdate?.(questBranch);
-		} catch (error) {
-			console.error('Failed to update branch:', error);
-		} finally {
-			isUpdating = false;
-		}
 	}
 
-	function handleCancel() {
+	function onclickCancel() {
 		const selectedNode = flowNodes.current.find((n) => n.selected);
 		if (!selectedNode) return;
 
@@ -103,15 +104,15 @@
 					<Input id="edit-display-order" type="number" bind:value={editDisplayOrder} />
 				</div>
 				<div class="flex justify-end gap-2">
-					<Button variant="outline" onclick={handleCancel} disabled={isUpdating}>취소</Button>
-					<Button onclick={handleUpdate} disabled={isUpdating}>
+					<Button variant="outline" onclick={onclickCancel} disabled={isUpdating}>취소</Button>
+					<Button onclick={onclickUpdate} disabled={isUpdating}>
 						{isUpdating ? '저장 중...' : '저장'}
 					</Button>
 				</div>
 			</div>
 		{:else}
 			<h3 class="mb-4 text-lg font-semibold">브랜치 관리</h3>
-			<Button onclick={handleCreate} disabled={isCreating} class="w-full">
+			<Button onclick={onclickCreate} disabled={isCreating} class="w-full">
 				{isCreating ? '생성 중...' : '새로운 브랜치 추가'}
 			</Button>
 		{/if}

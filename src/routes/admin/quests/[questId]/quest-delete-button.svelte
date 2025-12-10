@@ -17,13 +17,14 @@
 	const { questId }: { questId: string } = $props();
 	const { admin } = useQuest();
 
-	async function handleDelete() {
-		try {
-			await admin.remove(questId);
-			goto('/admin/quests');
-		} catch (error) {
-			console.error('Failed to delete quest:', error);
-		}
+	function onclick() {
+		admin.remove(questId)
+			.then(() => {
+				goto('/admin/quests');
+			})
+			.catch((error) => {
+				console.error('Failed to delete quest:', error);
+			});
 	}
 </script>
 
@@ -42,7 +43,7 @@
 		</AlertDialogHeader>
 		<AlertDialogFooter>
 			<AlertDialogCancel>취소</AlertDialogCancel>
-			<AlertDialogAction onclick={handleDelete}>삭제</AlertDialogAction>
+			<AlertDialogAction {onclick}>삭제</AlertDialogAction>
 		</AlertDialogFooter>
 	</AlertDialogContent>
 </AlertDialog>

@@ -19,20 +19,23 @@
 	let title = $state('');
 	let isSubmitting = $state(false);
 
-	async function handleSubmit() {
+	function onsubmit(e: SubmitEvent) {
+		e.preventDefault();
 		if (!title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
-		try {
-			await admin.create({ title: title.trim() });
-			title = '';
-			open = false;
-		} catch (error) {
-			console.error('Failed to create quest:', error);
-		} finally {
-			isSubmitting = false;
-		}
+		admin.create({ title: title.trim() })
+			.then(() => {
+				title = '';
+				open = false;
+			})
+			.catch((error) => {
+				console.error('Failed to create quest:', error);
+			})
+			.finally(() => {
+				isSubmitting = false;
+			});
 	}
 </script>
 
@@ -47,12 +50,7 @@
 			<DialogTitle>새로운 퀘스트 만들기</DialogTitle>
 			<DialogDescription>퀘스트의 기본 정보를 입력해주세요.</DialogDescription>
 		</DialogHeader>
-		<form
-			onsubmit={(e) => {
-				e.preventDefault();
-				handleSubmit();
-			}}
-		>
+		<form {onsubmit}>
 			<div class="space-y-4">
 				<div class="space-y-2">
 					<Label for="quest-name">퀘스트 이름</Label>
