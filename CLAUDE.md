@@ -28,6 +28,19 @@
    - ✅ `import { page } from '$app/state'` (Svelte 5 runes)
    - stores 기반 API 대신 runes 기반 API 사용
 
+## 데이터베이스 규칙
+
+1. **데이터 무결성은 데이터베이스에서 보장**
+   - 데이터 제약사항은 DB constraint/index로 강제해야 함
+   - 애플리케이션 코드에서 예외처리로 우회하지 말 것
+   - 예: 중복 레코드가 있으면 `.limit(1)` 같은 방법으로 회피하지 말고, DB에서 unique constraint로 원천 차단
+   - 이유: 데이터가 실제로 꼬였을 때 애플리케이션에서 에러가 발생해야 문제를 감지할 수 있음
+
+2. **user_roles 테이블**
+   - 각 유저는 0개 또는 1개의 역할을 가질 수 있음 (unique index로 보장)
+   - 역할 없음 = 일반 유저, 역할 1개 = 특정 권한 보유
+   - 쿼리 시 `.maybeSingle()` 사용 (0개=정상, 1개=정상, 2개 이상=에러)
+
 ## 린팅
 
 - `pnpm check` - svelte-check (타입 체크 + unused variables)

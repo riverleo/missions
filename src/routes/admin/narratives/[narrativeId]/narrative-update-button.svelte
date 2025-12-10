@@ -48,7 +48,7 @@
 	}
 </script>
 
-<Dialog bind:open}>
+<Dialog bind:open>
 	<DialogTrigger>
 		{#snippet child({ props })}
 			<Button {...props} variant="outline">수정</Button>
