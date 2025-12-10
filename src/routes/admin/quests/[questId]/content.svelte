@@ -16,6 +16,7 @@
 	import QuestBranchPanel from './quest-branch-panel.svelte';
 	import ELK from 'elkjs/lib/elk.bundled.js';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { sort } from 'radash';
 
 	const questId = $derived(page.params.questId);
 	const { quests, admin } = useQuest();
@@ -129,7 +130,7 @@
 		const newEdges: Edge[] = [];
 
 		// display_order로 정렬된 브랜치 사용
-		const sortedBranches = [...questBranches].sort((a, b) => a.display_order - b.display_order);
+		const sortedBranches = sort(questBranches, (b) => b.display_order);
 
 		// 노드 생성
 		sortedBranches.forEach((questBranch) => {
