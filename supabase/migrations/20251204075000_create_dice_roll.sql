@@ -1,11 +1,11 @@
-create type dice_roll_action as enum ('narrative_node', 'narrative_node_done', 'chapter_done');
+create type dice_roll_action as enum ('narrative_node_next', 'narrative_node_done');
 
 create table dice_rolls (
   id uuid primary key default gen_random_uuid(),
-  difficulty_class integer not null,
-  success_action dice_roll_action not null,
+  difficulty_class integer not null default 0,
+  success_action dice_roll_action not null default 'narrative_node_next',
   success_narrative_node_id uuid references narrative_nodes(id) on delete cascade,
-  failure_action dice_roll_action not null,
+  failure_action dice_roll_action not null default 'narrative_node_next',
   failure_narrative_node_id uuid references narrative_nodes(id) on delete cascade,
   created_at timestamptz not null default now()
 );

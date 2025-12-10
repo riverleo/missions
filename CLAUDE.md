@@ -28,6 +28,68 @@
    - ✅ `import { page } from '$app/state'` (Svelte 5 runes)
    - stores 기반 API 대신 runes 기반 API 사용
 
+2. **스토어는 단일 진실 공급원(Single Source of Truth)**
+   - 모든 데이터는 스토어를 통해 관리되어야 함
+   - 컴포넌트에서 prop으로 받은 객체를 직접 수정하지 말 것
+   - DB 업데이트 후 두 가지 방식 중 선택:
+     - **작은 데이터**: `shouldRefetch=true`로 전체 데이터 다시 불러오기
+     - **큰 데이터**: `shouldRefetch=false` + 스토어 내부 데이터 직접 수정
+
+3. **스토어 업데이트는 Immer 사용**
+   - Svelte의 reactivity는 참조 변경을 감지하므로 항상 새로운 객체/배열을 생성해야 함
+   - **Immer의 `produce`를 사용하여 불변성을 유지하면서 mutable한 코드 작성 가능**
+   - Immer는 structural sharing을 통해 성능을 최적화하고, 중첩된 업데이트를 간단하게 만듦
+   - 예시:
+     ```typescript
+     import { produce } from 'immer';
+
+     // ❌ 나쁜 예: Immer 없이 직접 수정 (reactivity 동작 안 함)
+     store.update((state) => {
+       const item = state.data?.find(i => i.id === id);
+       if (item) Object.assign(item, updates);
+       return state; // 같은 참조 반환
+     });
+
+     // ✅ 좋은 예: Immer의 produce 사용
+     store.update((state) =>
+       produce(state, (draft) => {
+         const item = draft.data?.find(i => i.id === id);
+         if (item) {
+           Object.assign(item, updates); // draft에서는 직접 수정 가능
+         }
+       })
+     );
+
+     // ✅ 좋은 예: 배열에 아이템 추가
+     store.update((state) =>
+       produce(state, (draft) => {
+         if (draft.data) {
+           draft.data.push(newItem); // draft에서는 push 가능
+         } else {
+           draft.data = [newItem];
+         }
+       })
+     );
+
+     // ✅ 좋은 예: 중첩된 구조 업데이트
+     store.update((state) =>
+       produce(state, (draft) => {
+         const narrative = draft.data?.find((n) => n.id === narrativeId);
+         if (narrative?.narrative_nodes) {
+           const node = narrative.narrative_nodes.find((n) => n.id === nodeId);
+           if (node) {
+             node.title = 'New Title'; // 중첩된 객체도 직접 수정 가능
+           }
+         }
+       })
+     );
+     ```
+   - **장점**:
+     - 네이티브 JS처럼 직관적인 코드 작성 가능
+     - TypeScript 타입 추론이 자동으로 동작
+     - Structural sharing으로 성능 최적화
+     - 중첩된 업데이트가 간단함
+
 ## 데이터베이스 규칙
 
 1. **데이터 무결성은 데이터베이스에서 보장**
@@ -35,6 +97,12 @@
    - 애플리케이션 코드에서 예외처리로 우회하지 말 것
    - 예: 중복 레코드가 있으면 `.limit(1)` 같은 방법으로 회피하지 말고, DB에서 unique constraint로 원천 차단
    - 이유: 데이터가 실제로 꼬였을 때 애플리케이션에서 에러가 발생해야 문제를 감지할 수 있음
+
+1-1. **DB default 값 우선 사용**
+   - 테이블 컬럼에 default 값이 정의되어 있으면 애플리케이션에서 명시적으로 값을 넣지 말 것
+   - INSERT 시 필수가 아닌 필드는 생략하여 DB의 default 값을 사용하도록 함
+   - 예: `difficulty_class`에 `default 0`이 설정되어 있다면 insert 시 생략
+   - 이유: DB의 default 값이 단일 진실 공급원(single source of truth)이 되어야 일관성 유지 가능
 
 2. **user_roles 테이블**
    - 각 유저는 0개 또는 1개의 역할을 가질 수 있음 (unique index로 보장)
@@ -100,6 +168,18 @@
 - 하지만 관계 데이터는 단수형으로 작성 (예: `quest.quest_branches`가 아니라 `quest.quest_branch`)
   - 왜냐하면 Supabase 쿼리에서 `quest_branch:quest_branches!fk_name (*)` 형태로 alias를 사용하기 때문
 - `any` 타입은 최후의 수단이 아닌 이상 절대 사용하지 않기. 항상 명시적인 타입을 정의하거나 추론하도록 작성
+
+## UI 컴포넌트
+
+- **shadcn-svelte 컴포넌트 우선 사용**
+  - 네이티브 HTML 요소보다 shadcn-svelte 컴포넌트를 우선적으로 사용
+  - 문서: https://www.shadcn-svelte.com/docs/components
+  - 사용법이 불확실한 경우 문서 참조
+
+- **아이콘 라이브러리**
+  - `@tabler/icons-svelte` 사용 (lucide-svelte 사용 금지)
+  - Icon 접두사를 붙여서 import
+  - 예: `import { IconTrash, IconPlus } from '@tabler/icons-svelte';`
 
 ## 패키지 매니저
 

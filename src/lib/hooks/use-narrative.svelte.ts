@@ -10,6 +10,7 @@ import type {
 	NarrativeNodeChoiceUpdate,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
+import { produce } from 'immer';
 
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
 
@@ -106,15 +107,28 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function createNode(node: NarrativeNodeInsert, shouldRefetch = true) {
+	async function createNode(node: NarrativeNodeInsert) {
 		try {
-			const { error } = await supabase.from('narrative_nodes').insert(node);
+			const { data, error } = await supabase
+				.from('narrative_nodes')
+				.insert(node)
+				.select('*, narrative_node_choices (*)')
+				.single();
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					const narrative = draft.data?.find((n) => n.id === node.narrative_id);
+					if (narrative) {
+						if (!narrative.narrative_nodes) {
+							narrative.narrative_nodes = [];
+						}
+						narrative.narrative_nodes.push(data);
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -124,15 +138,31 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function updateNode(id: string, node: NarrativeNodeUpdate, shouldRefetch = false) {
+	async function updateNode(id: string, node: NarrativeNodeUpdate) {
 		try {
 			const { error } = await supabase.from('narrative_nodes').update(node).eq('id', id);
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_nodes) {
+								const nodeIndex = narrative.narrative_nodes.findIndex((n) => n.id === id);
+								if (nodeIndex !== -1) {
+									narrative.narrative_nodes[nodeIndex] = {
+										...narrative.narrative_nodes[nodeIndex],
+										...node,
+									};
+									break;
+								}
+							}
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -142,15 +172,26 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function removeNode(id: string, shouldRefetch = true) {
+	async function removeNode(id: string) {
 		try {
 			const { error } = await supabase.from('narrative_nodes').delete().eq('id', id);
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_nodes) {
+								narrative.narrative_nodes = narrative.narrative_nodes.filter(
+									(n) => n.id !== id
+								);
+							}
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -160,15 +201,37 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function createChoice(choice: NarrativeNodeChoiceInsert, shouldRefetch = true) {
+	async function createChoice(choice: NarrativeNodeChoiceInsert) {
 		try {
-			const { error } = await supabase.from('narrative_node_choices').insert(choice);
+			const { data, error } = await supabase
+				.from('narrative_node_choices')
+				.insert(choice)
+				.select()
+				.single();
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_nodes) {
+								const node = narrative.narrative_nodes.find(
+									(n) => n.id === choice.narrative_node_id
+								);
+								if (node) {
+									if (!node.narrative_node_choices) {
+										node.narrative_node_choices = [];
+									}
+									node.narrative_node_choices.push(data);
+									break;
+								}
+							}
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -178,19 +241,35 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function updateChoice(
-		id: string,
-		choice: NarrativeNodeChoiceUpdate,
-		shouldRefetch = false
-	) {
+	async function updateChoice(id: string, choice: NarrativeNodeChoiceUpdate) {
 		try {
 			const { error } = await supabase.from('narrative_node_choices').update(choice).eq('id', id);
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_nodes) {
+								for (const node of narrative.narrative_nodes) {
+									if (node.narrative_node_choices) {
+										const choiceIndex = node.narrative_node_choices.findIndex((c) => c.id === id);
+										if (choiceIndex !== -1) {
+											node.narrative_node_choices[choiceIndex] = {
+												...node.narrative_node_choices[choiceIndex],
+												...choice,
+											};
+											return;
+										}
+									}
+								}
+							}
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -200,15 +279,30 @@ function createNarrativeStore() {
 		}
 	}
 
-	async function removeChoice(id: string, shouldRefetch = true) {
+	async function removeChoice(id: string) {
 		try {
 			const { error } = await supabase.from('narrative_node_choices').delete().eq('id', id);
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await fetchNarratives();
-			}
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_nodes) {
+								for (const node of narrative.narrative_nodes) {
+									if (node.narrative_node_choices) {
+										node.narrative_node_choices = node.narrative_node_choices.filter(
+											(c) => c.id !== id
+										);
+									}
+								}
+							}
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,

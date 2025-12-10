@@ -11,8 +11,8 @@ create table narratives (
 create table narrative_nodes (
   id uuid primary key default gen_random_uuid(),
   narrative_id uuid not null references narratives(id) on delete cascade,
-  title text not null,
-  description text not null,
+  title text not null default '',
+  description text not null default '',
   root boolean not null default false,
   type narrative_node_type not null,
   created_at timestamptz not null default now()
@@ -21,8 +21,8 @@ create table narrative_nodes (
 create table narrative_node_choices (
   id uuid primary key default gen_random_uuid(),
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
-  title text not null,
-  description text not null,
+  title text not null default '',
+  description text not null default '',
   display_order integer not null default 0,
   created_at timestamptz not null default now()
 );

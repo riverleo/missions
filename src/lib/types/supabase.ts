@@ -45,7 +45,7 @@ export type Database = {
           created_at?: string
           id?: string
           order: number
-          title: string
+          title?: string
         }
         Update: {
           created_at?: string
@@ -67,11 +67,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          difficulty_class: number
-          failure_action: Database["public"]["Enums"]["dice_roll_action"]
+          difficulty_class?: number
+          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
           failure_narrative_node_id?: string | null
           id?: string
-          success_action: Database["public"]["Enums"]["dice_roll_action"]
+          success_action?: Database["public"]["Enums"]["dice_roll_action"]
           success_narrative_node_id?: string | null
         }
         Update: {
@@ -136,12 +136,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description: string
+          description?: string
           dice_roll_id?: string | null
           display_order?: number
           id?: string
           narrative_node_id: string
-          title: string
+          title?: string
         }
         Update: {
           created_at?: string
@@ -182,12 +182,12 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          description: string
+          description?: string
           dice_roll_id?: string | null
           id?: string
           narrative_id: string
           root?: boolean
-          title: string
+          title?: string
           type: Database["public"]["Enums"]["narrative_node_type"]
         }
         Update: {
@@ -615,7 +615,7 @@ export type Database = {
           id?: string
           order_in_chapter?: number
           status?: Database["public"]["Enums"]["quest_status"]
-          title: string
+          title?: string
           type?: Database["public"]["Enums"]["quest_type"]
         }
         Update: {
@@ -674,10 +674,7 @@ export type Database = {
       }
     }
     Enums: {
-      dice_roll_action:
-        | "narrative_node"
-        | "narrative_node_done"
-        | "chapter_done"
+      dice_roll_action: "narrative_node_next" | "narrative_node_done"
       narrative_node_type: "text" | "choice"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
@@ -814,11 +811,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      dice_roll_action: [
-        "narrative_node",
-        "narrative_node_done",
-        "chapter_done",
-      ],
+      dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       narrative_node_type: ["text", "choice"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],

@@ -1,6 +1,6 @@
 create table chapters (
   id uuid primary key default gen_random_uuid(),
-  title text not null,
+  title text not null default '',
   "order" integer not null,
   created_at timestamptz not null default now(),
 

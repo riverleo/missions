@@ -49,11 +49,7 @@
 		isCreatingDiceRoll = true;
 
 		try {
-			await diceRollAdmin.create({
-				difficulty_class: 10,
-				success_action: 'narrative_node_done',
-				failure_action: 'narrative_node_done',
-			});
+			await diceRollAdmin.create({});
 		} catch (error) {
 			console.error('Failed to create dice roll:', error);
 		} finally {

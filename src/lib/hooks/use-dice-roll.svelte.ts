@@ -1,6 +1,7 @@
 import { writable, type Readable } from 'svelte/store';
 import type { FetchState, DiceRoll, DiceRollInsert } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
+import { produce } from 'immer';
 
 let instance: ReturnType<typeof createDiceRollStore> | undefined = undefined;
 
@@ -46,7 +47,17 @@ function createDiceRollStore() {
 
 			if (error) throw error;
 
-			await fetchDiceRolls();
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						draft.data.push(data);
+					} else {
+						draft.data = [data];
+					}
+				})
+			);
+
 			return data;
 		} catch (error) {
 			store.update((state) => ({
@@ -63,7 +74,15 @@ function createDiceRollStore() {
 
 			if (error) throw error;
 
-			await fetchDiceRolls();
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					const diceRollIndex = draft.data?.findIndex((dr) => dr.id === id);
+					if (diceRollIndex !== undefined && diceRollIndex !== -1 && draft.data) {
+						draft.data[diceRollIndex] = { ...draft.data[diceRollIndex], ...diceRoll };
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -79,7 +98,14 @@ function createDiceRollStore() {
 
 			if (error) throw error;
 
-			await fetchDiceRolls();
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						draft.data = draft.data.filter((dr) => dr.id !== id);
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,

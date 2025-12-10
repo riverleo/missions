@@ -1,6 +1,13 @@
 <script lang="ts">
 	import '@xyflow/svelte/dist/style.css';
-	import { SvelteFlow, Controls, Background, BackgroundVariant, MiniMap } from '@xyflow/svelte';
+	import {
+		SvelteFlow,
+		Controls,
+		Background,
+		BackgroundVariant,
+		MiniMap,
+		useNodes,
+	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
@@ -9,16 +16,32 @@
 	import NarrativeNode from './narrative-node.svelte';
 	import DiceRollNode from './dice-roll-node.svelte';
 	import NarrativePanel from './narrative-panel.svelte';
+	import NarrativeNodePanel from './narrative-node-panel.svelte';
+	import DiceRollPanel from './dice-roll-panel.svelte';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { NarrativeNode as NarrativeNodeType, DiceRoll } from '$lib/types';
 
 	const narrativeId = $derived(page.params.narrativeId);
 	const { store, admin } = useNarrative();
 	const { store: diceRollStore, admin: diceRollAdmin } = useDiceRoll();
+	const flowNodes = useNodes();
 
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
 	const allDiceRolls = $derived($diceRollStore.data ?? []);
+
+	// 선택된 노드 추적
+	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
+	const selectedNarrativeNode = $derived(
+		selectedNode?.type === 'narrativeNode'
+			? narrativeNodes.find((n) => n.id === selectedNode.id)
+			: undefined
+	);
+	const selectedDiceRoll = $derived(
+		selectedNode?.type === 'diceRoll'
+			? allDiceRolls.find((d) => `dice-roll-${d.id}` === selectedNode.id)
+			: undefined
+	);
 
 	const nodeTypes = {
 		narrativeNode: NarrativeNode,
@@ -198,12 +221,12 @@
 					!edge.id.startsWith('dice-roll-')
 				) {
 					const nodeId = edge.id.split('-dice-roll-')[0];
-					await admin.updateNode(nodeId, { dice_roll_id: null }, true);
+					await admin.updateNode(nodeId, { dice_roll_id: null });
 				}
 				// 2. choice → dice_roll 엣지 (형식: choice-${choiceId}-dice-roll-${diceRollId})
 				else if (edge.id.startsWith('choice-') && edge.id.includes('-dice-roll-')) {
 					const choiceId = edge.id.split('-dice-roll-')[0].replace('choice-', '');
-					await admin.updateChoice(choiceId, { dice_roll_id: null }, true);
+					await admin.updateChoice(choiceId, { dice_roll_id: null });
 				}
 				// 3. dice_roll → success 엣지 (형식: dice-roll-${diceRollId}-success-${nodeId})
 				else if (edge.id.includes('-success-')) {
@@ -220,7 +243,7 @@
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'narrativeNode') {
-					await admin.removeNode(node.id, false);
+					await admin.removeNode(node.id);
 				} else if (node.type === 'diceRoll') {
 					// dice_roll 노드의 실제 ID 추출 (형식: dice-roll-${id})
 					const diceRollId = node.id.replace('dice-roll-', '');
@@ -357,7 +380,14 @@
 			<Controls />
 			<Background variant={BackgroundVariant.Dots} />
 			<MiniMap />
-			<NarrativePanel {onlayout} />
+
+			{#if selectedNarrativeNode}
+				<NarrativeNodePanel narrativeNode={selectedNarrativeNode} />
+			{:else if selectedDiceRoll}
+				<DiceRollPanel diceRoll={selectedDiceRoll} />
+			{:else}
+				<NarrativePanel {onlayout} />
+			{/if}
 		</SvelteFlow>
 	{/if}
 </div>
