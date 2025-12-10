@@ -27,3 +27,9 @@ create policy "admins can update dice"
   for update
   to authenticated
   using (is_admin());
+
+create policy "admins can delete dice"
+  on dice
+  for delete
+  to authenticated
+  using (is_admin());

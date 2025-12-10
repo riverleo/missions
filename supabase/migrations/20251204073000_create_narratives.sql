@@ -49,6 +49,12 @@ create policy "admins can update narratives"
   to authenticated
   using (is_admin());
 
+create policy "admins can delete narratives"
+  on narratives
+  for delete
+  to authenticated
+  using (is_admin());
+
 create policy "authenticated can view narrative_nodes"
   on narrative_nodes
   for select
@@ -67,6 +73,12 @@ create policy "admins can update narrative_nodes"
   to authenticated
   using (is_admin());
 
+create policy "admins can delete narrative_nodes"
+  on narrative_nodes
+  for delete
+  to authenticated
+  using (is_admin());
+
 create policy "authenticated can view narrative_node_choices"
   on narrative_node_choices
   for select
@@ -82,5 +94,11 @@ create policy "admins can insert narrative_node_choices"
 create policy "admins can update narrative_node_choices"
   on narrative_node_choices
   for update
+  to authenticated
+  using (is_admin());
+
+create policy "admins can delete narrative_node_choices"
+  on narrative_node_choices
+  for delete
   to authenticated
   using (is_admin());
