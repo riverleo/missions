@@ -7,6 +7,7 @@
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import NarrativeNode from './narrative-node.svelte';
 	import DiceRollNode from './dice-roll-node.svelte';
+	import NarrativePanel from './panel.svelte';
 
 	const narrativeId = $derived(page.params.narrativeId);
 	const { narratives } = useNarrative();
@@ -93,6 +94,7 @@
 			<Controls />
 			<Background variant={BackgroundVariant.Dots} />
 			<MiniMap />
+			<NarrativePanel />
 		</SvelteFlow>
 	{/if}
 </div>

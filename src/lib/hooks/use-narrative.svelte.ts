@@ -10,6 +10,7 @@ import type {
 	NarrativeNodeChoice,
 	NarrativeNodeChoiceInsert,
 	NarrativeNodeChoiceUpdate,
+	DiceRollInsert,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
