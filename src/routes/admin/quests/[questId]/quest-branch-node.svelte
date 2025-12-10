@@ -7,10 +7,9 @@
 			label: string;
 			questBranch: QuestBranch;
 		};
-		id: string;
 	};
 
-	const { data, id }: Props = $props();
+	const { data }: Props = $props();
 
 	// 좌측 핸들(target)의 연결 개수 체크
 	const targetConnections = useNodeConnections({ handleType: 'target' });
