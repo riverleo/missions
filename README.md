@@ -22,6 +22,7 @@
 ### 필수 도구
 
 - **ImageMagick**: 아틀라스 생성에 사용
+
   ```sh
   brew install imagemagick
   ```

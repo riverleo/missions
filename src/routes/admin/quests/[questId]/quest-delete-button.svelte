@@ -9,7 +9,7 @@
 		AlertDialogFooter,
 		AlertDialogHeader,
 		AlertDialogTitle,
-		AlertDialogTrigger
+		AlertDialogTrigger,
 	} from '$lib/components/ui/alert-dialog';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { goto } from '$app/navigation';
@@ -18,7 +18,8 @@
 	const { admin } = useQuest();
 
 	function onclick() {
-		admin.remove(questId)
+		admin
+			.remove(questId)
 			.then(() => {
 				goto('/admin/quests');
 			})

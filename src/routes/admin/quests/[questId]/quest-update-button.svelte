@@ -7,7 +7,7 @@
 		DialogHeader,
 		DialogTitle,
 		DialogDescription,
-		DialogFooter
+		DialogFooter,
 	} from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -34,7 +34,8 @@
 
 		isSubmitting = true;
 
-		admin.update(questId, { title: title.trim() })
+		admin
+			.update(questId, { title: title.trim() })
 			.then(() => {
 				open = false;
 			})

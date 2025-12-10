@@ -14,12 +14,10 @@
 
 	let { questBranch, onupdate }: Props = $props();
 
-	const { quests, admin } = useQuest();
+	const { admin } = useQuest();
 	const flowNodes = useNodes();
 
 	const questId = $derived(page.params.questId);
-	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
-	const questBranches = $derived(currentQuest?.quest_branches ?? []);
 
 	let editTitle = $state('');
 	let editDisplayOrder = $state(0);
@@ -39,11 +37,12 @@
 
 		isCreating = true;
 
-		admin.createBranch({
-			quest_id: questId,
-			title: '',
-			display_order: 0,
-		})
+		admin
+			.createBranch({
+				quest_id: questId,
+				title: '',
+				display_order: 0,
+			})
 			.catch((error) => {
 				console.error('Failed to create quest branch:', error);
 			})
@@ -57,10 +56,11 @@
 
 		isUpdating = true;
 
-		admin.updateBranch(questBranch.id, {
-			title: editTitle,
-			display_order: editDisplayOrder,
-		})
+		admin
+			.updateBranch(questBranch.id, {
+				title: editTitle,
+				display_order: editDisplayOrder,
+			})
 			.then(() => {
 				// 로컬 데이터 업데이트
 				questBranch.title = editTitle;

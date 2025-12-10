@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		Empty,
-		EmptyContent,
-		EmptyTitle,
-		EmptyDescription
-	} from '$lib/components/ui/empty';
+	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
 </script>
 
 <div class="flex h-full items-center justify-center">

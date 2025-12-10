@@ -65,10 +65,16 @@
 			speed: 12,
 		},
 		equipment: {
-			helmet: { id: 101, name: '강철 투구', rarity: 'rare', type: 'helmet' } as Equipment | undefined,
+			helmet: { id: 101, name: '강철 투구', rarity: 'rare', type: 'helmet' } as
+				| Equipment
+				| undefined,
 			amulet: undefined as Equipment | undefined,
-			armor: { id: 102, name: '가죽 갑옷', rarity: 'common', type: 'armor' } as Equipment | undefined,
-			gloves: { id: 103, name: '가죽 장갑', rarity: 'common', type: 'gloves' } as Equipment | undefined,
+			armor: { id: 102, name: '가죽 갑옷', rarity: 'common', type: 'armor' } as
+				| Equipment
+				| undefined,
+			gloves: { id: 103, name: '가죽 장갑', rarity: 'common', type: 'gloves' } as
+				| Equipment
+				| undefined,
 			belt: undefined as Equipment | undefined,
 			pants: undefined as Equipment | undefined,
 			boots: { id: 104, name: '무쇠 부츠', rarity: 'rare', type: 'boots' } as Equipment | undefined,

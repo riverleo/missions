@@ -28,7 +28,7 @@ export class SpriteAnimator {
 		try {
 			const [metadataModule, atlasModule] = await Promise.all([
 				import(`$lib/assets/atlas/generated/${this.atlasName}.json`),
-				import(`$lib/assets/atlas/generated/${this.atlasName}.png`)
+				import(`$lib/assets/atlas/generated/${this.atlasName}.png`),
 			]);
 			this.metadata = metadataModule.default;
 			this.atlasUrl = atlasModule.default;
@@ -61,7 +61,7 @@ export class SpriteAnimator {
 		// 이전 애니메이션 정지
 		this.stop();
 
-		  this.currentAnimation = name;
+		this.currentAnimation = name;
 		this.currentFrame = animation.from ? animation.from - 1 : 0; // 0-based로 변환
 		this.direction = 1; // 항상 정방향으로 시작
 
@@ -78,7 +78,9 @@ export class SpriteAnimator {
 		const fps = animation.fps ?? DEFAULT_FPS;
 		const frameDelay = 1000 / fps;
 		const from = animation.from ? animation.from - 1 : 0;
-		const to = animation.to ? animation.to - 1 : (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT) - 1;
+		const to = animation.to
+			? animation.to - 1
+			: (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT) - 1;
 
 		const updateFrame = () => {
 			// 다음 프레임으로 이동

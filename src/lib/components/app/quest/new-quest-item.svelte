@@ -52,7 +52,7 @@
 
 <div
 	role="presentation"
-	class="quest-item flex w-[500px] items-center gap-4 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:bg-white/5 cursor-pointer"
+	class="quest-item flex w-[500px] cursor-pointer items-center gap-4 rounded-lg p-4 transition-all duration-200 hover:scale-105 hover:bg-white/5"
 	onmouseenter={handleMouseEnter}
 >
 	<!-- 아이콘 영역 -->
@@ -79,7 +79,7 @@
 			{title}
 		</div>
 		<div
-			class="floating-element text-sm text-gray-600 dark:text-gray-300 leading-relaxed"
+			class="floating-element text-sm leading-relaxed text-gray-600 dark:text-gray-300"
 			style="--float-x: {descAnimation.x}px; --float-y: {descAnimation.y}px; --duration: {descAnimation.duration}s; --delay: {descAnimation.delay}s;"
 			transition:fade={{ duration: 300, delay: delay + 200 }}
 		>

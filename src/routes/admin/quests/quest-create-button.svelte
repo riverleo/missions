@@ -6,7 +6,7 @@
 		DialogHeader,
 		DialogTitle,
 		DialogDescription,
-		DialogFooter
+		DialogFooter,
 	} from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -25,7 +25,8 @@
 
 		isSubmitting = true;
 
-		admin.create({ title: title.trim() })
+		admin
+			.create({ title: title.trim() })
 			.then(() => {
 				title = '';
 				open = false;

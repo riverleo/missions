@@ -34,10 +34,7 @@
 		{@render children?.()}
 	</div>
 {:else if sidebar.isMobile}
-	<Sheet.Root
-		bind:open={sidebar.openMobile}
-		{...restProps}
-	>
+	<Sheet.Root bind:open={sidebar.openMobile} {...restProps}>
 		<Sheet.Content
 			data-sidebar="sidebar"
 			data-slot="sidebar"

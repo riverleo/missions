@@ -10,7 +10,7 @@
 	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
 </script>
 
-<header class="h-16 border-b px-6 flex items-center justify-between">
+<header class="flex h-16 items-center justify-between border-b px-6">
 	<h1 class="text-xl font-semibold">{currentQuest?.title ?? '퀘스트 이름'}</h1>
 	{#if questId}
 		<div class="flex gap-2">
