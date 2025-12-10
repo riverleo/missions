@@ -36,7 +36,7 @@ create policy "admins can delete dice_roll"
   to authenticated
   using (is_admin());
 
-create table player_dice_rolled (
+create table player_dice_rolleds (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
@@ -74,20 +74,20 @@ end;
 $$ language plpgsql;
 
 create trigger insert_player_dice_rolled_value
-  before insert on player_dice_rolled
+  before insert on player_dice_rolleds
   for each row
   execute function create_player_dice_rolled_value();
 
-alter table player_dice_rolled enable row level security;
+alter table player_dice_rolleds enable row level security;
 
-create policy "players can view their own player_dice_rolled"
-  on player_dice_rolled
+create policy "players can view their own player_dice_rolleds"
+  on player_dice_rolleds
   for select
   to authenticated
   using (is_own_player(user_id, player_id));
 
-create policy "players can insert their own player_dice_rolled"
-  on player_dice_rolled
+create policy "players can insert their own player_dice_rolleds"
+  on player_dice_rolleds
   for insert
   to authenticated
   with check (is_own_player(user_id, player_id));

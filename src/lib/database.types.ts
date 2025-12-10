@@ -277,7 +277,7 @@ export type Database = {
           },
         ]
       }
-      player_dice_rolled: {
+      player_dice_rolleds: {
         Row: {
           created_at: string
           dice_id: string | null
@@ -328,70 +328,70 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "player_dice_rolled_dice_id_fkey"
+            foreignKeyName: "player_dice_rolleds_dice_id_fkey"
             columns: ["dice_id"]
             isOneToOne: false
             referencedRelation: "dice"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_dice_roll_id_fkey"
+            foreignKeyName: "player_dice_rolleds_dice_roll_id_fkey"
             columns: ["dice_roll_id"]
             isOneToOne: false
             referencedRelation: "dice_roll"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_narrative_id_fkey"
+            foreignKeyName: "player_dice_rolleds_narrative_id_fkey"
             columns: ["narrative_id"]
             isOneToOne: false
             referencedRelation: "narratives"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_narrative_node_choice_id_fkey"
+            foreignKeyName: "player_dice_rolleds_narrative_node_choice_id_fkey"
             columns: ["narrative_node_choice_id"]
             isOneToOne: false
             referencedRelation: "narrative_node_choices"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_narrative_node_id_fkey"
+            foreignKeyName: "player_dice_rolleds_narrative_node_id_fkey"
             columns: ["narrative_node_id"]
             isOneToOne: false
             referencedRelation: "narrative_nodes"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_player_id_fkey"
+            foreignKeyName: "player_dice_rolleds_player_id_fkey"
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "players"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_player_quest_branch_id_fkey"
+            foreignKeyName: "player_dice_rolleds_player_quest_branch_id_fkey"
             columns: ["player_quest_branch_id"]
             isOneToOne: false
             referencedRelation: "player_quest_branches"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_player_quest_id_fkey"
+            foreignKeyName: "player_dice_rolleds_player_quest_id_fkey"
             columns: ["player_quest_id"]
             isOneToOne: false
             referencedRelation: "player_quests"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_quest_branch_id_fkey"
+            foreignKeyName: "player_dice_rolleds_quest_branch_id_fkey"
             columns: ["quest_branch_id"]
             isOneToOne: false
             referencedRelation: "quest_branches"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolled_quest_id_fkey"
+            foreignKeyName: "player_dice_rolleds_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"

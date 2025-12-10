@@ -1,4 +1,4 @@
-import type { Tables, TablesInsert, TablesUpdate, Enums } from './supabase';
+import type { Tables, TablesInsert, TablesUpdate, Enums } from '$lib/database.types';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 
 // Fetch types
@@ -15,28 +15,58 @@ export interface ServerPayload {
 	user: User | undefined;
 }
 
-// Quest enums
+// Enums
 export type QuestStatus = Enums<'quest_status'>;
 export type QuestType = Enums<'quest_type'>;
 export type PlayerQuestStatus = Enums<'player_quest_status'>;
+export type PlayerChapterStatus = Enums<'player_chapter_status'>;
+export type DiceRollAction = Enums<'dice_roll_action'>;
+export type NarrativeNodeType = Enums<'narrative_node_type'>;
 
-// Base types
-export type QuestRow = Tables<'quests'>;
-export type QuestBranch = Tables<'quest_branches'>;
-export type PlayerQuestRow = Tables<'player_quests'>;
-export type PlayerQuestBranchRow = Tables<'player_quest_branches'>;
+// Chapter types
+export type Chapter = Tables<'chapters'>;
+export type ChapterInsert = TablesInsert<'chapters'>;
+export type ChapterUpdate = TablesUpdate<'chapters'>;
+export type PlayerChapter = Tables<'player_chapters'>;
+export type PlayerChapterInsert = TablesInsert<'player_chapters'>;
 
-// Insert/Update types
+// Quest types
+export type Quest = Tables<'quests'>;
 export type QuestInsert = TablesInsert<'quests'>;
 export type QuestUpdate = TablesUpdate<'quests'>;
+export type QuestBranch = Tables<'quest_branches'>;
 export type QuestBranchInsert = TablesInsert<'quest_branches'>;
 export type QuestBranchUpdate = TablesUpdate<'quest_branches'>;
+export type PlayerQuest = Tables<'player_quests'>;
 export type PlayerQuestInsert = TablesInsert<'player_quests'>;
-export type PlayerQuestUpdate = TablesUpdate<'player_quests'>;
+export type PlayerQuestBranch = Tables<'player_quest_branches'>;
 export type PlayerQuestBranchInsert = TablesInsert<'player_quest_branches'>;
-export type PlayerQuestBranchUpdate = TablesUpdate<'player_quest_branches'>;
 
-// Extended types with joins
-export type Quest = QuestRow & {
-	quest_branches?: QuestBranch[];
-};
+// Narrative types
+export type Narrative = Tables<'narratives'>;
+export type NarrativeInsert = TablesInsert<'narratives'>;
+export type NarrativeUpdate = TablesUpdate<'narratives'>;
+export type NarrativeNode = Tables<'narrative_nodes'>;
+export type NarrativeNodeInsert = TablesInsert<'narrative_nodes'>;
+export type NarrativeNodeUpdate = TablesUpdate<'narrative_nodes'>;
+export type NarrativeNodeChoice = Tables<'narrative_node_choices'>;
+export type NarrativeNodeChoiceInsert = TablesInsert<'narrative_node_choices'>;
+export type NarrativeNodeChoiceUpdate = TablesUpdate<'narrative_node_choices'>;
+
+// Dice types
+export type Dice = Tables<'dice'>;
+export type DiceInsert = TablesInsert<'dice'>;
+export type DiceUpdate = TablesUpdate<'dice'>;
+export type DiceRoll = Tables<'dice_roll'>;
+export type DiceRollInsert = TablesInsert<'dice_roll'>;
+export type DiceRollUpdate = TablesUpdate<'dice_roll'>;
+export type PlayerDiceRolled = Tables<'player_dice_rolleds'>;
+export type PlayerDiceRolledInsert = TablesInsert<'player_dice_rolleds'>;
+
+// Player types
+export type Player = Tables<'players'>;
+export type PlayerInsert = TablesInsert<'players'>;
+export type PlayerUpdate = TablesUpdate<'players'>;
+
+// User types
+export type UserRole = Tables<'user_roles'>;
