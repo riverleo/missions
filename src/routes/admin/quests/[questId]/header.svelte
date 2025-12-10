@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import QuestUpdateButton from './quest-update-button.svelte';
 	import QuestDeleteButton from './quest-delete-button.svelte';
 
-	const questId = $derived($page.params.questId);
+	const questId = $derived(page.params.questId);
 	const { quests } = useQuest();
 
 	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));

@@ -14,15 +14,13 @@
 	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
 	import QuestBranchPanel from './quest-branch-panel.svelte';
-	import ELK from 'elkjs/lib/elk.bundled.js';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { sort } from 'radash';
+	import { applyElkLayout } from '$lib/utils/elk-layout';
 
 	const questId = $derived(page.params.questId);
 	const { quests, admin } = useQuest();
 	const flowNodes = useNodes();
-
-	const elk = new ELK();
 
 	const nodeTypes = {
 		questBranch: QuestBranchNode,
@@ -125,6 +123,11 @@
 		}
 	}
 
+	function onlayout(layoutedNodes: Node[], layoutedEdges: Edge[]) {
+		nodes = layoutedNodes;
+		edges = layoutedEdges;
+	}
+
 	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
@@ -156,38 +159,9 @@
 		});
 
 		// elkjs로 레이아웃 계산
-		if (newNodes.length > 0) {
-			const layoutedGraph = await elk.layout({
-				id: 'root',
-				layoutOptions: {
-					'elk.algorithm': 'layered',
-					'elk.direction': 'RIGHT',
-					'elk.spacing.nodeNode': '10',
-					'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-					'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
-				},
-				children: newNodes.map((node) => ({
-					id: node.id,
-					width: node.width ?? 200,
-					height: node.height ?? 60,
-				})),
-				edges: newEdges.map((edge) => ({
-					id: edge.id,
-					sources: [edge.source],
-					targets: [edge.target],
-				})),
-			});
+		const layoutedNodes = await applyElkLayout(newNodes, newEdges);
 
-			// elkjs 결과를 노드 position에 적용
-			layoutedGraph.children?.forEach((node) => {
-				const flowNode = newNodes.find((n) => n.id === node.id);
-				if (flowNode && node.x !== undefined && node.y !== undefined) {
-					flowNode.position = { x: node.x, y: node.y };
-				}
-			});
-		}
-
-		nodes = newNodes;
+		nodes = layoutedNodes;
 		edges = newEdges;
 	}
 
@@ -203,7 +177,7 @@
 			<Background variant={BackgroundVariant.Dots} />
 			<MiniMap />
 
-			<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} />
+			<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} {onlayout} />
 		</SvelteFlow>
 	{/if}
 </div>

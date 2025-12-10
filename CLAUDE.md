@@ -11,6 +11,22 @@
 7. **이벤트 핸들러에서 리터럴 함수 자제하기**
    - ❌ `onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}`
    - ✅ `function onsubmit(e: SubmitEvent) { e.preventDefault(); ... }`
+8. **로직은 컴포넌트 내부에, 콜백은 결과만 전달**
+   - 복잡한 비즈니스 로직을 외부에서 prop으로 주입받지 말고 컴포넌트 내부에 구현
+   - 콜백은 처리 결과 데이터만 전달받는 형태로 설계
+   - ❌ `onrelayout={() => { /* 복잡한 정렬 로직 */ }}`
+   - ✅ `onrelayout={(sortedNodes: Node[]) => { /* 결과만 받아서 처리 */ }}`
+9. **여러 컴포넌트에서 사용되는 로직은 별도 파일로 분리**
+   - 2개 이상의 컴포넌트에서 동일한 로직을 사용한다면 유틸리티 함수로 추출
+   - `$lib/utils/` 또는 관련 도메인 디렉토리에 배치
+   - 예: `applyElkLayout()` 함수를 여러 컴포넌트에서 사용하는 경우 별도 파일로 분리
+
+## Svelte 5 특화 규칙
+
+1. **Deprecated된 API 사용 금지**
+   - ❌ `import { page } from '$app/stores'` (Svelte 4 방식)
+   - ✅ `import { page } from '$app/state'` (Svelte 5 runes)
+   - stores 기반 API 대신 runes 기반 API 사용
 
 ## 린팅
 
