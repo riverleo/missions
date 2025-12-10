@@ -6,22 +6,19 @@
 		Background,
 		BackgroundVariant,
 		MiniMap,
-		Panel,
-		useSvelteFlow,
 		useNodes,
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
+	import QuestBranchPanel from './quest-branch-panel.svelte';
 	import ELK from 'elkjs/lib/elk.bundled.js';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { Button } from '$lib/components/ui/button';
+	import { title } from 'process';
 
-	const questId = $derived($page.params.questId);
+	const questId = $derived(page.params.questId);
 	const { quests, admin } = useQuest();
 	const flowNodes = useNodes();
 
@@ -39,89 +36,30 @@
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
-	const selectedBranch = $derived(
-		selectedNode ? questBranches.find((b) => b.id === selectedNode.id) : null
+	const selectedQuestBranch = $derived(
+		selectedNode ? questBranches.find((b: QuestBranch) => b.id === selectedNode.id) : undefined
 	);
 
-	let editTitle = $state('');
-	let editDisplayOrder = $state(0);
-	let isUpdating = $state(false);
-	let isCreating = $state(false);
-
-	// 선택된 브랜치가 변경되면 편집 필드 업데이트
-	$effect(() => {
-		if (selectedBranch) {
-			editTitle = selectedBranch.title;
-			editDisplayOrder = selectedBranch.display_order;
+	function onupdate(questBranch: QuestBranch) {
+		// 노드 레이블 업데이트
+		const node = nodes.find((n) => n.id === questBranch.id);
+		if (node && node.data) {
+			node.data.label = questBranch.title;
+			const branchData = node.data as { label: string; branch: QuestBranch };
+			branchData.branch.title = questBranch.title;
+			branchData.branch.display_order = questBranch.display_order;
 		}
-	});
-
-	async function handleCreateBranch() {
-		if (isCreating || !questId) return;
-
-		isCreating = true;
-
-		try {
-			await admin.createBranch({
-				quest_id: questId,
-				title: '',
-				display_order: questBranches.length,
-			});
-		} catch (error) {
-			console.error('Failed to create quest branch:', error);
-		} finally {
-			isCreating = false;
-		}
-	}
-
-	async function handleUpdateBranch() {
-		if (!selectedBranch || !selectedNode || isUpdating) return;
-
-		isUpdating = true;
-
-		try {
-			await admin.updateBranch(selectedBranch.id, {
-				title: editTitle,
-				display_order: editDisplayOrder,
-			});
-
-			// 로컬 데이터 업데이트
-			selectedBranch.title = editTitle;
-			selectedBranch.display_order = editDisplayOrder;
-
-			// 노드 레이블도 업데이트
-			const node = nodes.find((n) => n.id === selectedBranch.id);
-			if (node && node.data) {
-				node.data.label = editTitle;
-				const branchData = node.data as { label: string; branch: QuestBranch };
-				branchData.branch.title = editTitle;
-				branchData.branch.display_order = editDisplayOrder;
-			}
-
-			// 선택 해제
-			flowNodes.update((ns) =>
-				ns.map((n) => (n.id === selectedNode.id ? { ...n, selected: false } : n))
-			);
-		} catch (error) {
-			console.error('Failed to update branch:', error);
-		} finally {
-			isUpdating = false;
-		}
-	}
-
-	function handleCancelEdit() {
-		if (!selectedNode) return;
 
 		// 선택 해제
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === selectedNode.id ? { ...n, selected: false } : n))
+			ns.map((n) => (n.id === questBranch.id ? { ...n, selected: false } : n))
 		);
 	}
 
-	async function handleConnect(connection: Connection) {
+	async function onconnect(connection: Connection) {
 		try {
 			// target이 연결되는 브랜치 (자식), source가 부모 브랜치
-			const targetBranch = questBranches.find((b) => b.id === connection.target);
+			const targetBranch = questBranches.find((b: QuestBranch) => b.id === connection.target);
 			if (!targetBranch) return;
 
 			await admin.updateBranch(connection.target, {
@@ -146,7 +84,7 @@
 		}
 	}
 
-	async function handleDelete({
+	async function ondelete({
 		nodes: nodesToDelete,
 		edges: edgesToDelete,
 	}: {
@@ -156,7 +94,7 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				const targetBranch = questBranches.find((b) => b.id === edge.target);
+				const targetBranch = questBranches.find((b: QuestBranch) => b.id === edge.target);
 				if (!targetBranch) continue;
 
 				await admin.updateBranch(edge.target, {
@@ -187,16 +125,16 @@
 		}
 	}
 
-	async function convertToNodesAndEdges(branches: QuestBranch[]) {
+	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
 		// 노드 생성
-		branches.forEach((branch) => {
+		questBranches.forEach((questBranch) => {
 			newNodes.push({
-				id: branch.id,
+				id: questBranch.id,
 				type: 'questBranch',
-				data: { label: branch.title, branch },
+				data: { label: questBranch.title, questBranch },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				width: 200,
 				height: 60,
@@ -204,11 +142,11 @@
 			});
 
 			// 엣지 생성 (parent -> child)
-			if (branch.parent_quest_branch_id) {
+			if (questBranch.parent_quest_branch_id) {
 				newEdges.push({
-					id: `${branch.parent_quest_branch_id}-${branch.id}`,
-					source: branch.parent_quest_branch_id,
-					target: branch.id,
+					id: `${questBranch.parent_quest_branch_id}-${questBranch.id}`,
+					source: questBranch.parent_quest_branch_id,
+					target: questBranch.id,
 					deletable: true,
 				});
 			}
@@ -250,55 +188,18 @@
 	}
 
 	$effect(() => {
-		if (questBranches.length >= 0) {
-			convertToNodesAndEdges(questBranches);
-		}
+		convertToNodesAndEdges(questBranches);
 	});
 </script>
 
 <div class="relative flex-1">
-	<SvelteFlow
-		{nodes}
-		{edges}
-		{nodeTypes}
-		colorMode={mode.current}
-		onconnect={handleConnect}
-		ondelete={handleDelete}
-		fitView
-	>
-		<Controls />
-		<Background variant={BackgroundVariant.Dots} />
-		<MiniMap />
+	{#if questId}
+		<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {ondelete} fitView>
+			<Controls />
+			<Background variant={BackgroundVariant.Dots} />
+			<MiniMap />
 
-		<Panel position="top-right">
-			<div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 w-80">
-				{#if selectedBranch}
-					<h3 class="text-lg font-semibold mb-4">브랜치 수정</h3>
-					<div class="space-y-4">
-						<div class="space-y-2">
-							<Label for="edit-title">제목</Label>
-							<Input id="edit-title" bind:value={editTitle} />
-						</div>
-						<div class="space-y-2">
-							<Label for="edit-display-order">표시 순서</Label>
-							<Input id="edit-display-order" type="number" bind:value={editDisplayOrder} />
-						</div>
-						<div class="flex gap-2 justify-end">
-							<Button variant="outline" onclick={handleCancelEdit} disabled={isUpdating}>
-								취소
-							</Button>
-							<Button onclick={handleUpdateBranch} disabled={isUpdating}>
-								{isUpdating ? '저장 중...' : '저장'}
-							</Button>
-						</div>
-					</div>
-				{:else}
-					<h3 class="text-lg font-semibold mb-4">브랜치 관리</h3>
-					<Button onclick={handleCreateBranch} disabled={isCreating} class="w-full">
-						{isCreating ? '생성 중...' : '새로운 브랜치 추가'}
-					</Button>
-				{/if}
-			</div>
-		</Panel>
-	</SvelteFlow>
+			<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} />
+		</SvelteFlow>
+	{/if}
 </div>

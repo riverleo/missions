@@ -65,17 +65,17 @@
 			speed: 12,
 		},
 		equipment: {
-			helmet: { id: 101, name: '강철 투구', rarity: 'rare', type: 'helmet' } as Equipment | null,
-			amulet: null as Equipment | null,
-			armor: { id: 102, name: '가죽 갑옷', rarity: 'common', type: 'armor' } as Equipment | null,
-			gloves: { id: 103, name: '가죽 장갑', rarity: 'common', type: 'gloves' } as Equipment | null,
-			belt: null as Equipment | null,
-			pants: null as Equipment | null,
-			boots: { id: 104, name: '무쇠 부츠', rarity: 'rare', type: 'boots' } as Equipment | null,
-			weapon: { id: 105, name: '강철 검', rarity: 'rare', type: 'weapon' } as Equipment | null,
-			offhand: null as Equipment | null,
-			ring1: null as Equipment | null,
-			ring2: null as Equipment | null,
+			helmet: { id: 101, name: '강철 투구', rarity: 'rare', type: 'helmet' } as Equipment | undefined,
+			amulet: undefined as Equipment | undefined,
+			armor: { id: 102, name: '가죽 갑옷', rarity: 'common', type: 'armor' } as Equipment | undefined,
+			gloves: { id: 103, name: '가죽 장갑', rarity: 'common', type: 'gloves' } as Equipment | undefined,
+			belt: undefined as Equipment | undefined,
+			pants: undefined as Equipment | undefined,
+			boots: { id: 104, name: '무쇠 부츠', rarity: 'rare', type: 'boots' } as Equipment | undefined,
+			weapon: { id: 105, name: '강철 검', rarity: 'rare', type: 'weapon' } as Equipment | undefined,
+			offhand: undefined as Equipment | undefined,
+			ring1: undefined as Equipment | undefined,
+			ring2: undefined as Equipment | undefined,
 		},
 		inventory: [
 			{ id: 1, name: '체력 물약', type: 'consumable', quantity: 3, rarity: 'common' },
@@ -102,8 +102,8 @@
 		legendary: 'bg-orange-500',
 	};
 
-	let draggedItem = $state<InventoryItem | Equipment | null>(null);
-	let dragSource = $state<'inventory' | EquipmentSlot | null>(null);
+	let draggedItem = $state<InventoryItem | Equipment | undefined>(undefined);
+	let dragSource = $state<'inventory' | EquipmentSlot | undefined>(undefined);
 
 	function getSlotIcon(slot: EquipmentSlot) {
 		const iconMap = {
@@ -145,8 +145,8 @@
 	}
 
 	function handleDragEnd() {
-		draggedItem = null;
-		dragSource = null;
+		draggedItem = undefined;
+		dragSource = undefined;
 	}
 
 	function canEquipItem(item: InventoryItem | Equipment, slot: EquipmentSlot): boolean {
@@ -210,7 +210,7 @@
 
 			// Swap the items
 			playerData.equipment[slot] = sourceItem;
-			playerData.equipment[dragSource] = targetItem as Equipment | null;
+			playerData.equipment[dragSource] = targetItem as Equipment | undefined;
 		}
 
 		handleDragEnd();
@@ -241,8 +241,7 @@
 		}
 
 		// Remove from equipment
-		// @ts-ignore - equipment slot accepts null
-		playerData.equipment[slot] = null;
+		playerData.equipment[slot] = undefined;
 
 		handleDragEnd();
 	}

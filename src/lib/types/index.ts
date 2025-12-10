@@ -31,7 +31,7 @@ export type PlayerChapter = Tables<'player_chapters'>;
 export type PlayerChapterInsert = TablesInsert<'player_chapters'>;
 
 // Quest types
-export type Quest = Tables<'quests'>;
+export type QuestRow = Tables<'quests'>;
 export type QuestInsert = TablesInsert<'quests'>;
 export type QuestUpdate = TablesUpdate<'quests'>;
 export type QuestBranch = Tables<'quest_branches'>;
@@ -41,6 +41,11 @@ export type PlayerQuest = Tables<'player_quests'>;
 export type PlayerQuestInsert = TablesInsert<'player_quests'>;
 export type PlayerQuestBranch = Tables<'player_quest_branches'>;
 export type PlayerQuestBranchInsert = TablesInsert<'player_quest_branches'>;
+
+// Extended Quest with relations
+export type Quest = QuestRow & {
+	quest_branches?: QuestBranch[];
+};
 
 // Narrative types
 export type Narrative = Tables<'narratives'>;
