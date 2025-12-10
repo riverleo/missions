@@ -171,13 +171,11 @@
 </script>
 
 <div class="relative flex-1">
-	{#if questId}
-		<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {ondelete} fitView>
-			<Controls />
-			<Background variant={BackgroundVariant.Dots} />
-			<MiniMap />
+	<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {ondelete} fitView>
+		<Controls />
+		<Background variant={BackgroundVariant.Dots} />
+		<MiniMap />
 
-			<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} {onlayout} />
-		</SvelteFlow>
-	{/if}
+		<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} {onlayout} />
+	</SvelteFlow>
 </div>

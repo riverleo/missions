@@ -36,10 +36,10 @@ function createNarrativeStore() {
 					*,
 					narrative_nodes (
 						*,
-						dice_roll (*),
+						dice_roll!narrative_nodes_dice_roll_id_fkey (*),
 						narrative_node_choices (
 							*,
-							dice_roll (*)
+							dice_roll!narrative_node_choices_dice_roll_id_fkey (*)
 						)
 					)
 				`
@@ -54,6 +54,8 @@ function createNarrativeStore() {
 				error: undefined,
 			});
 		} catch (error) {
+			console.error(error);
+
 			store.set({
 				status: 'error',
 				data: undefined,

@@ -4,7 +4,7 @@
 	import QuestUpdateButton from './quest-update-button.svelte';
 	import QuestDeleteButton from './quest-delete-button.svelte';
 
-	const questId = $derived(page.params.questId);
+	const questId = $derived(page.params.questId) as string;
 	const { quests } = useQuest();
 
 	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
@@ -12,10 +12,8 @@
 
 <header class="flex h-16 items-center justify-between border-b px-6">
 	<h1 class="text-xl font-semibold">{currentQuest?.title ?? '퀘스트 이름'}</h1>
-	{#if questId}
-		<div class="flex gap-2">
-			<QuestUpdateButton {questId} />
-			<QuestDeleteButton {questId} />
-		</div>
-	{/if}
+	<div class="flex gap-2">
+		<QuestUpdateButton {questId} />
+		<QuestDeleteButton {questId} />
+	</div>
 </header>
