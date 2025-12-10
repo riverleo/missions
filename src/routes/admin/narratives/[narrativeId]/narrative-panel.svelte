@@ -10,6 +10,7 @@
 	const diceRoll = useDiceRoll();
 
 	let isCreatingNode = $state(false);
+	let isCreatingDiceRoll = $state(false);
 
 	async function onclickCreateNode() {
 		if (isCreatingNode || !narrativeId) return;
@@ -17,7 +18,8 @@
 		isCreatingNode = true;
 
 		try {
-			// 먼저 dice_roll 생성
+			// TODO: 기존 dice_roll 선택 또는 새로 생성
+			// 일단은 임시로 매번 새로 생성
 			const diceRollData = await diceRoll.create({
 				difficulty_class: 10,
 				success_action: 'narrative_node_done',
@@ -39,6 +41,24 @@
 			isCreatingNode = false;
 		}
 	}
+
+	async function onclickCreateDiceRoll() {
+		if (isCreatingDiceRoll) return;
+
+		isCreatingDiceRoll = true;
+
+		try {
+			await diceRoll.create({
+				difficulty_class: 10,
+				success_action: 'narrative_node_done',
+				failure_action: 'narrative_node_done',
+			});
+		} catch (error) {
+			console.error('Failed to create dice roll:', error);
+		} finally {
+			isCreatingDiceRoll = false;
+		}
+	}
 </script>
 
 <Panel position="top-right">
@@ -49,6 +69,14 @@
 		<div class="space-y-2">
 			<Button onclick={onclickCreateNode} disabled={isCreatingNode} class="w-full">
 				{isCreatingNode ? '생성 중...' : '새로운 노드 추가'}
+			</Button>
+			<Button
+				onclick={onclickCreateDiceRoll}
+				disabled={isCreatingDiceRoll}
+				variant="outline"
+				class="w-full"
+			>
+				{isCreatingDiceRoll ? '생성 중...' : '주사위 굴리기 추가'}
 			</Button>
 		</div>
 	</div>
