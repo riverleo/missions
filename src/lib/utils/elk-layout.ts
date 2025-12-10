@@ -3,16 +3,27 @@ import ELK from 'elkjs/lib/elk.bundled.js';
 
 const elk = new ELK();
 
-export async function applyElkLayout(nodes: Node[], edges: Edge[]): Promise<Node[]> {
+export interface ElkLayoutOptions {
+	nodeSpacing?: number;
+	layerSpacing?: number;
+}
+
+export async function applyElkLayout(
+	nodes: Node[],
+	edges: Edge[],
+	options: ElkLayoutOptions = {}
+): Promise<Node[]> {
 	if (nodes.length === 0) return nodes;
+
+	const { nodeSpacing = 80, layerSpacing = 150 } = options;
 
 	const layoutedGraph = await elk.layout({
 		id: 'root',
 		layoutOptions: {
 			'elk.algorithm': 'layered',
 			'elk.direction': 'RIGHT',
-			'elk.spacing.nodeNode': '50',
-			'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+			'elk.spacing.nodeNode': String(nodeSpacing),
+			'elk.layered.spacing.nodeNodeBetweenLayers': String(layerSpacing),
 			'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
 		},
 		children: nodes.map((node) => ({

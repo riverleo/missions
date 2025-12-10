@@ -7,14 +7,26 @@
 			narrativeNode: NarrativeNode;
 		};
 		id: string;
+		selected?: boolean;
 	}
 
-	const { data, id }: Props = $props();
+	const { data, id, selected = false }: Props = $props();
 	const narrativeNode = $derived(data.narrativeNode);
 </script>
 
 <div
-	class="min-w-[200px] rounded-md border-2 border-gray-300 bg-white px-4 py-3 shadow-md dark:border-gray-600 dark:bg-gray-800"
+	class="min-w-[200px] rounded-md border-2 px-4 py-3 shadow-md transition-colors"
+	class:border-gray-300={!selected}
+	class:bg-white={!selected}
+	class:dark:border-gray-600={!selected}
+	class:dark:bg-gray-800={!selected}
+	class:border-blue-500={selected}
+	class:bg-blue-50={selected}
+	class:dark:border-blue-400={selected}
+	class:dark:bg-blue-900={selected}
+	class:ring-2={selected}
+	class:ring-blue-400={selected}
+	class:dark:ring-blue-500={selected}
 >
 	<!-- 입력 핸들 (부모 노드 또는 dice_roll에서 연결) -->
 	<Handle type="target" position={Position.Left} />

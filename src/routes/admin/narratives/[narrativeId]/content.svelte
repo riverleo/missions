@@ -10,6 +10,7 @@
 	import DiceRollNode from './dice-roll-node.svelte';
 	import NarrativePanel from './narrative-panel.svelte';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import type { NarrativeNode as NarrativeNodeType, DiceRoll } from '$lib/types';
 
 	const narrativeId = $derived(page.params.narrativeId);
 	const { store, admin } = useNarrative();
@@ -27,7 +28,7 @@
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 
-	function isValidConnection(connection: Connection) {
+	function isValidConnection(connection: Connection | Edge) {
 		const sourceNode = nodes.find((n) => n.id === connection.source);
 		const targetNode = nodes.find((n) => n.id === connection.target);
 
@@ -53,17 +54,20 @@
 		}
 
 		// target 노드의 해당 핸들에 이미 들어오는 엣지가 있는지 확인
-		const existingTargetEdge = edges.find((edge) => {
-			if (connection.targetHandle) {
-				// targetHandle이 지정된 경우
-				return edge.target === connection.target && edge.targetHandle === connection.targetHandle;
-			}
-			// targetHandle이 없는 경우 target만 확인
-			return edge.target === connection.target && !edge.targetHandle;
-		});
+		// 단, diceRoll 타입의 target은 여러 연결을 받을 수 있음
+		if (targetNode.type !== 'diceRoll') {
+			const existingTargetEdge = edges.find((edge) => {
+				if (connection.targetHandle) {
+					// targetHandle이 지정된 경우
+					return edge.target === connection.target && edge.targetHandle === connection.targetHandle;
+				}
+				// targetHandle이 없는 경우 target만 확인
+				return edge.target === connection.target && !edge.targetHandle;
+			});
 
-		if (existingTargetEdge) {
-			return false;
+			if (existingTargetEdge) {
+				return false;
+			}
 		}
 
 		return true;
@@ -100,7 +104,7 @@
 			// 1. narrative_node → dice_roll 연결
 			if (sourceNode.type === 'narrativeNode' && targetNode.type === 'diceRoll') {
 				const diceRollId = connection.target.replace('dice-roll-', '');
-				const narrativeNode = sourceNode.data.narrativeNode;
+				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
 
 				// text 타입만 dice_roll_id를 가질 수 있음
 				if (narrativeNode.type !== 'text') return;
@@ -134,7 +138,7 @@
 					});
 
 					// 로컬 데이터 업데이트
-					const diceRoll = sourceNode.data.diceRoll;
+					const diceRoll = sourceNode.data.diceRoll as DiceRoll;
 					diceRoll.success_narrative_node_id = connection.target;
 
 					// 엣지 추가
@@ -155,7 +159,7 @@
 					});
 
 					// 로컬 데이터 업데이트
-					const diceRoll = sourceNode.data.diceRoll;
+					const diceRoll = sourceNode.data.diceRoll as DiceRoll;
 					diceRoll.failure_narrative_node_id = connection.target;
 
 					// 엣지 추가
@@ -242,6 +246,9 @@
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
+		// 노드 타입별 고정 높이
+		const NODE_HEIGHT = 180;
+
 		// 1. narrative_node 노드 생성
 		narrativeNodes.forEach((narrativeNode) => {
 			newNodes.push({
@@ -249,7 +256,7 @@
 				type: 'narrativeNode',
 				data: { narrativeNode },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
-				width: 250,
+				width: 200,
 				deletable: true,
 			});
 		});
@@ -261,7 +268,8 @@
 				type: 'diceRoll',
 				data: { diceRoll: diceRollData },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
-				width: 250,
+				width: 110,
+				height: 100,
 				deletable: true,
 			});
 		});

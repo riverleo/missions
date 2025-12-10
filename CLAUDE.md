@@ -93,8 +93,20 @@
      export type NarrativeNodeChoice = NarrativeNodeChoiceRow & { dice_roll: DiceRoll };
      ```
 
-## 린팅
+## Types
 
-- `pnpm check` - svelte-check (타입 체크 + unused variables)
-- `pnpm lint` - prettier (코드 포맷팅)
+- 타입 재정의 시 WithXXX 같은 suffix 붙이지 않기. 타입 재정의 시 원본 타입을 덮어쓰는 형태로 export
+- 테이블 이름은 복수형으로 작성 (예: `quests`, `narratives`, `dices`)
+- 하지만 관계 데이터는 단수형으로 작성 (예: `quest.quest_branches`가 아니라 `quest.quest_branch`)
+  - 왜냐하면 Supabase 쿼리에서 `quest_branch:quest_branches!fk_name (*)` 형태로 alias를 사용하기 때문
+- `any` 타입은 최후의 수단이 아닌 이상 절대 사용하지 않기. 항상 명시적인 타입을 정의하거나 추론하도록 작성
+
+## 패키지 매니저
+
+- **pnpm 사용** (npm, yarn 사용 금지)
+- 명령어 예시:
+  - `pnpm install` - 패키지 설치
+  - `pnpm check` - svelte-check (타입 체크 + unused variables)
+  - `pnpm lint` - prettier (코드 포맷팅)
+  - `pnpm dev` - 개발 서버 실행
 - ESLint는 사용하지 않음 (svelte-check가 대체)
