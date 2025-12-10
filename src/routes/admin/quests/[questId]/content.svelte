@@ -16,7 +16,6 @@
 	import QuestBranchPanel from './quest-branch-panel.svelte';
 	import ELK from 'elkjs/lib/elk.bundled.js';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import { title } from 'process';
 
 	const questId = $derived(page.params.questId);
 	const { quests, admin } = useQuest();
@@ -44,10 +43,10 @@
 		// 노드 레이블 업데이트
 		const node = nodes.find((n) => n.id === questBranch.id);
 		if (node && node.data) {
-			node.data.label = questBranch.title;
-			const branchData = node.data as { label: string; branch: QuestBranch };
-			branchData.branch.title = questBranch.title;
-			branchData.branch.display_order = questBranch.display_order;
+			const data = node.data as { label: string; questBranch: QuestBranch };
+			data.label = questBranch.title;
+			data.questBranch.title = questBranch.title;
+			data.questBranch.display_order = questBranch.display_order;
 		}
 
 		// 선택 해제
@@ -129,8 +128,11 @@
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
+		// display_order로 정렬된 브랜치 사용
+		const sortedBranches = [...questBranches].sort((a, b) => a.display_order - b.display_order);
+
 		// 노드 생성
-		questBranches.forEach((questBranch) => {
+		sortedBranches.forEach((questBranch) => {
 			newNodes.push({
 				id: questBranch.id,
 				type: 'questBranch',
@@ -159,8 +161,9 @@
 				layoutOptions: {
 					'elk.algorithm': 'layered',
 					'elk.direction': 'RIGHT',
-					'elk.spacing.nodeNode': '80',
+					'elk.spacing.nodeNode': '10',
 					'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+					'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
 				},
 				children: newNodes.map((node) => ({
 					id: node.id,

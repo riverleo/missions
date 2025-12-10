@@ -43,7 +43,7 @@
 			await admin.createBranch({
 				quest_id: questId,
 				title: '',
-				display_order: questBranches.length,
+				display_order: 0,
 			});
 		} catch (error) {
 			console.error('Failed to create quest branch:', error);

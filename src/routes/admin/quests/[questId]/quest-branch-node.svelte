@@ -5,7 +5,7 @@
 	type Props = {
 		data: {
 			label: string;
-			branch: QuestBranch;
+			questBranch: QuestBranch;
 		};
 		id: string;
 	};
@@ -16,7 +16,7 @@
 	const targetConnections = useNodeConnections({ handleType: 'target' });
 	const isConnectable = $derived(targetConnections.current.length === 0);
 
-	const branch = $derived(data.branch);
+	const questBranch = $derived(data.questBranch);
 </script>
 
 <div
@@ -26,7 +26,7 @@
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
 	<div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-		{branch.title || '(제목 없음)'}
+		{questBranch.title || '(제목 없음)'}
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->
