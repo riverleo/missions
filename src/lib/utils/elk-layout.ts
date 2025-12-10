@@ -11,7 +11,7 @@ export async function applyElkLayout(nodes: Node[], edges: Edge[]): Promise<Node
 		layoutOptions: {
 			'elk.algorithm': 'layered',
 			'elk.direction': 'RIGHT',
-			'elk.spacing.nodeNode': '10',
+			'elk.spacing.nodeNode': '50',
 			'elk.layered.spacing.nodeNodeBetweenLayers': '100',
 			'elk.layered.considerModelOrder.strategy': 'NODES_AND_EDGES',
 		},

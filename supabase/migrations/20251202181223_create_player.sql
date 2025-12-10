@@ -22,7 +22,7 @@ create table players (
 );
 
 -- 삭제되지 않은 레코드 중에서 user_id는 유일해야 함 (한 유저당 하나의 플레이어)
-create unique index players_uniq_user_id
+create unique index uq_players_user_id
   on players(user_id)
   where deleted_at is null;
 

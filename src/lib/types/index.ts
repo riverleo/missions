@@ -1,5 +1,12 @@
-import type { Tables, TablesInsert, TablesUpdate, Enums } from '$lib/database.types';
+import type { Database } from './supabase';
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+
+type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+type TablesInsert<T extends keyof Database['public']['Tables']> =
+	Database['public']['Tables'][T]['Insert'];
+type TablesUpdate<T extends keyof Database['public']['Tables']> =
+	Database['public']['Tables'][T]['Update'];
+type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
 // Fetch types
 export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -59,13 +66,8 @@ export type NarrativeNodeChoiceInsert = TablesInsert<'narrative_node_choices'>;
 export type NarrativeNodeChoiceUpdate = TablesUpdate<'narrative_node_choices'>;
 
 // Extended Narrative with relations
-export type NarrativeNodeChoiceWithDiceRoll = NarrativeNodeChoice & {
-	dice_roll: DiceRoll;
-};
-
 export type NarrativeNode = NarrativeNodeRow & {
-	dice_roll: DiceRoll;
-	narrative_node_choices?: NarrativeNodeChoiceWithDiceRoll[];
+	narrative_node_choices?: NarrativeNodeChoice[];
 };
 
 export type Narrative = NarrativeRow & {
@@ -73,14 +75,14 @@ export type Narrative = NarrativeRow & {
 };
 
 // Dice types
-export type Dice = Tables<'dice'>;
-export type DiceInsert = TablesInsert<'dice'>;
-export type DiceUpdate = TablesUpdate<'dice'>;
-export type DiceRoll = Tables<'dice_roll'>;
-export type DiceRollInsert = TablesInsert<'dice_roll'>;
-export type DiceRollUpdate = TablesUpdate<'dice_roll'>;
-export type PlayerDiceRolled = Tables<'player_dice_rolleds'>;
-export type PlayerDiceRolledInsert = TablesInsert<'player_dice_rolleds'>;
+export type Dice = Tables<'dices'>;
+export type DiceInsert = TablesInsert<'dices'>;
+export type DiceUpdate = TablesUpdate<'dices'>;
+export type DiceRoll = Tables<'dice_rolls'>;
+export type DiceRollInsert = TablesInsert<'dice_rolls'>;
+export type DiceRollUpdate = TablesUpdate<'dice_rolls'>;
+export type PlayerDiceRoll = Tables<'player_dice_rolls'>;
+export type PlayerDiceRollInsert = TablesInsert<'player_dice_rolls'>;
 
 // Player types
 export type Player = Tables<'players'>;

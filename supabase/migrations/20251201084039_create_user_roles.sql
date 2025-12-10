@@ -11,7 +11,7 @@ create table user_roles (
 );
 
 -- 삭제되지 않은 레코드 중에서 user_id는 유일해야 함
-create unique index user_roles_uniq_user_id
+create unique index uq_user_roles_user_id
   on user_roles(user_id)
   where deleted_at is null;
 

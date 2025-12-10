@@ -14,9 +14,9 @@
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 
 	const { narrativeId }: { narrativeId: string } = $props();
-	const { narratives, admin } = useNarrative();
+	const { store, admin } = useNarrative();
 
-	const currentNarrative = $derived($narratives.data?.find((n) => n.id === narrativeId));
+	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 
 	let open = $state(false);
 	let title = $state('');

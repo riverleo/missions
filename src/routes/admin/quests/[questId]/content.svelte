@@ -19,14 +19,14 @@
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 
 	const questId = $derived(page.params.questId);
-	const { quests, admin } = useQuest();
+	const { store, admin } = useQuest();
 	const flowNodes = useNodes();
 
 	const nodeTypes = {
 		questBranch: QuestBranchNode,
 	};
 
-	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
+	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
 	const questBranches = $derived(currentQuest?.quest_branches ?? []);
 
 	let nodes = $state<Node[]>([]);

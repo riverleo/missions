@@ -10,7 +10,7 @@
 	import NarrativeCreateButton from './narrative-create-button.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
-	const { narratives } = useNarrative();
+	const { store } = useNarrative();
 </script>
 
 <aside class="w-80 overflow-y-auto border-r">
@@ -19,17 +19,17 @@
 		<NarrativeCreateButton />
 	</header>
 
-	{#if $narratives.status === 'loading'}
+	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />
 		</div>
-	{:else if $narratives.status === 'error'}
+	{:else if $store.status === 'error'}
 		<div class="p-4 text-sm text-destructive">내러티브를 불러오는데 실패했습니다.</div>
-	{:else if $narratives.data && $narratives.data.length > 0}
+	{:else if $store.data && $store.data.length > 0}
 		<ItemGroup>
-			{#each $narratives.data as narrative (narrative.id)}
+			{#each $store.data as narrative (narrative.id)}
 				<Item>
 					{#snippet child({ props })}
 						<a href={`/admin/narratives/${narrative.id}`} {...props}>

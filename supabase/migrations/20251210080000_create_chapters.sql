@@ -4,7 +4,7 @@ create table chapters (
   "order" integer not null,
   created_at timestamptz not null default now(),
 
-  constraint chapters_uniq_order unique ("order")
+  constraint uq_chapters_order unique ("order")
 );
 
 create type player_chapter_status as enum ('in_progress', 'completed');
@@ -17,7 +17,7 @@ create table player_chapters (
   status player_chapter_status not null default 'in_progress',
   created_at timestamptz not null default now(),
 
-  constraint player_chapters_uniq_player_id_chapter_id_status unique (player_id, chapter_id, status)
+  constraint uq_player_chapters_player_id_chapter_id_status unique (player_id, chapter_id, status)
 );
 
 alter table quests add column chapter_id uuid references chapters(id) on delete cascade;

@@ -4,13 +4,10 @@ import type {
 	Narrative,
 	NarrativeInsert,
 	NarrativeUpdate,
-	NarrativeNode,
 	NarrativeNodeInsert,
 	NarrativeNodeUpdate,
-	NarrativeNodeChoice,
 	NarrativeNodeChoiceInsert,
 	NarrativeNodeChoiceUpdate,
-	DiceRollInsert,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
@@ -37,11 +34,7 @@ function createNarrativeStore() {
 					*,
 					narrative_nodes (
 						*,
-						dice_roll!narrative_nodes_dice_roll_id_fkey (*),
-						narrative_node_choices (
-							*,
-							dice_roll!narrative_node_choices_dice_roll_id_fkey (*)
-						)
+						narrative_node_choices (*)
 					)
 				`
 				)
@@ -231,7 +224,7 @@ function createNarrativeStore() {
 	}
 
 	return {
-		narratives: store as Readable<FetchState<Narrative[]>>,
+		store: store as Readable<FetchState<Narrative[]>>,
 		admin: {
 			create,
 			update,

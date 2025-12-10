@@ -5,9 +5,9 @@
 	import QuestDeleteButton from './quest-delete-button.svelte';
 
 	const questId = $derived(page.params.questId) as string;
-	const { quests } = useQuest();
+	const { store } = useQuest();
 
-	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
+	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
 </script>
 
 <header class="flex h-16 items-center justify-between border-b px-6">

@@ -5,9 +5,9 @@
 	import NarrativeDeleteButton from './narrative-delete-button.svelte';
 
 	const narrativeId = $derived(page.params.narrativeId);
-	const { narratives } = useNarrative();
+	const { store } = useNarrative();
 
-	const currentNarrative = $derived($narratives.data?.find((n) => n.id === narrativeId));
+	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 </script>
 
 <header class="flex h-16 items-center justify-between border-b px-6">

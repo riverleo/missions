@@ -27,7 +27,7 @@ create table player_quests (
   status player_quest_status not null default 'in_progress',
   created_at timestamptz not null default now(),
 
-  constraint player_quests_uniq_player_id_quest_id_status unique (player_id, quest_id, status)
+  constraint uq_player_quests_player_id_quest_id_status unique (player_id, quest_id, status)
 );
 
 create table player_quest_branches (
@@ -39,7 +39,7 @@ create table player_quest_branches (
   quest_branch_id uuid not null references quest_branches(id) on delete cascade,
   created_at timestamptz not null default now(),
 
-  constraint player_quest_branches_uniq_player_id_quest_id_quest_branch_id unique (player_id, quest_id, quest_branch_id)
+  constraint uq_player_quest_branches_player_id_quest_id_quest_branch_id unique (player_id, quest_id, quest_branch_id)
 );
 
 alter table quests enable row level security;

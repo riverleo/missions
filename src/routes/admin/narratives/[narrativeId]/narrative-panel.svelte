@@ -1,16 +1,26 @@
 <script lang="ts">
-	import { Panel } from '@xyflow/svelte';
+	import { Panel, useNodes } from '@xyflow/svelte';
+	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
 	import { page } from '$app/state';
+	import { applyElkLayout } from '$lib/utils/elk-layout';
+
+	interface Props {
+		onlayout?: (nodes: Node[], edges: Edge[]) => void;
+	}
+
+	let { onlayout }: Props = $props();
 
 	const narrativeId = $derived(page.params.narrativeId);
 	const { admin } = useNarrative();
-	const diceRoll = useDiceRoll();
+	const { admin: diceRollAdmin } = useDiceRoll();
+	const flowNodes = useNodes();
 
 	let isCreatingNode = $state(false);
 	let isCreatingDiceRoll = $state(false);
+	let isLayouting = $state(false);
 
 	async function onclickCreateNode() {
 		if (isCreatingNode || !narrativeId) return;
@@ -18,22 +28,13 @@
 		isCreatingNode = true;
 
 		try {
-			// TODO: 기존 dice_roll 선택 또는 새로 생성
-			// 일단은 임시로 매번 새로 생성
-			const diceRollData = await diceRoll.create({
-				difficulty_class: 10,
-				success_action: 'narrative_node_done',
-				failure_action: 'narrative_node_done',
-			});
-
-			// narrative_node 생성
 			await admin.createNode({
 				narrative_id: narrativeId,
-				title: '새로운 노드',
+				title: '내러티브 노드',
 				description: '',
 				type: 'text',
 				root: false,
-				dice_roll_id: diceRollData.id,
+				dice_roll_id: null,
 			});
 		} catch (error) {
 			console.error('Failed to create narrative node:', error);
@@ -48,7 +49,7 @@
 		isCreatingDiceRoll = true;
 
 		try {
-			await diceRoll.create({
+			await diceRollAdmin.create({
 				difficulty_class: 10,
 				success_action: 'narrative_node_done',
 				failure_action: 'narrative_node_done',
@@ -57,6 +58,97 @@
 			console.error('Failed to create dice roll:', error);
 		} finally {
 			isCreatingDiceRoll = false;
+		}
+	}
+
+	async function onclickLayout() {
+		if (isLayouting || !onlayout) return;
+
+		isLayouting = true;
+
+		try {
+			const nodes = flowNodes.current;
+			const edges: Edge[] = [];
+
+			// 노드 ID 집합 생성 (존재 여부 확인용)
+			const nodeIds = new Set(nodes.map((n) => n.id));
+
+			// 현재 노드들로부터 엣지 추출
+			nodes.forEach((node) => {
+				// narrative_node → dice_roll 엣지
+				if (node.type === 'narrativeNode') {
+					const data = node.data as { narrativeNode: any };
+					const narrativeNode = data.narrativeNode;
+
+					if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
+						const targetId = `dice-roll-${narrativeNode.dice_roll_id}`;
+						// target 노드가 실제로 존재하는지 확인
+						if (nodeIds.has(targetId)) {
+							edges.push({
+								id: `${node.id}-${targetId}`,
+								source: node.id,
+								target: targetId,
+								deletable: true,
+							});
+						}
+					}
+
+					if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
+						narrativeNode.narrative_node_choices.forEach((choice: any) => {
+							if (choice.dice_roll_id) {
+								const targetId = `dice-roll-${choice.dice_roll_id}`;
+								// target 노드가 실제로 존재하는지 확인
+								if (nodeIds.has(targetId)) {
+									edges.push({
+										id: `choice-${choice.id}-${targetId}`,
+										source: node.id,
+										target: targetId,
+										deletable: true,
+									});
+								}
+							}
+						});
+					}
+				}
+
+				// dice_roll → narrative_node 엣지 (success/failure)
+				if (node.type === 'diceRoll') {
+					const data = node.data as { diceRoll: any };
+					const diceRoll = data.diceRoll;
+
+					if (diceRoll.success_narrative_node_id && nodeIds.has(diceRoll.success_narrative_node_id)) {
+						edges.push({
+							id: `${node.id}-success-${diceRoll.success_narrative_node_id}`,
+							source: node.id,
+							sourceHandle: 'success',
+							target: diceRoll.success_narrative_node_id,
+							deletable: true,
+							style: 'stroke: #22c55e',
+						});
+					}
+
+					if (diceRoll.failure_narrative_node_id && nodeIds.has(diceRoll.failure_narrative_node_id)) {
+						edges.push({
+							id: `${node.id}-failure-${diceRoll.failure_narrative_node_id}`,
+							source: node.id,
+							sourceHandle: 'failure',
+							target: diceRoll.failure_narrative_node_id,
+							deletable: true,
+							style: 'stroke: #ef4444',
+						});
+					}
+				}
+			});
+
+			// ELK 레이아웃 계산
+			const layoutedNodes = await applyElkLayout(nodes, edges);
+
+			// 부모 컴포넌트에 정렬된 노드와 엣지 전달
+			onlayout(layoutedNodes, edges);
+		} catch (error) {
+			console.error('Failed to layout:', error);
+		} finally {
+			isLayouting = false;
 		}
 	}
 </script>
@@ -68,7 +160,7 @@
 		<h3 class="mb-4 text-lg font-semibold">노드 관리</h3>
 		<div class="space-y-2">
 			<Button onclick={onclickCreateNode} disabled={isCreatingNode} class="w-full">
-				{isCreatingNode ? '생성 중...' : '새로운 노드 추가'}
+				{isCreatingNode ? '생성 중...' : '내러티브 노드 추가'}
 			</Button>
 			<Button
 				onclick={onclickCreateDiceRoll}
@@ -76,7 +168,10 @@
 				variant="outline"
 				class="w-full"
 			>
-				{isCreatingDiceRoll ? '생성 중...' : '주사위 굴리기 추가'}
+				{isCreatingDiceRoll ? '생성 중...' : '주사위 굴림 추가'}
+			</Button>
+			<Button onclick={onclickLayout} disabled={isLayouting} variant="outline" class="w-full">
+				{isLayouting ? '정렬 중...' : '자동 정렬'}
 			</Button>
 		</div>
 	</div>

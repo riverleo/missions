@@ -5,7 +5,7 @@ create table narratives (
   title text not null,
   created_at timestamptz not null default now(),
 
-  constraint narratives_uniq_title unique (title)
+  constraint uq_narratives_title unique (title)
 );
 
 create table narrative_nodes (

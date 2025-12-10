@@ -41,6 +41,58 @@
    - 역할 없음 = 일반 유저, 역할 1개 = 특정 권한 보유
    - 쿼리 시 `.maybeSingle()` 사용 (0개=정상, 1개=정상, 2개 이상=에러)
 
+3. **Supabase 타입 생성**
+   - `src/lib/types/supabase.ts`는 Supabase에서 자동 생성되는 파일 (기존 파일)
+   - 타입 생성 명령어: `pnpm supabase gen types typescript --local > src/lib/types/supabase.ts`
+   - 이 파일을 직접 수정하지 말고, 필요한 타입 확장은 `src/lib/types/index.ts`에서 할 것
+
+4. **Constraint 및 Index 명명 규칙**
+   - 모든 constraint와 index는 명시적으로 이름을 지정할 것
+   - Unique: `uq_<table_name>_<column_name>` (복수 컬럼: `uq_<table_name>_<col1>_<col2>`)
+   - Foreign Key: `fk_<table_name>_<column_name>`
+   - Index: `idx_<table_name>_<column_name>`
+   - Check: `chk_<table_name>_<column_name>`
+
+5. **테이블 생성 스타일**
+   - 가능하면 `create table` 문 안에서 모든 constraint를 한번에 정의
+   - `alter table`로 나중에 추가하는 것보다 inline constraint 선호
+   - 예:
+
+     ```sql
+     create table users (
+       id uuid primary key default gen_random_uuid(),
+       email text not null,
+       name text not null,
+
+       constraint uq_users_email_name unique (email, name)
+     );
+     ```
+
+6. **테이블명과 관계 데이터 명명**
+   - 테이블명은 복수형 사용 (예: `dices`, `dice_rolls`, `narratives`)
+   - 단일 관계 데이터를 참조할 때는 단수형 사용 (예: `narrativeNode.dice_roll`)
+   - Supabase 쿼리에서 alias로 단수형 지정:
+     ```typescript
+     .select(`
+       *,
+       dice_roll:dice_rolls!narrative_nodes_dice_roll_id_fkey (*)
+     `)
+     ```
+   - 이유: 테이블은 여러 레코드의 집합이므로 복수형, 개별 관계는 단일 객체이므로 단수형
+
+7. **타입 re-export 규칙**
+   - `src/lib/types/index.ts`에서 확장된 타입을 re-export할 때는 원래 이름 사용
+   - `WithXXX` 같은 suffix를 붙이지 말고, 확장된 타입이 기본 타입이 되도록 함
+   - 예:
+     ```typescript
+     // ❌ 나쁜 예
+     export type NarrativeNodeChoiceWithDiceRoll = NarrativeNodeChoice & { dice_roll: DiceRoll };
+
+     // ✅ 좋은 예
+     type NarrativeNodeChoiceRow = Tables<'narrative_node_choices'>;
+     export type NarrativeNodeChoice = NarrativeNodeChoiceRow & { dice_roll: DiceRoll };
+     ```
+
 ## 린팅
 
 - `pnpm check` - svelte-check (타입 체크 + unused variables)

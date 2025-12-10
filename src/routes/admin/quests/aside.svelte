@@ -10,7 +10,7 @@
 	import QuestCreateButton from './quest-create-button.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
-	const { quests } = useQuest();
+	const { store } = useQuest();
 </script>
 
 <aside class="w-80 overflow-y-auto border-r">
@@ -19,17 +19,17 @@
 		<QuestCreateButton />
 	</header>
 
-	{#if $quests.status === 'loading'}
+	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />
 			<Skeleton class="h-16 w-full" />
 		</div>
-	{:else if $quests.status === 'error'}
+	{:else if $store.status === 'error'}
 		<div class="p-4 text-sm text-destructive">퀘스트를 불러오는데 실패했습니다.</div>
-	{:else if $quests.data && $quests.data.length > 0}
+	{:else if $store.data && $store.data.length > 0}
 		<ItemGroup>
-			{#each $quests.data as quest (quest.id)}
+			{#each $store.data as quest (quest.id)}
 				<Item>
 					{#snippet child({ props })}
 						<a href={`/admin/quests/${quest.id}`} {...props}>

@@ -14,9 +14,9 @@
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 
 	const { questId }: { questId: string } = $props();
-	const { quests, admin } = useQuest();
+	const { store, admin } = useQuest();
 
-	const currentQuest = $derived($quests.data?.find((q) => q.id === questId));
+	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
 
 	let open = $state(false);
 	let title = $state('');

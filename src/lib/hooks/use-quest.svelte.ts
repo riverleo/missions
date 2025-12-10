@@ -151,7 +151,7 @@ function createQuestStore() {
 	}
 
 	return {
-		quests: store as Readable<FetchState<Quest[]>>,
+		store: store as Readable<FetchState<Quest[]>>,
 		admin: {
 			create,
 			update,
