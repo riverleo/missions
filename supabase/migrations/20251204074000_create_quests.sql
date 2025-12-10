@@ -22,28 +22,23 @@ create table quest_branches (
 create table player_quests (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  quest_id uuid not null references quests(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
+  quest_id uuid not null references quests(id) on delete cascade,
   status player_quest_status not null default 'in_progress',
   created_at timestamptz not null default now(),
-  completed_at timestamptz,
-  in_progressed_at timestamptz,
-  abandoned_at timestamptz,
 
-  -- player_id + quest_id는 유일해야 함
-  constraint player_quests_uniq_player_id_quest_id unique (player_id, quest_id)
+  constraint player_quests_uniq_player_id_quest_id_status unique (player_id, quest_id, status)
 );
 
 create table player_quest_branches (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  quest_id uuid not null references quests(id) on delete cascade,
-  quest_branch_id uuid not null references quest_branches(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   player_quest_id uuid not null references player_quests(id) on delete cascade,
+  quest_id uuid not null references quests(id) on delete cascade,
+  quest_branch_id uuid not null references quest_branches(id) on delete cascade,
   created_at timestamptz not null default now(),
 
-  -- player_id + quest_id + quest_branch_id는 유일해야 함
   constraint player_quest_branches_uniq_player_id_quest_id_quest_branch_id unique (player_id, quest_id, quest_branch_id)
 );
 
@@ -111,12 +106,6 @@ create policy "players can insert their own player_quests"
   for insert
   to authenticated
   with check (is_own_player(user_id, player_id));
-
-create policy "players can update their own player_quests"
-  on player_quests
-  for update
-  to authenticated
-  using (is_own_player(user_id, player_id));
 
 create policy "players can view their own player_quest_branches"
   on player_quest_branches

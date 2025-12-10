@@ -1,4 +1,4 @@
-create type dice_roll_action as enum ('narrative_node', 'terminate');
+create type dice_roll_action as enum ('narrative_node', 'narrative_node_done', 'chapter_done');
 
 create table dice_roll (
   id uuid primary key default gen_random_uuid(),
@@ -40,13 +40,13 @@ create table player_dice_rolled (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
+  player_quest_id uuid references player_quests(id) on delete cascade,
+  player_quest_branch_id uuid references player_quest_branches(id) on delete cascade,
   narrative_id uuid not null references narratives(id) on delete cascade,
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   narrative_node_choice_id uuid references narrative_node_choices(id) on delete cascade,
   quest_id uuid references quests(id) on delete cascade,
   quest_branch_id uuid references quest_branches(id) on delete cascade,
-  player_quest_id uuid references player_quests(id) on delete cascade,
-  player_quest_branch_id uuid references player_quest_branches(id) on delete cascade,
   dice_id uuid references dice(id) on delete cascade,
   dice_roll_id uuid not null references dice_roll(id) on delete cascade,
   value integer,
