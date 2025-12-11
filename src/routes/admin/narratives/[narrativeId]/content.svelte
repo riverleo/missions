@@ -26,9 +26,9 @@
 	const { store: diceRollStore, admin: diceRollAdmin } = useDiceRoll();
 	const flowNodes = useNodes();
 
+	const diceRolls = $derived($diceRollStore.data ?? []);
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
-	const allDiceRolls = $derived($diceRollStore.data ?? []);
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
@@ -39,7 +39,7 @@
 	);
 	const selectedDiceRoll = $derived(
 		selectedNode?.type === 'diceRoll'
-			? allDiceRolls.find((d) => `dice-roll-${d.id}` === selectedNode.id)
+			? diceRolls.find((d) => `dice-roll-${d.id}` === selectedNode.id)
 			: undefined
 	);
 
@@ -105,13 +105,6 @@
 		try {
 			const sourceNode = nodes.find((n) => n.id === connection.source);
 			const targetNode = nodes.find((n) => n.id === connection.target);
-
-			console.log('Connection attempt:', {
-				source: connection.source,
-				sourceType: sourceNode?.type,
-				target: connection.target,
-				targetType: targetNode?.type,
-			});
 
 			if (!sourceNode || !targetNode) {
 				console.warn('Source or target node not found');
@@ -285,7 +278,7 @@
 		});
 
 		// 2. dice_roll 노드 생성 (모든 dice_roll)
-		allDiceRolls.forEach((diceRollData) => {
+		diceRolls.forEach((diceRollData) => {
 			newNodes.push({
 				id: `dice-roll-${diceRollData.id}`,
 				type: 'diceRoll',
@@ -327,7 +320,7 @@
 		});
 
 		// 4. dice_roll의 success/failure 참조를 시각화
-		allDiceRolls.forEach((diceRollData) => {
+		diceRolls.forEach((diceRollData) => {
 			const diceRollId = `dice-roll-${diceRollData.id}`;
 
 			if (diceRollData.success_narrative_node_id) {
