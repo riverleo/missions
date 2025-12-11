@@ -12,6 +12,9 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { IconPlus } from '@tabler/icons-svelte';
+	import Tooltip from '$lib/components/ui/tooltip/tooltip.svelte';
+	import { TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
 	const { admin } = useNarrative();
 
@@ -42,13 +45,22 @@
 
 <Dialog bind:open>
 	<DialogTrigger>
-		{#snippet child({ props })}
-			<Button {...props} size="sm">새로운 내러티브</Button>
+		{#snippet child({ props: dialogTriggerProps })}
+			<Tooltip>
+				<TooltipTrigger>
+					{#snippet child({ props })}
+						<Button {...props} {...dialogTriggerProps} size="icon" variant="outline">
+							<IconPlus />
+						</Button>
+					{/snippet}
+				</TooltipTrigger>
+				<TooltipContent>새로 내러티브를 만듭니다.</TooltipContent>
+			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 내러티브 만들기</DialogTitle>
+			<DialogTitle>새로운 내러티브</DialogTitle>
 			<DialogDescription>내러티브의 기본 정보를 입력해주세요.</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>

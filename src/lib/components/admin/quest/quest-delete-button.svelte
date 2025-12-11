@@ -11,8 +11,10 @@
 		AlertDialogTitle,
 		AlertDialogTrigger,
 	} from '$lib/components/ui/alert-dialog';
+	import { IconTrash } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { goto } from '$app/navigation';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
 	const { questId }: { questId: string } = $props();
 	const { admin } = useQuest();
@@ -31,8 +33,18 @@
 
 <AlertDialog>
 	<AlertDialogTrigger>
-		{#snippet child({ props })}
-			<Button {...props} variant="destructive">삭제</Button>
+		{#snippet child({ props: alertDialogTriggerProps })}
+			<Tooltip>
+				<TooltipTrigger>
+					{#snippet child({ props })}
+						<Button {...props} {...alertDialogTriggerProps} size="icon" variant="outline">
+							<IconTrash class="h-4 w-4" />
+							<span class="sr-only">Delete</span>
+						</Button>
+					{/snippet}
+				</TooltipTrigger>
+				<TooltipContent>퀘스트를 삭제합니다</TooltipContent>
+			</Tooltip>
 		{/snippet}
 	</AlertDialogTrigger>
 	<AlertDialogContent>

@@ -5,6 +5,7 @@
 	import ServerPayloadProvider from '$lib/components/server-payload-provider.svelte';
 	import { ModeWatcher } from 'mode-watcher';
 	import type { ServerPayload } from '$lib/types';
+	import { TooltipProvider } from '$lib/components/ui/tooltip';
 
 	const { data, children }: { data: ServerPayload; children: any } = $props();
 </script>
@@ -18,5 +19,7 @@
 <ModeWatcher />
 
 <ServerPayloadProvider {data}>
-	{@render children()}
+	<TooltipProvider>
+		{@render children()}
+	</TooltipProvider>
 </ServerPayloadProvider>

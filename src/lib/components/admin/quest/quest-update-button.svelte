@@ -11,7 +11,9 @@
 	} from '$lib/components/ui/dialog';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { IconEditCircle } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
 	const { questId }: { questId: string } = $props();
 	const { store, admin } = useQuest();
@@ -50,8 +52,18 @@
 
 <Dialog bind:open>
 	<DialogTrigger>
-		{#snippet child({ props })}
-			<Button {...props} variant="outline">수정</Button>
+		{#snippet child({ props: dialogTriggerProps })}
+			<Tooltip>
+				<TooltipTrigger>
+					{#snippet child({ props })}
+						<Button {...props} {...dialogTriggerProps} variant="outline" size="icon">
+							<IconEditCircle class="h-4 w-4" />
+							<span class="sr-only">Edit</span>
+						</Button>
+					{/snippet}
+				</TooltipTrigger>
+				<TooltipContent>퀘스트의 정보를 수정합니다</TooltipContent>
+			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>

@@ -11,6 +11,7 @@
 		AlertDialogTitle,
 		AlertDialogTrigger,
 	} from '$lib/components/ui/alert-dialog';
+	import { IconTrash } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { goto } from '$app/navigation';
 
@@ -32,7 +33,10 @@
 <AlertDialog>
 	<AlertDialogTrigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="destructive">삭제</Button>
+			<Button {...props} variant="ghost" size="icon">
+				<IconTrash class="h-4 w-4" />
+				<span class="sr-only">Delete</span>
+			</Button>
 		{/snippet}
 	</AlertDialogTrigger>
 	<AlertDialogContent>

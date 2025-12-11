@@ -1,9 +1,6 @@
 import { writable, type Readable } from 'svelte/store';
-import type { Database } from '$lib/types/supabase';
-import type { FetchState, ServerPayload } from '$lib/types';
+import type { FetchState, ServerPayload, UserRole } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
-
-type UserRole = Database['public']['Tables']['user_roles']['Row'];
 
 export interface UserState {
 	user: User | undefined;

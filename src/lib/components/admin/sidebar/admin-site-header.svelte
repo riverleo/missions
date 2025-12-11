@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
-	import { Separator } from '$lib/components/ui/separator';
 	import {
 		Breadcrumb,
 		BreadcrumbItem,
@@ -9,10 +8,13 @@
 		BreadcrumbPage,
 		BreadcrumbSeparator,
 	} from '$lib/components/ui/breadcrumb';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import { useAdmin } from '$lib/hooks/use-admin.svelte';
+
+	const admin = useAdmin();
 
 	const breadcrumbs = $derived(() => {
-		const path = $page.url.pathname;
+		const path = page.url.pathname;
 		const segments = path.split('/').filter(Boolean);
 
 		// 항상 Home을 첫 번째로 추가
@@ -74,4 +76,9 @@
 			{/each}
 		</BreadcrumbList>
 	</Breadcrumb>
+	<div class="ml-auto">
+		{#if admin.siteHeaderActions}
+			{@render admin.siteHeaderActions()}
+		{/if}
+	</div>
 </header>

@@ -1,10 +1,21 @@
 <script lang="ts">
-	import Header from '$lib/components/admin/narrative/narrative-header.svelte';
+	import { onMount } from 'svelte';
+	import NarrativeSiteHeaderActions from '$lib/components/admin/narrative/narrative-site-header-actions.svelte';
+	import { useAdmin } from '$lib/hooks/use-admin.svelte';
 
 	let { children } = $props();
+
+	const admin = useAdmin();
+
+	onMount(() => {
+		admin.siteHeaderActions = siteHeaderActions;
+
+		return () => (admin.siteHeaderActions = undefined);
+	});
 </script>
 
-<div class="flex flex-1 flex-col">
-	<Header />
-	{@render children()}
-</div>
+{#snippet siteHeaderActions()}
+	<NarrativeSiteHeaderActions />
+{/snippet}
+
+{@render children()}

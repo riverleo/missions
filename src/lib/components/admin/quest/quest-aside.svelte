@@ -7,18 +7,12 @@
 		ItemDescription,
 	} from '$lib/components/ui/item';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import QuestCreateButton from './quest-create-button.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	const { store } = useQuest();
 </script>
 
 <aside class="w-80 overflow-y-auto border-r">
-	<header class="mb-4 flex h-16 items-center justify-between border-b p-4">
-		<h2 class="text-lg font-semibold">퀘스트</h2>
-		<QuestCreateButton />
-	</header>
-
 	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />

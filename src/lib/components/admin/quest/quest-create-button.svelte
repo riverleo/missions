@@ -11,7 +11,10 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import { IconPlus } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import Tooltip from '$lib/components/ui/tooltip/tooltip.svelte';
+	import { TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
 	const { admin } = useQuest();
 
@@ -42,8 +45,17 @@
 
 <Dialog bind:open>
 	<DialogTrigger>
-		{#snippet child({ props })}
-			<Button {...props} size="sm">새로운 퀘스트</Button>
+		{#snippet child({ props: dialogTriggerProps })}
+			<Tooltip>
+				<TooltipTrigger>
+					{#snippet child({ props })}
+						<Button {...props} {...dialogTriggerProps} size="icon" variant="outline">
+							<IconPlus />
+						</Button>
+					{/snippet}
+				</TooltipTrigger>
+				<TooltipContent>새로운 퀘스트를 만듭니다.</TooltipContent>
+			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>

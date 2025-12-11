@@ -1,24 +1,12 @@
 <script lang="ts">
-	import {
-		ItemGroup,
-		Item,
-		ItemContent,
-		ItemTitle,
-		ItemDescription,
-	} from '$lib/components/ui/item';
+	import { ItemGroup, Item, ItemContent, ItemTitle } from '$lib/components/ui/item';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import NarrativeCreateButton from './narrative-create-button.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 
 	const { store } = useNarrative();
 </script>
 
 <aside class="w-80 overflow-y-auto border-r">
-	<header class="mb-4 flex h-16 items-center justify-between border-b p-4">
-		<h2 class="text-lg font-semibold">내러티브</h2>
-		<NarrativeCreateButton />
-	</header>
-
 	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />
