@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
-	import { Root as InputGroupRoot, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
+	import { InputGroup, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Root as SelectRoot, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
+	import { Select, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 
@@ -82,7 +82,7 @@
 	<Card class="w-80 pt-6 pb-4">
 		<CardContent class="px-4">
 			<form {onsubmit} class="space-y-4">
-				<InputGroupRoot>
+				<InputGroup>
 					<InputGroupText>최소 눈금</InputGroupText>
 					<InputGroupInput
 						type="number"
@@ -91,10 +91,10 @@
 						min={1}
 						max={30}
 					/>
-				</InputGroupRoot>
+				</InputGroup>
 
 				<div class="space-y-2">
-					<SelectRoot type="single" bind:value={editSuccessAction}>
+					<Select type="single" bind:value={editSuccessAction}>
 						<SelectTrigger>
 							<span class="text-muted-foreground">성공:</span>
 							<span class="ml-1">{getActionLabel(editSuccessAction)}</span>
@@ -103,9 +103,9 @@
 							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
 							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
 						</SelectContent>
-					</SelectRoot>
+					</Select>
 
-					<SelectRoot type="single" bind:value={editFailureAction}>
+					<Select type="single" bind:value={editFailureAction}>
 						<SelectTrigger>
 							<span class="text-muted-foreground">실패:</span>
 							<span class="ml-1">{getActionLabel(editFailureAction)}</span>
@@ -114,7 +114,7 @@
 							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
 							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
 						</SelectContent>
-					</SelectRoot>
+					</Select>
 				</div>
 
 				<div class="flex justify-end gap-2">
