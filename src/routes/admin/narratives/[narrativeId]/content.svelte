@@ -19,6 +19,24 @@
 	import NarrativeNodePanel from './narrative-node-panel.svelte';
 	import DiceRollPanel from './dice-roll-panel.svelte';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import {
+		createNarrativeNodeId,
+		parseNarrativeNodeId,
+		createDiceRollNodeId,
+		parseDiceRollNodeId,
+		createNarrativeNodeToDiceRollEdgeId,
+		createNarrativeNodeChoiceToDiceRollEdgeId,
+		createDiceRollToSuccessEdgeId,
+		createDiceRollToFailureEdgeId,
+		parseNarrativeNodeToDiceRollEdgeId,
+		parseNarrativeNodeChoiceToDiceRollEdgeId,
+		parseDiceRollToSuccessEdgeId,
+		parseDiceRollToFailureEdgeId,
+		isNarrativeNodeToDiceRollEdge,
+		isNarrativeNodeChoiceToDiceRollEdge,
+		isDiceRollToSuccessEdge,
+		isDiceRollToFailureEdge,
+	} from '$lib/utils/flow-id';
 	import type { NarrativeNode as NarrativeNodeType, DiceRoll } from '$lib/types';
 
 	const narrativeId = $derived(page.params.narrativeId);
@@ -34,12 +52,12 @@
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
 	const selectedNarrativeNode = $derived(
 		selectedNode?.type === 'narrativeNode'
-			? narrativeNodes.find((n) => n.id === selectedNode.id)
+			? narrativeNodes.find((n) => createNarrativeNodeId(n) === selectedNode.id)
 			: undefined
 	);
 	const selectedDiceRoll = $derived(
 		selectedNode?.type === 'diceRoll'
-			? diceRolls.find((d) => `dice-roll-${d.id}` === selectedNode.id)
+			? diceRolls.find((d) => createDiceRollNodeId(d) === selectedNode.id)
 			: undefined
 	);
 
@@ -119,13 +137,15 @@
 
 			// 1. narrative_node → dice_roll 연결
 			if (sourceNode.type === 'narrativeNode' && targetNode.type === 'diceRoll') {
-				const diceRollId = connection.target.replace('dice-roll-', '');
+				const narrativeNodeId = parseNarrativeNodeId(connection.source);
+				const diceRollId = parseDiceRollNodeId(connection.target);
 				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
+				const diceRoll = targetNode.data.diceRoll as DiceRoll;
 
 				// text 타입만 dice_roll_id를 가질 수 있음
 				if (narrativeNode.type !== 'text') return;
 
-				await admin.updateNode(connection.source, {
+				await admin.updateNode(narrativeNodeId, {
 					dice_roll_id: diceRollId,
 				});
 
@@ -136,7 +156,7 @@
 				edges = [
 					...edges,
 					{
-						id: `${connection.source}-${connection.target}`,
+						id: createNarrativeNodeToDiceRollEdgeId(narrativeNode, diceRoll),
 						source: connection.source,
 						target: connection.target,
 						deletable: true,
@@ -145,7 +165,9 @@
 			}
 			// 2. dice_roll → narrative_node 연결 (success/failure)
 			else if (sourceNode.type === 'diceRoll' && targetNode.type === 'narrativeNode') {
-				const diceRollId = connection.source.replace('dice-roll-', '');
+				const diceRollId = parseDiceRollNodeId(connection.source);
+				const diceRoll = sourceNode.data.diceRoll as DiceRoll;
+				const narrativeNode = targetNode.data.narrativeNode as NarrativeNodeType;
 				const handle = connection.sourceHandle;
 
 				if (handle === 'success') {
@@ -154,14 +176,13 @@
 					});
 
 					// 로컬 데이터 업데이트
-					const diceRoll = sourceNode.data.diceRoll as DiceRoll;
 					diceRoll.success_narrative_node_id = connection.target;
 
 					// 엣지 추가
 					edges = [
 						...edges,
 						{
-							id: `${connection.source}-success-${connection.target}`,
+							id: createDiceRollToSuccessEdgeId(diceRoll, narrativeNode),
 							source: connection.source,
 							sourceHandle: 'success',
 							target: connection.target,
@@ -175,14 +196,13 @@
 					});
 
 					// 로컬 데이터 업데이트
-					const diceRoll = sourceNode.data.diceRoll as DiceRoll;
 					diceRoll.failure_narrative_node_id = connection.target;
 
 					// 엣지 추가
 					edges = [
 						...edges,
 						{
-							id: `${connection.source}-failure-${connection.target}`,
+							id: createDiceRollToFailureEdgeId(diceRoll, narrativeNode),
 							source: connection.source,
 							sourceHandle: 'failure',
 							target: connection.target,
@@ -207,28 +227,24 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				// 1. narrative_node → dice_roll 엣지 (형식: ${nodeId}-dice-roll-${diceRollId})
-				if (
-					edge.id.includes('-dice-roll-') &&
-					!edge.id.startsWith('choice-') &&
-					!edge.id.startsWith('dice-roll-')
-				) {
-					const nodeId = edge.id.split('-dice-roll-')[0];
+				// 1. narrative_node → dice_roll 엣지
+				if (isNarrativeNodeToDiceRollEdge(edge.id)) {
+					const { nodeId } = parseNarrativeNodeToDiceRollEdgeId(edge.id);
 					await admin.updateNode(nodeId, { dice_roll_id: null });
 				}
-				// 2. choice → dice_roll 엣지 (형식: choice-${choiceId}-dice-roll-${diceRollId})
-				else if (edge.id.startsWith('choice-') && edge.id.includes('-dice-roll-')) {
-					const choiceId = edge.id.split('-dice-roll-')[0].replace('choice-', '');
-					await admin.updateChoice(choiceId, { dice_roll_id: null });
+				// 2. narrative_node_choice → dice_roll 엣지
+				else if (isNarrativeNodeChoiceToDiceRollEdge(edge.id)) {
+					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToDiceRollEdgeId(edge.id);
+					await admin.updateChoice(narrativeNodeChoiceId, { dice_roll_id: null });
 				}
-				// 3. dice_roll → success 엣지 (형식: dice-roll-${diceRollId}-success-${nodeId})
-				else if (edge.id.includes('-success-')) {
-					const diceRollId = edge.id.split('-success-')[0].replace('dice-roll-', '');
+				// 3. dice_roll → success 엣지
+				else if (isDiceRollToSuccessEdge(edge.id)) {
+					const { diceRollId } = parseDiceRollToSuccessEdgeId(edge.id);
 					await diceRollAdmin.update(diceRollId, { success_narrative_node_id: null });
 				}
-				// 4. dice_roll → failure 엣지 (형식: dice-roll-${diceRollId}-failure-${nodeId})
-				else if (edge.id.includes('-failure-')) {
-					const diceRollId = edge.id.split('-failure-')[0].replace('dice-roll-', '');
+				// 4. dice_roll → failure 엣지
+				else if (isDiceRollToFailureEdge(edge.id)) {
+					const { diceRollId } = parseDiceRollToFailureEdgeId(edge.id);
 					await diceRollAdmin.update(diceRollId, { failure_narrative_node_id: null });
 				}
 			}
@@ -236,10 +252,10 @@
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'narrativeNode') {
-					await admin.removeNode(node.id);
+					const narrativeNodeId = parseNarrativeNodeId(node.id);
+					await admin.removeNode(narrativeNodeId);
 				} else if (node.type === 'diceRoll') {
-					// dice_roll 노드의 실제 ID 추출 (형식: dice-roll-${id})
-					const diceRollId = node.id.replace('dice-roll-', '');
+					const diceRollId = parseDiceRollNodeId(node.id);
 					await diceRollAdmin.remove(diceRollId);
 				}
 			}
@@ -268,7 +284,7 @@
 		// 1. narrative_node 노드 생성
 		narrativeNodes.forEach((narrativeNode) => {
 			newNodes.push({
-				id: narrativeNode.id,
+				id: createNarrativeNodeId(narrativeNode),
 				type: 'narrativeNode',
 				data: { narrativeNode },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
@@ -280,7 +296,7 @@
 		// 2. dice_roll 노드 생성 (모든 dice_roll)
 		diceRolls.forEach((diceRollData) => {
 			newNodes.push({
-				id: `dice-roll-${diceRollData.id}`,
+				id: createDiceRollNodeId(diceRollData),
 				type: 'diceRoll',
 				data: { diceRoll: diceRollData },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
@@ -294,24 +310,32 @@
 		narrativeNodes.forEach((narrativeNode) => {
 			// text 타입이고 dice_roll_id가 있으면 엣지 생성
 			if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
-				const diceRollId = `dice-roll-${narrativeNode.dice_roll_id}`;
+				const diceRoll = diceRolls.find((d) => d.id === narrativeNode.dice_roll_id);
+				if (!diceRoll) return;
+
+				const narrativeNodeId = createNarrativeNodeId(narrativeNode);
+				const diceRollNodeId = createDiceRollNodeId(diceRoll);
 				newEdges.push({
-					id: `${narrativeNode.id}-${diceRollId}`,
-					source: narrativeNode.id,
-					target: diceRollId,
+					id: createNarrativeNodeToDiceRollEdgeId(narrativeNode, diceRoll),
+					source: narrativeNodeId,
+					target: diceRollNodeId,
 					deletable: true,
 				});
 			}
 
-			// choice 타입이면 각 choice의 dice_roll_id로 엣지 생성
+			// choice 타입이면 각 narrativeNodeChoice의 dice_roll_id로 엣지 생성
 			if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
-				narrativeNode.narrative_node_choices.forEach((choice) => {
-					if (choice.dice_roll_id) {
-						const diceRollId = `dice-roll-${choice.dice_roll_id}`;
+				narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice) => {
+					if (narrativeNodeChoice.dice_roll_id) {
+						const diceRoll = diceRolls.find((d) => d.id === narrativeNodeChoice.dice_roll_id);
+						if (!diceRoll) return;
+
+						const narrativeNodeId = createNarrativeNodeId(narrativeNode);
+						const diceRollNodeId = createDiceRollNodeId(diceRoll);
 						newEdges.push({
-							id: `choice-${choice.id}-${diceRollId}`,
-							source: narrativeNode.id,
-							target: diceRollId,
+							id: createNarrativeNodeChoiceToDiceRollEdgeId(narrativeNodeChoice, diceRoll),
+							source: narrativeNodeId,
+							target: diceRollNodeId,
 							deletable: true,
 						});
 					}
@@ -321,25 +345,33 @@
 
 		// 4. dice_roll의 success/failure 참조를 시각화
 		diceRolls.forEach((diceRollData) => {
-			const diceRollId = `dice-roll-${diceRollData.id}`;
+			const diceRollNodeId = createDiceRollNodeId(diceRollData);
 
 			if (diceRollData.success_narrative_node_id) {
+				const successNode = narrativeNodes.find((n) => n.id === diceRollData.success_narrative_node_id);
+				if (!successNode) return;
+
+				const successNodeId = createNarrativeNodeId(successNode);
 				newEdges.push({
-					id: `${diceRollId}-success-${diceRollData.success_narrative_node_id}`,
-					source: diceRollId,
+					id: createDiceRollToSuccessEdgeId(diceRollData, successNode),
+					source: diceRollNodeId,
 					sourceHandle: 'success',
-					target: diceRollData.success_narrative_node_id,
+					target: successNodeId,
 					deletable: true,
 					style: 'stroke: #22c55e',
 				});
 			}
 
 			if (diceRollData.failure_narrative_node_id) {
+				const failureNode = narrativeNodes.find((n) => n.id === diceRollData.failure_narrative_node_id);
+				if (!failureNode) return;
+
+				const failureNodeId = createNarrativeNodeId(failureNode);
 				newEdges.push({
-					id: `${diceRollId}-failure-${diceRollData.failure_narrative_node_id}`,
-					source: diceRollId,
+					id: createDiceRollToFailureEdgeId(diceRollData, failureNode),
+					source: diceRollNodeId,
 					sourceHandle: 'failure',
-					target: diceRollData.failure_narrative_node_id,
+					target: failureNodeId,
 					deletable: true,
 					style: 'stroke: #ef4444',
 				});

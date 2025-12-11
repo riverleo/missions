@@ -20,6 +20,10 @@
    - 2개 이상의 컴포넌트에서 동일한 로직을 사용한다면 유틸리티 함수로 추출
    - `$lib/utils/` 또는 관련 도메인 디렉토리에 배치
    - 예: `applyElkLayout()` 함수를 여러 컴포넌트에서 사용하는 경우 별도 파일로 분리
+10. **임포트는 명시적으로**
+   - `import * as` 형태 사용 금지
+   - ❌ `import * as FlowId from '$lib/utils/flow-id'`
+   - ✅ `import { createDiceRollNodeId, parseDiceRollNodeId } from '$lib/utils/flow-id'`
 
 ## Svelte 5 특화 규칙
 

@@ -6,6 +6,11 @@
 	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import {
+		createDiceRollNodeId,
+		createNarrativeNodeToDiceRollEdgeId,
+		createNarrativeNodeChoiceToDiceRollEdgeId,
+	} from '$lib/utils/flow-id';
 
 	interface Props {
 		onlayout?: (nodes: Node[], edges: Edge[]) => void;
@@ -28,14 +33,7 @@
 		isCreatingNode = true;
 
 		try {
-			await admin.createNode({
-				narrative_id: narrativeId,
-				title: '내러티브 노드',
-				description: '',
-				type: 'text',
-				root: false,
-				dice_roll_id: null,
-			});
+			await admin.createNode({ narrative_id: narrativeId, type: 'text' });
 		} catch (error) {
 			console.error('Failed to create narrative node:', error);
 		} finally {
@@ -77,11 +75,17 @@
 					const narrativeNode = data.narrativeNode;
 
 					if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
-						const targetId = `dice-roll-${narrativeNode.dice_roll_id}`;
+						// dice_roll 객체 찾기
+						const targetDiceRollNode = nodes.find((n) => n.id.endsWith(narrativeNode.dice_roll_id));
+						if (!targetDiceRollNode || targetDiceRollNode.type !== 'diceRoll') return;
+
+						const diceRoll = (targetDiceRollNode.data as { diceRoll: any }).diceRoll;
+						const targetId = createDiceRollNodeId(diceRoll);
+
 						// target 노드가 실제로 존재하는지 확인
 						if (nodeIds.has(targetId)) {
 							edges.push({
-								id: `${node.id}-${targetId}`,
+								id: createNarrativeNodeToDiceRollEdgeId(narrativeNode, diceRoll),
 								source: node.id,
 								target: targetId,
 								deletable: true,
@@ -90,13 +94,21 @@
 					}
 
 					if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
-						narrativeNode.narrative_node_choices.forEach((choice: any) => {
-							if (choice.dice_roll_id) {
-								const targetId = `dice-roll-${choice.dice_roll_id}`;
+						narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice: any) => {
+							if (narrativeNodeChoice.dice_roll_id) {
+								// dice_roll 객체 찾기
+								const targetDiceRollNode = nodes.find((n) =>
+									n.id.endsWith(narrativeNodeChoice.dice_roll_id)
+								);
+								if (!targetDiceRollNode || targetDiceRollNode.type !== 'diceRoll') return;
+
+								const diceRoll = (targetDiceRollNode.data as { diceRoll: any }).diceRoll;
+								const targetId = createDiceRollNodeId(diceRoll);
+
 								// target 노드가 실제로 존재하는지 확인
 								if (nodeIds.has(targetId)) {
 									edges.push({
-										id: `choice-${choice.id}-${targetId}`,
+										id: createNarrativeNodeChoiceToDiceRollEdgeId(narrativeNodeChoice, diceRoll),
 										source: node.id,
 										target: targetId,
 										deletable: true,
@@ -112,7 +124,10 @@
 					const data = node.data as { diceRoll: any };
 					const diceRoll = data.diceRoll;
 
-					if (diceRoll.success_narrative_node_id && nodeIds.has(diceRoll.success_narrative_node_id)) {
+					if (
+						diceRoll.success_narrative_node_id &&
+						nodeIds.has(diceRoll.success_narrative_node_id)
+					) {
 						edges.push({
 							id: `${node.id}-success-${diceRoll.success_narrative_node_id}`,
 							source: node.id,
@@ -123,7 +138,10 @@
 						});
 					}
 
-					if (diceRoll.failure_narrative_node_id && nodeIds.has(diceRoll.failure_narrative_node_id)) {
+					if (
+						diceRoll.failure_narrative_node_id &&
+						nodeIds.has(diceRoll.failure_narrative_node_id)
+					) {
 						edges.push({
 							id: `${node.id}-failure-${diceRoll.failure_narrative_node_id}`,
 							source: node.id,

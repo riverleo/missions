@@ -6,6 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Select from '$lib/components/ui/select';
 	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
+	import { createDiceRollNodeId } from '$lib/utils/flow-id';
 
 	interface Props {
 		diceRoll: DiceRoll | undefined;
@@ -44,8 +45,9 @@
 			})
 			.then(() => {
 				// 선택 해제
+				const diceRollNodeId = createDiceRollNodeId(diceRoll);
 				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === `dice-roll-${diceRoll.id}` ? { ...n, selected: false } : n))
+					ns.map((n) => (n.id === diceRollNodeId ? { ...n, selected: false } : n))
 				);
 			})
 			.catch((error) => {
@@ -60,8 +62,9 @@
 		if (!diceRoll) return;
 
 		// 선택 해제
+		const diceRollNodeId = createDiceRollNodeId(diceRoll);
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === `dice-roll-${diceRoll.id}` ? { ...n, selected: false } : n))
+			ns.map((n) => (n.id === diceRollNodeId ? { ...n, selected: false } : n))
 		);
 	}
 
@@ -94,7 +97,7 @@
 					<Select.Content>
 						<Select.Item value="narrative_node_next" label="다음 노드">다음 노드</Select.Item>
 						<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-						</Select.Content>
+					</Select.Content>
 				</Select.Root>
 			</div>
 			<div class="space-y-2">
@@ -106,7 +109,7 @@
 					<Select.Content>
 						<Select.Item value="narrative_node_next" label="다음 노드">다음 노드</Select.Item>
 						<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-						</Select.Content>
+					</Select.Content>
 				</Select.Root>
 			</div>
 			<div class="flex justify-end gap-2">
