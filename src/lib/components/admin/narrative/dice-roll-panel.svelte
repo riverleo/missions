@@ -4,6 +4,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
 	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
 	import { createDiceRollNodeId } from '$lib/utils/flow-id';
@@ -71,7 +72,7 @@
 	function getActionLabel(action: DiceRollAction) {
 		switch (action) {
 			case 'narrative_node_next':
-				return '다음 노드';
+				return '다음 대화';
 			case 'narrative_node_done':
 				return '대화 종료';
 		}
@@ -79,47 +80,46 @@
 </script>
 
 <Panel position="top-right">
-	<div
-		class="w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800"
-	>
-		<h3 class="mb-4 text-lg font-semibold">주사위 굴림 수정</h3>
-		<form {onsubmit} class="space-y-4">
-			<div class="space-y-2">
-				<Label for="edit-dc">난이도 (DC)</Label>
-				<Input id="edit-dc" type="number" bind:value={editDifficultyClass} min={1} max={30} />
-			</div>
-			<div class="space-y-2">
-				<Label for="edit-success-action">성공 시 동작</Label>
-				<Select.Root type="single" bind:value={editSuccessAction}>
-					<Select.Trigger id="edit-success-action">
-						{getActionLabel(editSuccessAction)}
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="narrative_node_next" label="다음 노드">다음 노드</Select.Item>
-						<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-					</Select.Content>
-				</Select.Root>
-			</div>
-			<div class="space-y-2">
-				<Label for="edit-failure-action">실패 시 동작</Label>
-				<Select.Root type="single" bind:value={editFailureAction}>
-					<Select.Trigger id="edit-failure-action">
-						{getActionLabel(editFailureAction)}
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="narrative_node_next" label="다음 노드">다음 노드</Select.Item>
-						<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-					</Select.Content>
-				</Select.Root>
-			</div>
-			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
-					취소
-				</Button>
-				<Button type="submit" disabled={isUpdating}>
-					{isUpdating ? '저장 중...' : '저장'}
-				</Button>
-			</div>
+	<Card class="w-80 pt-6 pb-4">
+		<CardContent class="px-4">
+			<form {onsubmit} class="space-y-4">
+				<div class="space-y-2">
+					<Label for="edit-dc">난이도 (DC)</Label>
+					<Input id="edit-dc" type="number" bind:value={editDifficultyClass} min={1} max={30} />
+				</div>
+				<div class="space-y-2">
+					<Label for="edit-success-action">성공 시 동작</Label>
+					<Select.Root type="single" bind:value={editSuccessAction}>
+						<Select.Trigger id="edit-success-action">
+							{getActionLabel(editSuccessAction)}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
+							<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div class="space-y-2">
+					<Label for="edit-failure-action">실패 시 동작</Label>
+					<Select.Root type="single" bind:value={editFailureAction}>
+						<Select.Trigger id="edit-failure-action">
+							{getActionLabel(editFailureAction)}
+						</Select.Trigger>
+						<Select.Content>
+							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
+							<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div class="flex justify-end gap-2">
+					<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
+						취소
+					</Button>
+					<Button type="submit" disabled={isUpdating}>
+						{isUpdating ? '저장 중...' : '저장'}
+					</Button>
+				</div>
 		</form>
-	</div>
+		</CardContent>
+	</Card>
 </Panel>

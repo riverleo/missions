@@ -2,6 +2,10 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent } from '$lib/components/ui/card';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
+	import { IconMessagePlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
 	import { page } from '$app/state';
@@ -169,25 +173,54 @@
 </script>
 
 <Panel position="top-right">
-	<div
-		class="w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800"
-	>
-		<h3 class="mb-4 text-lg font-semibold">노드 관리</h3>
-		<div class="space-y-2">
-			<Button onclick={onclickCreateNode} disabled={isCreatingNode} class="w-full">
-				{isCreatingNode ? '생성 중...' : '내러티브 노드 추가'}
-			</Button>
-			<Button
-				onclick={onclickCreateDiceRoll}
-				disabled={isCreatingDiceRoll}
-				variant="outline"
-				class="w-full"
-			>
-				{isCreatingDiceRoll ? '생성 중...' : '주사위 굴림 추가'}
-			</Button>
-			<Button onclick={onclickLayout} disabled={isLayouting} variant="outline" class="w-full">
-				{isLayouting ? '정렬 중...' : '자동 정렬'}
-			</Button>
-		</div>
-	</div>
+	<ButtonGroup class="bg-background">
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickCreateNode}
+						disabled={isCreatingNode}
+						size="icon"
+						variant="outline"
+					>
+						<IconMessagePlus class="h-4 w-4" />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>대화 또는 효과 추가</TooltipContent>
+		</Tooltip>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickCreateDiceRoll}
+						disabled={isCreatingDiceRoll}
+						size="icon"
+						variant="outline"
+					>
+						<IconDice class="h-4 w-4" />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>주사위 굴림 추가</TooltipContent>
+		</Tooltip>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickLayout}
+						disabled={isLayouting}
+						size="icon"
+						variant="outline"
+					>
+						<IconLayoutDistributeVertical class="h-4 w-4" />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>자동 정렬</TooltipContent>
+		</Tooltip>
+	</ButtonGroup>
 </Panel>

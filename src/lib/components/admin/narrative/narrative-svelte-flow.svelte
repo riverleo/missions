@@ -75,6 +75,11 @@
 
 		if (!sourceNode || !targetNode) return false;
 
+		// narrative_node → narrative_node 연결 차단
+		if (sourceNode.type === 'narrativeNode' && targetNode.type === 'narrativeNode') {
+			return false;
+		}
+
 		// dice_roll → dice_roll 연결 차단
 		if (sourceNode.type === 'diceRoll' && targetNode.type === 'diceRoll') {
 			return false;
@@ -321,8 +326,36 @@
 			});
 		});
 
-		// 2. dice_roll 노드 생성 (모든 dice_roll)
-		diceRolls.forEach((diceRollData) => {
+		// 2. 현재 내러티브와 연결된 dice_roll만 수집
+		const connectedDiceRollIds = new Set<string>();
+		narrativeNodes.forEach((narrativeNode) => {
+			if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
+				connectedDiceRollIds.add(narrativeNode.dice_roll_id);
+			}
+			if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
+				narrativeNode.narrative_node_choices.forEach((choice) => {
+					if (choice.dice_roll_id) {
+						connectedDiceRollIds.add(choice.dice_roll_id);
+					}
+				});
+			}
+		});
+
+		// dice_roll에서 참조하는 narrative_node_id도 포함
+		diceRolls.forEach((diceRoll) => {
+			const hasSuccessRef = diceRoll.success_narrative_node_id &&
+				narrativeNodes.some((n) => n.id === diceRoll.success_narrative_node_id);
+			const hasFailureRef = diceRoll.failure_narrative_node_id &&
+				narrativeNodes.some((n) => n.id === diceRoll.failure_narrative_node_id);
+
+			if (hasSuccessRef || hasFailureRef) {
+				connectedDiceRollIds.add(diceRoll.id);
+			}
+		});
+
+		// 연결된 dice_roll만 노드로 생성
+		const connectedDiceRolls = diceRolls.filter((d) => connectedDiceRollIds.has(d.id));
+		connectedDiceRolls.forEach((diceRollData) => {
 			newNodes.push({
 				id: createDiceRollNodeId(diceRollData),
 				type: 'diceRoll',
@@ -338,7 +371,7 @@
 		narrativeNodes.forEach((narrativeNode) => {
 			// text 타입이고 dice_roll_id가 있으면 엣지 생성
 			if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
-				const diceRoll = diceRolls.find((d) => d.id === narrativeNode.dice_roll_id);
+				const diceRoll = connectedDiceRolls.find((d) => d.id === narrativeNode.dice_roll_id);
 				if (!diceRoll) return;
 
 				const narrativeNodeId = createNarrativeNodeId(narrativeNode);
@@ -355,7 +388,7 @@
 			if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
 				narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice) => {
 					if (narrativeNodeChoice.dice_roll_id) {
-						const diceRoll = diceRolls.find((d) => d.id === narrativeNodeChoice.dice_roll_id);
+						const diceRoll = connectedDiceRolls.find((d) => d.id === narrativeNodeChoice.dice_roll_id);
 						if (!diceRoll) return;
 
 						const narrativeNodeId = createNarrativeNodeId(narrativeNode);
@@ -372,12 +405,14 @@
 			}
 		});
 
-		// 4. dice_roll의 success/failure 참조를 시각화
-		diceRolls.forEach((diceRollData) => {
+		// 4. dice_roll의 success/failure 참조를 시각화 (연결된 dice_roll만)
+		connectedDiceRolls.forEach((diceRollData) => {
 			const diceRollNodeId = createDiceRollNodeId(diceRollData);
 
 			if (diceRollData.success_narrative_node_id) {
-				const successNode = narrativeNodes.find((n) => n.id === diceRollData.success_narrative_node_id);
+				const successNode = narrativeNodes.find(
+					(n) => n.id === diceRollData.success_narrative_node_id
+				);
 				if (!successNode) return;
 
 				const successNodeId = createNarrativeNodeId(successNode);
@@ -392,7 +427,9 @@
 			}
 
 			if (diceRollData.failure_narrative_node_id) {
-				const failureNode = narrativeNodes.find((n) => n.id === diceRollData.failure_narrative_node_id);
+				const failureNode = narrativeNodes.find(
+					(n) => n.id === diceRollData.failure_narrative_node_id
+				);
 				if (!failureNode) return;
 
 				const failureNodeId = createNarrativeNodeId(failureNode);

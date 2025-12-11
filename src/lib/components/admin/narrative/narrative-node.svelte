@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { NarrativeNode } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
+	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
 
 	interface Props {
@@ -37,18 +38,17 @@
 	class:dark:ring-blue-500={selected}
 >
 	<!-- 입력 핸들 (부모 노드 또는 dice_roll에서 연결) -->
-	<Handle type="target" position={Position.Left} />
+	<!-- 시작 노드일 때는 입력 핸들 숨김 -->
+	{#if !narrativeNode.root}
+		<Handle type="target" position={Position.Left} />
+	{/if}
 
 	<div class="space-y-2">
-		<div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
-			{narrativeNode.type === 'text' ? '텍스트' : '선택지'}
+		<div class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
 			{#if narrativeNode.root}
-				<span class="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs dark:bg-blue-900">시작</span>
+				<IconCircleDashedNumber1 class="h-4 w-4 text-blue-500 dark:text-blue-400" />
 			{/if}
-		</div>
-
-		<div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-			{narrativeNode.title || '(제목 없음)'}
+			<span>{narrativeNode.title || '(제목 없음)'}</span>
 		</div>
 
 		{#if narrativeNode.description}

@@ -13,6 +13,7 @@
 	import { page } from '$app/state';
 	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
+	import QuestPanel from './quest-panel.svelte';
 	import QuestBranchPanel from './quest-branch-panel.svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { sort } from 'radash';
@@ -176,6 +177,10 @@
 		<Background variant={BackgroundVariant.Dots} />
 		<MiniMap />
 
-		<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} {onlayout} />
+		{#if selectedQuestBranch}
+			<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} />
+		{:else}
+			<QuestPanel {onlayout} />
+		{/if}
 	</SvelteFlow>
 </div>

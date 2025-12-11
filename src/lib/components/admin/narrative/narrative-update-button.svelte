@@ -62,19 +62,19 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>내러티브의 정보를 수정합니다</TooltipContent>
+				<TooltipContent>대화 또는 효과의 정보를 수정합니다</TooltipContent>
 			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>내러티브 수정</DialogTitle>
-			<DialogDescription>내러티브 정보를 수정합니다.</DialogDescription>
+			<DialogTitle>대화 또는 효과 수정</DialogTitle>
+			<DialogDescription>대화 또는 효과 정보를 수정합니다.</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label for="narrative-title">내러티브 제목</Label>
+					<Label for="narrative-title">대화 또는 효과 제목</Label>
 					<Input id="narrative-title" bind:value={title} />
 				</div>
 			</div>

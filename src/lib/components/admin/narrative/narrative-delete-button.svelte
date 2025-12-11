@@ -41,9 +41,9 @@
 	</AlertDialogTrigger>
 	<AlertDialogContent>
 		<AlertDialogHeader>
-			<AlertDialogTitle>내러티브를 삭제하시겠습니까?</AlertDialogTitle>
+			<AlertDialogTitle>대화 또는 효과를 삭제하시겠습니까?</AlertDialogTitle>
 			<AlertDialogDescription>
-				이 작업은 되돌릴 수 없습니다. 내러티브와 관련된 모든 데이터가 삭제됩니다.
+				이 작업은 되돌릴 수 없습니다. 대화 또는 효과와 관련된 모든 데이터가 삭제됩니다.
 			</AlertDialogDescription>
 		</AlertDialogHeader>
 		<AlertDialogFooter>

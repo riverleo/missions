@@ -4,7 +4,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { IconTrash, IconPlus, IconGripVertical } from '@tabler/icons-svelte';
-	import { isEqual, sort } from 'radash';
+	import { isEqual, sort, clone } from 'radash';
 	import { dndzone } from 'svelte-dnd-action';
 	import type { DndEvent } from 'svelte-dnd-action';
 
@@ -19,11 +19,11 @@
 	const TEMP_ID_PREFIX = 'temp-';
 
 	let current = $state<NarrativeNodeChoice[]>(
-		sort(structuredClone(narrativeNodeChoices), (c) => c.order_in_narrative_node)
+		sort(clone(narrativeNodeChoices), (c) => c.order_in_narrative_node)
 	);
 
 	$effect(() => {
-		current = sort(structuredClone(narrativeNodeChoices), (c) => c.order_in_narrative_node);
+		current = sort(clone(narrativeNodeChoices), (c) => c.order_in_narrative_node);
 	});
 
 	// 변경사항 계산 및 콜백 호출

@@ -54,20 +54,20 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>새로 내러티브를 만듭니다.</TooltipContent>
+				<TooltipContent>새로운 대화 또는 효과를 만듭니다.</TooltipContent>
 			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 내러티브</DialogTitle>
-			<DialogDescription>내러티브의 기본 정보를 입력해주세요.</DialogDescription>
+			<DialogTitle>새로운 대화 또는 효과</DialogTitle>
+			<DialogDescription>대화 또는 효과의 기본 정보를 입력해주세요.</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label for="narrative-title">내러티브 제목</Label>
-					<Input id="narrative-title" placeholder="내러티브 제목을 입력하세요" bind:value={title} />
+					<Label for="narrative-title">대화 또는 효과 제목</Label>
+					<Input id="narrative-title" placeholder="대화 또는 효과 제목을 입력하세요" bind:value={title} />
 				</div>
 			</div>
 			<DialogFooter>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Panel, useNodes } from '@xyflow/svelte';
+	import { Panel, useNodes, useEdges } from '@xyflow/svelte';
 	import type {
 		NarrativeNode,
 		NarrativeNodeType,
@@ -7,26 +7,16 @@
 		NarrativeNodeChoice,
 	} from '$lib/types';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import {
-		Root as Select,
-		Trigger as SelectTrigger,
-		Content as SelectContent,
-		Item as SelectItem,
-	} from '$lib/components/ui/select';
-	import {
-		InputGroup,
-		InputGroupAddon,
-		InputGroupInput,
-		InputGroupButton,
-	} from '$lib/components/ui/input-group';
-	import { ButtonGroup } from '$lib/components/ui/button-group';
-	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconFlag } from '@tabler/icons-svelte';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import * as InputGroup from '$lib/components/ui/input-group';
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { Card, CardContent } from '$lib/components/ui/card';
+	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
+	import { createNarrativeNodeId } from '$lib/utils/flow-id';
+	import { clone } from 'radash';
 
 	interface Props {
 		narrativeNode: NarrativeNode | undefined;
@@ -36,33 +26,44 @@
 
 	const { admin } = useNarrative();
 	const flowNodes = useNodes();
+	const flowEdges = useEdges();
 
-	let editTitle = $state(narrativeNode?.title ?? '');
-	let editDescription = $state(narrativeNode?.description ?? '');
-	let editType = $state<NarrativeNodeType>(narrativeNode?.type ?? 'text');
-	let editRoot = $state(narrativeNode?.root ?? false);
 	let isUpdating = $state(false);
 
-	// 선택지 변경사항을 콜백으로 받음
+	let changes = $state<NarrativeNode | undefined>(undefined);
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
 
-	async function onsubmit() {
-		if (!narrativeNode || isUpdating) return;
+	// narrativeNode가 변경될 때마다 클론해서 로컬 상태 업데이트
+	$effect(() => {
+		if (narrativeNode) {
+			changes = clone(narrativeNode);
+			narrativeNodeChoicesChanges = undefined;
+		}
+	});
 
-		const nodeId = narrativeNode.id; // await 이후에 narrativeNode가 변경될 수 있으므로 미리 저장
+	async function onsubmit() {
+		if (!changes || isUpdating) return;
+
+		const nodeId = changes.id;
+		const flowNodeId = createNarrativeNodeId(changes);
 		isUpdating = true;
 
 		try {
 			// 1. 기본 정보 업데이트
 			await admin.updateNode(nodeId, {
-				title: editTitle,
-				description: editDescription,
-				type: editType,
-				root: editRoot,
+				title: changes.title,
+				description: changes.description,
+				type: changes.type,
+				root: changes.root,
 			});
 
-			// 2. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
-			if (editType === 'choice' && narrativeNodeChoicesChanges) {
+			// 2. 시작 노드로 설정된 경우 들어오는 엣지 제거
+			if (changes.root) {
+				flowEdges.update((edges) => edges.filter((edge) => edge.target !== flowNodeId));
+			}
+
+			// 3. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
+			if (changes.type === 'choice' && narrativeNodeChoicesChanges) {
 				await Promise.all([
 					...narrativeNodeChoicesChanges.created.map((choice) => admin.createChoice(choice)),
 					...narrativeNodeChoicesChanges.updated.map((choice) =>
@@ -82,80 +83,97 @@
 	}
 
 	function onclickCancel() {
-		if (!narrativeNode) return;
+		if (!changes) return;
 
+		const nodeId = changes.id;
 		// 선택 해제
-		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === narrativeNode.id ? { ...n, selected: false } : n))
-		);
+		flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 	}
 </script>
 
 <Panel position="top-right">
-	<div
-		class="w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800"
-	>
-		<h3 class="mb-4 text-lg font-semibold">내러티브 노드 수정</h3>
-		<form {onsubmit} class="space-y-4">
-			<div class="space-y-2">
-				<Label>제목</Label>
-				<ButtonGroup>
-					<Select type="single" bind:value={editType}>
-						<SelectTrigger>
-							{editType === 'text' ? '텍스트' : '선택지'}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="text" label="텍스트">텍스트</SelectItem>
-							<SelectItem value="choice" label="선택지">선택지</SelectItem>
-						</SelectContent>
-					</Select>
-					<InputGroup>
-						<InputGroupInput bind:value={editTitle} placeholder="제목을 입력하세요" />
-						<InputGroupAddon align="inline-end">
-							<Tooltip>
-								<TooltipTrigger>
+	<Card class="w-80 py-4">
+		<CardContent class="px-4">
+			<form {onsubmit} class="space-y-4">
+				{#if changes}
+					<InputGroup.Root>
+						<InputGroup.Input bind:value={changes.title} placeholder="제목을 입력하세요" />
+					</InputGroup.Root>
+					<InputGroup.Root>
+						<InputGroup.Textarea
+							id="edit-description"
+							bind:value={changes.description}
+							rows={3}
+							placeholder="내용을 입력하세요"
+						/>
+						<InputGroup.Addon align="block-end" class="justify-between">
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
 									{#snippet child({ props })}
-										<InputGroupButton
+										<InputGroup.Button {...props} variant="ghost">
+											{changes?.type === 'text' ? '텍스트' : '선택지'}
+										</InputGroup.Button>
+									{/snippet}
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content>
+									<DropdownMenu.Item
+										onclick={() => {
+											if (changes) changes.type = 'text';
+										}}
+									>
+										텍스트
+									</DropdownMenu.Item>
+									<DropdownMenu.Item
+										onclick={() => {
+											if (changes) changes.type = 'choice';
+										}}
+									>
+										선택지
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+							<Tooltip.Root>
+								<Tooltip.Trigger>
+									{#snippet child({ props })}
+										<InputGroup.Button
 											{...props}
-											variant={editRoot ? 'default' : 'ghost'}
+											variant={changes?.root ? 'default' : 'ghost'}
 											size="icon-xs"
-											aria-label="시작 노드로 설정"
-											onclick={() => (editRoot = !editRoot)}
+											aria-label="시작 대화로 지정"
+											onclick={() => {
+												if (changes) changes.root = !changes.root;
+											}}
 											class="rounded-full"
 										>
-											<IconFlag class="h-4 w-4" />
-										</InputGroupButton>
+											<IconCircleDashedNumber1 class="h-4 w-4" />
+										</InputGroup.Button>
 									{/snippet}
-								</TooltipTrigger>
-								<TooltipContent>시작 노드</TooltipContent>
-							</Tooltip>
-						</InputGroupAddon>
-					</InputGroup>
-				</ButtonGroup>
-			</div>
-			<div class="space-y-2">
-				<Label for="edit-description">설명</Label>
-				<Textarea id="edit-description" bind:value={editDescription} rows={3} />
-			</div>
+								</Tooltip.Trigger>
+								<Tooltip.Content>시작 대화로 지정</Tooltip.Content>
+							</Tooltip.Root>
+						</InputGroup.Addon>
+					</InputGroup.Root>
 
-			{#if editType === 'choice' && narrativeNode}
-				<div class="mt-4 border-t pt-4">
-					<NarrativeNodeChoicesSection
-						narrativeNodeId={narrativeNode.id}
-						narrativeNodeChoices={narrativeNode.narrative_node_choices ?? []}
-						onchange={(changes) => (narrativeNodeChoicesChanges = changes)}
-					/>
+					{#if changes.type === 'choice'}
+						<div class="mt-4 border-t pt-4">
+							<NarrativeNodeChoicesSection
+								narrativeNodeId={changes.id}
+								narrativeNodeChoices={changes.narrative_node_choices ?? []}
+								onchange={(c) => (narrativeNodeChoicesChanges = c)}
+							/>
+						</div>
+					{/if}
+				{/if}
+
+				<div class="flex justify-end gap-2">
+					<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
+						취소
+					</Button>
+					<Button type="submit" disabled={isUpdating}>
+						{isUpdating ? '저장 중...' : '저장'}
+					</Button>
 				</div>
-			{/if}
-
-			<div class="flex justify-end gap-2">
-				<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
-					취소
-				</Button>
-				<Button type="submit" disabled={isUpdating}>
-					{isUpdating ? '저장 중...' : '저장'}
-				</Button>
-			</div>
-		</form>
-	</div>
+			</form>
+		</CardContent>
+	</Card>
 </Panel>

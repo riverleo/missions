@@ -17,7 +17,7 @@
 			href: '/admin/quests',
 		},
 		{
-			title: '내러티브',
+			title: '대화 또는 효과',
 			href: '/admin/narratives',
 		},
 	];

@@ -5,9 +5,9 @@
 <div class="flex h-full items-center justify-center">
 	<Empty>
 		<EmptyContent>
-			<EmptyTitle>내러티브를 선택하세요</EmptyTitle>
+			<EmptyTitle>대화 또는 효과를 선택하세요</EmptyTitle>
 			<EmptyDescription>
-				왼쪽 목록에서 내러티브를 선택하거나 새로운 내러티브를 만들어주세요.
+				왼쪽 목록에서 대화를 선택하거나 새로운 효과를 만들어주세요.
 			</EmptyDescription>
 		</EmptyContent>
 	</Empty>

@@ -8,14 +8,16 @@
 	const narrativeId = $derived(page.params.narrativeId);
 </script>
 
-{#if narrativeId}
+<ButtonGroup>
 	<ButtonGroup>
-		<ButtonGroup>
-			<NarrativeCreateButton />
+		<NarrativeCreateButton />
+		{#if narrativeId}
 			<NarrativeUpdateButton {narrativeId} />
-		</ButtonGroup>
+		{/if}
+	</ButtonGroup>
+	{#if narrativeId}
 		<ButtonGroup>
 			<NarrativeDeleteButton {narrativeId} />
 		</ButtonGroup>
-	</ButtonGroup>
-{/if}
+	{/if}
+</ButtonGroup>

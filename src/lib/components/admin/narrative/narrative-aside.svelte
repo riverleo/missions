@@ -17,7 +17,7 @@
 			<Skeleton class="h-16 w-full" />
 		</div>
 	{:else if $store.status === 'error'}
-		<div class="p-4 text-sm text-destructive">내러티브를 불러오는데 실패했습니다.</div>
+		<div class="p-4 text-sm text-destructive">대화 또는 효과를 불러오는데 실패했습니다.</div>
 	{:else if $store.data && $store.data.length > 0}
 		<ItemGroup class="gap-1">
 			{#each $store.data as narrative (narrative.id)}
@@ -33,6 +33,6 @@
 			{/each}
 		</ItemGroup>
 	{:else}
-		<div class="p-4 text-sm text-muted-foreground">내러티브가 없습니다.</div>
+		<div class="p-4 text-sm text-muted-foreground">대화 또는 효과가 없습니다.</div>
 	{/if}
 </aside>
