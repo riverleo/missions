@@ -3,6 +3,7 @@ import type { Snippet } from 'svelte';
 
 class AdminContext {
 	siteHeaderActions = $state<Snippet | undefined>(undefined);
+	breadcrumbTitle = $state<string | undefined>(undefined);
 }
 
 const [getAdminContext, setAdminContext] = createContext<AdminContext>();

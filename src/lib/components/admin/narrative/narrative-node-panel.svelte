@@ -10,7 +10,21 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import * as Select from '$lib/components/ui/select';
+	import {
+		Root as Select,
+		Trigger as SelectTrigger,
+		Content as SelectContent,
+		Item as SelectItem,
+	} from '$lib/components/ui/select';
+	import {
+		InputGroup,
+		InputGroupAddon,
+		InputGroupInput,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
+	import { IconFlag } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 
@@ -84,28 +98,44 @@
 		<h3 class="mb-4 text-lg font-semibold">내러티브 노드 수정</h3>
 		<form {onsubmit} class="space-y-4">
 			<div class="space-y-2">
-				<Label for="edit-title">제목</Label>
-				<Input id="edit-title" bind:value={editTitle} />
+				<Label>제목</Label>
+				<ButtonGroup>
+					<Select type="single" bind:value={editType}>
+						<SelectTrigger>
+							{editType === 'text' ? '텍스트' : '선택지'}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="text" label="텍스트">텍스트</SelectItem>
+							<SelectItem value="choice" label="선택지">선택지</SelectItem>
+						</SelectContent>
+					</Select>
+					<InputGroup>
+						<InputGroupInput bind:value={editTitle} placeholder="제목을 입력하세요" />
+						<InputGroupAddon align="inline-end">
+							<Tooltip>
+								<TooltipTrigger>
+									{#snippet child({ props })}
+										<InputGroupButton
+											{...props}
+											variant={editRoot ? 'default' : 'ghost'}
+											size="icon-xs"
+											aria-label="시작 노드로 설정"
+											onclick={() => (editRoot = !editRoot)}
+											class="rounded-full"
+										>
+											<IconFlag class="h-4 w-4" />
+										</InputGroupButton>
+									{/snippet}
+								</TooltipTrigger>
+								<TooltipContent>시작 노드</TooltipContent>
+							</Tooltip>
+						</InputGroupAddon>
+					</InputGroup>
+				</ButtonGroup>
 			</div>
 			<div class="space-y-2">
 				<Label for="edit-description">설명</Label>
 				<Textarea id="edit-description" bind:value={editDescription} rows={3} />
-			</div>
-			<div class="space-y-2">
-				<Label for="edit-type">타입</Label>
-				<Select.Root type="single" bind:value={editType}>
-					<Select.Trigger id="edit-type">
-						{editType === 'text' ? '텍스트' : '선택지'}
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="text" label="텍스트">텍스트</Select.Item>
-						<Select.Item value="choice" label="선택지">선택지</Select.Item>
-					</Select.Content>
-				</Select.Root>
-			</div>
-			<div class="flex items-center space-x-2">
-				<input id="edit-root" type="checkbox" bind:checked={editRoot} class="h-4 w-4" />
-				<Label for="edit-root">시작 노드</Label>
 			</div>
 
 			{#if editType === 'choice' && narrativeNode}

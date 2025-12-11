@@ -8,11 +8,14 @@
 	} from '$lib/components/ui/item';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import { page } from '$app/stores';
+	import { cn } from '$lib/utils';
 
 	const { store } = useQuest();
+	const currentQuestId = $derived($page.params.questId);
 </script>
 
-<aside class="w-80 overflow-y-auto border-r">
+<aside class="w-80 overflow-y-auto border-r p-2">
 	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />
@@ -22,9 +25,9 @@
 	{:else if $store.status === 'error'}
 		<div class="p-4 text-sm text-destructive">퀘스트를 불러오는데 실패했습니다.</div>
 	{:else if $store.data && $store.data.length > 0}
-		<ItemGroup>
+		<ItemGroup class="gap-1">
 			{#each $store.data as quest (quest.id)}
-				<Item>
+				<Item class={cn('p-2 px-4', { 'bg-accent': quest.id === currentQuestId })}>
 					{#snippet child({ props })}
 						<a href={`/admin/quests/${quest.id}`} {...props}>
 							<ItemContent>

@@ -41,6 +41,14 @@
 			// 라벨 매핑
 			if (segments[i] === 'quests') label = 'Quest';
 			else if (segments[i] === 'narratives') label = 'Narrative';
+			// UUID 형태의 ID는 title (id) 형식으로 표시
+			else if (
+				/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segments[i])
+			) {
+				const id = segments[i];
+				const title = admin.breadcrumbTitle || id;
+				label = title !== id ? `${title} (${id.slice(0, 8)})` : id.slice(0, 8);
+			}
 
 			crumbs.push({
 				label,
