@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '$lib/components/ui/sheet/index.js';
 	import { cn, type WithElementRef } from '$lib/utils';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SIDEBAR_WIDTH_MOBILE } from './constants.js';
@@ -34,8 +34,8 @@
 		{@render children?.()}
 	</div>
 {:else if sidebar.isMobile}
-	<Sheet.Root bind:open={sidebar.openMobile} {...restProps}>
-		<Sheet.Content
+	<Sheet bind:open={sidebar.openMobile} {...restProps}>
+		<SheetContent
 			data-sidebar="sidebar"
 			data-slot="sidebar"
 			data-mobile="true"
@@ -43,15 +43,15 @@
 			style="--sidebar-width: {SIDEBAR_WIDTH_MOBILE};"
 			{side}
 		>
-			<Sheet.Header class="sr-only">
-				<Sheet.Title>Sidebar</Sheet.Title>
-				<Sheet.Description>Displays the mobile sidebar.</Sheet.Description>
-			</Sheet.Header>
+			<SheetHeader class="sr-only">
+				<SheetTitle>Sidebar</SheetTitle>
+				<SheetDescription>Displays the mobile sidebar.</SheetDescription>
+			</SheetHeader>
 			<div class="flex h-full w-full flex-col">
 				{@render children?.()}
 			</div>
-		</Sheet.Content>
-	</Sheet.Root>
+		</SheetContent>
+	</Sheet>
 {:else}
 	<div
 		bind:this={ref}

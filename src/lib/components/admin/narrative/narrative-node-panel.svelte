@@ -8,9 +8,20 @@
 	} from '$lib/types';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as InputGroup from '$lib/components/ui/input-group';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import {
+		DropdownMenu,
+		DropdownMenuTrigger,
+		DropdownMenuContent,
+		DropdownMenuItem,
+	} from '$lib/components/ui/dropdown-menu';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupTextarea,
+		InputGroupAddon,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
@@ -96,63 +107,65 @@
 		<CardContent class="px-4">
 			<form {onsubmit} class="space-y-4">
 				{#if changes}
-					<InputGroup.Root>
-						<InputGroup.Input bind:value={changes.title} placeholder="제목을 입력하세요" />
-					</InputGroup.Root>
-					<InputGroup.Root>
-						<InputGroup.Textarea
-							id="edit-description"
-							bind:value={changes.description}
-							rows={3}
-							placeholder="내용을 입력하세요"
-						/>
-						<InputGroup.Addon align="block-end" class="justify-between">
-							<DropdownMenu.Root>
-								<DropdownMenu.Trigger>
-									{#snippet child({ props })}
-										<InputGroup.Button {...props} variant="ghost">
-											{changes?.type === 'text' ? '텍스트' : '선택지'}
-										</InputGroup.Button>
-									{/snippet}
-								</DropdownMenu.Trigger>
-								<DropdownMenu.Content>
-									<DropdownMenu.Item
-										onclick={() => {
-											if (changes) changes.type = 'text';
-										}}
-									>
-										텍스트
-									</DropdownMenu.Item>
-									<DropdownMenu.Item
-										onclick={() => {
-											if (changes) changes.type = 'choice';
-										}}
-									>
-										선택지
-									</DropdownMenu.Item>
-								</DropdownMenu.Content>
-							</DropdownMenu.Root>
-							<Tooltip.Root>
-								<Tooltip.Trigger>
-									{#snippet child({ props })}
-										<InputGroup.Button
-											{...props}
-											variant={changes?.root ? 'default' : 'ghost'}
-											size="icon-xs"
-											aria-label="시작 대화로 지정"
+					<div class="space-y-2">
+						<InputGroup>
+							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
+						</InputGroup>
+						<InputGroup>
+							<InputGroupTextarea
+								id="edit-description"
+								bind:value={changes.description}
+								rows={3}
+								placeholder="내용을 입력하세요"
+							/>
+							<InputGroupAddon align="block-end" class="justify-between">
+								<DropdownMenu>
+									<DropdownMenuTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton {...props} variant="ghost">
+												{changes?.type === 'text' ? '텍스트' : '선택지'}
+											</InputGroupButton>
+										{/snippet}
+									</DropdownMenuTrigger>
+									<DropdownMenuContent>
+										<DropdownMenuItem
 											onclick={() => {
-												if (changes) changes.root = !changes.root;
+												if (changes) changes.type = 'text';
 											}}
-											class="rounded-full"
 										>
-											<IconCircleDashedNumber1 class="h-4 w-4" />
-										</InputGroup.Button>
-									{/snippet}
-								</Tooltip.Trigger>
-								<Tooltip.Content>시작 대화로 지정</Tooltip.Content>
-							</Tooltip.Root>
-						</InputGroup.Addon>
-					</InputGroup.Root>
+											텍스트
+										</DropdownMenuItem>
+										<DropdownMenuItem
+											onclick={() => {
+												if (changes) changes.type = 'choice';
+											}}
+										>
+											선택지
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+								<Tooltip>
+									<TooltipTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton
+												{...props}
+												variant={changes?.root ? 'default' : 'ghost'}
+												size="icon-xs"
+												aria-label="시작 대화로 지정"
+												onclick={() => {
+													if (changes) changes.root = !changes.root;
+												}}
+												class="rounded-full"
+											>
+												<IconCircleDashedNumber1 class="h-4 w-4" />
+											</InputGroupButton>
+										{/snippet}
+									</TooltipTrigger>
+									<TooltipContent>시작 대화로 지정</TooltipContent>
+								</Tooltip>
+							</InputGroupAddon>
+						</InputGroup>
+					</div>
 
 					{#if changes.type === 'choice'}
 						<div class="mt-4 border-t pt-4">

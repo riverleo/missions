@@ -51,18 +51,22 @@
 	</div>
 
 	<!-- 출력 핸들: 성공 (상단) -->
-	<Handle
-		type="source"
-		position={Position.Right}
-		id="success"
-		style="top: 30%; background-color: #22c55e"
-	/>
+	{#if narrativeDiceRoll.success_action !== 'narrative_node_done'}
+		<Handle
+			type="source"
+			position={Position.Right}
+			id="success"
+			style="top: 30%; background-color: #22c55e"
+		/>
+	{/if}
 
 	<!-- 출력 핸들: 실패 (하단) -->
-	<Handle
-		type="source"
-		position={Position.Right}
-		id="failure"
-		style="top: 70%; background-color: #ef4444"
-	/>
+	{#if narrativeDiceRoll.failure_action !== 'narrative_node_done' && narrativeDiceRoll.difficulty_class > 0}
+		<Handle
+			type="source"
+			position={Position.Right}
+			id="failure"
+			style="top: 70%; background-color: #ef4444"
+		/>
+	{/if}
 </div>

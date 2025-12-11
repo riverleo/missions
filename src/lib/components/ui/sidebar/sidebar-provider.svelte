@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+	import { TooltipProvider } from '$lib/components/ui/tooltip/index.js';
 	import { cn, type WithElementRef } from '$lib/utils';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import {
@@ -37,7 +37,7 @@
 
 <svelte:window onkeydown={sidebar.handleShortcutKeydown} />
 
-<Tooltip.Provider delayDuration={0}>
+<TooltipProvider delayDuration={0}>
 	<div
 		data-sidebar="sidebar-provider"
 		data-state={open ? 'expanded' : 'collapsed'}
@@ -52,4 +52,4 @@
 	>
 		{@render children?.()}
 	</div>
-</Tooltip.Provider>
+</TooltipProvider>

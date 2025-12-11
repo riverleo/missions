@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/ui/sheet';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import * as Card from '$lib/components/ui/card';
+	import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '$lib/components/ui/sheet';
+	import { Tabs, TabsList, TabsTrigger, TabsContent } from '$lib/components/ui/tabs';
+	import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -300,22 +300,22 @@
 	</div>
 {/snippet}
 
-<Sheet.Root>
-	<Sheet.Trigger>
+<Sheet>
+	<SheetTrigger>
 		{#snippet child({ props })}
 			<Button {...props} variant="ghost" size="icon">
 				<IconUser class="size-5" />
 			</Button>
 		{/snippet}
-	</Sheet.Trigger>
-	<Sheet.Content side="right" class="w-full overflow-y-auto sm:max-w-2xl">
-		<Sheet.Header>
-			<Sheet.Title>캐릭터 정보</Sheet.Title>
-			<Sheet.Description>캐릭터의 스테이터스와 장비를 확인하고 관리하세요.</Sheet.Description>
-		</Sheet.Header>
+	</SheetTrigger>
+	<SheetContent side="right" class="w-full overflow-y-auto sm:max-w-2xl">
+		<SheetHeader>
+			<SheetTitle>캐릭터 정보</SheetTitle>
+			<SheetDescription>캐릭터의 스테이터스와 장비를 확인하고 관리하세요.</SheetDescription>
+		</SheetHeader>
 
-		<Card.Root class="mt-4 w-full">
-			<Card.Header>
+		<Card class="mt-4 w-full">
+			<CardHeader>
 				<div class="flex items-start justify-between">
 					<div class="flex items-center gap-4">
 						<div
@@ -324,10 +324,10 @@
 							<IconUser class="size-10 text-primary" />
 						</div>
 						<div>
-							<Card.Title>{playerData.name}</Card.Title>
-							<Card.Description>
+							<CardTitle>{playerData.name}</CardTitle>
+							<CardDescription>
 								{playerData.characterClass} • Lv.{playerData.level}
-							</Card.Description>
+							</CardDescription>
 						</div>
 					</div>
 					<Badge variant="secondary" class="gap-1">
@@ -346,17 +346,17 @@
 					</div>
 					<Progress value={(playerData.experience / playerData.experienceToNextLevel) * 100} />
 				</div>
-			</Card.Header>
+			</CardHeader>
 
-			<Card.Content>
-				<Tabs.Root value="character" class="w-full">
-					<Tabs.List class="grid w-full grid-cols-2">
-						<Tabs.Trigger value="status">스테이터스</Tabs.Trigger>
-						<Tabs.Trigger value="character">캐릭터</Tabs.Trigger>
-					</Tabs.List>
+			<CardContent>
+				<Tabs value="character" class="w-full">
+					<TabsList class="grid w-full grid-cols-2">
+						<TabsTrigger value="status">스테이터스</TabsTrigger>
+						<TabsTrigger value="character">캐릭터</TabsTrigger>
+					</TabsList>
 
 					<!-- Status Tab -->
-					<Tabs.Content value="status" class="space-y-4">
+					<TabsContent value="status" class="space-y-4">
 						<!-- HP/MP Bars -->
 						<div class="space-y-3">
 							<div class="space-y-1">
@@ -416,10 +416,10 @@
 								<div class="text-xs text-muted-foreground">속도</div>
 							</div>
 						</div>
-					</Tabs.Content>
+					</TabsContent>
 
 					<!-- Character Tab (Equipment + Inventory) -->
-					<Tabs.Content value="character" class="py-4">
+					<TabsContent value="character" class="py-4">
 						<div class="grid gap-4 lg:grid-cols-2">
 							<!-- Equipment Grid -->
 							<div class="space-y-2">
@@ -530,9 +530,9 @@
 								</div>
 							</div>
 						</div>
-					</Tabs.Content>
-				</Tabs.Root>
-			</Card.Content>
-		</Card.Root>
-	</Sheet.Content>
-</Sheet.Root>
+					</TabsContent>
+				</Tabs>
+			</CardContent>
+		</Card>
+	</SheetContent>
+</Sheet>

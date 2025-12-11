@@ -3,7 +3,7 @@
 	import DialogPortal from './dialog-portal.svelte';
 	import XIcon from '@lucide/svelte/icons/x';
 	import type { Snippet } from 'svelte';
-	import * as Dialog from './index.js';
+	import { DialogOverlay } from './index.js';
 	import { cn, type WithoutChildrenOrChild } from '$lib/utils/index.js';
 	import type { ComponentProps } from 'svelte';
 
@@ -22,7 +22,7 @@
 </script>
 
 <DialogPortal {...portalProps}>
-	<Dialog.Overlay />
+	<DialogOverlay />
 	<DialogPrimitive.Content
 		bind:ref
 		data-slot="dialog-content"

@@ -1,10 +1,19 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
-	import { InputGroup, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+		InputGroupText,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import { Select, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
+	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
+	import { Card, CardContent } from '$lib/components/ui/card';
+	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
+	import { IconDice5, IconInfoCircle } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 
@@ -18,8 +27,12 @@
 	const flowNodes = useNodes();
 
 	let editDifficultyClass = $state(narrativeDiceRoll?.difficulty_class ?? 0);
-	let editSuccessAction = $state<DiceRollAction>(narrativeDiceRoll?.success_action ?? 'narrative_node_next');
-	let editFailureAction = $state<DiceRollAction>(narrativeDiceRoll?.failure_action ?? 'narrative_node_next');
+	let editSuccessAction = $state<DiceRollAction>(
+		narrativeDiceRoll?.success_action ?? 'narrative_node_next'
+	);
+	let editFailureAction = $state<DiceRollAction>(
+		narrativeDiceRoll?.failure_action ?? 'narrative_node_next'
+	);
 	let isUpdating = $state(false);
 
 	// 선택된 주사위 굴림이 변경되면 편집 필드 업데이트
@@ -79,42 +92,75 @@
 </script>
 
 <Panel position="top-right">
-	<Card class="w-80 pt-6 pb-4">
+	<Card class="w-96 pt-6 pb-4">
 		<CardContent class="px-4">
 			<form {onsubmit} class="space-y-4">
-				<InputGroup>
-					<InputGroupText>최소 눈금</InputGroupText>
-					<InputGroupInput
-						type="number"
-						placeholder="난이도 (DC)"
-						bind:value={editDifficultyClass}
-						min={1}
-						max={30}
-					/>
-				</InputGroup>
-
 				<div class="space-y-2">
-					<Select type="single" bind:value={editSuccessAction}>
-						<SelectTrigger>
-							<span class="text-muted-foreground">성공:</span>
-							<span class="ml-1">{getActionLabel(editSuccessAction)}</span>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
-							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
-						</SelectContent>
-					</Select>
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<IconDice5 class="h-4 w-4" />
+						</InputGroupAddon>
+						<InputGroupInput
+							type="number"
+							placeholder="난이도 (DC)"
+							bind:value={editDifficultyClass}
+							min={0}
+							max={30}
+						/>
+						<InputGroupAddon align="inline-end">
+							<Tooltip>
+								<TooltipTrigger>
+									{#snippet child({ props })}
+										<InputGroupButton
+											{...props}
+											variant="ghost"
+											class="rounded-full"
+											size="icon-xs"
+										>
+											<IconInfoCircle />
+										</InputGroupButton>
+									{/snippet}
+								</TooltipTrigger>
+								<TooltipContent>
+									성공에 필요한 최소한의 주사위 숫자입니다.
+									<br />
+									0은 주사위를 굴리지 않고 자동으로 진행됩니다.
+								</TooltipContent>
+							</Tooltip>
+						</InputGroupAddon>
+					</InputGroup>
 
-					<Select type="single" bind:value={editFailureAction}>
-						<SelectTrigger>
-							<span class="text-muted-foreground">실패:</span>
-							<span class="ml-1">{getActionLabel(editFailureAction)}</span>
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
-							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
-						</SelectContent>
-					</Select>
+					<ButtonGroup class="w-full *:flex-1">
+						<ButtonGroup>
+							<ButtonGroupText>성공</ButtonGroupText>
+							<Select type="single" bind:value={editSuccessAction}>
+								<SelectTrigger class="flex-1">
+									{getActionLabel(editSuccessAction)}
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
+									<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
+
+						<ButtonGroup>
+							<ButtonGroupText>실패</ButtonGroupText>
+							<Select
+								type="single"
+								bind:value={editFailureAction}
+								disabled={editDifficultyClass === 0}
+							>
+								<SelectTrigger class="flex-1">
+									{getActionLabel(editFailureAction)}
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
+									<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
+					</ButtonGroup>
 				</div>
 
 				<div class="flex justify-end gap-2">
