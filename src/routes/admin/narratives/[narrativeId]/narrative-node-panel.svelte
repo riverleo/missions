@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { NarrativeNode, NarrativeNodeType } from '$lib/types';
+	import type {
+		NarrativeNode,
+		NarrativeNodeType,
+		BulkChanges,
+		NarrativeNodeChoice,
+	} from '$lib/types';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
@@ -24,15 +29,8 @@
 	let editRoot = $state(narrativeNode?.root ?? false);
 	let isUpdating = $state(false);
 
-	// 선택된 노드가 변경되면 편집 필드 업데이트
-	$effect(() => {
-		if (narrativeNode) {
-			editTitle = narrativeNode.title || '';
-			editDescription = narrativeNode.description || '';
-			editType = narrativeNode.type;
-			editRoot = narrativeNode.root;
-		}
-	});
+	// 선택지 변경사항을 콜백으로 받음
+	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
 
 	// 타입이 변경되면 dice_roll_id를 null로 설정
 	let prevType = $state<NarrativeNodeType>(narrativeNode?.type ?? 'text');
@@ -45,31 +43,39 @@
 		}
 	});
 
-	function onsubmit(e: SubmitEvent) {
-		e.preventDefault();
+	async function onsubmit() {
 		if (!narrativeNode || isUpdating) return;
 
+		const nodeId = narrativeNode.id; // await 이후에 narrativeNode가 변경될 수 있으므로 미리 저장
 		isUpdating = true;
 
-		admin
-			.updateNode(narrativeNode.id, {
+		try {
+			// 1. 기본 정보 업데이트
+			await admin.updateNode(nodeId, {
 				title: editTitle,
 				description: editDescription,
 				type: editType,
 				root: editRoot,
-			})
-			.then(() => {
-				// 선택 해제
-				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === narrativeNode.id ? { ...n, selected: false } : n))
-				);
-			})
-			.catch((error) => {
-				console.error('Failed to update narrative node:', error);
-			})
-			.finally(() => {
-				isUpdating = false;
 			});
+
+			// 2. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
+			if (editType === 'choice' && narrativeNodeChoicesChanges) {
+				await Promise.all([
+					...narrativeNodeChoicesChanges.created.map((choice) => admin.createChoice(choice)),
+					...narrativeNodeChoicesChanges.updated.map((choice) =>
+						admin.updateChoice(choice.id!, choice)
+					),
+					...narrativeNodeChoicesChanges.deleted.map((id) => admin.removeChoice(id)),
+				]);
+			}
+
+			// 선택 해제
+			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
+		} catch (error) {
+			console.error('Failed to update narrative node:', error);
+		} finally {
+			isUpdating = false;
+		}
 	}
 
 	function onclickCancel() {
@@ -113,6 +119,16 @@
 				<Label for="edit-root">시작 노드</Label>
 			</div>
 
+			{#if editType === 'choice' && narrativeNode}
+				<div class="mt-4 border-t pt-4">
+					<NarrativeNodeChoiceEditor
+						narrativeNodeId={narrativeNode.id}
+						narrativeNodeChoices={narrativeNode.narrative_node_choices ?? []}
+						onchange={(changes) => (narrativeNodeChoicesChanges = changes)}
+					/>
+				</div>
+			{/if}
+
 			<div class="flex justify-end gap-2">
 				<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
 					취소
@@ -122,14 +138,5 @@
 				</Button>
 			</div>
 		</form>
-
-		{#if editType === 'choice' && narrativeNode?.narrative_node_choices}
-			<div class="mt-4 border-t pt-4">
-				<NarrativeNodeChoiceEditor
-					narrativeNodeId={narrativeNode.id}
-					choices={narrativeNode.narrative_node_choices}
-				/>
-			</div>
-		{/if}
 	</div>
 </Panel>

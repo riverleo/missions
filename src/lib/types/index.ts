@@ -17,6 +17,15 @@ export interface FetchState<T> {
 	error: Error | undefined;
 }
 
+// Bulk update types
+export interface BulkChanges<T> {
+	origin: T[];
+	current: T[];
+	created: T[]; // id가 optional이므로 Omit 불필요
+	updated: T[];
+	deleted: string[];
+}
+
 export interface ServerPayload {
 	supabase: SupabaseClient;
 	user: User | undefined;
