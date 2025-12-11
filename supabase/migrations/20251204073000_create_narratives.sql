@@ -23,7 +23,7 @@ create table narrative_node_choices (
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   title text not null default '',
   description text not null default '',
-  display_order integer not null default 0,
+  order_in_narrative_node integer not null default 0,
   created_at timestamptz not null default now()
 );
 

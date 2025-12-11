@@ -129,27 +129,27 @@ export type Database = {
           created_at: string
           description: string
           dice_roll_id: string | null
-          display_order: number
           id: string
           narrative_node_id: string
+          order_in_narrative_node: number
           title: string
         }
         Insert: {
           created_at?: string
           description?: string
           dice_roll_id?: string | null
-          display_order?: number
           id?: string
           narrative_node_id: string
+          order_in_narrative_node?: number
           title?: string
         }
         Update: {
           created_at?: string
           description?: string
           dice_roll_id?: string | null
-          display_order?: number
           id?: string
           narrative_node_id?: string
+          order_in_narrative_node?: number
           title?: string
         }
         Relationships: [
