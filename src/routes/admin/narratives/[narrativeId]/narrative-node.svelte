@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { NarrativeNode } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
+	import { sort } from 'radash';
 
 	interface Props {
 		data: {
@@ -12,6 +13,13 @@
 
 	const { data, id, selected = false }: Props = $props();
 	const narrativeNode = $derived(data.narrativeNode);
+
+	// 선택지를 order_in_narrative_node로 정렬
+	const narrativeNodeChoices = $derived(
+		narrativeNode.narrative_node_choices
+			? sort(narrativeNode.narrative_node_choices, (c) => c.order_in_narrative_node)
+			: []
+	);
 </script>
 
 <div
@@ -49,17 +57,26 @@
 			</div>
 		{/if}
 
-		{#if narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices}
+		{#if narrativeNode.type === 'choice' && narrativeNodeChoices.length > 0}
 			<div class="space-y-1 border-t pt-2">
-				{#each narrativeNode.narrative_node_choices as choice}
-					<div class="text-xs text-gray-700 dark:text-gray-300">
-						• {choice.title || '(선택지 없음)'}
+				{#each narrativeNodeChoices as choice}
+					<div class="relative flex items-center text-xs text-gray-700 dark:text-gray-300">
+						<span class="flex-1">• {choice.title || '(선택지 없음)'}</span>
+						<!-- 각 선택지마다 출력 핸들 -->
+						<Handle
+							type="source"
+							position={Position.Right}
+							id={choice.id}
+							class="top-1/2! -right-4! -translate-y-1/2!"
+						/>
 					</div>
 				{/each}
 			</div>
 		{/if}
 	</div>
 
-	<!-- 출력 핸들 (dice_roll로 연결) -->
-	<Handle type="source" position={Position.Right} />
+	<!-- text 타입일 때만 출력 핸들 표시 -->
+	{#if narrativeNode.type === 'text'}
+		<Handle type="source" position={Position.Right} />
+	{/if}
 </div>

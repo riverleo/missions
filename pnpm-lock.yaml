@@ -53,6 +53,9 @@ importers:
       radash:
         specifier: ^12.1.1
         version: 12.1.1
+      svelte-dnd-action:
+        specifier: ^0.9.68
+        version: 0.9.68(svelte@5.45.2)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -2027,6 +2030,11 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
+  svelte-dnd-action@0.9.68:
+    resolution: {integrity: sha512-maFNIHwimGYbvIG8uOHsU9T/4+VKBIaAaFEGWYFIyo4f8qwUs0BIqwvBfHkaN+MXt8MBB9rByPTvF7fRx0eIjw==}
+    peerDependencies:
+      svelte: '>=3.23.0 || ^5.0.0-next.0'
+
   svelte-toolbelt@0.10.6:
     resolution: {integrity: sha512-YWuX+RE+CnWYx09yseAe4ZVMM7e7GRFZM6OYWpBKOb++s+SQ8RBIMMe+Bs/CznBMc0QPLjr+vDBxTAkozXsFXQ==}
     engines: {node: '>=18', pnpm: '>=8.7.0'}
@@ -3813,6 +3821,10 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte-dnd-action@0.9.68(svelte@5.45.2):
+    dependencies:
+      svelte: 5.45.2
 
   svelte-toolbelt@0.10.6(@sveltejs/kit@2.49.0(@sveltejs/vite-plugin-svelte@6.2.1(svelte@5.45.2)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)))(svelte@5.45.2)(vite@7.2.4(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)))(svelte@5.45.2):
     dependencies:

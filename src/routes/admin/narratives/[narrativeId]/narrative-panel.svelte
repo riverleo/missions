@@ -110,6 +110,7 @@
 									edges.push({
 										id: createNarrativeNodeChoiceToDiceRollEdgeId(narrativeNodeChoice, diceRoll),
 										source: node.id,
+										sourceHandle: narrativeNodeChoice.id,
 										target: targetId,
 										deletable: true,
 									});

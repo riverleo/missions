@@ -12,7 +12,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Select from '$lib/components/ui/select';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import NarrativeNodeChoiceEditor from './narrative-node-choice-editor.svelte';
+	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 
 	interface Props {
 		narrativeNode: NarrativeNode | undefined;
@@ -31,17 +31,6 @@
 
 	// 선택지 변경사항을 콜백으로 받음
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
-
-	// 타입이 변경되면 dice_roll_id를 null로 설정
-	let prevType = $state<NarrativeNodeType>(narrativeNode?.type ?? 'text');
-	$effect(() => {
-		if (narrativeNode && editType !== prevType) {
-			prevType = editType;
-			if (narrativeNode.dice_roll_id) {
-				admin.updateNode(narrativeNode.id, { dice_roll_id: null });
-			}
-		}
-	});
 
 	async function onsubmit() {
 		if (!narrativeNode || isUpdating) return;
@@ -121,7 +110,7 @@
 
 			{#if editType === 'choice' && narrativeNode}
 				<div class="mt-4 border-t pt-4">
-					<NarrativeNodeChoiceEditor
+					<NarrativeNodeChoicesSection
 						narrativeNodeId={narrativeNode.id}
 						narrativeNodeChoices={narrativeNode.narrative_node_choices ?? []}
 						onchange={(changes) => (narrativeNodeChoicesChanges = changes)}

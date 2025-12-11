@@ -142,41 +142,69 @@
 				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
 				const diceRoll = targetNode.data.diceRoll as DiceRoll;
 
-				// text 타입만 dice_roll_id를 가질 수 있음
-				if (narrativeNode.type !== 'text') return;
+				// text 타입: narrative_node의 dice_roll_id 업데이트
+				if (narrativeNode.type === 'text') {
+					await admin.updateNode(narrativeNodeId, {
+						dice_roll_id: diceRollId,
+					});
 
-				await admin.updateNode(narrativeNodeId, {
-					dice_roll_id: diceRollId,
-				});
+					// 로컬 데이터 업데이트
+					narrativeNode.dice_roll_id = diceRollId;
 
-				// 로컬 데이터 업데이트
-				narrativeNode.dice_roll_id = diceRollId;
+					// 엣지 추가
+					edges = [
+						...edges,
+						{
+							id: createNarrativeNodeToDiceRollEdgeId(narrativeNode, diceRoll),
+							source: connection.source,
+							target: connection.target,
+							deletable: true,
+						},
+					];
+				}
+				// choice 타입: sourceHandle로 어느 choice인지 확인
+				else if (narrativeNode.type === 'choice') {
+					const choiceId = connection.sourceHandle;
+					if (!choiceId) return;
 
-				// 엣지 추가
-				edges = [
-					...edges,
-					{
-						id: createNarrativeNodeToDiceRollEdgeId(narrativeNode, diceRoll),
-						source: connection.source,
-						target: connection.target,
-						deletable: true,
-					},
-				];
+					await admin.updateChoice(choiceId, {
+						dice_roll_id: diceRollId,
+					});
+
+					// 로컬 데이터 업데이트
+					const choice = narrativeNode.narrative_node_choices?.find((c) => c.id === choiceId);
+					if (choice) {
+						choice.dice_roll_id = diceRollId;
+
+						// 엣지 추가
+						edges = [
+							...edges,
+							{
+								id: createNarrativeNodeChoiceToDiceRollEdgeId(choice, diceRoll),
+								source: connection.source,
+								sourceHandle: choiceId,
+								target: connection.target,
+								deletable: true,
+							},
+						];
+					}
+				}
 			}
 			// 2. dice_roll → narrative_node 연결 (success/failure)
 			else if (sourceNode.type === 'diceRoll' && targetNode.type === 'narrativeNode') {
 				const diceRollId = parseDiceRollNodeId(connection.source);
+				const narrativeNodeId = parseNarrativeNodeId(connection.target);
 				const diceRoll = sourceNode.data.diceRoll as DiceRoll;
 				const narrativeNode = targetNode.data.narrativeNode as NarrativeNodeType;
 				const handle = connection.sourceHandle;
 
 				if (handle === 'success') {
 					await diceRollAdmin.update(diceRollId, {
-						success_narrative_node_id: connection.target,
+						success_narrative_node_id: narrativeNodeId,
 					});
 
 					// 로컬 데이터 업데이트
-					diceRoll.success_narrative_node_id = connection.target;
+					diceRoll.success_narrative_node_id = narrativeNodeId;
 
 					// 엣지 추가
 					edges = [
@@ -192,11 +220,11 @@
 					];
 				} else if (handle === 'failure') {
 					await diceRollAdmin.update(diceRollId, {
-						failure_narrative_node_id: connection.target,
+						failure_narrative_node_id: narrativeNodeId,
 					});
 
 					// 로컬 데이터 업데이트
-					diceRoll.failure_narrative_node_id = connection.target;
+					diceRoll.failure_narrative_node_id = narrativeNodeId;
 
 					// 엣지 추가
 					edges = [
@@ -335,6 +363,7 @@
 						newEdges.push({
 							id: createNarrativeNodeChoiceToDiceRollEdgeId(narrativeNodeChoice, diceRoll),
 							source: narrativeNodeId,
+							sourceHandle: narrativeNodeChoice.id,
 							target: diceRollNodeId,
 							deletable: true,
 						});

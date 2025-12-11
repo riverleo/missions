@@ -21,7 +21,7 @@ export interface FetchState<T> {
 export interface BulkChanges<T> {
 	origin: T[];
 	current: T[];
-	created: T[]; // id가 optional이므로 Omit 불필요
+	created: Omit<T, 'id'>[];
 	updated: T[];
 	deleted: string[];
 }
