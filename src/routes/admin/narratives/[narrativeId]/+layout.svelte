@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Header from './header.svelte';
+	import Header from '$lib/components/admin/narrative/narrative-header.svelte';
 
 	let { children } = $props();
 </script>

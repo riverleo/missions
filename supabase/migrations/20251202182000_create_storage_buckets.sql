@@ -6,9 +6,11 @@ values (
   true,
   array['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
   5242880  -- 5MB
-);
+)
+on conflict (id) do nothing;
 
 -- authenticated 유저는 자신의 아바타를 업로드할 수 있음
+drop policy if exists "authenticated can upload their own avatar" on storage.objects;
 create policy "authenticated can upload their own avatar"
   on storage.objects
   for insert
@@ -19,6 +21,7 @@ create policy "authenticated can upload their own avatar"
   );
 
 -- 모든 사람이 아바타를 조회할 수 있음 (public bucket)
+drop policy if exists "anyone can view avatars" on storage.objects;
 create policy "anyone can view avatars"
   on storage.objects
   for select

@@ -18,7 +18,6 @@
 
 	const TEMP_ID_PREFIX = 'temp-';
 
-	// current만 $state로 관리 (origin은 narrativeNodeChoices prop을 그대로 사용)
 	let current = $state<NarrativeNodeChoice[]>(
 		sort(structuredClone(narrativeNodeChoices), (c) => c.order_in_narrative_node)
 	);

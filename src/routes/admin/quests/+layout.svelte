@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Aside from './aside.svelte';
+	import Aside from '$lib/components/admin/quest/quest-aside.svelte';
 	import type { Snippet } from 'svelte';
 
 	const { children }: { children: Snippet } = $props();

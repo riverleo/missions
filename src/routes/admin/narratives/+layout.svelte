@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Aside from './aside.svelte';
+	import Aside from '$lib/components/admin/narrative/narrative-aside.svelte';
 
 	let { children } = $props();
 </script>
