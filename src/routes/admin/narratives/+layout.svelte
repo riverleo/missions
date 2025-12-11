@@ -4,9 +4,9 @@
 	let { children } = $props();
 </script>
 
-<div class="flex h-screen">
+<div class="flex h-full">
 	<Aside />
-	<div class="flex flex-1 flex-col">
+	<div class="flex flex-1 flex-col overflow-hidden">
 		{@render children()}
 	</div>
 </div>
