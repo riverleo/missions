@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import * as InputGroup from '$lib/components/ui/input-group';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
@@ -83,27 +82,32 @@
 	<Card class="w-80 pt-6 pb-4">
 		<CardContent class="px-4">
 			<form {onsubmit} class="space-y-4">
+				<InputGroup.Root>
+					<InputGroup.Input
+						type="number"
+						placeholder="난이도 (DC)"
+						bind:value={editDifficultyClass}
+						min={1}
+						max={30}
+					/>
+				</InputGroup.Root>
+
 				<div class="space-y-2">
-					<Label for="edit-dc">난이도 (DC)</Label>
-					<Input id="edit-dc" type="number" bind:value={editDifficultyClass} min={1} max={30} />
-				</div>
-				<div class="space-y-2">
-					<Label for="edit-success-action">성공 시 동작</Label>
 					<Select.Root type="single" bind:value={editSuccessAction}>
-						<Select.Trigger id="edit-success-action">
-							{getActionLabel(editSuccessAction)}
+						<Select.Trigger>
+							<span class="text-muted-foreground">성공:</span>
+							<span class="ml-1">{getActionLabel(editSuccessAction)}</span>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
 							<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
 						</Select.Content>
 					</Select.Root>
-				</div>
-				<div class="space-y-2">
-					<Label for="edit-failure-action">실패 시 동작</Label>
+
 					<Select.Root type="single" bind:value={editFailureAction}>
-						<Select.Trigger id="edit-failure-action">
-							{getActionLabel(editFailureAction)}
+						<Select.Trigger>
+							<span class="text-muted-foreground">실패:</span>
+							<span class="ml-1">{getActionLabel(editFailureAction)}</span>
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
@@ -111,6 +115,7 @@
 						</Select.Content>
 					</Select.Root>
 				</div>
+
 				<div class="flex justify-end gap-2">
 					<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
 						취소
@@ -119,7 +124,7 @@
 						{isUpdating ? '저장 중...' : '저장'}
 					</Button>
 				</div>
-		</form>
+			</form>
 		</CardContent>
 	</Card>
 </Panel>
