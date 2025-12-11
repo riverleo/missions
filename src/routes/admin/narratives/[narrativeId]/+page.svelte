@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Content from '$lib/components/admin/narrative/narrative-content.svelte';
+	import NarrativeSvelteFlow from '$lib/components/admin/narrative/narrative-svelte-flow.svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 </script>
 
 <SvelteFlowProvider>
-	<Content />
+	<NarrativeSvelteFlow />
 </SvelteFlowProvider>

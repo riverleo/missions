@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Header from '$lib/components/admin/quest/quest-header.svelte';
-	import Content from '$lib/components/admin/quest/quest-content.svelte';
+	import QuestSvelteFlow from '$lib/components/admin/quest/quest-svelte-flow.svelte';
 	import { SvelteFlowProvider } from '@xyflow/svelte';
 </script>
 
 <Header />
 
 <SvelteFlowProvider>
-	<Content />
+	<QuestSvelteFlow />
 </SvelteFlowProvider>
