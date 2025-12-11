@@ -180,6 +180,20 @@
   - 문서: https://www.shadcn-svelte.com/docs/components
   - 사용법이 불확실한 경우 문서 참조
 
+- **shadcn-svelte import 규칙**
+  - `import * as` 형태 사용 금지
+  - Root 컴포넌트는 컴포넌트 이름 그대로 import
+  - 예시:
+    ```typescript
+    // ❌ 나쁜 예
+    import * as Select from '$lib/components/ui/select';
+    import { Root as SelectRoot } from '$lib/components/ui/select';
+
+    // ✅ 좋은 예
+    import { Select, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
+    import { InputGroup, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
+    ```
+
 - **아이콘 라이브러리**
   - `@tabler/icons-svelte` 사용 (lucide-svelte 사용 금지)
   - Icon 접두사를 붙여서 import
