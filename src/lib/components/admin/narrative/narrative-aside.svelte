@@ -9,7 +9,7 @@
 	const currentNarrativeId = $derived($page.params.narrativeId);
 </script>
 
-<aside class="w-80 overflow-y-auto border-r p-2">
+<aside class="w-60 overflow-y-auto border-r bg-muted/30 p-2">
 	{#if $store.status === 'loading'}
 		<div class="space-y-2 p-4">
 			<Skeleton class="h-16 w-full" />
