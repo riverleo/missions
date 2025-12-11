@@ -2,7 +2,9 @@
 	import { setMode } from 'mode-watcher';
 	import { onMount, onDestroy } from 'svelte';
 	import type { Snippet } from 'svelte';
-	import AdminSidebar from '$lib/components/admin/admin-sidebar.svelte';
+	import AdminSidebar from '$lib/components/admin/sidebar/admin-sidebar.svelte';
+	import AdminHeader from '$lib/components/admin/sidebar/admin-site-header.svelte';
+	import { SidebarProvider, SidebarInset } from '$lib/components/ui/sidebar';
 
 	const { children }: { children: Snippet } = $props();
 
@@ -15,9 +17,14 @@
 	});
 </script>
 
-<div class="flex h-screen">
-	<AdminSidebar />
-	<div class="flex flex-1 flex-col overflow-hidden">
-		{@render children()}
-	</div>
+<div class="[--header-height:theme(spacing.16)]">
+	<SidebarProvider class="flex flex-col">
+		<AdminHeader />
+		<div class="flex flex-1">
+			<AdminSidebar />
+			<SidebarInset>
+				{@render children()}
+			</SidebarInset>
+		</div>
+	</SidebarProvider>
 </div>
