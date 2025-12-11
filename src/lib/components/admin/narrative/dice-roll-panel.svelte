@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { DiceRoll, DiceRollAction } from '$lib/types';
+	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
@@ -10,7 +10,7 @@
 	import { createDiceRollNodeId } from '$lib/utils/flow-id';
 
 	interface Props {
-		diceRoll: DiceRoll | undefined;
+		diceRoll: NarrativeDiceRoll | undefined;
 	}
 
 	let { diceRoll }: Props = $props();

@@ -55,51 +55,6 @@ export type Database = {
         }
         Relationships: []
       }
-      dice_rolls: {
-        Row: {
-          created_at: string
-          difficulty_class: number
-          failure_action: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id: string | null
-          id: string
-          success_action: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          difficulty_class?: number
-          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id?: string | null
-          id?: string
-          success_action?: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          difficulty_class?: number
-          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id?: string | null
-          id?: string
-          success_action?: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dice_rolls_failure_narrative_node_id_fkey"
-            columns: ["failure_narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "dice_rolls_success_narrative_node_id_fkey"
-            columns: ["success_narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       dices: {
         Row: {
           created_at: string
@@ -124,12 +79,67 @@ export type Database = {
         }
         Relationships: []
       }
+      narrative_dice_rolls: {
+        Row: {
+          created_at: string
+          difficulty_class: number
+          failure_action: Database["public"]["Enums"]["dice_roll_action"]
+          failure_narrative_node_id: string | null
+          id: string
+          narrative_id: string
+          success_action: Database["public"]["Enums"]["dice_roll_action"]
+          success_narrative_node_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          difficulty_class?: number
+          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
+          failure_narrative_node_id?: string | null
+          id?: string
+          narrative_id: string
+          success_action?: Database["public"]["Enums"]["dice_roll_action"]
+          success_narrative_node_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          difficulty_class?: number
+          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
+          failure_narrative_node_id?: string | null
+          id?: string
+          narrative_id?: string
+          success_action?: Database["public"]["Enums"]["dice_roll_action"]
+          success_narrative_node_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "narrative_dice_rolls_failure_narrative_node_id_fkey"
+            columns: ["failure_narrative_node_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "narrative_dice_rolls_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "narrative_dice_rolls_success_narrative_node_id_fkey"
+            columns: ["success_narrative_node_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       narrative_node_choices: {
         Row: {
           created_at: string
           description: string
-          dice_roll_id: string | null
           id: string
+          narrative_dice_roll_id: string | null
           narrative_node_id: string
           order_in_narrative_node: number
           title: string
@@ -137,8 +147,8 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string
-          dice_roll_id?: string | null
           id?: string
+          narrative_dice_roll_id?: string | null
           narrative_node_id: string
           order_in_narrative_node?: number
           title?: string
@@ -146,18 +156,18 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
-          dice_roll_id?: string | null
           id?: string
+          narrative_dice_roll_id?: string | null
           narrative_node_id?: string
           order_in_narrative_node?: number
           title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "narrative_node_choices_dice_roll_id_fkey"
-            columns: ["dice_roll_id"]
+            foreignKeyName: "narrative_node_choices_narrative_dice_roll_id_fkey"
+            columns: ["narrative_dice_roll_id"]
             isOneToOne: false
-            referencedRelation: "dice_rolls"
+            referencedRelation: "narrative_dice_rolls"
             referencedColumns: ["id"]
           },
           {
@@ -173,8 +183,8 @@ export type Database = {
         Row: {
           created_at: string
           description: string
-          dice_roll_id: string | null
           id: string
+          narrative_dice_roll_id: string | null
           narrative_id: string
           root: boolean
           title: string
@@ -183,8 +193,8 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string
-          dice_roll_id?: string | null
           id?: string
+          narrative_dice_roll_id?: string | null
           narrative_id: string
           root?: boolean
           title?: string
@@ -193,8 +203,8 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
-          dice_roll_id?: string | null
           id?: string
+          narrative_dice_roll_id?: string | null
           narrative_id?: string
           root?: boolean
           title?: string
@@ -202,10 +212,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "narrative_nodes_dice_roll_id_fkey"
-            columns: ["dice_roll_id"]
+            foreignKeyName: "narrative_nodes_narrative_dice_roll_id_fkey"
+            columns: ["narrative_dice_roll_id"]
             isOneToOne: false
-            referencedRelation: "dice_rolls"
+            referencedRelation: "narrative_dice_rolls"
             referencedColumns: ["id"]
           },
           {
@@ -281,8 +291,8 @@ export type Database = {
         Row: {
           created_at: string
           dice_id: string | null
-          dice_roll_id: string
           id: string
+          narrative_dice_roll_id: string
           narrative_id: string
           narrative_node_choice_id: string | null
           narrative_node_id: string
@@ -297,8 +307,8 @@ export type Database = {
         Insert: {
           created_at?: string
           dice_id?: string | null
-          dice_roll_id: string
           id?: string
+          narrative_dice_roll_id: string
           narrative_id: string
           narrative_node_choice_id?: string | null
           narrative_node_id: string
@@ -313,8 +323,8 @@ export type Database = {
         Update: {
           created_at?: string
           dice_id?: string | null
-          dice_roll_id?: string
           id?: string
+          narrative_dice_roll_id?: string
           narrative_id?: string
           narrative_node_choice_id?: string | null
           narrative_node_id?: string
@@ -335,10 +345,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_dice_rolls_dice_roll_id_fkey"
-            columns: ["dice_roll_id"]
+            foreignKeyName: "player_dice_rolls_narrative_dice_roll_id_fkey"
+            columns: ["narrative_dice_roll_id"]
             isOneToOne: false
-            referencedRelation: "dice_rolls"
+            referencedRelation: "narrative_dice_rolls"
             referencedColumns: ["id"]
           },
           {

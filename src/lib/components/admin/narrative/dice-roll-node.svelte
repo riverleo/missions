@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { DiceRoll } from '$lib/types';
+	import type { NarrativeDiceRoll } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 
 	interface Props {
 		data: {
-			diceRoll: DiceRoll;
+			diceRoll: NarrativeDiceRoll;
 		};
 		id: string;
 		selected?: boolean;

@@ -87,9 +87,9 @@ export type Narrative = NarrativeRow & {
 export type Dice = Tables<'dices'>;
 export type DiceInsert = TablesInsert<'dices'>;
 export type DiceUpdate = TablesUpdate<'dices'>;
-export type DiceRoll = Tables<'dice_rolls'>;
-export type DiceRollInsert = TablesInsert<'dice_rolls'>;
-export type DiceRollUpdate = TablesUpdate<'dice_rolls'>;
+export type NarrativeDiceRoll = Tables<'narrative_dice_rolls'>;
+export type NarrativeDiceRollInsert = TablesInsert<'narrative_dice_rolls'>;
+export type NarrativeDiceRollUpdate = TablesUpdate<'narrative_dice_rolls'>;
 export type PlayerDiceRoll = Tables<'player_dice_rolls'>;
 export type PlayerDiceRollInsert = TablesInsert<'player_dice_rolls'>;
 

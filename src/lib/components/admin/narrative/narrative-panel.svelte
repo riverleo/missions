@@ -46,12 +46,12 @@
 	}
 
 	async function onclickCreateDiceRoll() {
-		if (isCreatingDiceRoll) return;
+		if (isCreatingDiceRoll || !narrativeId) return;
 
 		isCreatingDiceRoll = true;
 
 		try {
-			await diceRollAdmin.create({});
+			await diceRollAdmin.create({ narrative_id: narrativeId });
 		} catch (error) {
 			console.error('Failed to create dice roll:', error);
 		} finally {
@@ -78,9 +78,9 @@
 					const data = node.data as { narrativeNode: any };
 					const narrativeNode = data.narrativeNode;
 
-					if (narrativeNode.type === 'text' && narrativeNode.dice_roll_id) {
+					if (narrativeNode.type === 'text' && narrativeNode.narrative_dice_roll_id) {
 						// dice_roll 객체 찾기
-						const targetDiceRollNode = nodes.find((n) => n.id.endsWith(narrativeNode.dice_roll_id));
+						const targetDiceRollNode = nodes.find((n) => n.id.endsWith(narrativeNode.narrative_dice_roll_id));
 						if (!targetDiceRollNode || targetDiceRollNode.type !== 'diceRoll') return;
 
 						const diceRoll = (targetDiceRollNode.data as { diceRoll: any }).diceRoll;
@@ -99,10 +99,10 @@
 
 					if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
 						narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice: any) => {
-							if (narrativeNodeChoice.dice_roll_id) {
+							if (narrativeNodeChoice.narrative_dice_roll_id) {
 								// dice_roll 객체 찾기
 								const targetDiceRollNode = nodes.find((n) =>
-									n.id.endsWith(narrativeNodeChoice.dice_roll_id)
+									n.id.endsWith(narrativeNodeChoice.narrative_dice_roll_id)
 								);
 								if (!targetDiceRollNode || targetDiceRollNode.type !== 'diceRoll') return;
 

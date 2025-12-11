@@ -1,7 +1,8 @@
 create type dice_roll_action as enum ('narrative_node_next', 'narrative_node_done');
 
-create table dice_rolls (
+create table narrative_dice_rolls (
   id uuid primary key default gen_random_uuid(),
+  narrative_id uuid not null references narratives(id) on delete cascade,
   difficulty_class integer not null default 0,
   success_action dice_roll_action not null default 'narrative_node_next',
   success_narrative_node_id uuid references narrative_nodes(id) on delete cascade,
@@ -10,28 +11,28 @@ create table dice_rolls (
   created_at timestamptz not null default now()
 );
 
-alter table dice_rolls enable row level security;
+alter table narrative_dice_rolls enable row level security;
 
-create policy "authenticated can view dice_rolls"
-  on dice_rolls
+create policy "authenticated can view narrative_dice_rolls"
+  on narrative_dice_rolls
   for select
   to authenticated
   using (true);
 
-create policy "admins can insert dice_rolls"
-  on dice_rolls
+create policy "admins can insert narrative_dice_rolls"
+  on narrative_dice_rolls
   for insert
   to authenticated
   with check (is_admin());
 
-create policy "admins can update dice_rolls"
-  on dice_rolls
+create policy "admins can update narrative_dice_rolls"
+  on narrative_dice_rolls
   for update
   to authenticated
   using (is_admin());
 
-create policy "admins can delete dice_rolls"
-  on dice_rolls
+create policy "admins can delete narrative_dice_rolls"
+  on narrative_dice_rolls
   for delete
   to authenticated
   using (is_admin());
@@ -45,10 +46,10 @@ create table player_dice_rolls (
   narrative_id uuid not null references narratives(id) on delete cascade,
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   narrative_node_choice_id uuid references narrative_node_choices(id) on delete cascade,
+  narrative_dice_roll_id uuid not null references narrative_dice_rolls(id) on delete cascade,
   quest_id uuid references quests(id) on delete cascade,
   quest_branch_id uuid references quest_branches(id) on delete cascade,
   dice_id uuid references dices(id) on delete cascade,
-  dice_roll_id uuid not null references dice_rolls(id) on delete cascade,
   value integer,
   created_at timestamptz not null default now()
 );

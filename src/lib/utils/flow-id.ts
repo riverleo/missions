@@ -2,7 +2,7 @@
  * Flow 노드 및 엣지의 ID를 생성/파싱하는 유틸리티 함수
  */
 
-import type { DiceRoll, NarrativeNode, NarrativeNodeChoice } from '$lib/types';
+import type { NarrativeDiceRoll, NarrativeNode, NarrativeNodeChoice } from '$lib/types';
 
 // Node IDs
 export function createNarrativeNodeId(narrativeNode: NarrativeNode): string {
@@ -17,7 +17,7 @@ export function isNarrativeNodeId(nodeId: string): boolean {
 	return nodeId.startsWith('narrative-node-');
 }
 
-export function createDiceRollNodeId(diceRoll: DiceRoll): string {
+export function createDiceRollNodeId(diceRoll: NarrativeDiceRoll): string {
 	return `dice-roll-${diceRoll.id}`;
 }
 
@@ -32,27 +32,27 @@ export function isDiceRollNodeId(nodeId: string): boolean {
 // Edge IDs
 export function createNarrativeNodeToDiceRollEdgeId(
 	narrativeNode: NarrativeNode,
-	diceRoll: DiceRoll
+	diceRoll: NarrativeDiceRoll
 ): string {
 	return `${narrativeNode.id}-${createDiceRollNodeId(diceRoll)}`;
 }
 
 export function createNarrativeNodeChoiceToDiceRollEdgeId(
 	narrativeNodeChoice: NarrativeNodeChoice,
-	diceRoll: DiceRoll
+	diceRoll: NarrativeDiceRoll
 ): string {
 	return `narrative-node-choice-${narrativeNodeChoice.id}-${createDiceRollNodeId(diceRoll)}`;
 }
 
 export function createDiceRollToSuccessEdgeId(
-	diceRoll: DiceRoll,
+	diceRoll: NarrativeDiceRoll,
 	narrativeNode: NarrativeNode
 ): string {
 	return `${createDiceRollNodeId(diceRoll)}-success-${narrativeNode.id}`;
 }
 
 export function createDiceRollToFailureEdgeId(
-	diceRoll: DiceRoll,
+	diceRoll: NarrativeDiceRoll,
 	narrativeNode: NarrativeNode
 ): string {
 	return `${createDiceRollNodeId(diceRoll)}-failure-${narrativeNode.id}`;

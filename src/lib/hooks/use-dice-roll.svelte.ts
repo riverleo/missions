@@ -1,5 +1,5 @@
 import { writable, type Readable } from 'svelte/store';
-import type { FetchState, DiceRoll, DiceRollInsert } from '$lib/types';
+import type { FetchState, NarrativeDiceRoll, NarrativeDiceRollInsert } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 import { produce } from 'immer';
 
@@ -7,7 +7,7 @@ let instance: ReturnType<typeof createDiceRollStore> | undefined = undefined;
 
 function createDiceRollStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<FetchState<DiceRoll[]>>({
+	const store = writable<FetchState<NarrativeDiceRoll[]>>({
 		status: 'idle',
 		data: undefined,
 		error: undefined,
@@ -19,7 +19,7 @@ function createDiceRollStore() {
 		store.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase.from('dice_rolls').select('*');
+			const { data, error } = await supabase.from('narrative_dice_rolls').select('*');
 
 			if (error) throw error;
 
@@ -37,10 +37,10 @@ function createDiceRollStore() {
 		}
 	}
 
-	async function create(diceRoll: DiceRollInsert) {
+	async function create(diceRoll: NarrativeDiceRollInsert) {
 		try {
 			const { data, error } = await supabase
-				.from('dice_rolls')
+				.from('narrative_dice_rolls')
 				.insert(diceRoll)
 				.select()
 				.single();
@@ -68,9 +68,9 @@ function createDiceRollStore() {
 		}
 	}
 
-	async function update(id: string, diceRoll: Partial<DiceRollInsert>) {
+	async function update(id: string, diceRoll: Partial<NarrativeDiceRollInsert>) {
 		try {
-			const { error } = await supabase.from('dice_rolls').update(diceRoll).eq('id', id);
+			const { error } = await supabase.from('narrative_dice_rolls').update(diceRoll).eq('id', id);
 
 			if (error) throw error;
 
@@ -94,7 +94,7 @@ function createDiceRollStore() {
 
 	async function remove(id: string) {
 		try {
-			const { error } = await supabase.from('dice_rolls').delete().eq('id', id);
+			const { error } = await supabase.from('narrative_dice_rolls').delete().eq('id', id);
 
 			if (error) throw error;
 
@@ -115,14 +115,14 @@ function createDiceRollStore() {
 		}
 	}
 
-	function find(id: string): DiceRoll | undefined {
-		const currentState = writable<DiceRoll | undefined>(undefined);
+	function find(id: string): NarrativeDiceRoll | undefined {
+		const currentState = writable<NarrativeDiceRoll | undefined>(undefined);
 		store.subscribe((state) => {
 			if (state.data) {
 				currentState.set(state.data.find((dr) => dr.id === id));
 			}
 		});
-		let result: DiceRoll | undefined;
+		let result: NarrativeDiceRoll | undefined;
 		currentState.subscribe((value) => {
 			result = value;
 		});
@@ -135,7 +135,7 @@ function createDiceRollStore() {
 	}
 
 	return {
-		store: store as Readable<FetchState<DiceRoll[]>>,
+		store: store as Readable<FetchState<NarrativeDiceRoll[]>>,
 		find,
 		admin: {
 			create,
