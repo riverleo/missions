@@ -4,14 +4,14 @@
 
 	interface Props {
 		data: {
-			diceRoll: NarrativeDiceRoll;
+			narrativeDiceRoll: NarrativeDiceRoll;
 		};
 		id: string;
 		selected?: boolean;
 	}
 
 	const { data, id, selected = false }: Props = $props();
-	const diceRoll = $derived(data.diceRoll);
+	const narrativeDiceRoll = $derived(data.narrativeDiceRoll);
 </script>
 
 <div
@@ -35,7 +35,7 @@
 		<div class="text-xs font-semibold text-purple-600 dark:text-purple-400">주사위 굴림</div>
 
 		<div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-			DC {diceRoll.difficulty_class}
+			DC {narrativeDiceRoll.difficulty_class}
 		</div>
 
 		<div class="flex items-center gap-2 text-xs">

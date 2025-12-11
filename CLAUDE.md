@@ -141,13 +141,13 @@
      ```
 
 6. **테이블명과 관계 데이터 명명**
-   - 테이블명은 복수형 사용 (예: `dices`, `dice_rolls`, `narratives`)
-   - 단일 관계 데이터를 참조할 때는 단수형 사용 (예: `narrativeNode.dice_roll`)
+   - 테이블명은 복수형 사용 (예: `dices`, `narrative_dice_rolls`, `narratives`)
+   - 단일 관계 데이터를 참조할 때는 단수형 사용 (예: `narrativeNode.narrative_dice_roll`)
    - Supabase 쿼리에서 alias로 단수형 지정:
      ```typescript
      .select(`
        *,
-       dice_roll:dice_rolls!narrative_nodes_dice_roll_id_fkey (*)
+       narrative_dice_roll:narrative_dice_rolls!narrative_nodes_narrative_dice_roll_id_fkey (*)
      `)
      ```
    - 이유: 테이블은 여러 레코드의 집합이므로 복수형, 개별 관계는 단일 객체이므로 단수형
@@ -158,11 +158,11 @@
    - 예:
      ```typescript
      // ❌ 나쁜 예
-     export type NarrativeNodeChoiceWithDiceRoll = NarrativeNodeChoice & { dice_roll: DiceRoll };
+     export type NarrativeNodeChoiceWithNarrativeDiceRoll = NarrativeNodeChoice & { narrative_dice_roll: NarrativeDiceRoll };
 
      // ✅ 좋은 예
      type NarrativeNodeChoiceRow = Tables<'narrative_node_choices'>;
-     export type NarrativeNodeChoice = NarrativeNodeChoiceRow & { dice_roll: DiceRoll };
+     export type NarrativeNodeChoice = NarrativeNodeChoiceRow & { narrative_dice_roll: NarrativeDiceRoll };
      ```
 
 ## Types

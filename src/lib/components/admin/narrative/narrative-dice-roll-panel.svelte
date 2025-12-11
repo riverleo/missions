@@ -6,53 +6,53 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
-	import { useDiceRoll } from '$lib/hooks/use-dice-roll.svelte';
-	import { createDiceRollNodeId } from '$lib/utils/flow-id';
+	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 
 	interface Props {
-		diceRoll: NarrativeDiceRoll | undefined;
+		narrativeDiceRoll: NarrativeDiceRoll | undefined;
 	}
 
-	let { diceRoll }: Props = $props();
+	let { narrativeDiceRoll }: Props = $props();
 
-	const { admin } = useDiceRoll();
+	const { admin } = useNarrative();
 	const flowNodes = useNodes();
 
-	let editDifficultyClass = $state(diceRoll?.difficulty_class ?? 0);
-	let editSuccessAction = $state<DiceRollAction>(diceRoll?.success_action ?? 'narrative_node_next');
-	let editFailureAction = $state<DiceRollAction>(diceRoll?.failure_action ?? 'narrative_node_next');
+	let editDifficultyClass = $state(narrativeDiceRoll?.difficulty_class ?? 0);
+	let editSuccessAction = $state<DiceRollAction>(narrativeDiceRoll?.success_action ?? 'narrative_node_next');
+	let editFailureAction = $state<DiceRollAction>(narrativeDiceRoll?.failure_action ?? 'narrative_node_next');
 	let isUpdating = $state(false);
 
 	// 선택된 주사위 굴림이 변경되면 편집 필드 업데이트
 	$effect(() => {
-		if (diceRoll) {
-			editDifficultyClass = diceRoll.difficulty_class;
-			editSuccessAction = diceRoll.success_action;
-			editFailureAction = diceRoll.failure_action;
+		if (narrativeDiceRoll) {
+			editDifficultyClass = narrativeDiceRoll.difficulty_class;
+			editSuccessAction = narrativeDiceRoll.success_action;
+			editFailureAction = narrativeDiceRoll.failure_action;
 		}
 	});
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!diceRoll || isUpdating) return;
+		if (!narrativeDiceRoll || isUpdating) return;
 
 		isUpdating = true;
 
 		admin
-			.update(diceRoll.id, {
+			.updateNarrativeDiceRoll(narrativeDiceRoll.id, {
 				difficulty_class: editDifficultyClass,
 				success_action: editSuccessAction,
 				failure_action: editFailureAction,
 			})
 			.then(() => {
 				// 선택 해제
-				const diceRollNodeId = createDiceRollNodeId(diceRoll);
+				const narrativeDiceRollNodeId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
 				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === diceRollNodeId ? { ...n, selected: false } : n))
+					ns.map((n) => (n.id === narrativeDiceRollNodeId ? { ...n, selected: false } : n))
 				);
 			})
 			.catch((error) => {
-				console.error('Failed to update dice roll:', error);
+				console.error('Failed to update narrative dice roll:', error);
 			})
 			.finally(() => {
 				isUpdating = false;
@@ -60,12 +60,12 @@
 	}
 
 	function onclickCancel() {
-		if (!diceRoll) return;
+		if (!narrativeDiceRoll) return;
 
 		// 선택 해제
-		const diceRollNodeId = createDiceRollNodeId(diceRoll);
+		const narrativeDiceRollNodeId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === diceRollNodeId ? { ...n, selected: false } : n))
+			ns.map((n) => (n.id === narrativeDiceRollNodeId ? { ...n, selected: false } : n))
 		);
 	}
 

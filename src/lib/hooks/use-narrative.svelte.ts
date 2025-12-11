@@ -8,6 +8,8 @@ import type {
 	NarrativeNodeUpdate,
 	NarrativeNodeChoiceInsert,
 	NarrativeNodeChoiceUpdate,
+	NarrativeDiceRollInsert,
+	NarrativeDiceRollUpdate,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 import { produce } from 'immer';
@@ -36,7 +38,8 @@ function createNarrativeStore() {
 					narrative_nodes (
 						*,
 						narrative_node_choices (*)
-					)
+					),
+					narrative_dice_rolls (*)
 				`
 				)
 				.order('created_at', { ascending: false });
@@ -312,6 +315,107 @@ function createNarrativeStore() {
 		}
 	}
 
+	async function createNarrativeDiceRoll(narrativeDiceRoll: NarrativeDiceRollInsert) {
+		try {
+			const { data, error } = await supabase
+				.from('narrative_dice_rolls')
+				.insert(narrativeDiceRoll)
+				.select()
+				.single();
+
+			if (error) throw error;
+
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					const narrative = draft.data?.find((n) => n.id === narrativeDiceRoll.narrative_id);
+					if (narrative) {
+						if (!narrative.narrative_dice_rolls) {
+							narrative.narrative_dice_rolls = [];
+						}
+						narrative.narrative_dice_rolls.push(data);
+					}
+				})
+			);
+
+			return data;
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function updateNarrativeDiceRoll(id: string, narrativeDiceRoll: NarrativeDiceRollUpdate) {
+		try {
+			const { error } = await supabase
+				.from('narrative_dice_rolls')
+				.update(narrativeDiceRoll)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_dice_rolls) {
+								const diceRollIndex = narrative.narrative_dice_rolls.findIndex(
+									(dr) => dr.id === id
+								);
+								if (diceRollIndex !== -1) {
+									narrative.narrative_dice_rolls[diceRollIndex] = {
+										...narrative.narrative_dice_rolls[diceRollIndex],
+										...narrativeDiceRoll,
+									};
+									break;
+								}
+							}
+						}
+					}
+				})
+			);
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function removeNarrativeDiceRoll(id: string) {
+		try {
+			const { error } = await supabase.from('narrative_dice_rolls').delete().eq('id', id);
+
+			if (error) throw error;
+
+			// 스토어 데이터 업데이트 (Immer 사용)
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const narrative of draft.data) {
+							if (narrative.narrative_dice_rolls) {
+								narrative.narrative_dice_rolls = narrative.narrative_dice_rolls.filter(
+									(dr) => dr.id !== id
+								);
+							}
+						}
+					}
+				})
+			);
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
 	if (!initialized) {
 		initialized = true;
 		fetchNarratives();
@@ -329,6 +433,9 @@ function createNarrativeStore() {
 			createChoice,
 			updateChoice,
 			removeChoice,
+			createNarrativeDiceRoll,
+			updateNarrativeDiceRoll,
+			removeNarrativeDiceRoll,
 		},
 	};
 }

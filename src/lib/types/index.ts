@@ -81,6 +81,7 @@ export type NarrativeNode = NarrativeNodeRow & {
 
 export type Narrative = NarrativeRow & {
 	narrative_nodes?: NarrativeNode[];
+	narrative_dice_rolls?: NarrativeDiceRoll[];
 };
 
 // Dice types

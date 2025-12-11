@@ -17,102 +17,102 @@ export function isNarrativeNodeId(nodeId: string): boolean {
 	return nodeId.startsWith('narrative-node-');
 }
 
-export function createDiceRollNodeId(diceRoll: NarrativeDiceRoll): string {
-	return `dice-roll-${diceRoll.id}`;
+export function createNarrativeDiceRollNodeId(narrativeDiceRoll: NarrativeDiceRoll): string {
+	return `narrative-dice-roll-${narrativeDiceRoll.id}`;
 }
 
-export function parseDiceRollNodeId(nodeId: string): string {
-	return nodeId.replace('dice-roll-', '');
+export function parseNarrativeDiceRollNodeId(nodeId: string): string {
+	return nodeId.replace('narrative-dice-roll-', '');
 }
 
-export function isDiceRollNodeId(nodeId: string): boolean {
-	return nodeId.startsWith('dice-roll-');
+export function isNarrativeDiceRollNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('narrative-dice-roll-');
 }
 
 // Edge IDs
-export function createNarrativeNodeToDiceRollEdgeId(
+export function createNarrativeNodeToNarrativeDiceRollEdgeId(
 	narrativeNode: NarrativeNode,
-	diceRoll: NarrativeDiceRoll
+	narrativeDiceRoll: NarrativeDiceRoll
 ): string {
-	return `${narrativeNode.id}-${createDiceRollNodeId(diceRoll)}`;
+	return `${narrativeNode.id}-${createNarrativeDiceRollNodeId(narrativeDiceRoll)}`;
 }
 
-export function createNarrativeNodeChoiceToDiceRollEdgeId(
+export function createNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
 	narrativeNodeChoice: NarrativeNodeChoice,
-	diceRoll: NarrativeDiceRoll
+	narrativeDiceRoll: NarrativeDiceRoll
 ): string {
-	return `narrative-node-choice-${narrativeNodeChoice.id}-${createDiceRollNodeId(diceRoll)}`;
+	return `narrative-node-choice-${narrativeNodeChoice.id}-${createNarrativeDiceRollNodeId(narrativeDiceRoll)}`;
 }
 
-export function createDiceRollToSuccessEdgeId(
-	diceRoll: NarrativeDiceRoll,
+export function createNarrativeDiceRollToSuccessEdgeId(
+	narrativeDiceRoll: NarrativeDiceRoll,
 	narrativeNode: NarrativeNode
 ): string {
-	return `${createDiceRollNodeId(diceRoll)}-success-${narrativeNode.id}`;
+	return `${createNarrativeDiceRollNodeId(narrativeDiceRoll)}-success-${narrativeNode.id}`;
 }
 
-export function createDiceRollToFailureEdgeId(
-	diceRoll: NarrativeDiceRoll,
+export function createNarrativeDiceRollToFailureEdgeId(
+	narrativeDiceRoll: NarrativeDiceRoll,
 	narrativeNode: NarrativeNode
 ): string {
-	return `${createDiceRollNodeId(diceRoll)}-failure-${narrativeNode.id}`;
+	return `${createNarrativeDiceRollNodeId(narrativeDiceRoll)}-failure-${narrativeNode.id}`;
 }
 
 // Edge ID parsers
-export function parseNarrativeNodeToDiceRollEdgeId(edgeId: string): {
+export function parseNarrativeNodeToNarrativeDiceRollEdgeId(edgeId: string): {
 	nodeId: string;
-	diceRollId: string;
+	narrativeDiceRollId: string;
 } {
-	const [nodeId, diceRollPart] = edgeId.split('-dice-roll-');
-	return { nodeId, diceRollId: diceRollPart };
+	const [nodeId, narrativeDiceRollPart] = edgeId.split('-narrative-dice-roll-');
+	return { nodeId, narrativeDiceRollId: narrativeDiceRollPart };
 }
 
-export function parseNarrativeNodeChoiceToDiceRollEdgeId(edgeId: string): {
+export function parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(edgeId: string): {
 	narrativeNodeChoiceId: string;
-	diceRollId: string;
+	narrativeDiceRollId: string;
 } {
 	const narrativeNodeChoiceId = edgeId
-		.split('-dice-roll-')[0]
+		.split('-narrative-dice-roll-')[0]
 		.replace('narrative-node-choice-', '');
-	const diceRollId = edgeId.split('-dice-roll-')[1];
-	return { narrativeNodeChoiceId, diceRollId };
+	const narrativeDiceRollId = edgeId.split('-narrative-dice-roll-')[1];
+	return { narrativeNodeChoiceId, narrativeDiceRollId };
 }
 
-export function parseDiceRollToSuccessEdgeId(edgeId: string): {
-	diceRollId: string;
+export function parseNarrativeDiceRollToSuccessEdgeId(edgeId: string): {
+	narrativeDiceRollId: string;
 	nodeId: string;
 } {
-	const [diceRollPart, nodeId] = edgeId.split('-success-');
-	const diceRollId = parseDiceRollNodeId(diceRollPart);
-	return { diceRollId, nodeId };
+	const [narrativeDiceRollPart, nodeId] = edgeId.split('-success-');
+	const narrativeDiceRollId = parseNarrativeDiceRollNodeId(narrativeDiceRollPart);
+	return { narrativeDiceRollId, nodeId };
 }
 
-export function parseDiceRollToFailureEdgeId(edgeId: string): {
-	diceRollId: string;
+export function parseNarrativeDiceRollToFailureEdgeId(edgeId: string): {
+	narrativeDiceRollId: string;
 	nodeId: string;
 } {
-	const [diceRollPart, nodeId] = edgeId.split('-failure-');
-	const diceRollId = parseDiceRollNodeId(diceRollPart);
-	return { diceRollId, nodeId };
+	const [narrativeDiceRollPart, nodeId] = edgeId.split('-failure-');
+	const narrativeDiceRollId = parseNarrativeDiceRollNodeId(narrativeDiceRollPart);
+	return { narrativeDiceRollId, nodeId };
 }
 
 // Edge type checkers
-export function isNarrativeNodeToDiceRollEdge(edgeId: string): boolean {
+export function isNarrativeNodeToNarrativeDiceRollEdge(edgeId: string): boolean {
 	return (
-		edgeId.includes('-dice-roll-') &&
+		edgeId.includes('-narrative-dice-roll-') &&
 		!edgeId.startsWith('narrative-node-choice-') &&
-		!edgeId.startsWith('dice-roll-')
+		!edgeId.startsWith('narrative-dice-roll-')
 	);
 }
 
-export function isNarrativeNodeChoiceToDiceRollEdge(edgeId: string): boolean {
-	return edgeId.startsWith('narrative-node-choice-') && edgeId.includes('-dice-roll-');
+export function isNarrativeNodeChoiceToNarrativeDiceRollEdge(edgeId: string): boolean {
+	return edgeId.startsWith('narrative-node-choice-') && edgeId.includes('-narrative-dice-roll-');
 }
 
-export function isDiceRollToSuccessEdge(edgeId: string): boolean {
+export function isNarrativeDiceRollToSuccessEdge(edgeId: string): boolean {
 	return edgeId.includes('-success-');
 }
 
-export function isDiceRollToFailureEdge(edgeId: string): boolean {
+export function isNarrativeDiceRollToFailureEdge(edgeId: string): boolean {
 	return edgeId.includes('-failure-');
 }
