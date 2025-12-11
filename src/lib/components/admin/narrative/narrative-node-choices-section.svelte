@@ -31,13 +31,13 @@
 		const originalMap = new Map(narrativeNodeChoices.map((c) => [c.id, c]));
 		const currentIds = new Set(current.map((c) => c.id).filter(Boolean));
 
-		// created: id가 임시 id인 항목들 (임시 id를 undefined로 변경)
+		// created: id가 임시 id인 항목들 (id 필드 제거)
 		const created = current
 			.filter((c) => c.id?.startsWith(TEMP_ID_PREFIX))
-			.map((c) => ({
-				...c,
-				id: undefined,
-			})) as Omit<NarrativeNodeChoice, 'id'>[];
+			.map((c) => {
+				const { id, ...rest } = c;
+				return rest;
+			}) as Omit<NarrativeNodeChoice, 'id'>[];
 
 		// updated: id 있고(임시 id 제외) 변경된 항목들
 		const updated = current.filter((c) => {
@@ -62,25 +62,28 @@
 	function onclickAddChoice(e: MouseEvent) {
 		// id 없이 추가 = 새로 생성될 항목
 		// svelte-dnd-action은 각 항목에 id가 필요하므로 임시 id 생성
-		current.push({
-			id: `${TEMP_ID_PREFIX}${Date.now()}-${Math.random()}`,
-			narrative_node_id: narrativeNodeId,
-			order_in_narrative_node: current.length,
-		} as NarrativeNodeChoice);
-
-		current = current;
+		current = [
+			...current,
+			{
+				id: `${TEMP_ID_PREFIX}${Date.now()}-${Math.random()}`,
+				narrative_node_id: narrativeNodeId,
+				order_in_narrative_node: current.length,
+				title: '',
+			} as NarrativeNodeChoice,
+		];
 		calculateAndNotifyChanges();
 	}
 
 	function onchangeChoiceTitle(index: number, newTitle: string) {
-		current[index].title = newTitle;
-		current = current;
+		current = current.map((choice, i) => (i === index ? { ...choice, title: newTitle } : choice));
 		calculateAndNotifyChanges();
 	}
 
 	function onclickDeleteChoice(e: MouseEvent, index: number) {
-		current.splice(index, 1);
-		current = current;
+		current = current.filter((_, i) => i !== index).map((choice, i) => ({
+			...choice,
+			order_in_narrative_node: i,
+		}));
 		calculateAndNotifyChanges();
 	}
 

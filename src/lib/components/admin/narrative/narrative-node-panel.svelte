@@ -43,10 +43,13 @@
 
 	let changes = $state<NarrativeNode | undefined>(undefined);
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
+	let currentNarrativeNodeId = $state<string | undefined>(undefined);
 
 	// narrativeNode가 변경될 때마다 클론해서 로컬 상태 업데이트
+	// 단, 다른 노드로 바뀔 때만 초기화 (같은 노드의 업데이트는 무시)
 	$effect(() => {
-		if (narrativeNode) {
+		if (narrativeNode && narrativeNode.id !== currentNarrativeNodeId) {
+			currentNarrativeNodeId = narrativeNode.id;
 			changes = clone(narrativeNode);
 			narrativeNodeChoicesChanges = undefined;
 		}

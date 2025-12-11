@@ -3,6 +3,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
+	import { Separator } from '$lib/components/ui/separator';
 
 	interface Props {
 		data: {
@@ -58,10 +59,11 @@
 		{/if}
 
 		{#if narrativeNode.type === 'choice' && narrativeNodeChoices.length > 0}
-			<div class="space-y-1 border-t pt-2">
+			<Separator class="bg-white/10" />
+			<div class="space-y-1 pt-2">
 				{#each narrativeNodeChoices as choice}
 					<div class="relative flex items-center text-xs text-gray-700 dark:text-gray-300">
-						<span class="flex-1">• {choice.title || '(선택지 없음)'}</span>
+						<span class="flex-1">{choice.title || '(선택지 없음)'}</span>
 						<!-- 각 선택지마다 출력 핸들 -->
 						<Handle
 							type="source"
