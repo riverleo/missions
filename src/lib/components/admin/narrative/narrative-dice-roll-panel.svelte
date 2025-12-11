@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
-	import * as InputGroup from '$lib/components/ui/input-group';
+	import { Root as InputGroupRoot, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
-	import * as Select from '$lib/components/ui/select';
+	import { Root as SelectRoot, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 
@@ -82,38 +82,39 @@
 	<Card class="w-80 pt-6 pb-4">
 		<CardContent class="px-4">
 			<form {onsubmit} class="space-y-4">
-				<InputGroup.Root>
-					<InputGroup.Input
+				<InputGroupRoot>
+					<InputGroupText>최소 눈금</InputGroupText>
+					<InputGroupInput
 						type="number"
 						placeholder="난이도 (DC)"
 						bind:value={editDifficultyClass}
 						min={1}
 						max={30}
 					/>
-				</InputGroup.Root>
+				</InputGroupRoot>
 
 				<div class="space-y-2">
-					<Select.Root type="single" bind:value={editSuccessAction}>
-						<Select.Trigger>
+					<SelectRoot type="single" bind:value={editSuccessAction}>
+						<SelectTrigger>
 							<span class="text-muted-foreground">성공:</span>
 							<span class="ml-1">{getActionLabel(editSuccessAction)}</span>
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
-							<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-						</Select.Content>
-					</Select.Root>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
+							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
+						</SelectContent>
+					</SelectRoot>
 
-					<Select.Root type="single" bind:value={editFailureAction}>
-						<Select.Trigger>
+					<SelectRoot type="single" bind:value={editFailureAction}>
+						<SelectTrigger>
 							<span class="text-muted-foreground">실패:</span>
 							<span class="ml-1">{getActionLabel(editFailureAction)}</span>
-						</Select.Trigger>
-						<Select.Content>
-							<Select.Item value="narrative_node_next" label="다음 대화">다음 대화</Select.Item>
-							<Select.Item value="narrative_node_done" label="대화 종료">대화 종료</Select.Item>
-						</Select.Content>
-					</Select.Root>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="narrative_node_next" label="다음 대화">다음 대화</SelectItem>
+							<SelectItem value="narrative_node_done" label="대화 종료">대화 종료</SelectItem>
+						</SelectContent>
+					</SelectRoot>
 				</div>
 
 				<div class="flex justify-end gap-2">
