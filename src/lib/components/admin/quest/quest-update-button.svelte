@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, type ButtonProps } from '$lib/components/ui/button';
 	import {
 		Dialog,
 		DialogTrigger,
@@ -15,10 +15,10 @@
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { questId }: { questId: string } = $props();
+	const { questId, ...restProps }: ButtonProps & { questId?: string } = $props();
 	const { store, admin } = useQuest();
 
-	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
+	const currentQuest = $derived(questId ? $store.data?.find((q) => q.id === questId) : undefined);
 
 	let open = $state(false);
 	let title = $state('');
@@ -32,7 +32,7 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!title.trim() || isSubmitting) return;
+		if (!questId || !title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
@@ -56,7 +56,7 @@
 			<Tooltip>
 				<TooltipTrigger>
 					{#snippet child({ props })}
-						<Button {...props} {...dialogTriggerProps} variant="outline" size="icon">
+						<Button {...props} {...dialogTriggerProps} {...restProps}>
 							<IconEditCircle class="h-4 w-4" />
 							<span class="sr-only">Edit</span>
 						</Button>

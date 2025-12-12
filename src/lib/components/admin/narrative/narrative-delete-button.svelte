@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, type ButtonProps } from '$lib/components/ui/button';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -15,10 +15,12 @@
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { goto } from '$app/navigation';
 
-	const { narrativeId }: { narrativeId: string } = $props();
+	const { narrativeId, ...restProps }: ButtonProps & { narrativeId?: string } = $props();
 	const { admin } = useNarrative();
 
 	function onclick() {
+		if (!narrativeId) return;
+
 		admin
 			.remove(narrativeId)
 			.then(() => {
@@ -33,7 +35,7 @@
 <AlertDialog>
 	<AlertDialogTrigger>
 		{#snippet child({ props })}
-			<Button {...props} variant="ghost" size="icon">
+			<Button {...props} {...restProps}>
 				<IconTrash class="h-4 w-4" />
 				<span class="sr-only">Delete</span>
 			</Button>

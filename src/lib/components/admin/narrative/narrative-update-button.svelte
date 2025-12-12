@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, type ButtonProps } from '$lib/components/ui/button';
 	import {
 		Dialog,
 		DialogTrigger,
@@ -15,10 +15,10 @@
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { narrativeId }: { narrativeId: string } = $props();
+	const { narrativeId, ...restProps }: ButtonProps & { narrativeId?: string } = $props();
 	const { store, admin } = useNarrative();
 
-	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
+	const currentNarrative = $derived(narrativeId ? $store.data?.find((n) => n.id === narrativeId) : undefined);
 
 	let open = $state(false);
 	let title = $state('');
@@ -32,7 +32,7 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!title.trim() || isSubmitting) return;
+		if (!narrativeId || !title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
@@ -56,7 +56,7 @@
 			<Tooltip>
 				<TooltipTrigger>
 					{#snippet child({ props })}
-						<Button {...props} {...dialogTriggerProps} variant="outline" size="icon">
+						<Button {...props} {...dialogTriggerProps} {...restProps}>
 							<IconEditCircle class="h-4 w-4" />
 							<span class="sr-only">Edit</span>
 						</Button>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, type ButtonProps } from '$lib/components/ui/button';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -16,10 +16,12 @@
 	import { goto } from '$app/navigation';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { questId }: { questId: string } = $props();
+	const { questId, ...restProps }: ButtonProps & { questId?: string } = $props();
 	const { admin } = useQuest();
 
 	function onclick() {
+		if (!questId) return;
+
 		admin
 			.remove(questId)
 			.then(() => {
@@ -37,7 +39,7 @@
 			<Tooltip>
 				<TooltipTrigger>
 					{#snippet child({ props })}
-						<Button {...props} {...alertDialogTriggerProps} size="icon" variant="outline">
+						<Button {...props} {...alertDialogTriggerProps} {...restProps}>
 							<IconTrash class="h-4 w-4" />
 							<span class="sr-only">Delete</span>
 						</Button>
