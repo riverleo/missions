@@ -3,15 +3,17 @@
 		Dialog,
 		DialogTrigger,
 		DialogContent,
+		DialogFooter,
 		DialogHeader,
 		DialogTitle,
-		DialogDescription,
-		DialogFooter,
 	} from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { IconPlus } from '@tabler/icons-svelte';
+	import {
+		InputGroup,
+		Input as InputGroupInput,
+		Addon as InputGroupAddon,
+	} from '$lib/components/ui/input-group';
+	import { IconPlus, IconHeading } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import Tooltip from '$lib/components/ui/tooltip/tooltip.svelte';
 	import { TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
@@ -54,23 +56,25 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>새로운 퀘스트를 만듭니다.</TooltipContent>
+				<TooltipContent>새로운 퀘스트</TooltipContent>
 			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
 			<DialogTitle>새로운 퀘스트 만들기</DialogTitle>
-			<DialogDescription>퀘스트의 기본 정보를 입력해주세요.</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>
-			<div class="space-y-4">
-				<div class="space-y-2">
-					<Label for="quest-name">퀘스트 이름</Label>
-					<Input id="quest-name" placeholder="퀘스트 이름을 입력하세요" bind:value={title} />
-				</div>
-			</div>
-			<DialogFooter>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<IconHeading class="size-4" />
+				</InputGroupAddon>
+				<InputGroupInput placeholder="제목" bind:value={title} />
+				<InputGroupAddon align="inline-end">
+					<span class="text-xs text-muted-foreground">{title.length}</span>
+				</InputGroupAddon>
+			</InputGroup>
+			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>

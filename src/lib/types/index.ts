@@ -61,6 +61,7 @@ export type PlayerQuestBranchInsert = TablesInsert<'player_quest_branches'>;
 // Extended Quest with relations
 export type Quest = QuestRow & {
 	quest_branches?: QuestBranch[];
+	chapter?: Chapter | null;
 };
 
 // Narrative types

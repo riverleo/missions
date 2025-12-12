@@ -16,7 +16,12 @@
 	import { goto } from '$app/navigation';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { questId, ...restProps }: ButtonProps & { questId?: string } = $props();
+	let {
+		questId,
+		open = $bindable(false),
+		showTrigger = true,
+		...restProps
+	}: ButtonProps & { questId?: string; open?: boolean; showTrigger?: boolean } = $props();
 	const { admin } = useQuest();
 
 	function onclick() {
@@ -25,6 +30,7 @@
 		admin
 			.remove(questId)
 			.then(() => {
+				open = false;
 				goto('/admin/quests');
 			})
 			.catch((error) => {
@@ -33,22 +39,24 @@
 	}
 </script>
 
-<AlertDialog>
-	<AlertDialogTrigger>
-		{#snippet child({ props: alertDialogTriggerProps })}
-			<Tooltip>
-				<TooltipTrigger>
-					{#snippet child({ props })}
-						<Button {...props} {...alertDialogTriggerProps} {...restProps}>
-							<IconTrash class="h-4 w-4" />
-							<span class="sr-only">Delete</span>
-						</Button>
-					{/snippet}
-				</TooltipTrigger>
-				<TooltipContent>퀘스트를 삭제합니다</TooltipContent>
-			</Tooltip>
-		{/snippet}
-	</AlertDialogTrigger>
+<AlertDialog bind:open>
+	{#if showTrigger}
+		<AlertDialogTrigger>
+			{#snippet child({ props: alertDialogTriggerProps })}
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button {...props} {...alertDialogTriggerProps} {...restProps}>
+								<IconTrash class="h-4 w-4" />
+								<span class="sr-only">Delete</span>
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>퀘스트 삭제</TooltipContent>
+				</Tooltip>
+			{/snippet}
+		</AlertDialogTrigger>
+	{/if}
 	<AlertDialogContent>
 		<AlertDialogHeader>
 			<AlertDialogTitle>퀘스트를 삭제하시겠습니까?</AlertDialogTitle>

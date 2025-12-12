@@ -25,7 +25,7 @@ function createQuestStore() {
 		store.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase.from('quests').select('*, quest_branches(*)');
+			const { data, error } = await supabase.from('quests').select('*, quest_branches(*), chapter:chapters(*)');
 
 			if (error) throw error;
 

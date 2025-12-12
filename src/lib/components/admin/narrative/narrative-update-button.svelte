@@ -4,23 +4,30 @@
 		Dialog,
 		DialogTrigger,
 		DialogContent,
+		DialogFooter,
 		DialogHeader,
 		DialogTitle,
-		DialogDescription,
-		DialogFooter,
 	} from '$lib/components/ui/dialog';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
-	import { IconEditCircle } from '@tabler/icons-svelte';
+	import {
+		InputGroup,
+		Input as InputGroupInput,
+		Addon as InputGroupAddon,
+	} from '$lib/components/ui/input-group';
+	import { IconEditCircle, IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { narrativeId, ...restProps }: ButtonProps & { narrativeId?: string } = $props();
+	let {
+		narrativeId,
+		open = $bindable(false),
+		showTrigger = true,
+		...restProps
+	}: ButtonProps & { narrativeId?: string; open?: boolean; showTrigger?: boolean } = $props();
 	const { store, admin } = useNarrative();
 
-	const currentNarrative = $derived(narrativeId ? $store.data?.find((n) => n.id === narrativeId) : undefined);
-
-	let open = $state(false);
+	const currentNarrative = $derived(
+		narrativeId ? $store.data?.find((n) => n.id === narrativeId) : undefined
+	);
 	let title = $state('');
 	let isSubmitting = $state(false);
 
@@ -51,34 +58,38 @@
 </script>
 
 <Dialog bind:open>
-	<DialogTrigger>
-		{#snippet child({ props: dialogTriggerProps })}
-			<Tooltip>
-				<TooltipTrigger>
-					{#snippet child({ props })}
-						<Button {...props} {...dialogTriggerProps} {...restProps}>
-							<IconEditCircle class="h-4 w-4" />
-							<span class="sr-only">Edit</span>
-						</Button>
-					{/snippet}
-				</TooltipTrigger>
-				<TooltipContent>대화 또는 효과의 정보를 수정합니다</TooltipContent>
-			</Tooltip>
-		{/snippet}
-	</DialogTrigger>
+	{#if showTrigger}
+		<DialogTrigger>
+			{#snippet child({ props: dialogTriggerProps })}
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button {...props} {...dialogTriggerProps} {...restProps}>
+								<IconEditCircle class="h-4 w-4" />
+								<span class="sr-only">Edit</span>
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>대화 수정</TooltipContent>
+				</Tooltip>
+			{/snippet}
+		</DialogTrigger>
+	{/if}
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>대화 또는 효과 수정</DialogTitle>
-			<DialogDescription>대화 또는 효과 정보를 수정합니다.</DialogDescription>
+			<DialogTitle>대화 수정하기</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
-			<div class="space-y-4">
-				<div class="space-y-2">
-					<Label for="narrative-title">대화 또는 효과 제목</Label>
-					<Input id="narrative-title" bind:value={title} />
-				</div>
-			</div>
-			<DialogFooter>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<IconHeading class="size-4" />
+				</InputGroupAddon>
+				<InputGroupInput placeholder="제목" bind:value={title} />
+				<InputGroupAddon align="inline-end">
+					<span class="text-xs text-muted-foreground">{title.length}</span>
+				</InputGroupAddon>
+			</InputGroup>
+			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>

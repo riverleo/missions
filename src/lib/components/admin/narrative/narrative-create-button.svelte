@@ -3,16 +3,18 @@
 		Dialog,
 		DialogTrigger,
 		DialogContent,
+		DialogFooter,
 		DialogHeader,
 		DialogTitle,
-		DialogDescription,
-		DialogFooter,
 	} from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
+	import {
+		InputGroup,
+		Input as InputGroupInput,
+		Addon as InputGroupAddon,
+	} from '$lib/components/ui/input-group';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import { IconPlus } from '@tabler/icons-svelte';
+	import { IconPlus, IconHeading } from '@tabler/icons-svelte';
 	import Tooltip from '$lib/components/ui/tooltip/tooltip.svelte';
 	import { TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
@@ -54,23 +56,25 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>새로운 대화 또는 효과를 만듭니다.</TooltipContent>
+				<TooltipContent>새로운 대화</TooltipContent>
 			</Tooltip>
 		{/snippet}
 	</DialogTrigger>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 대화 또는 효과</DialogTitle>
-			<DialogDescription>대화 또는 효과의 기본 정보를 입력해주세요.</DialogDescription>
+			<DialogTitle>새로운 대화 만들기</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
-			<div class="space-y-4">
-				<div class="space-y-2">
-					<Label for="narrative-title">대화 또는 효과 제목</Label>
-					<Input id="narrative-title" placeholder="대화 또는 효과 제목을 입력하세요" bind:value={title} />
-				</div>
-			</div>
-			<DialogFooter>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<IconHeading class="size-4" />
+				</InputGroupAddon>
+				<InputGroupInput placeholder="제목" bind:value={title} />
+				<InputGroupAddon align="inline-end">
+					<span class="text-xs text-muted-foreground">{title.length}</span>
+				</InputGroupAddon>
+			</InputGroup>
+			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>

@@ -14,8 +14,14 @@
 	import { IconTrash } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { goto } from '$app/navigation';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { narrativeId, ...restProps }: ButtonProps & { narrativeId?: string } = $props();
+	let {
+		narrativeId,
+		open = $bindable(false),
+		showTrigger = true,
+		...restProps
+	}: ButtonProps & { narrativeId?: string; open?: boolean; showTrigger?: boolean } = $props();
 	const { admin } = useNarrative();
 
 	function onclick() {
@@ -24,6 +30,7 @@
 		admin
 			.remove(narrativeId)
 			.then(() => {
+				open = false;
 				goto('/admin/narratives');
 			})
 			.catch((error) => {
@@ -32,15 +39,24 @@
 	}
 </script>
 
-<AlertDialog>
-	<AlertDialogTrigger>
-		{#snippet child({ props })}
-			<Button {...props} {...restProps}>
-				<IconTrash class="h-4 w-4" />
-				<span class="sr-only">Delete</span>
-			</Button>
-		{/snippet}
-	</AlertDialogTrigger>
+<AlertDialog bind:open>
+	{#if showTrigger}
+		<AlertDialogTrigger>
+			{#snippet child({ props: alertDialogTriggerProps })}
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button {...props} {...alertDialogTriggerProps} {...restProps}>
+								<IconTrash class="h-4 w-4" />
+								<span class="sr-only">Delete</span>
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>대화 삭제</TooltipContent>
+				</Tooltip>
+			{/snippet}
+		</AlertDialogTrigger>
+	{/if}
 	<AlertDialogContent>
 		<AlertDialogHeader>
 			<AlertDialogTitle>대화 또는 효과를 삭제하시겠습니까?</AlertDialogTitle>
