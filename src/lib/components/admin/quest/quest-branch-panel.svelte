@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { QuestBranch } from '$lib/types';
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+	} from '$lib/components/ui/input-group';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -65,17 +69,23 @@
 </script>
 
 <Panel position="top-right">
-	<Card class="w-80 pt-6 pb-4">
+	<Card class="w-80 py-4">
 		<CardContent class="px-4">
 			{#if changes}
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
-						<Label for="edit-title">제목</Label>
-						<Input id="edit-title" bind:value={changes.title} />
-					</div>
-					<div class="space-y-2">
-						<Label for="edit-display-order">표시 순서</Label>
-						<Input id="edit-display-order" type="number" bind:value={changes.display_order} />
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<IconHeading class="size-4" />
+							</InputGroupAddon>
+							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
+						</InputGroup>
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<IconSortDescending class="size-4" />
+							</InputGroupAddon>
+							<InputGroupInput type="number" bind:value={changes.display_order} />
+						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">
 						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>

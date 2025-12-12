@@ -23,7 +23,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
+	import { IconCircleDashedNumber1, IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 	import { createNarrativeNodeId } from '$lib/utils/flow-id';
@@ -126,6 +126,9 @@
 				{#if changes}
 					<div class="space-y-2">
 						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<IconHeading class="size-4" />
+							</InputGroupAddon>
 							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
 						</InputGroup>
 						<InputGroup>
