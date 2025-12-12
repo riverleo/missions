@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import './lib/shortcut/shortcut.css';
+@import './shortcut.css';
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -126,11 +126,4 @@
 	--radius-xl: calc(var(--radius) + 4px);
 
 	--font-sans: 'Pretendard', sans-serif;
-}
-
-/* Svelte Flow Handle 크기 조정 */
-.svelte-flow__handle {
-	width: 12px;
-	height: 12px;
-	border-width: 2px;
 }

@@ -24,58 +24,49 @@
 	);
 </script>
 
-<div
-	class="min-w-[200px] rounded-md border-2 px-4 py-3 shadow-md transition-colors"
-	class:border-gray-300={!selected}
-	class:bg-white={!selected}
-	class:dark:border-gray-600={!selected}
-	class:dark:bg-gray-800={!selected}
-	class:border-blue-500={selected}
-	class:bg-blue-50={selected}
-	class:dark:border-blue-400={selected}
-	class:dark:bg-blue-900={selected}
-	class:ring-2={selected}
-	class:ring-blue-400={selected}
-	class:dark:ring-blue-500={selected}
->
-	<!-- 입력 핸들 (부모 노드 또는 dice_roll에서 연결) -->
-	<!-- 시작 노드일 때는 입력 핸들 숨김 -->
-	{#if !narrativeNode.root}
-		<Handle type="target" position={Position.Left} />
-	{/if}
+<div class="w-48">
+	<div class="relative space-y-1 px-3 py-2">
+		{#if !narrativeNode.root}
+			<Handle type="target" position={Position.Left} />
+		{/if}
 
-	<div class="space-y-2">
-		<div class="flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+		<div
+			class="flex items-center gap-1 text-sm font-medium text-white"
+			class:text-neutral-500={!narrativeNode.title}
+		>
 			{#if narrativeNode.root}
-				<IconCircleDashedNumber1 class="h-4 w-4 text-blue-500 dark:text-blue-400" />
+				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			<span>{narrativeNode.title || '(제목 없음)'}</span>
+			<span class="flex-1 truncate">{narrativeNode.title || '제목을 입력해 주세요'}</span>
 		</div>
 
 		{#if narrativeNode.description}
-			<div class="text-xs text-gray-600 dark:text-gray-400">
+			<div class="text-xs text-neutral-400 truncate">
 				{narrativeNode.description}
 			</div>
 		{/if}
-
-		{#if narrativeNode.type === 'choice' && narrativeNodeChoices.length > 0}
-			<Separator class="bg-white/10" />
-			<div class="space-y-1 pt-2">
-				{#each narrativeNodeChoices as choice}
-					<div class="relative flex items-center text-xs text-gray-700 dark:text-gray-300">
-						<span class="flex-1">{choice.title || '(선택지 없음)'}</span>
-						<!-- 각 선택지마다 출력 핸들 -->
-						<Handle
-							type="source"
-							position={Position.Right}
-							id={choice.id}
-							class="top-1/2! -right-4! -translate-y-1/2!"
-						/>
-					</div>
-				{/each}
-			</div>
-		{/if}
 	</div>
+
+	{#if narrativeNode.type === 'choice' && narrativeNodeChoices.length > 0}
+		<Separator class="bg-neutral-700" />
+		<div class="space-y-1">
+			{#each narrativeNodeChoices as narrativeNodeChoice}
+				<div class="relative flex items-center text-xs text-white border-b border-neutral-700 last:border-b-0 border-dashed">
+					<span
+						class="flex-1 px-3 py-2 truncate"
+						class:text-neutral-500={!narrativeNodeChoice.title}
+					>
+						{narrativeNodeChoice.title || '내용을 입력해 주세요'}
+					</span>
+					<Handle
+						type="source"
+						position={Position.Right}
+						id={narrativeNodeChoice.id}
+					/>
+				</div>
+			{/each}
+		</div>
+	{/if}
 
 	<!-- text 타입일 때만 출력 핸들 표시 -->
 	{#if narrativeNode.type === 'text'}

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import '@xyflow/svelte/dist/base.css';
+	import '$lib/styles/svelte-flow.css';
 	import { setMode } from 'mode-watcher';
 	import { onMount, onDestroy } from 'svelte';
 	import type { Snippet } from 'svelte';

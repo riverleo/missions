@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '@xyflow/svelte/dist/style.css';
 	import {
 		SvelteFlow,
 		Controls,
@@ -45,7 +44,6 @@
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
 	const narrativeDiceRolls = $derived(currentNarrative?.narrative_dice_rolls ?? []);
-
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
@@ -266,18 +264,24 @@
 				}
 				// 2. narrative_node_choice → narrative_dice_roll 엣지
 				else if (isNarrativeNodeChoiceToNarrativeDiceRollEdge(edge.id)) {
-					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(edge.id);
+					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
+						edge.id
+					);
 					await admin.updateChoice(narrativeNodeChoiceId, { narrative_dice_roll_id: null });
 				}
 				// 3. narrative_dice_roll → success 엣지
 				else if (isNarrativeDiceRollToSuccessEdge(edge.id)) {
 					const { narrativeDiceRollId } = parseNarrativeDiceRollToSuccessEdgeId(edge.id);
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, { success_narrative_node_id: null });
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+						success_narrative_node_id: null,
+					});
 				}
 				// 4. narrative_dice_roll → failure 엣지
 				else if (isNarrativeDiceRollToFailureEdge(edge.id)) {
 					const { narrativeDiceRollId } = parseNarrativeDiceRollToFailureEdgeId(edge.id);
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, { failure_narrative_node_id: null });
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+						failure_narrative_node_id: null,
+					});
 				}
 			}
 
@@ -341,7 +345,9 @@
 		narrativeNodes.forEach((narrativeNode) => {
 			// text 타입이고 narrative_dice_roll_id가 있으면 엣지 생성
 			if (narrativeNode.type === 'text' && narrativeNode.narrative_dice_roll_id) {
-				const narrativeDiceRoll = narrativeDiceRolls.find((d) => d.id === narrativeNode.narrative_dice_roll_id);
+				const narrativeDiceRoll = narrativeDiceRolls.find(
+					(d) => d.id === narrativeNode.narrative_dice_roll_id
+				);
 				if (!narrativeDiceRoll) return;
 
 				const narrativeNodeId = createNarrativeNodeId(narrativeNode);
@@ -358,13 +364,18 @@
 			if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
 				narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice) => {
 					if (narrativeNodeChoice.narrative_dice_roll_id) {
-						const narrativeDiceRoll = narrativeDiceRolls.find((d) => d.id === narrativeNodeChoice.narrative_dice_roll_id);
+						const narrativeDiceRoll = narrativeDiceRolls.find(
+							(d) => d.id === narrativeNodeChoice.narrative_dice_roll_id
+						);
 						if (!narrativeDiceRoll) return;
 
 						const narrativeNodeId = createNarrativeNodeId(narrativeNode);
 						const narrativeDiceRollNodeId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
 						newEdges.push({
-							id: createNarrativeNodeChoiceToNarrativeDiceRollEdgeId(narrativeNodeChoice, narrativeDiceRoll),
+							id: createNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
+								narrativeNodeChoice,
+								narrativeDiceRoll
+							),
 							source: narrativeNodeId,
 							sourceHandle: narrativeNodeChoice.id,
 							target: narrativeDiceRollNodeId,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '../app.css';
+	import '$lib/styles/app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { onkeydown, onkeyup, onmousedown, onmouseup, onmouseover } from '$lib/shortcut/events';
 	import ServerPayloadProvider from '$lib/components/server-payload-provider.svelte';

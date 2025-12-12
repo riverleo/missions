@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '@xyflow/svelte/dist/style.css';
 	import {
 		SvelteFlow,
 		Controls,
