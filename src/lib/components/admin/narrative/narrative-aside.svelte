@@ -21,7 +21,7 @@
 	{:else if $store.data && $store.data.length > 0}
 		<ItemGroup class="gap-1">
 			{#each $store.data as narrative (narrative.id)}
-				<Item class={cn('p-2 px-4', { 'bg-accent': narrative.id === currentNarrativeId })}>
+				<Item class={cn('p-2', { 'bg-accent': narrative.id === currentNarrativeId })}>
 					{#snippet child({ props })}
 						<a href={`/admin/narratives/${narrative.id}`} {...props}>
 							<ItemContent>

@@ -314,26 +314,25 @@
 		const NODE_HEIGHT = 180;
 
 		// 1. narrative_node 노드 생성
+		// XYFlow가 자동으로 크기를 측정하도록 width/height를 지정하지 않음
 		narrativeNodes.forEach((narrativeNode) => {
 			newNodes.push({
 				id: createNarrativeNodeId(narrativeNode),
 				type: 'narrativeNode',
 				data: { narrativeNode },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
-				width: 200,
 				deletable: true,
 			});
 		});
 
 		// 2. 현재 내러티브의 모든 narrative_dice_roll을 노드로 생성
+		// XYFlow가 자동으로 크기를 측정하도록 width/height를 지정하지 않음
 		narrativeDiceRolls.forEach((narrativeDiceRollData) => {
 			newNodes.push({
 				id: createNarrativeDiceRollNodeId(narrativeDiceRollData),
 				type: 'narrativeDiceRoll',
 				data: { narrativeDiceRoll: narrativeDiceRollData },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
-				width: 110,
-				height: 100,
 				deletable: true,
 			});
 		});

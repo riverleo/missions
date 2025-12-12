@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { NarrativeNodeChoice, BulkChanges } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
 	import { Label } from '$lib/components/ui/label';
 	import { IconTrash, IconPlus, IconGripVertical } from '@tabler/icons-svelte';
 	import { isEqual, sort, clone } from 'radash';
@@ -80,10 +85,12 @@
 	}
 
 	function onclickDeleteChoice(e: MouseEvent, index: number) {
-		current = current.filter((_, i) => i !== index).map((choice, i) => ({
-			...choice,
-			order_in_narrative_node: i,
-		}));
+		current = current
+			.filter((_, i) => i !== index)
+			.map((choice, i) => ({
+				...choice,
+				order_in_narrative_node: i,
+			}));
 		calculateAndNotifyChanges();
 	}
 
@@ -116,25 +123,29 @@
 		onfinalize={handleDndFinalize}
 	>
 		{#each current as choice, index (choice.id)}
-			<div class="flex items-center gap-2">
-				<button type="button" class="cursor-grab active:cursor-grabbing" aria-label="드래그">
-					<IconGripVertical class="h-4 w-4 text-muted-foreground" />
-				</button>
-				<Input
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<button type="button" class="cursor-grab px-1 active:cursor-grabbing" aria-label="드래그">
+						<IconGripVertical class="h-4 w-4 text-muted-foreground" />
+					</button>
+				</InputGroupAddon>
+				<InputGroupInput
 					value={choice.title || ''}
 					onchange={(e) => onchangeChoiceTitle(index, e.currentTarget.value)}
-					class="flex-1"
 					placeholder="선택지 이름"
 				/>
-				<Button
-					type="button"
-					size="sm"
-					variant="ghost"
-					onclick={(e) => onclickDeleteChoice(e, index)}
-				>
-					<IconTrash class="h-4 w-4 text-destructive" />
-				</Button>
-			</div>
+				<InputGroupAddon align="inline-end">
+					<InputGroupButton
+						type="button"
+						variant="ghost"
+						size="icon-xs"
+						onclick={(e) => onclickDeleteChoice(e, index)}
+						class="hover:text-destructive"
+					>
+						<IconTrash class="size-3" />
+					</InputGroupButton>
+				</InputGroupAddon>
+			</InputGroup>
 		{/each}
 
 		{#if current.length === 0}

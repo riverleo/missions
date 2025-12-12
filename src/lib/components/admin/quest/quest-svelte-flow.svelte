@@ -137,14 +137,13 @@
 		const sortedBranches = sort(questBranches, (b) => b.display_order);
 
 		// 노드 생성
+		// XYFlow가 자동으로 크기를 측정하도록 width/height를 지정하지 않음
 		sortedBranches.forEach((questBranch) => {
 			newNodes.push({
 				id: questBranch.id,
 				type: 'questBranch',
 				data: { label: questBranch.title, questBranch },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
-				width: 200,
-				height: 60,
 				deletable: true,
 			});
 

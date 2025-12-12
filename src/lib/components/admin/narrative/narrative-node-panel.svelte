@@ -35,7 +35,7 @@
 
 	let { narrativeNode }: Props = $props();
 
-	const { admin } = useNarrative();
+	const { admin, store } = useNarrative();
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
 
@@ -63,7 +63,21 @@
 		isUpdating = true;
 
 		try {
-			// 1. 기본 정보 업데이트
+			// 1. 시작 대화로 설정하려는 경우, 다른 시작 대화 해제
+			if (changes.root) {
+				const currentNarrative = $store.data?.find((n) =>
+					n.narrative_nodes?.some((node) => node.id === nodeId)
+				);
+				if (currentNarrative?.narrative_nodes) {
+					const otherRootNodes = currentNarrative.narrative_nodes.filter(
+						(n) => n.id !== nodeId && n.root
+					);
+					// 다른 root 노드들을 먼저 해제
+					await Promise.all(otherRootNodes.map((n) => admin.updateNode(n.id, { root: false })));
+				}
+			}
+
+			// 2. 기본 정보 업데이트
 			await admin.updateNode(nodeId, {
 				title: changes.title,
 				description: changes.description,
@@ -71,12 +85,12 @@
 				root: changes.root,
 			});
 
-			// 2. 시작 노드로 설정된 경우 들어오는 엣지 제거
+			// 3. 시작 노드로 설정된 경우 들어오는 엣지 제거
 			if (changes.root) {
 				flowEdges.update((edges) => edges.filter((edge) => edge.target !== flowNodeId));
 			}
 
-			// 3. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
+			// 4. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
 			if (changes.type === 'choice' && narrativeNodeChoicesChanges) {
 				await Promise.all([
 					...narrativeNodeChoicesChanges.created.map((choice) => admin.createChoice(choice)),
@@ -171,7 +185,7 @@
 					</div>
 
 					{#if changes.type === 'choice'}
-						<div class="mt-4 border-t pt-4">
+						<div class="mt-3 border-t pt-2">
 							<NarrativeNodeChoicesSection
 								narrativeNodeId={changes.id}
 								narrativeNodeChoices={changes.narrative_node_choices ?? []}

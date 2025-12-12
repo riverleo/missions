@@ -28,8 +28,9 @@ export async function applyElkLayout(
 		},
 		children: nodes.map((node) => ({
 			id: node.id,
-			width: node.width ?? 200,
-			height: node.height ?? 60,
+			// XYFlow가 측정한 실제 크기 사용, 없으면 기본값
+			width: node.measured?.width ?? node.width ?? 200,
+			height: node.measured?.height ?? node.height ?? 100,
 		})),
 		edges: edges.map((edge) => ({
 			id: edge.id,
