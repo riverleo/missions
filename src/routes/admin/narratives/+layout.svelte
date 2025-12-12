@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Aside from '$lib/components/admin/narrative/narrative-aside.svelte';
+	import NarrativeAside from '$lib/components/admin/narrative/narrative-aside.svelte';
 	import NarrativeSiteHeaderActions from '$lib/components/admin/narrative/narrative-site-header-actions.svelte';
 	import { useAdmin } from '$lib/hooks/use-admin.svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
 	const admin = useAdmin();
 	const { store } = useNarrative();
-	const narrativeId = $derived($page.params.narrativeId);
+	const narrativeId = $derived(page.params.narrativeId);
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 
 	$effect(() => {
@@ -35,9 +35,7 @@
 	<NarrativeSiteHeaderActions />
 {/snippet}
 
-<div class="flex h-full">
-	<Aside />
-	<div class="flex flex-1 flex-col overflow-hidden">
-		{@render children()}
-	</div>
+<div class="relative h-full">
+	<NarrativeAside />
+	{@render children()}
 </div>

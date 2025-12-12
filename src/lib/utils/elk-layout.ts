@@ -15,7 +15,7 @@ export async function applyElkLayout(
 ): Promise<Node[]> {
 	if (nodes.length === 0) return nodes;
 
-	const { nodeSpacing = 80, layerSpacing = 150 } = options;
+	const { nodeSpacing = 30, layerSpacing = 80 } = options;
 
 	const layoutedGraph = await elk.layout({
 		id: 'root',
@@ -28,9 +28,8 @@ export async function applyElkLayout(
 		},
 		children: nodes.map((node) => ({
 			id: node.id,
-			// XYFlow가 측정한 실제 크기 사용, 없으면 기본값
-			width: node.measured?.width ?? node.width ?? 200,
-			height: node.measured?.height ?? node.height ?? 100,
+			width: node.measured?.width,
+			height: node.measured?.height,
 		})),
 		edges: edges.map((edge) => ({
 			id: edge.id,

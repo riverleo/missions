@@ -78,6 +78,7 @@
 							<InputGroupAddon align="inline-start">
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
+
 							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
 						</InputGroup>
 						<InputGroup>

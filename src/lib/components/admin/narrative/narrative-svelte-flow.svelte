@@ -6,6 +6,7 @@
 		BackgroundVariant,
 		MiniMap,
 		useNodes,
+		useNodesInitialized,
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
@@ -40,6 +41,10 @@
 	const narrativeId = $derived(page.params.narrativeId);
 	const { store, admin } = useNarrative();
 	const flowNodes = useNodes();
+	const nodesInitialized = useNodesInitialized();
+
+	// 레이아웃 적용 여부 추적
+	let layoutApplied = $state(false);
 
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
@@ -425,41 +430,50 @@
 			}
 		});
 
-		// elkjs로 레이아웃 계산
-		const layoutedNodes = await applyElkLayout(newNodes, newEdges);
-
-		nodes = layoutedNodes;
+		nodes = newNodes;
 		edges = newEdges;
+		layoutApplied = false;
 	}
 
+	// 데이터 변경 시 노드/엣지 생성
 	$effect(() => {
 		convertToNodesAndEdges();
 	});
+
+	// 노드 측정 완료 후 레이아웃 적용
+	$effect(() => {
+		if (nodesInitialized.current && !layoutApplied && nodes.length > 0) {
+			// flowNodes.current에서 measured 값을 가져와서 레이아웃 적용
+			const nodesWithMeasured = flowNodes.current;
+			applyElkLayout(nodesWithMeasured, edges).then((layoutedNodes) => {
+				nodes = layoutedNodes;
+				layoutApplied = true;
+			});
+		}
+	});
 </script>
 
-<div class="relative flex-1">
-	{#if narrativeId}
-		<SvelteFlow
-			{nodes}
-			{edges}
-			{nodeTypes}
-			{isValidConnection}
-			colorMode={mode.current}
-			{onconnect}
-			{ondelete}
-			fitView
-		>
-			<Controls />
-			<Background variant={BackgroundVariant.Dots} />
-			<MiniMap />
+{#if narrativeId}
+	<SvelteFlow
+		{nodes}
+		{edges}
+		{nodeTypes}
+		{isValidConnection}
+		colorMode={mode.current}
+		{onconnect}
+		{ondelete}
+		fitView
+	>
+		<Controls />
+		<Background variant={BackgroundVariant.Dots} />
+		<MiniMap />
 
-			{#if selectedNarrativeNode}
-				<NarrativeNodePanel narrativeNode={selectedNarrativeNode} />
-			{:else if selectedNarrativeDiceRoll}
-				<NarrativeDiceRollPanel narrativeDiceRoll={selectedNarrativeDiceRoll} />
-			{:else}
-				<NarrativePanel {onlayout} />
-			{/if}
-		</SvelteFlow>
-	{/if}
-</div>
+		{#if selectedNarrativeNode}
+			<NarrativeNodePanel narrativeNode={selectedNarrativeNode} />
+		{:else if selectedNarrativeDiceRoll}
+			<NarrativeDiceRollPanel narrativeDiceRoll={selectedNarrativeDiceRoll} />
+		{:else}
+			<NarrativePanel {onlayout} />
+		{/if}
+	</SvelteFlow>
+{/if}

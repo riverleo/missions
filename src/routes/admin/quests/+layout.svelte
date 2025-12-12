@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Aside from '$lib/components/admin/quest/quest-aside.svelte';
+	import QuestAside from '$lib/components/admin/quest/quest-aside.svelte';
 	import QuestSiteHeaderActions from '$lib/components/admin/quest/quest-site-header-actions.svelte';
 	import { useAdmin } from '$lib/hooks/use-admin.svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 
 	const admin = useAdmin();
 	const { store } = useQuest();
-	const questId = $derived($page.params.questId);
+	const questId = $derived(page.params.questId);
 	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
 
 	$effect(() => {
@@ -34,9 +34,7 @@
 	<QuestSiteHeaderActions />
 {/snippet}
 
-<div class="flex h-full">
-	<Aside />
-	<div class="flex flex-1 flex-col overflow-hidden">
-		{@render children()}
-	</div>
+<div class="relative h-full">
+	<QuestAside />
+	{@render children()}
 </div>
