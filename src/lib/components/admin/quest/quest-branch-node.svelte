@@ -19,12 +19,16 @@
 	const questBranch = $derived(data.questBranch);
 </script>
 
-<div>
+<div class="flex items-center gap-1 justify-center px-3 py-2">
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
-	<div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-		{questBranch.title || '(제목 없음)'}
+	<div
+		class="text-sm font-medium"
+		class:text-white={questBranch.title}
+		class:text-neutral-500={!questBranch.title}
+	>
+		{questBranch.title || '제목 없음'}
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->
