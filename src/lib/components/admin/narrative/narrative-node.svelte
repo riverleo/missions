@@ -42,7 +42,7 @@
 				class:text-white={narrativeNode.title}
 				class:text-neutral-500={!narrativeNode.title}
 			>
-				{narrativeNode.title || '제목 없음'}
+				{narrativeNode.title || `제목없음 (${narrativeNode.id.split('-')[0]})`}
 			</span>
 		</div>
 

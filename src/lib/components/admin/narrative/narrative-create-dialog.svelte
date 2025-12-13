@@ -7,11 +7,7 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import {
-		InputGroup,
-		Input as InputGroupInput,
-		Addon as InputGroupAddon,
-	} from '$lib/components/ui/input-group';
+	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 

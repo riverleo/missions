@@ -19,7 +19,7 @@
 	const scenarioChapter = $derived(data.scenarioChapter);
 </script>
 
-<div class="min-w-32 px-3 py-2">
+<div class="min-w-48 px-3 py-2">
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
@@ -29,7 +29,7 @@
 			class:text-white={scenarioChapter.title}
 			class:text-neutral-500={!scenarioChapter.title}
 		>
-			{scenarioChapter.title || '제목 없음'}
+			{scenarioChapter.title || `제목없음 (${scenarioChapter.id.split('-')[0]})`}
 		</div>
 		<span class="text-xs text-muted-foreground">
 			{scenarioChapter.status === 'published' ? '공개됨' : '작업중'}

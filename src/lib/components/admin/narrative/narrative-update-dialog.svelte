@@ -7,11 +7,7 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import {
-		InputGroup,
-		Input as InputGroupInput,
-		Addon as InputGroupAddon,
-	} from '$lib/components/ui/input-group';
+	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 
@@ -71,9 +67,6 @@
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
 				<InputGroupInput placeholder="제목" bind:value={title} />
-				<InputGroupAddon align="inline-end">
-					<span class="text-xs text-muted-foreground">{title.length}</span>
-				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>

@@ -19,7 +19,7 @@
 	const scenarioQuestBranch = $derived(data.scenarioQuestBranch);
 </script>
 
-<div class="min-w-32 px-3 py-2">
+<div class="min-w-48 px-3 py-2">
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
@@ -28,7 +28,7 @@
 		class:text-white={scenarioQuestBranch.title}
 		class:text-neutral-500={!scenarioQuestBranch.title}
 	>
-		{scenarioQuestBranch.title || '제목 없음'}
+		{scenarioQuestBranch.title || `제목없음 (${scenarioQuestBranch.id.split('-')[0]})`}
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->

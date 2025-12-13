@@ -66,7 +66,7 @@
 								)}
 							/>
 							<div class="flex flex-1 flex-col">
-								<span class="truncate">{scenarioQuest.title || '(제목 없음)'}</span>
+								<span class="truncate">{scenarioQuest.title || `제목없음 (${scenarioQuest.id.split('-')[0]})`}</span>
 								<span class="text-xs text-muted-foreground">
 									{scenarioQuest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {scenarioQuest.status ===
 									'published'

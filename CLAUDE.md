@@ -226,26 +226,19 @@
 
 - **shadcn-svelte import 규칙**
   - `import * as` 형태 사용 금지
-  - Root 컴포넌트는 컴포넌트 이름 그대로 import
+  - shadcn-svelte 컴포넌트는 이미 접두사가 붙은 이름으로 export됨 (alias 불필요)
   - 예시:
 
     ```typescript
     // ❌ 나쁜 예
     import * as Select from '$lib/components/ui/select';
     import { Root as SelectRoot } from '$lib/components/ui/select';
+    import { Input as InputGroupInput } from '$lib/components/ui/input-group';
 
     // ✅ 좋은 예
-    import {
-    	Select,
-    	Trigger as SelectTrigger,
-    	Content as SelectContent,
-    	Item as SelectItem,
-    } from '$lib/components/ui/select';
-    import {
-    	InputGroup,
-    	Input as InputGroupInput,
-    	Text as InputGroupText,
-    } from '$lib/components/ui/input-group';
+    import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+    import { InputGroup, InputGroupInput, InputGroupText, InputGroupButton } from '$lib/components/ui/input-group';
+    import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
     ```
 
 - **아이콘 라이브러리**
@@ -256,6 +249,7 @@
 - **Label 사용 금지**
   - `<Label>` 컴포넌트 대신 `InputGroupText` 또는 `ButtonGroupText` 사용
   - `InputGroupText`, `InputGroupButton`은 반드시 `InputGroupAddon`으로 감싸서 사용
+  - `InputGroupAddon` 안에 아이콘이나 텍스트를 넣을 때는 반드시 `InputGroupText`로 감싸기
   - `InputGroup`은 `Select`와 궁합이 안 맞으므로 `ButtonGroup` + `Select` 조합 사용
   - 예시:
 
@@ -282,6 +276,36 @@
     		<InputGroupText>순서</InputGroupText>
     	</InputGroupAddon>
     	<InputGroupInput type="number" />
+    </InputGroup>
+    ```
+
+- **InputGroup 내 DropdownMenu 사용 패턴**
+  - `InputGroup` 내에서 `DropdownMenu`를 사용할 때는 `InputGroupButton`을 트리거로 사용
+  - `DropdownMenuTrigger`의 `child` snippet을 사용하여 props 전달
+  - 예시:
+
+    ```svelte
+    <InputGroup>
+    	<InputGroupInput placeholder="제목" bind:value={title} />
+    	<InputGroupAddon align="inline-end">
+    		<DropdownMenu>
+    			<DropdownMenuTrigger>
+    				{#snippet child({ props })}
+    					<InputGroupButton {...props} variant="ghost">
+    						{selectedLabel}
+    					</InputGroupButton>
+    				{/snippet}
+    			</DropdownMenuTrigger>
+    			<DropdownMenuContent align="end">
+    				<DropdownMenuRadioGroup bind:value={selectedValue}>
+    					<DropdownMenuRadioItem value="">없음</DropdownMenuRadioItem>
+    					{#each items as item (item.id)}
+    						<DropdownMenuRadioItem value={item.id}>{item.name}</DropdownMenuRadioItem>
+    					{/each}
+    				</DropdownMenuRadioGroup>
+    			</DropdownMenuContent>
+    		</DropdownMenu>
+    	</InputGroupAddon>
     </InputGroup>
     ```
 
