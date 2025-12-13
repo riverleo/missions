@@ -4,6 +4,7 @@ create table dices (
   faces integer not null,
   is_default boolean not null default false,
   created_at timestamptz not null default now(),
+  created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
   constraint uq_dices_name unique (name)
 );

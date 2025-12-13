@@ -13,16 +13,16 @@
 	import { mode } from 'mode-watcher';
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
-	import type { QuestBranch } from '$lib/types';
-	import QuestBranchNode from './quest-branch-node.svelte';
-	import QuestPanel from './quest-panel.svelte';
-	import QuestBranchPanel from './quest-branch-panel.svelte';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import type { ScenarioQuestBranch } from '$lib/types';
+	import ScenarioQuestBranchNode from './scenario-quest-branch-node.svelte';
+	import ScenarioQuestPanel from './scenario-quest-panel.svelte';
+	import ScenarioQuestBranchPanel from './scenario-quest-branch-panel.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 
-	const questId = $derived(page.params.questId);
-	const { store, admin } = useQuest();
+	const scenarioQuestId = $derived(page.params.scenarioQuestId);
+	const { store, admin } = useScenarioQuest();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -33,49 +33,49 @@
 	let skipConvertEffect = $state(false);
 
 	const nodeTypes = {
-		questBranch: QuestBranchNode,
+		scenarioQuestBranch: ScenarioQuestBranchNode,
 	};
 
-	const currentQuest = $derived($store.data?.find((q) => q.id === questId));
-	const questBranches = $derived(currentQuest?.quest_branches ?? []);
+	const currentScenarioQuest = $derived($store.data?.find((q) => q.id === scenarioQuestId));
+	const scenarioQuestBranches = $derived(currentScenarioQuest?.scenario_quest_branches ?? []);
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
-	const selectedQuestBranch = $derived(
-		selectedNode ? questBranches.find((b: QuestBranch) => b.id === selectedNode.id) : undefined
+	const selectedScenarioQuestBranch = $derived(
+		selectedNode ? scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === selectedNode.id) : undefined
 	);
 
-	function onupdate(questBranch: QuestBranch) {
+	function onupdateScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranch) {
 		// 노드 레이블 업데이트
-		const node = nodes.find((n) => n.id === questBranch.id);
+		const node = nodes.find((n) => n.id === scenarioQuestBranch.id);
 		if (node && node.data) {
-			const data = node.data as { label: string; questBranch: QuestBranch };
-			data.label = questBranch.title;
-			data.questBranch.title = questBranch.title;
-			data.questBranch.display_order = questBranch.display_order;
+			const data = node.data as { label: string; scenarioQuestBranch: ScenarioQuestBranch };
+			data.label = scenarioQuestBranch.title;
+			data.scenarioQuestBranch.title = scenarioQuestBranch.title;
+			data.scenarioQuestBranch.display_order = scenarioQuestBranch.display_order;
 		}
 
 		// 선택 해제
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === questBranch.id ? { ...n, selected: false } : n))
+			ns.map((n) => (n.id === scenarioQuestBranch.id ? { ...n, selected: false } : n))
 		);
 	}
 
 	async function onconnect(connection: Connection) {
 		try {
 			// target이 연결되는 브랜치 (자식), source가 부모 브랜치
-			const targetBranch = questBranches.find((b: QuestBranch) => b.id === connection.target);
-			if (!targetBranch) return;
+			const targetScenarioQuestBranch = scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === connection.target);
+			if (!targetScenarioQuestBranch) return;
 
-			await admin.updateBranch(connection.target, {
-				parent_quest_branch_id: connection.source,
+			await admin.updateScenarioQuestBranch(connection.target, {
+				parent_scenario_quest_branch_id: connection.source,
 			});
 
 			// 로컬 데이터 업데이트
-			targetBranch.parent_quest_branch_id = connection.source;
+			targetScenarioQuestBranch.parent_scenario_quest_branch_id = connection.source;
 
 			// 엣지 추가
 			edges = [
@@ -88,7 +88,7 @@
 				},
 			];
 		} catch (error) {
-			console.error('Failed to connect branch:', error);
+			console.error('Failed to connect scenario quest branch:', error);
 		}
 	}
 
@@ -102,21 +102,21 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				const targetBranch = questBranches.find((b: QuestBranch) => b.id === edge.target);
-				if (!targetBranch) continue;
+				const targetScenarioQuestBranch = scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === edge.target);
+				if (!targetScenarioQuestBranch) continue;
 
-				await admin.updateBranch(edge.target, {
-					parent_quest_branch_id: null,
+				await admin.updateScenarioQuestBranch(edge.target, {
+					parent_scenario_quest_branch_id: null,
 				});
 
 				// 로컬 데이터 업데이트
-				targetBranch.parent_quest_branch_id = null;
+				targetScenarioQuestBranch.parent_scenario_quest_branch_id = null;
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				// DB에서 deleted_at 업데이트하되, refetch는 하지 않음 (화면 깜빡임 방지)
-				await admin.removeBranch(node.id, false);
+				await admin.removeScenarioQuestBranch(node.id, false);
 			}
 
 			// 로컬 노드 제거
@@ -141,7 +141,7 @@
 	const onconnectend: OnConnectEnd = async (event, connectionState) => {
 		// 유효한 연결이면 무시 (onconnect에서 처리)
 		if (connectionState.isValid) return;
-		if (!questId) return;
+		if (!scenarioQuestId) return;
 
 		const sourceNode = connectionState.fromNode;
 		if (!sourceNode) return;
@@ -156,52 +156,52 @@
 
 		try {
 			// 새 브랜치 생성 (소스 노드를 부모로 설정)
-			const newBranch = await admin.createBranch({
-				quest_id: questId,
-				parent_quest_branch_id: sourceNode.id,
+			const newScenarioQuestBranch = await admin.createScenarioQuestBranch({
+				scenario_quest_id: scenarioQuestId,
+				parent_scenario_quest_branch_id: sourceNode.id,
 			});
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
 			skipConvertEffect = false;
-			convertToNodesAndEdges(questBranches);
+			convertToNodesAndEdges(scenarioQuestBranches);
 
 			// 새 노드의 위치를 드롭 위치로 설정
-			if (newBranch) {
+			if (newScenarioQuestBranch) {
 				nodes = nodes.map((n) =>
-					n.id === newBranch.id ? { ...n, position } : n
+					n.id === newScenarioQuestBranch.id ? { ...n, position } : n
 				);
 				// 레이아웃 재적용 방지
 				layoutApplied = true;
 			}
 		} catch (error) {
 			skipConvertEffect = false;
-			console.error('Failed to create branch on edge drop:', error);
+			console.error('Failed to create scenario quest branch on edge drop:', error);
 		}
 	};
 
-	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
+	async function convertToNodesAndEdges(scenarioQuestBranches: ScenarioQuestBranch[]) {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
 		// display_order로 정렬된 브랜치 사용
-		const sortedBranches = sort(questBranches, (b) => b.display_order);
+		const sortedScenarioQuestBranches = sort(scenarioQuestBranches, (b) => b.display_order);
 
 		// 노드 생성
-		sortedBranches.forEach((questBranch) => {
+		sortedScenarioQuestBranches.forEach((scenarioQuestBranch) => {
 			newNodes.push({
-				id: questBranch.id,
-				type: 'questBranch',
-				data: { label: questBranch.title, questBranch },
+				id: scenarioQuestBranch.id,
+				type: 'scenarioQuestBranch',
+				data: { label: scenarioQuestBranch.title, scenarioQuestBranch },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
 			});
 
 			// 엣지 생성 (parent -> child)
-			if (questBranch.parent_quest_branch_id) {
+			if (scenarioQuestBranch.parent_scenario_quest_branch_id) {
 				newEdges.push({
-					id: `${questBranch.parent_quest_branch_id}-${questBranch.id}`,
-					source: questBranch.parent_quest_branch_id,
-					target: questBranch.id,
+					id: `${scenarioQuestBranch.parent_scenario_quest_branch_id}-${scenarioQuestBranch.id}`,
+					source: scenarioQuestBranch.parent_scenario_quest_branch_id,
+					target: scenarioQuestBranch.id,
 					deletable: true,
 				});
 			}
@@ -215,10 +215,10 @@
 	// 데이터 변경 시 노드/엣지 생성
 	$effect(() => {
 		// 의존성 추적을 위해 여기서 접근
-		questBranches;
+		scenarioQuestBranches;
 
 		if (skipConvertEffect) return;
-		convertToNodesAndEdges(questBranches);
+		convertToNodesAndEdges(scenarioQuestBranches);
 	});
 
 	// 노드 측정 완료 후 레이아웃 적용
@@ -238,9 +238,9 @@
 	<Background variant={BackgroundVariant.Dots} />
 	<MiniMap />
 
-	{#if selectedQuestBranch}
-		<QuestBranchPanel questBranch={selectedQuestBranch} {onupdate} />
+	{#if selectedScenarioQuestBranch}
+		<ScenarioQuestBranchPanel scenarioQuestBranch={selectedScenarioQuestBranch} onupdate={onupdateScenarioQuestBranch} />
 	{:else}
-		<QuestPanel {onlayout} />
+		<ScenarioQuestPanel {onlayout} />
 	{/if}
 </SvelteFlow>

@@ -13,18 +13,22 @@
 		Addon as InputGroupAddon,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario.svelte';
 
-	const { admin, dialogStore, closeDialog } = useQuest();
+	const { store, admin, dialogStore, closeDialog } = useScenario();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($dialogStore?.type === 'update');
+	const scenarioId = $derived($dialogStore?.type === 'update' ? $dialogStore.scenarioId : undefined);
+	const currentScenario = $derived(
+		scenarioId ? $store.data?.find((s) => s.id === scenarioId) : undefined
+	);
 
 	let title = $state('');
 	let isSubmitting = $state(false);
 
 	$effect(() => {
-		if (open) {
-			title = '';
+		if (open && currentScenario) {
+			title = currentScenario.title;
 		}
 	});
 
@@ -36,17 +40,17 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!title.trim() || isSubmitting) return;
+		if (!scenarioId || !title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim() })
+			.update(scenarioId, { title: title.trim() })
 			.then(() => {
 				closeDialog();
 			})
 			.catch((error) => {
-				console.error('Failed to create quest:', error);
+				console.error('Failed to update scenario:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -57,7 +61,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 퀘스트 만들기</DialogTitle>
+			<DialogTitle>시나리오 수정하기</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
 			<InputGroup>
@@ -65,10 +69,13 @@
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
 				<InputGroupInput placeholder="제목" bind:value={title} />
+				<InputGroupAddon align="inline-end">
+					<span class="text-xs text-muted-foreground">{title.length}</span>
+				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>
 			</DialogFooter>
 		</form>

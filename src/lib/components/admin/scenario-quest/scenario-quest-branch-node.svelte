@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { QuestBranch } from '$lib/types';
+	import type { ScenarioQuestBranch } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 
 	type Props = {
 		data: {
 			label: string;
-			questBranch: QuestBranch;
+			scenarioQuestBranch: ScenarioQuestBranch;
 		};
 		id: string;
 	};
@@ -16,7 +16,7 @@
 	const targetConnections = useNodeConnections({ handleType: 'target' });
 	const isConnectable = $derived(targetConnections.current.length === 0);
 
-	const questBranch = $derived(data.questBranch);
+	const scenarioQuestBranch = $derived(data.scenarioQuestBranch);
 </script>
 
 <div class="flex items-center gap-1 justify-center px-3 py-2">
@@ -25,10 +25,10 @@
 
 	<div
 		class="text-sm font-medium"
-		class:text-white={questBranch.title}
-		class:text-neutral-500={!questBranch.title}
+		class:text-white={scenarioQuestBranch.title}
+		class:text-neutral-500={!scenarioQuestBranch.title}
 	>
-		{questBranch.title || '제목 없음'}
+		{scenarioQuestBranch.title || '제목 없음'}
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->

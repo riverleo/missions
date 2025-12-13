@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { QuestType } from '$lib/types';
+	import type { ScenarioQuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -17,29 +17,29 @@
 	import { ButtonGroup, Text as ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 
-	const { store, admin, dialogStore, closeDialog } = useQuest();
+	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const questId = $derived($dialogStore?.type === 'update' ? $dialogStore.questId : undefined);
-	const currentQuest = $derived(questId ? $store.data?.find((q) => q.id === questId) : undefined);
+	const scenarioQuestId = $derived($dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined);
+	const currentScenarioQuest = $derived(scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined);
 
 	let title = $state('');
-	let type = $state<QuestType>('primary');
+	let type = $state<ScenarioQuestType>('primary');
 	let orderInChapter = $state(0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
-		if (open && currentQuest) {
-			title = currentQuest.title;
-			type = currentQuest.type;
-			orderInChapter = currentQuest.order_in_chapter;
+		if (open && currentScenarioQuest) {
+			title = currentScenarioQuest.title;
+			type = currentScenarioQuest.type;
+			orderInChapter = currentScenarioQuest.order_in_chapter;
 		}
 	});
 
-	function getTypeLabel(questType: QuestType) {
-		return questType === 'primary' ? '메인 퀘스트' : '서브 퀘스트';
+	function getTypeLabel(scenarioQuestType: ScenarioQuestType) {
+		return scenarioQuestType === 'primary' ? '메인 퀘스트' : '서브 퀘스트';
 	}
 
 	function onOpenChange(value: boolean) {
@@ -50,12 +50,12 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!questId || !title.trim() || isSubmitting) return;
+		if (!scenarioQuestId || !title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.update(questId, {
+			.update(scenarioQuestId, {
 				title: title.trim(),
 				type,
 				order_in_chapter: orderInChapter,
@@ -64,7 +64,7 @@
 				closeDialog();
 			})
 			.catch((error) => {
-				console.error('Failed to update quest:', error);
+				console.error('Failed to update scenario quest:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;

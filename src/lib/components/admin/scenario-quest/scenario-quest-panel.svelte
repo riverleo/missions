@@ -4,11 +4,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconGitBranch, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
-	import type { QuestBranch } from '$lib/types';
+	import type { ScenarioQuestBranch } from '$lib/types';
 
 	interface Props {
 		onlayout?: (nodes: Node[], edges: Edge[]) => void;
@@ -16,26 +16,26 @@
 
 	let { onlayout }: Props = $props();
 
-	const { admin } = useQuest();
+	const { admin } = useScenarioQuest();
 	const flowNodes = useNodes();
-	const questId = $derived(page.params.questId);
+	const scenarioQuestId = $derived(page.params.scenarioQuestId);
 
 	let isCreating = $state(false);
 	let isLayouting = $state(false);
 
-	function onclickCreate() {
-		if (isCreating || !questId) return;
+	function onclickCreateScenarioQuestBranch() {
+		if (isCreating || !scenarioQuestId) return;
 
 		isCreating = true;
 
 		admin
-			.createBranch({
-				quest_id: questId,
+			.createScenarioQuestBranch({
+				scenario_quest_id: scenarioQuestId,
 				title: '',
 				display_order: 0,
 			})
 			.catch((error) => {
-				console.error('Failed to create quest branch:', error);
+				console.error('Failed to create scenario quest branch:', error);
 			})
 			.finally(() => {
 				isCreating = false;
@@ -53,11 +53,11 @@
 
 			// 현재 노드들로부터 엣지 추출
 			nodes.forEach((node) => {
-				const data = node.data as { questBranch: QuestBranch };
-				if (data.questBranch.parent_quest_branch_id) {
+				const data = node.data as { scenarioQuestBranch: ScenarioQuestBranch };
+				if (data.scenarioQuestBranch.parent_scenario_quest_branch_id) {
 					edges.push({
-						id: `${data.questBranch.parent_quest_branch_id}-${node.id}`,
-						source: data.questBranch.parent_quest_branch_id,
+						id: `${data.scenarioQuestBranch.parent_scenario_quest_branch_id}-${node.id}`,
+						source: data.scenarioQuestBranch.parent_scenario_quest_branch_id,
 						target: node.id,
 						deletable: true,
 					});
@@ -84,16 +84,16 @@
 				{#snippet child({ props })}
 					<Button
 						{...props}
-						onclick={onclickCreate}
+						onclick={onclickCreateScenarioQuestBranch}
 						disabled={isCreating}
 						size="icon"
 						variant="outline"
 					>
-						<IconGitBranch class="h-4 w-4" />
+						<IconPlus class="h-4 w-4" />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>새로운 브랜치 추가</TooltipContent>
+			<TooltipContent>새로운 브랜치 생성</TooltipContent>
 		</Tooltip>
 		<Tooltip>
 			<TooltipTrigger>

@@ -10,8 +10,31 @@
 	} from '$lib/components/ui/breadcrumb';
 	import { page } from '$app/state';
 	import { useAdmin } from '$lib/hooks/use-admin.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 
 	const admin = useAdmin();
+	const { store: scenarioStore } = useScenario();
+	const { store: scenarioQuestStore } = useScenarioQuest();
+	const { store: narrativeStore } = useNarrative();
+
+	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
+		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
+		if (prevSegment === 'scenarios') {
+			const scenario = $scenarioStore.data?.find((s) => s.id === id);
+			return scenario?.title;
+		}
+		if (prevSegment === 'quests') {
+			const quest = $scenarioQuestStore.data?.find((q) => q.id === id);
+			return quest?.title;
+		}
+		if (prevSegment === 'narratives') {
+			const narrative = $narrativeStore.data?.find((n) => n.id === id);
+			return narrative?.title;
+		}
+		return undefined;
+	}
 
 	const breadcrumbs = $derived(() => {
 		const path = page.url.pathname;
@@ -28,7 +51,7 @@
 
 		if (segments.length === 0) return crumbs;
 
-		let currentPath = '';
+		let currentPath = '/admin';
 
 		for (let i = 0; i < segments.length; i++) {
 			// admin은 건너뛰기 (이미 Home으로 처리됨)
@@ -39,15 +62,17 @@
 
 			let label = segments[i];
 			// 라벨 매핑
-			if (segments[i] === 'quests') label = '퀘스트';
+			if (segments[i] === 'scenarios') label = '시나리오';
+			else if (segments[i] === 'quests') label = '퀘스트';
 			else if (segments[i] === 'narratives') label = '대화 또는 효과';
-			// UUID 형태의 ID는 title (id) 형식으로 표시
+			// UUID 형태의 ID는 title로 표시
 			else if (
 				/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segments[i])
 			) {
 				const id = segments[i];
-				const title = admin.breadcrumbTitle || id;
-				label = title !== id ? `${title} (${id.slice(0, 8)})` : id.slice(0, 8);
+				const prevSegment = segments[i - 1];
+				const title = getTitle(id, prevSegment);
+				label = title || id.slice(0, 8);
 			}
 
 			crumbs.push({

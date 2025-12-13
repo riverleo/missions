@@ -6,8 +6,11 @@ create table user_roles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   type user_role_type not null,
+  display_name text not null default '',
   created_at timestamptz not null default now(),
-  deleted_at timestamptz
+  created_by uuid,
+  deleted_at timestamptz,
+  deleted_by uuid
 );
 
 -- 삭제되지 않은 레코드 중에서 user_id는 유일해야 함
@@ -26,6 +29,22 @@ returns boolean as $$
   );
 $$ language sql security definer
 set search_path = '';
+
+-- 현재 유저의 user_role id 반환 함수
+create or replace function current_user_role_id()
+returns uuid as $$
+  select id from public.user_roles
+  where user_id = (select auth.uid())
+  and deleted_at is null
+  limit 1;
+$$ language sql security definer
+set search_path = '';
+
+-- created_by, deleted_by FK 및 default 추가
+alter table user_roles
+  add constraint fk_user_roles_created_by foreign key (created_by) references user_roles(id) on delete set null,
+  add constraint fk_user_roles_deleted_by foreign key (deleted_by) references user_roles(id) on delete set null,
+  alter column created_by set default current_user_role_id();
 
 -- RLS 활성화
 alter table user_roles enable row level security;

@@ -9,13 +9,16 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { goto } from '$app/navigation';
 
-	const { admin, dialogStore, closeDialog } = useQuest();
+	const { store: scenarioStore } = useScenario();
+	const { admin, dialogStore, closeDialog } = useScenarioQuest();
+	const currentScenarioId = $derived($scenarioStore.currentScenarioId);
 
 	const open = $derived($dialogStore?.type === 'delete');
-	const questId = $derived($dialogStore?.type === 'delete' ? $dialogStore.questId : undefined);
+	const scenarioQuestId = $derived($dialogStore?.type === 'delete' ? $dialogStore.scenarioQuestId : undefined);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -24,16 +27,16 @@
 	}
 
 	function onclick() {
-		if (!questId) return;
+		if (!scenarioQuestId) return;
 
 		admin
-			.remove(questId)
+			.remove(scenarioQuestId)
 			.then(() => {
 				closeDialog();
-				goto('/admin/quests');
+				goto(`/admin/scenarios/${currentScenarioId}/quests`);
 			})
 			.catch((error) => {
-				console.error('Failed to delete quest:', error);
+				console.error('Failed to delete scenario quest:', error);
 			});
 	}
 </script>

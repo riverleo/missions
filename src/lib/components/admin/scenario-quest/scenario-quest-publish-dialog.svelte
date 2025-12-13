@@ -9,14 +9,14 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 
-	const { store, admin, dialogStore, closeDialog } = useQuest();
+	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
 
 	const open = $derived($dialogStore?.type === 'publish');
-	const questId = $derived($dialogStore?.type === 'publish' ? $dialogStore.questId : undefined);
-	const currentQuest = $derived(questId ? $store.data?.find((q) => q.id === questId) : undefined);
-	const isPublished = $derived(currentQuest?.status === 'published');
+	const scenarioQuestId = $derived($dialogStore?.type === 'publish' ? $dialogStore.scenarioQuestId : undefined);
+	const currentScenarioQuest = $derived(scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined);
+	const isPublished = $derived(currentScenarioQuest?.status === 'published');
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -25,9 +25,9 @@
 	}
 
 	function onclick() {
-		if (!questId) return;
+		if (!scenarioQuestId) return;
 
-		const action = isPublished ? admin.unpublish(questId) : admin.publish(questId);
+		const action = isPublished ? admin.unpublish(scenarioQuestId) : admin.publish(scenarioQuestId);
 
 		action
 			.then(() => {

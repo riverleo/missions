@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { QuestBranch } from '$lib/types';
+	import type { ScenarioQuestBranch } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -8,27 +8,27 @@
 		InputGroupInput,
 		InputGroupAddon,
 	} from '$lib/components/ui/input-group';
-	import { useQuest } from '$lib/hooks/use-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 
 	interface Props {
-		questBranch: QuestBranch | undefined;
-		onupdate?: (questBranch: QuestBranch) => void;
+		scenarioQuestBranch: ScenarioQuestBranch | undefined;
+		onupdate?: (scenarioQuestBranch: ScenarioQuestBranch) => void;
 	}
 
-	let { questBranch, onupdate }: Props = $props();
+	let { scenarioQuestBranch, onupdate }: Props = $props();
 
-	const { admin } = useQuest();
+	const { admin } = useScenarioQuest();
 	const flowNodes = useNodes();
 
 	let isUpdating = $state(false);
-	let changes = $state<QuestBranch | undefined>(undefined);
+	let changes = $state<ScenarioQuestBranch | undefined>(undefined);
 
 	// 선택된 브랜치가 변경되면 클론해서 로컬 상태 업데이트
 	$effect(() => {
-		if (questBranch) {
-			changes = clone(questBranch);
+		if (scenarioQuestBranch) {
+			changes = clone(scenarioQuestBranch);
 		}
 	});
 
@@ -36,21 +36,21 @@
 		e.preventDefault();
 		if (!changes || isUpdating) return;
 
-		const branchId = changes.id;
-		const updatedBranch = changes; // await 이전에 참조 저장
+		const scenarioQuestBranchId = changes.id;
+		const updatedScenarioQuestBranch = changes; // await 이전에 참조 저장
 		isUpdating = true;
 
 		admin
-			.updateBranch(branchId, {
+			.updateScenarioQuestBranch(scenarioQuestBranchId, {
 				title: changes.title,
 				display_order: changes.display_order,
 			})
 			.then(() => {
 				// 부모 컴포넌트에 업데이트 알림
-				onupdate?.(updatedBranch);
+				onupdate?.(updatedScenarioQuestBranch);
 			})
 			.catch((error) => {
-				console.error('Failed to update branch:', error);
+				console.error('Failed to update scenario quest branch:', error);
 			})
 			.finally(() => {
 				isUpdating = false;

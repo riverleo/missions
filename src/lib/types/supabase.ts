@@ -34,33 +34,10 @@ export type Database = {
   }
   public: {
     Tables: {
-      chapters: {
-        Row: {
-          created_at: string
-          id: string
-          order: number
-          status: Database["public"]["Enums"]["publish_status"]
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          order: number
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          order?: number
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Relationships: []
-      }
       dices: {
         Row: {
           created_at: string
+          created_by: string | null
           faces: number
           id: string
           is_default: boolean
@@ -68,6 +45,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           faces: number
           id?: string
           is_default?: boolean
@@ -75,16 +53,26 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           faces?: number
           id?: string
           is_default?: boolean
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "dices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       narrative_dice_rolls: {
         Row: {
           created_at: string
+          created_by: string | null
           difficulty_class: number
           failure_action: Database["public"]["Enums"]["dice_roll_action"]
           failure_narrative_node_id: string | null
@@ -95,6 +83,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           difficulty_class?: number
           failure_action?: Database["public"]["Enums"]["dice_roll_action"]
           failure_narrative_node_id?: string | null
@@ -105,6 +94,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           difficulty_class?: number
           failure_action?: Database["public"]["Enums"]["dice_roll_action"]
           failure_narrative_node_id?: string | null
@@ -114,6 +104,13 @@ export type Database = {
           success_narrative_node_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "narrative_dice_rolls_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "narrative_dice_rolls_failure_narrative_node_id_fkey"
             columns: ["failure_narrative_node_id"]
@@ -140,6 +137,7 @@ export type Database = {
       narrative_node_choices: {
         Row: {
           created_at: string
+          created_user_id: string | null
           description: string
           id: string
           narrative_dice_roll_id: string | null
@@ -149,6 +147,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_user_id?: string | null
           description?: string
           id?: string
           narrative_dice_roll_id?: string | null
@@ -158,6 +157,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_user_id?: string | null
           description?: string
           id?: string
           narrative_dice_roll_id?: string | null
@@ -185,6 +185,7 @@ export type Database = {
       narrative_nodes: {
         Row: {
           created_at: string
+          created_user_id: string | null
           description: string
           id: string
           narrative_dice_roll_id: string | null
@@ -195,6 +196,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_user_id?: string | null
           description?: string
           id?: string
           narrative_dice_roll_id?: string | null
@@ -205,6 +207,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_user_id?: string | null
           description?: string
           id?: string
           narrative_dice_roll_id?: string | null
@@ -233,160 +236,28 @@ export type Database = {
       narratives: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           title: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           title: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           title?: string
         }
-        Relationships: []
-      }
-      player_chapters: {
-        Row: {
-          chapter_id: string
-          created_at: string
-          id: string
-          player_id: string
-          status: Database["public"]["Enums"]["player_chapter_status"]
-          user_id: string
-        }
-        Insert: {
-          chapter_id: string
-          created_at?: string
-          id?: string
-          player_id: string
-          status?: Database["public"]["Enums"]["player_chapter_status"]
-          user_id: string
-        }
-        Update: {
-          chapter_id?: string
-          created_at?: string
-          id?: string
-          player_id?: string
-          status?: Database["public"]["Enums"]["player_chapter_status"]
-          user_id?: string
-        }
         Relationships: [
           {
-            foreignKeyName: "player_chapters_chapter_id_fkey"
-            columns: ["chapter_id"]
+            foreignKeyName: "narratives_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_chapters_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_quest_branches: {
-        Row: {
-          created_at: string
-          id: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          player_id?: string
-          player_quest_id?: string
-          quest_branch_id?: string
-          quest_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_quest_branches_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_player_quest_id_fkey"
-            columns: ["player_quest_id"]
-            isOneToOne: false
-            referencedRelation: "player_quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_quests: {
-        Row: {
-          created_at: string
-          id: string
-          player_id: string
-          quest_id: string
-          status: Database["public"]["Enums"]["player_quest_status"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          player_id: string
-          quest_id: string
-          status?: Database["public"]["Enums"]["player_quest_status"]
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          player_id?: string
-          quest_id?: string
-          status?: Database["public"]["Enums"]["player_quest_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_quests_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quests_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -401,10 +272,11 @@ export type Database = {
           narrative_node_choice_id: string | null
           narrative_node_id: string
           player_id: string
-          player_quest_branch_id: string | null
-          player_quest_id: string | null
-          quest_branch_id: string | null
-          quest_id: string | null
+          player_scenario_quest_branch_id: string | null
+          player_scenario_quest_id: string | null
+          scenario_id: string | null
+          scenario_quest_branch_id: string | null
+          scenario_quest_id: string | null
           user_id: string
           value: number | null
         }
@@ -417,10 +289,11 @@ export type Database = {
           narrative_node_choice_id?: string | null
           narrative_node_id: string
           player_id: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
+          player_scenario_quest_branch_id?: string | null
+          player_scenario_quest_id?: string | null
+          scenario_id?: string | null
+          scenario_quest_branch_id?: string | null
+          scenario_quest_id?: string | null
           user_id: string
           value?: number | null
         }
@@ -433,10 +306,11 @@ export type Database = {
           narrative_node_choice_id?: string | null
           narrative_node_id?: string
           player_id?: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
+          player_scenario_quest_branch_id?: string | null
+          player_scenario_quest_id?: string | null
+          scenario_id?: string | null
+          scenario_quest_branch_id?: string | null
+          scenario_quest_id?: string | null
           user_id?: string
           value?: number | null
         }
@@ -484,31 +358,253 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_rolled_dices_player_quest_branch_id_fkey"
-            columns: ["player_quest_branch_id"]
+            foreignKeyName: "player_rolled_dices_player_scenario_quest_branch_id_fkey"
+            columns: ["player_scenario_quest_branch_id"]
             isOneToOne: false
-            referencedRelation: "player_quest_branches"
+            referencedRelation: "player_scenario_quest_branches"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_rolled_dices_player_quest_id_fkey"
-            columns: ["player_quest_id"]
+            foreignKeyName: "player_rolled_dices_player_scenario_quest_id_fkey"
+            columns: ["player_scenario_quest_id"]
             isOneToOne: false
-            referencedRelation: "player_quests"
+            referencedRelation: "player_scenario_quests"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_rolled_dices_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
+            foreignKeyName: "player_rolled_dices_scenario_id_fkey"
+            columns: ["scenario_id"]
             isOneToOne: false
-            referencedRelation: "quest_branches"
+            referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "player_rolled_dices_quest_id_fkey"
-            columns: ["quest_id"]
+            foreignKeyName: "player_rolled_dices_scenario_quest_branch_id_fkey"
+            columns: ["scenario_quest_branch_id"]
             isOneToOne: false
-            referencedRelation: "quests"
+            referencedRelation: "scenario_quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_scenario_quest_id_fkey"
+            columns: ["scenario_quest_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_scenario_chapters: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          scenario_chapter_id: string
+          scenario_id: string
+          status: Database["public"]["Enums"]["player_scenario_chapter_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          scenario_chapter_id: string
+          scenario_id: string
+          status?: Database["public"]["Enums"]["player_scenario_chapter_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          scenario_chapter_id?: string
+          scenario_id?: string
+          status?: Database["public"]["Enums"]["player_scenario_chapter_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_scenario_chapters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_chapters_scenario_chapter_id_fkey"
+            columns: ["scenario_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_chapters_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_scenario_quest_branches: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          player_scenario_quest_id: string
+          scenario_id: string
+          scenario_quest_branch_id: string
+          scenario_quest_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          player_scenario_quest_id: string
+          scenario_id: string
+          scenario_quest_branch_id: string
+          scenario_quest_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          player_scenario_quest_id?: string
+          scenario_id?: string
+          scenario_quest_branch_id?: string
+          scenario_quest_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_scenario_quest_branches_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quest_branches_player_scenario_quest_id_fkey"
+            columns: ["player_scenario_quest_id"]
+            isOneToOne: false
+            referencedRelation: "player_scenario_quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quest_branches_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quest_branches_scenario_quest_branch_id_fkey"
+            columns: ["scenario_quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quest_branches_scenario_quest_id_fkey"
+            columns: ["scenario_quest_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_scenario_quests: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          scenario_id: string
+          scenario_quest_id: string
+          status: Database["public"]["Enums"]["player_scenario_quest_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          scenario_id: string
+          scenario_quest_id: string
+          status?: Database["public"]["Enums"]["player_scenario_quest_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          scenario_id?: string
+          scenario_quest_id?: string
+          status?: Database["public"]["Enums"]["player_scenario_quest_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_scenario_quests_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quests_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenario_quests_scenario_quest_id_fkey"
+            columns: ["scenario_quest_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_scenarios: {
+        Row: {
+          created_at: string
+          id: string
+          player_id: string
+          scenario_id: string
+          status: Database["public"]["Enums"]["player_scenario_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_id: string
+          scenario_id: string
+          status?: Database["public"]["Enums"]["player_scenario_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_id?: string
+          scenario_id?: string
+          status?: Database["public"]["Enums"]["player_scenario_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_scenarios_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenarios_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
         ]
@@ -570,82 +666,192 @@ export type Database = {
         }
         Relationships: []
       }
-      quest_branches: {
+      scenario_chapters: {
         Row: {
           created_at: string
-          display_order: number
+          created_by: string | null
           id: string
-          parent_quest_branch_id: string | null
-          quest_id: string
+          order: number
+          scenario_id: string
+          status: Database["public"]["Enums"]["publish_status"]
           title: string
         }
         Insert: {
           created_at?: string
-          display_order?: number
+          created_by?: string | null
           id?: string
-          parent_quest_branch_id?: string | null
-          quest_id: string
+          order: number
+          scenario_id: string
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }
         Update: {
           created_at?: string
-          display_order?: number
+          created_by?: string | null
           id?: string
-          parent_quest_branch_id?: string | null
-          quest_id?: string
+          order?: number
+          scenario_id?: string
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "quest_branches_parent_quest_branch_id_fkey"
-            columns: ["parent_quest_branch_id"]
+            foreignKeyName: "scenario_chapters_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: "quest_branches"
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "quest_branches_quest_id_fkey"
-            columns: ["quest_id"]
+            foreignKeyName: "scenario_chapters_scenario_id_fkey"
+            columns: ["scenario_id"]
             isOneToOne: false
-            referencedRelation: "quests"
+            referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
         ]
       }
-      quests: {
+      scenario_quest_branches: {
         Row: {
-          chapter_id: string | null
           created_at: string
+          created_by: string | null
+          display_order: number
           id: string
-          order_in_chapter: number
-          status: Database["public"]["Enums"]["publish_status"]
+          parent_scenario_quest_branch_id: string | null
+          scenario_quest_id: string
           title: string
-          type: Database["public"]["Enums"]["quest_type"]
         }
         Insert: {
-          chapter_id?: string | null
           created_at?: string
+          created_by?: string | null
+          display_order?: number
           id?: string
-          order_in_chapter?: number
-          status?: Database["public"]["Enums"]["publish_status"]
+          parent_scenario_quest_branch_id?: string | null
+          scenario_quest_id: string
           title?: string
-          type?: Database["public"]["Enums"]["quest_type"]
         }
         Update: {
-          chapter_id?: string | null
           created_at?: string
+          created_by?: string | null
+          display_order?: number
           id?: string
-          order_in_chapter?: number
-          status?: Database["public"]["Enums"]["publish_status"]
+          parent_scenario_quest_branch_id?: string | null
+          scenario_quest_id?: string
           title?: string
-          type?: Database["public"]["Enums"]["quest_type"]
         }
         Relationships: [
           {
-            foreignKeyName: "quests_chapter_id_fkey"
-            columns: ["chapter_id"]
+            foreignKeyName: "scenario_quest_branches_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
-            referencedRelation: "chapters"
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_quest_branches_parent_scenario_quest_branch_id_fkey"
+            columns: ["parent_scenario_quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_quest_branches_scenario_quest_id_fkey"
+            columns: ["scenario_quest_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenario_quests: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_in_chapter: number
+          scenario_chapter_id: string | null
+          scenario_id: string
+          status: Database["public"]["Enums"]["publish_status"]
+          title: string
+          type: Database["public"]["Enums"]["scenario_quest_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_in_chapter?: number
+          scenario_chapter_id?: string | null
+          scenario_id: string
+          status?: Database["public"]["Enums"]["publish_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["scenario_quest_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_in_chapter?: number
+          scenario_chapter_id?: string | null
+          scenario_id?: string
+          status?: Database["public"]["Enums"]["publish_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["scenario_quest_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenario_quests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_quests_scenario_chapter_id_fkey"
+            columns: ["scenario_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_quests_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenarios: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order: number
+          status: Database["public"]["Enums"]["publish_status"]
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order: number
+          status?: Database["public"]["Enums"]["publish_status"]
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order?: number
+          status?: Database["public"]["Enums"]["publish_status"]
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -653,32 +859,57 @@ export type Database = {
       user_roles: {
         Row: {
           created_at: string
+          created_by: string | null
           deleted_at: string | null
+          deleted_by: string | null
+          display_name: string
           id: string
           type: Database["public"]["Enums"]["user_role_type"]
           user_id: string
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           deleted_at?: string | null
+          deleted_by?: string | null
+          display_name?: string
           id?: string
           type: Database["public"]["Enums"]["user_role_type"]
           user_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           deleted_at?: string | null
+          deleted_by?: string | null
+          display_name?: string
           id?: string
           type?: Database["public"]["Enums"]["user_role_type"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_roles_created_by"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_roles_deleted_by"
+            columns: ["deleted_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      current_user_role_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_me: { Args: { target_user_id: string }; Returns: boolean }
       is_own_player: {
@@ -689,10 +920,11 @@ export type Database = {
     Enums: {
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       narrative_node_type: "text" | "choice"
-      player_chapter_status: "in_progress" | "completed"
-      player_quest_status: "in_progress" | "completed" | "abandoned"
+      player_scenario_chapter_status: "in_progress" | "completed"
+      player_scenario_quest_status: "in_progress" | "completed" | "abandoned"
+      player_scenario_status: "in_progress" | "completed"
       publish_status: "draft" | "published"
-      quest_type: "primary" | "secondary"
+      scenario_quest_type: "primary" | "secondary"
       user_role_type: "admin"
     }
     CompositeTypes: {
@@ -826,10 +1058,11 @@ export const Constants = {
     Enums: {
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       narrative_node_type: ["text", "choice"],
-      player_chapter_status: ["in_progress", "completed"],
-      player_quest_status: ["in_progress", "completed", "abandoned"],
+      player_scenario_chapter_status: ["in_progress", "completed"],
+      player_scenario_quest_status: ["in_progress", "completed", "abandoned"],
+      player_scenario_status: ["in_progress", "completed"],
       publish_status: ["draft", "published"],
-      quest_type: ["primary", "secondary"],
+      scenario_quest_type: ["primary", "secondary"],
       user_role_type: ["admin"],
     },
   },

@@ -5,7 +5,7 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconMessagePlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
+	import { IconPlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
@@ -201,11 +201,11 @@
 						size="icon"
 						variant="outline"
 					>
-						<IconMessagePlus class="h-4 w-4" />
+						<IconPlus class="h-4 w-4" />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>대화 또는 효과 추가</TooltipContent>
+			<TooltipContent>새로운 대화 생성</TooltipContent>
 		</Tooltip>
 		<Tooltip>
 			<TooltipTrigger>
@@ -221,7 +221,7 @@
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>주사위 굴림 추가</TooltipContent>
+			<TooltipContent>새로운 주사위 굴림 생성</TooltipContent>
 		</Tooltip>
 		<Tooltip>
 			<TooltipTrigger>

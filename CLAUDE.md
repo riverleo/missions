@@ -39,7 +39,23 @@
      - **작은 데이터**: `shouldRefetch=true`로 전체 데이터 다시 불러오기
      - **큰 데이터**: `shouldRefetch=false` + 스토어 내부 데이터 직접 수정
 
-3. **스토어 업데이트는 Immer 사용**
+3. **Hook 함수 명명 규칙**
+   - 해당 훅의 도메인에 대한 함수는 짧은 이름 사용: `fetch`, `create`, `update`, `remove`
+   - 하위 도메인에 대한 함수만 도메인명 포함: `createScenarioQuestBranch`
+   - 예시:
+     ```typescript
+     // useScenarioQuest 훅 내부
+     const { fetch, create, admin } = useScenarioQuest();
+
+     // ✅ 좋은 예: 자신의 도메인
+     fetch(scenarioId);  // scenarioQuest를 fetch
+     admin.create({ ... });  // scenarioQuest를 create
+
+     // ✅ 좋은 예: 하위 도메인
+     admin.createScenarioQuestBranch({ ... });  // 하위 도메인이라 이름 포함
+     ```
+
+4. **스토어 업데이트는 Immer 사용**
    - Svelte의 reactivity는 참조 변경을 감지하므로 항상 새로운 객체/배열을 생성해야 함
    - **Immer의 `produce`를 사용하여 불변성을 유지하면서 mutable한 코드 작성 가능**
    - Immer는 structural sharing을 통해 성능을 최적화하고, 중첩된 업데이트를 간단하게 만듦
@@ -113,19 +129,32 @@
    - 역할 없음 = 일반 유저, 역할 1개 = 특정 권한 보유
    - 쿼리 시 `.maybeSingle()` 사용 (0개=정상, 1개=정상, 2개 이상=에러)
 
-3. **Supabase 타입 생성**
+3. **Audit 컬럼 (`created_by`, `deleted_by`)**
+   - admin이 관리하는 테이블(player_ 테이블 제외)에는 audit 컬럼 추가
+   - `created_by`: `user_roles(id)` 참조, `default current_user_role_id()`
+   - `deleted_by`: `user_roles(id)` 참조, soft delete 시 수동 설정
+   - `current_user_role_id()`: 현재 로그인 유저의 user_role.id 반환 함수
+   - 예시:
+     ```sql
+     created_at timestamptz not null default now(),
+     created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
+     deleted_at timestamptz,
+     deleted_by uuid references user_roles(id) on delete set null
+     ```
+
+4. **Supabase 타입 생성**
    - `src/lib/types/supabase.ts`는 Supabase에서 자동 생성되는 파일 (기존 파일)
    - 타입 생성 명령어: `pnpm supabase gen types typescript --local > src/lib/types/supabase.ts`
    - 이 파일을 직접 수정하지 말고, 필요한 타입 확장은 `src/lib/types/index.ts`에서 할 것
 
-4. **Constraint 및 Index 명명 규칙**
+5. **Constraint 및 Index 명명 규칙**
    - 모든 constraint와 index는 명시적으로 이름을 지정할 것
    - Unique: `uq_<table_name>_<column_name>` (복수 컬럼: `uq_<table_name>_<col1>_<col2>`)
    - Foreign Key: `fk_<table_name>_<column_name>`
    - Index: `idx_<table_name>_<column_name>`
    - Check: `chk_<table_name>_<column_name>`
 
-5. **테이블 생성 스타일**
+6. **테이블 생성 스타일**
    - 가능하면 `create table` 문 안에서 모든 constraint를 한번에 정의
    - `alter table`로 나중에 추가하는 것보다 inline constraint 선호
    - 예:
@@ -140,7 +169,7 @@
      );
      ```
 
-6. **테이블명과 관계 데이터 명명**
+7. **테이블명과 관계 데이터 명명**
    - 테이블명은 복수형 사용 (예: `dices`, `narrative_dice_rolls`, `narratives`)
    - 단일 관계 데이터를 참조할 때는 단수형 사용 (예: `narrativeNode.narrative_dice_roll`)
    - Supabase 쿼리에서 alias로 단수형 지정:
@@ -152,7 +181,7 @@
      ```
    - 이유: 테이블은 여러 레코드의 집합이므로 복수형, 개별 관계는 단일 객체이므로 단수형
 
-7. **타입 re-export 규칙**
+8. **타입 re-export 규칙**
    - `src/lib/types/index.ts`에서 확장된 타입을 re-export할 때는 원래 이름 사용
    - `WithXXX` 같은 suffix를 붙이지 말고, 확장된 타입이 기본 타입이 되도록 함
    - 예:

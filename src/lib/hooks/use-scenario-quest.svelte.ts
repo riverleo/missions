@@ -1,39 +1,43 @@
 import { writable, type Readable } from 'svelte/store';
 import type {
 	FetchState,
-	Quest,
-	QuestInsert,
-	QuestUpdate,
-	QuestBranchInsert,
-	QuestBranchUpdate,
+	ScenarioQuest,
+	ScenarioQuestInsert,
+	ScenarioQuestUpdate,
+	ScenarioQuestBranchInsert,
+	ScenarioQuestBranchUpdate,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
-type DialogState =
+type ScenarioQuestDialogState =
 	| { type: 'create' }
-	| { type: 'update' | 'delete' | 'publish'; questId: string }
+	| { type: 'update' | 'delete' | 'publish'; scenarioQuestId: string }
 	| undefined;
 
-let instance: ReturnType<typeof createQuestStore> | null = null;
+let instance: ReturnType<typeof createScenarioQuestStore> | null = null;
 
-function createQuestStore() {
+function createScenarioQuestStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<FetchState<Quest[]>>({
+	const store = writable<FetchState<ScenarioQuest[]>>({
 		status: 'idle',
 		data: undefined,
 		error: undefined,
 	});
 
 	// 다이얼로그 상태 관리
-	const dialogStore = writable<DialogState>(undefined);
+	const dialogStore = writable<ScenarioQuestDialogState>(undefined);
 
-	let initialized = false;
+	let currentScenarioId: string | undefined;
 
-	async function fetchQuests() {
+	async function fetch(scenarioId: string) {
+		currentScenarioId = scenarioId;
 		store.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase.from('quests').select('*, quest_branches(*), chapter:chapters(*)');
+			const { data, error } = await supabase
+				.from('scenario_quests')
+				.select('*, scenario_quest_branches(*), scenario_chapter:scenario_chapters(*)')
+				.eq('scenario_id', scenarioId);
 
 			if (error) throw error;
 
@@ -51,13 +55,26 @@ function createQuestStore() {
 		}
 	}
 
-	async function create(quest: QuestInsert) {
+	async function refetch() {
+		if (!currentScenarioId) {
+			throw new Error('useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.');
+		}
+		await fetch(currentScenarioId);
+	}
+
+	async function create(scenarioQuest: Omit<ScenarioQuestInsert, 'scenario_id'>) {
+		if (!currentScenarioId) {
+			throw new Error('useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.');
+		}
 		try {
-			const { error } = await supabase.from('quests').insert(quest);
+			const { error } = await supabase.from('scenario_quests').insert({
+				...scenarioQuest,
+				scenario_id: currentScenarioId,
+			});
 
 			if (error) throw error;
 
-			await fetchQuests();
+			await refetch();
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -67,13 +84,13 @@ function createQuestStore() {
 		}
 	}
 
-	async function update(id: string, quest: QuestUpdate) {
+	async function update(id: string, scenarioQuest: ScenarioQuestUpdate) {
 		try {
-			const { error } = await supabase.from('quests').update(quest).eq('id', id);
+			const { error } = await supabase.from('scenario_quests').update(scenarioQuest).eq('id', id);
 
 			if (error) throw error;
 
-			await fetchQuests();
+			await refetch();
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -85,11 +102,11 @@ function createQuestStore() {
 
 	async function remove(id: string) {
 		try {
-			const { error } = await supabase.from('quests').delete().eq('id', id);
+			const { error } = await supabase.from('scenario_quests').delete().eq('id', id);
 
 			if (error) throw error;
 
-			await fetchQuests();
+			await refetch();
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -102,13 +119,13 @@ function createQuestStore() {
 	async function publish(id: string) {
 		try {
 			const { error } = await supabase
-				.from('quests')
+				.from('scenario_quests')
 				.update({ status: 'published' })
 				.eq('id', id);
 
 			if (error) throw error;
 
-			await fetchQuests();
+			await refetch();
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -121,13 +138,13 @@ function createQuestStore() {
 	async function unpublish(id: string) {
 		try {
 			const { error } = await supabase
-				.from('quests')
+				.from('scenario_quests')
 				.update({ status: 'draft' })
 				.eq('id', id);
 
 			if (error) throw error;
 
-			await fetchQuests();
+			await refetch();
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -137,18 +154,18 @@ function createQuestStore() {
 		}
 	}
 
-	async function createBranch(branch: QuestBranchInsert, shouldRefetch = true) {
+	async function createScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranchInsert, shouldRefetch = true) {
 		try {
 			const { data, error } = await supabase
-				.from('quest_branches')
-				.insert(branch)
+				.from('scenario_quest_branches')
+				.insert(scenarioQuestBranch)
 				.select()
 				.single();
 
 			if (error) throw error;
 
 			if (shouldRefetch) {
-				await fetchQuests();
+				await refetch();
 			}
 
 			return data;
@@ -161,14 +178,14 @@ function createQuestStore() {
 		}
 	}
 
-	async function updateBranch(id: string, branch: QuestBranchUpdate, shouldRefetch = false) {
+	async function updateScenarioQuestBranch(id: string, scenarioQuestBranch: ScenarioQuestBranchUpdate, shouldRefetch = false) {
 		try {
-			const { error } = await supabase.from('quest_branches').update(branch).eq('id', id);
+			const { error } = await supabase.from('scenario_quest_branches').update(scenarioQuestBranch).eq('id', id);
 
 			if (error) throw error;
 
 			if (shouldRefetch) {
-				await fetchQuests();
+				await refetch();
 			}
 		} catch (error) {
 			store.update((state) => ({
@@ -179,14 +196,14 @@ function createQuestStore() {
 		}
 	}
 
-	async function removeBranch(id: string, shouldRefetch = true) {
+	async function removeScenarioQuestBranch(id: string, shouldRefetch = true) {
 		try {
-			const { error } = await supabase.from('quest_branches').delete().eq('id', id);
+			const { error } = await supabase.from('scenario_quest_branches').delete().eq('id', id);
 
 			if (error) throw error;
 
 			if (shouldRefetch) {
-				await fetchQuests();
+				await refetch();
 			}
 		} catch (error) {
 			store.update((state) => ({
@@ -197,7 +214,7 @@ function createQuestStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<DialogState>) {
+	function openDialog(state: NonNullable<ScenarioQuestDialogState>) {
 		dialogStore.set(state);
 	}
 
@@ -205,14 +222,10 @@ function createQuestStore() {
 		dialogStore.set(undefined);
 	}
 
-	if (!initialized) {
-		initialized = true;
-		fetchQuests();
-	}
-
 	return {
-		store: store as Readable<FetchState<Quest[]>>,
-		dialogStore: dialogStore as Readable<DialogState>,
+		store: store as Readable<FetchState<ScenarioQuest[]>>,
+		dialogStore: dialogStore as Readable<ScenarioQuestDialogState>,
+		fetch,
 		openDialog,
 		closeDialog,
 		admin: {
@@ -221,16 +234,16 @@ function createQuestStore() {
 			remove,
 			publish,
 			unpublish,
-			createBranch,
-			updateBranch,
-			removeBranch,
+			createScenarioQuestBranch,
+			updateScenarioQuestBranch,
+			removeScenarioQuestBranch,
 		},
 	};
 }
 
-export function useQuest() {
+export function useScenarioQuest() {
 	if (!instance) {
-		instance = createQuestStore();
+		instance = createScenarioQuestStore();
 	}
 	return instance;
 }

@@ -4,6 +4,7 @@ create table narratives (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   created_at timestamptz not null default now(),
+  created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
   constraint uq_narratives_title unique (title)
 );
@@ -15,7 +16,8 @@ create table narrative_nodes (
   description text not null default '',
   root boolean not null default false,
   type narrative_node_type not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  created_user_id uuid references auth.users(id) on delete set null
 );
 
 create table narrative_node_choices (
@@ -24,7 +26,8 @@ create table narrative_node_choices (
   title text not null default '',
   description text not null default '',
   order_in_narrative_node integer not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  created_user_id uuid references auth.users(id) on delete set null
 );
 
 alter table narratives enable row level security;
