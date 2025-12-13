@@ -250,6 +250,7 @@
   - `<Label>` 컴포넌트 대신 `InputGroupText` 또는 `ButtonGroupText` 사용
   - `InputGroupText`, `InputGroupButton`은 반드시 `InputGroupAddon`으로 감싸서 사용
   - `InputGroupAddon` 안에 아이콘이나 텍스트를 넣을 때는 반드시 `InputGroupText`로 감싸기
+  - `ButtonGroup` 안에 아이콘이나 텍스트를 넣을 때는 반드시 `ButtonGroupText`로 감싸기
   - `InputGroup`은 `Select`와 궁합이 안 맞으므로 `ButtonGroup` + `Select` 조합 사용
   - 예시:
 
@@ -264,9 +265,17 @@
     	<Select>...</Select>
     </InputGroup>
 
-    <!-- ✅ 좋은 예: ButtonGroup + Select -->
+    <!-- ❌ 나쁜 예: ButtonGroup에 아이콘 직접 넣기 -->
     <ButtonGroup>
-    	<ButtonGroupText>타입</ButtonGroupText>
+    	<IconCategory class="size-4" />
+    	<Select>...</Select>
+    </ButtonGroup>
+
+    <!-- ✅ 좋은 예: ButtonGroup + ButtonGroupText + Select -->
+    <ButtonGroup>
+    	<ButtonGroupText>
+    		<IconCategory class="size-4" />
+    	</ButtonGroupText>
     	<Select>...</Select>
     </ButtonGroup>
 

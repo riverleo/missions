@@ -39,11 +39,18 @@
 			return scenarioQuests[0].scenario_chapter.display_order_in_scenario ?? 0;
 		});
 
-		return sortedEntries.map(([scenarioChapterId, scenarioQuests]) => ({
-			scenarioChapterId,
-			scenarioChapterTitle: scenarioQuests?.[0]?.scenario_chapter?.title ?? '챕터 없음',
-			scenarioQuests: sort(scenarioQuests ?? [], (q) => q.order_in_chapter),
-		}));
+		return sortedEntries.map(([scenarioChapterId, scenarioQuests]) => {
+			const chapter = scenarioQuests?.[0]?.scenario_chapter;
+			let scenarioChapterTitle = '챕터 없음';
+			if (chapter) {
+				scenarioChapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
+			}
+			return {
+				scenarioChapterId,
+				scenarioChapterTitle,
+				scenarioQuests: sort(scenarioQuests ?? [], (q) => q.order_in_chapter),
+			};
+		});
 	});
 </script>
 

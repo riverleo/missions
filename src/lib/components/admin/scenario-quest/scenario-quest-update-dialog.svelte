@@ -145,7 +145,9 @@
 
 				<div class="grid grid-cols-2 gap-2">
 					<ButtonGroup class="w-full">
-						<IconCategory class="size-4" />
+						<ButtonGroupText>
+							<IconCategory class="size-4" />
+						</ButtonGroupText>
 						<Select type="single" bind:value={type}>
 							<SelectTrigger class="flex-1">
 								{getTypeLabel(type)}
