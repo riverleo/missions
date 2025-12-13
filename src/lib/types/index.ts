@@ -32,7 +32,7 @@ export interface ServerPayload {
 }
 
 // Enums
-export type QuestStatus = Enums<'quest_status'>;
+export type PublishStatus = Enums<'publish_status'>;
 export type QuestType = Enums<'quest_type'>;
 export type PlayerQuestStatus = Enums<'player_quest_status'>;
 export type PlayerChapterStatus = Enums<'player_chapter_status'>;

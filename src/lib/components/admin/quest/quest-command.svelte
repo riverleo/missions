@@ -20,13 +20,15 @@
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';
 
+	const NO_CHAPTER = 'no-chapter';
+
 	const { store, openDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
 
 	// 퀘스트를 챕터별로 그룹화
 	const questsByChapter = $derived(() => {
 		const quests = $store.data ?? [];
-		const grouped = group(quests, (q) => q.chapter?.id);
+		const grouped = group(quests, (q) => q.chapter?.id ?? NO_CHAPTER);
 
 		// 챕터 순서대로 정렬
 		const sortedEntries = sort(Object.entries(grouped), ([_, quests]) => {

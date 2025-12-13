@@ -39,18 +39,21 @@ export type Database = {
           created_at: string
           id: string
           order: number
+          status: Database["public"]["Enums"]["publish_status"]
           title: string
         }
         Insert: {
           created_at?: string
           id?: string
           order: number
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }
         Update: {
           created_at?: string
           id?: string
           order?: number
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }
         Relationships: []
@@ -615,7 +618,7 @@ export type Database = {
           created_at: string
           id: string
           order_in_chapter: number
-          status: Database["public"]["Enums"]["quest_status"]
+          status: Database["public"]["Enums"]["publish_status"]
           title: string
           type: Database["public"]["Enums"]["quest_type"]
         }
@@ -624,7 +627,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_in_chapter?: number
-          status?: Database["public"]["Enums"]["quest_status"]
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
           type?: Database["public"]["Enums"]["quest_type"]
         }
@@ -633,7 +636,7 @@ export type Database = {
           created_at?: string
           id?: string
           order_in_chapter?: number
-          status?: Database["public"]["Enums"]["quest_status"]
+          status?: Database["public"]["Enums"]["publish_status"]
           title?: string
           type?: Database["public"]["Enums"]["quest_type"]
         }
@@ -688,7 +691,7 @@ export type Database = {
       narrative_node_type: "text" | "choice"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
-      quest_status: "draft" | "published"
+      publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
       user_role_type: "admin"
     }
@@ -825,7 +828,7 @@ export const Constants = {
       narrative_node_type: ["text", "choice"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],
-      quest_status: ["draft", "published"],
+      publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
       user_role_type: ["admin"],
     },

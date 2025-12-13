@@ -1,12 +1,12 @@
 create type quest_type as enum ('primary', 'secondary');
-create type quest_status as enum ('draft', 'published');
+create type publish_status as enum ('draft', 'published');
 create type player_quest_status as enum ('in_progress', 'completed', 'abandoned');
 
 create table quests (
   id uuid primary key default gen_random_uuid(),
   title text not null default '',
   type quest_type not null default 'secondary',
-  status quest_status not null default 'draft',
+  status publish_status not null default 'draft',
   created_at timestamptz not null default now()
 );
 

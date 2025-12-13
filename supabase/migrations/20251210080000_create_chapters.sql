@@ -2,6 +2,7 @@ create table chapters (
   id uuid primary key default gen_random_uuid(),
   title text not null default '',
   "order" integer not null,
+  status publish_status not null default 'draft',
   created_at timestamptz not null default now(),
 
   constraint uq_chapters_order unique ("order")
@@ -26,11 +27,11 @@ alter table quests add column order_in_chapter integer not null default 0;
 alter table chapters enable row level security;
 alter table player_chapters enable row level security;
 
-create policy "authenticated can view chapters"
+create policy "authenticated can view published chapters"
   on chapters
   for select
   to authenticated
-  using (true);
+  using (status = 'published' or is_admin());
 
 create policy "admins can insert chapters"
   on chapters
