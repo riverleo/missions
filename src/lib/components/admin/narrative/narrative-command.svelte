@@ -37,7 +37,7 @@
 								narrative.id === currentNarrativeId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
-						<span class="flex-1 truncate">{narrative.title || '(제목 없음)'}</span>
+						<span class="flex-1 truncate">{narrative.title || '제목 없음'}</span>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}

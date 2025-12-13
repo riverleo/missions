@@ -1,4 +1,5 @@
 import { writable, type Readable } from 'svelte/store';
+import { produce } from 'immer';
 import type {
 	FetchState,
 	ScenarioQuest,
@@ -178,22 +179,22 @@ function createScenarioQuestStore() {
 		}
 	}
 
-	async function updateScenarioQuestBranch(id: string, scenarioQuestBranch: ScenarioQuestBranchUpdate, shouldRefetch = false) {
-		try {
-			const { error } = await supabase.from('scenario_quest_branches').update(scenarioQuestBranch).eq('id', id);
+	async function updateScenarioQuestBranch(id: string, scenarioQuestBranch: ScenarioQuestBranchUpdate) {
+		const { error } = await supabase.from('scenario_quest_branches').update(scenarioQuestBranch).eq('id', id);
 
-			if (error) throw error;
+		if (error) throw error;
 
-			if (shouldRefetch) {
-				await refetch();
-			}
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
+		store.update((state) =>
+			produce(state, (draft) => {
+				for (const quest of draft.data ?? []) {
+					const branch = quest.scenario_quest_branches?.find((b) => b.id === id);
+					if (branch) {
+						Object.assign(branch, scenarioQuestBranch);
+						break;
+					}
+				}
+			})
+		);
 	}
 
 	async function removeScenarioQuestBranch(id: string, shouldRefetch = true) {

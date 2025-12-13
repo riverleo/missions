@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { ScenarioQuestBranch } from '$lib/types';
+	import type { ScenarioChapter } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 
 	type Props = {
 		data: {
 			label: string;
-			scenarioQuestBranch: ScenarioQuestBranch;
+			scenarioChapter: ScenarioChapter;
 		};
 		id: string;
 	};
@@ -16,19 +16,24 @@
 	const targetConnections = useNodeConnections({ handleType: 'target' });
 	const isConnectable = $derived(targetConnections.current.length === 0);
 
-	const scenarioQuestBranch = $derived(data.scenarioQuestBranch);
+	const scenarioChapter = $derived(data.scenarioChapter);
 </script>
 
 <div class="min-w-32 px-3 py-2">
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
-	<div
-		class="text-sm font-medium"
-		class:text-white={scenarioQuestBranch.title}
-		class:text-neutral-500={!scenarioQuestBranch.title}
-	>
-		{scenarioQuestBranch.title || '제목 없음'}
+	<div class="flex flex-col gap-1">
+		<div
+			class="text-sm font-medium"
+			class:text-white={scenarioChapter.title}
+			class:text-neutral-500={!scenarioChapter.title}
+		>
+			{scenarioChapter.title || '제목 없음'}
+		</div>
+		<span class="text-xs text-muted-foreground">
+			{scenarioChapter.status === 'published' ? '공개됨' : '작업중'}
+		</span>
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->

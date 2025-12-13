@@ -1,4 +1,5 @@
 import { writable, type Readable } from 'svelte/store';
+import { produce } from 'immer';
 import type {
 	FetchState,
 	ScenarioChapter,
@@ -6,11 +7,6 @@ import type {
 	ScenarioChapterUpdate,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
-
-type ScenarioChapterDialogState =
-	| { type: 'create' }
-	| { type: 'update' | 'delete'; scenarioChapterId: string }
-	| undefined;
 
 let instance: ReturnType<typeof createScenarioChapterStore> | null = null;
 
@@ -21,9 +17,6 @@ function createScenarioChapterStore() {
 		data: undefined,
 		error: undefined,
 	});
-
-	// 다이얼로그 상태 관리
-	const dialogStore = writable<ScenarioChapterDialogState>(undefined);
 
 	let currentScenarioId: string | undefined;
 
@@ -36,7 +29,7 @@ function createScenarioChapterStore() {
 				.from('scenario_chapters')
 				.select('*')
 				.eq('scenario_id', scenarioId)
-				.order('order', { ascending: true });
+				.order('display_order_in_scenario', { ascending: true });
 
 			if (error) throw error;
 
@@ -56,83 +49,117 @@ function createScenarioChapterStore() {
 
 	async function refetch() {
 		if (!currentScenarioId) {
-			throw new Error('useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.');
+			throw new Error(
+				'useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.'
+			);
 		}
 		await fetch(currentScenarioId);
 	}
 
 	async function create(scenarioChapter: Omit<ScenarioChapterInsert, 'scenario_id'>) {
 		if (!currentScenarioId) {
-			throw new Error('useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.');
+			throw new Error(
+				'useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.'
+			);
 		}
-		try {
-			const { error } = await supabase.from('scenario_chapters').insert({
+		const { data, error } = await supabase
+			.from('scenario_chapters')
+			.insert({
 				...scenarioChapter,
 				scenario_id: currentScenarioId,
-			});
+			})
+			.select()
+			.single();
 
-			if (error) throw error;
+		if (error) throw error;
 
-			await refetch();
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
+		store.update((state) =>
+			produce(state, (draft) => {
+				if (draft.data) {
+					draft.data.push(data);
+				} else {
+					draft.data = [data];
+				}
+			})
+		);
+
+		return data;
 	}
 
 	async function update(id: string, scenarioChapter: ScenarioChapterUpdate) {
-		try {
-			const { error } = await supabase.from('scenario_chapters').update(scenarioChapter).eq('id', id);
+		const { error } = await supabase.from('scenario_chapters').update(scenarioChapter).eq('id', id);
 
-			if (error) throw error;
+		if (error) throw error;
 
-			await refetch();
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
+		store.update((state) =>
+			produce(state, (draft) => {
+				const chapter = draft.data?.find((c) => c.id === id);
+				if (chapter) {
+					Object.assign(chapter, scenarioChapter);
+				}
+			})
+		);
 	}
 
 	async function remove(id: string) {
-		try {
-			const { error } = await supabase.from('scenario_chapters').delete().eq('id', id);
+		const { error } = await supabase.from('scenario_chapters').delete().eq('id', id);
 
-			if (error) throw error;
+		if (error) throw error;
 
-			await refetch();
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
+		store.update((state) =>
+			produce(state, (draft) => {
+				if (draft.data) {
+					draft.data = draft.data.filter((c) => c.id !== id);
+				}
+			})
+		);
 	}
 
-	function openDialog(state: NonNullable<ScenarioChapterDialogState>) {
-		dialogStore.set(state);
+	async function publish(id: string) {
+		const { error } = await supabase
+			.from('scenario_chapters')
+			.update({ status: 'published' })
+			.eq('id', id);
+
+		if (error) throw error;
+
+		store.update((state) =>
+			produce(state, (draft) => {
+				const chapter = draft.data?.find((c) => c.id === id);
+				if (chapter) {
+					chapter.status = 'published';
+				}
+			})
+		);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	async function unpublish(id: string) {
+		const { error } = await supabase
+			.from('scenario_chapters')
+			.update({ status: 'draft' })
+			.eq('id', id);
+
+		if (error) throw error;
+
+		store.update((state) =>
+			produce(state, (draft) => {
+				const chapter = draft.data?.find((c) => c.id === id);
+				if (chapter) {
+					chapter.status = 'draft';
+				}
+			})
+		);
 	}
 
 	return {
 		store: store as Readable<FetchState<ScenarioChapter[]>>,
-		dialogStore: dialogStore as Readable<ScenarioChapterDialogState>,
 		fetch,
-		openDialog,
-		closeDialog,
 		admin: {
 			create,
 			update,
 			remove,
+			publish,
+			unpublish,
 		},
 	};
 }

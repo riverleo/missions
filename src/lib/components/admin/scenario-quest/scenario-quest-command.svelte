@@ -36,7 +36,7 @@
 		// 챕터 순서대로 정렬
 		const sortedEntries = sort(Object.entries(grouped), ([_, scenarioQuests]) => {
 			if (!scenarioQuests?.[0]?.scenario_chapter) return Infinity;
-			return scenarioQuests[0].scenario_chapter.order ?? 0;
+			return scenarioQuests[0].scenario_chapter.display_order_in_scenario ?? 0;
 		});
 
 		return sortedEntries.map(([scenarioChapterId, scenarioQuests]) => ({
@@ -55,7 +55,10 @@
 			{#each scenarioQuestsByScenarioChapter() as { scenarioChapterId, scenarioChapterTitle, scenarioQuests } (scenarioChapterId)}
 				<CommandGroup heading={scenarioChapterTitle}>
 					{#each scenarioQuests as scenarioQuest (scenarioQuest.id)}
-						<CommandLinkItem href={`/admin/scenarios/${currentScenarioId}/quests/${scenarioQuest.id}`} class="group pr-1">
+						<CommandLinkItem
+							href={`/admin/scenarios/${currentScenarioId}/quests/${scenarioQuest.id}`}
+							class="group pr-1"
+						>
 							<IconCheck
 								class={cn(
 									'mr-2 size-4',
@@ -65,10 +68,10 @@
 							<div class="flex flex-1 flex-col">
 								<span class="truncate">{scenarioQuest.title || '(제목 없음)'}</span>
 								<span class="text-xs text-muted-foreground">
-									{scenarioQuest.type === 'primary' ? '메인 퀘스트' : '서브 퀘스트'} • {scenarioQuest.status ===
+									{scenarioQuest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {scenarioQuest.status ===
 									'published'
 										? '공개됨'
-										: '초안'}
+										: '작업중'}
 								</span>
 							</div>
 							<DropdownMenu>
@@ -87,17 +90,20 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'update', scenarioQuestId: scenarioQuest.id })}
+										onclick={() =>
+											openDialog({ type: 'update', scenarioQuestId: scenarioQuest.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'publish', scenarioQuestId: scenarioQuest.id })}
+										onclick={() =>
+											openDialog({ type: 'publish', scenarioQuestId: scenarioQuest.id })}
 									>
-										{scenarioQuest.status === 'published' ? '초안으로 전환' : '공개'}
+										{scenarioQuest.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'delete', scenarioQuestId: scenarioQuest.id })}
+										onclick={() =>
+											openDialog({ type: 'delete', scenarioQuestId: scenarioQuest.id })}
 									>
 										삭제
 									</DropdownMenuItem>

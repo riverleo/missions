@@ -10,6 +10,7 @@
 	import ScenarioCreateDialog from '$lib/components/admin/sidebar/scenario-create-dialog.svelte';
 	import ScenarioUpdateDialog from '$lib/components/admin/sidebar/scenario-update-dialog.svelte';
 	import ScenarioDeleteDialog from '$lib/components/admin/sidebar/scenario-delete-dialog.svelte';
+	import ScenarioPublishDialog from '$lib/components/admin/sidebar/scenario-publish-dialog.svelte';
 	import { SidebarProvider, SidebarInset } from '$lib/components/ui/sidebar';
 
 	const { children }: { children: Snippet } = $props();
@@ -38,4 +39,5 @@
 	<ScenarioCreateDialog />
 	<ScenarioUpdateDialog />
 	<ScenarioDeleteDialog />
+	<ScenarioPublishDialog />
 </AdminProvider>

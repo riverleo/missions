@@ -22,8 +22,12 @@
 	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const scenarioQuestId = $derived($dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined);
-	const currentScenarioQuest = $derived(scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined);
+	const scenarioQuestId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined
+	);
+	const currentScenarioQuest = $derived(
+		scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined
+	);
 
 	let title = $state('');
 	let type = $state<ScenarioQuestType>('primary');
@@ -39,7 +43,7 @@
 	});
 
 	function getTypeLabel(scenarioQuestType: ScenarioQuestType) {
-		return scenarioQuestType === 'primary' ? '메인 퀘스트' : '서브 퀘스트';
+		return scenarioQuestType === 'primary' ? '메인' : '보조';
 	}
 
 	function onOpenChange(value: boolean) {
@@ -75,39 +79,41 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>퀘스트 수정하기</DialogTitle>
+			<DialogTitle>퀘스트 수정</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit} class="space-y-4">
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<IconHeading class="size-4" />
-				</InputGroupAddon>
-				<InputGroupInput placeholder="제목" bind:value={title} />
-				<InputGroupAddon align="inline-end">
-					<span class="text-xs text-muted-foreground">{title.length}</span>
-				</InputGroupAddon>
-			</InputGroup>
-
-			<div class="grid grid-cols-2 gap-4">
-				<ButtonGroup class="w-full">
-					<ButtonGroupText>타입</ButtonGroupText>
-					<Select type="single" bind:value={type}>
-						<SelectTrigger class="flex-1">
-							{getTypeLabel(type)}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="primary" label="메인 퀘스트">메인 퀘스트</SelectItem>
-							<SelectItem value="secondary" label="서브 퀘스트">서브 퀘스트</SelectItem>
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-
+		<form {onsubmit} class="space-y-6">
+			<div class="space-y-2">
 				<InputGroup>
-					<InputGroupAddon>
-						<InputGroupText>순서</InputGroupText>
+					<InputGroupAddon align="inline-start">
+						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput type="number" bind:value={orderInChapter} min={0} />
+					<InputGroupInput placeholder="제목" bind:value={title} />
+					<InputGroupAddon align="inline-end">
+						<span class="text-xs text-muted-foreground">{title.length}</span>
+					</InputGroupAddon>
 				</InputGroup>
+
+				<div class="grid grid-cols-2 gap-2">
+					<ButtonGroup class="w-full">
+						<ButtonGroupText>타입</ButtonGroupText>
+						<Select type="single" bind:value={type}>
+							<SelectTrigger class="flex-1">
+								{getTypeLabel(type)}
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="primary" label="메인">메인</SelectItem>
+								<SelectItem value="secondary" label="보조">보조</SelectItem>
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+
+					<InputGroup>
+						<InputGroupAddon>
+							<InputGroupText>순서</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" bind:value={orderInChapter} min={0} />
+					</InputGroup>
+				</div>
 			</div>
 
 			<DialogFooter>

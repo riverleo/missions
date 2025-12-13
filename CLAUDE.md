@@ -21,9 +21,10 @@
    - `$lib/utils/` 또는 관련 도메인 디렉토리에 배치
    - 예: `applyElkLayout()` 함수를 여러 컴포넌트에서 사용하는 경우 별도 파일로 분리
 10. **임포트는 명시적으로**
-   - `import * as` 형태 사용 금지
-   - ❌ `import * as FlowId from '$lib/utils/flow-id'`
-   - ✅ `import { createDiceRollNodeId, parseDiceRollNodeId } from '$lib/utils/flow-id'`
+
+- `import * as` 형태 사용 금지
+- ❌ `import * as FlowId from '$lib/utils/flow-id'`
+- ✅ `import { createDiceRollNodeId, parseDiceRollNodeId } from '$lib/utils/flow-id'`
 
 ## Svelte 5 특화 규칙
 
@@ -43,6 +44,7 @@
    - 해당 훅의 도메인에 대한 함수는 짧은 이름 사용: `fetch`, `create`, `update`, `remove`
    - 하위 도메인에 대한 함수만 도메인명 포함: `createScenarioQuestBranch`
    - 예시:
+
      ```typescript
      // useScenarioQuest 훅 내부
      const { fetch, create, admin } = useScenarioQuest();
@@ -60,50 +62,52 @@
    - **Immer의 `produce`를 사용하여 불변성을 유지하면서 mutable한 코드 작성 가능**
    - Immer는 structural sharing을 통해 성능을 최적화하고, 중첩된 업데이트를 간단하게 만듦
    - 예시:
+
      ```typescript
      import { produce } from 'immer';
 
      // ❌ 나쁜 예: Immer 없이 직접 수정 (reactivity 동작 안 함)
      store.update((state) => {
-       const item = state.data?.find(i => i.id === id);
-       if (item) Object.assign(item, updates);
-       return state; // 같은 참조 반환
+     	const item = state.data?.find((i) => i.id === id);
+     	if (item) Object.assign(item, updates);
+     	return state; // 같은 참조 반환
      });
 
      // ✅ 좋은 예: Immer의 produce 사용
      store.update((state) =>
-       produce(state, (draft) => {
-         const item = draft.data?.find(i => i.id === id);
-         if (item) {
-           Object.assign(item, updates); // draft에서는 직접 수정 가능
-         }
-       })
+     	produce(state, (draft) => {
+     		const item = draft.data?.find((i) => i.id === id);
+     		if (item) {
+     			Object.assign(item, updates); // draft에서는 직접 수정 가능
+     		}
+     	})
      );
 
      // ✅ 좋은 예: 배열에 아이템 추가
      store.update((state) =>
-       produce(state, (draft) => {
-         if (draft.data) {
-           draft.data.push(newItem); // draft에서는 push 가능
-         } else {
-           draft.data = [newItem];
-         }
-       })
+     	produce(state, (draft) => {
+     		if (draft.data) {
+     			draft.data.push(newItem); // draft에서는 push 가능
+     		} else {
+     			draft.data = [newItem];
+     		}
+     	})
      );
 
      // ✅ 좋은 예: 중첩된 구조 업데이트
      store.update((state) =>
-       produce(state, (draft) => {
-         const narrative = draft.data?.find((n) => n.id === narrativeId);
-         if (narrative?.narrative_nodes) {
-           const node = narrative.narrative_nodes.find((n) => n.id === nodeId);
-           if (node) {
-             node.title = 'New Title'; // 중첩된 객체도 직접 수정 가능
-           }
-         }
-       })
+     	produce(state, (draft) => {
+     		const narrative = draft.data?.find((n) => n.id === narrativeId);
+     		if (narrative?.narrative_nodes) {
+     			const node = narrative.narrative_nodes.find((n) => n.id === nodeId);
+     			if (node) {
+     				node.title = 'New Title'; // 중첩된 객체도 직접 수정 가능
+     			}
+     		}
+     	})
      );
      ```
+
    - **장점**:
      - 네이티브 JS처럼 직관적인 코드 작성 가능
      - TypeScript 타입 추론이 자동으로 동작
@@ -119,10 +123,11 @@
    - 이유: 데이터가 실제로 꼬였을 때 애플리케이션에서 에러가 발생해야 문제를 감지할 수 있음
 
 1-1. **DB default 값 우선 사용**
-   - 테이블 컬럼에 default 값이 정의되어 있으면 애플리케이션에서 명시적으로 값을 넣지 말 것
-   - INSERT 시 필수가 아닌 필드는 생략하여 DB의 default 값을 사용하도록 함
-   - 예: `difficulty_class`에 `default 0`이 설정되어 있다면 insert 시 생략
-   - 이유: DB의 default 값이 단일 진실 공급원(single source of truth)이 되어야 일관성 유지 가능
+
+- 테이블 컬럼에 default 값이 정의되어 있으면 애플리케이션에서 명시적으로 값을 넣지 말 것
+- INSERT 시 필수가 아닌 필드는 생략하여 DB의 default 값을 사용하도록 함
+- 예: `difficulty_class`에 `default 0`이 설정되어 있다면 insert 시 생략
+- 이유: DB의 default 값이 단일 진실 공급원(single source of truth)이 되어야 일관성 유지 가능
 
 2. **user_roles 테이블**
    - 각 유저는 0개 또는 1개의 역할을 가질 수 있음 (unique index로 보장)
@@ -130,7 +135,7 @@
    - 쿼리 시 `.maybeSingle()` 사용 (0개=정상, 1개=정상, 2개 이상=에러)
 
 3. **Audit 컬럼 (`created_by`, `deleted_by`)**
-   - admin이 관리하는 테이블(player_ 테이블 제외)에는 audit 컬럼 추가
+   - admin이 관리하는 테이블(player\_ 테이블 제외)에는 audit 컬럼 추가
    - `created_by`: `user_roles(id)` 참조, `default current_user_role_id()`
    - `deleted_by`: `user_roles(id)` 참조, soft delete 시 수동 설정
    - `current_user_role_id()`: 현재 로그인 유저의 user_role.id 반환 함수
@@ -146,6 +151,11 @@
    - `src/lib/types/supabase.ts`는 Supabase에서 자동 생성되는 파일 (기존 파일)
    - 타입 생성 명령어: `pnpm supabase gen types typescript --local > src/lib/types/supabase.ts`
    - 이 파일을 직접 수정하지 말고, 필요한 타입 확장은 `src/lib/types/index.ts`에서 할 것
+
+4-1. **원격 DB 리셋 금지**
+
+- `supabase db reset --linked` 명령은 Claude가 실행하지 말 것
+- 원격 DB 변경은 사용자가 직접 수행
 
 5. **Constraint 및 Index 명명 규칙**
    - 모든 constraint와 index는 명시적으로 이름을 지정할 것
@@ -185,13 +195,18 @@
    - `src/lib/types/index.ts`에서 확장된 타입을 re-export할 때는 원래 이름 사용
    - `WithXXX` 같은 suffix를 붙이지 말고, 확장된 타입이 기본 타입이 되도록 함
    - 예:
+
      ```typescript
      // ❌ 나쁜 예
-     export type NarrativeNodeChoiceWithNarrativeDiceRoll = NarrativeNodeChoice & { narrative_dice_roll: NarrativeDiceRoll };
+     export type NarrativeNodeChoiceWithNarrativeDiceRoll = NarrativeNodeChoice & {
+     	narrative_dice_roll: NarrativeDiceRoll;
+     };
 
      // ✅ 좋은 예
      type NarrativeNodeChoiceRow = Tables<'narrative_node_choices'>;
-     export type NarrativeNodeChoice = NarrativeNodeChoiceRow & { narrative_dice_roll: NarrativeDiceRoll };
+     export type NarrativeNodeChoice = NarrativeNodeChoiceRow & {
+     	narrative_dice_roll: NarrativeDiceRoll;
+     };
      ```
 
 ## Types
@@ -213,14 +228,24 @@
   - `import * as` 형태 사용 금지
   - Root 컴포넌트는 컴포넌트 이름 그대로 import
   - 예시:
+
     ```typescript
     // ❌ 나쁜 예
     import * as Select from '$lib/components/ui/select';
     import { Root as SelectRoot } from '$lib/components/ui/select';
 
     // ✅ 좋은 예
-    import { Select, Trigger as SelectTrigger, Content as SelectContent, Item as SelectItem } from '$lib/components/ui/select';
-    import { InputGroup, Input as InputGroupInput, Text as InputGroupText } from '$lib/components/ui/input-group';
+    import {
+    	Select,
+    	Trigger as SelectTrigger,
+    	Content as SelectContent,
+    	Item as SelectItem,
+    } from '$lib/components/ui/select';
+    import {
+    	InputGroup,
+    	Input as InputGroupInput,
+    	Text as InputGroupText,
+    } from '$lib/components/ui/input-group';
     ```
 
 - **아이콘 라이브러리**
@@ -233,6 +258,7 @@
   - `InputGroupText`, `InputGroupButton`은 반드시 `InputGroupAddon`으로 감싸서 사용
   - `InputGroup`은 `Select`와 궁합이 안 맞으므로 `ButtonGroup` + `Select` 조합 사용
   - 예시:
+
     ```svelte
     <!-- ❌ 나쁜 예: Label 사용 -->
     <Label>타입</Label>
@@ -240,22 +266,22 @@
 
     <!-- ❌ 나쁜 예: InputGroup + Select -->
     <InputGroup>
-      <InputGroupAddon><InputGroupText>타입</InputGroupText></InputGroupAddon>
-      <Select>...</Select>
+    	<InputGroupAddon><InputGroupText>타입</InputGroupText></InputGroupAddon>
+    	<Select>...</Select>
     </InputGroup>
 
     <!-- ✅ 좋은 예: ButtonGroup + Select -->
     <ButtonGroup>
-      <ButtonGroupText>타입</ButtonGroupText>
-      <Select>...</Select>
+    	<ButtonGroupText>타입</ButtonGroupText>
+    	<Select>...</Select>
     </ButtonGroup>
 
     <!-- ✅ 좋은 예: InputGroup + Input -->
     <InputGroup>
-      <InputGroupAddon>
-        <InputGroupText>순서</InputGroupText>
-      </InputGroupAddon>
-      <InputGroupInput type="number" />
+    	<InputGroupAddon>
+    		<InputGroupText>순서</InputGroupText>
+    	</InputGroupAddon>
+    	<InputGroupInput type="number" />
     </InputGroup>
     ```
 

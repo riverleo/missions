@@ -3,12 +3,10 @@ create type publish_status as enum ('draft', 'published');
 create table scenarios (
   id uuid primary key default gen_random_uuid(),
   title text not null default '',
-  "order" integer not null,
+  display_order integer not null default 0,
   status publish_status not null default 'draft',
   created_at timestamptz not null default now(),
-  created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
-
-  constraint uq_scenarios_order unique ("order")
+  created_by uuid default current_user_role_id() references user_roles(id) on delete set null
 );
 
 create type player_scenario_status as enum ('in_progress', 'completed');
@@ -63,4 +61,4 @@ create policy "players can insert their own player_scenarios"
   to authenticated
   with check (is_own_player(user_id, player_id));
 
-insert into scenarios (title, "order", status) values ('도람푸의 역습', 1, 'draft');
+insert into scenarios (title, status) values ('도람푸의 역습', 'draft');

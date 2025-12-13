@@ -46,7 +46,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 대화</TooltipContent>
+					<TooltipContent>새로운 대화 생성</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger>

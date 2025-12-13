@@ -19,6 +19,10 @@
 
 	const menuItems = $derived([
 		{
+			title: '챕터',
+			href: currentScenarioId ? `/admin/scenarios/${currentScenarioId}/chapters` : undefined,
+		},
+		{
 			title: '퀘스트',
 			href: currentScenarioId ? `/admin/scenarios/${currentScenarioId}/quests` : undefined,
 		},

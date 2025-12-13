@@ -14,9 +14,9 @@ create table scenario_quests (
 create table scenario_quest_branches (
   id uuid primary key default gen_random_uuid(),
   scenario_quest_id uuid not null references scenario_quests(id) on delete cascade,
-  parent_scenario_quest_branch_id uuid references scenario_quest_branches(id) on delete cascade,
+  parent_scenario_quest_branch_id uuid references scenario_quest_branches(id) on delete set null,
   title text not null default '',
-  display_order integer not null default 0,
+  display_order_in_scenario_quest integer not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null
 );

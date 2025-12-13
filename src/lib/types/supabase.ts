@@ -670,8 +670,9 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          display_order_in_scenario: number
           id: string
-          order: number
+          parent_scenario_chapter_id: string | null
           scenario_id: string
           status: Database["public"]["Enums"]["publish_status"]
           title: string
@@ -679,8 +680,9 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          display_order_in_scenario?: number
           id?: string
-          order: number
+          parent_scenario_chapter_id?: string | null
           scenario_id: string
           status?: Database["public"]["Enums"]["publish_status"]
           title?: string
@@ -688,8 +690,9 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          display_order_in_scenario?: number
           id?: string
-          order?: number
+          parent_scenario_chapter_id?: string | null
           scenario_id?: string
           status?: Database["public"]["Enums"]["publish_status"]
           title?: string
@@ -700,6 +703,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenario_chapters_parent_scenario_chapter_id_fkey"
+            columns: ["parent_scenario_chapter_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_chapters"
             referencedColumns: ["id"]
           },
           {
@@ -715,7 +725,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          display_order: number
+          display_order_in_scenario_quest: number
           id: string
           parent_scenario_quest_branch_id: string | null
           scenario_quest_id: string
@@ -724,7 +734,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          display_order?: number
+          display_order_in_scenario_quest?: number
           id?: string
           parent_scenario_quest_branch_id?: string | null
           scenario_quest_id: string
@@ -733,7 +743,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          display_order?: number
+          display_order_in_scenario_quest?: number
           id?: string
           parent_scenario_quest_branch_id?: string | null
           scenario_quest_id?: string
@@ -825,24 +835,24 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          display_order: number
           id: string
-          order: number
           status: Database["public"]["Enums"]["publish_status"]
           title: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          display_order?: number
           id?: string
-          order: number
           status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          display_order?: number
           id?: string
-          order?: number
           status?: Database["public"]["Enums"]["publish_status"]
           title?: string
         }

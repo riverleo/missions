@@ -22,10 +22,8 @@
 	border-radius: 100%;
 }
 
-/* 커스텀 노드 공통 스타일 (XYFlow가 자동 추가하는 클래스 활용) */
-.svelte-flow__node-narrativeNode,
-.svelte-flow__node-narrativeDiceRoll,
-.svelte-flow__node-questBranch {
+/* 커스텀 노드 공통 스타일 */
+.svelte-flow__node {
 	border-radius: var(--radius-sm);
 	background-color: var(--xy-node-background-color-default);
 	border: var(--xy-node-border-default);
@@ -33,9 +31,7 @@
 	transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
 }
 
-.svelte-flow__node-narrativeNode.selected,
-.svelte-flow__node-narrativeDiceRoll.selected,
-.svelte-flow__node-questBranch.selected {
+.svelte-flow__node.selected {
 	box-shadow: var(--xy-node-boxshadow-selected-default);
 	border-color: var(--color-ring);
 }

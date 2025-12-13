@@ -1,3 +1,3 @@
 <div class="flex h-full items-center justify-center">
-	<p class="text-sm text-muted-foreground">Select a menu item from the sidebar to get started</p>
+	<p class="text-sm text-muted-foreground">hi</p>
 </div>

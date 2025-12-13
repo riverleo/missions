@@ -44,6 +44,10 @@
 	function onclickDelete(scenarioId: string) {
 		openDialog({ type: 'delete', scenarioId });
 	}
+
+	function onclickPublish(scenarioId: string) {
+		openDialog({ type: 'publish', scenarioId });
+	}
 </script>
 
 <SidebarMenu>
@@ -65,9 +69,9 @@
 							<span class="truncate font-semibold">
 								{currentScenario?.title ?? '시나리오 선택'}
 							</span>
-							{#if currentScenario?.created_by?.display_name}
+							{#if currentScenario}
 								<span class="truncate text-xs text-muted-foreground">
-									{currentScenario.created_by.display_name}
+									{currentScenario.status === 'published' ? '공개됨' : '작업중'}
 								</span>
 							{/if}
 						</div>
@@ -87,6 +91,9 @@
 						<DropdownMenuSubContent>
 							<DropdownMenuItem onclick={() => onclickUpdate(scenario.id)}>
 								수정
+							</DropdownMenuItem>
+							<DropdownMenuItem onclick={() => onclickPublish(scenario.id)}>
+								{scenario.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
 							</DropdownMenuItem>
 							<DropdownMenuItem onclick={() => onclickDelete(scenario.id)}>
 								삭제

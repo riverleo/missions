@@ -18,7 +18,9 @@
 	const { store, admin, dialogStore, closeDialog } = useScenario();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const scenarioId = $derived($dialogStore?.type === 'update' ? $dialogStore.scenarioId : undefined);
+	const scenarioId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.scenarioId : undefined
+	);
 	const currentScenario = $derived(
 		scenarioId ? $store.data?.find((s) => s.id === scenarioId) : undefined
 	);
@@ -61,19 +63,21 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>시나리오 수정하기</DialogTitle>
+			<DialogTitle>시나리오 수정</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit}>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<IconHeading class="size-4" />
-				</InputGroupAddon>
-				<InputGroupInput placeholder="제목" bind:value={title} />
-				<InputGroupAddon align="inline-end">
-					<span class="text-xs text-muted-foreground">{title.length}</span>
-				</InputGroupAddon>
-			</InputGroup>
-			<DialogFooter class="mt-4">
+		<form {onsubmit} class="space-y-6">
+			<div class="space-y-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<IconHeading class="size-4" />
+					</InputGroupAddon>
+					<InputGroupInput placeholder="제목" bind:value={title} />
+					<InputGroupAddon align="inline-end">
+						<span class="text-xs text-muted-foreground">{title.length}</span>
+					</InputGroupAddon>
+				</InputGroup>
+			</div>
+			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>

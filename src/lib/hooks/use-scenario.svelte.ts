@@ -11,6 +11,7 @@ type ScenarioDialogState =
 	| { type: 'create' }
 	| { type: 'update'; scenarioId: string }
 	| { type: 'delete'; scenarioId: string }
+	| { type: 'publish'; scenarioId: string }
 	| undefined;
 
 let instance: ReturnType<typeof createScenarioStore> | null = null;
@@ -47,7 +48,7 @@ function createScenarioStore() {
 					created_by:user_roles (*)
 				`
 				)
-				.order('order', { ascending: true });
+				.order('display_order', { ascending: true });
 
 			if (error) throw error;
 
@@ -97,10 +98,10 @@ function createScenarioStore() {
 	}
 
 	const admin = {
-		async create(input: Omit<ScenarioInsert, 'order'>) {
+		async create(input: Omit<ScenarioInsert, 'display_order'>) {
 			const { data, error } = await supabase
 				.from('scenarios')
-				.insert({ ...input, order: 0 })
+				.insert(input)
 				.select()
 				.single();
 
@@ -154,6 +155,42 @@ function createScenarioStore() {
 					// 삭제된 시나리오가 현재 선택된 시나리오인 경우 초기화
 					if (draft.currentScenarioId === scenarioId) {
 						draft.currentScenarioId = draft.data?.[0]?.id;
+					}
+				})
+			);
+		},
+
+		async publish(scenarioId: string) {
+			const { error } = await supabase
+				.from('scenarios')
+				.update({ status: 'published' })
+				.eq('id', scenarioId);
+
+			if (error) throw error;
+
+			store.update((state) =>
+				produce(state, (draft) => {
+					const scenario = draft.data?.find((s) => s.id === scenarioId);
+					if (scenario) {
+						scenario.status = 'published';
+					}
+				})
+			);
+		},
+
+		async unpublish(scenarioId: string) {
+			const { error } = await supabase
+				.from('scenarios')
+				.update({ status: 'draft' })
+				.eq('id', scenarioId);
+
+			if (error) throw error;
+
+			store.update((state) =>
+				produce(state, (draft) => {
+					const scenario = draft.data?.find((s) => s.id === scenarioId);
+					if (scenario) {
+						scenario.status = 'draft';
 					}
 				})
 			);

@@ -94,7 +94,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>{isPublished ? '초안으로 전환' : '공개'}</TooltipContent>
+					<TooltipContent>{isPublished ? '작업중으로 전환' : '공개로 전환'}</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>

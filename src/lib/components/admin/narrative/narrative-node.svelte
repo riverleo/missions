@@ -37,11 +37,17 @@
 			{#if narrativeNode.root}
 				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			<span class="flex-1 truncate">{narrativeNode.title || '제목을 입력해 주세요'}</span>
+			<span
+				class="flex-1 truncate text-sm font-medium"
+				class:text-white={narrativeNode.title}
+				class:text-neutral-500={!narrativeNode.title}
+			>
+				{narrativeNode.title || '제목 없음'}
+			</span>
 		</div>
 
 		{#if narrativeNode.description}
-			<div class="text-xs text-neutral-400 truncate">
+			<div class="truncate text-xs text-neutral-400">
 				{narrativeNode.description}
 			</div>
 		{/if}
@@ -51,18 +57,16 @@
 		<Separator class="bg-neutral-700" />
 		<div class="space-y-1">
 			{#each narrativeNodeChoices as narrativeNodeChoice}
-				<div class="relative flex items-center text-xs text-white border-b border-neutral-700 last:border-b-0 border-dashed">
+				<div
+					class="relative flex items-center border-b border-dashed border-neutral-700 text-xs text-white last:border-b-0"
+				>
 					<span
-						class="flex-1 px-3 py-2 truncate"
+						class="flex-1 truncate px-3 py-2"
 						class:text-neutral-500={!narrativeNodeChoice.title}
 					>
 						{narrativeNodeChoice.title || '내용을 입력해 주세요'}
 					</span>
-					<Handle
-						type="source"
-						position={Position.Right}
-						id={narrativeNodeChoice.id}
-					/>
+					<Handle type="source" position={Position.Right} id={narrativeNodeChoice.id} />
 				</div>
 			{/each}
 		</div>

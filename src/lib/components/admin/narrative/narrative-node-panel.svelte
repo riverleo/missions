@@ -28,6 +28,7 @@
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 	import { createNarrativeNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
+	import { tick } from 'svelte';
 
 	interface Props {
 		narrativeNode: NarrativeNode | undefined;
@@ -44,6 +45,7 @@
 	let changes = $state<NarrativeNode | undefined>(undefined);
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
 	let currentNarrativeNodeId = $state<string | undefined>(undefined);
+	let titleInputRef = $state<HTMLInputElement | null>(null);
 
 	// narrativeNode가 변경될 때마다 클론해서 로컬 상태 업데이트
 	// 단, 다른 노드로 바뀔 때만 초기화 (같은 노드의 업데이트는 무시)
@@ -52,6 +54,11 @@
 			currentNarrativeNodeId = narrativeNode.id;
 			changes = clone(narrativeNode);
 			narrativeNodeChoicesChanges = undefined;
+
+			// 패널 열릴 때 title input에 포커스
+			tick().then(() => {
+				titleInputRef?.focus();
+			});
 		}
 	});
 
@@ -129,7 +136,7 @@
 							<InputGroupAddon align="inline-start">
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
-							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
+							<InputGroupInput bind:ref={titleInputRef} bind:value={changes.title} placeholder="제목을 입력하세요" />
 						</InputGroup>
 						<InputGroup>
 							<InputGroupTextarea

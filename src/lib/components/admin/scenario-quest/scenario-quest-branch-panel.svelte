@@ -11,6 +11,7 @@
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
+	import { tick } from 'svelte';
 
 	interface Props {
 		scenarioQuestBranch: ScenarioQuestBranch | undefined;
@@ -24,11 +25,18 @@
 
 	let isUpdating = $state(false);
 	let changes = $state<ScenarioQuestBranch | undefined>(undefined);
+	let titleInputRef = $state<HTMLInputElement | null>(null);
+	let currentBranchId = $state<string | undefined>(undefined);
 
 	// 선택된 브랜치가 변경되면 클론해서 로컬 상태 업데이트
 	$effect(() => {
-		if (scenarioQuestBranch) {
+		if (scenarioQuestBranch && scenarioQuestBranch.id !== currentBranchId) {
+			currentBranchId = scenarioQuestBranch.id;
 			changes = clone(scenarioQuestBranch);
+
+			tick().then(() => {
+				titleInputRef?.focus();
+			});
 		}
 	});
 
@@ -43,7 +51,7 @@
 		admin
 			.updateScenarioQuestBranch(scenarioQuestBranchId, {
 				title: changes.title,
-				display_order: changes.display_order,
+				display_order_in_scenario_quest: changes.display_order_in_scenario_quest,
 			})
 			.then(() => {
 				// 부모 컴포넌트에 업데이트 알림
@@ -79,13 +87,13 @@
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
 
-							<InputGroupInput bind:value={changes.title} placeholder="제목을 입력하세요" />
+							<InputGroupInput bind:ref={titleInputRef} bind:value={changes.title} placeholder="제목을 입력하세요" />
 						</InputGroup>
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
 								<IconSortDescending class="size-4" />
 							</InputGroupAddon>
-							<InputGroupInput type="number" bind:value={changes.display_order} />
+							<InputGroupInput type="number" bind:value={changes.display_order_in_scenario_quest} />
 						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">

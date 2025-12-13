@@ -11,11 +11,13 @@
 	import { page } from '$app/state';
 	import { useAdmin } from '$lib/hooks/use-admin.svelte';
 	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 
 	const admin = useAdmin();
 	const { store: scenarioStore } = useScenario();
+	const { store: scenarioChapterStore } = useScenarioChapter();
 	const { store: scenarioQuestStore } = useScenarioQuest();
 	const { store: narrativeStore } = useNarrative();
 
@@ -24,6 +26,10 @@
 		if (prevSegment === 'scenarios') {
 			const scenario = $scenarioStore.data?.find((s) => s.id === id);
 			return scenario?.title;
+		}
+		if (prevSegment === 'chapters') {
+			const chapter = $scenarioChapterStore.data?.find((c) => c.id === id);
+			return chapter?.title;
 		}
 		if (prevSegment === 'quests') {
 			const quest = $scenarioQuestStore.data?.find((q) => q.id === id);
@@ -63,6 +69,7 @@
 			let label = segments[i];
 			// 라벨 매핑
 			if (segments[i] === 'scenarios') label = '시나리오';
+			else if (segments[i] === 'chapters') label = '챕터';
 			else if (segments[i] === 'quests') label = '퀘스트';
 			else if (segments[i] === 'narratives') label = '대화 또는 효과';
 			// UUID 형태의 ID는 title로 표시

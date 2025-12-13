@@ -9,14 +9,14 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario.svelte';
 
-	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
+	const { store, admin, dialogStore, closeDialog } = useScenario();
 
 	const open = $derived($dialogStore?.type === 'publish');
-	const scenarioQuestId = $derived($dialogStore?.type === 'publish' ? $dialogStore.scenarioQuestId : undefined);
-	const currentScenarioQuest = $derived(scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined);
-	const isPublished = $derived(currentScenarioQuest?.status === 'published');
+	const scenarioId = $derived($dialogStore?.type === 'publish' ? $dialogStore.scenarioId : undefined);
+	const currentScenario = $derived(scenarioId ? $store.data?.find((s) => s.id === scenarioId) : undefined);
+	const isPublished = $derived(currentScenario?.status === 'published');
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -25,9 +25,9 @@
 	}
 
 	function onclick() {
-		if (!scenarioQuestId) return;
+		if (!scenarioId) return;
 
-		const action = isPublished ? admin.unpublish(scenarioQuestId) : admin.publish(scenarioQuestId);
+		const action = isPublished ? admin.unpublish(scenarioId) : admin.publish(scenarioId);
 
 		action
 			.then(() => {
@@ -43,13 +43,13 @@
 	<AlertDialogContent>
 		<AlertDialogHeader>
 			<AlertDialogTitle>
-				{isPublished ? '퀘스트를 작업중으로 전환하시겠습니까?' : '퀘스트를 공개하시겠습니까?'}
+				{isPublished ? '시나리오를 작업중으로 전환하시겠습니까?' : '시나리오를 공개하시겠습니까?'}
 			</AlertDialogTitle>
 			<AlertDialogDescription>
 				{#if isPublished}
-					작업중으로 전환하면 플레이어들이 이 퀘스트를 플레이할 수 없게 됩니다.
+					작업중으로 전환하면 플레이어들이 이 시나리오를 플레이할 수 없게 됩니다.
 				{:else}
-					공개하면 플레이어들이 이 퀘스트를 플레이할 수 있게 됩니다.
+					공개하면 플레이어들이 이 시나리오를 플레이할 수 있게 됩니다.
 				{/if}
 			</AlertDialogDescription>
 		</AlertDialogHeader>

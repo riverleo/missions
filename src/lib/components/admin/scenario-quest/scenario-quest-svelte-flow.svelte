@@ -55,7 +55,7 @@
 			const data = node.data as { label: string; scenarioQuestBranch: ScenarioQuestBranch };
 			data.label = scenarioQuestBranch.title;
 			data.scenarioQuestBranch.title = scenarioQuestBranch.title;
-			data.scenarioQuestBranch.display_order = scenarioQuestBranch.display_order;
+			data.scenarioQuestBranch.display_order_in_scenario_quest = scenarioQuestBranch.display_order_in_scenario_quest;
 		}
 
 		// 선택 해제
@@ -183,8 +183,8 @@
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
-		// display_order로 정렬된 브랜치 사용
-		const sortedScenarioQuestBranches = sort(scenarioQuestBranches, (b) => b.display_order);
+		// display_order_in_scenario_quest로 정렬된 브랜치 사용
+		const sortedScenarioQuestBranches = sort(scenarioQuestBranches, (b) => b.display_order_in_scenario_quest);
 
 		// 노드 생성
 		sortedScenarioQuestBranches.forEach((scenarioQuestBranch) => {

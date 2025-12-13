@@ -60,16 +60,18 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 시나리오 만들기</DialogTitle>
+			<DialogTitle>새로운 시나리오 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit}>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<IconHeading class="size-4" />
-				</InputGroupAddon>
-				<InputGroupInput placeholder="제목" bind:value={title} />
-			</InputGroup>
-			<DialogFooter class="mt-4">
+		<form {onsubmit} class="space-y-6">
+			<div class="space-y-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<IconHeading class="size-4" />
+					</InputGroupAddon>
+					<InputGroupInput placeholder="제목" bind:value={title} />
+				</InputGroup>
+			</div>
+			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>

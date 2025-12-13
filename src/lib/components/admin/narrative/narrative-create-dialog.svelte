@@ -57,7 +57,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 대화 만들기</DialogTitle>
+			<DialogTitle>새로운 대화 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
 			<InputGroup>

@@ -16,6 +16,7 @@
 	import { IconDice5, IconInfoCircle } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
+	import { tick } from 'svelte';
 
 	interface Props {
 		narrativeDiceRoll: NarrativeDiceRoll | undefined;
@@ -34,13 +35,20 @@
 		narrativeDiceRoll?.failure_action ?? 'narrative_node_next'
 	);
 	let isUpdating = $state(false);
+	let difficultyInputRef = $state<HTMLInputElement | null>(null);
+	let currentNarrativeDiceRollId = $state<string | undefined>(undefined);
 
 	// 선택된 주사위 굴림이 변경되면 편집 필드 업데이트
 	$effect(() => {
-		if (narrativeDiceRoll) {
+		if (narrativeDiceRoll && narrativeDiceRoll.id !== currentNarrativeDiceRollId) {
+			currentNarrativeDiceRollId = narrativeDiceRoll.id;
 			editDifficultyClass = narrativeDiceRoll.difficulty_class;
 			editSuccessAction = narrativeDiceRoll.success_action;
 			editFailureAction = narrativeDiceRoll.failure_action;
+
+			tick().then(() => {
+				difficultyInputRef?.focus();
+			});
 		}
 	});
 
@@ -101,6 +109,7 @@
 							<IconDice5 class="h-4 w-4" />
 						</InputGroupAddon>
 						<InputGroupInput
+							bind:ref={difficultyInputRef}
 							type="number"
 							placeholder="난이도 (DC)"
 							bind:value={editDifficultyClass}

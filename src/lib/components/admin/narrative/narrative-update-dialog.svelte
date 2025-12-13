@@ -63,7 +63,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>대화 수정하기</DialogTitle>
+			<DialogTitle>대화 또는 효과 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
 			<InputGroup>

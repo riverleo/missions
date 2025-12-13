@@ -5,10 +5,9 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
-	import { page } from '$app/state';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
-	import type { ScenarioQuestBranch } from '$lib/types';
+	import type { ScenarioChapter } from '$lib/types';
 
 	interface Props {
 		onlayout?: (nodes: Node[], edges: Edge[]) => void;
@@ -16,26 +15,21 @@
 
 	let { onlayout }: Props = $props();
 
-	const { admin } = useScenarioQuest();
+	const { admin } = useScenarioChapter();
 	const flowNodes = useNodes();
-	const scenarioQuestId = $derived(page.params.scenarioQuestId);
 
 	let isCreating = $state(false);
 	let isLayouting = $state(false);
 
-	function onclickCreateScenarioQuestBranch() {
-		if (isCreating || !scenarioQuestId) return;
+	function onclickCreateScenarioChapter() {
+		if (isCreating) return;
 
 		isCreating = true;
 
 		admin
-			.createScenarioQuestBranch({
-				scenario_quest_id: scenarioQuestId,
-				title: '',
-				display_order_in_scenario_quest: 0,
-			})
+			.create({ title: '' })
 			.catch((error) => {
-				console.error('Failed to create scenario quest branch:', error);
+				console.error('Failed to create scenario chapter:', error);
 			})
 			.finally(() => {
 				isCreating = false;
@@ -53,11 +47,11 @@
 
 			// 현재 노드들로부터 엣지 추출
 			nodes.forEach((node) => {
-				const data = node.data as { scenarioQuestBranch: ScenarioQuestBranch };
-				if (data.scenarioQuestBranch.parent_scenario_quest_branch_id) {
+				const data = node.data as { scenarioChapter: ScenarioChapter };
+				if (data.scenarioChapter.parent_scenario_chapter_id) {
 					edges.push({
-						id: `${data.scenarioQuestBranch.parent_scenario_quest_branch_id}-${node.id}`,
-						source: data.scenarioQuestBranch.parent_scenario_quest_branch_id,
+						id: `${data.scenarioChapter.parent_scenario_chapter_id}-${node.id}`,
+						source: data.scenarioChapter.parent_scenario_chapter_id,
 						target: node.id,
 						deletable: true,
 					});
@@ -84,7 +78,7 @@
 				{#snippet child({ props })}
 					<Button
 						{...props}
-						onclick={onclickCreateScenarioQuestBranch}
+						onclick={onclickCreateScenarioChapter}
 						disabled={isCreating}
 						size="icon"
 						variant="outline"
@@ -93,7 +87,7 @@
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>새로운 브랜치 생성</TooltipContent>
+			<TooltipContent>새로운 챕터 생성</TooltipContent>
 		</Tooltip>
 		<Tooltip>
 			<TooltipTrigger>
