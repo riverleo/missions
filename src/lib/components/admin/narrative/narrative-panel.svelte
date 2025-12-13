@@ -10,9 +10,12 @@
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import {
+		createNarrativeNodeId,
 		createNarrativeDiceRollNodeId,
 		createNarrativeNodeToNarrativeDiceRollEdgeId,
 		createNarrativeNodeChoiceToNarrativeDiceRollEdgeId,
+		createNarrativeDiceRollToSuccessEdgeId,
+		createNarrativeDiceRollToFailureEdgeId,
 	} from '$lib/utils/flow-id';
 
 	interface Props {
@@ -66,9 +69,6 @@
 			const nodes = flowNodes.current;
 			const edges: Edge[] = [];
 
-			// 노드 ID 집합 생성 (존재 여부 확인용)
-			const nodeIds = new Set(nodes.map((n) => n.id));
-
 			// 현재 노드들로부터 엣지 추출
 			nodes.forEach((node) => {
 				// narrative_node → narrative_dice_roll 엣지
@@ -77,19 +77,20 @@
 					const narrativeNode = data.narrativeNode;
 
 					if (narrativeNode.type === 'text' && narrativeNode.narrative_dice_roll_id) {
-						// narrative_dice_roll 객체 찾기
-						const targetNarrativeDiceRollNode = nodes.find((n) => n.id.endsWith(narrativeNode.narrative_dice_roll_id));
-						if (!targetNarrativeDiceRollNode || targetNarrativeDiceRollNode.type !== 'narrativeDiceRoll') return;
-
-						const narrativeDiceRoll = (targetNarrativeDiceRollNode.data as { narrativeDiceRoll: any }).narrativeDiceRoll;
-						const targetId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
-
-						// target 노드가 실제로 존재하는지 확인
-						if (nodeIds.has(targetId)) {
+						// narrative_dice_roll 노드 찾기
+						const targetNode = nodes.find(
+							(n) =>
+								n.type === 'narrativeDiceRoll' &&
+								(n.data as { narrativeDiceRoll: any }).narrativeDiceRoll.id ===
+									narrativeNode.narrative_dice_roll_id
+						);
+						if (targetNode) {
+							const narrativeDiceRoll = (targetNode.data as { narrativeDiceRoll: any })
+								.narrativeDiceRoll;
 							edges.push({
 								id: createNarrativeNodeToNarrativeDiceRollEdgeId(narrativeNode, narrativeDiceRoll),
 								source: node.id,
-								target: targetId,
+								target: createNarrativeDiceRollNodeId(narrativeDiceRoll),
 								deletable: true,
 							});
 						}
@@ -98,22 +99,24 @@
 					if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
 						narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice: any) => {
 							if (narrativeNodeChoice.narrative_dice_roll_id) {
-								// narrative_dice_roll 객체 찾기
-								const targetNarrativeDiceRollNode = nodes.find((n) =>
-									n.id.endsWith(narrativeNodeChoice.narrative_dice_roll_id)
+								// narrative_dice_roll 노드 찾기
+								const targetNode = nodes.find(
+									(n) =>
+										n.type === 'narrativeDiceRoll' &&
+										(n.data as { narrativeDiceRoll: any }).narrativeDiceRoll.id ===
+											narrativeNodeChoice.narrative_dice_roll_id
 								);
-								if (!targetNarrativeDiceRollNode || targetNarrativeDiceRollNode.type !== 'narrativeDiceRoll') return;
-
-								const narrativeDiceRoll = (targetNarrativeDiceRollNode.data as { narrativeDiceRoll: any }).narrativeDiceRoll;
-								const targetId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
-
-								// target 노드가 실제로 존재하는지 확인
-								if (nodeIds.has(targetId)) {
+								if (targetNode) {
+									const narrativeDiceRoll = (targetNode.data as { narrativeDiceRoll: any })
+										.narrativeDiceRoll;
 									edges.push({
-										id: createNarrativeNodeChoiceToNarrativeDiceRollEdgeId(narrativeNodeChoice, narrativeDiceRoll),
+										id: createNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
+											narrativeNodeChoice,
+											narrativeDiceRoll
+										),
 										source: node.id,
 										sourceHandle: narrativeNodeChoice.id,
-										target: targetId,
+										target: createNarrativeDiceRollNodeId(narrativeDiceRoll),
 										deletable: true,
 									});
 								}
@@ -127,32 +130,48 @@
 					const data = node.data as { narrativeDiceRoll: any };
 					const narrativeDiceRoll = data.narrativeDiceRoll;
 
-					if (
-						narrativeDiceRoll.success_narrative_node_id &&
-						nodeIds.has(narrativeDiceRoll.success_narrative_node_id)
-					) {
-						edges.push({
-							id: `${node.id}-success-${narrativeDiceRoll.success_narrative_node_id}`,
-							source: node.id,
-							sourceHandle: 'success',
-							target: narrativeDiceRoll.success_narrative_node_id,
-							deletable: true,
-							style: 'stroke: #22c55e',
-						});
+					if (narrativeDiceRoll.success_narrative_node_id) {
+						// success_narrative_node를 찾아서 올바른 ID와 엣지 생성
+						const successNode = nodes.find(
+							(n) =>
+								n.type === 'narrativeNode' &&
+								(n.data as { narrativeNode: any }).narrativeNode.id ===
+									narrativeDiceRoll.success_narrative_node_id
+						);
+						if (successNode) {
+							const successNarrativeNode = (successNode.data as { narrativeNode: any })
+								.narrativeNode;
+							edges.push({
+								id: createNarrativeDiceRollToSuccessEdgeId(narrativeDiceRoll, successNarrativeNode),
+								source: node.id,
+								sourceHandle: 'success',
+								target: createNarrativeNodeId(successNarrativeNode),
+								deletable: true,
+								style: 'stroke: #22c55e',
+							});
+						}
 					}
 
-					if (
-						narrativeDiceRoll.failure_narrative_node_id &&
-						nodeIds.has(narrativeDiceRoll.failure_narrative_node_id)
-					) {
-						edges.push({
-							id: `${node.id}-failure-${narrativeDiceRoll.failure_narrative_node_id}`,
-							source: node.id,
-							sourceHandle: 'failure',
-							target: narrativeDiceRoll.failure_narrative_node_id,
-							deletable: true,
-							style: 'stroke: #ef4444',
-						});
+					if (narrativeDiceRoll.failure_narrative_node_id) {
+						// failure_narrative_node를 찾아서 올바른 ID와 엣지 생성
+						const failureNode = nodes.find(
+							(n) =>
+								n.type === 'narrativeNode' &&
+								(n.data as { narrativeNode: any }).narrativeNode.id ===
+									narrativeDiceRoll.failure_narrative_node_id
+						);
+						if (failureNode) {
+							const failureNarrativeNode = (failureNode.data as { narrativeNode: any })
+								.narrativeNode;
+							edges.push({
+								id: createNarrativeDiceRollToFailureEdgeId(narrativeDiceRoll, failureNarrativeNode),
+								source: node.id,
+								sourceHandle: 'failure',
+								target: createNarrativeNodeId(failureNarrativeNode),
+								deletable: true,
+								style: 'stroke: #ef4444',
+							});
+						}
 					}
 				}
 			});
@@ -171,7 +190,7 @@
 </script>
 
 <Panel position="top-right">
-	<ButtonGroup class="bg-background">
+	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}

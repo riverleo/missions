@@ -140,6 +140,8 @@ function createNarrativeStore() {
 					}
 				})
 			);
+
+			return data;
 		} catch (error) {
 			store.update((state) => ({
 				...state,

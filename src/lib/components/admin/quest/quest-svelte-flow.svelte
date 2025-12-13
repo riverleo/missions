@@ -7,9 +7,11 @@
 		MiniMap,
 		useNodes,
 		useNodesInitialized,
+		useSvelteFlow,
 	} from '@xyflow/svelte';
-	import type { Node, Edge, Connection } from '@xyflow/svelte';
+	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
+	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
@@ -23,9 +25,12 @@
 	const { store, admin } = useQuest();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
+	const { screenToFlowPosition } = useSvelteFlow();
 
 	// 레이아웃 적용 여부 추적
 	let layoutApplied = $state(false);
+	// 노드 생성 중 effect 건너뛰기 플래그
+	let skipConvertEffect = $state(false);
 
 	const nodeTypes = {
 		questBranch: QuestBranchNode,
@@ -133,6 +138,47 @@
 		edges = layoutedEdges;
 	}
 
+	const onconnectend: OnConnectEnd = async (event, connectionState) => {
+		// 유효한 연결이면 무시 (onconnect에서 처리)
+		if (connectionState.isValid) return;
+		if (!questId) return;
+
+		const sourceNode = connectionState.fromNode;
+		if (!sourceNode) return;
+
+		// 마우스/터치 위치를 플로우 좌표로 변환
+		const { clientX, clientY } =
+			'changedTouches' in event ? event.changedTouches[0] : event;
+		const position = screenToFlowPosition({ x: clientX, y: clientY });
+
+		// 스토어 업데이트 중 effect 건너뛰기
+		skipConvertEffect = true;
+
+		try {
+			// 새 브랜치 생성 (소스 노드를 부모로 설정)
+			const newBranch = await admin.createBranch({
+				quest_id: questId,
+				parent_quest_branch_id: sourceNode.id,
+			});
+
+			// 모든 업데이트 완료 후 노드/엣지 재생성
+			skipConvertEffect = false;
+			convertToNodesAndEdges(questBranches);
+
+			// 새 노드의 위치를 드롭 위치로 설정
+			if (newBranch) {
+				nodes = nodes.map((n) =>
+					n.id === newBranch.id ? { ...n, position } : n
+				);
+				// 레이아웃 재적용 방지
+				layoutApplied = true;
+			}
+		} catch (error) {
+			skipConvertEffect = false;
+			console.error('Failed to create branch on edge drop:', error);
+		}
+	};
+
 	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
@@ -168,6 +214,10 @@
 
 	// 데이터 변경 시 노드/엣지 생성
 	$effect(() => {
+		// 의존성 추적을 위해 여기서 접근
+		questBranches;
+
+		if (skipConvertEffect) return;
 		convertToNodesAndEdges(questBranches);
 	});
 
@@ -183,7 +233,7 @@
 	});
 </script>
 
-<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {ondelete} fitView>
+<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {onconnectend} {ondelete} fitView>
 	<Controls />
 	<Background variant={BackgroundVariant.Dots} />
 	<MiniMap />

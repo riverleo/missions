@@ -26,18 +26,17 @@
 	// 퀘스트를 챕터별로 그룹화
 	const questsByChapter = $derived(() => {
 		const quests = $store.data ?? [];
-		const grouped = group(quests, (q) => q.chapter?.id ?? 'no-chapter');
+		const grouped = group(quests, (q) => q.chapter?.id);
 
 		// 챕터 순서대로 정렬
-		const sortedEntries = sort(Object.entries(grouped), ([chapterId, quests]) => {
-			if (chapterId === 'no-chapter') return Infinity;
-			return quests?.[0]?.chapter?.order ?? 0;
+		const sortedEntries = sort(Object.entries(grouped), ([_, quests]) => {
+			if (!quests?.[0]?.chapter) return Infinity;
+			return quests[0].chapter.order ?? 0;
 		});
 
 		return sortedEntries.map(([chapterId, quests]) => ({
 			chapterId,
-			chapterTitle:
-				chapterId === 'no-chapter' ? '챕터 미지정' : (quests?.[0]?.chapter?.title ?? '알 수 없음'),
+			chapterTitle: quests?.[0]?.chapter?.title ?? '챕터 없음',
 			quests: sort(quests ?? [], (q) => q.order_in_chapter),
 		}));
 	});

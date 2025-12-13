@@ -78,7 +78,7 @@
 </script>
 
 <Panel position="top-right">
-	<ButtonGroup class="bg-background">
+	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}

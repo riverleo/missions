@@ -7,9 +7,11 @@
 		MiniMap,
 		useNodes,
 		useNodesInitialized,
+		useSvelteFlow,
 	} from '@xyflow/svelte';
-	import type { Node, Edge, Connection } from '@xyflow/svelte';
+	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
+	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
 	import NarrativeNode from './narrative-node.svelte';
@@ -42,9 +44,12 @@
 	const { store, admin } = useNarrative();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
+	const { screenToFlowPosition } = useSvelteFlow();
 
 	// 레이아웃 적용 여부 추적
 	let layoutApplied = $state(false);
+	// 노드 생성 중 effect 건너뛰기 플래그
+	let skipConvertEffect = $state(false);
 
 	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
 	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
@@ -315,6 +320,96 @@
 		}
 	}
 
+	const onconnectend: OnConnectEnd = async (event, connectionState) => {
+		// 유효한 연결이면 무시 (onconnect에서 처리)
+		if (connectionState.isValid) return;
+		if (!narrativeId) return;
+
+		const sourceNode = connectionState.fromNode;
+		if (!sourceNode) return;
+
+		// 마우스/터치 위치를 플로우 좌표로 변환
+		const { clientX, clientY } =
+			'changedTouches' in event ? event.changedTouches[0] : event;
+		const position = screenToFlowPosition({ x: clientX, y: clientY });
+
+		// 스토어 업데이트 중 effect 건너뛰기
+		skipConvertEffect = true;
+
+		try {
+			let newNodeId: string | undefined;
+
+			// narrativeNode에서 드래그 → narrativeDiceRoll 생성
+			if (sourceNode.type === 'narrativeNode') {
+				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
+				const sourceHandle = connectionState.fromHandle?.id;
+
+				// 새 주사위 굴림 생성
+				const newDiceRoll = await admin.createNarrativeDiceRoll({
+					narrative_id: narrativeId,
+				});
+				newNodeId = createNarrativeDiceRollNodeId(newDiceRoll);
+
+				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
+				if (narrativeNode.type === 'text') {
+					await admin.updateNode(narrativeNode.id, {
+						narrative_dice_roll_id: newDiceRoll.id,
+					});
+				}
+				// choice 타입: sourceHandle로 어느 choice인지 확인
+				else if (narrativeNode.type === 'choice' && sourceHandle) {
+					await admin.updateChoice(sourceHandle, {
+						narrative_dice_roll_id: newDiceRoll.id,
+					});
+				}
+			}
+			// narrativeDiceRoll에서 드래그 → narrativeNode 생성
+			else if (sourceNode.type === 'narrativeDiceRoll') {
+				const narrativeDiceRoll = sourceNode.data.narrativeDiceRoll as NarrativeDiceRoll;
+				const sourceHandle = connectionState.fromHandle?.id; // 'success' or 'failure'
+
+				if (!sourceHandle || (sourceHandle !== 'success' && sourceHandle !== 'failure')) {
+					skipConvertEffect = false;
+					return;
+				}
+
+				// 새 노드 생성
+				const newNarrativeNode = await admin.createNode({
+					narrative_id: narrativeId,
+					type: 'text',
+				});
+				newNodeId = createNarrativeNodeId(newNarrativeNode);
+
+				// 주사위 굴림의 success/failure 연결 업데이트
+				if (sourceHandle === 'success') {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRoll.id, {
+						success_narrative_node_id: newNarrativeNode.id,
+					});
+				} else {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRoll.id, {
+						failure_narrative_node_id: newNarrativeNode.id,
+					});
+				}
+			}
+
+			// 모든 업데이트 완료 후 노드/엣지 재생성
+			skipConvertEffect = false;
+			convertToNodesAndEdges();
+
+			// 새 노드의 위치를 드롭 위치로 설정
+			if (newNodeId) {
+				nodes = nodes.map((n) =>
+					n.id === newNodeId ? { ...n, position } : n
+				);
+				// 레이아웃 재적용 방지
+				layoutApplied = true;
+			}
+		} catch (error) {
+			skipConvertEffect = false;
+			console.error('Failed to create node on edge drop:', error);
+		}
+	};
+
 	async function convertToNodesAndEdges() {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
@@ -437,6 +532,11 @@
 
 	// 데이터 변경 시 노드/엣지 생성
 	$effect(() => {
+		// 의존성 추적을 위해 여기서 접근
+		narrativeNodes;
+		narrativeDiceRolls;
+
+		if (skipConvertEffect) return;
 		convertToNodesAndEdges();
 	});
 
@@ -461,6 +561,7 @@
 		{isValidConnection}
 		colorMode={mode.current}
 		{onconnect}
+		{onconnectend}
 		{ondelete}
 		fitView
 	>

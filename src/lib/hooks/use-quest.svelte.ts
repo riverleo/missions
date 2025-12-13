@@ -101,13 +101,19 @@ function createQuestStore() {
 
 	async function createBranch(branch: QuestBranchInsert, shouldRefetch = true) {
 		try {
-			const { error } = await supabase.from('quest_branches').insert(branch);
+			const { data, error } = await supabase
+				.from('quest_branches')
+				.insert(branch)
+				.select()
+				.single();
 
 			if (error) throw error;
 
 			if (shouldRefetch) {
 				await fetchQuests();
 			}
+
+			return data;
 		} catch (error) {
 			store.update((state) => ({
 				...state,
