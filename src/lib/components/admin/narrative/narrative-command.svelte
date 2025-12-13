@@ -19,7 +19,7 @@
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 
-	const { store, openUpdateDialog, openDeleteDialog } = useNarrative();
+	const { store, openDialog } = useNarrative();
 	const currentNarrativeId = $derived(page.params.narrativeId);
 </script>
 
@@ -53,10 +53,14 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openUpdateDialog(narrative.id)}>
+								<DropdownMenuItem
+									onclick={() => openDialog({ type: 'update', narrativeId: narrative.id })}
+								>
 									수정
 								</DropdownMenuItem>
-								<DropdownMenuItem onclick={() => openDeleteDialog(narrative.id)}>
+								<DropdownMenuItem
+									onclick={() => openDialog({ type: 'delete', narrativeId: narrative.id })}
+								>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

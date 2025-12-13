@@ -1,28 +1,38 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
-		DialogTrigger,
 		DialogContent,
 		DialogFooter,
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { Button } from '$lib/components/ui/button';
 	import {
 		InputGroup,
 		Input as InputGroupInput,
 		Addon as InputGroupAddon,
 	} from '$lib/components/ui/input-group';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import { IconPlus, IconHeading } from '@tabler/icons-svelte';
-	import Tooltip from '$lib/components/ui/tooltip/tooltip.svelte';
-	import { TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	const { admin } = useNarrative();
+	const { admin, dialogStore, closeDialog } = useNarrative();
 
-	let open = $state(false);
+	const open = $derived($dialogStore?.type === 'create');
+
 	let title = $state('');
 	let isSubmitting = $state(false);
+
+	$effect(() => {
+		if (open) {
+			title = '';
+		}
+	});
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeDialog();
+		}
+	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -33,8 +43,7 @@
 		admin
 			.create({ title: title.trim() })
 			.then(() => {
-				title = '';
-				open = false;
+				closeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to create narrative:', error);
@@ -45,21 +54,7 @@
 	}
 </script>
 
-<Dialog bind:open>
-	<DialogTrigger>
-		{#snippet child({ props: dialogTriggerProps })}
-			<Tooltip>
-				<TooltipTrigger>
-					{#snippet child({ props })}
-						<Button {...props} {...dialogTriggerProps} size="icon" variant="outline">
-							<IconPlus />
-						</Button>
-					{/snippet}
-				</TooltipTrigger>
-				<TooltipContent>새로운 대화</TooltipContent>
-			</Tooltip>
-		{/snippet}
-	</DialogTrigger>
+<Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
 			<DialogTitle>새로운 대화 만들기</DialogTitle>
@@ -70,9 +65,6 @@
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
 				<InputGroupInput placeholder="제목" bind:value={title} />
-				<InputGroupAddon align="inline-end">
-					<span class="text-xs text-muted-foreground">{title.length}</span>
-				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>

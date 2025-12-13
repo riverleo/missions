@@ -15,10 +15,8 @@ import { useServerPayload } from './use-server-payload.svelte';
 import { produce } from 'immer';
 
 type DialogState =
-	| {
-			type: 'update' | 'delete';
-			narrativeId: string;
-	  }
+	| { type: 'create' }
+	| { type: 'update' | 'delete'; narrativeId: string }
 	| undefined;
 
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
@@ -426,12 +424,8 @@ function createNarrativeStore() {
 		}
 	}
 
-	function openUpdateDialog(narrativeId: string) {
-		dialogStore.set({ type: 'update', narrativeId });
-	}
-
-	function openDeleteDialog(narrativeId: string) {
-		dialogStore.set({ type: 'delete', narrativeId });
+	function openDialog(state: NonNullable<DialogState>) {
+		dialogStore.set(state);
 	}
 
 	function closeDialog() {
@@ -446,8 +440,7 @@ function createNarrativeStore() {
 	return {
 		store: store as Readable<FetchState<Narrative[]>>,
 		dialogStore: dialogStore as Readable<DialogState>,
-		openUpdateDialog,
-		openDeleteDialog,
+		openDialog,
 		closeDialog,
 		admin: {
 			create,

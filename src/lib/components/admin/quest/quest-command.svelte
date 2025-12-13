@@ -20,7 +20,7 @@
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';
 
-	const { store, openUpdateDialog, openDeleteDialog } = useQuest();
+	const { store, openDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
 
 	// 퀘스트를 챕터별로 그룹화
@@ -82,10 +82,14 @@
 									{/snippet}
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
-									<DropdownMenuItem onclick={() => openUpdateDialog(quest.id)}>
+									<DropdownMenuItem
+										onclick={() => openDialog({ type: 'update', questId: quest.id })}
+									>
 										수정
 									</DropdownMenuItem>
-									<DropdownMenuItem onclick={() => openDeleteDialog(quest.id)}>
+									<DropdownMenuItem
+										onclick={() => openDialog({ type: 'delete', questId: quest.id })}
+									>
 										삭제
 									</DropdownMenuItem>
 								</DropdownMenuContent>
