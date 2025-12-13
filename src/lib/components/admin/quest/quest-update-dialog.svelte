@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { QuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -11,7 +12,10 @@
 		InputGroup,
 		Input as InputGroupInput,
 		Addon as InputGroupAddon,
+		Text as InputGroupText,
 	} from '$lib/components/ui/input-group';
+	import { ButtonGroup, Text as ButtonGroupText } from '$lib/components/ui/button-group';
+	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 
@@ -22,13 +26,21 @@
 	const currentQuest = $derived(questId ? $store.data?.find((q) => q.id === questId) : undefined);
 
 	let title = $state('');
+	let type = $state<QuestType>('primary');
+	let orderInChapter = $state(0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open && currentQuest) {
 			title = currentQuest.title;
+			type = currentQuest.type;
+			orderInChapter = currentQuest.order_in_chapter;
 		}
 	});
+
+	function getTypeLabel(questType: QuestType) {
+		return questType === 'primary' ? '메인 퀘스트' : '서브 퀘스트';
+	}
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -43,7 +55,11 @@
 		isSubmitting = true;
 
 		admin
-			.update(questId, { title: title.trim() })
+			.update(questId, {
+				title: title.trim(),
+				type,
+				order_in_chapter: orderInChapter,
+			})
 			.then(() => {
 				closeDialog();
 			})
@@ -61,7 +77,7 @@
 		<DialogHeader>
 			<DialogTitle>퀘스트 수정하기</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit}>
+		<form {onsubmit} class="space-y-4">
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
 					<IconHeading class="size-4" />
@@ -71,7 +87,30 @@
 					<span class="text-xs text-muted-foreground">{title.length}</span>
 				</InputGroupAddon>
 			</InputGroup>
-			<DialogFooter class="mt-4">
+
+			<div class="grid grid-cols-2 gap-4">
+				<ButtonGroup class="w-full">
+					<ButtonGroupText>타입</ButtonGroupText>
+					<Select type="single" bind:value={type}>
+						<SelectTrigger class="flex-1">
+							{getTypeLabel(type)}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="primary" label="메인 퀘스트">메인 퀘스트</SelectItem>
+							<SelectItem value="secondary" label="서브 퀘스트">서브 퀘스트</SelectItem>
+						</SelectContent>
+					</Select>
+				</ButtonGroup>
+
+				<InputGroup>
+					<InputGroupAddon>
+						<InputGroupText>순서</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput type="number" bind:value={orderInChapter} min={0} />
+				</InputGroup>
+			</div>
+
+			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>

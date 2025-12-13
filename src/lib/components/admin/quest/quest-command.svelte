@@ -62,7 +62,7 @@
 								<span class="text-xs text-muted-foreground">
 									{quest.type === 'primary' ? '메인 퀘스트' : '서브 퀘스트'} • {quest.status ===
 									'published'
-										? '게시됨'
+										? '공개됨'
 										: '초안'}
 								</span>
 							</div>
@@ -85,6 +85,11 @@
 										onclick={() => openDialog({ type: 'update', questId: quest.id })}
 									>
 										수정
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onclick={() => openDialog({ type: 'publish', questId: quest.id })}
+									>
+										{quest.status === 'published' ? '초안으로 전환' : '공개'}
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() => openDialog({ type: 'delete', questId: quest.id })}

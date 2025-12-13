@@ -199,6 +199,37 @@
   - Icon 접두사를 붙여서 import
   - 예: `import { IconTrash, IconPlus } from '@tabler/icons-svelte';`
 
+- **Label 사용 금지**
+  - `<Label>` 컴포넌트 대신 `InputGroupText` 또는 `ButtonGroupText` 사용
+  - `InputGroupText`, `InputGroupButton`은 반드시 `InputGroupAddon`으로 감싸서 사용
+  - `InputGroup`은 `Select`와 궁합이 안 맞으므로 `ButtonGroup` + `Select` 조합 사용
+  - 예시:
+    ```svelte
+    <!-- ❌ 나쁜 예: Label 사용 -->
+    <Label>타입</Label>
+    <Select>...</Select>
+
+    <!-- ❌ 나쁜 예: InputGroup + Select -->
+    <InputGroup>
+      <InputGroupAddon><InputGroupText>타입</InputGroupText></InputGroupAddon>
+      <Select>...</Select>
+    </InputGroup>
+
+    <!-- ✅ 좋은 예: ButtonGroup + Select -->
+    <ButtonGroup>
+      <ButtonGroupText>타입</ButtonGroupText>
+      <Select>...</Select>
+    </ButtonGroup>
+
+    <!-- ✅ 좋은 예: InputGroup + Input -->
+    <InputGroup>
+      <InputGroupAddon>
+        <InputGroupText>순서</InputGroupText>
+      </InputGroupAddon>
+      <InputGroupInput type="number" />
+    </InputGroup>
+    ```
+
 ## 패키지 매니저
 
 - **pnpm 사용** (npm, yarn 사용 금지)

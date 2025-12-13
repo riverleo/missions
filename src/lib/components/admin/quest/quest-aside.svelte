@@ -3,16 +3,26 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconEditCircle, IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
+	import {
+		IconEditCircle,
+		IconInputSearch,
+		IconPlus,
+		IconTrash,
+		IconEye,
+		IconEyeClosed,
+	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import QuestCommand from './quest-command.svelte';
 	import QuestCreateDialog from './quest-create-dialog.svelte';
 	import QuestUpdateDialog from './quest-update-dialog.svelte';
 	import QuestDeleteDialog from './quest-delete-dialog.svelte';
+	import QuestPublishDialog from './quest-publish-dialog.svelte';
 
-	const { openDialog } = useQuest();
+	const { store, openDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
+	const currentQuest = $derived($store.data?.find((q) => q.id === currentQuestId));
+	const isPublished = $derived(currentQuest?.status === 'published');
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -65,6 +75,27 @@
 					</TooltipTrigger>
 					<TooltipContent>퀘스트 수정</TooltipContent>
 				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button
+								{...props}
+								variant="outline"
+								size="icon"
+								disabled={!currentQuestId}
+								onclick={() =>
+									currentQuestId && openDialog({ type: 'publish', questId: currentQuestId })}
+							>
+								{#if isPublished}
+									<IconEyeClosed class="size-4" />
+								{:else}
+									<IconEye class="size-4" />
+								{/if}
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>{isPublished ? '초안으로 전환' : '공개'}</TooltipContent>
+				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
 		<ButtonGroup>
@@ -96,3 +127,4 @@
 <QuestCreateDialog />
 <QuestUpdateDialog />
 <QuestDeleteDialog />
+<QuestPublishDialog />

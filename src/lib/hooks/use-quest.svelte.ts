@@ -11,7 +11,7 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type DialogState =
 	| { type: 'create' }
-	| { type: 'update' | 'delete'; questId: string }
+	| { type: 'update' | 'delete' | 'publish'; questId: string }
 	| undefined;
 
 let instance: ReturnType<typeof createQuestStore> | null = null;
@@ -86,6 +86,44 @@ function createQuestStore() {
 	async function remove(id: string) {
 		try {
 			const { error } = await supabase.from('quests').delete().eq('id', id);
+
+			if (error) throw error;
+
+			await fetchQuests();
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function publish(id: string) {
+		try {
+			const { error } = await supabase
+				.from('quests')
+				.update({ status: 'published' })
+				.eq('id', id);
+
+			if (error) throw error;
+
+			await fetchQuests();
+		} catch (error) {
+			store.update((state) => ({
+				...state,
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
+			throw error;
+		}
+	}
+
+	async function unpublish(id: string) {
+		try {
+			const { error } = await supabase
+				.from('quests')
+				.update({ status: 'draft' })
+				.eq('id', id);
 
 			if (error) throw error;
 
@@ -181,6 +219,8 @@ function createQuestStore() {
 			create,
 			update,
 			remove,
+			publish,
+			unpublish,
 			createBranch,
 			updateBranch,
 			removeBranch,
