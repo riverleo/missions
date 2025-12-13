@@ -20,6 +20,7 @@
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import { toTreeMap } from '$lib/utils';
 
 	const scenarioQuestId = $derived(page.params.scenarioQuestId);
 	const { store, admin } = useScenarioQuest();
@@ -186,12 +187,24 @@
 		// display_order_in_scenario_quest로 정렬된 브랜치 사용
 		const sortedScenarioQuestBranches = sort(scenarioQuestBranches, (b) => b.display_order_in_scenario_quest);
 
+		// 트리 위치 계산
+		const treeMap = toTreeMap(
+			scenarioQuestBranches,
+			'parent_scenario_quest_branch_id',
+			'display_order_in_scenario_quest'
+		);
+
 		// 노드 생성
 		sortedScenarioQuestBranches.forEach((scenarioQuestBranch) => {
+			const treeNode = treeMap.get(scenarioQuestBranch.id);
 			newNodes.push({
 				id: scenarioQuestBranch.id,
 				type: 'scenarioQuestBranch',
-				data: { label: scenarioQuestBranch.title, scenarioQuestBranch },
+				data: {
+					label: scenarioQuestBranch.title,
+					scenarioQuestBranch,
+					position: treeNode?.toString(),
+				},
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
 			});

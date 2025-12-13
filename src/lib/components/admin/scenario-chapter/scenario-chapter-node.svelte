@@ -6,6 +6,7 @@
 		data: {
 			label: string;
 			scenarioChapter: ScenarioChapter;
+			position?: string;
 		};
 		id: string;
 	};
@@ -40,6 +41,7 @@
 			class:text-neutral-600={scenarioChapter.status === 'published'}
 			class:text-muted-foreground={scenarioChapter.status !== 'published'}
 		>
+			{#if data.position}{data.position} •{/if}
 			{scenarioChapter.status === 'published' ? '공개됨' : '작업중'}
 		</span>
 	</div>

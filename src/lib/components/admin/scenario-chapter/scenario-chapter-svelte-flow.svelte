@@ -18,6 +18,7 @@
 	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import { toTreeMap } from '$lib/utils';
 
 	const { store, admin } = useScenarioChapter();
 	const flowNodes = useNodes();
@@ -171,12 +172,24 @@
 		// display_order_in_scenario로 정렬된 챕터 사용
 		const sortedScenarioChapters = sort(scenarioChapters, (c) => c.display_order_in_scenario);
 
+		// 트리 위치 계산
+		const treeMap = toTreeMap(
+			scenarioChapters,
+			'parent_scenario_chapter_id',
+			'display_order_in_scenario'
+		);
+
 		// 노드 생성
 		sortedScenarioChapters.forEach((scenarioChapter) => {
+			const treeNode = treeMap.get(scenarioChapter.id);
 			newNodes.push({
 				id: scenarioChapter.id,
 				type: 'scenarioChapter',
-				data: { label: scenarioChapter.title, scenarioChapter },
+				data: {
+					label: scenarioChapter.title,
+					scenarioChapter,
+					position: treeNode?.toString(),
+				},
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
 			});

@@ -6,6 +6,7 @@
 		data: {
 			label: string;
 			scenarioQuestBranch: ScenarioQuestBranch;
+			position?: string;
 		};
 		id: string;
 	};
@@ -23,12 +24,17 @@
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 
-	<div
-		class="text-sm font-medium"
-		class:text-white={scenarioQuestBranch.title}
-		class:text-neutral-500={!scenarioQuestBranch.title}
-	>
-		{scenarioQuestBranch.title || `제목없음 (${scenarioQuestBranch.id.split('-')[0]})`}
+	<div class="flex flex-col gap-1">
+		<div
+			class="text-sm font-medium"
+			class:text-white={scenarioQuestBranch.title}
+			class:text-neutral-500={!scenarioQuestBranch.title}
+		>
+			{scenarioQuestBranch.title || `제목없음 (${scenarioQuestBranch.id.split('-')[0]})`}
+		</div>
+		{#if data.position}
+			<span class="text-xs text-muted-foreground">{data.position}</span>
+		{/if}
 	</div>
 
 	<!-- 우측 Handle: children 연결용 (source) -->
