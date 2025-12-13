@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Button, type ButtonProps } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
-		DialogTrigger,
 		DialogContent,
 		DialogFooter,
 		DialogHeader,
@@ -13,21 +12,19 @@
 		Input as InputGroupInput,
 		Addon as InputGroupAddon,
 	} from '$lib/components/ui/input-group';
-	import { IconEditCircle, IconHeading } from '@tabler/icons-svelte';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
-	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	let {
-		narrativeId,
-		open = $bindable(false),
-		showTrigger = true,
-		...restProps
-	}: ButtonProps & { narrativeId?: string; open?: boolean; showTrigger?: boolean } = $props();
-	const { store, admin } = useNarrative();
+	const { store, admin, dialogStore, closeDialog } = useNarrative();
 
+	const open = $derived($dialogStore?.type === 'update');
+	const narrativeId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.narrativeId : undefined
+	);
 	const currentNarrative = $derived(
 		narrativeId ? $store.data?.find((n) => n.id === narrativeId) : undefined
 	);
+
 	let title = $state('');
 	let isSubmitting = $state(false);
 
@@ -36,6 +33,12 @@
 			title = currentNarrative.title;
 		}
 	});
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeDialog();
+		}
+	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -46,7 +49,7 @@
 		admin
 			.update(narrativeId, { title: title.trim() })
 			.then(() => {
-				open = false;
+				closeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update narrative:', error);
@@ -57,24 +60,7 @@
 	}
 </script>
 
-<Dialog bind:open>
-	{#if showTrigger}
-		<DialogTrigger>
-			{#snippet child({ props: dialogTriggerProps })}
-				<Tooltip>
-					<TooltipTrigger>
-						{#snippet child({ props })}
-							<Button {...props} {...dialogTriggerProps} {...restProps}>
-								<IconEditCircle class="h-4 w-4" />
-								<span class="sr-only">Edit</span>
-							</Button>
-						{/snippet}
-					</TooltipTrigger>
-					<TooltipContent>대화 수정</TooltipContent>
-				</Tooltip>
-			{/snippet}
-		</DialogTrigger>
-	{/if}
+<Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
 			<DialogTitle>대화 수정하기</DialogTitle>

@@ -9,6 +9,13 @@ import type {
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
+type DialogState =
+	| {
+			type: 'update' | 'delete';
+			questId: string;
+	  }
+	| undefined;
+
 let instance: ReturnType<typeof createQuestStore> | null = null;
 
 function createQuestStore() {
@@ -18,6 +25,9 @@ function createQuestStore() {
 		data: undefined,
 		error: undefined,
 	});
+
+	// 다이얼로그 상태 관리
+	const dialogStore = writable<DialogState>(undefined);
 
 	let initialized = false;
 
@@ -145,6 +155,18 @@ function createQuestStore() {
 		}
 	}
 
+	function openUpdateDialog(questId: string) {
+		dialogStore.set({ type: 'update', questId });
+	}
+
+	function openDeleteDialog(questId: string) {
+		dialogStore.set({ type: 'delete', questId });
+	}
+
+	function closeDialog() {
+		dialogStore.set(undefined);
+	}
+
 	if (!initialized) {
 		initialized = true;
 		fetchQuests();
@@ -152,6 +174,10 @@ function createQuestStore() {
 
 	return {
 		store: store as Readable<FetchState<Quest[]>>,
+		dialogStore: dialogStore as Readable<DialogState>,
+		openUpdateDialog,
+		openDeleteDialog,
+		closeDialog,
 		admin: {
 			create,
 			update,

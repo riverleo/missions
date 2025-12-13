@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Button, type ButtonProps } from '$lib/components/ui/button';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -9,20 +8,20 @@
 		AlertDialogFooter,
 		AlertDialogHeader,
 		AlertDialogTitle,
-		AlertDialogTrigger,
 	} from '$lib/components/ui/alert-dialog';
-	import { IconTrash } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
 	import { goto } from '$app/navigation';
-	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	let {
-		questId,
-		open = $bindable(false),
-		showTrigger = true,
-		...restProps
-	}: ButtonProps & { questId?: string; open?: boolean; showTrigger?: boolean } = $props();
-	const { admin } = useQuest();
+	const { admin, dialogStore, closeDialog } = useQuest();
+
+	const open = $derived($dialogStore?.type === 'delete');
+	const questId = $derived($dialogStore?.type === 'delete' ? $dialogStore.questId : undefined);
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeDialog();
+		}
+	}
 
 	function onclick() {
 		if (!questId) return;
@@ -30,7 +29,7 @@
 		admin
 			.remove(questId)
 			.then(() => {
-				open = false;
+				closeDialog();
 				goto('/admin/quests');
 			})
 			.catch((error) => {
@@ -39,24 +38,7 @@
 	}
 </script>
 
-<AlertDialog bind:open>
-	{#if showTrigger}
-		<AlertDialogTrigger>
-			{#snippet child({ props: alertDialogTriggerProps })}
-				<Tooltip>
-					<TooltipTrigger>
-						{#snippet child({ props })}
-							<Button {...props} {...alertDialogTriggerProps} {...restProps}>
-								<IconTrash class="h-4 w-4" />
-								<span class="sr-only">Delete</span>
-							</Button>
-						{/snippet}
-					</TooltipTrigger>
-					<TooltipContent>퀘스트 삭제</TooltipContent>
-				</Tooltip>
-			{/snippet}
-		</AlertDialogTrigger>
-	{/if}
+<AlertDialog {open} {onOpenChange}>
 	<AlertDialogContent>
 		<AlertDialogHeader>
 			<AlertDialogTitle>퀘스트를 삭제하시겠습니까?</AlertDialogTitle>

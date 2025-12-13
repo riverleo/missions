@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Button, type ButtonProps } from '$lib/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
-		DialogTrigger,
 		DialogContent,
 		DialogFooter,
 		DialogHeader,
@@ -13,19 +12,15 @@
 		Input as InputGroupInput,
 		Addon as InputGroupAddon,
 	} from '$lib/components/ui/input-group';
-	import { IconEditCircle, IconHeading } from '@tabler/icons-svelte';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest.svelte';
-	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
-	let {
-		questId,
-		open = $bindable(false),
-		showTrigger = true,
-		...restProps
-	}: ButtonProps & { questId?: string; open?: boolean; showTrigger?: boolean } = $props();
-	const { store, admin } = useQuest();
+	const { store, admin, dialogStore, closeDialog } = useQuest();
 
+	const open = $derived($dialogStore?.type === 'update');
+	const questId = $derived($dialogStore?.type === 'update' ? $dialogStore.questId : undefined);
 	const currentQuest = $derived(questId ? $store.data?.find((q) => q.id === questId) : undefined);
+
 	let title = $state('');
 	let isSubmitting = $state(false);
 
@@ -34,6 +29,12 @@
 			title = currentQuest.title;
 		}
 	});
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeDialog();
+		}
+	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
@@ -44,7 +45,7 @@
 		admin
 			.update(questId, { title: title.trim() })
 			.then(() => {
-				open = false;
+				closeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update quest:', error);
@@ -55,24 +56,7 @@
 	}
 </script>
 
-<Dialog bind:open>
-	{#if showTrigger}
-		<DialogTrigger>
-			{#snippet child({ props: dialogTriggerProps })}
-				<Tooltip>
-					<TooltipTrigger>
-						{#snippet child({ props })}
-							<Button {...props} {...dialogTriggerProps} {...restProps}>
-								<IconEditCircle class="h-4 w-4" />
-								<span class="sr-only">Edit</span>
-							</Button>
-						{/snippet}
-					</TooltipTrigger>
-					<TooltipContent>퀘스트 수정</TooltipContent>
-				</Tooltip>
-			{/snippet}
-		</DialogTrigger>
-	{/if}
+<Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
 			<DialogTitle>퀘스트 수정하기</DialogTitle>

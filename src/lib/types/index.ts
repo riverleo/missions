@@ -92,8 +92,8 @@ export type DiceUpdate = TablesUpdate<'dices'>;
 export type NarrativeDiceRoll = Tables<'narrative_dice_rolls'>;
 export type NarrativeDiceRollInsert = TablesInsert<'narrative_dice_rolls'>;
 export type NarrativeDiceRollUpdate = TablesUpdate<'narrative_dice_rolls'>;
-export type PlayerDiceRoll = Tables<'player_dice_rolls'>;
-export type PlayerDiceRollInsert = TablesInsert<'player_dice_rolls'>;
+export type PlayerRolledDice = Tables<'player_rolled_dices'>;
+export type PlayerRolledDiceInsert = TablesInsert<'player_rolled_dices'>;
 
 // Player types
 export type Player = Tables<'players'>;

@@ -37,7 +37,7 @@ create policy "admins can delete narrative_dice_rolls"
   to authenticated
   using (is_admin());
 
-create table player_dice_rolls (
+create table player_rolled_dices (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
@@ -54,7 +54,7 @@ create table player_dice_rolls (
   created_at timestamptz not null default now()
 );
 
-create or replace function create_player_dice_roll_value()
+create or replace function create_player_rolled_dice_value()
 returns trigger as $$
 declare
   dice_faces integer;
@@ -74,21 +74,21 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger insert_player_dice_roll_value
-  before insert on player_dice_rolls
+create trigger insert_player_rolled_dice_value
+  before insert on player_rolled_dices
   for each row
-  execute function create_player_dice_roll_value();
+  execute function create_player_rolled_dice_value();
 
-alter table player_dice_rolls enable row level security;
+alter table player_rolled_dices enable row level security;
 
-create policy "players can view their own player_dice_rolls"
-  on player_dice_rolls
+create policy "players can view their own player_rolled_dices"
+  on player_rolled_dices
   for select
   to authenticated
   using (is_own_player(user_id, player_id));
 
-create policy "players can insert their own player_dice_rolls"
-  on player_dice_rolls
+create policy "players can insert their own player_rolled_dices"
+  on player_rolled_dices
   for insert
   to authenticated
   with check (is_own_player(user_id, player_id));

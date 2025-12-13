@@ -287,128 +287,6 @@ export type Database = {
           },
         ]
       }
-      player_dice_rolls: {
-        Row: {
-          created_at: string
-          dice_id: string | null
-          id: string
-          narrative_dice_roll_id: string
-          narrative_id: string
-          narrative_node_choice_id: string | null
-          narrative_node_id: string
-          player_id: string
-          player_quest_branch_id: string | null
-          player_quest_id: string | null
-          quest_branch_id: string | null
-          quest_id: string | null
-          user_id: string
-          value: number | null
-        }
-        Insert: {
-          created_at?: string
-          dice_id?: string | null
-          id?: string
-          narrative_dice_roll_id: string
-          narrative_id: string
-          narrative_node_choice_id?: string | null
-          narrative_node_id: string
-          player_id: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
-          user_id: string
-          value?: number | null
-        }
-        Update: {
-          created_at?: string
-          dice_id?: string | null
-          id?: string
-          narrative_dice_roll_id?: string
-          narrative_id?: string
-          narrative_node_choice_id?: string | null
-          narrative_node_id?: string
-          player_id?: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
-          user_id?: string
-          value?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_dice_rolls_dice_id_fkey"
-            columns: ["dice_id"]
-            isOneToOne: false
-            referencedRelation: "dices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_narrative_dice_roll_id_fkey"
-            columns: ["narrative_dice_roll_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_dice_rolls"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_narrative_id_fkey"
-            columns: ["narrative_id"]
-            isOneToOne: false
-            referencedRelation: "narratives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_narrative_node_choice_id_fkey"
-            columns: ["narrative_node_choice_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_node_choices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_narrative_node_id_fkey"
-            columns: ["narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_player_quest_branch_id_fkey"
-            columns: ["player_quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "player_quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_player_quest_id_fkey"
-            columns: ["player_quest_id"]
-            isOneToOne: false
-            referencedRelation: "player_quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_dice_rolls_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       player_quest_branches: {
         Row: {
           created_at: string
@@ -503,6 +381,128 @@ export type Database = {
           },
           {
             foreignKeyName: "player_quests_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_rolled_dices: {
+        Row: {
+          created_at: string
+          dice_id: string | null
+          id: string
+          narrative_dice_roll_id: string
+          narrative_id: string
+          narrative_node_choice_id: string | null
+          narrative_node_id: string
+          player_id: string
+          player_quest_branch_id: string | null
+          player_quest_id: string | null
+          quest_branch_id: string | null
+          quest_id: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          dice_id?: string | null
+          id?: string
+          narrative_dice_roll_id: string
+          narrative_id: string
+          narrative_node_choice_id?: string | null
+          narrative_node_id: string
+          player_id: string
+          player_quest_branch_id?: string | null
+          player_quest_id?: string | null
+          quest_branch_id?: string | null
+          quest_id?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          dice_id?: string | null
+          id?: string
+          narrative_dice_roll_id?: string
+          narrative_id?: string
+          narrative_node_choice_id?: string | null
+          narrative_node_id?: string
+          player_id?: string
+          player_quest_branch_id?: string | null
+          player_quest_id?: string | null
+          quest_branch_id?: string | null
+          quest_id?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_rolled_dices_dice_id_fkey"
+            columns: ["dice_id"]
+            isOneToOne: false
+            referencedRelation: "dices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_narrative_dice_roll_id_fkey"
+            columns: ["narrative_dice_roll_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_dice_rolls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_narrative_id_fkey"
+            columns: ["narrative_id"]
+            isOneToOne: false
+            referencedRelation: "narratives"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_narrative_node_choice_id_fkey"
+            columns: ["narrative_node_choice_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_node_choices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_narrative_node_id_fkey"
+            columns: ["narrative_node_id"]
+            isOneToOne: false
+            referencedRelation: "narrative_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_player_quest_branch_id_fkey"
+            columns: ["player_quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "player_quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_player_quest_id_fkey"
+            columns: ["player_quest_id"]
+            isOneToOne: false
+            referencedRelation: "player_quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_quest_branch_id_fkey"
+            columns: ["quest_branch_id"]
+            isOneToOne: false
+            referencedRelation: "quest_branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_rolled_dices_quest_id_fkey"
             columns: ["quest_id"]
             isOneToOne: false
             referencedRelation: "quests"
