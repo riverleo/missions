@@ -2,16 +2,29 @@
 	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
 	import { useNarrative } from '$lib/hooks/use-narrative';
-	import { bindLayerEvent } from '$lib/shortcut/store';
+	import {
+		bindStackEvent,
+		activateStack,
+		deactivateStack,
+		type StackId,
+	} from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
-	const layerId = 'dice-roll';
+	const stackId: StackId = 'dice-roll';
 
 	const { play } = useNarrative();
 	const playStore = play.store;
 
-	bindLayerEvent({
-		id: layerId,
+	$effect(() => {
+		if ($playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0) {
+			activateStack(stackId);
+		} else {
+			deactivateStack(stackId);
+		}
+	});
+
+	bindStackEvent({
+		id: stackId,
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
 			const narrativeDiceRoll = $playStore.narrativeDiceRoll;
 			if (narrativeDiceRoll === undefined || narrativeDiceRoll.difficulty_class === 0) return;
@@ -37,7 +50,7 @@
 				onclick={() => play.next()}
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"
-				data-shortcut-layer={layerId}
+				data-shortcut-stack={stackId}
 			>
 				계속 진행하기
 			</Button>
@@ -50,7 +63,7 @@
 				variant="ghost"
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"
-				data-shortcut-layer={layerId}
+				data-shortcut-stack={stackId}
 			>
 				주사위 굴리기
 			</Button>

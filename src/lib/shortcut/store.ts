@@ -1,40 +1,44 @@
-import { writable, get } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 
-export type LayerId = 'narrative' | 'dice-roll' | 'quest';
+export type StackId = 'narrative' | 'dice-roll' | 'quest';
 
-export interface LayerConfig {
+export interface StackConfig {
 	onkeyup?: (event: KeyboardEvent) => void;
 	onkeydown?: (event: KeyboardEvent) => void;
 }
 
-// 현재 활성화된 레이어
-export const currentLayerId = writable<LayerId | undefined>(undefined);
+// 스택
+const stack = writable<StackId[]>([]);
 
-// 각 레이어별 설정
-export const layers = writable<Record<LayerId, LayerConfig>>({
+// 현재 활성화된 스택 (스택의 마지막)
+export const currentStackId = derived(stack, (s) => s[s.length - 1]);
+
+// 각 스택별 설정
+export const stacks = writable<Record<StackId, StackConfig>>({
 	narrative: {},
 	'dice-roll': {},
 	quest: {},
 });
 
-// 레이어 이벤트 핸들러 등록
-export function bindLayerEvent({ id, onkeyup, onkeydown }: { id: LayerId } & LayerConfig) {
-	layers.update((layer) => ({
-		...layer,
+// 스택 이벤트 핸들러 등록
+export function bindStackEvent({ id, onkeyup, onkeydown }: { id: StackId } & StackConfig) {
+	stacks.update((s) => ({
+		...s,
 		[id]: { onkeyup, onkeydown },
 	}));
 }
 
-// 레이어 활성화
-export function activateLayer(id: LayerId) {
-	currentLayerId.set(id);
+// 스택 활성화 (이미 있으면 맨 위로 이동)
+export function activateStack(id: StackId) {
+	stack.update((s) => {
+		const filtered = s.filter((stackId) => stackId !== id);
+		return [...filtered, id];
+	});
 }
 
-// 레이어 비활성화
-export function deactivateLayer(id: LayerId) {
-	if (get(currentLayerId) !== id) return;
-
-	currentLayerId.set(undefined);
+// 스택 비활성화 (스택에서 제거)
+export function deactivateStack(id: StackId) {
+	stack.update((s) => s.filter((stackId) => stackId !== id));
 }
 
 // 단축키 취소 상태

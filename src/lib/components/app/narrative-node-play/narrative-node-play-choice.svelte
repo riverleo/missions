@@ -3,9 +3,9 @@
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import type { NarrativeNodeChoice } from '$lib/types';
-	import type { LayerId } from '$lib/shortcut/store';
+	import type { StackId } from '$lib/shortcut/store';
 
-	const layerId: LayerId = 'narrative';
+	const stackId: StackId = 'narrative';
 
 	const { play } = useNarrative();
 	const playStore = play.store;
@@ -23,7 +23,7 @@
 <button
 	data-shortcut-key={isSelected ? 'Space Enter' : undefined}
 	data-shortcut-effect="bounce"
-	data-shortcut-layer={layerId}
+	data-shortcut-stack={stackId}
 	onclick={() => play.select(narrativeNodeChoice.id)}
 	class={cn('text-2xl blur-3xl', {
 		'opacity-20': !isSelected,

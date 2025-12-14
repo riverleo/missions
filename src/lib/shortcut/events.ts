@@ -1,7 +1,7 @@
 import { getShortcut, keymap } from './keymap.js';
 import sounds from './sounds.js';
 import { get } from 'svelte/store';
-import { currentLayerId, layers, isShortcutEscaped } from './store.js';
+import { currentStackId, stacks, isShortcutEscaped } from './store.js';
 import { isEnterOrSpace, isEscape } from './utils.js';
 
 const effectTimeouts = new WeakMap<HTMLElement, NodeJS.Timeout>();
@@ -22,9 +22,9 @@ function clearAllEffects() {
 function triggerKeyUpEffect(element: HTMLElement) {
 	if (element.dataset.shortcutEffect === undefined) return;
 
-	// data-shortcut-layer 체크
-	const layerId = element.dataset.shortcutLayer;
-	if (layerId && get(currentLayerId) !== layerId) return;
+	// data-shortcut-stack 체크
+	const stackId = element.dataset.shortcutStack;
+	if (stackId && get(currentStackId) !== stackId) return;
 
 	const { shortcutEffect = 'bounce' } = element.dataset;
 
@@ -43,9 +43,9 @@ function triggerKeyUpEffect(element: HTMLElement) {
 function triggerKeyDownEffect(element: HTMLElement) {
 	if (element.dataset.shortcutEffect === undefined) return;
 
-	// data-shortcut-layer 체크
-	const layerId = element.dataset.shortcutLayer;
-	if (layerId && get(currentLayerId) !== layerId) return;
+	// data-shortcut-stack 체크
+	const stackId = element.dataset.shortcutStack;
+	if (stackId && get(currentStackId) !== stackId) return;
 
 	const { shortcutEffect = 'bounce' } = element.dataset;
 
@@ -63,13 +63,13 @@ export function onkeydown(event: KeyboardEvent) {
 		return clearAllEffects();
 	}
 
-	// 레이어 단축키 처리
-	const $currentLayerId = get(currentLayerId);
+	// 스택 단축키 처리
+	const $currentStackId = get(currentStackId);
 
-	if ($currentLayerId) {
+	if ($currentStackId) {
 		event.preventDefault();
 
-		get(layers)[$currentLayerId].onkeydown?.(event);
+		get(stacks)[$currentStackId].onkeydown?.(event);
 	}
 
 	// 포커스된 요소가 data-shortcut-effect를 가지고 있을 때
@@ -128,13 +128,13 @@ export function onkeyup(event: KeyboardEvent) {
 		if (keyList?.includes(event.code)) triggerKeyUpEffect(element);
 	});
 
-	// 레이어 단축키 처리
-	const $currentLayerId = get(currentLayerId);
+	// 스택 단축키 처리
+	const $currentStackId = get(currentStackId);
 
-	if ($currentLayerId) {
+	if ($currentStackId) {
 		event.preventDefault();
 
-		return get(layers)[$currentLayerId].onkeyup?.(event);
+		return get(stacks)[$currentStackId].onkeyup?.(event);
 	}
 
 	// 포커스된 요소가 data-shortcut-effect를 가지고 있고 스페이스바나 엔터를 떼면 active 제거 및 효과 실행

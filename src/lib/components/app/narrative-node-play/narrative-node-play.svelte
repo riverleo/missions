@@ -1,17 +1,30 @@
 <script lang="ts">
 	import { useNarrative } from '$lib/hooks/use-narrative';
-	import NarrativePlayMessage from './narrative-play-message.svelte';
-	import NarrativePlayAction from './narrative-play-action.svelte';
+	import NarrativeNodePlayMessage from './narrative-node-play-message.svelte';
+	import NarrativeNodePlayAction from './narrative-node-play-action.svelte';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
-	import { bindLayerEvent, type LayerId } from '$lib/shortcut/store';
+	import {
+		bindStackEvent,
+		activateStack,
+		deactivateStack,
+		type StackId,
+	} from '$lib/shortcut/store';
 
-	const layerId: LayerId = 'narrative';
+	const stackId: StackId = 'narrative';
 
 	const { play } = useNarrative();
 	const playStore = play.store;
 
-	bindLayerEvent({
-		id: layerId,
+	$effect(() => {
+		if ($playStore.narrativeNode) {
+			activateStack(stackId);
+		} else {
+			deactivateStack(stackId);
+		}
+	});
+
+	bindStackEvent({
+		id: stackId,
 		onkeyup: (event: KeyboardEvent) => {
 			const narrativeNode = $playStore.narrativeNode;
 			if (narrativeNode === undefined) return;
@@ -37,11 +50,12 @@
 <div
 	class="fixed top-0 right-0 bottom-0 left-0 z-0 min-h-lvh items-center justify-center bg-black/10 backdrop-blur-sm"
 	class:invisible={$playStore.narrativeNode === undefined}
+	data-shortcut-stack={stackId}
 >
 	<div class="absolute top-1/2 left-1/2 -translate-1/2">
-		<NarrativePlayMessage />
+		<NarrativeNodePlayMessage />
 	</div>
 	<div class="absolute top-1/2 left-1/2 mt-10 -translate-1/2">
-		<NarrativePlayAction />
+		<NarrativeNodePlayAction />
 	</div>
 </div>
