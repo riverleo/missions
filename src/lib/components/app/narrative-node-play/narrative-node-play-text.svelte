@@ -20,7 +20,7 @@
 				if ($playStore.narrativeNode?.type !== 'text') return;
 
 				if (isEnterOrSpace(event)) {
-					play.roll();
+					play.next();
 				}
 			},
 		});
@@ -61,13 +61,9 @@
 		data-shortcut-key="Space Enter"
 		data-shortcut-effect="bounce"
 		data-shortcut-stack={stackId}
-		onclick={() => play.roll()}
+		onclick={() => play.next()}
 	>
-		{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0}
-			주사위 굴리기
-		{:else}
-			다음
-		{/if}
+		다음
 		<Kbd>Space</Kbd>
 	</Button>
 </div>

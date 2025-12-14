@@ -11,9 +11,9 @@
 	const playStore = play.store;
 
 	$effect(() => {
-		if ($playStore.narrativeNode) {
-			return activateStack(stackId);
-		}
+		if ($playStore.narrativeNode === undefined) return;
+
+		return activateStack(stackId);
 	});
 </script>
 
@@ -23,12 +23,7 @@
 	data-shortcut-stack={stackId}
 >
 	<!-- TODO: 임시 닫기 버튼 -->
-	<button
-		class="absolute top-4 right-4 text-white text-2xl"
-		onclick={() => play.done()}
-	>
-		✕
-	</button>
+	<button class="absolute top-4 right-4 text-2xl text-white" onclick={() => play.done()}>✕</button>
 
 	<div class="absolute top-1/2 left-1/2 -translate-1/2">
 		{#if $playStore.narrativeNode?.type === 'text'}

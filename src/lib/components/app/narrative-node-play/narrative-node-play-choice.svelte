@@ -50,7 +50,7 @@
 				if (isEnterOrSpace(event)) {
 					const selectedChoice = narrativeNodeChoices[focusedIndex];
 					if (selectedChoice !== undefined) {
-						play.select(selectedChoice.id);
+						play.next(selectedChoice.id);
 					}
 				}
 			},
@@ -93,7 +93,7 @@
 			data-shortcut-key={focused ? 'Space Enter' : undefined}
 			data-shortcut-effect="bounce"
 			data-shortcut-stack={stackId}
-			onclick={() => play.select(narrativeNodeChoice.id)}
+			onclick={() => play.next(narrativeNodeChoice.id)}
 			class={cn('choice-button text-2xl blur-3xl', {
 				'opacity-20': !focused,
 			})}

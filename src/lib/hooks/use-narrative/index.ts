@@ -27,7 +27,7 @@ import {
 	updateNarrativeDiceRoll,
 	removeNarrativeDiceRoll,
 } from './narrative-dice-roll';
-import { run, roll, next, done, select } from './play';
+import { run, roll, next, done, type PlayStoreState } from './play';
 
 // Types
 type DialogState =
@@ -37,13 +37,6 @@ type DialogState =
 
 interface AdminStoreState {
 	dialog: DialogState;
-}
-
-export interface PlayStoreState {
-	narrativeNode?: NarrativeNode;
-	narrativeDiceRoll?: NarrativeDiceRoll;
-	selectedNarrativeNodeChoice?: NarrativeNodeChoice;
-	playerRolledDice?: PlayerRolledDice;
 }
 
 export type NarrativeStore = Writable<RecordFetchState<Narrative>>;
@@ -143,13 +136,6 @@ function createNarrativeStore() {
 				playStore,
 			}),
 			done: done({
-				narrativeStore,
-				narrativeNodeStore,
-				narrativeNodeChoiceStore,
-				narrativeDiceRollStore,
-				playStore,
-			}),
-			select: select({
 				narrativeStore,
 				narrativeNodeStore,
 				narrativeNodeChoiceStore,
