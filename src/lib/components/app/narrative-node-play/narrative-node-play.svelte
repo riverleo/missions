@@ -30,5 +30,7 @@
 		{/if}
 	</div>
 
-	<NarrativeNodePlayDiceRoll />
+	{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0}
+		<NarrativeNodePlayDiceRoll />
+	{/if}
 </div>

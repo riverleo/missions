@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindStackEvent, activateStack, type StackId } from '$lib/shortcut/store';
@@ -10,61 +9,52 @@
 	const { play } = useNarrative();
 	const playStore = play.store;
 
-	$effect(() => {
-		if ($playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0) {
-			return activateStack(stackId);
-		}
-	});
+	$effect(() => activateStack(stackId));
 
-	$effect(() => {
-		return bindStackEvent({
+	$effect(() =>
+		bindStackEvent({
 			id: stackId,
-			onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
-				const { narrativeDiceRoll, playerRolledDice } = $playStore;
-				if (narrativeDiceRoll === undefined || narrativeDiceRoll.difficulty_class === 0) return;
+			onkeyup: (event: KeyboardEvent) => {
+				if (!isEnterOrSpace(event)) return;
 
-				if (isEnterOrSpace(event)) {
-					if (playerRolledDice !== undefined) play.next();
-					else play.roll();
-				}
-			}),
-		});
-	});
+				if ($playStore.playerRolledDice !== undefined) play.next();
+				else play.roll();
+			},
+		})
+	);
 </script>
 
-{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class !== 0}
-	<div
-		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
-	>
-		{#if $playStore.playerRolledDice !== undefined}
-			<!-- 결과 표시 -->
-			<div class="text-8xl font-bold">{$playStore.playerRolledDice.value}</div>
-			<div>최소 눈금: {$playStore.narrativeDiceRoll.difficulty_class}</div>
+<div
+	class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
+>
+	{#if $playStore.playerRolledDice !== undefined}
+		<!-- 결과 표시 -->
+		<div class="text-8xl font-bold">{$playStore.playerRolledDice.value}</div>
+		<div>최소 눈금: {$playStore.narrativeDiceRoll?.difficulty_class}</div>
 
-			<Button
-				onclick={() => play.next()}
-				data-shortcut-key="Space Enter"
-				data-shortcut-effect="bounce"
-				data-shortcut-stack={stackId}
-			>
-				계속 진행하기
-			</Button>
-		{:else}
-			<!-- 주사위 애니메이션 -->
-			<div class="dice-sprite"></div>
+		<Button
+			onclick={() => play.next()}
+			data-shortcut-key="Space Enter"
+			data-shortcut-effect="bounce"
+			data-shortcut-stack={stackId}
+		>
+			계속 진행하기
+		</Button>
+	{:else}
+		<!-- 주사위 애니메이션 -->
+		<div class="dice-sprite"></div>
 
-			<Button
-				onclick={() => play.roll()}
-				variant="ghost"
-				data-shortcut-key="Space Enter"
-				data-shortcut-effect="bounce"
-				data-shortcut-stack={stackId}
-			>
-				주사위 굴리기
-			</Button>
-		{/if}
-	</div>
-{/if}
+		<Button
+			onclick={() => play.roll()}
+			variant="ghost"
+			data-shortcut-key="Space Enter"
+			data-shortcut-effect="bounce"
+			data-shortcut-stack={stackId}
+		>
+			주사위 굴리기
+		</Button>
+	{/if}
+</div>
 
 <style>
 	.dice-sprite {
