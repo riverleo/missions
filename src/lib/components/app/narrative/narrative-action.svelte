@@ -1,45 +1,37 @@
 <script lang="ts">
-	import { currentNarrativeNode, messageComplete, narrativeActionHeight } from './store';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
-	import { open } from '$lib/components/app/dice-roll/store';
 	import NarrativeChoice from './narrative-choice.svelte';
 	import type { LayerId } from '$lib/shortcut/store';
 
 	const layerId: LayerId = 'narrative';
 
-	let element = $state<HTMLDivElement | undefined>();
-
-	$effect(() => {
-		if ($messageComplete && element) {
-			$narrativeActionHeight = element.offsetHeight;
-		}
-	});
+	const { play } = useNarrative();
+	const playStore = play.store;
 </script>
 
-{#if $messageComplete}
-	{#if $currentNarrativeNode?.type === 'choice'}
-		<div bind:this={element} class="flex flex-col items-center gap-3 px-8">
-			{#each $currentNarrativeNode?.choices as narrativeChoice, index (narrativeChoice.id)}
-				<NarrativeChoice {narrativeChoice} {index} />
-			{/each}
-		</div>
-	{:else if $currentNarrativeNode?.type === 'text'}
-		<div bind:this={element} class="flex flex-col items-center gap-8 px-8">
-			<Button
-				variant="ghost"
-				data-shortcut-key="Space Enter"
-				data-shortcut-effect="bounce"
-				data-shortcut-layer={layerId}
-				onclick={() => open($currentNarrativeNode.diceRoll)}
-			>
-				{#if $currentNarrativeNode.diceRoll.difficultyClass > 0}
-					주사위 굴리기
-				{:else}
-					다음
-				{/if}
-				<Kbd>Space</Kbd>
-			</Button>
-		</div>
-	{/if}
+{#if $playStore.narrativeNode?.type === 'choice'}
+	<div class="flex flex-col items-center gap-3 px-8">
+		{#each $playStore.narrativeNode.narrative_node_choices ?? [] as narrativeNodeChoice, index (narrativeNodeChoice.id)}
+			<NarrativeChoice {narrativeNodeChoice} {index} />
+		{/each}
+	</div>
+{:else if $playStore.narrativeNode?.type === 'text'}
+	<div class="flex flex-col items-center gap-8 px-8">
+		<Button
+			variant="ghost"
+			data-shortcut-key="Space Enter"
+			data-shortcut-effect="bounce"
+			data-shortcut-layer={layerId}
+			onclick={() => play.roll()}
+		>
+			{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0}
+				주사위 굴리기
+			{:else}
+				다음
+			{/if}
+			<Kbd>Space</Kbd>
+		</Button>
+	</div>
 {/if}

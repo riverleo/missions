@@ -15,11 +15,11 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 
-	const { store, openDialog } = useNarrative();
+	const { store, admin } = useNarrative();
 	const currentNarrativeId = $derived(page.params.narrativeId);
 </script>
 
@@ -37,7 +37,9 @@
 								narrative.id === currentNarrativeId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
-						<span class="flex-1 truncate">{narrative.title || `제목없음 (${narrative.id.split('-')[0]})`}</span>
+						<span class="flex-1 truncate">
+							{narrative.title || `제목없음 (${narrative.id.split('-')[0]})`}
+						</span>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}
@@ -54,12 +56,12 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'update', narrativeId: narrative.id })}
+									onclick={() => admin.openDialog({ type: 'update', narrativeId: narrative.id })}
 								>
 									수정
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', narrativeId: narrative.id })}
+									onclick={() => admin.openDialog({ type: 'delete', narrativeId: narrative.id })}
 								>
 									삭제
 								</DropdownMenuItem>

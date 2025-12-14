@@ -13,7 +13,7 @@
 	import { useScenario } from '$lib/hooks/use-scenario.svelte';
 	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 
 	const admin = useAdmin();
 	const { store: scenarioStore } = useScenario();
@@ -116,9 +116,4 @@
 			{/each}
 		</BreadcrumbList>
 	</Breadcrumb>
-	<div class="ml-auto">
-		{#if admin.siteHeaderActions}
-			{@render admin.siteHeaderActions()}
-		{/if}
-	</div>
 </header>

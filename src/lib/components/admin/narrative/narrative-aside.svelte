@@ -5,13 +5,13 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEditCircle, IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeCommand from './narrative-command.svelte';
 	import NarrativeCreateDialog from './narrative-create-dialog.svelte';
 	import NarrativeUpdateDialog from './narrative-update-dialog.svelte';
 	import NarrativeDeleteDialog from './narrative-delete-dialog.svelte';
 
-	const { openDialog } = useNarrative();
+	const { admin } = useNarrative();
 	const currentNarrativeId = $derived(page.params.narrativeId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -40,7 +40,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => admin.openDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -58,7 +58,7 @@
 								disabled={!currentNarrativeId}
 								onclick={() =>
 									currentNarrativeId &&
-									openDialog({ type: 'update', narrativeId: currentNarrativeId })}
+									admin.openDialog({ type: 'update', narrativeId: currentNarrativeId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +79,7 @@
 							disabled={!currentNarrativeId}
 							onclick={() =>
 								currentNarrativeId &&
-								openDialog({ type: 'delete', narrativeId: currentNarrativeId })}
+								admin.openDialog({ type: 'delete', narrativeId: currentNarrativeId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

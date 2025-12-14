@@ -24,7 +24,7 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { IconCircleDashedNumber1, IconHeading } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 	import { createNarrativeNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
@@ -36,7 +36,7 @@
 
 	let { narrativeNode }: Props = $props();
 
-	const { admin, store } = useNarrative();
+	const { admin, store, play } = useNarrative();
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
 
@@ -124,6 +124,12 @@
 		// 선택 해제
 		flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 	}
+
+	function onclickPlay() {
+		if (!narrativeNode) return;
+
+		play.open(narrativeNode.id);
+	}
 </script>
 
 <Panel position="top-right">
@@ -136,7 +142,11 @@
 							<InputGroupAddon align="inline-start">
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
-							<InputGroupInput bind:ref={titleInputRef} bind:value={changes.title} placeholder="제목을 입력하세요" />
+							<InputGroupInput
+								bind:ref={titleInputRef}
+								bind:value={changes.title}
+								placeholder="제목을 입력하세요"
+							/>
 						</InputGroup>
 						<InputGroup>
 							<InputGroupTextarea
@@ -205,13 +215,16 @@
 					{/if}
 				{/if}
 
-				<div class="flex justify-end gap-2">
-					<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
-						취소
-					</Button>
-					<Button type="submit" disabled={isUpdating}>
-						{isUpdating ? '저장 중...' : '저장'}
-					</Button>
+				<div class="flex justify-between">
+					<Button type="button" variant="outline" onclick={onclickPlay}>플레이</Button>
+					<div class="flex gap-2">
+						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
+							취소
+						</Button>
+						<Button type="submit" disabled={isUpdating}>
+							{isUpdating ? '저장 중...' : '저장'}
+						</Button>
+					</div>
 				</div>
 			</form>
 		</CardContent>

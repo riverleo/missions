@@ -6,7 +6,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import {

@@ -9,19 +9,20 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { goto } from '$app/navigation';
 
-	const { admin, dialogStore, closeDialog } = useNarrative();
+	const { admin } = useNarrative();
+	const { store } = admin;
 
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($store.dialog?.type === 'delete');
 	const narrativeId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.narrativeId : undefined
+		$store.dialog?.type === 'delete' ? $store.dialog.narrativeId : undefined
 	);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			admin.closeDialog();
 		}
 	}
 
@@ -31,7 +32,7 @@
 		admin
 			.remove(narrativeId)
 			.then(() => {
-				closeDialog();
+				admin.closeDialog();
 				goto('/admin/narratives');
 			})
 			.catch((error) => {

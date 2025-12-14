@@ -26,8 +26,10 @@ export interface BulkChanges<T> {
 	deleted: string[];
 }
 
+export type Supabase = SupabaseClient<Database>;
+
 export interface ServerPayload {
-	supabase: SupabaseClient;
+	supabase: Supabase;
 	user: User | undefined;
 }
 

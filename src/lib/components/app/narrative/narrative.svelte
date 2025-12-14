@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { throttle } from 'radash';
-	import {
-		currentNarrativeNode,
-		focusedNarrativeNodeChoice,
-		messageComplete,
-		narrativeActionHeight,
-	} from './store';
-	import { open } from '$lib/components/app/dice-roll/store';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import Message from './narrative-message.svelte';
 	import NarrativeAction from './narrative-action.svelte';
 	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
@@ -14,56 +8,57 @@
 
 	const layerId: LayerId = 'narrative';
 
-	// Calculate transform values
-	const messageTranslateY = $derived(
-		$messageComplete && $currentNarrativeNode?.type === 'choice' ? -$narrativeActionHeight / 2 : 0
-	);
-
-	const actionTranslateY = $derived(
-		$messageComplete && $currentNarrativeNode?.type === 'choice' ? $narrativeActionHeight / 2 : 0
-	);
+	const { play } = useNarrative();
+	const playStore = play.store;
 
 	bindLayerEvent({
 		id: layerId,
 		onkeyup: (event: KeyboardEvent) => {
-			if ($currentNarrativeNode === undefined) return;
+			const currentNarrativeNode = $playStore.narrativeNode;
+			if (currentNarrativeNode === undefined) return;
 
-			const { type } = $currentNarrativeNode;
+			const { type } = currentNarrativeNode;
 
 			if (isEnterOrSpace(event)) {
 				switch (type) {
 					case 'text':
-						open($currentNarrativeNode.diceRoll);
+						play.roll();
 						break;
 					case 'choice':
 						// Enter or Space to select highlighted choice
-						if ($focusedNarrativeNodeChoice !== undefined)
-							open($focusedNarrativeNodeChoice.diceRoll);
+						if ($playStore.selectedNarrativeNodeChoice !== undefined) {
+							play.select($playStore.selectedNarrativeNodeChoice);
+						}
 						break;
 				}
 			}
 		},
 		onkeydown: throttle({ interval: 100 }, (event: KeyboardEvent) => {
-			if ($currentNarrativeNode === undefined) return;
+			const currentNarrativeNode = $playStore.narrativeNode;
 
-			const { type } = $currentNarrativeNode;
+			if (currentNarrativeNode === undefined) return;
+
+			const { type } = currentNarrativeNode;
 
 			if (type !== 'choice') return;
 
-			const choices = $currentNarrativeNode.choices;
+			const narrativeNodeChoices = currentNarrativeNode.narrative_node_choices ?? [];
 
-			if (isArrowUpOrDown(event) && $focusedNarrativeNodeChoice === undefined) {
-				$focusedNarrativeNodeChoice = choices[0];
+			if (isArrowUpOrDown(event) && $playStore.selectedNarrativeNodeChoice === undefined) {
+				play.highlight(narrativeNodeChoices[0]);
 			} else if (isArrowDown(event)) {
-				const currentIndex = choices.findIndex((c) => c.id === $focusedNarrativeNodeChoice?.id);
-				const nextIndex = (currentIndex + 1) % choices.length;
-
-				$focusedNarrativeNodeChoice = choices[nextIndex];
+				const currentIndex = narrativeNodeChoices.findIndex(
+					(c) => c.id === $playStore.selectedNarrativeNodeChoice?.id
+				);
+				const nextIndex = (currentIndex + 1) % narrativeNodeChoices.length;
+				play.highlight(narrativeNodeChoices[nextIndex]);
 			} else if (isArrowUp(event)) {
-				const currentIndex = choices.findIndex((c) => c.id === $focusedNarrativeNodeChoice?.id);
-				const prevIndex = (currentIndex - 1 + choices.length) % choices.length;
-
-				$focusedNarrativeNodeChoice = choices[prevIndex];
+				const currentIndex = narrativeNodeChoices.findIndex(
+					(c) => c.id === $playStore.selectedNarrativeNodeChoice?.id
+				);
+				const prevIndex =
+					(currentIndex - 1 + narrativeNodeChoices.length) % narrativeNodeChoices.length;
+				play.highlight(narrativeNodeChoices[prevIndex]);
 			}
 		}),
 	});
@@ -71,18 +66,12 @@
 
 <div
 	class="fixed top-0 right-0 bottom-0 left-0 z-0 min-h-lvh items-center justify-center bg-black/10 backdrop-blur-sm"
-	class:invisible={$currentNarrativeNode === undefined}
+	class:invisible={$playStore.narrativeNode === undefined}
 >
-	<div
-		class="absolute top-1/2 left-1/2 -translate-1/2 transition-transform duration-800"
-		style="transform: translateY(calc(-50% + {messageTranslateY}px));"
-	>
+	<div class="absolute top-1/2 left-1/2 -translate-1/2">
 		<Message />
 	</div>
-	<div
-		class="absolute top-1/2 left-1/2 mt-10 -translate-1/2 transition-transform duration-800"
-		style="transform: translateY(calc(-50% + {actionTranslateY}px));"
-	>
+	<div class="absolute top-1/2 left-1/2 mt-10 -translate-1/2">
 		<NarrativeAction />
 	</div>
 </div>

@@ -9,11 +9,12 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 
-	const { admin, dialogStore, closeDialog } = useNarrative();
+	const { admin } = useNarrative();
+	const { store } = admin;
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($store.dialog?.type === 'create');
 
 	let title = $state('');
 	let isSubmitting = $state(false);
@@ -26,7 +27,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			admin.closeDialog();
 		}
 	}
 
@@ -39,7 +40,7 @@
 		admin
 			.create({ title: title.trim() })
 			.then(() => {
-				closeDialog();
+				admin.closeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to create narrative:', error);

@@ -1,37 +1,40 @@
 <script lang="ts">
 	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
-	import { current, diceRolled, roll } from './store';
-	import { next } from '$lib/components/app/narrative/store';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindLayerEvent } from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
 	const layerId = 'dice-roll';
 
+	const { play } = useNarrative();
+	const playStore = play.store;
+
 	bindLayerEvent({
 		id: layerId,
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
-			if ($current === undefined || $current.difficultyClass === 0) return;
+			const diceRoll = $playStore.narrativeDiceRoll;
+			if (diceRoll === undefined || diceRoll.difficulty_class === 0) return;
 
 			if (isEnterOrSpace(event)) {
-				if ($diceRolled) next();
-				else roll();
+				if ($playStore.playerRolledDice !== undefined) play.next();
+				else play.roll();
 			}
 		}),
 	});
 </script>
 
-{#if $current && $current.difficultyClass !== 0}
+{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class !== 0}
 	<div
 		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
 	>
-		{#if $diceRolled}
+		{#if $playStore.playerRolledDice !== undefined}
 			<!-- 결과 표시 -->
-			<div class="text-8xl font-bold">{$diceRolled.value}</div>
-			<div>최소 눈금: {$diceRolled.diceRoll.difficultyClass}</div>
+			<div class="text-8xl font-bold">{$playStore.playerRolledDice}</div>
+			<div>최소 눈금: {$playStore.narrativeDiceRoll.difficulty_class}</div>
 
 			<Button
-				onclick={() => next()}
+				onclick={() => play.next()}
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"
 				data-shortcut-layer={layerId}
@@ -43,7 +46,7 @@
 			<div class="dice-sprite"></div>
 
 			<Button
-				onclick={roll}
+				onclick={() => play.roll()}
 				variant="ghost"
 				data-shortcut-key="Space Enter"
 				data-shortcut-effect="bounce"

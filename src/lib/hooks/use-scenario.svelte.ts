@@ -102,7 +102,7 @@ function createScenarioStore() {
 			const { data, error } = await supabase
 				.from('scenarios')
 				.insert(input)
-				.select()
+				.select('*, created_by:user_roles (*)')
 				.single();
 
 			if (error) throw error;
@@ -125,7 +125,7 @@ function createScenarioStore() {
 				.from('scenarios')
 				.update(input)
 				.eq('id', scenarioId)
-				.select()
+				.select('*, created_by:user_roles (*)')
 				.single();
 
 			if (error) throw error;

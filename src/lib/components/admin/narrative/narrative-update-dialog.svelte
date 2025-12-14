@@ -9,16 +9,17 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 
-	const { store, admin, dialogStore, closeDialog } = useNarrative();
+	const { store: narrativeStore, admin } = useNarrative();
+	const { store } = admin;
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($store.dialog?.type === 'update');
 	const narrativeId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.narrativeId : undefined
+		$store.dialog?.type === 'update' ? $store.dialog.narrativeId : undefined
 	);
 	const currentNarrative = $derived(
-		narrativeId ? $store.data?.find((n) => n.id === narrativeId) : undefined
+		narrativeId ? $narrativeStore.data?.find((n) => n.id === narrativeId) : undefined
 	);
 
 	let title = $state('');
@@ -32,7 +33,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			admin.closeDialog();
 		}
 	}
 
@@ -45,7 +46,7 @@
 		admin
 			.update(narrativeId, { title: title.trim() })
 			.then(() => {
-				closeDialog();
+				admin.closeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update narrative:', error);

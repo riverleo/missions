@@ -1,28 +1,14 @@
 <script lang="ts">
-	import { currentNarrativeNode, messageComplete } from './store';
+	import { useNarrative } from '$lib/hooks/use-narrative';
+
+	const { play } = useNarrative();
+	const playStore = play.store;
 
 	// 텍스트를 문자 배열로 변환 (공백 포함)
-	const messageCharacters = $derived($currentNarrativeNode?.message.split(''));
-
-	// 타이핑 애니메이션 완료 시간 계산
-	const typingDuration = $derived(() => {
-		const charCount = messageCharacters?.length || 0;
-		return charCount * 15 + 200; // delay per char + animation duration
-	});
-
-	// 타이핑 완료 타이머 (완료 후 300ms 추가 대기)
-	$effect(() => {
-		if ($currentNarrativeNode) {
-			const timer = setTimeout(() => {
-				$messageComplete = true;
-			}, typingDuration() + 300);
-
-			return () => clearTimeout(timer);
-		}
-	});
+	const messageCharacters = $derived($playStore.narrativeNode?.title.split(''));
 </script>
 
-{#key $currentNarrativeNode?.message}
+{#key $playStore.narrativeNode?.title}
 	<div class="relative text-white">
 		<div
 			class="background absolute top-4 left-0 -z-10 h-full w-full rounded-[40%] bg-black px-8 py-4 blur-lg"
@@ -39,9 +25,11 @@
 					{/if}
 				{/each}
 			</p>
-			{#if $currentNarrativeNode?.description}
+			{#if $playStore.narrativeNode?.description}
 				<p class="description inline-flex flex-wrap justify-center">
-					<span class="text-lg font-light opacity-60">{$currentNarrativeNode.description}</span>
+					<span class="text-lg font-light opacity-60">
+						{$playStore.narrativeNode.description}
+					</span>
 				</p>
 			{/if}
 		</div>

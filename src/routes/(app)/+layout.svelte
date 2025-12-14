@@ -4,7 +4,6 @@
 	import { NewQuest } from '$lib/components/app/quest';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
-	import Narrative from '$lib/components/app/narrative/narrative.svelte';
 
 	injectSpeedInsights();
 	injectAnalytics();
@@ -21,4 +20,3 @@
 </AppSidebar>
 
 <NewQuest />
-<Narrative />

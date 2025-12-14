@@ -13,7 +13,7 @@
 	import { mode } from 'mode-watcher';
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
-	import { useNarrative } from '$lib/hooks/use-narrative.svelte';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNode from './narrative-node.svelte';
 	import NarrativeDiceRollNode from './narrative-dice-roll-node.svelte';
 	import NarrativePanel from './narrative-panel.svelte';
@@ -329,8 +329,7 @@
 		if (!sourceNode) return;
 
 		// 마우스/터치 위치를 플로우 좌표로 변환
-		const { clientX, clientY } =
-			'changedTouches' in event ? event.changedTouches[0] : event;
+		const { clientX, clientY } = 'changedTouches' in event ? event.changedTouches[0] : event;
 		const position = screenToFlowPosition({ x: clientX, y: clientY });
 
 		// 스토어 업데이트 중 effect 건너뛰기
@@ -398,9 +397,7 @@
 
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newNodeId) {
-				nodes = nodes.map((n) =>
-					n.id === newNodeId ? { ...n, position } : n
-				);
+				nodes = nodes.map((n) => (n.id === newNodeId ? { ...n, position } : n));
 				// 레이아웃 재적용 방지
 				layoutApplied = true;
 			}
