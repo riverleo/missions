@@ -7,6 +7,8 @@ import type {
 	NarrativeNodeChoiceStore,
 	PlayStore,
 } from '.';
+import { useCurrentUser } from '../use-current-user';
+import { useServerPayload } from '../use-server-payload.svelte';
 
 interface Params {
 	narrativeStore: NarrativeStore;
@@ -31,10 +33,46 @@ export const run =
 	};
 
 export const roll =
-	({ narrativeDiceRollStore, playStore }: Params) =>
-	(): PlayerRolledDice | undefined => {
-		// TODO: implement
-		return undefined;
+	({ playStore }: Params) =>
+	async (): Promise<PlayerRolledDice | undefined> => {
+		const { supabase } = useServerPayload();
+		const { store: currentUserStore } = useCurrentUser();
+
+		const currentUser = get(currentUserStore);
+		const playState = get(playStore);
+
+		const userId = currentUser.data?.user?.id;
+		const playerId = currentUser.data?.currentPlayer?.id;
+		const narrativeNode = playState.narrativeNode;
+		const narrativeDiceRoll = playState.narrativeDiceRoll;
+
+		if (!userId || !playerId || !narrativeNode || !narrativeDiceRoll) {
+			return undefined;
+		}
+
+		const { data, error } = await supabase
+			.from('player_rolled_dices')
+			.insert({
+				user_id: userId,
+				player_id: playerId,
+				narrative_id: narrativeNode.narrative_id,
+				narrative_node_id: narrativeNode.id,
+				narrative_dice_roll_id: narrativeDiceRoll.id,
+			})
+			.select()
+			.single();
+
+		if (error) {
+			console.error('Failed to roll dice:', error);
+			return undefined;
+		}
+
+		playStore.update((state) => ({
+			...state,
+			playerRolledDice: data,
+		}));
+
+		return data;
 	};
 
 export const next =

@@ -45,7 +45,7 @@
 	>
 		{#if $playStore.playerRolledDice !== undefined}
 			<!-- 결과 표시 -->
-			<div class="text-8xl font-bold">{$playStore.playerRolledDice}</div>
+			<div class="text-8xl font-bold">{$playStore.playerRolledDice.value}</div>
 			<div>최소 눈금: {$playStore.narrativeDiceRoll.difficulty_class}</div>
 
 			<Button

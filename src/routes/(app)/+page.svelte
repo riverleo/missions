@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { useCurrentUser } from '$lib/hooks/use-current-user';
+	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
-	const { data } = $props();
-
-	const currentUser = useCurrentUser(data);
+	const { supabase } = useServerPayload();
+	const { store: currentUser, createPlayer } = useCurrentUser();
 
 	let isCreatingAnonymousUser = $state(false);
 
 	async function createAnonymousUser() {
 		isCreatingAnonymousUser = true;
 		try {
-			const { error } = await data.supabase.auth.signInAnonymously();
+			const { error } = await supabase.auth.signInAnonymously();
 			if (error) throw error;
+
+			// 플레이어 생성
+			await createPlayer({ name: '모험가' });
 
 			// 페이지 새로고침하여 새 유저 정보 로드
 			window.location.reload();

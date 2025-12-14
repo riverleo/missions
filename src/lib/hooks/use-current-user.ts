@@ -1,13 +1,20 @@
-import { writable, type Readable } from 'svelte/store';
-import type { FetchState, ServerPayload, UserRole } from '$lib/types';
+import { writable, get, type Readable } from 'svelte/store';
+import { produce } from 'immer';
+import type { FetchState, Player, PlayerInsert, UserRole } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
+import { useServerPayload } from './use-server-payload.svelte';
 
 export interface UserState {
 	user?: User;
 	role?: UserRole;
+	players: Player[];
+	currentPlayer?: Player;
 }
 
-export function useCurrentUser({ supabase, user: serverUser }: ServerPayload) {
+let instance: ReturnType<typeof createCurrentUserStore> | undefined = undefined;
+
+function createCurrentUserStore() {
+	const { supabase, user: serverUser } = useServerPayload();
 	const store = writable<FetchState<UserState>>({ status: 'idle' });
 
 	let initialized = false;
@@ -41,24 +48,29 @@ export function useCurrentUser({ supabase, user: serverUser }: ServerPayload) {
 					data: {
 						user: undefined,
 						role: undefined,
+						players: [],
+						currentPlayer: undefined,
 					},
 					error: undefined,
 				});
 				return;
 			}
 
-			// user_roles 정보 가져오기 (전체 row)
-			const { data: role } = await supabase
-				.from('user_roles')
-				.select('*')
-				.eq('user_id', user.id)
-				.maybeSingle();
+			// user_roles와 players 정보 가져오기
+			const [{ data: role }, { data: players }] = await Promise.all([
+				supabase.from('user_roles').select('*').eq('user_id', user.id).maybeSingle(),
+				supabase.from('players').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
+			]);
+
+			const playerList = players ?? [];
 
 			store.set({
 				status: 'success',
 				data: {
 					user: user,
 					role: role ?? undefined,
+					players: playerList,
+					currentPlayer: playerList[0],
 				},
 				error: undefined,
 			});
@@ -71,8 +83,59 @@ export function useCurrentUser({ supabase, user: serverUser }: ServerPayload) {
 		}
 	}
 
+	async function createPlayer(player: Omit<PlayerInsert, 'user_id'>) {
+		const currentState = get(store);
+		const userId = currentState.data?.user?.id;
+		if (!userId) throw new Error('User not found');
+
+		const { data, error } = await supabase
+			.from('players')
+			.insert({ ...player, user_id: userId })
+			.select()
+			.single();
+
+		if (error) throw error;
+
+		store.update((state) =>
+			produce(state, (draft) => {
+				if (draft.data) {
+					draft.data.players.push(data);
+					if (!draft.data.currentPlayer) {
+						draft.data.currentPlayer = data;
+					}
+				}
+			})
+		);
+
+		return data;
+	}
+
+	function selectPlayer(playerId: string) {
+		store.update((state) =>
+			produce(state, (draft) => {
+				if (draft.data) {
+					const player = draft.data.players.find((p) => p.id === playerId);
+					if (player) {
+						draft.data.currentPlayer = player;
+					}
+				}
+			})
+		);
+	}
+
 	// 초기 fetch 실행
 	fetchUser();
 
-	return store as Readable<FetchState<UserState>>;
+	return {
+		store: store as Readable<FetchState<UserState>>,
+		createPlayer,
+		selectPlayer,
+	};
+}
+
+export function useCurrentUser() {
+	if (!instance) {
+		instance = createCurrentUserStore();
+	}
+	return instance;
 }
