@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { Panel, useNodes, useEdges } from '@xyflow/svelte';
-	import type {
-		NarrativeNode,
-		NarrativeNodeType,
-		BulkChanges,
-		NarrativeNodeChoice,
-	} from '$lib/types';
-	import { Input } from '$lib/components/ui/input';
+	import type { NarrativeNode, BulkChanges, NarrativeNodeChoice } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		DropdownMenu,
@@ -42,7 +36,9 @@
 
 	let isUpdating = $state(false);
 
-	let changes = $state<(NarrativeNode & { narrative_node_choices?: NarrativeNodeChoice[] }) | undefined>(undefined);
+	let changes = $state<
+		(NarrativeNode & { narrative_node_choices?: NarrativeNodeChoice[] }) | undefined
+	>(undefined);
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
 	let currentNarrativeNodeId = $state<string | undefined>(undefined);
 	let titleInputRef = $state<HTMLInputElement | null>(null);
@@ -128,7 +124,7 @@
 	function onclickPlay() {
 		if (!narrativeNode) return;
 
-		play.open(narrativeNode.id);
+		play.run(narrativeNode.id);
 	}
 </script>
 

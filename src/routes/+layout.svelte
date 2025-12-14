@@ -6,8 +6,8 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import type { ServerPayload } from '$lib/types';
 	import { TooltipProvider } from '$lib/components/ui/tooltip';
-	import Narrative from '$lib/components/app/narrative/narrative.svelte';
-	import DiceRoll from '$lib/components/app/dice-roll/dice-roll.svelte';
+	import Narrative from '$lib/components/app/narrative-play/narrative.svelte';
+	import DiceRoll from '$lib/components/app/dice-roll-play/dice-roll.svelte';
 
 	const { data, children }: { data: ServerPayload; children: any } = $props();
 </script>

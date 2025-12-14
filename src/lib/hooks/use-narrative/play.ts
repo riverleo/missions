@@ -7,7 +7,7 @@ import type {
 	PlayStore,
 } from '.';
 
-export const open =
+export const run =
 	(
 		narrativeStore: NarrativeStore,
 		narrativeNodeStore: NarrativeNodeStore,
