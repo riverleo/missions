@@ -11,15 +11,15 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 
-	const { store: narrativeStore, admin } = useNarrative();
-	const { store } = admin;
+	const { narrativeStore, admin } = useNarrative();
+	const { store: adminStore } = admin;
 
-	const open = $derived($store.dialog?.type === 'update');
+	const open = $derived($adminStore.dialog?.type === 'update');
 	const narrativeId = $derived(
-		$store.dialog?.type === 'update' ? $store.dialog.narrativeId : undefined
+		$adminStore.dialog?.type === 'update' ? $adminStore.dialog.narrativeId : undefined
 	);
 	const currentNarrative = $derived(
-		narrativeId ? $narrativeStore.data?.find((n) => n.id === narrativeId) : undefined
+		narrativeId ? $narrativeStore.data?.[narrativeId] : undefined
 	);
 
 	let title = $state('');

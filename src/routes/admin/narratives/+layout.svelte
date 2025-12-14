@@ -8,9 +8,9 @@
 	let { children } = $props();
 
 	const admin = useAdmin();
-	const { store } = useNarrative();
+	const { narrativeStore } = useNarrative();
 	const narrativeId = $derived(page.params.narrativeId);
-	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
+	const currentNarrative = $derived(narrativeId ? $narrativeStore.data?.[narrativeId] : undefined);
 
 	$effect(() => {
 		if (currentNarrative) {

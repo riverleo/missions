@@ -4,6 +4,7 @@
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
+	import { useNarrative } from '$lib/hooks/use-narrative';
 
 	interface Props {
 		data: {
@@ -15,12 +16,16 @@
 
 	const { data, id, selected = false }: Props = $props();
 	const narrativeNode = $derived(data.narrativeNode);
+	const { narrativeNodeChoiceStore } = useNarrative();
 
 	// 선택지를 order_in_narrative_node로 정렬
 	const narrativeNodeChoices = $derived(
-		narrativeNode.narrative_node_choices
-			? sort(narrativeNode.narrative_node_choices, (c) => c.order_in_narrative_node)
-			: []
+		sort(
+			Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+				(c) => c.narrative_node_id === narrativeNode.id
+			),
+			(c) => c.order_in_narrative_node
+		)
 	);
 </script>
 

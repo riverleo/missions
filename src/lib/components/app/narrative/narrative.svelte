@@ -8,16 +8,35 @@
 
 	const layerId: LayerId = 'narrative';
 
-	const { play } = useNarrative();
+	const { narrativeNodeStore, narrativeNodeChoiceStore, play } = useNarrative();
 	const playStore = play.store;
+
+	const narrativeNode = $derived(
+		$playStore.narrativeNodeId
+			? $narrativeNodeStore.data?.[$playStore.narrativeNodeId]
+			: undefined
+	);
+
+	const narrativeNodeChoices = $derived(
+		narrativeNode
+			? Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+					(c) => c.narrative_node_id === narrativeNode.id
+				)
+			: []
+	);
+
+	const selectedNarrativeNodeChoice = $derived(
+		$playStore.selectedNarrativeNodeChoiceId
+			? $narrativeNodeChoiceStore.data?.[$playStore.selectedNarrativeNodeChoiceId]
+			: undefined
+	);
 
 	bindLayerEvent({
 		id: layerId,
 		onkeyup: (event: KeyboardEvent) => {
-			const currentNarrativeNode = $playStore.narrativeNode;
-			if (currentNarrativeNode === undefined) return;
+			if (narrativeNode === undefined) return;
 
-			const { type } = currentNarrativeNode;
+			const { type } = narrativeNode;
 
 			if (isEnterOrSpace(event)) {
 				switch (type) {
@@ -26,35 +45,31 @@
 						break;
 					case 'choice':
 						// Enter or Space to select highlighted choice
-						if ($playStore.selectedNarrativeNodeChoice !== undefined) {
-							play.select($playStore.selectedNarrativeNodeChoice);
+						if (selectedNarrativeNodeChoice !== undefined) {
+							play.select(selectedNarrativeNodeChoice);
 						}
 						break;
 				}
 			}
 		},
 		onkeydown: throttle({ interval: 100 }, (event: KeyboardEvent) => {
-			const currentNarrativeNode = $playStore.narrativeNode;
+			if (narrativeNode === undefined) return;
 
-			if (currentNarrativeNode === undefined) return;
-
-			const { type } = currentNarrativeNode;
+			const { type } = narrativeNode;
 
 			if (type !== 'choice') return;
 
-			const narrativeNodeChoices = currentNarrativeNode.narrative_node_choices ?? [];
-
-			if (isArrowUpOrDown(event) && $playStore.selectedNarrativeNodeChoice === undefined) {
+			if (isArrowUpOrDown(event) && selectedNarrativeNodeChoice === undefined) {
 				play.highlight(narrativeNodeChoices[0]);
 			} else if (isArrowDown(event)) {
 				const currentIndex = narrativeNodeChoices.findIndex(
-					(c) => c.id === $playStore.selectedNarrativeNodeChoice?.id
+					(c) => c.id === selectedNarrativeNodeChoice?.id
 				);
 				const nextIndex = (currentIndex + 1) % narrativeNodeChoices.length;
 				play.highlight(narrativeNodeChoices[nextIndex]);
 			} else if (isArrowUp(event)) {
 				const currentIndex = narrativeNodeChoices.findIndex(
-					(c) => c.id === $playStore.selectedNarrativeNodeChoice?.id
+					(c) => c.id === selectedNarrativeNodeChoice?.id
 				);
 				const prevIndex =
 					(currentIndex - 1 + narrativeNodeChoices.length) % narrativeNodeChoices.length;
@@ -66,7 +81,7 @@
 
 <div
 	class="fixed top-0 right-0 bottom-0 left-0 z-0 min-h-lvh items-center justify-center bg-black/10 backdrop-blur-sm"
-	class:invisible={$playStore.narrativeNode === undefined}
+	class:invisible={narrativeNode === undefined}
 >
 	<div class="absolute top-1/2 left-1/2 -translate-1/2">
 		<Message />

@@ -7,17 +7,37 @@
 
 	const layerId: LayerId = 'narrative';
 
-	const { play } = useNarrative();
+	const { narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, play } = useNarrative();
 	const playStore = play.store;
+
+	const narrativeNode = $derived(
+		$playStore.narrativeNodeId
+			? $narrativeNodeStore.data?.[$playStore.narrativeNodeId]
+			: undefined
+	);
+
+	const narrativeNodeChoices = $derived(
+		narrativeNode
+			? Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+					(c) => c.narrative_node_id === narrativeNode.id
+				)
+			: []
+	);
+
+	const narrativeDiceRoll = $derived(
+		$playStore.narrativeDiceRollId
+			? $narrativeDiceRollStore.data?.[$playStore.narrativeDiceRollId]
+			: undefined
+	);
 </script>
 
-{#if $playStore.narrativeNode?.type === 'choice'}
+{#if narrativeNode?.type === 'choice'}
 	<div class="flex flex-col items-center gap-3 px-8">
-		{#each $playStore.narrativeNode.narrative_node_choices ?? [] as narrativeNodeChoice, index (narrativeNodeChoice.id)}
+		{#each narrativeNodeChoices as narrativeNodeChoice, index (narrativeNodeChoice.id)}
 			<NarrativeChoice {narrativeNodeChoice} {index} />
 		{/each}
 	</div>
-{:else if $playStore.narrativeNode?.type === 'text'}
+{:else if narrativeNode?.type === 'text'}
 	<div class="flex flex-col items-center gap-8 px-8">
 		<Button
 			variant="ghost"
@@ -26,7 +46,7 @@
 			data-shortcut-layer={layerId}
 			onclick={() => play.roll()}
 		>
-			{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0}
+			{#if narrativeDiceRoll && narrativeDiceRoll.difficulty_class > 0}
 				주사위 굴리기
 			{:else}
 				다음

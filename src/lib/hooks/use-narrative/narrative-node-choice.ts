@@ -1,9 +1,43 @@
 import type { NarrativeNodeChoiceInsert, NarrativeNodeChoiceUpdate, Supabase } from '$lib/types';
-import type { NarrativeStore } from '.';
+import type { NarrativeNodeChoiceStore } from '.';
 import { produce } from 'immer';
 
+export const fetchNarrativeNodeChoices = async (supabase: Supabase, store: NarrativeNodeChoiceStore) => {
+	store.update((state) => ({ ...state, status: 'loading' }));
+
+	try {
+		const { data, error } = await supabase
+			.from('narrative_node_choices')
+			.select('*')
+			.order('order_in_narrative_node', { ascending: true });
+
+		if (error) throw error;
+
+		// Convert array to Record
+		const record: Record<string, (typeof data)[number]> = {};
+		for (const item of data ?? []) {
+			record[item.id] = item;
+		}
+
+		store.set({
+			status: 'success',
+			data: record,
+			error: undefined,
+		});
+	} catch (error) {
+		console.error(error);
+
+		store.set({
+			status: 'error',
+			data: undefined,
+			error: error instanceof Error ? error : new Error('Unknown error'),
+		});
+	}
+};
+
 export const createNarrativeNodeChoice =
-	(supabase: Supabase, store: NarrativeStore) => async (narrativeNodeChoice: NarrativeNodeChoiceInsert) => {
+	(supabase: Supabase, store: NarrativeNodeChoiceStore) =>
+	async (narrativeNodeChoice: NarrativeNodeChoiceInsert) => {
 		try {
 			const { data, error } = await supabase
 				.from('narrative_node_choices')
@@ -15,24 +49,14 @@ export const createNarrativeNodeChoice =
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_nodes) {
-								const node = narrative.narrative_nodes.find(
-									(n) => n.id === narrativeNodeChoice.narrative_node_id
-								);
-								if (node) {
-									if (!node.narrative_node_choices) {
-										node.narrative_node_choices = [];
-									}
-									node.narrative_node_choices.push(data);
-									break;
-								}
-							}
-						}
+					if (!draft.data) {
+						draft.data = {};
 					}
+					draft.data[data.id] = data;
 				})
 			);
+
+			return data;
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -43,7 +67,7 @@ export const createNarrativeNodeChoice =
 	};
 
 export const updateNarrativeNodeChoice =
-	(supabase: Supabase, store: NarrativeStore) =>
+	(supabase: Supabase, store: NarrativeNodeChoiceStore) =>
 	async (id: string, narrativeNodeChoice: NarrativeNodeChoiceUpdate) => {
 		try {
 			const { error } = await supabase
@@ -55,23 +79,8 @@ export const updateNarrativeNodeChoice =
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_nodes) {
-								for (const node of narrative.narrative_nodes) {
-									if (node.narrative_node_choices) {
-										const choiceIndex = node.narrative_node_choices.findIndex((c) => c.id === id);
-										if (choiceIndex !== -1) {
-											node.narrative_node_choices[choiceIndex] = {
-												...node.narrative_node_choices[choiceIndex],
-												...narrativeNodeChoice,
-											};
-											return;
-										}
-									}
-								}
-							}
-						}
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], narrativeNodeChoice);
 					}
 				})
 			);
@@ -85,7 +94,7 @@ export const updateNarrativeNodeChoice =
 	};
 
 export const removeNarrativeNodeChoice =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeNodeChoiceStore) => async (id: string) => {
 		try {
 			const { error } = await supabase.from('narrative_node_choices').delete().eq('id', id);
 
@@ -94,17 +103,7 @@ export const removeNarrativeNodeChoice =
 			store.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_nodes) {
-								for (const node of narrative.narrative_nodes) {
-									if (node.narrative_node_choices) {
-										node.narrative_node_choices = node.narrative_node_choices.filter(
-											(c) => c.id !== id
-										);
-									}
-								}
-							}
-						}
+						delete draft.data[id];
 					}
 				})
 			);

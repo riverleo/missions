@@ -36,13 +36,13 @@
 
 	let { narrativeNode }: Props = $props();
 
-	const { admin, store, play } = useNarrative();
+	const { narrativeNodeStore, narrativeNodeChoiceStore, admin, play } = useNarrative();
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
 
 	let isUpdating = $state(false);
 
-	let changes = $state<NarrativeNode | undefined>(undefined);
+	let changes = $state<(NarrativeNode & { narrative_node_choices?: NarrativeNodeChoice[] }) | undefined>(undefined);
 	let narrativeNodeChoicesChanges = $state<BulkChanges<NarrativeNodeChoice> | undefined>(undefined);
 	let currentNarrativeNodeId = $state<string | undefined>(undefined);
 	let titleInputRef = $state<HTMLInputElement | null>(null);
@@ -52,7 +52,11 @@
 	$effect(() => {
 		if (narrativeNode && narrativeNode.id !== currentNarrativeNodeId) {
 			currentNarrativeNodeId = narrativeNode.id;
-			changes = clone(narrativeNode);
+			// 선택지 데이터 가져와서 포함
+			const choices = Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+				(c) => c.narrative_node_id === narrativeNode.id
+			);
+			changes = { ...clone(narrativeNode), narrative_node_choices: choices };
 			narrativeNodeChoicesChanges = undefined;
 
 			// 패널 열릴 때 title input에 포커스
@@ -72,16 +76,12 @@
 		try {
 			// 1. 시작 대화로 설정하려는 경우, 다른 시작 대화 해제
 			if (changes.root) {
-				const currentNarrative = $store.data?.find((n) =>
-					n.narrative_nodes?.some((node) => node.id === nodeId)
+				const narrativeId = changes.narrative_id;
+				const otherRootNodes = Object.values($narrativeNodeStore.data ?? {}).filter(
+					(n) => n.narrative_id === narrativeId && n.id !== nodeId && n.root
 				);
-				if (currentNarrative?.narrative_nodes) {
-					const otherRootNodes = currentNarrative.narrative_nodes.filter(
-						(n) => n.id !== nodeId && n.root
-					);
-					// 다른 root 노드들을 먼저 해제
-					await Promise.all(otherRootNodes.map((n) => admin.updateNode(n.id, { root: false })));
-				}
+				// 다른 root 노드들을 먼저 해제
+				await Promise.all(otherRootNodes.map((n) => admin.updateNode(n.id, { root: false })));
 			}
 
 			// 2. 기본 정보 업데이트

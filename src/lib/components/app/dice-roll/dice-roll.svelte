@@ -7,14 +7,19 @@
 
 	const layerId = 'dice-roll';
 
-	const { play } = useNarrative();
+	const { narrativeDiceRollStore, play } = useNarrative();
 	const playStore = play.store;
+
+	const narrativeDiceRoll = $derived(
+		$playStore.narrativeDiceRollId
+			? $narrativeDiceRollStore.data?.[$playStore.narrativeDiceRollId]
+			: undefined
+	);
 
 	bindLayerEvent({
 		id: layerId,
 		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
-			const diceRoll = $playStore.narrativeDiceRoll;
-			if (diceRoll === undefined || diceRoll.difficulty_class === 0) return;
+			if (narrativeDiceRoll === undefined || narrativeDiceRoll.difficulty_class === 0) return;
 
 			if (isEnterOrSpace(event)) {
 				if ($playStore.playerRolledDice !== undefined) play.next();
@@ -24,14 +29,14 @@
 	});
 </script>
 
-{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class !== 0}
+{#if narrativeDiceRoll && narrativeDiceRoll.difficulty_class !== 0}
 	<div
 		class="fixed top-0 left-0 z-10 flex min-h-dvh w-full flex-col items-center justify-center gap-8 bg-black/50 text-white"
 	>
 		{#if $playStore.playerRolledDice !== undefined}
 			<!-- 결과 표시 -->
 			<div class="text-8xl font-bold">{$playStore.playerRolledDice}</div>
-			<div>최소 눈금: {$playStore.narrativeDiceRoll.difficulty_class}</div>
+			<div>최소 눈금: {narrativeDiceRoll.difficulty_class}</div>
 
 			<Button
 				onclick={() => play.next()}

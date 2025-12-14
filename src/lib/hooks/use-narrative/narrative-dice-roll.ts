@@ -1,9 +1,43 @@
 import type { NarrativeDiceRollInsert, NarrativeDiceRollUpdate, Supabase } from '$lib/types';
-import type { NarrativeStore } from '.';
+import type { NarrativeDiceRollStore } from '.';
 import { produce } from 'immer';
 
+export const fetchNarrativeDiceRolls = async (supabase: Supabase, store: NarrativeDiceRollStore) => {
+	store.update((state) => ({ ...state, status: 'loading' }));
+
+	try {
+		const { data, error } = await supabase
+			.from('narrative_dice_rolls')
+			.select('*')
+			.order('created_at', { ascending: true });
+
+		if (error) throw error;
+
+		// Convert array to Record
+		const record: Record<string, (typeof data)[number]> = {};
+		for (const item of data ?? []) {
+			record[item.id] = item;
+		}
+
+		store.set({
+			status: 'success',
+			data: record,
+			error: undefined,
+		});
+	} catch (error) {
+		console.error(error);
+
+		store.set({
+			status: 'error',
+			data: undefined,
+			error: error instanceof Error ? error : new Error('Unknown error'),
+		});
+	}
+};
+
 export const createNarrativeDiceRoll =
-	(supabase: Supabase, store: NarrativeStore) => async (narrativeDiceRoll: NarrativeDiceRollInsert) => {
+	(supabase: Supabase, store: NarrativeDiceRollStore) =>
+	async (narrativeDiceRoll: NarrativeDiceRollInsert) => {
 		try {
 			const { data, error } = await supabase
 				.from('narrative_dice_rolls')
@@ -15,13 +49,10 @@ export const createNarrativeDiceRoll =
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					const narrative = draft.data?.find((n) => n.id === narrativeDiceRoll.narrative_id);
-					if (narrative) {
-						if (!narrative.narrative_dice_rolls) {
-							narrative.narrative_dice_rolls = [];
-						}
-						narrative.narrative_dice_rolls.push(data);
+					if (!draft.data) {
+						draft.data = {};
 					}
+					draft.data[data.id] = data;
 				})
 			);
 
@@ -36,7 +67,7 @@ export const createNarrativeDiceRoll =
 	};
 
 export const updateNarrativeDiceRoll =
-	(supabase: Supabase, store: NarrativeStore) =>
+	(supabase: Supabase, store: NarrativeDiceRollStore) =>
 	async (id: string, narrativeDiceRoll: NarrativeDiceRollUpdate) => {
 		try {
 			const { error } = await supabase
@@ -48,21 +79,8 @@ export const updateNarrativeDiceRoll =
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_dice_rolls) {
-								const diceRollIndex = narrative.narrative_dice_rolls.findIndex(
-									(dr) => dr.id === id
-								);
-								if (diceRollIndex !== -1) {
-									narrative.narrative_dice_rolls[diceRollIndex] = {
-										...narrative.narrative_dice_rolls[diceRollIndex],
-										...narrativeDiceRoll,
-									};
-									break;
-								}
-							}
-						}
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], narrativeDiceRoll);
 					}
 				})
 			);
@@ -76,7 +94,7 @@ export const updateNarrativeDiceRoll =
 	};
 
 export const removeNarrativeDiceRoll =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeDiceRollStore) => async (id: string) => {
 		try {
 			const { error } = await supabase.from('narrative_dice_rolls').delete().eq('id', id);
 
@@ -85,13 +103,7 @@ export const removeNarrativeDiceRoll =
 			store.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_dice_rolls) {
-								narrative.narrative_dice_rolls = narrative.narrative_dice_rolls.filter(
-									(dr) => dr.id !== id
-								);
-							}
-						}
+						delete draft.data[id];
 					}
 				})
 			);

@@ -78,25 +78,15 @@ export type ScenarioQuest = ScenarioQuestRow & {
 };
 
 // Narrative types
-export type NarrativeRow = Tables<'narratives'>;
+export type Narrative = Tables<'narratives'>;
 export type NarrativeInsert = TablesInsert<'narratives'>;
 export type NarrativeUpdate = TablesUpdate<'narratives'>;
-export type NarrativeNodeRow = Tables<'narrative_nodes'>;
+export type NarrativeNode = Tables<'narrative_nodes'>;
 export type NarrativeNodeInsert = TablesInsert<'narrative_nodes'>;
 export type NarrativeNodeUpdate = TablesUpdate<'narrative_nodes'>;
 export type NarrativeNodeChoice = Tables<'narrative_node_choices'>;
 export type NarrativeNodeChoiceInsert = TablesInsert<'narrative_node_choices'>;
 export type NarrativeNodeChoiceUpdate = TablesUpdate<'narrative_node_choices'>;
-
-// Extended Narrative with relations
-export type NarrativeNode = NarrativeNodeRow & {
-	narrative_node_choices?: NarrativeNodeChoice[];
-};
-
-export type Narrative = NarrativeRow & {
-	narrative_nodes?: NarrativeNode[];
-	narrative_dice_rolls?: NarrativeDiceRoll[];
-};
 
 // Dice types
 export type Dice = Tables<'dices'>;

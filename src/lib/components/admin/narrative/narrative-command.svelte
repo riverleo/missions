@@ -19,17 +19,18 @@
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 
-	const { store, admin } = useNarrative();
+	const { narrativeStore, admin } = useNarrative();
 	const currentNarrativeId = $derived(page.params.narrativeId);
+	const narratives = $derived(Object.values($narrativeStore.data ?? {}));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
 	<CommandInput placeholder="대화 또는 효과 검색..." />
-	{#if ($store.data ?? []).length > 0}
+	{#if narratives.length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
 			<CommandGroup>
-				{#each $store.data ?? [] as narrative (narrative.id)}
+				{#each narratives as narrative (narrative.id)}
 					<CommandLinkItem href={`/admin/narratives/${narrative.id}`} class="group pr-1">
 						<IconCheck
 							class={cn(

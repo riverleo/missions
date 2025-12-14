@@ -6,16 +6,24 @@ import type {
 	NarrativeNode,
 	NarrativeNodeChoice,
 	PlayerRolledDice,
+	Supabase,
 } from '$lib/types';
 import { useServerPayload } from '../use-server-payload.svelte';
 import { fetchNarratives, createNarrative, updateNarrative, removeNarrative } from './narrative';
-import { createNarrativeNode, updateNarrativeNode, removeNarrativeNode } from './narrative-node';
 import {
+	fetchNarrativeNodes,
+	createNarrativeNode,
+	updateNarrativeNode,
+	removeNarrativeNode,
+} from './narrative-node';
+import {
+	fetchNarrativeNodeChoices,
 	createNarrativeNodeChoice,
 	updateNarrativeNodeChoice,
 	removeNarrativeNodeChoice,
 } from './narrative-node-choice';
 import {
+	fetchNarrativeDiceRolls,
 	createNarrativeDiceRoll,
 	updateNarrativeDiceRoll,
 	removeNarrativeDiceRoll,
@@ -33,29 +41,38 @@ interface AdminStoreState {
 }
 
 export interface PlayStoreState {
-	narrative?: Narrative;
-	narrativeNode?: NarrativeNode;
-	narrativeDiceRoll?: NarrativeDiceRoll;
-	selectedNarrativeNodeChoice?: NarrativeNodeChoice;
+	narrativeId?: string;
+	narrativeNodeId?: string;
+	narrativeDiceRollId?: string;
+	selectedNarrativeNodeChoiceId?: string;
 	playerRolledDice?: PlayerRolledDice;
 }
 
-export type NarrativeStore = Writable<FetchState<Narrative[]>>;
+export type NarrativeStore = Writable<FetchState<Record<string, Narrative>>>;
+export type NarrativeNodeStore = Writable<FetchState<Record<string, NarrativeNode>>>;
+export type NarrativeDiceRollStore = Writable<FetchState<Record<string, NarrativeDiceRoll>>>;
+export type NarrativeNodeChoiceStore = Writable<FetchState<Record<string, NarrativeNodeChoice>>>;
 export type PlayStore = Writable<PlayStoreState>;
 
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
 
-function createNarrativeStore() {
-	const { supabase } = useServerPayload();
-
-	const store = writable<FetchState<Narrative[]>>({
+function createEmptyFetchState<T>(): FetchState<Record<string, T>> {
+	return {
 		status: 'idle',
 		data: undefined,
 		error: undefined,
-	});
+	};
+}
+
+function createNarrativeStore() {
+	const { supabase } = useServerPayload();
+
+	const narrativeStore = writable<FetchState<Record<string, Narrative>>>(createEmptyFetchState());
+	const narrativeNodeStore = writable<FetchState<Record<string, NarrativeNode>>>(createEmptyFetchState());
+	const narrativeDiceRollStore = writable<FetchState<Record<string, NarrativeDiceRoll>>>(createEmptyFetchState());
+	const narrativeNodeChoiceStore = writable<FetchState<Record<string, NarrativeNodeChoice>>>(createEmptyFetchState());
 
 	const adminStore = writable<AdminStoreState>({ dialog: undefined });
-
 	const playStore = writable<PlayStoreState>({});
 
 	// Admin dialog functions
@@ -67,35 +84,48 @@ function createNarrativeStore() {
 		adminStore.update((s) => ({ ...s, dialog: undefined }));
 	};
 
-	fetchNarratives(supabase, store);
+	// Fetch all data
+	const fetchAll = async () => {
+		await Promise.all([
+			fetchNarratives(supabase, narrativeStore),
+			fetchNarrativeNodes(supabase, narrativeNodeStore),
+			fetchNarrativeDiceRolls(supabase, narrativeDiceRollStore),
+			fetchNarrativeNodeChoices(supabase, narrativeNodeChoiceStore),
+		]);
+	};
+
+	fetchAll();
 
 	return {
-		store: store as Readable<FetchState<Narrative[]>>,
+		narrativeStore: narrativeStore as Readable<FetchState<Record<string, Narrative>>>,
+		narrativeNodeStore: narrativeNodeStore as Readable<FetchState<Record<string, NarrativeNode>>>,
+		narrativeDiceRollStore: narrativeDiceRollStore as Readable<FetchState<Record<string, NarrativeDiceRoll>>>,
+		narrativeNodeChoiceStore: narrativeNodeChoiceStore as Readable<FetchState<Record<string, NarrativeNodeChoice>>>,
 		admin: {
 			store: adminStore as Readable<AdminStoreState>,
 			openDialog,
 			closeDialog,
-			create: createNarrative(supabase, store),
-			update: updateNarrative(supabase, store),
-			remove: removeNarrative(supabase, store),
-			createNode: createNarrativeNode(supabase, store),
-			updateNode: updateNarrativeNode(supabase, store),
-			removeNode: removeNarrativeNode(supabase, store),
-			createChoice: createNarrativeNodeChoice(supabase, store),
-			updateChoice: updateNarrativeNodeChoice(supabase, store),
-			removeChoice: removeNarrativeNodeChoice(supabase, store),
-			createNarrativeDiceRoll: createNarrativeDiceRoll(supabase, store),
-			updateNarrativeDiceRoll: updateNarrativeDiceRoll(supabase, store),
-			removeNarrativeDiceRoll: removeNarrativeDiceRoll(supabase, store),
+			create: createNarrative(supabase, narrativeStore),
+			update: updateNarrative(supabase, narrativeStore),
+			remove: removeNarrative(supabase, narrativeStore),
+			createNode: createNarrativeNode(supabase, narrativeNodeStore),
+			updateNode: updateNarrativeNode(supabase, narrativeNodeStore),
+			removeNode: removeNarrativeNode(supabase, narrativeNodeStore),
+			createChoice: createNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			updateChoice: updateNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			removeChoice: removeNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			createNarrativeDiceRoll: createNarrativeDiceRoll(supabase, narrativeDiceRollStore),
+			updateNarrativeDiceRoll: updateNarrativeDiceRoll(supabase, narrativeDiceRollStore),
+			removeNarrativeDiceRoll: removeNarrativeDiceRoll(supabase, narrativeDiceRollStore),
 		},
 		play: {
 			store: playStore as Readable<PlayStoreState>,
-			open: open(store, playStore),
-			roll: roll(store, playStore),
-			next: next(store, playStore),
+			open: open(narrativeStore, narrativeNodeStore, narrativeDiceRollStore, playStore),
+			roll: roll(narrativeDiceRollStore, playStore),
+			next: next(narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore),
 			done: done(playStore),
 			highlight: highlight(playStore),
-			select: select(store, playStore),
+			select: select(narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore),
 		},
 	};
 }

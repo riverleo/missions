@@ -19,7 +19,7 @@
 	const { store: scenarioStore } = useScenario();
 	const { store: scenarioChapterStore } = useScenarioChapter();
 	const { store: scenarioQuestStore } = useScenarioQuest();
-	const { store: narrativeStore } = useNarrative();
+	const { narrativeStore } = useNarrative();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
@@ -36,7 +36,7 @@
 			return quest?.title;
 		}
 		if (prevSegment === 'narratives') {
-			const narrative = $narrativeStore.data?.find((n) => n.id === id);
+			const narrative = $narrativeStore.data?.[id];
 			return narrative?.title;
 		}
 		return undefined;

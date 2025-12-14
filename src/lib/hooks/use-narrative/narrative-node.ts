@@ -1,27 +1,57 @@
 import type { NarrativeNodeInsert, NarrativeNodeUpdate, Supabase } from '$lib/types';
-import type { NarrativeStore } from '.';
+import type { NarrativeNodeStore } from '.';
 import { produce } from 'immer';
 
+export const fetchNarrativeNodes = async (supabase: Supabase, store: NarrativeNodeStore) => {
+	store.update((state) => ({ ...state, status: 'loading' }));
+
+	try {
+		const { data, error } = await supabase
+			.from('narrative_nodes')
+			.select('*')
+			.order('created_at', { ascending: true });
+
+		if (error) throw error;
+
+		// Convert array to Record
+		const record: Record<string, (typeof data)[number]> = {};
+		for (const item of data ?? []) {
+			record[item.id] = item;
+		}
+
+		store.set({
+			status: 'success',
+			data: record,
+			error: undefined,
+		});
+	} catch (error) {
+		console.error(error);
+
+		store.set({
+			status: 'error',
+			data: undefined,
+			error: error instanceof Error ? error : new Error('Unknown error'),
+		});
+	}
+};
+
 export const createNarrativeNode =
-	(supabase: Supabase, store: NarrativeStore) => async (narrativeNode: NarrativeNodeInsert) => {
+	(supabase: Supabase, store: NarrativeNodeStore) => async (narrativeNode: NarrativeNodeInsert) => {
 		try {
 			const { data, error } = await supabase
 				.from('narrative_nodes')
 				.insert(narrativeNode)
-				.select('*, narrative_node_choices (*)')
+				.select()
 				.single();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					const narrative = draft.data?.find((n) => n.id === narrativeNode.narrative_id);
-					if (narrative) {
-						if (!narrative.narrative_nodes) {
-							narrative.narrative_nodes = [];
-						}
-						narrative.narrative_nodes.push(data);
+					if (!draft.data) {
+						draft.data = {};
 					}
+					draft.data[data.id] = data;
 				})
 			);
 
@@ -36,7 +66,8 @@ export const createNarrativeNode =
 	};
 
 export const updateNarrativeNode =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string, narrativeNode: NarrativeNodeUpdate) => {
+	(supabase: Supabase, store: NarrativeNodeStore) =>
+	async (id: string, narrativeNode: NarrativeNodeUpdate) => {
 		try {
 			const { error } = await supabase.from('narrative_nodes').update(narrativeNode).eq('id', id);
 
@@ -44,19 +75,8 @@ export const updateNarrativeNode =
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_nodes) {
-								const nodeIndex = narrative.narrative_nodes.findIndex((n) => n.id === id);
-								if (nodeIndex !== -1) {
-									narrative.narrative_nodes[nodeIndex] = {
-										...narrative.narrative_nodes[nodeIndex],
-										...narrativeNode,
-									};
-									break;
-								}
-							}
-						}
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], narrativeNode);
 					}
 				})
 			);
@@ -70,7 +90,7 @@ export const updateNarrativeNode =
 	};
 
 export const removeNarrativeNode =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeNodeStore) => async (id: string) => {
 		try {
 			const { error } = await supabase.from('narrative_nodes').delete().eq('id', id);
 
@@ -79,11 +99,7 @@ export const removeNarrativeNode =
 			store.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
-						for (const narrative of draft.data) {
-							if (narrative.narrative_nodes) {
-								narrative.narrative_nodes = narrative.narrative_nodes.filter((n) => n.id !== id);
-							}
-						}
+						delete draft.data[id];
 					}
 				})
 			);

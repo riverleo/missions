@@ -1,5 +1,6 @@
 import type { NarrativeInsert, NarrativeUpdate, Supabase } from '$lib/types';
 import type { NarrativeStore } from '.';
+import { produce } from 'immer';
 
 export const fetchNarratives = async (supabase: Supabase, store: NarrativeStore) => {
 	store.update((state) => ({ ...state, status: 'loading' }));
@@ -7,23 +8,20 @@ export const fetchNarratives = async (supabase: Supabase, store: NarrativeStore)
 	try {
 		const { data, error } = await supabase
 			.from('narratives')
-			.select(
-				`
-					*,
-					narrative_nodes (
-						*,
-						narrative_node_choices (*)
-					),
-					narrative_dice_rolls (*)
-				`
-			)
+			.select('*')
 			.order('created_at', { ascending: false });
 
 		if (error) throw error;
 
+		// Convert array to Record
+		const record: Record<string, (typeof data)[number]> = {};
+		for (const item of data ?? []) {
+			record[item.id] = item;
+		}
+
 		store.set({
 			status: 'success',
-			data: data ?? [],
+			data: record,
 			error: undefined,
 		});
 	} catch (error) {
@@ -40,11 +38,24 @@ export const fetchNarratives = async (supabase: Supabase, store: NarrativeStore)
 export const createNarrative =
 	(supabase: Supabase, store: NarrativeStore) => async (narrative: NarrativeInsert) => {
 		try {
-			const { error } = await supabase.from('narratives').insert(narrative);
+			const { data, error } = await supabase
+				.from('narratives')
+				.insert(narrative)
+				.select()
+				.single();
 
 			if (error) throw error;
 
-			await fetchNarratives(supabase, store);
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (!draft.data) {
+						draft.data = {};
+					}
+					draft.data[data.id] = data;
+				})
+			);
+
+			return data;
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -61,7 +72,13 @@ export const updateNarrative =
 
 			if (error) throw error;
 
-			await fetchNarratives(supabase, store);
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], narrative);
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -78,7 +95,13 @@ export const removeNarrative =
 
 			if (error) throw error;
 
-			await fetchNarratives(supabase, store);
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,

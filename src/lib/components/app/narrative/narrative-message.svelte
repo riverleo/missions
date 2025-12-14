@@ -1,14 +1,20 @@
 <script lang="ts">
 	import { useNarrative } from '$lib/hooks/use-narrative';
 
-	const { play } = useNarrative();
+	const { narrativeNodeStore, play } = useNarrative();
 	const playStore = play.store;
 
+	const narrativeNode = $derived(
+		$playStore.narrativeNodeId
+			? $narrativeNodeStore.data?.[$playStore.narrativeNodeId]
+			: undefined
+	);
+
 	// 텍스트를 문자 배열로 변환 (공백 포함)
-	const messageCharacters = $derived($playStore.narrativeNode?.title.split(''));
+	const messageCharacters = $derived(narrativeNode?.title?.split('') ?? []);
 </script>
 
-{#key $playStore.narrativeNode?.title}
+{#key narrativeNode?.title}
 	<div class="relative text-white">
 		<div
 			class="background absolute top-4 left-0 -z-10 h-full w-full rounded-[40%] bg-black px-8 py-4 blur-lg"
@@ -25,10 +31,10 @@
 					{/if}
 				{/each}
 			</p>
-			{#if $playStore.narrativeNode?.description}
+			{#if narrativeNode?.description}
 				<p class="description inline-flex flex-wrap justify-center">
 					<span class="text-lg font-light opacity-60">
-						{$playStore.narrativeNode.description}
+						{narrativeNode.description}
 					</span>
 				</p>
 			{/if}

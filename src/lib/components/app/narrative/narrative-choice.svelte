@@ -16,18 +16,18 @@
 	};
 
 	let { narrativeNodeChoice, index, ...restProps }: Props = $props();
+
+	const isSelected = $derived($playStore.selectedNarrativeNodeChoiceId === narrativeNodeChoice.id);
 </script>
 
 <button
-	data-shortcut-key={$playStore.selectedNarrativeNodeChoice?.id === narrativeNodeChoice.id
-		? 'Space Enter'
-		: undefined}
+	data-shortcut-key={isSelected ? 'Space Enter' : undefined}
 	data-shortcut-effect="bounce"
 	data-shortcut-layer={layerId}
 	onclick={() => play.select(narrativeNodeChoice)}
 	onmouseenter={() => play.highlight(narrativeNodeChoice)}
 	class={cn('text-2xl blur-3xl', {
-		'opacity-20': $playStore.selectedNarrativeNodeChoice?.id !== narrativeNodeChoice.id,
+		'opacity-20': !isSelected,
 	})}
 	style="animation-delay: {index * 300}ms"
 	{...restProps}

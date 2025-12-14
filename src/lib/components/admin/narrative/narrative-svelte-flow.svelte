@@ -11,10 +11,9 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { useNarrative } from '$lib/hooks/use-narrative';
-	import NarrativeNode from './narrative-node.svelte';
+	import NarrativeNodeNode from './narrative-node-node.svelte';
 	import NarrativeDiceRollNode from './narrative-dice-roll-node.svelte';
 	import NarrativePanel from './narrative-panel.svelte';
 	import NarrativeNodePanel from './narrative-node-panel.svelte';
@@ -38,10 +37,11 @@
 		isNarrativeDiceRollToSuccessEdge,
 		isNarrativeDiceRollToFailureEdge,
 	} from '$lib/utils/flow-id';
-	import type { NarrativeNode as NarrativeNodeType, NarrativeDiceRoll } from '$lib/types';
+	import type { NarrativeNode, NarrativeDiceRoll } from '$lib/types';
 
 	const narrativeId = $derived(page.params.narrativeId);
-	const { store, admin } = useNarrative();
+	const { narrativeNodeStore, narrativeDiceRollStore, narrativeNodeChoiceStore, admin } =
+		useNarrative();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -51,9 +51,13 @@
 	// 노드 생성 중 effect 건너뛰기 플래그
 	let skipConvertEffect = $state(false);
 
-	const currentNarrative = $derived($store.data?.find((n) => n.id === narrativeId));
-	const narrativeNodes = $derived(currentNarrative?.narrative_nodes ?? []);
-	const narrativeDiceRolls = $derived(currentNarrative?.narrative_dice_rolls ?? []);
+	// Record에서 현재 narrative의 데이터 필터링
+	const narrativeNodes = $derived(
+		Object.values($narrativeNodeStore.data ?? {}).filter((n) => n.narrative_id === narrativeId)
+	);
+	const narrativeDiceRolls = $derived(
+		Object.values($narrativeDiceRollStore.data ?? {}).filter((d) => d.narrative_id === narrativeId)
+	);
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
@@ -69,7 +73,7 @@
 	);
 
 	const nodeTypes = {
-		narrativeNode: NarrativeNode,
+		narrativeNode: NarrativeNodeNode,
 		narrativeDiceRoll: NarrativeDiceRollNode,
 	};
 
@@ -151,7 +155,7 @@
 			if (sourceNode.type === 'narrativeNode' && targetNode.type === 'narrativeDiceRoll') {
 				const narrativeNodeId = parseNarrativeNodeId(connection.source);
 				const narrativeDiceRollId = parseNarrativeDiceRollNodeId(connection.target);
-				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
+				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNode;
 				const narrativeDiceRoll = targetNode.data.narrativeDiceRoll as NarrativeDiceRoll;
 
 				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
@@ -159,9 +163,6 @@
 					await admin.updateNode(narrativeNodeId, {
 						narrative_dice_roll_id: narrativeDiceRollId,
 					});
-
-					// 로컬 데이터 업데이트
-					narrativeNode.narrative_dice_roll_id = narrativeDiceRollId;
 
 					// 엣지 추가
 					edges = [
@@ -183,11 +184,8 @@
 						narrative_dice_roll_id: narrativeDiceRollId,
 					});
 
-					// 로컬 데이터 업데이트
-					const choice = narrativeNode.narrative_node_choices?.find((c) => c.id === choiceId);
+					const choice = $narrativeNodeChoiceStore.data?.[choiceId];
 					if (choice) {
-						choice.narrative_dice_roll_id = narrativeDiceRollId;
-
 						// 엣지 추가
 						edges = [
 							...edges,
@@ -207,16 +205,13 @@
 				const narrativeDiceRollId = parseNarrativeDiceRollNodeId(connection.source);
 				const narrativeNodeId = parseNarrativeNodeId(connection.target);
 				const narrativeDiceRoll = sourceNode.data.narrativeDiceRoll as NarrativeDiceRoll;
-				const narrativeNode = targetNode.data.narrativeNode as NarrativeNodeType;
+				const narrativeNode = targetNode.data.narrativeNode as NarrativeNode;
 				const handle = connection.sourceHandle;
 
 				if (handle === 'success') {
 					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
 						success_narrative_node_id: narrativeNodeId,
 					});
-
-					// 로컬 데이터 업데이트
-					narrativeDiceRoll.success_narrative_node_id = narrativeNodeId;
 
 					// 엣지 추가
 					edges = [
@@ -234,9 +229,6 @@
 					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
 						failure_narrative_node_id: narrativeNodeId,
 					});
-
-					// 로컬 데이터 업데이트
-					narrativeDiceRoll.failure_narrative_node_id = narrativeNodeId;
 
 					// 엣지 추가
 					edges = [
@@ -340,7 +332,7 @@
 
 			// narrativeNode에서 드래그 → narrativeDiceRoll 생성
 			if (sourceNode.type === 'narrativeNode') {
-				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNodeType;
+				const narrativeNode = sourceNode.data.narrativeNode as NarrativeNode;
 				const sourceHandle = connectionState.fromHandle?.id;
 
 				// 새 주사위 굴림 생성
@@ -411,11 +403,7 @@
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
-		// 노드 타입별 고정 높이
-		const NODE_HEIGHT = 180;
-
 		// 1. narrative_node 노드 생성
-		// XYFlow가 자동으로 크기를 측정하도록 width/height를 지정하지 않음
 		narrativeNodes.forEach((narrativeNode) => {
 			newNodes.push({
 				id: createNarrativeNodeId(narrativeNode),
@@ -427,7 +415,6 @@
 		});
 
 		// 2. 현재 내러티브의 모든 narrative_dice_roll을 노드로 생성
-		// XYFlow가 자동으로 크기를 측정하도록 width/height를 지정하지 않음
 		narrativeDiceRolls.forEach((narrativeDiceRollData) => {
 			newNodes.push({
 				id: createNarrativeDiceRollNodeId(narrativeDiceRollData),
@@ -442,9 +429,8 @@
 		narrativeNodes.forEach((narrativeNode) => {
 			// text 타입이고 narrative_dice_roll_id가 있으면 엣지 생성
 			if (narrativeNode.type === 'text' && narrativeNode.narrative_dice_roll_id) {
-				const narrativeDiceRoll = narrativeDiceRolls.find(
-					(d) => d.id === narrativeNode.narrative_dice_roll_id
-				);
+				const narrativeDiceRoll =
+					$narrativeDiceRollStore.data?.[narrativeNode.narrative_dice_roll_id];
 				if (!narrativeDiceRoll) return;
 
 				const narrativeNodeId = createNarrativeNodeId(narrativeNode);
@@ -458,12 +444,14 @@
 			}
 
 			// choice 타입이면 각 narrativeNodeChoice의 narrative_dice_roll_id로 엣지 생성
-			if (narrativeNode.type === 'choice' && narrativeNode.narrative_node_choices) {
-				narrativeNode.narrative_node_choices.forEach((narrativeNodeChoice) => {
+			if (narrativeNode.type === 'choice') {
+				const choices = Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+					(c) => c.narrative_node_id === narrativeNode.id
+				);
+				choices.forEach((narrativeNodeChoice) => {
 					if (narrativeNodeChoice.narrative_dice_roll_id) {
-						const narrativeDiceRoll = narrativeDiceRolls.find(
-							(d) => d.id === narrativeNodeChoice.narrative_dice_roll_id
-						);
+						const narrativeDiceRoll =
+							$narrativeDiceRollStore.data?.[narrativeNodeChoice.narrative_dice_roll_id];
 						if (!narrativeDiceRoll) return;
 
 						const narrativeNodeId = createNarrativeNodeId(narrativeNode);
@@ -488,9 +476,8 @@
 			const narrativeDiceRollNodeId = createNarrativeDiceRollNodeId(narrativeDiceRollData);
 
 			if (narrativeDiceRollData.success_narrative_node_id) {
-				const successNode = narrativeNodes.find(
-					(n) => n.id === narrativeDiceRollData.success_narrative_node_id
-				);
+				const successNode =
+					$narrativeNodeStore.data?.[narrativeDiceRollData.success_narrative_node_id];
 				if (!successNode) return;
 
 				const successNodeId = createNarrativeNodeId(successNode);
@@ -505,9 +492,8 @@
 			}
 
 			if (narrativeDiceRollData.failure_narrative_node_id) {
-				const failureNode = narrativeNodes.find(
-					(n) => n.id === narrativeDiceRollData.failure_narrative_node_id
-				);
+				const failureNode =
+					$narrativeNodeStore.data?.[narrativeDiceRollData.failure_narrative_node_id];
 				if (!failureNode) return;
 
 				const failureNodeId = createNarrativeNodeId(failureNode);
@@ -532,6 +518,7 @@
 		// 의존성 추적을 위해 여기서 접근
 		narrativeNodes;
 		narrativeDiceRolls;
+		$narrativeNodeChoiceStore.data;
 
 		if (skipConvertEffect) return;
 		convertToNodesAndEdges();

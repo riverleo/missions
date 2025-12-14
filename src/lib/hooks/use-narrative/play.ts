@@ -1,27 +1,56 @@
-import type { NarrativeNodeChoice, NarrativeDiceRoll, NarrativeNode } from '$lib/types';
-import type { NarrativeStore, PlayStore } from '.';
-
-const getDiceRoll = (diceRollId: string): NarrativeDiceRoll | undefined => {
-	return;
-};
-
-const getNarrativeNode = (narrativeNodeId: string): NarrativeNode | undefined => {
-	return;
-};
+import type { NarrativeNodeChoice } from '$lib/types';
+import type {
+	NarrativeStore,
+	NarrativeNodeStore,
+	NarrativeDiceRollStore,
+	NarrativeNodeChoiceStore,
+	PlayStore,
+} from '.';
 
 export const open =
-	(narrativeStore: NarrativeStore, playStore: PlayStore) => (narrativeNodeId: string) => {};
+	(
+		narrativeStore: NarrativeStore,
+		narrativeNodeStore: NarrativeNodeStore,
+		narrativeDiceRollStore: NarrativeDiceRollStore,
+		playStore: PlayStore
+	) =>
+	(narrativeNodeId: string) => {
+		// TODO: implement
+	};
 
 export const roll =
-	(narrativeStore: NarrativeStore, playStore: PlayStore) => (): number | void => {};
+	(narrativeDiceRollStore: NarrativeDiceRollStore, playStore: PlayStore) => (): number | undefined => {
+		// TODO: implement
+		return undefined;
+	};
 
-export const next = (narrativeStore: NarrativeStore, playStore: PlayStore) => () => {};
+export const next =
+	(
+		narrativeNodeStore: NarrativeNodeStore,
+		narrativeNodeChoiceStore: NarrativeNodeChoiceStore,
+		narrativeDiceRollStore: NarrativeDiceRollStore,
+		playStore: PlayStore
+	) =>
+	() => {
+		// TODO: implement
+	};
 
-export const done = (playStore: PlayStore) => () => {};
+export const done = (playStore: PlayStore) => () => {
+	// TODO: implement
+};
 
 export const highlight =
-	(playStore: PlayStore) => (narrativeNodeChoice: NarrativeNodeChoice | undefined) => {};
+	(playStore: PlayStore) => (narrativeNodeChoice: NarrativeNodeChoice | undefined) => {
+		// TODO: implement
+	};
 
 export const select =
-	(narrativeStore: NarrativeStore, playStore: PlayStore) =>
-	(narrativeNodeChoice: NarrativeNodeChoice) => {};
+	(
+		narrativeNodeStore: NarrativeNodeStore,
+		narrativeNodeChoiceStore: NarrativeNodeChoiceStore,
+		narrativeDiceRollStore: NarrativeDiceRollStore,
+		playStore: PlayStore
+	) =>
+	(narrativeNodeChoice: NarrativeNodeChoice) => {
+		// TODO: implement
+	};
