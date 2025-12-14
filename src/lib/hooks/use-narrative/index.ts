@@ -57,15 +57,18 @@ let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
 function createNarrativeStore() {
 	const { supabase } = useServerPayload();
 
-	const narrativeStore = writable<RecordFetchState<Narrative>>({ status: 'idle' });
+	const narrativeStore = writable<RecordFetchState<Narrative>>({ status: 'idle', data: {} });
 	const narrativeNodeStore = writable<RecordFetchState<NarrativeNode>>({
 		status: 'idle',
+		data: {},
 	});
 	const narrativeDiceRollStore = writable<RecordFetchState<NarrativeDiceRoll>>({
 		status: 'idle',
+		data: {},
 	});
 	const narrativeNodeChoiceStore = writable<RecordFetchState<NarrativeNodeChoice>>({
 		status: 'idle',
+		data: {},
 	});
 
 	const adminStore = writable<AdminStoreState>({ dialog: undefined });

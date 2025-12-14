@@ -38,7 +38,7 @@
 	};
 
 	const scenarioQuestBranches = $derived(
-		Object.values($scenarioQuestBranchStore.data ?? {}).filter((b) => b.scenario_quest_id === scenarioQuestId)
+		Object.values($scenarioQuestBranchStore.data).filter((b) => b.scenario_quest_id === scenarioQuestId)
 	);
 
 	let nodes = $state<Node[]>([]);

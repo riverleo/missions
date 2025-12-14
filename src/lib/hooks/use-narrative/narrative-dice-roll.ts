@@ -29,7 +29,7 @@ export const fetchNarrativeDiceRolls = async (supabase: Supabase, store: Narrati
 
 		store.set({
 			status: 'error',
-			data: undefined,
+			data: {},
 			error: error instanceof Error ? error : new Error('Unknown error'),
 		});
 	}

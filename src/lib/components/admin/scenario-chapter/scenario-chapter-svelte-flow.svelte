@@ -34,7 +34,7 @@
 		scenarioChapter: ScenarioChapterNode,
 	};
 
-	const scenarioChapters = $derived(Object.values($store.data ?? {}));
+	const scenarioChapters = $derived(Object.values($store.data));
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);

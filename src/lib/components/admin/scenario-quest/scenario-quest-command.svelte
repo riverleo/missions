@@ -31,8 +31,8 @@
 	const currentScenarioId = $derived($scenarioStore.currentScenarioId);
 	const currentScenarioQuestId = $derived(page.params.scenarioQuestId);
 
-	const scenarioQuests = $derived(Object.values($scenarioQuestStore.data ?? {}));
-	const scenarioChapters = $derived($scenarioChapterStore.data ?? {});
+	const scenarioQuests = $derived(Object.values($scenarioQuestStore.data));
+	const scenarioChapters = $derived($scenarioChapterStore.data);
 
 	// 퀘스트를 챕터별로 그룹화
 	const scenarioQuestsByScenarioChapter = $derived(() => {

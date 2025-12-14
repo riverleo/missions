@@ -42,7 +42,7 @@
 		$dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined
 	);
 	const currentScenarioQuest = $derived(scenarioQuestId ? $scenarioQuestStore.data?.[scenarioQuestId] : undefined);
-	const chapters = $derived(Object.values($chapterStore.data ?? {}));
+	const chapters = $derived(Object.values($chapterStore.data));
 
 	let title = $state('');
 	let type = $state<ScenarioQuestType>('primary');

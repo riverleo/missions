@@ -21,7 +21,7 @@ let instance: ReturnType<typeof createScenarioStore> | null = null;
 function createScenarioStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<ScenarioStoreState>({ status: 'idle' });
+	const store = writable<ScenarioStoreState>({ status: 'idle', data: {} });
 
 	const dialogStore = writable<ScenarioDialogState>(undefined);
 
@@ -98,9 +98,6 @@ function createScenarioStore() {
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (!draft.data) {
-						draft.data = {};
-					}
 					draft.data[data.id] = data;
 				})
 			);
@@ -134,7 +131,7 @@ function createScenarioStore() {
 					}
 					// 삭제된 시나리오가 현재 선택된 시나리오인 경우 초기화
 					if (draft.currentScenarioId === scenarioId) {
-						const remainingIds = Object.keys(draft.data ?? {});
+						const remainingIds = Object.keys(draft.data);
 						draft.currentScenarioId = remainingIds[0];
 					}
 				})

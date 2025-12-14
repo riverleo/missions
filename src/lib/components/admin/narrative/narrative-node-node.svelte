@@ -21,7 +21,7 @@
 	// 선택지를 order_in_narrative_node로 정렬
 	const narrativeNodeChoices = $derived(
 		sort(
-			Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+			Object.values($narrativeNodeChoiceStore.data).filter(
 				(c) => c.narrative_node_id === narrativeNode.id
 			),
 			(c) => c.order_in_narrative_node

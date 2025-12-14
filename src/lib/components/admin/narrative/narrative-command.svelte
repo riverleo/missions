@@ -21,7 +21,7 @@
 
 	const { narrativeStore, admin } = useNarrative();
 	const currentNarrativeId = $derived(page.params.narrativeId);
-	const narratives = $derived(Object.values($narrativeStore.data ?? {}));
+	const narratives = $derived(Object.values($narrativeStore.data));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">

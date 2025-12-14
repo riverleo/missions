@@ -23,10 +23,12 @@ function createScenarioQuestStore() {
 
 	const scenarioQuestStore = writable<RecordFetchState<ScenarioQuest>>({
 		status: 'idle',
+		data: {},
 	});
 
 	const scenarioQuestBranchStore = writable<RecordFetchState<ScenarioQuestBranch>>({
 		status: 'idle',
+		data: {},
 	});
 
 	const dialogStore = writable<ScenarioQuestDialogState>(undefined);
@@ -80,13 +82,13 @@ function createScenarioQuestStore() {
 
 			scenarioQuestStore.set({
 				status: 'error',
-				data: undefined,
+				data: {},
 				error: err,
 			});
 
 			scenarioQuestBranchStore.set({
 				status: 'error',
-				data: undefined,
+				data: {},
 				error: err,
 			});
 		}
@@ -121,9 +123,6 @@ function createScenarioQuestStore() {
 
 			scenarioQuestStore.update((state) =>
 				produce(state, (draft) => {
-					if (!draft.data) {
-						draft.data = {};
-					}
 					draft.data[data.id] = data;
 				})
 			);
@@ -217,9 +216,6 @@ function createScenarioQuestStore() {
 
 			scenarioQuestBranchStore.update((state) =>
 				produce(state, (draft) => {
-					if (!draft.data) {
-						draft.data = {};
-					}
 					draft.data[data.id] = data;
 				})
 			);

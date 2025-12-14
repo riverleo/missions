@@ -2,6 +2,7 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodePlayText from './narrative-node-play-text.svelte';
 	import NarrativeNodePlayChoice from './narrative-node-play-choice.svelte';
+	import NarrativeNodePlayDiceRoll from './narrative-node-play-dice-roll.svelte';
 	import { activateStack, deactivateStack, type StackId } from '$lib/shortcut/store';
 
 	const stackId: StackId = 'narrative';
@@ -38,4 +39,6 @@
 			<NarrativeNodePlayChoice />
 		{/if}
 	</div>
+
+	<NarrativeNodePlayDiceRoll />
 </div>

@@ -327,3 +327,60 @@
   - `pnpm lint` - prettier (코드 포맷팅)
   - `pnpm dev` - 개발 서버 실행
 - ESLint는 사용하지 않음 (svelte-check가 대체)
+
+## Shortcut Stack 시스템
+
+- **스택 기반 단축키 관리**: `$lib/shortcut/store.ts`
+  - 단일 레이어가 아닌 스택 기반으로 중첩 지원
+  - `StackId`: `'narrative' | 'dice-roll' | 'quest'`
+  - `activateStack(id)`: 스택 활성화 (같은 id가 이미 있으면 맨 위로 이동)
+  - `deactivateStack(id)`: 스택 비활성화
+  - `bindStackEvent({ id, onkeydown, onkeyup })`: 이벤트 바인딩, **cleanup 함수 반환**
+
+- **컴포넌트에서 사용 패턴**:
+  ```typescript
+  // $effect로 cleanup 함수 자동 호출
+  $effect(() =>
+    bindStackEvent({
+      id: stackId,
+      onkeydown: (event) => { ... },
+      onkeyup: (event) => { ... },
+    })
+  );
+
+  // 스택 활성화/비활성화도 $effect로 관리
+  $effect(() => {
+    if (isActive) {
+      activateStack(stackId);
+    } else {
+      deactivateStack(stackId);
+    }
+  });
+  ```
+
+## RecordFetchState 타입
+
+- `data` 필드는 **항상 정의됨** (non-optional)
+- 초기값: `{ status: 'idle', data: {} }`
+- `Object.values($store.data)`로 바로 사용 가능 (`?? {}` 불필요)
+- 예시:
+  ```typescript
+  // ✅ 좋은 예
+  const items = $derived(Object.values($store.data));
+
+  // ❌ 나쁜 예 (불필요한 fallback)
+  const items = $derived(Object.values($store.data ?? {}));
+  ```
+
+## Narrative Play 컴포넌트 구조
+
+- **위치**: `$lib/components/app/narrative-node-play/`
+- **컴포넌트 구성**:
+  - `narrative-node-play.svelte`: 메인 컨테이너, 스택 활성화 관리
+  - `narrative-node-play-text.svelte`: text 타입 노드 표시
+  - `narrative-node-play-choice.svelte`: choice 타입 노드 표시, 키보드 네비게이션
+  - `narrative-node-play-dice-roll.svelte`: 주사위 굴리기 UI
+- **keyboard navigation** (choice):
+  - `focusedIndex`를 `$state`로 관리
+  - ArrowUp/ArrowDown으로 포커스 이동
+  - Enter/Space로 선택

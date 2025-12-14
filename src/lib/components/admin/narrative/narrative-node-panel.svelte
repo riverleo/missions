@@ -49,7 +49,7 @@
 		if (narrativeNode && narrativeNode.id !== currentNarrativeNodeId) {
 			currentNarrativeNodeId = narrativeNode.id;
 			// 선택지 데이터 가져와서 포함
-			const choices = Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+			const choices = Object.values($narrativeNodeChoiceStore.data).filter(
 				(c) => c.narrative_node_id === narrativeNode.id
 			);
 			changes = { ...clone(narrativeNode), narrative_node_choices: choices };
@@ -73,7 +73,7 @@
 			// 1. 시작 대화로 설정하려는 경우, 다른 시작 대화 해제
 			if (changes.root) {
 				const narrativeId = changes.narrative_id;
-				const otherRootNodes = Object.values($narrativeNodeStore.data ?? {}).filter(
+				const otherRootNodes = Object.values($narrativeNodeStore.data).filter(
 					(n) => n.narrative_id === narrativeId && n.id !== nodeId && n.root
 				);
 				// 다른 root 노드들을 먼저 해제

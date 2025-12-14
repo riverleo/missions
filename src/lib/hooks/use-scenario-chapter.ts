@@ -12,7 +12,7 @@ let instance: ReturnType<typeof createScenarioChapterStore> | null = null;
 
 function createScenarioChapterStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<RecordFetchState<ScenarioChapter>>({ status: 'idle' });
+	const store = writable<RecordFetchState<ScenarioChapter>>({ status: 'idle', data: {} });
 
 	let currentScenarioId: string | undefined;
 
@@ -43,7 +43,7 @@ function createScenarioChapterStore() {
 		} catch (error) {
 			store.set({
 				status: 'error',
-				data: undefined,
+				data: {},
 				error: error instanceof Error ? error : new Error('Unknown error'),
 			});
 		}
@@ -68,9 +68,6 @@ function createScenarioChapterStore() {
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				if (!draft.data) {
-					draft.data = {};
-				}
 				draft.data[data.id] = data;
 			})
 		);

@@ -53,10 +53,10 @@
 
 	// Record에서 현재 narrative의 데이터 필터링
 	const narrativeNodes = $derived(
-		Object.values($narrativeNodeStore.data ?? {}).filter((n) => n.narrative_id === narrativeId)
+		Object.values($narrativeNodeStore.data).filter((n) => n.narrative_id === narrativeId)
 	);
 	const narrativeDiceRolls = $derived(
-		Object.values($narrativeDiceRollStore.data ?? {}).filter((d) => d.narrative_id === narrativeId)
+		Object.values($narrativeDiceRollStore.data).filter((d) => d.narrative_id === narrativeId)
 	);
 
 	// 선택된 노드 추적
@@ -445,7 +445,7 @@
 
 			// choice 타입이면 각 narrativeNodeChoice의 narrative_dice_roll_id로 엣지 생성
 			if (narrativeNode.type === 'choice') {
-				const choices = Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+				const choices = Object.values($narrativeNodeChoiceStore.data).filter(
 					(c) => c.narrative_node_id === narrativeNode.id
 				);
 				choices.forEach((narrativeNodeChoice) => {

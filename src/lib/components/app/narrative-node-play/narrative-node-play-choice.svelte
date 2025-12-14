@@ -2,7 +2,7 @@
 	import { cn } from '$lib/utils';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindStackEvent, type StackId } from '$lib/shortcut/store';
-	import { isEnterOrSpace } from '$lib/shortcut/utils';
+	import { isArrowUp, isArrowDown, isEnterOrSpace } from '$lib/shortcut/utils';
 
 	const stackId: StackId = 'narrative';
 
@@ -14,20 +14,41 @@
 
 	const narrativeNodeChoices = $derived(
 		$playStore.narrativeNode
-			? Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
+			? Object.values($narrativeNodeChoiceStore.data).filter(
 					(c) => c.narrative_node_id === $playStore.narrativeNode!.id
 				)
 			: []
 	);
 
+	// 현재 포커스된 선택지 인덱스
+	let focusedIndex = $state(0);
+
+	// narrativeNodeChoices가 바뀌면 focusedIndex 리셋
+	$effect(() => {
+		if (narrativeNodeChoices.length > 0) {
+			focusedIndex = 0;
+		}
+	});
+
 	$effect(() =>
 		bindStackEvent({
 			id: stackId,
+			onkeydown: (event: KeyboardEvent) => {
+				if ($playStore.narrativeNode?.type !== 'choice') return;
+				const length = narrativeNodeChoices.length;
+				if (length === 0) return;
+
+				if (isArrowUp(event)) {
+					focusedIndex = (focusedIndex - 1 + length) % length;
+				} else if (isArrowDown(event)) {
+					focusedIndex = (focusedIndex + 1) % length;
+				}
+			},
 			onkeyup: (event: KeyboardEvent) => {
 				if ($playStore.narrativeNode?.type !== 'choice') return;
 
 				if (isEnterOrSpace(event)) {
-					const selectedChoice = $playStore.selectedNarrativeNodeChoice;
+					const selectedChoice = narrativeNodeChoices[focusedIndex];
 					if (selectedChoice !== undefined) {
 						play.select(selectedChoice.id);
 					}
@@ -67,14 +88,14 @@
 
 <div class="mt-10 flex flex-col items-center gap-3 px-8">
 	{#each narrativeNodeChoices as narrativeNodeChoice, index (narrativeNodeChoice.id)}
-		{@const isSelected = $playStore.selectedNarrativeNodeChoice?.id === narrativeNodeChoice.id}
+		{@const focused = index === focusedIndex}
 		<button
-			data-shortcut-key={isSelected ? 'Space Enter' : undefined}
+			data-shortcut-key={focused ? 'Space Enter' : undefined}
 			data-shortcut-effect="bounce"
 			data-shortcut-stack={stackId}
 			onclick={() => play.select(narrativeNodeChoice.id)}
 			class={cn('choice-button text-2xl blur-3xl', {
-				'opacity-20': !isSelected,
+				'opacity-20': !focused,
 			})}
 			style="animation-delay: {index * 300}ms"
 		>

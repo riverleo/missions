@@ -29,7 +29,7 @@ export const fetchNarrativeNodes = async (supabase: Supabase, store: NarrativeNo
 
 		store.set({
 			status: 'error',
-			data: undefined,
+			data: {},
 			error: error instanceof Error ? error : new Error('Unknown error'),
 		});
 	}

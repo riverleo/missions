@@ -19,7 +19,7 @@ export interface FetchState<T> {
 
 export interface RecordFetchState<T> {
 	status: FetchStatus;
-	data?: Record<string, T>;
+	data: Record<string, T>;
 	error?: Error;
 }
 
