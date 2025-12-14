@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindStackEvent, activateStack, type StackId } from '$lib/shortcut/store';
@@ -9,10 +10,9 @@
 	const { play } = useNarrative();
 	const playStore = play.store;
 
-	$effect(() => activateStack(stackId));
-
-	$effect(() =>
-		bindStackEvent({
+	onMount(() => {
+		const cleanupStack = activateStack(stackId);
+		const cleanupEvent = bindStackEvent({
 			id: stackId,
 			onkeyup: (event: KeyboardEvent) => {
 				if (!isEnterOrSpace(event)) return;
@@ -20,8 +20,13 @@
 				if ($playStore.playerRolledDice !== undefined) play.next();
 				else play.roll();
 			},
-		})
-	);
+		});
+
+		return () => {
+			cleanupEvent();
+			cleanupStack();
+		};
+	});
 </script>
 
 <div
