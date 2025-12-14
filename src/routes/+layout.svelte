@@ -6,8 +6,8 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import type { ServerPayload } from '$lib/types';
 	import { TooltipProvider } from '$lib/components/ui/tooltip';
-	import Narrative from '$lib/components/app/narrative-play/narrative.svelte';
-	import DiceRoll from '$lib/components/app/dice-roll-play/dice-roll.svelte';
+	import NarrativePlay from '$lib/components/app/narrative-play/narrative-play.svelte';
+	import DiceRollPlay from '$lib/components/app/dice-roll-play/dice-roll-play.svelte';
 
 	const { data, children }: { data: ServerPayload; children: any } = $props();
 </script>
@@ -23,7 +23,8 @@
 <ServerPayloadProvider {data}>
 	<TooltipProvider>
 		{@render children()}
+
+		<NarrativePlay />
+		<DiceRollPlay />
 	</TooltipProvider>
-	<Narrative />
-	<DiceRoll />
 </ServerPayloadProvider>

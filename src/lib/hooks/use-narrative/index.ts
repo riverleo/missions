@@ -40,10 +40,9 @@ interface AdminStoreState {
 }
 
 export interface PlayStoreState {
-	narrativeId?: string;
-	narrativeNodeId?: string;
-	narrativeDiceRollId?: string;
-	selectedNarrativeNodeChoiceId?: string;
+	narrativeNode?: NarrativeNode;
+	narrativeDiceRoll?: NarrativeDiceRoll;
+	selectedNarrativeNodeChoice?: NarrativeNodeChoice;
 	playerRolledDice?: PlayerRolledDice;
 }
 
@@ -119,16 +118,41 @@ function createNarrativeStore() {
 		},
 		play: {
 			store: playStore as Readable<PlayStoreState>,
-			run: run(narrativeStore, narrativeNodeStore, narrativeDiceRollStore, playStore),
-			roll: roll(narrativeDiceRollStore, playStore),
-			next: next(narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore),
-			done: done(playStore),
-			select: select(
+			run: run({
+				narrativeStore,
 				narrativeNodeStore,
 				narrativeNodeChoiceStore,
 				narrativeDiceRollStore,
-				playStore
-			),
+				playStore,
+			}),
+			roll: roll({
+				narrativeStore,
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+				playStore,
+			}),
+			next: next({
+				narrativeStore,
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+				playStore,
+			}),
+			done: done({
+				narrativeStore,
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+				playStore,
+			}),
+			select: select({
+				narrativeStore,
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+				playStore,
+			}),
 		},
 	};
 }

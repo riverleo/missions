@@ -1,4 +1,5 @@
-import type { NarrativeNodeChoice } from '$lib/types';
+import { get } from 'svelte/store';
+import type { PlayerRolledDice } from '$lib/types';
 import type {
 	NarrativeStore,
 	NarrativeNodeStore,
@@ -7,46 +8,49 @@ import type {
 	PlayStore,
 } from '.';
 
+interface Params {
+	narrativeStore: NarrativeStore;
+	narrativeNodeStore: NarrativeNodeStore;
+	narrativeNodeChoiceStore: NarrativeNodeChoiceStore;
+	narrativeDiceRollStore: NarrativeDiceRollStore;
+	playStore: PlayStore;
+}
+
 export const run =
-	(
-		narrativeStore: NarrativeStore,
-		narrativeNodeStore: NarrativeNodeStore,
-		narrativeDiceRollStore: NarrativeDiceRollStore,
-		playStore: PlayStore
-	) =>
+	({ narrativeNodeStore, playStore }: Params) =>
 	(narrativeNodeId: string) => {
-		// TODO: implement
+		const narrativeNode = get(narrativeNodeStore).data?.[narrativeNodeId];
+		if (!narrativeNode) return;
+
+		playStore.set({
+			narrativeNode,
+			narrativeDiceRoll: undefined,
+			selectedNarrativeNodeChoice: undefined,
+			playerRolledDice: undefined,
+		});
 	};
 
 export const roll =
-	(narrativeDiceRollStore: NarrativeDiceRollStore, playStore: PlayStore) =>
-	(): number | undefined => {
+	({ narrativeDiceRollStore, playStore }: Params) =>
+	(): PlayerRolledDice | undefined => {
 		// TODO: implement
 		return undefined;
 	};
 
 export const next =
-	(
-		narrativeNodeStore: NarrativeNodeStore,
-		narrativeNodeChoiceStore: NarrativeNodeChoiceStore,
-		narrativeDiceRollStore: NarrativeDiceRollStore,
-		playStore: PlayStore
-	) =>
+	({ narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore }: Params) =>
 	() => {
 		// TODO: implement
 	};
 
-export const done = (playStore: PlayStore) => () => {
-	// TODO: implement
-};
+export const done =
+	({ playStore }: Params) =>
+	() => {
+		// TODO: implement
+	};
 
 export const select =
-	(
-		narrativeNodeStore: NarrativeNodeStore,
-		narrativeNodeChoiceStore: NarrativeNodeChoiceStore,
-		narrativeDiceRollStore: NarrativeDiceRollStore,
-		playStore: PlayStore
-	) =>
-	(narrativeNodeChoice: NarrativeNodeChoice) => {
+	({ narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore }: Params) =>
+	(narrativeNodeChoiceId: string) => {
 		// TODO: implement
 	};

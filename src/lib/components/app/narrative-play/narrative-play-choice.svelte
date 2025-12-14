@@ -17,14 +17,14 @@
 
 	let { narrativeNodeChoice, index, ...restProps }: Props = $props();
 
-	const isSelected = $derived($playStore.selectedNarrativeNodeChoiceId === narrativeNodeChoice.id);
+	const isSelected = $derived($playStore.selectedNarrativeNodeChoice?.id === narrativeNodeChoice.id);
 </script>
 
 <button
 	data-shortcut-key={isSelected ? 'Space Enter' : undefined}
 	data-shortcut-effect="bounce"
 	data-shortcut-layer={layerId}
-	onclick={() => play.select(narrativeNodeChoice)}
+	onclick={() => play.select(narrativeNodeChoice.id)}
 	class={cn('text-2xl blur-3xl', {
 		'opacity-20': !isSelected,
 	})}
