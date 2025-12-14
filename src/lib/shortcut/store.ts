@@ -38,12 +38,14 @@ export function bindStackEvent({ id, onkeyup, onkeydown }: { id: StackId } & Sta
 	};
 }
 
-// 스택 활성화 (이미 있으면 맨 위로 이동)
+// 스택 활성화 (이미 있으면 맨 위로 이동, cleanup 함수 반환)
 export function activateStack(id: StackId) {
 	stack.update((s) => {
 		const filtered = s.filter((stackId) => stackId !== id);
 		return [...filtered, id];
 	});
+
+	return () => deactivateStack(id);
 }
 
 // 스택 비활성화 (스택에서 제거)

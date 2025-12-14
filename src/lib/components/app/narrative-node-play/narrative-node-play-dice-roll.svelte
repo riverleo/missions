@@ -2,12 +2,7 @@
 	import { debounce } from 'radash';
 	import { Button } from '$lib/components/ui/button';
 	import { useNarrative } from '$lib/hooks/use-narrative';
-	import {
-		bindStackEvent,
-		activateStack,
-		deactivateStack,
-		type StackId,
-	} from '$lib/shortcut/store';
+	import { bindStackEvent, activateStack, type StackId } from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 
 	const stackId: StackId = 'dice-roll';
@@ -17,9 +12,7 @@
 
 	$effect(() => {
 		if ($playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0) {
-			activateStack(stackId);
-		} else {
-			deactivateStack(stackId);
+			return activateStack(stackId);
 		}
 	});
 

@@ -3,7 +3,7 @@
 	import NarrativeNodePlayText from './narrative-node-play-text.svelte';
 	import NarrativeNodePlayChoice from './narrative-node-play-choice.svelte';
 	import NarrativeNodePlayDiceRoll from './narrative-node-play-dice-roll.svelte';
-	import { activateStack, deactivateStack, type StackId } from '$lib/shortcut/store';
+	import { activateStack, type StackId } from '$lib/shortcut/store';
 
 	const stackId: StackId = 'narrative';
 
@@ -12,9 +12,7 @@
 
 	$effect(() => {
 		if ($playStore.narrativeNode) {
-			activateStack(stackId);
-		} else {
-			deactivateStack(stackId);
+			return activateStack(stackId);
 		}
 	});
 </script>
