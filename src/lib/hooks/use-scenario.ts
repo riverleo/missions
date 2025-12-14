@@ -62,8 +62,9 @@ function createScenarioStore() {
 			store.subscribe((s) => (currentState = s))();
 
 			const scenarios = data ?? [];
-			if (!currentState?.currentScenarioId && scenarios.length > 0) {
-				await init(scenarios[0].id);
+			const firstScenario = scenarios[0];
+			if (!currentState?.currentScenarioId && firstScenario) {
+				await init(firstScenario.id);
 			}
 		} catch (error) {
 			store.update((state) => ({

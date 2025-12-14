@@ -19,56 +19,58 @@ interface Params {
 }
 
 export interface PlayStoreState {
-	narrativeNode?: NarrativeNode; // 값이 있을 경우 대화 화면(NarrativeNodePlay) 표시
-	narrativeDiceRoll?: NarrativeDiceRoll; // 값이 있을 경우 주사위 굴림 화면(NarrativeDiceRollPlay) 표시
-	playerRolledDice?: PlayerRolledDice; // 값이 있을 경우 주사위 굴림 화면(NarrativeDiceRollPlay)에 결과 표시
+	narrativeNode?: NarrativeNode; // 값이 있을 경우 대화 화면(`NarrativeNodePlay`) 표시
+	narrativeDiceRoll?: NarrativeDiceRoll; // 값이 있을 경우 주사위 굴림 화면(`NarrativeDiceRollPlay`) 표시
+	playerRolledDice?: PlayerRolledDice; // 값이 있을 경우 주사위 굴림 화면(`NarrativeDiceRollPlay`)에 결과 표시
 }
 
 /**
- * 내러티브 노드 플레이 시작
- * - 지정한 노드로 playStore를 초기화하고 플레이를 시작함
- * - narrativeDiceRoll, playerRolledDice는 초기화됨
+ * 내러티브 노드 시작
+ * - 지정한 노드로 `playStore`를 초기화하고 플레이를 시작함
+ * - `narrativeDiceRoll`, `playerRolledDice`는 초기화됨
  */
-export const run =
-	({ narrativeNodeStore, playStore }: Params) =>
-	(narrativeNodeId: string) => {
-		const narrativeNode = get(narrativeNodeStore).data?.[narrativeNodeId];
-		if (!narrativeNode) return;
+export const run = (params: Params) => (narrativeNodeId: string) => {
+	const { narrativeNodeStore, playStore } = params;
 
-		playStore.set({
-			narrativeNode,
-			narrativeDiceRoll: undefined,
-		});
-	};
+	const narrativeNode = get(narrativeNodeStore).data?.[narrativeNodeId];
+	if (!narrativeNode) return;
+
+	playStore.set({
+		narrativeNode,
+		narrativeDiceRoll: undefined,
+		playerRolledDice: undefined,
+	});
+};
 
 /**
  * 주사위 굴리기
- * - DB에 player_rolled_dices 레코드 생성 (value는 DB 트리거가 자동 생성)
- * - 결과를 playStore.playerRolledDice에 저장
- * - narrativeDiceRoll이 설정되어 있어야 호출 가능
+ * - DB에 `player_rolled_dices` 레코드 생성 (`value`는 DB 트리거가 자동 생성)
+ * - 결과를 `playStore.playerRolledDice`에 저장
+ * - `narrativeDiceRoll`이 설정되어 있어야 호출 가능
  */
-export const roll = ({ playStore }: Params) => {
+export const roll = (params: Params) => {
+	const { playStore } = params;
+
+	// `useServerPayload`, `useCurrentUser`는 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
+	// async 함수 내부에서 호출하면 `lifecycle_outside_component` 에러 발생
 	const { supabase } = useServerPayload();
 	const { store: currentUserStore } = useCurrentUser();
 
 	return async (): Promise<PlayerRolledDice | undefined> => {
-		const currentUser = get(currentUserStore);
-		const playStoreState = get(playStore);
+		const { data } = get(currentUserStore);
+		const { user, currentPlayer } = data;
+		const { narrativeNode, narrativeDiceRoll } = get(playStore);
 
-		const userId = currentUser.data?.user?.id;
-		const playerId = currentUser.data?.currentPlayer?.id;
-		const narrativeNode = playStoreState.narrativeNode;
-		const narrativeDiceRoll = playStoreState.narrativeDiceRoll;
-
-		if (!userId || !playerId || !narrativeNode || !narrativeDiceRoll) {
-			return undefined;
+		if (!user?.id || !currentPlayer?.id || !narrativeNode || !narrativeDiceRoll) {
+			console.warn('Missing required data:', { user, currentPlayer, narrativeNode, narrativeDiceRoll });
+			return;
 		}
 
-		const { data, error } = await supabase
+		const { data: playerRolledDice, error } = await supabase
 			.from('player_rolled_dices')
 			.insert({
-				user_id: userId,
-				player_id: playerId,
+				user_id: user.id,
+				player_id: currentPlayer.id,
 				narrative_id: narrativeNode.narrative_id,
 				narrative_node_id: narrativeNode.id,
 				narrative_dice_roll_id: narrativeDiceRoll.id,
@@ -77,114 +79,101 @@ export const roll = ({ playStore }: Params) => {
 			.single();
 
 		if (error) {
-			return undefined;
+			console.error('Error inserting player_rolled_dice:', error);
+			return;
 		}
 
 		playStore.update((state) => ({
 			...state,
-			playerRolledDice: data,
+			playerRolledDice,
 		}));
 
-		return data;
+		return playerRolledDice;
 	};
 };
 
 /**
  * 다음 단계로 진행
- * - choice 노드: narrativeNodeChoiceId 필수, 선택지의 dice roll 확인
- * - text 노드: 노드의 dice roll 확인
+ * - `choice` 타입: `narrativeNodeChoiceId` 필수, 선택지의 주사위 굴림 ID 사용
+ * - `text` 타입: 노드의 주사위 굴림 ID 사용
  *
  * 동작 흐름:
- * 1. 이미 dice roll이 완료된 경우 → 성공/실패에 따라 다음 노드로 run
- * 2. dice roll ID가 없으면 → 대화 종료
- * 3. difficulty_class가 0이면 → 바로 성공 노드로 run
- * 4. 그 외 → dice roll UI 표시 (narrativeDiceRoll 설정)
+ * 1. 이미 주사위 굴림이 완료된 경우 → 성공/실패에 따라 다음 노드로 `run`
+ * 2. 주사위 굴림 ID가 없으면 → 대화 종료
+ * 3. `difficulty_class`가 0이면 → 바로 성공 노드로 `run`
+ * 4. 그 외 → 주사위 굴림 UI 표시 (`narrativeDiceRoll` 설정)
  */
-export const next =
-	({
-		narrativeStore,
-		narrativeNodeStore,
-		narrativeNodeChoiceStore,
-		narrativeDiceRollStore,
-		playStore,
-	}: Params) =>
-	(narrativeNodeChoiceId?: string) => {
-		const playStoreState = get(playStore);
-		const narrativeNode = playStoreState.narrativeNode;
+export const next = (params: Params) => (narrativeNodeChoiceId?: string) => {
+	const { narrativeNodeChoiceStore, narrativeDiceRollStore, playStore } = params;
 
-		if (!narrativeNode) return;
+	const { narrativeDiceRoll, playerRolledDice, narrativeNode } = get(playStore);
 
-		const { narrativeDiceRoll, playerRolledDice } = playStoreState;
+	if (!narrativeNode) return;
 
-		// 1. 이미 dice roll이 완료된 상태 → 결과에 따라 다음 노드로 이동
-		if (narrativeDiceRoll && playerRolledDice && playerRolledDice.value !== null) {
-			const isSuccess = playerRolledDice.value >= narrativeDiceRoll.difficulty_class;
-			const nextNarrativeNodeId = isSuccess
-				? narrativeDiceRoll.success_narrative_node_id
-				: narrativeDiceRoll.failure_narrative_node_id;
+	// 1. 이미 주사위 굴림이 완료된 상태 → 결과에 따라 다음 노드로 이동
+	if (narrativeDiceRoll && playerRolledDice && playerRolledDice.value !== null) {
+		const success = playerRolledDice.value >= narrativeDiceRoll.difficulty_class;
+		const nextNarrativeNodeId = success
+			? narrativeDiceRoll.success_narrative_node_id
+			: narrativeDiceRoll.failure_narrative_node_id;
 
-			if (nextNarrativeNodeId) {
-				run({
-					narrativeStore,
-					narrativeNodeStore,
-					narrativeNodeChoiceStore,
-					narrativeDiceRollStore,
-					playStore,
-				})(nextNarrativeNodeId);
-			} else {
-				playStore.set({});
-			}
-			return;
+		if (nextNarrativeNodeId) {
+			run(params)(nextNarrativeNodeId);
+		} else {
+			done(params)();
 		}
+		return;
+	}
 
-		// 2. dice roll ID 확인
-		let narrativeDiceRollId: string | null = null;
+	const { data: narrativeNodeChoices } = get(narrativeNodeChoiceStore);
+	// 2. 주사위 굴림 ID 확인
+	let narrativeDiceRollId: string | null = null;
 
-		if (narrativeNode.type === 'choice' && narrativeNodeChoiceId) {
-			const narrativeNodeChoice = get(narrativeNodeChoiceStore).data[narrativeNodeChoiceId];
-			narrativeDiceRollId = narrativeNodeChoice?.narrative_dice_roll_id ?? null;
-		} else if (narrativeNode.type === 'text') {
-			narrativeDiceRollId = narrativeNode.narrative_dice_roll_id;
+	if (narrativeNode.type === 'choice' && narrativeNodeChoiceId) {
+		const narrativeNodeChoice = narrativeNodeChoices[narrativeNodeChoiceId];
+
+		narrativeDiceRollId = narrativeNodeChoice?.narrative_dice_roll_id ?? null;
+	} else if (narrativeNode.type === 'text') {
+		narrativeDiceRollId = narrativeNode.narrative_dice_roll_id;
+	}
+
+	// 주사위 굴림이 없으면 대화 종료
+	if (!narrativeDiceRollId) {
+		return done(params)();
+	}
+
+	const { data: narrativeDiceRolls } = get(narrativeDiceRollStore);
+	const newNarrativeDiceRoll = narrativeDiceRolls[narrativeDiceRollId];
+
+	if (!newNarrativeDiceRoll) {
+		console.warn('narrativeDiceRoll not found:', narrativeDiceRollId);
+		return done(params)();
+	}
+
+	// 3. `difficulty_class`가 0이면 주사위 굴릴 필요 없이 바로 성공 노드로 이동
+	if (newNarrativeDiceRoll.difficulty_class === 0) {
+		const nextNarrativeNodeId = newNarrativeDiceRoll.success_narrative_node_id;
+
+		if (nextNarrativeNodeId) {
+			run(params)(nextNarrativeNodeId);
+		} else {
+			done(params)();
 		}
+		return;
+	}
 
-		// dice roll이 없으면 대화 종료
-		if (!narrativeDiceRollId) {
-			playStore.set({});
-			return;
-		}
-
-		const newNarrativeDiceRoll = get(narrativeDiceRollStore).data[narrativeDiceRollId];
-
-		// 3. difficulty_class가 0이면 주사위 굴릴 필요 없이 바로 성공 노드로 이동
-		if (newNarrativeDiceRoll.difficulty_class === 0) {
-			const nextNarrativeNodeId = newNarrativeDiceRoll.success_narrative_node_id;
-
-			if (nextNarrativeNodeId) {
-				run({
-					narrativeStore,
-					narrativeNodeStore,
-					narrativeNodeChoiceStore,
-					narrativeDiceRollStore,
-					playStore,
-				})(nextNarrativeNodeId);
-			} else {
-				playStore.set({});
-			}
-			return;
-		}
-
-		// 4. dice roll UI 표시
-		playStore.update((state) => ({
-			...state,
-			narrativeDiceRoll: newNarrativeDiceRoll,
-		}));
-	};
+	// 4. 주사위 굴림 UI 표시
+	playStore.update((state) => ({
+		...state,
+		narrativeDiceRoll: newNarrativeDiceRoll,
+	}));
+};
 
 /**
  * 내러티브 플레이 종료
- * - playStore를 초기화하여 플레이 화면을 닫음
+ * - `playStore`를 초기화하여 플레이 화면을 닫음
  */
-export const done =
-	({ playStore }: Params) =>
-	() =>
-		playStore.set({});
+export const done = (params: Params) => () => {
+	const { playStore } = params;
+	playStore.set({});
+};

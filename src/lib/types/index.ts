@@ -13,7 +13,7 @@ export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface FetchState<T> {
 	status: FetchStatus;
-	data?: T;
+	data: T;
 	error?: Error;
 }
 

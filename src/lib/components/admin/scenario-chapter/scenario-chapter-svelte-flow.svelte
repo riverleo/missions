@@ -135,7 +135,10 @@
 		if (!sourceNode) return;
 
 		// 마우스/터치 위치를 플로우 좌표로 변환
-		const { clientX, clientY } = 'changedTouches' in event ? event.changedTouches[0] : event;
+		const clientX =
+			'changedTouches' in event ? (event.changedTouches[0]?.clientX ?? 0) : event.clientX;
+		const clientY =
+			'changedTouches' in event ? (event.changedTouches[0]?.clientY ?? 0) : event.clientY;
 		const position = screenToFlowPosition({ x: clientX, y: clientY });
 
 		// 스토어 업데이트 중 effect 건너뛰기

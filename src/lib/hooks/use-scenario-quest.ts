@@ -162,7 +162,7 @@ function createScenarioQuestStore() {
 				produce(state, (draft) => {
 					if (draft.data) {
 						for (const branchId of Object.keys(draft.data)) {
-							if (draft.data[branchId].scenario_quest_id === id) {
+							if (draft.data[branchId]?.scenario_quest_id === id) {
 								delete draft.data[branchId];
 							}
 						}

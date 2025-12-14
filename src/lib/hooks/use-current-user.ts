@@ -15,7 +15,10 @@ let instance: ReturnType<typeof createCurrentUserStore> | undefined = undefined;
 
 function createCurrentUserStore() {
 	const { supabase, user: serverUser } = useServerPayload();
-	const store = writable<FetchState<UserState>>({ status: 'idle' });
+	const store = writable<FetchState<UserState>>({
+		status: 'idle',
+		data: { user: undefined, role: undefined, players: [], currentPlayer: undefined },
+	});
 
 	let initialized = false;
 
@@ -77,7 +80,7 @@ function createCurrentUserStore() {
 		} catch (error) {
 			store.set({
 				status: 'error',
-				data: undefined,
+				data: { user: undefined, role: undefined, players: [], currentPlayer: undefined },
 				error: error instanceof Error ? error : new Error('Unknown error'),
 			});
 		}

@@ -63,18 +63,19 @@ export function parseNarrativeNodeToNarrativeDiceRollEdgeId(edgeId: string): {
 	nodeId: string;
 	narrativeDiceRollId: string;
 } {
-	const [nodeId, narrativeDiceRollPart] = edgeId.split('-narrative-dice-roll-');
-	return { nodeId, narrativeDiceRollId: narrativeDiceRollPart };
+	const parts = edgeId.split('-narrative-dice-roll-');
+	const nodeId = parts[0] ?? '';
+	const narrativeDiceRollId = parts[1] ?? '';
+	return { nodeId, narrativeDiceRollId };
 }
 
 export function parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(edgeId: string): {
 	narrativeNodeChoiceId: string;
 	narrativeDiceRollId: string;
 } {
-	const narrativeNodeChoiceId = edgeId
-		.split('-narrative-dice-roll-')[0]
-		.replace('narrative-node-choice-', '');
-	const narrativeDiceRollId = edgeId.split('-narrative-dice-roll-')[1];
+	const parts = edgeId.split('-narrative-dice-roll-');
+	const narrativeNodeChoiceId = (parts[0] ?? '').replace('narrative-node-choice-', '');
+	const narrativeDiceRollId = parts[1] ?? '';
 	return { narrativeNodeChoiceId, narrativeDiceRollId };
 }
 
@@ -82,7 +83,9 @@ export function parseNarrativeDiceRollToSuccessEdgeId(edgeId: string): {
 	narrativeDiceRollId: string;
 	nodeId: string;
 } {
-	const [narrativeDiceRollPart, nodeId] = edgeId.split('-success-');
+	const parts = edgeId.split('-success-');
+	const narrativeDiceRollPart = parts[0] ?? '';
+	const nodeId = parts[1] ?? '';
 	const narrativeDiceRollId = parseNarrativeDiceRollNodeId(narrativeDiceRollPart);
 	return { narrativeDiceRollId, nodeId };
 }
@@ -91,7 +94,9 @@ export function parseNarrativeDiceRollToFailureEdgeId(edgeId: string): {
 	narrativeDiceRollId: string;
 	nodeId: string;
 } {
-	const [narrativeDiceRollPart, nodeId] = edgeId.split('-failure-');
+	const parts = edgeId.split('-failure-');
+	const narrativeDiceRollPart = parts[0] ?? '';
+	const nodeId = parts[1] ?? '';
 	const narrativeDiceRollId = parseNarrativeDiceRollNodeId(narrativeDiceRollPart);
 	return { narrativeDiceRollId, nodeId };
 }

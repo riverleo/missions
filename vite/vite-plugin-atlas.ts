@@ -29,7 +29,9 @@ function getImageSize(imagePath: string): ImageSize {
 	const output = execSync(`magick identify -format "%wx%h" "${imagePath}"`, {
 		encoding: 'utf-8',
 	}).trim();
-	const [width, height] = output.split('x').map(Number);
+	const parts = output.split('x').map(Number);
+	const width = parts[0] ?? 0;
+	const height = parts[1] ?? 0;
 	return { width, height };
 }
 
@@ -66,7 +68,12 @@ async function generateSpriteSheet(groupName: string, files: string[]) {
 	execSync(command, { stdio: 'inherit' });
 
 	// 프레임 크기 확인 (첫 번째 이미지)
-	const { width: frameWidth, height: frameHeight } = getImageSize(files[0]);
+	const firstFile = files[0];
+	if (!firstFile) {
+		console.warn(`⚠ [${groupName}] No files to process`);
+		return;
+	}
+	const { width: frameWidth, height: frameHeight } = getImageSize(firstFile);
 
 	// 메타데이터 생성
 	const metadata = {
@@ -219,6 +226,8 @@ export function atlasPlugin(): Plugin {
 
 				// 변경된 파일의 그룹명 추출
 				const groupName = filename.split('/')[0];
+				if (!groupName) return;
+
 				console.log(`\n📦 Atlas source changed: ${filename}`);
 
 				// 그룹별 debounce 생성 (없으면)
@@ -238,7 +247,7 @@ export function atlasPlugin(): Plugin {
 				}
 
 				// 해당 그룹의 debounced 함수 실행
-				debouncedGenerators.get(groupName)!();
+				debouncedGenerators.get(groupName)?.();
 			});
 
 			// 서버 시작 시 한 번 생성

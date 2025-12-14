@@ -56,26 +56,26 @@
 		let currentPath = '/admin';
 
 		for (let i = 0; i < segments.length; i++) {
-			// admin은 건너뛰기 (이미 Home으로 처리됨)
-			if (segments[i] === 'admin') continue;
+			const segment = segments[i];
+			if (!segment) continue;
 
-			currentPath += `/${segments[i]}`;
+			// admin은 건너뛰기 (이미 Home으로 처리됨)
+			if (segment === 'admin') continue;
+
+			currentPath += `/${segment}`;
 			const isLast = i === segments.length - 1;
 
-			let label = segments[i];
+			let label = segment;
 			// 라벨 매핑
-			if (segments[i] === 'scenarios') label = '시나리오';
-			else if (segments[i] === 'chapters') label = '챕터';
-			else if (segments[i] === 'quests') label = '퀘스트';
-			else if (segments[i] === 'narratives') label = '대화 또는 효과';
+			if (segment === 'scenarios') label = '시나리오';
+			else if (segment === 'chapters') label = '챕터';
+			else if (segment === 'quests') label = '퀘스트';
+			else if (segment === 'narratives') label = '대화 또는 효과';
 			// UUID 형태의 ID는 title로 표시
-			else if (
-				/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segments[i])
-			) {
-				const id = segments[i];
+			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
 				const prevSegment = segments[i - 1];
-				const title = getTitle(id, prevSegment);
-				label = title || id.slice(0, 8);
+				const title = getTitle(segment, prevSegment);
+				label = title || segment.slice(0, 8);
 			}
 
 			crumbs.push({

@@ -5,7 +5,6 @@ import type {
 	NarrativeDiceRoll,
 	NarrativeNode,
 	NarrativeNodeChoice,
-	PlayerRolledDice,
 } from '$lib/types';
 import { useServerPayload } from '../use-server-payload.svelte';
 import { fetchNarratives, createNarrative, updateNarrative, removeNarrative } from './narrative';
