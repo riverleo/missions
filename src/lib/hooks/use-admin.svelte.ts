@@ -1,17 +1,60 @@
 import { createContext } from 'svelte';
+import { get } from 'svelte/store';
+import type { PlayerRolledDice, NarrativeNode, NarrativeDiceRoll } from '$lib/types';
+import { useCurrentUser } from './use-current-user';
 
-class AdminContext {
-	breadcrumbTitle = $state<string | undefined>(undefined);
+interface AdminContext {
+	isAdmin: boolean;
 }
 
+const defaultContext: AdminContext = { isAdmin: false };
 const [getAdminContext, setAdminContext] = createContext<AdminContext>();
 
 export function createAdminContext() {
-	const context = new AdminContext();
-	setAdminContext(context);
-	return context;
+	setAdminContext({ isAdmin: true });
 }
 
-export function useAdmin(): AdminContext {
-	return getAdminContext();
+export function useAdmin() {
+	const { store: currentUserStore } = useCurrentUser();
+	const context = getAdminContext() ?? defaultContext;
+
+	const mock = {
+		playerRolledDice: ({
+			narrativeNode,
+			narrativeDiceRoll,
+		}: {
+			narrativeNode: NarrativeNode;
+			narrativeDiceRoll: NarrativeDiceRoll;
+		}): PlayerRolledDice => {
+			const { data } = get(currentUserStore);
+			const { user, currentPlayer } = data;
+
+			if (!user?.id || !currentPlayer?.id) {
+				throw new Error('user 또는 currentPlayer가 없습니다');
+			}
+
+			return {
+				id: crypto.randomUUID(),
+				created_at: new Date().toISOString(),
+				user_id: user.id,
+				player_id: currentPlayer.id,
+				narrative_id: narrativeNode.narrative_id,
+				narrative_node_id: narrativeNode.id,
+				narrative_dice_roll_id: narrativeDiceRoll.id,
+				dice_id: null,
+				narrative_node_choice_id: null,
+				player_scenario_quest_branch_id: null,
+				player_scenario_quest_id: null,
+				scenario_id: null,
+				scenario_quest_branch_id: null,
+				scenario_quest_id: null,
+				value: Math.floor(Math.random() * 20) + 1, // 1-20 (d20)
+			};
+		},
+	};
+
+	return {
+		...context,
+		mock,
+	};
 }

@@ -9,6 +9,7 @@ import type {
 } from '.';
 import { useCurrentUser } from '../use-current-user';
 import { useServerPayload } from '../use-server-payload.svelte';
+import { useAdmin } from '../use-admin.svelte';
 
 interface Params {
 	narrativeStore: NarrativeStore;
@@ -47,14 +48,16 @@ export const run = (params: Params) => (narrativeNodeId: string) => {
  * - DB에 `player_rolled_dices` 레코드 생성 (`value`는 DB 트리거가 자동 생성)
  * - 결과를 `playStore.playerRolledDice`에 저장
  * - `narrativeDiceRoll`이 설정되어 있어야 호출 가능
+ * - 어드민 모드에서는 DB 저장 없이 로컬에서 랜덤 값 생성
  */
 export const roll = (params: Params) => {
 	const { playStore } = params;
 
-	// `useServerPayload`, `useCurrentUser`는 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
+	// `useServerPayload`, `useCurrentUser`, `useAdmin`은 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
 	// async 함수 내부에서 호출하면 `lifecycle_outside_component` 에러 발생
 	const { supabase } = useServerPayload();
 	const { store: currentUserStore } = useCurrentUser();
+	const { isAdmin, mock } = useAdmin();
 
 	return async (): Promise<PlayerRolledDice | undefined> => {
 		const { data } = get(currentUserStore);
@@ -66,21 +69,30 @@ export const roll = (params: Params) => {
 			return;
 		}
 
-		const { data: playerRolledDice, error } = await supabase
-			.from('player_rolled_dices')
-			.insert({
-				user_id: user.id,
-				player_id: currentPlayer.id,
-				narrative_id: narrativeNode.narrative_id,
-				narrative_node_id: narrativeNode.id,
-				narrative_dice_roll_id: narrativeDiceRoll.id,
-			})
-			.select()
-			.single();
+		let playerRolledDice: PlayerRolledDice | undefined;
 
-		if (error) {
-			console.error('Error inserting player_rolled_dice:', error);
-			return;
+		// 어드민 모드: DB 저장 없이 로컬에서 랜덤 값 생성
+		if (isAdmin) {
+			playerRolledDice = mock.playerRolledDice({ narrativeNode, narrativeDiceRoll });
+		} else {
+			const { data, error } = await supabase
+				.from('player_rolled_dices')
+				.insert({
+					user_id: user.id,
+					player_id: currentPlayer.id,
+					narrative_id: narrativeNode.narrative_id,
+					narrative_node_id: narrativeNode.id,
+					narrative_dice_roll_id: narrativeDiceRoll.id,
+				})
+				.select()
+				.single();
+
+			if (error) {
+				console.error('Error inserting player_rolled_dice:', error);
+				return;
+			}
+
+			playerRolledDice = data;
 		}
 
 		playStore.update((state) => ({
