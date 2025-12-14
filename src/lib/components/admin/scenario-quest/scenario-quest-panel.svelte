@@ -34,7 +34,7 @@
 				title: '',
 				display_order_in_scenario_quest: 0,
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				console.error('Failed to create scenario quest branch:', error);
 			})
 			.finally(() => {

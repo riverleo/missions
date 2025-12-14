@@ -1,10 +1,11 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
-	FetchState,
+	RecordFetchState,
 	ScenarioQuest,
 	ScenarioQuestInsert,
 	ScenarioQuestUpdate,
+	ScenarioQuestBranch,
 	ScenarioQuestBranchInsert,
 	ScenarioQuestBranchUpdate,
 } from '$lib/types';
@@ -19,250 +20,75 @@ let instance: ReturnType<typeof createScenarioQuestStore> | null = null;
 
 function createScenarioQuestStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<FetchState<ScenarioQuest[]>>({
+
+	const scenarioQuestStore = writable<RecordFetchState<ScenarioQuest>>({
 		status: 'idle',
-		data: undefined,
-		error: undefined,
 	});
 
-	// 다이얼로그 상태 관리
+	const scenarioQuestBranchStore = writable<RecordFetchState<ScenarioQuestBranch>>({
+		status: 'idle',
+	});
+
 	const dialogStore = writable<ScenarioQuestDialogState>(undefined);
 
 	let currentScenarioId: string | undefined;
 
 	async function fetch(scenarioId: string) {
 		currentScenarioId = scenarioId;
-		store.update((state) => ({ ...state, status: 'loading' }));
+
+		scenarioQuestStore.update((state) => ({ ...state, status: 'loading' }));
+		scenarioQuestBranchStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('scenario_quests')
-				.select('*, scenario_quest_branches(*), scenario_chapter:scenario_chapters(*)')
-				.eq('scenario_id', scenarioId);
+			// Fetch quests and branches separately
+			const [questsResult, branchesResult] = await Promise.all([
+				supabase.from('scenario_quests').select('*').eq('scenario_id', scenarioId),
+				supabase.from('scenario_quest_branches').select('*'),
+			]);
 
-			if (error) throw error;
+			if (questsResult.error) throw questsResult.error;
+			if (branchesResult.error) throw branchesResult.error;
 
-			store.set({
+			// Convert arrays to Records
+			const questRecord: Record<string, ScenarioQuest> = {};
+			for (const item of questsResult.data ?? []) {
+				questRecord[item.id] = item;
+			}
+
+			// Filter branches that belong to quests in this scenario
+			const questIds = new Set(Object.keys(questRecord));
+			const branchRecord: Record<string, ScenarioQuestBranch> = {};
+			for (const item of branchesResult.data ?? []) {
+				if (questIds.has(item.scenario_quest_id)) {
+					branchRecord[item.id] = item;
+				}
+			}
+
+			scenarioQuestStore.set({
 				status: 'success',
-				data: data ?? [],
+				data: questRecord,
+				error: undefined,
+			});
+
+			scenarioQuestBranchStore.set({
+				status: 'success',
+				data: branchRecord,
 				error: undefined,
 			});
 		} catch (error) {
-			store.set({
+			const err = error instanceof Error ? error : new Error('Unknown error');
+
+			scenarioQuestStore.set({
 				status: 'error',
 				data: undefined,
-				error: error instanceof Error ? error : new Error('Unknown error'),
+				error: err,
 			});
-		}
-	}
 
-	async function create(scenarioQuest: Omit<ScenarioQuestInsert, 'scenario_id'>) {
-		if (!currentScenarioId) {
-			throw new Error('useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.');
-		}
-		try {
-			const { data, error } = await supabase
-				.from('scenario_quests')
-				.insert({
-					...scenarioQuest,
-					scenario_id: currentScenarioId,
-				})
-				.select('*, scenario_quest_branches(*), scenario_chapter:scenario_chapters(*)')
-				.single();
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						draft.data.push(data);
-					} else {
-						draft.data = [data];
-					}
-				})
-			);
-
-			return data;
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function update(id: string, scenarioQuest: ScenarioQuestUpdate) {
-		try {
-			const { error } = await supabase.from('scenario_quests').update(scenarioQuest).eq('id', id);
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					const quest = draft.data?.find((q) => q.id === id);
-					if (quest) {
-						Object.assign(quest, scenarioQuest);
-					}
-				})
-			);
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function remove(id: string) {
-		try {
-			const { error } = await supabase.from('scenario_quests').delete().eq('id', id);
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						draft.data = draft.data.filter((q) => q.id !== id);
-					}
-				})
-			);
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function publish(id: string) {
-		try {
-			const { error } = await supabase
-				.from('scenario_quests')
-				.update({ status: 'published' })
-				.eq('id', id);
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					const quest = draft.data?.find((q) => q.id === id);
-					if (quest) {
-						quest.status = 'published';
-					}
-				})
-			);
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function unpublish(id: string) {
-		try {
-			const { error } = await supabase
-				.from('scenario_quests')
-				.update({ status: 'draft' })
-				.eq('id', id);
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					const quest = draft.data?.find((q) => q.id === id);
-					if (quest) {
-						quest.status = 'draft';
-					}
-				})
-			);
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function createScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranchInsert) {
-		try {
-			const { data, error } = await supabase
-				.from('scenario_quest_branches')
-				.insert(scenarioQuestBranch)
-				.select()
-				.single();
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					const quest = draft.data?.find((q) => q.id === scenarioQuestBranch.scenario_quest_id);
-					if (quest) {
-						if (quest.scenario_quest_branches) {
-							quest.scenario_quest_branches.push(data);
-						} else {
-							quest.scenario_quest_branches = [data];
-						}
-					}
-				})
-			);
-
-			return data;
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
-		}
-	}
-
-	async function updateScenarioQuestBranch(id: string, scenarioQuestBranch: ScenarioQuestBranchUpdate) {
-		const { error } = await supabase.from('scenario_quest_branches').update(scenarioQuestBranch).eq('id', id);
-
-		if (error) throw error;
-
-		store.update((state) =>
-			produce(state, (draft) => {
-				for (const quest of draft.data ?? []) {
-					const branch = quest.scenario_quest_branches?.find((b) => b.id === id);
-					if (branch) {
-						Object.assign(branch, scenarioQuestBranch);
-						break;
-					}
-				}
-			})
-		);
-	}
-
-	async function removeScenarioQuestBranch(id: string) {
-		try {
-			const { error } = await supabase.from('scenario_quest_branches').delete().eq('id', id);
-
-			if (error) throw error;
-
-			store.update((state) =>
-				produce(state, (draft) => {
-					for (const quest of draft.data ?? []) {
-						if (quest.scenario_quest_branches) {
-							quest.scenario_quest_branches = quest.scenario_quest_branches.filter(
-								(b) => b.id !== id
-							);
-						}
-					}
-				})
-			);
-		} catch (error) {
-			store.update((state) => ({
-				...state,
-				error: error instanceof Error ? error : new Error('Unknown error'),
-			}));
-			throw error;
+			scenarioQuestBranchStore.set({
+				status: 'error',
+				data: undefined,
+				error: err,
+			});
 		}
 	}
 
@@ -274,22 +100,173 @@ function createScenarioQuestStore() {
 		dialogStore.set(undefined);
 	}
 
+	const admin = {
+		async createQuest(scenarioQuest: Omit<ScenarioQuestInsert, 'scenario_id'>) {
+			if (!currentScenarioId) {
+				throw new Error(
+					'useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.'
+				);
+			}
+
+			const { data, error } = await supabase
+				.from('scenario_quests')
+				.insert({
+					...scenarioQuest,
+					scenario_id: currentScenarioId,
+				})
+				.select()
+				.single();
+
+			if (error) throw error;
+
+			scenarioQuestStore.update((state) =>
+				produce(state, (draft) => {
+					if (!draft.data) {
+						draft.data = {};
+					}
+					draft.data[data.id] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateQuest(id: string, scenarioQuest: ScenarioQuestUpdate) {
+			const { error } = await supabase.from('scenario_quests').update(scenarioQuest).eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], scenarioQuest);
+					}
+				})
+			);
+		},
+
+		async removeQuest(id: string) {
+			const { error } = await supabase.from('scenario_quests').delete().eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+
+			// Also remove related branches from local store
+			scenarioQuestBranchStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						for (const branchId of Object.keys(draft.data)) {
+							if (draft.data[branchId].scenario_quest_id === id) {
+								delete draft.data[branchId];
+							}
+						}
+					}
+				})
+			);
+		},
+
+		async publishQuest(id: string) {
+			const { error } = await supabase
+				.from('scenario_quests')
+				.update({ status: 'published' })
+				.eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						draft.data[id].status = 'published';
+					}
+				})
+			);
+		},
+
+		async unpublishQuest(id: string) {
+			const { error } = await supabase
+				.from('scenario_quests')
+				.update({ status: 'draft' })
+				.eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						draft.data[id].status = 'draft';
+					}
+				})
+			);
+		},
+
+		async createScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranchInsert) {
+			const { data, error } = await supabase
+				.from('scenario_quest_branches')
+				.insert(scenarioQuestBranch)
+				.select()
+				.single();
+
+			if (error) throw error;
+
+			scenarioQuestBranchStore.update((state) =>
+				produce(state, (draft) => {
+					if (!draft.data) {
+						draft.data = {};
+					}
+					draft.data[data.id] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateScenarioQuestBranch(id: string, scenarioQuestBranch: ScenarioQuestBranchUpdate) {
+			const { error } = await supabase
+				.from('scenario_quest_branches')
+				.update(scenarioQuestBranch)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestBranchStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], scenarioQuestBranch);
+					}
+				})
+			);
+		},
+
+		async removeScenarioQuestBranch(id: string) {
+			const { error } = await supabase.from('scenario_quest_branches').delete().eq('id', id);
+
+			if (error) throw error;
+
+			scenarioQuestBranchStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
+	};
+
 	return {
-		store: store as Readable<FetchState<ScenarioQuest[]>>,
+		scenarioQuestStore: scenarioQuestStore as Readable<RecordFetchState<ScenarioQuest>>,
+		scenarioQuestBranchStore: scenarioQuestBranchStore as Readable<RecordFetchState<ScenarioQuestBranch>>,
 		dialogStore: dialogStore as Readable<ScenarioQuestDialogState>,
 		fetch,
 		openDialog,
 		closeDialog,
-		admin: {
-			create,
-			update,
-			remove,
-			publish,
-			unpublish,
-			createScenarioQuestBranch,
-			updateScenarioQuestBranch,
-			removeScenarioQuestBranch,
-		},
+		admin,
 	};
 }
 

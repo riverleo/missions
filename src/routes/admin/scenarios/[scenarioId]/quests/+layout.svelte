@@ -8,9 +8,9 @@
 	let { children } = $props();
 
 	const admin = useAdmin();
-	const { store } = useScenarioQuest();
+	const { scenarioQuestStore } = useScenarioQuest();
 	const scenarioQuestId = $derived(page.params.scenarioQuestId);
-	const currentScenarioQuest = $derived($store.data?.find((q) => q.id === scenarioQuestId));
+	const currentScenarioQuest = $derived(scenarioQuestId ? $scenarioQuestStore.data?.[scenarioQuestId] : undefined);
 
 	$effect(() => {
 		if (currentScenarioQuest) {

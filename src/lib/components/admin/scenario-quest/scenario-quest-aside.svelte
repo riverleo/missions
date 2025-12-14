@@ -19,9 +19,9 @@
 	import ScenarioQuestDeleteDialog from './scenario-quest-delete-dialog.svelte';
 	import ScenarioQuestPublishDialog from './scenario-quest-publish-dialog.svelte';
 
-	const { store, openDialog } = useScenarioQuest();
+	const { scenarioQuestStore, openDialog } = useScenarioQuest();
 	const currentScenarioQuestId = $derived(page.params.scenarioQuestId);
-	const currentScenarioQuest = $derived($store.data?.find((q) => q.id === currentScenarioQuestId));
+	const currentScenarioQuest = $derived(currentScenarioQuestId ? $scenarioQuestStore.data?.[currentScenarioQuestId] : undefined);
 	const isPublished = $derived(currentScenarioQuest?.status === 'published');
 
 	let toggleValue = $state<string[]>(['list']);

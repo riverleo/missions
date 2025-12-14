@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { throttle } from 'radash';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import Message from './narrative-message.svelte';
 	import NarrativeAction from './narrative-action.svelte';
-	import { isArrowDown, isArrowUp, isArrowUpOrDown, isEnterOrSpace } from '$lib/shortcut/utils';
+	import { isEnterOrSpace } from '$lib/shortcut/utils';
 	import { bindLayerEvent, type LayerId } from '$lib/shortcut/store';
 
 	const layerId: LayerId = 'narrative';
@@ -15,14 +14,6 @@
 		$playStore.narrativeNodeId
 			? $narrativeNodeStore.data?.[$playStore.narrativeNodeId]
 			: undefined
-	);
-
-	const narrativeNodeChoices = $derived(
-		narrativeNode
-			? Object.values($narrativeNodeChoiceStore.data ?? {}).filter(
-					(c) => c.narrative_node_id === narrativeNode.id
-				)
-			: []
 	);
 
 	const selectedNarrativeNodeChoice = $derived(
@@ -52,30 +43,6 @@
 				}
 			}
 		},
-		onkeydown: throttle({ interval: 100 }, (event: KeyboardEvent) => {
-			if (narrativeNode === undefined) return;
-
-			const { type } = narrativeNode;
-
-			if (type !== 'choice') return;
-
-			if (isArrowUpOrDown(event) && selectedNarrativeNodeChoice === undefined) {
-				play.highlight(narrativeNodeChoices[0]);
-			} else if (isArrowDown(event)) {
-				const currentIndex = narrativeNodeChoices.findIndex(
-					(c) => c.id === selectedNarrativeNodeChoice?.id
-				);
-				const nextIndex = (currentIndex + 1) % narrativeNodeChoices.length;
-				play.highlight(narrativeNodeChoices[nextIndex]);
-			} else if (isArrowUp(event)) {
-				const currentIndex = narrativeNodeChoices.findIndex(
-					(c) => c.id === selectedNarrativeNodeChoice?.id
-				);
-				const prevIndex =
-					(currentIndex - 1 + narrativeNodeChoices.length) % narrativeNodeChoices.length;
-				play.highlight(narrativeNodeChoices[prevIndex]);
-			}
-		}),
 	});
 </script>
 

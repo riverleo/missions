@@ -33,7 +33,7 @@
 	const { store: chapterStore } = useScenarioChapter();
 
 	const open = $derived($dialogStore?.type === 'create');
-	const chapters = $derived($chapterStore.data ?? []);
+	const chapters = $derived(Object.values($chapterStore.data ?? {}));
 
 	let title = $state('');
 	let type = $state<ScenarioQuestType>('primary');
@@ -77,7 +77,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({
+			.createQuest({
 				title: title.trim(),
 				type,
 				scenario_chapter_id: scenarioChapterId || null,

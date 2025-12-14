@@ -57,7 +57,7 @@
 				// 부모 컴포넌트에 업데이트 알림
 				onupdate?.(updatedScenarioQuestBranch);
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				console.error('Failed to update scenario quest branch:', error);
 			})
 			.finally(() => {

@@ -18,26 +18,22 @@
 	const admin = useAdmin();
 	const { store: scenarioStore } = useScenario();
 	const { store: scenarioChapterStore } = useScenarioChapter();
-	const { store: scenarioQuestStore } = useScenarioQuest();
+	const { scenarioQuestStore } = useScenarioQuest();
 	const { narrativeStore } = useNarrative();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
 		if (prevSegment === 'scenarios') {
-			const scenario = $scenarioStore.data?.find((s) => s.id === id);
-			return scenario?.title;
+			return $scenarioStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'chapters') {
-			const chapter = $scenarioChapterStore.data?.find((c) => c.id === id);
-			return chapter?.title;
+			return $scenarioChapterStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'quests') {
-			const quest = $scenarioQuestStore.data?.find((q) => q.id === id);
-			return quest?.title;
+			return $scenarioQuestStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'narratives') {
-			const narrative = $narrativeStore.data?.[id];
-			return narrative?.title;
+			return $narrativeStore.data?.[id]?.title;
 		}
 		return undefined;
 	}

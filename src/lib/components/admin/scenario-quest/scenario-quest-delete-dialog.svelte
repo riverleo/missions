@@ -30,7 +30,7 @@
 		if (!scenarioQuestId) return;
 
 		admin
-			.remove(scenarioQuestId)
+			.removeQuest(scenarioQuestId)
 			.then(() => {
 				closeDialog();
 				goto(`/admin/scenarios/${currentScenarioId}/quests`);

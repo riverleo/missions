@@ -1,7 +1,7 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
-	FetchState,
+	RecordFetchState,
 	ScenarioChapter,
 	ScenarioChapterInsert,
 	ScenarioChapterUpdate,
@@ -12,11 +12,7 @@ let instance: ReturnType<typeof createScenarioChapterStore> | null = null;
 
 function createScenarioChapterStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<FetchState<ScenarioChapter[]>>({
-		status: 'idle',
-		data: undefined,
-		error: undefined,
-	});
+	const store = writable<RecordFetchState<ScenarioChapter>>({ status: 'idle' });
 
 	let currentScenarioId: string | undefined;
 
@@ -33,9 +29,15 @@ function createScenarioChapterStore() {
 
 			if (error) throw error;
 
+			// Convert array to Record
+			const record: Record<string, ScenarioChapter> = {};
+			for (const item of data ?? []) {
+				record[item.id] = item;
+			}
+
 			store.set({
 				status: 'success',
-				data: data ?? [],
+				data: record,
 				error: undefined,
 			});
 		} catch (error) {
@@ -66,11 +68,10 @@ function createScenarioChapterStore() {
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				if (draft.data) {
-					draft.data.push(data);
-				} else {
-					draft.data = [data];
+				if (!draft.data) {
+					draft.data = {};
 				}
+				draft.data[data.id] = data;
 			})
 		);
 
@@ -84,9 +85,8 @@ function createScenarioChapterStore() {
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				const chapter = draft.data?.find((c) => c.id === id);
-				if (chapter) {
-					Object.assign(chapter, scenarioChapter);
+				if (draft.data?.[id]) {
+					Object.assign(draft.data[id], scenarioChapter);
 				}
 			})
 		);
@@ -100,7 +100,7 @@ function createScenarioChapterStore() {
 		store.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data) {
-					draft.data = draft.data.filter((c) => c.id !== id);
+					delete draft.data[id];
 				}
 			})
 		);
@@ -116,9 +116,8 @@ function createScenarioChapterStore() {
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				const chapter = draft.data?.find((c) => c.id === id);
-				if (chapter) {
-					chapter.status = 'published';
+				if (draft.data?.[id]) {
+					draft.data[id].status = 'published';
 				}
 			})
 		);
@@ -134,16 +133,15 @@ function createScenarioChapterStore() {
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				const chapter = draft.data?.find((c) => c.id === id);
-				if (chapter) {
-					chapter.status = 'draft';
+				if (draft.data?.[id]) {
+					draft.data[id].status = 'draft';
 				}
 			})
 		);
 	}
 
 	return {
-		store: store as Readable<FetchState<ScenarioChapter[]>>,
+		store: store as Readable<RecordFetchState<ScenarioChapter>>,
 		fetch,
 		admin: {
 			create,

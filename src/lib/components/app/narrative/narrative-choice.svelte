@@ -25,7 +25,6 @@
 	data-shortcut-effect="bounce"
 	data-shortcut-layer={layerId}
 	onclick={() => play.select(narrativeNodeChoice)}
-	onmouseenter={() => play.highlight(narrativeNodeChoice)}
 	class={cn('text-2xl blur-3xl', {
 		'opacity-20': !isSelected,
 	})}

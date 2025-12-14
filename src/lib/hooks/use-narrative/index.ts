@@ -1,12 +1,11 @@
 import { writable, type Readable, type Writable } from 'svelte/store';
 import type {
-	FetchState,
+	RecordFetchState,
 	Narrative,
 	NarrativeDiceRoll,
 	NarrativeNode,
 	NarrativeNodeChoice,
 	PlayerRolledDice,
-	Supabase,
 } from '$lib/types';
 import { useServerPayload } from '../use-server-payload.svelte';
 import { fetchNarratives, createNarrative, updateNarrative, removeNarrative } from './narrative';
@@ -28,7 +27,7 @@ import {
 	updateNarrativeDiceRoll,
 	removeNarrativeDiceRoll,
 } from './narrative-dice-roll';
-import { open, roll, next, done, highlight, select } from './play';
+import { open, roll, next, done, select } from './play';
 
 // Types
 type DialogState =
@@ -48,29 +47,27 @@ export interface PlayStoreState {
 	playerRolledDice?: PlayerRolledDice;
 }
 
-export type NarrativeStore = Writable<FetchState<Record<string, Narrative>>>;
-export type NarrativeNodeStore = Writable<FetchState<Record<string, NarrativeNode>>>;
-export type NarrativeDiceRollStore = Writable<FetchState<Record<string, NarrativeDiceRoll>>>;
-export type NarrativeNodeChoiceStore = Writable<FetchState<Record<string, NarrativeNodeChoice>>>;
+export type NarrativeStore = Writable<RecordFetchState<Narrative>>;
+export type NarrativeNodeStore = Writable<RecordFetchState<NarrativeNode>>;
+export type NarrativeDiceRollStore = Writable<RecordFetchState<NarrativeDiceRoll>>;
+export type NarrativeNodeChoiceStore = Writable<RecordFetchState<NarrativeNodeChoice>>;
 export type PlayStore = Writable<PlayStoreState>;
 
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
 
-function createEmptyFetchState<T>(): FetchState<Record<string, T>> {
-	return {
-		status: 'idle',
-		data: undefined,
-		error: undefined,
-	};
-}
-
 function createNarrativeStore() {
 	const { supabase } = useServerPayload();
 
-	const narrativeStore = writable<FetchState<Record<string, Narrative>>>(createEmptyFetchState());
-	const narrativeNodeStore = writable<FetchState<Record<string, NarrativeNode>>>(createEmptyFetchState());
-	const narrativeDiceRollStore = writable<FetchState<Record<string, NarrativeDiceRoll>>>(createEmptyFetchState());
-	const narrativeNodeChoiceStore = writable<FetchState<Record<string, NarrativeNodeChoice>>>(createEmptyFetchState());
+	const narrativeStore = writable<RecordFetchState<Narrative>>({ status: 'idle' });
+	const narrativeNodeStore = writable<RecordFetchState<NarrativeNode>>({
+		status: 'idle',
+	});
+	const narrativeDiceRollStore = writable<RecordFetchState<NarrativeDiceRoll>>({
+		status: 'idle',
+	});
+	const narrativeNodeChoiceStore = writable<RecordFetchState<NarrativeNodeChoice>>({
+		status: 'idle',
+	});
 
 	const adminStore = writable<AdminStoreState>({ dialog: undefined });
 	const playStore = writable<PlayStoreState>({});
@@ -97,10 +94,10 @@ function createNarrativeStore() {
 	fetchAll();
 
 	return {
-		narrativeStore: narrativeStore as Readable<FetchState<Record<string, Narrative>>>,
-		narrativeNodeStore: narrativeNodeStore as Readable<FetchState<Record<string, NarrativeNode>>>,
-		narrativeDiceRollStore: narrativeDiceRollStore as Readable<FetchState<Record<string, NarrativeDiceRoll>>>,
-		narrativeNodeChoiceStore: narrativeNodeChoiceStore as Readable<FetchState<Record<string, NarrativeNodeChoice>>>,
+		narrativeStore: narrativeStore as Readable<RecordFetchState<Narrative>>,
+		narrativeNodeStore: narrativeNodeStore as Readable<RecordFetchState<NarrativeNode>>,
+		narrativeDiceRollStore: narrativeDiceRollStore as Readable<RecordFetchState<NarrativeDiceRoll>>,
+		narrativeNodeChoiceStore: narrativeNodeChoiceStore as Readable<RecordFetchState<NarrativeNodeChoice>>,
 		admin: {
 			store: adminStore as Readable<AdminStoreState>,
 			openDialog,
@@ -124,8 +121,12 @@ function createNarrativeStore() {
 			roll: roll(narrativeDiceRollStore, playStore),
 			next: next(narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore),
 			done: done(playStore),
-			highlight: highlight(playStore),
-			select: select(narrativeNodeStore, narrativeNodeChoiceStore, narrativeDiceRollStore, playStore),
+			select: select(
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+				playStore
+			),
 		},
 	};
 }

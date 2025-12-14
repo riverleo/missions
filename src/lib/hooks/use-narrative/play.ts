@@ -19,7 +19,8 @@ export const open =
 	};
 
 export const roll =
-	(narrativeDiceRollStore: NarrativeDiceRollStore, playStore: PlayStore) => (): number | undefined => {
+	(narrativeDiceRollStore: NarrativeDiceRollStore, playStore: PlayStore) =>
+	(): number | undefined => {
 		// TODO: implement
 		return undefined;
 	};
@@ -38,11 +39,6 @@ export const next =
 export const done = (playStore: PlayStore) => () => {
 	// TODO: implement
 };
-
-export const highlight =
-	(playStore: PlayStore) => (narrativeNodeChoice: NarrativeNodeChoice | undefined) => {
-		// TODO: implement
-	};
 
 export const select =
 	(

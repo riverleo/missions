@@ -1,12 +1,12 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type { FetchState, Scenario, ScenarioInsert, ScenarioUpdate } from '$lib/types';
+import type { RecordFetchState, Scenario, ScenarioInsert, ScenarioUpdate } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 import { useScenarioQuest } from './use-scenario-quest';
 import { useScenarioChapter } from './use-scenario-chapter';
 
-interface ScenarioStoreState extends FetchState<Scenario[]> {
-	currentScenarioId: string | undefined;
+interface ScenarioStoreState extends RecordFetchState<Scenario> {
+	currentScenarioId?: string;
 }
 
 type ScenarioDialogState =
@@ -21,12 +21,7 @@ let instance: ReturnType<typeof createScenarioStore> | null = null;
 function createScenarioStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<ScenarioStoreState>({
-		status: 'idle',
-		data: undefined,
-		error: undefined,
-		currentScenarioId: undefined,
-	});
+	const store = writable<ScenarioStoreState>({ status: 'idle' });
 
 	const dialogStore = writable<ScenarioDialogState>(undefined);
 
@@ -44,22 +39,21 @@ function createScenarioStore() {
 		try {
 			const { data, error } = await supabase
 				.from('scenarios')
-				.select(
-					`
-					*,
-					created_by:user_roles (*)
-				`
-				)
+				.select('*')
 				.order('display_order', { ascending: true });
 
 			if (error) throw error;
 
-			const scenarios = data ?? [];
+			// Convert array to Record
+			const record: Record<string, Scenario> = {};
+			for (const item of data ?? []) {
+				record[item.id] = item;
+			}
 
 			store.update((state) => ({
 				...state,
 				status: 'success',
-				data: scenarios,
+				data: record,
 				error: undefined,
 			}));
 
@@ -67,6 +61,7 @@ function createScenarioStore() {
 			let currentState: ScenarioStoreState | undefined;
 			store.subscribe((s) => (currentState = s))();
 
+			const scenarios = data ?? [];
 			if (!currentState?.currentScenarioId && scenarios.length > 0) {
 				await init(scenarios[0].id);
 			}
@@ -97,21 +92,16 @@ function createScenarioStore() {
 
 	const admin = {
 		async create(input: Omit<ScenarioInsert, 'display_order'>) {
-			const { data, error } = await supabase
-				.from('scenarios')
-				.insert(input)
-				.select('*, created_by:user_roles (*)')
-				.single();
+			const { data, error } = await supabase.from('scenarios').insert(input).select().single();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					if (draft.data) {
-						draft.data.push(data);
-					} else {
-						draft.data = [data];
+					if (!draft.data) {
+						draft.data = {};
 					}
+					draft.data[data.id] = data;
 				})
 			);
 
@@ -119,25 +109,17 @@ function createScenarioStore() {
 		},
 
 		async update(scenarioId: string, input: ScenarioUpdate) {
-			const { data, error } = await supabase
-				.from('scenarios')
-				.update(input)
-				.eq('id', scenarioId)
-				.select('*, created_by:user_roles (*)')
-				.single();
+			const { error } = await supabase.from('scenarios').update(input).eq('id', scenarioId);
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					const index = draft.data?.findIndex((s) => s.id === scenarioId);
-					if (index !== undefined && index >= 0 && draft.data) {
-						draft.data[index] = data;
+					if (draft.data?.[scenarioId]) {
+						Object.assign(draft.data[scenarioId], input);
 					}
 				})
 			);
-
-			return data;
 		},
 
 		async remove(scenarioId: string) {
@@ -148,11 +130,12 @@ function createScenarioStore() {
 			store.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
-						draft.data = draft.data.filter((s) => s.id !== scenarioId);
+						delete draft.data[scenarioId];
 					}
 					// 삭제된 시나리오가 현재 선택된 시나리오인 경우 초기화
 					if (draft.currentScenarioId === scenarioId) {
-						draft.currentScenarioId = draft.data?.[0]?.id;
+						const remainingIds = Object.keys(draft.data ?? {});
+						draft.currentScenarioId = remainingIds[0];
 					}
 				})
 			);
@@ -168,9 +151,8 @@ function createScenarioStore() {
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					const scenario = draft.data?.find((s) => s.id === scenarioId);
-					if (scenario) {
-						scenario.status = 'published';
+					if (draft.data?.[scenarioId]) {
+						draft.data[scenarioId].status = 'published';
 					}
 				})
 			);
@@ -186,9 +168,8 @@ function createScenarioStore() {
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					const scenario = draft.data?.find((s) => s.id === scenarioId);
-					if (scenario) {
-						scenario.status = 'draft';
+					if (draft.data?.[scenarioId]) {
+						draft.data[scenarioId].status = 'draft';
 					}
 				})
 			);

@@ -3,16 +3,12 @@ import type { FetchState, ServerPayload, UserRole } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
 
 export interface UserState {
-	user: User | undefined;
-	role: UserRole | undefined;
+	user?: User;
+	role?: UserRole;
 }
 
 export function useCurrentUser({ supabase, user: serverUser }: ServerPayload) {
-	const store = writable<FetchState<UserState>>({
-		status: 'idle',
-		data: undefined,
-		error: undefined,
-	});
+	const store = writable<FetchState<UserState>>({ status: 'idle' });
 
 	let initialized = false;
 

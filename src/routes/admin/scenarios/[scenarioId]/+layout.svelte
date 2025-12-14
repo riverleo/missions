@@ -8,8 +8,7 @@
 	const { store, init } = useScenario();
 
 	const scenarioId = $derived(page.params.scenarioId);
-	const scenarios = $derived($store.data ?? []);
-	const isValidScenario = $derived(scenarios.some((s) => s.id === scenarioId));
+	const isValidScenario = $derived(scenarioId ? !!$store.data?.[scenarioId] : false);
 
 	$effect(() => {
 		if ($store.status === 'success' && scenarioId) {

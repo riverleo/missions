@@ -13,8 +13,14 @@ export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface FetchState<T> {
 	status: FetchStatus;
-	data: T | undefined;
-	error: Error | undefined;
+	data?: T;
+	error?: Error;
+}
+
+export interface RecordFetchState<T> {
+	status: FetchStatus;
+	data?: Record<string, T>;
+	error?: Error;
 }
 
 // Bulk update types
@@ -43,12 +49,9 @@ export type DiceRollAction = Enums<'dice_roll_action'>;
 export type NarrativeNodeType = Enums<'narrative_node_type'>;
 
 // Scenario types
-type ScenarioRow = Tables<'scenarios'>;
+export type Scenario = Tables<'scenarios'>;
 export type ScenarioInsert = TablesInsert<'scenarios'>;
 export type ScenarioUpdate = TablesUpdate<'scenarios'>;
-export type Scenario = ScenarioRow & {
-	created_by: UserRole | null;
-};
 export type PlayerScenario = Tables<'player_scenarios'>;
 export type PlayerScenarioInsert = TablesInsert<'player_scenarios'>;
 
@@ -60,7 +63,7 @@ export type PlayerScenarioChapter = Tables<'player_scenario_chapters'>;
 export type PlayerScenarioChapterInsert = TablesInsert<'player_scenario_chapters'>;
 
 // Scenario Quest types
-export type ScenarioQuestRow = Tables<'scenario_quests'>;
+export type ScenarioQuest = Tables<'scenario_quests'>;
 export type ScenarioQuestInsert = TablesInsert<'scenario_quests'>;
 export type ScenarioQuestUpdate = TablesUpdate<'scenario_quests'>;
 export type ScenarioQuestBranch = Tables<'scenario_quest_branches'>;
@@ -70,12 +73,6 @@ export type PlayerScenarioQuest = Tables<'player_scenario_quests'>;
 export type PlayerScenarioQuestInsert = TablesInsert<'player_scenario_quests'>;
 export type PlayerScenarioQuestBranch = Tables<'player_scenario_quest_branches'>;
 export type PlayerScenarioQuestBranchInsert = TablesInsert<'player_scenario_quest_branches'>;
-
-// Extended Scenario Quest with relations
-export type ScenarioQuest = ScenarioQuestRow & {
-	scenario_quest_branches?: ScenarioQuestBranch[];
-	scenario_chapter?: ScenarioChapter | null;
-};
 
 // Narrative types
 export type Narrative = Tables<'narratives'>;

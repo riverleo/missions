@@ -23,7 +23,7 @@
 	import { toTreeMap } from '$lib/utils';
 
 	const scenarioQuestId = $derived(page.params.scenarioQuestId);
-	const { store, admin } = useScenarioQuest();
+	const { scenarioQuestBranchStore, admin } = useScenarioQuest();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -37,8 +37,9 @@
 		scenarioQuestBranch: ScenarioQuestBranchNode,
 	};
 
-	const currentScenarioQuest = $derived($store.data?.find((q) => q.id === scenarioQuestId));
-	const scenarioQuestBranches = $derived(currentScenarioQuest?.scenario_quest_branches ?? []);
+	const scenarioQuestBranches = $derived(
+		Object.values($scenarioQuestBranchStore.data ?? {}).filter((b) => b.scenario_quest_id === scenarioQuestId)
+	);
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
@@ -46,7 +47,7 @@
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
 	const selectedScenarioQuestBranch = $derived(
-		selectedNode ? scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === selectedNode.id) : undefined
+		selectedNode ? scenarioQuestBranches.find((b) => b.id === selectedNode.id) : undefined
 	);
 
 	function onupdateScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranch) {
@@ -68,7 +69,7 @@
 	async function onconnect(connection: Connection) {
 		try {
 			// target이 연결되는 브랜치 (자식), source가 부모 브랜치
-			const targetScenarioQuestBranch = scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === connection.target);
+			const targetScenarioQuestBranch = scenarioQuestBranches.find((b) => b.id === connection.target);
 			if (!targetScenarioQuestBranch) return;
 
 			await admin.updateScenarioQuestBranch(connection.target, {
@@ -100,18 +101,15 @@
 		nodes: Node[];
 		edges: Edge[];
 	}) {
+		// 스토어 업데이트 중 effect 건너뛰기
+		skipConvertEffect = true;
+
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				const targetScenarioQuestBranch = scenarioQuestBranches.find((b: ScenarioQuestBranch) => b.id === edge.target);
-				if (!targetScenarioQuestBranch) continue;
-
 				await admin.updateScenarioQuestBranch(edge.target, {
 					parent_scenario_quest_branch_id: null,
 				});
-
-				// 로컬 데이터 업데이트
-				targetScenarioQuestBranch.parent_scenario_quest_branch_id = null;
 			}
 
 			// 노드 삭제 처리
@@ -119,16 +117,11 @@
 				await admin.removeScenarioQuestBranch(node.id);
 			}
 
-			// 로컬 노드 제거
-			nodes = nodes.filter((n) => !nodesToDelete.find((nd) => nd.id === n.id));
-
-			// 로컬 엣지 제거 (명시적으로 삭제된 엣지 + 삭제된 노드와 연결된 엣지)
-			edges = edges.filter(
-				(e) =>
-					!edgesToDelete.find((ed) => ed.id === e.id) &&
-					!nodesToDelete.find((nd) => nd.id === e.source || nd.id === e.target)
-			);
+			// 모든 업데이트 완료 후 노드/엣지 재생성
+			skipConvertEffect = false;
+			convertToNodesAndEdges(scenarioQuestBranches);
 		} catch (error) {
+			skipConvertEffect = false;
 			console.error('Failed to delete:', error);
 		}
 	}

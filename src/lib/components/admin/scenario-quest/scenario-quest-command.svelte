@@ -17,30 +17,36 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';
+	import type { ScenarioQuest } from '$lib/types';
 
 	const NO_SCENARIO_CHAPTER = 'no-scenario-chapter';
 
 	const { store: scenarioStore } = useScenario();
-	const { store, openDialog } = useScenarioQuest();
+	const { scenarioQuestStore, openDialog } = useScenarioQuest();
+	const { store: scenarioChapterStore } = useScenarioChapter();
 	const currentScenarioId = $derived($scenarioStore.currentScenarioId);
 	const currentScenarioQuestId = $derived(page.params.scenarioQuestId);
 
+	const scenarioQuests = $derived(Object.values($scenarioQuestStore.data ?? {}));
+	const scenarioChapters = $derived($scenarioChapterStore.data ?? {});
+
 	// 퀘스트를 챕터별로 그룹화
 	const scenarioQuestsByScenarioChapter = $derived(() => {
-		const scenarioQuests = $store.data ?? [];
-		const grouped = group(scenarioQuests, (q) => q.scenario_chapter?.id ?? NO_SCENARIO_CHAPTER);
+		const grouped = group(scenarioQuests, (q: ScenarioQuest) => q.scenario_chapter_id ?? NO_SCENARIO_CHAPTER);
 
 		// 챕터 순서대로 정렬
-		const sortedEntries = sort(Object.entries(grouped), ([_, scenarioQuests]) => {
-			if (!scenarioQuests?.[0]?.scenario_chapter) return Infinity;
-			return scenarioQuests[0].scenario_chapter.display_order_in_scenario ?? 0;
+		const sortedEntries = sort(Object.entries(grouped), ([chapterId]) => {
+			if (chapterId === NO_SCENARIO_CHAPTER) return Infinity;
+			const chapter = scenarioChapters[chapterId];
+			return chapter?.display_order_in_scenario ?? Infinity;
 		});
 
-		return sortedEntries.map(([scenarioChapterId, scenarioQuests]) => {
-			const chapter = scenarioQuests?.[0]?.scenario_chapter;
+		return sortedEntries.map(([scenarioChapterId, quests]) => {
+			const chapter = scenarioChapterId !== NO_SCENARIO_CHAPTER ? scenarioChapters[scenarioChapterId] : undefined;
 			let scenarioChapterTitle = '챕터 없음';
 			if (chapter) {
 				scenarioChapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
@@ -48,7 +54,7 @@
 			return {
 				scenarioChapterId,
 				scenarioChapterTitle,
-				scenarioQuests: sort(scenarioQuests ?? [], (q) => q.order_in_chapter),
+				scenarioQuests: sort(quests ?? [], (q: ScenarioQuest) => q.order_in_chapter),
 			};
 		});
 	});
@@ -56,7 +62,7 @@
 
 <Command class="w-full rounded-lg border shadow-md">
 	<CommandInput placeholder="퀘스트 검색..." />
-	{#if ($store.data ?? []).length > 0}
+	{#if scenarioQuests.length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
 			{#each scenarioQuestsByScenarioChapter() as { scenarioChapterId, scenarioChapterTitle, scenarioQuests } (scenarioChapterId)}

@@ -34,17 +34,15 @@
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 
-	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
+	const { scenarioQuestStore, admin, dialogStore, closeDialog } = useScenarioQuest();
 	const { store: chapterStore } = useScenarioChapter();
 
 	const open = $derived($dialogStore?.type === 'update');
 	const scenarioQuestId = $derived(
 		$dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined
 	);
-	const currentScenarioQuest = $derived(
-		scenarioQuestId ? $store.data?.find((q) => q.id === scenarioQuestId) : undefined
-	);
-	const chapters = $derived($chapterStore.data ?? []);
+	const currentScenarioQuest = $derived(scenarioQuestId ? $scenarioQuestStore.data?.[scenarioQuestId] : undefined);
+	const chapters = $derived(Object.values($chapterStore.data ?? {}));
 
 	let title = $state('');
 	let type = $state<ScenarioQuestType>('primary');
@@ -88,7 +86,7 @@
 		isSubmitting = true;
 
 		admin
-			.update(scenarioQuestId, {
+			.updateQuest(scenarioQuestId, {
 				title: title.trim(),
 				type,
 				scenario_chapter_id: scenarioChapterId || null,

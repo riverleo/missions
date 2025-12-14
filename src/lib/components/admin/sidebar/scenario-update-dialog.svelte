@@ -17,9 +17,7 @@
 	const scenarioId = $derived(
 		$dialogStore?.type === 'update' ? $dialogStore.scenarioId : undefined
 	);
-	const currentScenario = $derived(
-		scenarioId ? $store.data?.find((s) => s.id === scenarioId) : undefined
-	);
+	const currentScenario = $derived(scenarioId ? $store.data?.[scenarioId] : undefined);
 
 	let title = $state('');
 	let isSubmitting = $state(false);

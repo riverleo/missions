@@ -18,9 +18,9 @@
 
 	const { store, fetch, init, openDialog } = useScenario();
 
-	const scenarios = $derived($store.data ?? []);
+	const scenarios = $derived(Object.values($store.data ?? {}));
 	const currentScenarioId = $derived($store.currentScenarioId);
-	const currentScenario = $derived(scenarios.find((s) => s.id === currentScenarioId));
+	const currentScenario = $derived(currentScenarioId ? $store.data?.[currentScenarioId] : undefined);
 
 	onMount(() => {
 		fetch();

@@ -34,7 +34,7 @@
 		scenarioChapter: ScenarioChapterNode,
 	};
 
-	const scenarioChapters = $derived($store.data ?? []);
+	const scenarioChapters = $derived(Object.values($store.data ?? {}));
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
@@ -97,6 +97,9 @@
 		nodes: Node[];
 		edges: Edge[];
 	}) {
+		// 스토어 업데이트 중 effect 건너뛰기
+		skipConvertEffect = true;
+
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
@@ -110,16 +113,11 @@
 				await admin.remove(node.id);
 			}
 
-			// 로컬 노드 제거
-			nodes = nodes.filter((n) => !nodesToDelete.find((nd) => nd.id === n.id));
-
-			// 로컬 엣지 제거 (명시적으로 삭제된 엣지 + 삭제된 노드와 연결된 엣지)
-			edges = edges.filter(
-				(e) =>
-					!edgesToDelete.find((ed) => ed.id === e.id) &&
-					!nodesToDelete.find((nd) => nd.id === e.source || nd.id === e.target)
-			);
+			// 모든 업데이트 완료 후 노드/엣지 재생성
+			skipConvertEffect = false;
+			convertToNodesAndEdges(scenarioChapters);
 		} catch (error) {
+			skipConvertEffect = false;
 			console.error('Failed to delete:', error);
 		}
 	}
