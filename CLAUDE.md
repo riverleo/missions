@@ -384,3 +384,49 @@
   - `focusedIndex`를 `$state`로 관리
   - ArrowUp/ArrowDown으로 포커스 이동
   - Enter/Space로 선택
+
+## 게임 컨셉
+
+### 앱 개요
+
+- **기본**: 할일 목록 앱
+- **게임 요소**: 할일 완료에 동기부여를 주는 재미 요소
+
+### 게임 루프
+
+1. 유저가 할일을 완료함
+2. 돈(자원)을 벌음
+3. 돈으로 주민들에게 밥/집을 제공
+4. 주민들이 살아남음 (또는 굶어 죽음)
+
+### 시나리오 시스템
+
+- **시나리오** = 게임 월드의 위기 상황
+- 첫 번째 시나리오: **"도람푸의 역습"**
+  - 배경: 미국에 딸기/감자 팔아서 먹고 살던 나라
+  - 사건: 관세 10000% 맞고 수출 끊김
+  - 결과: 나라 사람들이 굶어가는 상황
+  - 해결: 유저가 할일을 완료해서 주민들을 살려야 함
+
+### 나라 뷰 (Country View)
+
+- **시각화**: 선 하나 위에 주민들이 살고 있는 모습
+- **주민**: 배고픔 상태, 행동 상태 등을 가짐
+- **건물**: 집 등 (돈으로 건설)
+
+### 기술 스택 (나라 뷰)
+
+| 역할 | 라이브러리 |
+|------|-----------|
+| 물리/위치 | Matter.js |
+| 상태 머신 | XState |
+| 애니메이션 | sprite-animator (`$lib/components/app/sprite-animator/`) |
+
+### sprite-animator
+
+- **위치**: `$lib/components/app/sprite-animator/`
+- **구성**:
+  - `sprite-animator.svelte.ts`: SpriteAnimator 클래스 (init, play, stop)
+  - `sprite-animator-renderer.svelte`: CSS background-position으로 렌더링
+- **루프 모드**: `loop`, `once`, `ping-pong`, `ping-pong-once`
+- **스프라이트 시트**: `$lib/assets/atlas/generated/`에서 로드
