@@ -2,7 +2,7 @@ import { writable, derived } from 'svelte/store';
 
 export type StackId = 'narrative' | 'dice-roll' | 'quest';
 
-export interface StackConfig {
+export interface StackEvent {
 	onkeyup?: (event: KeyboardEvent) => void;
 	onkeydown?: (event: KeyboardEvent) => void;
 }
@@ -13,19 +13,29 @@ const stack = writable<StackId[]>([]);
 // 현재 활성화된 스택 (스택의 마지막)
 export const currentStackId = derived(stack, (s) => s[s.length - 1]);
 
-// 각 스택별 설정
-export const stacks = writable<Record<StackId, StackConfig>>({
-	narrative: {},
-	'dice-roll': {},
-	quest: {},
+// 각 스택별 이벤트 핸들러 목록
+export const stacks = writable<Record<StackId, StackEvent[]>>({
+	narrative: [],
+	'dice-roll': [],
+	quest: [],
 });
 
-// 스택 이벤트 핸들러 등록
-export function bindStackEvent({ id, onkeyup, onkeydown }: { id: StackId } & StackConfig) {
+// 스택 이벤트 핸들러 등록 (cleanup 함수 반환)
+export function bindStackEvent({ id, onkeyup, onkeydown }: { id: StackId } & StackEvent) {
+	const event: StackEvent = { onkeyup, onkeydown };
+
 	stacks.update((s) => ({
 		...s,
-		[id]: { onkeyup, onkeydown },
+		[id]: [...s[id], event],
 	}));
+
+	// cleanup 함수 반환
+	return () => {
+		stacks.update((s) => ({
+			...s,
+			[id]: s[id].filter((e) => e !== event),
+		}));
+	};
 }
 
 // 스택 활성화 (이미 있으면 맨 위로 이동)

@@ -23,17 +23,19 @@
 		}
 	});
 
-	bindStackEvent({
-		id: stackId,
-		onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
-			const narrativeDiceRoll = $playStore.narrativeDiceRoll;
-			if (narrativeDiceRoll === undefined || narrativeDiceRoll.difficulty_class === 0) return;
+	$effect(() => {
+		return bindStackEvent({
+			id: stackId,
+			onkeyup: debounce({ delay: 100 }, (event: KeyboardEvent) => {
+				const narrativeDiceRoll = $playStore.narrativeDiceRoll;
+				if (narrativeDiceRoll === undefined || narrativeDiceRoll.difficulty_class === 0) return;
 
-			if (isEnterOrSpace(event)) {
-				if ($playStore.playerRolledDice !== undefined) play.next();
-				else play.roll();
-			}
-		}),
+				if (isEnterOrSpace(event)) {
+					if ($playStore.playerRolledDice !== undefined) play.next();
+					else play.roll();
+				}
+			}),
+		});
 	});
 </script>
 

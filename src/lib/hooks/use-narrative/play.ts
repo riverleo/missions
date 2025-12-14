@@ -46,7 +46,12 @@ export const next =
 export const done =
 	({ playStore }: Params) =>
 	() => {
-		// TODO: implement
+		playStore.set({
+			narrativeNode: undefined,
+			narrativeDiceRoll: undefined,
+			selectedNarrativeNodeChoice: undefined,
+			playerRolledDice: undefined,
+		});
 	};
 
 export const select =

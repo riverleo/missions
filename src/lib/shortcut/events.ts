@@ -69,7 +69,9 @@ export function onkeydown(event: KeyboardEvent) {
 	if ($currentStackId) {
 		event.preventDefault();
 
-		get(stacks)[$currentStackId].onkeydown?.(event);
+		for (const stackEvent of get(stacks)[$currentStackId]) {
+			stackEvent.onkeydown?.(event);
+		}
 	}
 
 	// 포커스된 요소가 data-shortcut-effect를 가지고 있을 때
@@ -134,7 +136,10 @@ export function onkeyup(event: KeyboardEvent) {
 	if ($currentStackId) {
 		event.preventDefault();
 
-		return get(stacks)[$currentStackId].onkeyup?.(event);
+		for (const stackEvent of get(stacks)[$currentStackId]) {
+			stackEvent.onkeyup?.(event);
+		}
+		return;
 	}
 
 	// 포커스된 요소가 data-shortcut-effect를 가지고 있고 스페이스바나 엔터를 떼면 active 제거 및 효과 실행

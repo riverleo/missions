@@ -1,14 +1,8 @@
 <script lang="ts">
 	import { useNarrative } from '$lib/hooks/use-narrative';
-	import NarrativeNodePlayMessage from './narrative-node-play-message.svelte';
-	import NarrativeNodePlayAction from './narrative-node-play-action.svelte';
-	import { isEnterOrSpace } from '$lib/shortcut/utils';
-	import {
-		bindStackEvent,
-		activateStack,
-		deactivateStack,
-		type StackId,
-	} from '$lib/shortcut/store';
+	import NarrativeNodePlayText from './narrative-node-play-text.svelte';
+	import NarrativeNodePlayChoice from './narrative-node-play-choice.svelte';
+	import { activateStack, deactivateStack, type StackId } from '$lib/shortcut/store';
 
 	const stackId: StackId = 'narrative';
 
@@ -22,29 +16,6 @@
 			deactivateStack(stackId);
 		}
 	});
-
-	bindStackEvent({
-		id: stackId,
-		onkeyup: (event: KeyboardEvent) => {
-			const narrativeNode = $playStore.narrativeNode;
-			if (narrativeNode === undefined) return;
-
-			if (isEnterOrSpace(event)) {
-				switch (narrativeNode.type) {
-					case 'text':
-						play.roll();
-						break;
-					case 'choice':
-						// Enter or Space to select highlighted choice
-						const selectedChoice = $playStore.selectedNarrativeNodeChoice;
-						if (selectedChoice !== undefined) {
-							play.select(selectedChoice.id);
-						}
-						break;
-				}
-			}
-		},
-	});
 </script>
 
 <div
@@ -52,10 +23,19 @@
 	class:invisible={$playStore.narrativeNode === undefined}
 	data-shortcut-stack={stackId}
 >
+	<!-- TODO: 임시 닫기 버튼 -->
+	<button
+		class="absolute top-4 right-4 text-white text-2xl"
+		onclick={() => play.done()}
+	>
+		✕
+	</button>
+
 	<div class="absolute top-1/2 left-1/2 -translate-1/2">
-		<NarrativeNodePlayMessage />
-	</div>
-	<div class="absolute top-1/2 left-1/2 mt-10 -translate-1/2">
-		<NarrativeNodePlayAction />
+		{#if $playStore.narrativeNode?.type === 'text'}
+			<NarrativeNodePlayText />
+		{:else if $playStore.narrativeNode?.type === 'choice'}
+			<NarrativeNodePlayChoice />
+		{/if}
 	</div>
 </div>

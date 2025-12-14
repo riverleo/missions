@@ -1,11 +1,30 @@
 <script lang="ts">
 	import { useNarrative } from '$lib/hooks/use-narrative';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { Kbd } from '$lib/components/ui/kbd';
+	import { bindStackEvent, type StackId } from '$lib/shortcut/store';
+	import { isEnterOrSpace } from '$lib/shortcut/utils';
+
+	const stackId: StackId = 'narrative';
 
 	const { play } = useNarrative();
 	const playStore = play.store;
 
 	// 텍스트를 문자 배열로 변환 (공백 포함)
 	const messageCharacters = $derived($playStore.narrativeNode?.title?.split('') ?? []);
+
+	$effect(() => {
+		return bindStackEvent({
+			id: stackId,
+			onkeyup: (event: KeyboardEvent) => {
+				if ($playStore.narrativeNode?.type !== 'text') return;
+
+				if (isEnterOrSpace(event)) {
+					play.roll();
+				}
+			},
+		});
+	});
 </script>
 
 {#key $playStore.narrativeNode?.title}
@@ -35,6 +54,23 @@
 		</div>
 	</div>
 {/key}
+
+<div class="mt-10 flex flex-col items-center gap-8 px-8">
+	<Button
+		variant="ghost"
+		data-shortcut-key="Space Enter"
+		data-shortcut-effect="bounce"
+		data-shortcut-stack={stackId}
+		onclick={() => play.roll()}
+	>
+		{#if $playStore.narrativeDiceRoll && $playStore.narrativeDiceRoll.difficulty_class > 0}
+			주사위 굴리기
+		{:else}
+			다음
+		{/if}
+		<Kbd>Space</Kbd>
+	</Button>
+</div>
 
 <style>
 	.message-char {
