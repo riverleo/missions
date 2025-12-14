@@ -9,7 +9,7 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { store, admin, dialogStore, closeDialog } = useScenario();
 

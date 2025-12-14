@@ -12,7 +12,7 @@
 		IconEyeClosed,
 	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import ScenarioQuestCommand from './scenario-quest-command.svelte';
 	import ScenarioQuestCreateDialog from './scenario-quest-create-dialog.svelte';
 	import ScenarioQuestUpdateDialog from './scenario-quest-update-dialog.svelte';

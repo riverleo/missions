@@ -15,7 +15,7 @@
 	import ScenarioChapterNode from './scenario-chapter-node.svelte';
 	import ScenarioChapterFlowPanel from './scenario-chapter-flow-panel.svelte';
 	import ScenarioChapterDetailPanel from './scenario-chapter-detail-panel.svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';

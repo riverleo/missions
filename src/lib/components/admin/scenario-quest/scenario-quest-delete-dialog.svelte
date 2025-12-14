@@ -9,8 +9,8 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { goto } from '$app/navigation';
 
 	const { store: scenarioStore } = useScenario();

@@ -9,7 +9,7 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { store, admin, dialogStore, closeDialog } = useScenario();
 

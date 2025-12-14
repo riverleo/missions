@@ -5,7 +5,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { ScenarioQuestBranch } from '$lib/types';

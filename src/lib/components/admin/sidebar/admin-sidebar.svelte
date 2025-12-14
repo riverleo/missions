@@ -12,7 +12,7 @@
 	} from '$lib/components/ui/sidebar';
 	import type { ComponentProps } from 'svelte';
 	import ScenarioSwitcher from './scenario-switcher.svelte';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { store } = useScenario();
 	const currentScenarioId = $derived($store.currentScenarioId);

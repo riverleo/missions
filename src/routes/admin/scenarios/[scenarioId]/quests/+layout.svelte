@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import ScenarioQuestAside from '$lib/components/admin/scenario-quest/scenario-quest-aside.svelte';
 	import { useAdmin } from '$lib/hooks/use-admin.svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { page } from '$app/state';
 
 	let { children } = $props();

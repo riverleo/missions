@@ -47,15 +47,6 @@ function createScenarioChapterStore() {
 		}
 	}
 
-	async function refetch() {
-		if (!currentScenarioId) {
-			throw new Error(
-				'useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.'
-			);
-		}
-		await fetch(currentScenarioId);
-	}
-
 	async function create(scenarioChapter: Omit<ScenarioChapterInsert, 'scenario_id'>) {
 		if (!currentScenarioId) {
 			throw new Error(

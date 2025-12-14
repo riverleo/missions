@@ -17,7 +17,7 @@
 	import ScenarioQuestBranchNode from './scenario-quest-branch-node.svelte';
 	import ScenarioQuestPanel from './scenario-quest-panel.svelte';
 	import ScenarioQuestBranchPanel from './scenario-quest-branch-panel.svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
@@ -116,8 +116,7 @@
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				// DB에서 deleted_at 업데이트하되, refetch는 하지 않음 (화면 깜빡임 방지)
-				await admin.removeScenarioQuestBranch(node.id, false);
+				await admin.removeScenarioQuestBranch(node.id);
 			}
 
 			// 로컬 노드 제거

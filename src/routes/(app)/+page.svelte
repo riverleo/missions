@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCurrentUser } from '$lib/hooks/use-current-user.svelte';
+	import { useCurrentUser } from '$lib/hooks/use-current-user';
 
 	const { data } = $props();
 

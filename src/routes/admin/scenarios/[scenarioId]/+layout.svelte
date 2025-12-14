@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 
 	let { children } = $props();
 

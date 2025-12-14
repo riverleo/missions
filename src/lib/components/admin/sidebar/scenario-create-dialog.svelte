@@ -13,7 +13,7 @@
 		Addon as InputGroupAddon,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
 
 	const { admin, dialogStore, closeDialog, init } = useScenario();

@@ -15,8 +15,8 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';

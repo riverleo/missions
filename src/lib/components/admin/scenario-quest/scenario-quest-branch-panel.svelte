@@ -8,7 +8,7 @@
 		InputGroupInput,
 		InputGroupAddon,
 	} from '$lib/components/ui/input-group';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';

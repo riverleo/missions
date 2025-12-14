@@ -56,26 +56,33 @@ function createScenarioQuestStore() {
 		}
 	}
 
-	async function refetch() {
-		if (!currentScenarioId) {
-			throw new Error('useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.');
-		}
-		await fetch(currentScenarioId);
-	}
-
 	async function create(scenarioQuest: Omit<ScenarioQuestInsert, 'scenario_id'>) {
 		if (!currentScenarioId) {
 			throw new Error('useScenarioQuest: currentScenarioId is not set. Call useScenario.init() first.');
 		}
 		try {
-			const { error } = await supabase.from('scenario_quests').insert({
-				...scenarioQuest,
-				scenario_id: currentScenarioId,
-			});
+			const { data, error } = await supabase
+				.from('scenario_quests')
+				.insert({
+					...scenarioQuest,
+					scenario_id: currentScenarioId,
+				})
+				.select('*, scenario_quest_branches(*), scenario_chapter:scenario_chapters(*)')
+				.single();
 
 			if (error) throw error;
 
-			await refetch();
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						draft.data.push(data);
+					} else {
+						draft.data = [data];
+					}
+				})
+			);
+
+			return data;
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -91,7 +98,14 @@ function createScenarioQuestStore() {
 
 			if (error) throw error;
 
-			await refetch();
+			store.update((state) =>
+				produce(state, (draft) => {
+					const quest = draft.data?.find((q) => q.id === id);
+					if (quest) {
+						Object.assign(quest, scenarioQuest);
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -107,7 +121,13 @@ function createScenarioQuestStore() {
 
 			if (error) throw error;
 
-			await refetch();
+			store.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						draft.data = draft.data.filter((q) => q.id !== id);
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -126,7 +146,14 @@ function createScenarioQuestStore() {
 
 			if (error) throw error;
 
-			await refetch();
+			store.update((state) =>
+				produce(state, (draft) => {
+					const quest = draft.data?.find((q) => q.id === id);
+					if (quest) {
+						quest.status = 'published';
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -145,7 +172,14 @@ function createScenarioQuestStore() {
 
 			if (error) throw error;
 
-			await refetch();
+			store.update((state) =>
+				produce(state, (draft) => {
+					const quest = draft.data?.find((q) => q.id === id);
+					if (quest) {
+						quest.status = 'draft';
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -155,7 +189,7 @@ function createScenarioQuestStore() {
 		}
 	}
 
-	async function createScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranchInsert, shouldRefetch = true) {
+	async function createScenarioQuestBranch(scenarioQuestBranch: ScenarioQuestBranchInsert) {
 		try {
 			const { data, error } = await supabase
 				.from('scenario_quest_branches')
@@ -165,9 +199,18 @@ function createScenarioQuestStore() {
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await refetch();
-			}
+			store.update((state) =>
+				produce(state, (draft) => {
+					const quest = draft.data?.find((q) => q.id === scenarioQuestBranch.scenario_quest_id);
+					if (quest) {
+						if (quest.scenario_quest_branches) {
+							quest.scenario_quest_branches.push(data);
+						} else {
+							quest.scenario_quest_branches = [data];
+						}
+					}
+				})
+			);
 
 			return data;
 		} catch (error) {
@@ -197,15 +240,23 @@ function createScenarioQuestStore() {
 		);
 	}
 
-	async function removeScenarioQuestBranch(id: string, shouldRefetch = true) {
+	async function removeScenarioQuestBranch(id: string) {
 		try {
 			const { error } = await supabase.from('scenario_quest_branches').delete().eq('id', id);
 
 			if (error) throw error;
 
-			if (shouldRefetch) {
-				await refetch();
-			}
+			store.update((state) =>
+				produce(state, (draft) => {
+					for (const quest of draft.data ?? []) {
+						if (quest.scenario_quest_branches) {
+							quest.scenario_quest_branches = quest.scenario_quest_branches.filter(
+								(b) => b.id !== id
+							);
+						}
+					}
+				})
+			);
 		} catch (error) {
 			store.update((state) => ({
 				...state,

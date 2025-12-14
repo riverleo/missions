@@ -5,7 +5,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { ScenarioChapter } from '$lib/types';
 

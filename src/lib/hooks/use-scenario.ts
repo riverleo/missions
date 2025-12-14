@@ -2,6 +2,8 @@ import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type { FetchState, Scenario, ScenarioInsert, ScenarioUpdate } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
+import { useScenarioQuest } from './use-scenario-quest';
+import { useScenarioChapter } from './use-scenario-chapter';
 
 interface ScenarioStoreState extends FetchState<Scenario[]> {
 	currentScenarioId: string | undefined;
@@ -79,10 +81,6 @@ function createScenarioStore() {
 
 	async function init(scenarioId: string) {
 		store.update((state) => ({ ...state, currentScenarioId: scenarioId }));
-
-		// Fetch related data from other hooks
-		const { useScenarioQuest } = await import('./use-scenario-quest.svelte');
-		const { useScenarioChapter } = await import('./use-scenario-chapter.svelte');
 
 		await Promise.all([
 			useScenarioQuest().fetch(scenarioId),

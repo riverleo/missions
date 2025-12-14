@@ -5,7 +5,7 @@
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
 

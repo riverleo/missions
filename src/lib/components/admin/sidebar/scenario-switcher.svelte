@@ -12,7 +12,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '$lib/components/ui/sidebar';
 	import { IconSelector, IconCheck, IconPlus } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario.svelte';
+	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 

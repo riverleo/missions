@@ -31,8 +31,8 @@
 		IconCategory,
 		IconSortDescending,
 	} from '@tabler/icons-svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest.svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter.svelte';
+	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 
 	const { store, admin, dialogStore, closeDialog } = useScenarioQuest();
 	const { store: chapterStore } = useScenarioChapter();
