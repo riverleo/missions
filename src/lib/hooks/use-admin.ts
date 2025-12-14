@@ -1,22 +1,21 @@
-import { createContext } from 'svelte';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import type { PlayerRolledDice, NarrativeNode, NarrativeDiceRoll } from '$lib/types';
 import { useCurrentUser } from './use-current-user';
 
-interface AdminContext {
-	isAdmin: boolean;
+export type AdminMode = 'admin' | 'player';
+
+export interface AdminStoreState {
+	mode: AdminMode;
 }
 
-const defaultContext: AdminContext = { isAdmin: false };
-const [getAdminContext, setAdminContext] = createContext<AdminContext>();
-
-export function createAdminContext() {
-	setAdminContext({ isAdmin: true });
-}
+export const adminStore = writable<AdminStoreState>({ mode: 'player' });
 
 export function useAdmin() {
 	const { store: currentUserStore } = useCurrentUser();
-	const context = getAdminContext() ?? defaultContext;
+
+	const setMode = (mode: AdminMode) => {
+		adminStore.set({ mode });
+	};
 
 	const mock = {
 		playerRolledDice: ({
@@ -54,7 +53,8 @@ export function useAdmin() {
 	};
 
 	return {
-		...context,
+		store: adminStore,
+		setMode,
 		mock,
 	};
 }

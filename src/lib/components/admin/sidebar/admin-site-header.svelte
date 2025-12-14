@@ -9,13 +9,11 @@
 		BreadcrumbSeparator,
 	} from '$lib/components/ui/breadcrumb';
 	import { page } from '$app/state';
-	import { useAdmin } from '$lib/hooks/use-admin.svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
 	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 
-	const admin = useAdmin();
 	const { store: scenarioStore } = useScenario();
 	const { store: scenarioChapterStore } = useScenarioChapter();
 	const { scenarioQuestStore } = useScenarioQuest();

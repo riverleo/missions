@@ -9,7 +9,7 @@ import type {
 } from '.';
 import { useCurrentUser } from '../use-current-user';
 import { useServerPayload } from '../use-server-payload.svelte';
-import { useAdmin } from '../use-admin.svelte';
+import { useAdmin } from '../use-admin';
 
 interface Params {
 	narrativeStore: NarrativeStore;
@@ -57,12 +57,13 @@ export const roll = (params: Params) => {
 	// async 함수 내부에서 호출하면 `lifecycle_outside_component` 에러 발생
 	const { supabase } = useServerPayload();
 	const { store: currentUserStore } = useCurrentUser();
-	const { isAdmin, mock } = useAdmin();
+	const { store: adminStore, mock } = useAdmin();
 
 	return async (): Promise<PlayerRolledDice | undefined> => {
 		const { data } = get(currentUserStore);
 		const { user, currentPlayer } = data;
 		const { narrativeNode, narrativeDiceRoll } = get(playStore);
+		const { mode } = get(adminStore);
 
 		if (!user?.id || !currentPlayer?.id || !narrativeNode || !narrativeDiceRoll) {
 			console.warn('Missing required data:', { user, currentPlayer, narrativeNode, narrativeDiceRoll });
@@ -72,7 +73,7 @@ export const roll = (params: Params) => {
 		let playerRolledDice: PlayerRolledDice | undefined;
 
 		// 어드민 모드: DB 저장 없이 로컬에서 랜덤 값 생성
-		if (isAdmin) {
+		if (mode === 'admin') {
 			playerRolledDice = mock.playerRolledDice({ narrativeNode, narrativeDiceRoll });
 		} else {
 			const { data, error } = await supabase
