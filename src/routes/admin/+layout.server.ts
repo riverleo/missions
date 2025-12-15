@@ -10,7 +10,11 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	}
 
 	// user_roles 조회 (0개=일반유저, 1개=정상, 2개 이상=데이터 꼬임 감지)
-	const { data, error } = await locals.supabase.from('user_roles').select('type').maybeSingle();
+	const { data, error } = await locals.supabase
+		.from('user_roles')
+		.select('type')
+		.eq('user_id', user.id)
+		.maybeSingle();
 
 	if (error) {
 		console.error('user_roles query error:', error);
