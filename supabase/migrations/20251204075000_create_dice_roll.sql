@@ -64,18 +64,19 @@ declare
   default_dice_id uuid;
 begin
   if NEW.dice_id is null then
-    select id into default_dice_id from dices where is_default = true limit 1;
+    select id into default_dice_id from public.dices where is_default = true limit 1;
     NEW.dice_id := default_dice_id;
   end if;
 
   if NEW.value is null then
-    select faces into dice_faces from dices where id = NEW.dice_id;
+    select faces into dice_faces from public.dices where id = NEW.dice_id;
     NEW.value := floor(random() * dice_faces) + 1;
   end if;
 
   return NEW;
 end;
-$$ language plpgsql;
+$$ language plpgsql
+set search_path = '';
 
 create trigger insert_player_rolled_dice_value
   before insert on player_rolled_dices
