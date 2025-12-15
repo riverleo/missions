@@ -2,8 +2,15 @@
 	import type { Terrain } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import {
+		InputGroup,
+		InputGroupAddon,
+		InputGroupButton,
+		InputGroupInput,
+		InputGroupText,
+	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconUpload, IconLoader2, IconBug, IconBugOff } from '@tabler/icons-svelte';
+	import { IconUpload, IconLoader2, IconBug, IconBugOff, IconHeading } from '@tabler/icons-svelte';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { uploadGameAsset } from '$lib/utils/storage';
@@ -21,6 +28,20 @@
 
 	let fileInput: HTMLInputElement;
 	let isUploading = $state(false);
+	let title = $state(terrain.title ?? '');
+
+	async function updateTitle() {
+		const trimmed = title.trim();
+		if (trimmed === (terrain.title ?? '')) return;
+		await admin.update(terrain.id, { title: trimmed || undefined });
+	}
+
+	function onkeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			(e.target as HTMLInputElement).blur();
+			updateTitle();
+		}
+	}
 
 	function onclickUpload() {
 		fileInput.click();
@@ -47,7 +68,7 @@
 	}
 </script>
 
-<div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+<div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
 	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
@@ -84,10 +105,18 @@
 			<TooltipContent>{debug ? '디버그 모드 끄기' : '디버그 모드 켜기'}</TooltipContent>
 		</Tooltip>
 	</ButtonGroup>
+	<InputGroup class="h-10">
+		<InputGroupAddon>
+			<InputGroupText>
+				<IconHeading class="size-4" />
+			</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupInput bind:value={title} placeholder="지형 이름" {onkeydown} />
+		<InputGroupAddon align="inline-end">
+			<InputGroupButton onclick={updateTitle} variant="secondary" class="h-7">
+				저장
+			</InputGroupButton>
+		</InputGroupAddon>
+	</InputGroup>
 </div>
-<input
-	bind:this={fileInput}
-	type="file"
-	class="hidden"
-	onchange={onfilechange}
-/>
+<input bind:this={fileInput} type="file" class="hidden" onchange={onfilechange} />
