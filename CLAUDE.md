@@ -430,3 +430,70 @@
   - `sprite-animator-renderer.svelte`: CSS background-position으로 렌더링
 - **루프 모드**: `loop`, `once`, `ping-pong`, `ping-pong-once`
 - **스프라이트 시트**: `$lib/assets/atlas/generated/`에서 로드
+
+### World 컴포넌트 (Matter.js 물리 월드)
+
+- **위치**: `$lib/components/app/world/world.svelte`
+- **주요 기능**:
+  - SVG 지형 로딩 및 물리 바디 생성
+  - 반응형 캔버스 (ResizeObserver로 컨테이너 크기 감지)
+  - 디버그 모드로 물리 충돌 영역 시각화
+- **Props**:
+  - `terrain?: Terrain` - 지형 데이터 (game_asset 포함)
+  - `debug?: boolean` - 디버그 모드 (물리 바디 표시)
+- **SVG → 물리 바디 변환 로직**:
+  - `fill && stroke` 둘 다 있으면: fill은 다각형, stroke는 선
+  - `fill`만 또는 `stroke`만 있으면: 선으로 처리 (벡터 브러쉬 대응)
+  - 선은 얇은 사각형(rectangle)으로 생성
+- **pathseg 폴리필**: Matter.js의 `Svg.pathToVertices` 사용을 위해 필요
+
+## Storage 유틸리티
+
+- **위치**: `$lib/utils/storage.ts`
+- **함수**:
+  - `getAvatarUrl(supabase, player)` - 플레이어 아바타 URL
+  - `uploadAvatar(supabase, player, file)` - 아바타 업로드
+  - `getGameAssetUrl(supabase, type, target)` - 게임 에셋 URL
+  - `uploadGameAsset(supabase, type, target, file)` - 게임 에셋 업로드
+- **GameAssetType**: `'terrain' | 'item'`
+- **target 패턴**: `{ id: string; game_asset: string | null }`
+- **반환값**: 실패 시 빈 문자열 `''` 반환, 에러는 console.error로 출력
+
+## $effect로 prop 변경 감지 패턴
+
+- prop 변경 시 특정 로직을 실행해야 할 때 사용
+- 이전 값과 비교하여 변경 여부 판단
+- 예시:
+  ```typescript
+  let prevGameAsset: string | null | undefined = terrain?.game_asset;
+  $effect(() => {
+    const currentGameAsset = terrain?.game_asset;
+    if (currentGameAsset !== prevGameAsset && engine) {
+      prevGameAsset = currentGameAsset;
+      // 변경 시 실행할 로직
+    }
+  });
+  ```
+- **성능 고려**: 무거운 작업(SVG 파싱 등)과 가벼운 작업(스타일 변경 등)은 별도 $effect로 분리
+  ```typescript
+  // 무거운 작업: terrain 변경 시에만 실행
+  $effect(() => { /* SVG 재로딩 */ });
+
+  // 가벼운 작업: debug 변경 시 기존 바디 스타일만 업데이트
+  $effect(() => {
+    const bodies = Composite.allBodies(engine.world);
+    for (const body of bodies) {
+      body.render.visible = debug;
+    }
+  });
+  ```
+
+## Supabase Storage 버킷
+
+- **avatars**: 플레이어 아바타 이미지
+  - 경로: `{player.id}/{filename}`
+- **game-assets**: 게임 에셋 (지형, 아이템 등)
+  - 경로: `{type}/{target.id}/{filename}`
+  - 파일 크기 제한: 10MB
+  - public bucket (누구나 조회 가능)
+  - 업로드/삭제는 admin만 가능
