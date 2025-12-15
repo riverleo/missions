@@ -2,7 +2,6 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Card, CardContent } from '$lib/components/ui/card';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
@@ -189,7 +188,7 @@
 	}
 </script>
 
-<Panel position="top-right">
+<Panel position="bottom-center">
 	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
@@ -198,10 +197,10 @@
 						{...props}
 						onclick={onclickCreateNode}
 						disabled={isCreatingNode}
-						size="icon"
+						size="icon-lg"
 						variant="outline"
 					>
-						<IconPlus class="h-4 w-4" />
+						<IconPlus />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
@@ -214,10 +213,10 @@
 						{...props}
 						onclick={onclickCreateNarrativeDiceRoll}
 						disabled={isCreatingNarrativeDiceRoll}
-						size="icon"
+						size="icon-lg"
 						variant="outline"
 					>
-						<IconDice class="h-4 w-4" />
+						<IconDice />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
@@ -230,10 +229,10 @@
 						{...props}
 						onclick={onclickLayout}
 						disabled={isLayouting}
-						size="icon"
+						size="icon-lg"
 						variant="outline"
 					>
-						<IconLayoutDistributeVertical class="h-4 w-4" />
+						<IconLayoutDistributeVertical />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>

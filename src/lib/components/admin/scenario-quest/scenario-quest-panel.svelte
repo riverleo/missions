@@ -77,7 +77,7 @@
 	}
 </script>
 
-<Panel position="top-right">
+<Panel position="bottom-center">
 	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
@@ -86,10 +86,10 @@
 						{...props}
 						onclick={onclickCreateScenarioQuestBranch}
 						disabled={isCreating}
-						size="icon"
+						size="icon-lg"
 						variant="outline"
 					>
-						<IconPlus class="h-4 w-4" />
+						<IconPlus />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
@@ -102,10 +102,10 @@
 						{...props}
 						onclick={onclickLayout}
 						disabled={isLayouting}
-						size="icon"
+						size="icon-lg"
 						variant="outline"
 					>
-						<IconLayoutDistributeVertical class="h-4 w-4" />
+						<IconLayoutDistributeVertical />
 					</Button>
 				{/snippet}
 			</TooltipTrigger>

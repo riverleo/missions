@@ -11,7 +11,6 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import type { ScenarioQuestBranch } from '$lib/types';
 	import ScenarioQuestBranchNode from './scenario-quest-branch-node.svelte';
@@ -38,7 +37,9 @@
 	};
 
 	const scenarioQuestBranches = $derived(
-		Object.values($scenarioQuestBranchStore.data).filter((b) => b.scenario_quest_id === scenarioQuestId)
+		Object.values($scenarioQuestBranchStore.data).filter(
+			(b) => b.scenario_quest_id === scenarioQuestId
+		)
 	);
 
 	let nodes = $state<Node[]>([]);
@@ -57,7 +58,8 @@
 			const data = node.data as { label: string; scenarioQuestBranch: ScenarioQuestBranch };
 			data.label = scenarioQuestBranch.title;
 			data.scenarioQuestBranch.title = scenarioQuestBranch.title;
-			data.scenarioQuestBranch.display_order_in_scenario_quest = scenarioQuestBranch.display_order_in_scenario_quest;
+			data.scenarioQuestBranch.display_order_in_scenario_quest =
+				scenarioQuestBranch.display_order_in_scenario_quest;
 		}
 
 		// 선택 해제
@@ -69,7 +71,9 @@
 	async function onconnect(connection: Connection) {
 		try {
 			// target이 연결되는 브랜치 (자식), source가 부모 브랜치
-			const targetScenarioQuestBranch = scenarioQuestBranches.find((b) => b.id === connection.target);
+			const targetScenarioQuestBranch = scenarioQuestBranches.find(
+				(b) => b.id === connection.target
+			);
 			if (!targetScenarioQuestBranch) return;
 
 			await admin.updateScenarioQuestBranch(connection.target, {
@@ -162,9 +166,7 @@
 
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newScenarioQuestBranch) {
-				nodes = nodes.map((n) =>
-					n.id === newScenarioQuestBranch.id ? { ...n, position } : n
-				);
+				nodes = nodes.map((n) => (n.id === newScenarioQuestBranch.id ? { ...n, position } : n));
 				// 레이아웃 재적용 방지
 				layoutApplied = true;
 			}
@@ -179,7 +181,10 @@
 		const newEdges: Edge[] = [];
 
 		// display_order_in_scenario_quest로 정렬된 브랜치 사용
-		const sortedScenarioQuestBranches = sort(scenarioQuestBranches, (b) => b.display_order_in_scenario_quest);
+		const sortedScenarioQuestBranches = sort(
+			scenarioQuestBranches,
+			(b) => b.display_order_in_scenario_quest
+		);
 
 		// 트리 위치 계산
 		const treeMap = toTreeMap(
@@ -240,13 +245,25 @@
 	});
 </script>
 
-<SvelteFlow {nodes} {edges} {nodeTypes} colorMode={mode.current} {onconnect} {onconnectend} {ondelete} fitView>
+<SvelteFlow
+	{nodes}
+	{edges}
+	{nodeTypes}
+	colorMode={mode.current}
+	{onconnect}
+	{onconnectend}
+	{ondelete}
+	fitView
+>
 	<Controls />
 	<Background variant={BackgroundVariant.Dots} />
 	<MiniMap />
 
 	{#if selectedScenarioQuestBranch}
-		<ScenarioQuestBranchPanel scenarioQuestBranch={selectedScenarioQuestBranch} onupdate={onupdateScenarioQuestBranch} />
+		<ScenarioQuestBranchPanel
+			scenarioQuestBranch={selectedScenarioQuestBranch}
+			onupdate={onupdateScenarioQuestBranch}
+		/>
 	{:else}
 		<ScenarioQuestPanel {onlayout} />
 	{/if}
