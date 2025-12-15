@@ -11,16 +11,18 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import type { Chapter } from '$lib/types';
-	import ScenarioChapterNode from './scenario-chapter-node.svelte';
-	import ScenarioChapterFlowPanel from './scenario-chapter-flow-panel.svelte';
-	import ScenarioChapterDetailPanel from './scenario-chapter-detail-panel.svelte';
-	import { useChapter } from '$lib/hooks/use-chapter';
+	import { page } from '$app/state';
+	import type { QuestBranch } from '$lib/types';
+	import QuestBranchNode from './quest-branch-node.svelte';
+	import QuestPanel from './quest-panel.svelte';
+	import QuestBranchPanel from './quest-branch-panel.svelte';
+	import { useQuest } from '$lib/hooks/use-quest';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
 
-	const { store, admin } = useChapter();
+	const questId = $derived(page.params.questId);
+	const { questBranchStore, admin } = useQuest();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -31,43 +33,50 @@
 	let skipConvertEffect = $state(false);
 
 	const nodeTypes = {
-		chapter: ScenarioChapterNode,
+		questBranch: QuestBranchNode,
 	};
 
-	const chapters = $derived(Object.values($store.data));
+	const questBranches = $derived(
+		Object.values($questBranchStore.data).filter((b) => b.quest_id === questId)
+	);
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 
 	// 선택된 노드 추적
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
-	const selectedChapter = $derived(
-		selectedNode ? chapters.find((c: Chapter) => c.id === selectedNode.id) : undefined
+	const selectedQuestBranch = $derived(
+		selectedNode ? questBranches.find((b) => b.id === selectedNode.id) : undefined
 	);
 
-	function onupdateChapter(chapter: Chapter) {
+	function onupdateQuestBranch(questBranch: QuestBranch) {
 		// 노드 레이블 업데이트
-		const node = nodes.find((n) => n.id === chapter.id);
+		const node = nodes.find((n) => n.id === questBranch.id);
 		if (node && node.data) {
-			const data = node.data as { label: string; chapter: Chapter };
-			data.label = chapter.title;
-			data.chapter.title = chapter.title;
-			data.chapter.display_order_in_scenario = chapter.display_order_in_scenario;
+			const data = node.data as { label: string; questBranch: QuestBranch };
+			data.label = questBranch.title;
+			data.questBranch.title = questBranch.title;
+			data.questBranch.display_order_in_quest = questBranch.display_order_in_quest;
 		}
 
 		// 선택 해제
-		flowNodes.update((ns) => ns.map((n) => (n.id === chapter.id ? { ...n, selected: false } : n)));
+		flowNodes.update((ns) =>
+			ns.map((n) => (n.id === questBranch.id ? { ...n, selected: false } : n))
+		);
 	}
 
 	async function onconnect(connection: Connection) {
 		try {
-			// target이 연결되는 챕터 (자식), source가 부모 챕터
-			const targetChapter = chapters.find((c: Chapter) => c.id === connection.target);
-			if (!targetChapter) return;
+			// target이 연결되는 브랜치 (자식), source가 부모 브랜치
+			const targetQuestBranch = questBranches.find((b) => b.id === connection.target);
+			if (!targetQuestBranch) return;
 
-			await admin.update(connection.target, {
-				parent_chapter_id: connection.source,
+			await admin.updateQuestBranch(connection.target, {
+				parent_quest_branch_id: connection.source,
 			});
+
+			// 로컬 데이터 업데이트
+			targetQuestBranch.parent_quest_branch_id = connection.source;
 
 			// 엣지 추가
 			edges = [
@@ -80,7 +89,7 @@
 				},
 			];
 		} catch (error) {
-			console.error('Failed to connect chapter:', error);
+			console.error('Failed to connect quest branch:', error);
 		}
 	}
 
@@ -97,19 +106,19 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				await admin.update(edge.target, {
-					parent_chapter_id: null,
+				await admin.updateQuestBranch(edge.target, {
+					parent_quest_branch_id: null,
 				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				await admin.remove(node.id);
+				await admin.removeQuestBranch(node.id);
 			}
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
 			skipConvertEffect = false;
-			convertToNodesAndEdges(chapters);
+			convertToNodesAndEdges(questBranches);
 		} catch (error) {
 			skipConvertEffect = false;
 			console.error('Failed to delete:', error);
@@ -124,6 +133,7 @@
 	const onconnectend: OnConnectEnd = async (event, connectionState) => {
 		// 유효한 연결이면 무시 (onconnect에서 처리)
 		if (connectionState.isValid) return;
+		if (!questId) return;
 
 		const sourceNode = connectionState.fromNode;
 		if (!sourceNode) return;
@@ -139,46 +149,47 @@
 		skipConvertEffect = true;
 
 		try {
-			// 새 챕터 생성 (소스 노드를 부모로 설정)
-			const newChapter = await admin.create({
-				parent_chapter_id: sourceNode.id,
+			// 새 브랜치 생성 (소스 노드를 부모로 설정)
+			const newQuestBranch = await admin.createQuestBranch({
+				quest_id: questId,
+				parent_quest_branch_id: sourceNode.id,
 			});
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
 			skipConvertEffect = false;
-			convertToNodesAndEdges(chapters);
+			convertToNodesAndEdges(questBranches);
 
 			// 새 노드의 위치를 드롭 위치로 설정
-			if (newChapter) {
-				nodes = nodes.map((n) => (n.id === newChapter.id ? { ...n, position } : n));
+			if (newQuestBranch) {
+				nodes = nodes.map((n) => (n.id === newQuestBranch.id ? { ...n, position } : n));
 				// 레이아웃 재적용 방지
 				layoutApplied = true;
 			}
 		} catch (error) {
 			skipConvertEffect = false;
-			console.error('Failed to create chapter on edge drop:', error);
+			console.error('Failed to create quest branch on edge drop:', error);
 		}
 	};
 
-	async function convertToNodesAndEdges(chapters: Chapter[]) {
+	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
-		// display_order_in_scenario로 정렬된 챕터 사용
-		const sortedChapters = sort(chapters, (c) => c.display_order_in_scenario);
+		// display_order_in_quest로 정렬된 브랜치 사용
+		const sortedQuestBranches = sort(questBranches, (b) => b.display_order_in_quest);
 
 		// 트리 위치 계산
-		const treeMap = toTreeMap(chapters, 'parent_chapter_id', 'display_order_in_scenario');
+		const treeMap = toTreeMap(questBranches, 'parent_quest_branch_id', 'display_order_in_quest');
 
 		// 노드 생성
-		sortedChapters.forEach((chapter) => {
-			const treeNode = treeMap.get(chapter.id);
+		sortedQuestBranches.forEach((questBranch) => {
+			const treeNode = treeMap.get(questBranch.id);
 			newNodes.push({
-				id: chapter.id,
-				type: 'chapter',
+				id: questBranch.id,
+				type: 'questBranch',
 				data: {
-					label: chapter.title,
-					chapter,
+					label: questBranch.title,
+					questBranch,
 					position: treeNode?.toString(),
 				},
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
@@ -186,11 +197,11 @@
 			});
 
 			// 엣지 생성 (parent -> child)
-			if (chapter.parent_chapter_id) {
+			if (questBranch.parent_quest_branch_id) {
 				newEdges.push({
-					id: `${chapter.parent_chapter_id}-${chapter.id}`,
-					source: chapter.parent_chapter_id,
-					target: chapter.id,
+					id: `${questBranch.parent_quest_branch_id}-${questBranch.id}`,
+					source: questBranch.parent_quest_branch_id,
+					target: questBranch.id,
 					deletable: true,
 				});
 			}
@@ -204,10 +215,10 @@
 	// 데이터 변경 시 노드/엣지 생성
 	$effect(() => {
 		// 의존성 추적을 위해 여기서 접근
-		chapters;
+		questBranches;
 
 		if (skipConvertEffect) return;
-		convertToNodesAndEdges(chapters);
+		convertToNodesAndEdges(questBranches);
 	});
 
 	// 노드 측정 완료 후 레이아웃 적용
@@ -236,9 +247,9 @@
 	<Background variant={BackgroundVariant.Dots} />
 	<MiniMap />
 
-	{#if selectedChapter}
-		<ScenarioChapterDetailPanel chapter={selectedChapter} onupdate={onupdateChapter} />
+	{#if selectedQuestBranch}
+		<QuestBranchPanel questBranch={selectedQuestBranch} onupdate={onupdateQuestBranch} />
 	{:else}
-		<ScenarioChapterFlowPanel {onlayout} />
+		<QuestPanel {onlayout} />
 	{/if}
 </SvelteFlow>

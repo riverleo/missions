@@ -1,10 +1,10 @@
 <script lang="ts">
-	import ScenarioQuestAside from '$lib/components/admin/scenario-quest/scenario-quest-aside.svelte';
+	import QuestAside from '$lib/components/admin/quest/quest-aside.svelte';
 
 	let { children } = $props();
 </script>
 
 <div class="relative h-full">
-	<ScenarioQuestAside />
+	<QuestAside />
 	{@render children()}
 </div>

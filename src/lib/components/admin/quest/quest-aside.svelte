@@ -13,11 +13,11 @@
 	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useQuest } from '$lib/hooks/use-quest';
-	import ScenarioQuestCommand from './scenario-quest-command.svelte';
-	import ScenarioQuestCreateDialog from './scenario-quest-create-dialog.svelte';
-	import ScenarioQuestUpdateDialog from './scenario-quest-update-dialog.svelte';
-	import ScenarioQuestDeleteDialog from './scenario-quest-delete-dialog.svelte';
-	import ScenarioQuestPublishDialog from './scenario-quest-publish-dialog.svelte';
+	import QuestCommand from './quest-command.svelte';
+	import QuestCreateDialog from './quest-create-dialog.svelte';
+	import QuestUpdateDialog from './quest-update-dialog.svelte';
+	import QuestDeleteDialog from './quest-delete-dialog.svelte';
+	import QuestPublishDialog from './quest-publish-dialog.svelte';
 
 	const { questStore, openDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
@@ -120,11 +120,11 @@
 	</ButtonGroup>
 
 	{#if toggleValue.includes('list')}
-		<ScenarioQuestCommand />
+		<QuestCommand />
 	{/if}
 </aside>
 
-<ScenarioQuestCreateDialog />
-<ScenarioQuestUpdateDialog />
-<ScenarioQuestDeleteDialog />
-<ScenarioQuestPublishDialog />
+<QuestCreateDialog />
+<QuestUpdateDialog />
+<QuestDeleteDialog />
+<QuestPublishDialog />

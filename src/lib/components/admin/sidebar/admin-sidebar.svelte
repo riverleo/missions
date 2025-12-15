@@ -31,12 +31,24 @@
 		},
 	]);
 
-	const gameElementMenuItems = [
+	const gameElementMenuItems = $derived([
 		{
-			title: '게임 요소',
-			href: '/admin/game-elements',
+			title: '플레이',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/play` : undefined,
 		},
-	];
+		{
+			title: '지형',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined,
+		},
+		{
+			title: '캐릭터',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
+		},
+		{
+			title: '아이템',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
+		},
+	]);
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
 
