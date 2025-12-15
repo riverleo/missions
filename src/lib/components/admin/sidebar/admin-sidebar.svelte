@@ -33,7 +33,7 @@
 
 	const gameElementMenuItems = $derived([
 		{
-			title: '플레이',
+			title: '테스트',
 			href: scenarioId ? `/admin/scenarios/${scenarioId}/play` : undefined,
 		},
 		{
@@ -84,7 +84,7 @@
 			</SidebarGroupContent>
 		</SidebarGroup>
 		<SidebarGroup>
-			<SidebarGroupLabel>게임 요소</SidebarGroupLabel>
+			<SidebarGroupLabel>세계</SidebarGroupLabel>
 			<SidebarGroupContent>
 				<SidebarMenu>
 					{#each gameElementMenuItems as item}
