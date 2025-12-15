@@ -5,6 +5,7 @@
 		SidebarContent,
 		SidebarGroup,
 		SidebarGroupContent,
+		SidebarGroupLabel,
 		SidebarHeader,
 		SidebarMenu,
 		SidebarMenuItem,
@@ -17,7 +18,7 @@
 	const { store } = useScenario();
 	const currentScenarioId = $derived($store.currentScenarioId);
 
-	const menuItems = $derived([
+	const scenarioMenuItems = $derived([
 		{
 			title: '챕터',
 			href: currentScenarioId ? `/admin/scenarios/${currentScenarioId}/chapters` : undefined,
@@ -31,6 +32,13 @@
 			href: '/admin/narratives',
 		},
 	]);
+
+	const gameElementMenuItems = [
+		{
+			title: '게임 요소',
+			href: '/admin/game-elements',
+		},
+	];
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar> = $props();
 
@@ -46,9 +54,10 @@
 	</SidebarHeader>
 	<SidebarContent>
 		<SidebarGroup>
+			<SidebarGroupLabel>시나리오</SidebarGroupLabel>
 			<SidebarGroupContent>
 				<SidebarMenu>
-					{#each menuItems as item}
+					{#each scenarioMenuItems as item}
 						{#if item.href}
 							<SidebarMenuItem>
 								<SidebarMenuButton isActive={isActive(item.href)}>
@@ -60,6 +69,24 @@
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						{/if}
+					{/each}
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
+		<SidebarGroup>
+			<SidebarGroupLabel>게임 요소</SidebarGroupLabel>
+			<SidebarGroupContent>
+				<SidebarMenu>
+					{#each gameElementMenuItems as item}
+						<SidebarMenuItem>
+							<SidebarMenuButton isActive={isActive(item.href)}>
+								{#snippet child({ props })}
+									<a href={item.href} {...props}>
+										<span>{item.title}</span>
+									</a>
+								{/snippet}
+							</SidebarMenuButton>
+						</SidebarMenuItem>
 					{/each}
 				</SidebarMenu>
 			</SidebarGroupContent>
