@@ -50,6 +50,9 @@ importers:
       mode-watcher:
         specifier: ^1.1.0
         version: 1.1.0(svelte@5.45.2)
+      pathseg:
+        specifier: ^1.2.1
+        version: 1.2.1
       pixi.js:
         specifier: ^8.14.3
         version: 8.14.3
@@ -1780,6 +1783,9 @@ packages:
 
   parse-svg-path@0.1.2:
     resolution: {integrity: sha512-JyPSBnkTJ0AI8GGJLfMXvKq42cj5c006fnLz6fXy6zfoVjJizi8BNTpu8on8ziI1cKy9d9DGNuY17Ce7wuejpQ==}
+
+  pathseg@1.2.1:
+    resolution: {integrity: sha512-LtvemzPvcGamWBbNWJaIrgfUzpynXfwYrP6SSFVRhNHVcCaq6SVm4kRGJNuIV8qzBKgCN3fEXFZZ16YETFIXoA==}
 
   pathval@2.0.1:
     resolution: {integrity: sha512-//nshmD55c46FuFw26xV/xFAaB5HF9Xdap7HJBBnrKdAd6/GxDBaNA1870O79+9ueg61cZLSVc+OaFlfmObYVQ==}
@@ -3593,6 +3599,8 @@ snapshots:
       svelte-toolbelt: 0.9.3(svelte@5.45.2)
 
   parse-svg-path@0.1.2: {}
+
+  pathseg@1.2.1: {}
 
   pathval@2.0.1: {}
 

@@ -1,11 +1,10 @@
 -- game-assets 버킷 생성
-insert into storage.buckets (id, name, public, allowed_mime_types, file_size_limit)
+insert into storage.buckets (id, name, public, file_size_limit)
 values (
   'game-assets',
   'game-assets',
   true,
-  array['image/svg+xml'],
-  1048576  -- 1MB
+  10485760  -- 10MB
 )
 on conflict (id) do nothing;
 

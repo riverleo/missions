@@ -32,7 +32,7 @@
 	{#if terrains.length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
-			<CommandGroup heading="지형">
+			<CommandGroup>
 				{#each terrains as terrain (terrain.id)}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`}
@@ -44,9 +44,9 @@
 								terrain.id === currentTerrainId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
-						<span class="flex-1 truncate"
-							>{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}</span
-						>
+						<span class="flex-1 truncate">
+							{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
+						</span>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}
