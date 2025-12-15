@@ -28,8 +28,11 @@
 	import { IconHeading, IconChevronDown, IconCategory, IconSortDescending } from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { useChapter } from '$lib/hooks/use-chapter';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	const { admin, dialogStore, closeDialog } = useQuest();
+	const scenarioId = $derived(page.params.scenarioId);
 	const { store: chapterStore } = useChapter();
 
 	const open = $derived($dialogStore?.type === 'create');
@@ -83,8 +86,9 @@
 				chapter_id: chapterId || null,
 				order_in_chapter: orderInChapter,
 			})
-			.then(() => {
+			.then((quest) => {
 				closeDialog();
+				goto(`/admin/scenarios/${scenarioId}/quests/${quest.id}`);
 			})
 			.catch((error) => {
 				console.error('Failed to create quest:', error);

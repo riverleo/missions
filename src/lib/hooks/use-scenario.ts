@@ -4,6 +4,7 @@ import type { RecordFetchState, Scenario, ScenarioInsert, ScenarioUpdate } from 
 import { useServerPayload } from './use-server-payload.svelte';
 import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
+import { useTerrain } from './use-terrain';
 
 type ScenarioStoreState = RecordFetchState<Scenario>;
 
@@ -64,7 +65,11 @@ function createScenarioStore() {
 	}
 
 	async function init(scenarioId: string) {
-		await Promise.all([useQuest().fetch(scenarioId), useChapter().fetch(scenarioId)]);
+		await Promise.all([
+			useQuest().fetch(scenarioId),
+			useChapter().fetch(scenarioId),
+			useTerrain().fetch(scenarioId),
+		]);
 	}
 
 	const admin = {

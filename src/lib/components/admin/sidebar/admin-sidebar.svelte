@@ -34,7 +34,7 @@
 	const gameElementMenuItems = $derived([
 		{
 			title: '테스트',
-			href: scenarioId ? `/admin/scenarios/${scenarioId}/play` : undefined,
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/world` : undefined,
 		},
 		{
 			title: '지형',

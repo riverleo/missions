@@ -102,3 +102,8 @@ export type PlayerUpdate = TablesUpdate<'players'>;
 
 // User types
 export type UserRole = Tables<'user_roles'>;
+
+// Terrain types
+export type Terrain = Tables<'terrains'>;
+export type TerrainInsert = TablesInsert<'terrains'>;
+export type TerrainUpdate = TablesUpdate<'terrains'>;

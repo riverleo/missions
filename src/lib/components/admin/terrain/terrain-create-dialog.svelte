@@ -7,17 +7,20 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
+	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
-	const { admin } = useNarrative();
-	const { store } = admin;
-
+	const { admin, dialogStore, closeDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId);
-	const open = $derived($store.dialog?.type === 'create');
+
+	const open = $derived($dialogStore?.type === 'create');
 
 	let title = $state('');
 	let isSubmitting = $state(false);
@@ -30,24 +33,24 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			admin.closeDialog();
+			closeDialog();
 		}
 	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!title.trim() || isSubmitting || !scenarioId) return;
+		if (!title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim(), scenario_id: scenarioId })
-			.then((narrative) => {
-				admin.closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`);
+			.create({ title: title.trim() })
+			.then((terrain) => {
+				closeDialog();
+				goto(`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`);
 			})
 			.catch((error) => {
-				console.error('Failed to create narrative:', error);
+				console.error('Failed to create terrain:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -58,16 +61,16 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 대화 생성</DialogTitle>
+			<DialogTitle>새로운 지형 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit}>
+		<form {onsubmit} class="space-y-6">
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
 				<InputGroupInput placeholder="제목" bind:value={title} />
 			</InputGroup>
-			<DialogFooter class="mt-4">
+			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>

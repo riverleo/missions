@@ -906,6 +906,51 @@ export type Database = {
           },
         ]
       }
+      terrains: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_order: number
+          game_asset: string | null
+          id: string
+          scenario_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          game_asset?: string | null
+          id?: string
+          scenario_id: string
+          title?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          game_asset?: string | null
+          id?: string
+          scenario_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terrains_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terrains_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
