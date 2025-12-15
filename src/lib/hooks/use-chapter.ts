@@ -1,18 +1,13 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type {
-	RecordFetchState,
-	ScenarioChapter,
-	ScenarioChapterInsert,
-	ScenarioChapterUpdate,
-} from '$lib/types';
+import type { RecordFetchState, Chapter, ChapterInsert, ChapterUpdate } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
-let instance: ReturnType<typeof createScenarioChapterStore> | null = null;
+let instance: ReturnType<typeof createChapterStore> | null = null;
 
-function createScenarioChapterStore() {
+function createChapterStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<RecordFetchState<ScenarioChapter>>({ status: 'idle', data: {} });
+	const store = writable<RecordFetchState<Chapter>>({ status: 'idle', data: {} });
 
 	let currentScenarioId: string | undefined;
 
@@ -22,7 +17,7 @@ function createScenarioChapterStore() {
 
 		try {
 			const { data, error } = await supabase
-				.from('scenario_chapters')
+				.from('chapters')
 				.select('*')
 				.eq('scenario_id', scenarioId)
 				.order('display_order_in_scenario', { ascending: true });
@@ -30,7 +25,7 @@ function createScenarioChapterStore() {
 			if (error) throw error;
 
 			// Convert array to Record
-			const record: Record<string, ScenarioChapter> = {};
+			const record: Record<string, Chapter> = {};
 			for (const item of data ?? []) {
 				record[item.id] = item;
 			}
@@ -49,16 +44,14 @@ function createScenarioChapterStore() {
 		}
 	}
 
-	async function create(scenarioChapter: Omit<ScenarioChapterInsert, 'scenario_id'>) {
+	async function create(chapter: Omit<ChapterInsert, 'scenario_id'>) {
 		if (!currentScenarioId) {
-			throw new Error(
-				'useScenarioChapter: currentScenarioId is not set. Call useScenario.init() first.'
-			);
+			throw new Error('useChapter: currentScenarioId is not set. Call useScenario.init() first.');
 		}
 		const { data, error } = await supabase
-			.from('scenario_chapters')
+			.from('chapters')
 			.insert({
-				...scenarioChapter,
+				...chapter,
 				scenario_id: currentScenarioId,
 			})
 			.select()
@@ -75,22 +68,22 @@ function createScenarioChapterStore() {
 		return data;
 	}
 
-	async function update(id: string, scenarioChapter: ScenarioChapterUpdate) {
-		const { error } = await supabase.from('scenario_chapters').update(scenarioChapter).eq('id', id);
+	async function update(id: string, chapter: ChapterUpdate) {
+		const { error } = await supabase.from('chapters').update(chapter).eq('id', id);
 
 		if (error) throw error;
 
 		store.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data?.[id]) {
-					Object.assign(draft.data[id], scenarioChapter);
+					Object.assign(draft.data[id], chapter);
 				}
 			})
 		);
 	}
 
 	async function remove(id: string) {
-		const { error } = await supabase.from('scenario_chapters').delete().eq('id', id);
+		const { error } = await supabase.from('chapters').delete().eq('id', id);
 
 		if (error) throw error;
 
@@ -104,10 +97,7 @@ function createScenarioChapterStore() {
 	}
 
 	async function publish(id: string) {
-		const { error } = await supabase
-			.from('scenario_chapters')
-			.update({ status: 'published' })
-			.eq('id', id);
+		const { error } = await supabase.from('chapters').update({ status: 'published' }).eq('id', id);
 
 		if (error) throw error;
 
@@ -121,10 +111,7 @@ function createScenarioChapterStore() {
 	}
 
 	async function unpublish(id: string) {
-		const { error } = await supabase
-			.from('scenario_chapters')
-			.update({ status: 'draft' })
-			.eq('id', id);
+		const { error } = await supabase.from('chapters').update({ status: 'draft' }).eq('id', id);
 
 		if (error) throw error;
 
@@ -138,7 +125,7 @@ function createScenarioChapterStore() {
 	}
 
 	return {
-		store: store as Readable<RecordFetchState<ScenarioChapter>>,
+		store: store as Readable<RecordFetchState<Chapter>>,
 		fetch,
 		admin: {
 			create,
@@ -150,9 +137,9 @@ function createScenarioChapterStore() {
 	};
 }
 
-export function useScenarioChapter() {
+export function useChapter() {
 	if (!instance) {
-		instance = createScenarioChapterStore();
+		instance = createChapterStore();
 	}
 	return instance;
 }

@@ -23,6 +23,7 @@
 
 	let { onlayout }: Props = $props();
 
+	const scenarioId = $derived(page.params.scenarioId);
 	const narrativeId = $derived(page.params.narrativeId);
 	const { admin } = useNarrative();
 	const flowNodes = useNodes();
@@ -32,12 +33,12 @@
 	let isLayouting = $state(false);
 
 	async function onclickCreateNode() {
-		if (isCreatingNode || !narrativeId) return;
+		if (isCreatingNode || !narrativeId || !scenarioId) return;
 
 		isCreatingNode = true;
 
 		try {
-			await admin.createNode({ narrative_id: narrativeId, type: 'text' });
+			await admin.createNode({ narrative_id: narrativeId, scenario_id: scenarioId, type: 'text' });
 		} catch (error) {
 			console.error('Failed to create narrative node:', error);
 		} finally {
@@ -46,12 +47,12 @@
 	}
 
 	async function onclickCreateNarrativeDiceRoll() {
-		if (isCreatingNarrativeDiceRoll || !narrativeId) return;
+		if (isCreatingNarrativeDiceRoll || !narrativeId || !scenarioId) return;
 
 		isCreatingNarrativeDiceRoll = true;
 
 		try {
-			await admin.createNarrativeDiceRoll({ narrative_id: narrativeId });
+			await admin.createNarrativeDiceRoll({ narrative_id: narrativeId, scenario_id: scenarioId });
 		} catch (error) {
 			console.error('Failed to create narrative dice roll:', error);
 		} finally {

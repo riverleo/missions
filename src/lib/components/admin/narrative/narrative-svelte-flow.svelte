@@ -39,6 +39,7 @@
 	} from '$lib/utils/flow-id';
 	import type { NarrativeNode, NarrativeDiceRoll } from '$lib/types';
 
+	const scenarioId = $derived(page.params.scenarioId);
 	const narrativeId = $derived(page.params.narrativeId);
 	const { narrativeNodeStore, narrativeDiceRollStore, narrativeNodeChoiceStore, admin } =
 		useNarrative();
@@ -315,7 +316,7 @@
 	const onconnectend: OnConnectEnd = async (event, connectionState) => {
 		// 유효한 연결이면 무시 (onconnect에서 처리)
 		if (connectionState.isValid) return;
-		if (!narrativeId) return;
+		if (!narrativeId || !scenarioId) return;
 
 		const sourceNode = connectionState.fromNode;
 		if (!sourceNode) return;
@@ -341,6 +342,7 @@
 				// 새 주사위 굴림 생성
 				const newDiceRoll = await admin.createNarrativeDiceRoll({
 					narrative_id: narrativeId,
+					scenario_id: scenarioId,
 				});
 				newNodeId = createNarrativeDiceRollNodeId(newDiceRoll);
 
@@ -370,6 +372,7 @@
 				// 새 노드 생성
 				const newNarrativeNode = await admin.createNode({
 					narrative_id: narrativeId,
+					scenario_id: scenarioId,
 					type: 'text',
 				});
 				newNodeId = createNarrativeNodeId(newNarrativeNode);

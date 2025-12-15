@@ -1,36 +1,36 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { ScenarioChapter } from '$lib/types';
+	import type { Chapter } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
+	import { useChapter } from '$lib/hooks/use-chapter';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
 
 	interface Props {
-		scenarioChapter: ScenarioChapter;
-		onupdate?: (scenarioChapter: ScenarioChapter) => void;
+		chapter: Chapter;
+		onupdate?: (chapter: Chapter) => void;
 	}
 
-	let { scenarioChapter, onupdate }: Props = $props();
+	let { chapter, onupdate }: Props = $props();
 
-	const { admin } = useScenarioChapter();
+	const { admin } = useChapter();
 	const flowNodes = useNodes();
 
 	let isUpdating = $state(false);
 	let isPublishing = $state(false);
-	let changes = $state<ScenarioChapter | undefined>(undefined);
+	let changes = $state<Chapter | undefined>(undefined);
 	let titleInputRef = $state<HTMLInputElement | null>(null);
 	let currentChapterId = $state<string | undefined>(undefined);
 
 	const isPublished = $derived(changes?.status === 'published');
 
 	$effect(() => {
-		if (scenarioChapter && scenarioChapter.id !== currentChapterId) {
-			currentChapterId = scenarioChapter.id;
-			changes = clone(scenarioChapter);
+		if (chapter && chapter.id !== currentChapterId) {
+			currentChapterId = chapter.id;
+			changes = clone(chapter);
 
 			tick().then(() => {
 				titleInputRef?.focus();
@@ -42,20 +42,20 @@
 		e.preventDefault();
 		if (!changes || isUpdating) return;
 
-		const scenarioChapterId = changes.id;
-		const updatedScenarioChapter = changes;
+		const chapterId = changes.id;
+		const updatedChapter = changes;
 		isUpdating = true;
 
 		admin
-			.update(scenarioChapterId, {
+			.update(chapterId, {
 				title: changes.title,
 				display_order_in_scenario: changes.display_order_in_scenario,
 			})
 			.then(() => {
-				onupdate?.(updatedScenarioChapter);
+				onupdate?.(updatedChapter);
 			})
 			.catch((error) => {
-				console.error('Failed to update scenario chapter:', error);
+				console.error('Failed to update chapter:', error);
 			})
 			.finally(() => {
 				isUpdating = false;
@@ -80,7 +80,7 @@
 
 		action(changes.id)
 			.catch((error) => {
-				console.error('Failed to change scenario chapter status:', error);
+				console.error('Failed to change chapter status:', error);
 			})
 			.finally(() => {
 				isPublishing = false;

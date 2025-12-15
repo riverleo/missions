@@ -11,10 +11,12 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	const { admin } = useNarrative();
 	const { store } = admin;
 
+	const scenarioId = $derived(page.params.scenarioId);
 	const open = $derived($store.dialog?.type === 'delete');
 	const narrativeId = $derived(
 		$store.dialog?.type === 'delete' ? $store.dialog.narrativeId : undefined
@@ -27,13 +29,13 @@
 	}
 
 	function onclick() {
-		if (!narrativeId) return;
+		if (!narrativeId || !scenarioId) return;
 
 		admin
 			.remove(narrativeId)
 			.then(() => {
 				admin.closeDialog();
-				goto('/admin/narratives');
+				goto(`/admin/scenarios/${scenarioId}/narratives`);
 			})
 			.catch((error) => {
 				console.error('Failed to delete narrative:', error);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ScenarioQuestType } from '$lib/types';
+	import type { QuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -31,31 +31,29 @@
 		IconCategory,
 		IconSortDescending,
 	} from '@tabler/icons-svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
+	import { useQuest } from '$lib/hooks/use-quest';
+	import { useChapter } from '$lib/hooks/use-chapter';
 
-	const { scenarioQuestStore, admin, dialogStore, closeDialog } = useScenarioQuest();
-	const { store: chapterStore } = useScenarioChapter();
+	const { questStore, admin, dialogStore, closeDialog } = useQuest();
+	const { store: chapterStore } = useChapter();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const scenarioQuestId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.scenarioQuestId : undefined
-	);
-	const currentScenarioQuest = $derived(scenarioQuestId ? $scenarioQuestStore.data?.[scenarioQuestId] : undefined);
+	const questId = $derived($dialogStore?.type === 'update' ? $dialogStore.questId : undefined);
+	const currentQuest = $derived(questId ? $questStore.data?.[questId] : undefined);
 	const chapters = $derived(Object.values($chapterStore.data));
 
 	let title = $state('');
-	let type = $state<ScenarioQuestType>('primary');
-	let scenarioChapterId = $state('');
+	let type = $state<QuestType>('primary');
+	let chapterId = $state('');
 	let orderInChapter = $state(0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
-		if (open && currentScenarioQuest) {
-			title = currentScenarioQuest.title;
-			type = currentScenarioQuest.type;
-			scenarioChapterId = currentScenarioQuest.scenario_chapter_id ?? '';
-			orderInChapter = currentScenarioQuest.order_in_chapter;
+		if (open && currentQuest) {
+			title = currentQuest.title;
+			type = currentQuest.type;
+			chapterId = currentQuest.chapter_id ?? '';
+			orderInChapter = currentQuest.order_in_chapter;
 		}
 	});
 
@@ -64,13 +62,13 @@
 	}
 
 	const chapterLabel = $derived.by(() => {
-		if (!scenarioChapterId) return '챕터 없음';
-		const chapter = chapters.find((c) => c.id === scenarioChapterId);
+		if (!chapterId) return '챕터 없음';
+		const chapter = chapters.find((c) => c.id === chapterId);
 		return chapter ? getChapterTitle(chapter) : '챕터 없음';
 	});
 
-	function getTypeLabel(scenarioQuestType: ScenarioQuestType) {
-		return scenarioQuestType === 'primary' ? '메인 퀘스트' : '보조 퀘스트';
+	function getTypeLabel(questType: QuestType) {
+		return questType === 'primary' ? '메인 퀘스트' : '보조 퀘스트';
 	}
 
 	function onOpenChange(value: boolean) {
@@ -81,22 +79,22 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!scenarioQuestId || !title.trim() || isSubmitting) return;
+		if (!questId || !title.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.updateQuest(scenarioQuestId, {
+			.updateQuest(questId, {
 				title: title.trim(),
 				type,
-				scenario_chapter_id: scenarioChapterId || null,
+				chapter_id: chapterId || null,
 				order_in_chapter: orderInChapter,
 			})
 			.then(() => {
 				closeDialog();
 			})
 			.catch((error) => {
-				console.error('Failed to update scenario quest:', error);
+				console.error('Failed to update quest:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -127,7 +125,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuRadioGroup bind:value={scenarioChapterId}>
+								<DropdownMenuRadioGroup bind:value={chapterId}>
 									<DropdownMenuRadioItem value="">챕터 해제</DropdownMenuRadioItem>
 									<DropdownMenuSeparator />
 									{#each chapters as chapter (chapter.id)}

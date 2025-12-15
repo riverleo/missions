@@ -42,11 +42,11 @@ export function useAdmin() {
 				narrative_dice_roll_id: narrativeDiceRoll.id,
 				dice_id: null,
 				narrative_node_choice_id: null,
-				player_scenario_quest_branch_id: null,
-				player_scenario_quest_id: null,
+				player_quest_branch_id: null,
+				player_quest_id: null,
 				scenario_id: null,
-				scenario_quest_branch_id: null,
-				scenario_quest_id: null,
+				quest_branch_id: null,
+				quest_id: null,
 				value: Math.floor(Math.random() * 20) + 1, // 1-20 (d20)
 			};
 		},

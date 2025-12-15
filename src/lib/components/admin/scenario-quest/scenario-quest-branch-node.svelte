@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { ScenarioQuestBranch } from '$lib/types';
+	import type { QuestBranch } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
 
 	type Props = {
 		data: {
 			label: string;
-			scenarioQuestBranch: ScenarioQuestBranch;
+			questBranch: QuestBranch;
 			position?: string;
 		};
 		id: string;
@@ -17,7 +17,7 @@
 	const targetConnections = useNodeConnections({ handleType: 'target' });
 	const isConnectable = $derived(targetConnections.current.length === 0);
 
-	const scenarioQuestBranch = $derived(data.scenarioQuestBranch);
+	const questBranch = $derived(data.questBranch);
 </script>
 
 <div class="min-w-48 px-3 py-2">
@@ -27,10 +27,10 @@
 	<div class="flex flex-col gap-1">
 		<div
 			class="text-sm font-medium"
-			class:text-white={scenarioQuestBranch.title}
-			class:text-neutral-500={!scenarioQuestBranch.title}
+			class:text-white={questBranch.title}
+			class:text-neutral-500={!questBranch.title}
 		>
-			{scenarioQuestBranch.title || `제목없음 (${scenarioQuestBranch.id.split('-')[0]})`}
+			{questBranch.title || `제목없음 (${questBranch.id.split('-')[0]})`}
 		</div>
 		{#if data.position}
 			<span class="text-xs text-muted-foreground">{data.position}</span>

@@ -10,13 +10,13 @@
 	} from '$lib/components/ui/breadcrumb';
 	import { page } from '$app/state';
 	import { useScenario } from '$lib/hooks/use-scenario';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useChapter } from '$lib/hooks/use-chapter';
+	import { useQuest } from '$lib/hooks/use-quest';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 
 	const { store: scenarioStore } = useScenario();
-	const { store: scenarioChapterStore } = useScenarioChapter();
-	const { scenarioQuestStore } = useScenarioQuest();
+	const { store: chapterStore } = useChapter();
+	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
@@ -25,10 +25,10 @@
 			return $scenarioStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'chapters') {
-			return $scenarioChapterStore.data?.[id]?.title;
+			return $chapterStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'quests') {
-			return $scenarioQuestStore.data?.[id]?.title;
+			return $questStore.data?.[id]?.title;
 		}
 		if (prevSegment === 'narratives') {
 			return $narrativeStore.data?.[id]?.title;

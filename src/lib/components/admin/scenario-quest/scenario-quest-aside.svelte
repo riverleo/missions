@@ -12,17 +12,17 @@
 		IconEyeClosed,
 	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useQuest } from '$lib/hooks/use-quest';
 	import ScenarioQuestCommand from './scenario-quest-command.svelte';
 	import ScenarioQuestCreateDialog from './scenario-quest-create-dialog.svelte';
 	import ScenarioQuestUpdateDialog from './scenario-quest-update-dialog.svelte';
 	import ScenarioQuestDeleteDialog from './scenario-quest-delete-dialog.svelte';
 	import ScenarioQuestPublishDialog from './scenario-quest-publish-dialog.svelte';
 
-	const { scenarioQuestStore, openDialog } = useScenarioQuest();
-	const currentScenarioQuestId = $derived(page.params.scenarioQuestId);
-	const currentScenarioQuest = $derived(currentScenarioQuestId ? $scenarioQuestStore.data?.[currentScenarioQuestId] : undefined);
-	const isPublished = $derived(currentScenarioQuest?.status === 'published');
+	const { questStore, openDialog } = useQuest();
+	const currentQuestId = $derived(page.params.questId);
+	const currentQuest = $derived(currentQuestId ? $questStore.data?.[currentQuestId] : undefined);
+	const isPublished = $derived(currentQuest?.status === 'published');
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -65,9 +65,9 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								disabled={!currentScenarioQuestId}
+								disabled={!currentQuestId}
 								onclick={() =>
-									currentScenarioQuestId && openDialog({ type: 'update', scenarioQuestId: currentScenarioQuestId })}
+									currentQuestId && openDialog({ type: 'update', questId: currentQuestId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -82,9 +82,9 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								disabled={!currentScenarioQuestId}
+								disabled={!currentQuestId}
 								onclick={() =>
-									currentScenarioQuestId && openDialog({ type: 'publish', scenarioQuestId: currentScenarioQuestId })}
+									currentQuestId && openDialog({ type: 'publish', questId: currentQuestId })}
 							>
 								{#if isPublished}
 									<IconEyeClosed class="size-4" />
@@ -106,9 +106,9 @@
 							{...props}
 							variant="outline"
 							size="icon"
-							disabled={!currentScenarioQuestId}
+							disabled={!currentQuestId}
 							onclick={() =>
-								currentScenarioQuestId && openDialog({ type: 'delete', scenarioQuestId: currentScenarioQuestId })}
+								currentQuestId && openDialog({ type: 'delete', questId: currentQuestId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

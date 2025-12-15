@@ -15,46 +15,44 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
+	import { useQuest } from '$lib/hooks/use-quest';
+	import { useChapter } from '$lib/hooks/use-chapter';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';
-	import type { ScenarioQuest } from '$lib/types';
+	import type { Quest } from '$lib/types';
 
-	const NO_SCENARIO_CHAPTER = 'no-scenario-chapter';
+	const NO_CHAPTER = 'no-chapter';
 
-	const { store: scenarioStore } = useScenario();
-	const { scenarioQuestStore, openDialog } = useScenarioQuest();
-	const { store: scenarioChapterStore } = useScenarioChapter();
-	const currentScenarioId = $derived($scenarioStore.currentScenarioId);
-	const currentScenarioQuestId = $derived(page.params.scenarioQuestId);
+	const { questStore, openDialog } = useQuest();
+	const { store: chapterStore } = useChapter();
+	const scenarioId = $derived(page.params.scenarioId);
+	const currentQuestId = $derived(page.params.questId);
 
-	const scenarioQuests = $derived(Object.values($scenarioQuestStore.data));
-	const scenarioChapters = $derived($scenarioChapterStore.data);
+	const quests = $derived(Object.values($questStore.data));
+	const chapters = $derived($chapterStore.data);
 
 	// 퀘스트를 챕터별로 그룹화
-	const scenarioQuestsByScenarioChapter = $derived(() => {
-		const grouped = group(scenarioQuests, (q: ScenarioQuest) => q.scenario_chapter_id ?? NO_SCENARIO_CHAPTER);
+	const questsByChapter = $derived(() => {
+		const grouped = group(quests, (q: Quest) => q.chapter_id ?? NO_CHAPTER);
 
 		// 챕터 순서대로 정렬
 		const sortedEntries = sort(Object.entries(grouped), ([chapterId]) => {
-			if (chapterId === NO_SCENARIO_CHAPTER) return Infinity;
-			const chapter = scenarioChapters[chapterId];
+			if (chapterId === NO_CHAPTER) return Infinity;
+			const chapter = chapters[chapterId];
 			return chapter?.display_order_in_scenario ?? Infinity;
 		});
 
-		return sortedEntries.map(([scenarioChapterId, quests]) => {
-			const chapter = scenarioChapterId !== NO_SCENARIO_CHAPTER ? scenarioChapters[scenarioChapterId] : undefined;
-			let scenarioChapterTitle = '챕터 없음';
+		return sortedEntries.map(([chapterId, chapterQuests]) => {
+			const chapter = chapterId !== NO_CHAPTER ? chapters[chapterId] : undefined;
+			let chapterTitle = '챕터 없음';
 			if (chapter) {
-				scenarioChapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
+				chapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
 			}
 			return {
-				scenarioChapterId,
-				scenarioChapterTitle,
-				scenarioQuests: sort(quests ?? [], (q: ScenarioQuest) => q.order_in_chapter),
+				chapterId,
+				chapterTitle,
+				quests: sort(chapterQuests ?? [], (q: Quest) => q.order_in_chapter),
 			};
 		});
 	});
@@ -62,26 +60,26 @@
 
 <Command class="w-full rounded-lg border shadow-md">
 	<CommandInput placeholder="퀘스트 검색..." />
-	{#if scenarioQuests.length > 0}
+	{#if quests.length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
-			{#each scenarioQuestsByScenarioChapter() as { scenarioChapterId, scenarioChapterTitle, scenarioQuests } (scenarioChapterId)}
-				<CommandGroup heading={scenarioChapterTitle}>
-					{#each scenarioQuests as scenarioQuest (scenarioQuest.id)}
+			{#each questsByChapter() as { chapterId, chapterTitle, quests } (chapterId)}
+				<CommandGroup heading={chapterTitle}>
+					{#each quests as quest (quest.id)}
 						<CommandLinkItem
-							href={`/admin/scenarios/${currentScenarioId}/quests/${scenarioQuest.id}`}
+							href={`/admin/scenarios/${scenarioId}/quests/${quest.id}`}
 							class="group pr-1"
 						>
 							<IconCheck
 								class={cn(
 									'mr-2 size-4',
-									scenarioQuest.id === currentScenarioQuestId ? 'opacity-100' : 'opacity-0'
+									quest.id === currentQuestId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
 							<div class="flex flex-1 flex-col">
-								<span class="truncate">{scenarioQuest.title || `제목없음 (${scenarioQuest.id.split('-')[0]})`}</span>
+								<span class="truncate">{quest.title || `제목없음 (${quest.id.split('-')[0]})`}</span>
 								<span class="text-xs text-muted-foreground">
-									{scenarioQuest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {scenarioQuest.status ===
+									{quest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {quest.status ===
 									'published'
 										? '공개됨'
 										: '작업중'}
@@ -103,20 +101,17 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() =>
-											openDialog({ type: 'update', scenarioQuestId: scenarioQuest.id })}
+										onclick={() => openDialog({ type: 'update', questId: quest.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() =>
-											openDialog({ type: 'publish', scenarioQuestId: scenarioQuest.id })}
+										onclick={() => openDialog({ type: 'publish', questId: quest.id })}
 									>
-										{scenarioQuest.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
+										{quest.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() =>
-											openDialog({ type: 'delete', scenarioQuestId: scenarioQuest.id })}
+										onclick={() => openDialog({ type: 'delete', questId: quest.id })}
 									>
 										삭제
 									</DropdownMenuItem>

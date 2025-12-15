@@ -41,9 +41,9 @@ export interface ServerPayload {
 
 // Enums
 export type PublishStatus = Enums<'publish_status'>;
-export type ScenarioQuestType = Enums<'scenario_quest_type'>;
-export type PlayerScenarioQuestStatus = Enums<'player_scenario_quest_status'>;
-export type PlayerScenarioChapterStatus = Enums<'player_scenario_chapter_status'>;
+export type QuestType = Enums<'quest_type'>;
+export type PlayerQuestStatus = Enums<'player_quest_status'>;
+export type PlayerChapterStatus = Enums<'player_chapter_status'>;
 export type PlayerScenarioStatus = Enums<'player_scenario_status'>;
 export type DiceRollAction = Enums<'dice_roll_action'>;
 export type NarrativeNodeType = Enums<'narrative_node_type'>;
@@ -55,24 +55,24 @@ export type ScenarioUpdate = TablesUpdate<'scenarios'>;
 export type PlayerScenario = Tables<'player_scenarios'>;
 export type PlayerScenarioInsert = TablesInsert<'player_scenarios'>;
 
-// Scenario Chapter types
-export type ScenarioChapter = Tables<'scenario_chapters'>;
-export type ScenarioChapterInsert = TablesInsert<'scenario_chapters'>;
-export type ScenarioChapterUpdate = TablesUpdate<'scenario_chapters'>;
-export type PlayerScenarioChapter = Tables<'player_scenario_chapters'>;
-export type PlayerScenarioChapterInsert = TablesInsert<'player_scenario_chapters'>;
+// Chapter types
+export type Chapter = Tables<'chapters'>;
+export type ChapterInsert = TablesInsert<'chapters'>;
+export type ChapterUpdate = TablesUpdate<'chapters'>;
+export type PlayerChapter = Tables<'player_chapters'>;
+export type PlayerChapterInsert = TablesInsert<'player_chapters'>;
 
-// Scenario Quest types
-export type ScenarioQuest = Tables<'scenario_quests'>;
-export type ScenarioQuestInsert = TablesInsert<'scenario_quests'>;
-export type ScenarioQuestUpdate = TablesUpdate<'scenario_quests'>;
-export type ScenarioQuestBranch = Tables<'scenario_quest_branches'>;
-export type ScenarioQuestBranchInsert = TablesInsert<'scenario_quest_branches'>;
-export type ScenarioQuestBranchUpdate = TablesUpdate<'scenario_quest_branches'>;
-export type PlayerScenarioQuest = Tables<'player_scenario_quests'>;
-export type PlayerScenarioQuestInsert = TablesInsert<'player_scenario_quests'>;
-export type PlayerScenarioQuestBranch = Tables<'player_scenario_quest_branches'>;
-export type PlayerScenarioQuestBranchInsert = TablesInsert<'player_scenario_quest_branches'>;
+// Quest types
+export type Quest = Tables<'quests'>;
+export type QuestInsert = TablesInsert<'quests'>;
+export type QuestUpdate = TablesUpdate<'quests'>;
+export type QuestBranch = Tables<'quest_branches'>;
+export type QuestBranchInsert = TablesInsert<'quest_branches'>;
+export type QuestBranchUpdate = TablesUpdate<'quest_branches'>;
+export type PlayerQuest = Tables<'player_quests'>;
+export type PlayerQuestInsert = TablesInsert<'player_quests'>;
+export type PlayerQuestBranch = Tables<'player_quest_branches'>;
+export type PlayerQuestBranchInsert = TablesInsert<'player_quest_branches'>;
 
 // Narrative types
 export type Narrative = Tables<'narratives'>;

@@ -62,7 +62,11 @@ function createCurrentUserStore() {
 			// user_roles와 players 정보 가져오기
 			const [{ data: role }, { data: players }] = await Promise.all([
 				supabase.from('user_roles').select('*').eq('user_id', user.id).maybeSingle(),
-				supabase.from('players').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
+				supabase
+					.from('players')
+					.select('*')
+					.eq('user_id', user.id)
+					.order('created_at', { ascending: true }),
 			]);
 
 			const playerList = players ?? [];
@@ -86,14 +90,10 @@ function createCurrentUserStore() {
 		}
 	}
 
-	async function createPlayer(player: Omit<PlayerInsert, 'user_id'>) {
-		const currentState = get(store);
-		const userId = currentState.data?.user?.id;
-		if (!userId) throw new Error('User not found');
-
+	async function createPlayer(player: PlayerInsert) {
 		const { data, error } = await supabase
 			.from('players')
-			.insert({ ...player, user_id: userId })
+			.insert({ ...player })
 			.select()
 			.single();
 

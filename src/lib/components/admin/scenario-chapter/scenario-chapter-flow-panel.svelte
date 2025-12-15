@@ -5,9 +5,9 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
+	import { useChapter } from '$lib/hooks/use-chapter';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
-	import type { ScenarioChapter } from '$lib/types';
+	import type { Chapter } from '$lib/types';
 
 	interface Props {
 		onlayout?: (nodes: Node[], edges: Edge[]) => void;
@@ -15,13 +15,13 @@
 
 	let { onlayout }: Props = $props();
 
-	const { admin } = useScenarioChapter();
+	const { admin } = useChapter();
 	const flowNodes = useNodes();
 
 	let isCreating = $state(false);
 	let isLayouting = $state(false);
 
-	function onclickCreateScenarioChapter() {
+	function onclickCreateChapter() {
 		if (isCreating) return;
 
 		isCreating = true;
@@ -29,7 +29,7 @@
 		admin
 			.create({ title: '' })
 			.catch((error) => {
-				console.error('Failed to create scenario chapter:', error);
+				console.error('Failed to create chapter:', error);
 			})
 			.finally(() => {
 				isCreating = false;
@@ -47,11 +47,11 @@
 
 			// 현재 노드들로부터 엣지 추출
 			nodes.forEach((node) => {
-				const data = node.data as { scenarioChapter: ScenarioChapter };
-				if (data.scenarioChapter.parent_scenario_chapter_id) {
+				const data = node.data as { chapter: Chapter };
+				if (data.chapter.parent_chapter_id) {
 					edges.push({
-						id: `${data.scenarioChapter.parent_scenario_chapter_id}-${node.id}`,
-						source: data.scenarioChapter.parent_scenario_chapter_id,
+						id: `${data.chapter.parent_chapter_id}-${node.id}`,
+						source: data.chapter.parent_chapter_id,
 						target: node.id,
 						deletable: true,
 					});
@@ -78,7 +78,7 @@
 				{#snippet child({ props })}
 					<Button
 						{...props}
-						onclick={onclickCreateScenarioChapter}
+						onclick={onclickCreateChapter}
 						disabled={isCreating}
 						size="icon-lg"
 						variant="outline"

@@ -10,10 +10,12 @@
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative';
+	import { page } from '$app/state';
 
 	const { admin } = useNarrative();
 	const { store } = admin;
 
+	const scenarioId = $derived(page.params.scenarioId);
 	const open = $derived($store.dialog?.type === 'create');
 
 	let title = $state('');
@@ -33,12 +35,12 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!title.trim() || isSubmitting) return;
+		if (!title.trim() || isSubmitting || !scenarioId) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim() })
+			.create({ title: title.trim(), scenario_id: scenarioId })
 			.then(() => {
 				admin.closeDialog();
 			})

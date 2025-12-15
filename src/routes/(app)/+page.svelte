@@ -10,11 +10,13 @@
 	async function createAnonymousUser() {
 		isCreatingAnonymousUser = true;
 		try {
-			const { error } = await supabase.auth.signInAnonymously();
+			const { data, error } = await supabase.auth.signInAnonymously();
 			if (error) throw error;
 
-			// 플레이어 생성
-			await createPlayer({ name: '모험가' });
+			if (data.user) {
+				// 플레이어 생성
+				await createPlayer({ user_id: data.user.id, name: '모험가' });
+			}
 
 			// 페이지 새로고침하여 새 유저 정보 로드
 			window.location.reload();

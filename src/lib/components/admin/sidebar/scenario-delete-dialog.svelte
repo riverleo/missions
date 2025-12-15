@@ -11,12 +11,13 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
-	const { store, admin, dialogStore, closeDialog, init } = useScenario();
+	const { store, admin, dialogStore, closeDialog } = useScenario();
 
 	const open = $derived($dialogStore?.type === 'delete');
 	const scenarioId = $derived($dialogStore?.type === 'delete' ? $dialogStore.scenarioId : undefined);
-	const currentScenarioId = $derived($store.currentScenarioId);
+	const currentScenarioId = $derived(page.params.scenarioId);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -35,7 +36,6 @@
 				const remainingScenarios = Object.values($store.data).filter((s) => s.id !== scenarioId);
 				const nextScenario = remainingScenarios[0];
 				if (scenarioId === currentScenarioId && nextScenario) {
-					init(nextScenario.id);
 					goto(`/admin/scenarios/${nextScenario.id}/quests`);
 				} else if (remainingScenarios.length === 0) {
 					goto('/admin');

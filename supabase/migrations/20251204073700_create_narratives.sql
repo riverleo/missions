@@ -2,6 +2,7 @@ create type narrative_node_type as enum ('text', 'choice');
 
 create table narratives (
   id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   title text not null,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
@@ -11,6 +12,7 @@ create table narratives (
 
 create table narrative_nodes (
   id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   narrative_id uuid not null references narratives(id) on delete cascade,
   title text not null default '',
   description text not null default '',
@@ -22,6 +24,7 @@ create table narrative_nodes (
 
 create table narrative_node_choices (
   id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   title text not null default '',
   description text not null default '',

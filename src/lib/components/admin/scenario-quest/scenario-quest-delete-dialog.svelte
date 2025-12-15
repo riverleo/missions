@@ -9,16 +9,15 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useScenario } from '$lib/hooks/use-scenario';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useQuest } from '$lib/hooks/use-quest';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
-	const { store: scenarioStore } = useScenario();
-	const { admin, dialogStore, closeDialog } = useScenarioQuest();
-	const currentScenarioId = $derived($scenarioStore.currentScenarioId);
+	const { admin, dialogStore, closeDialog } = useQuest();
+	const scenarioId = $derived(page.params.scenarioId);
 
 	const open = $derived($dialogStore?.type === 'delete');
-	const scenarioQuestId = $derived($dialogStore?.type === 'delete' ? $dialogStore.scenarioQuestId : undefined);
+	const questId = $derived($dialogStore?.type === 'delete' ? $dialogStore.questId : undefined);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -27,16 +26,16 @@
 	}
 
 	function onclick() {
-		if (!scenarioQuestId) return;
+		if (!questId || !scenarioId) return;
 
 		admin
-			.removeQuest(scenarioQuestId)
+			.removeQuest(questId)
 			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${currentScenarioId}/quests`);
+				goto(`/admin/scenarios/${scenarioId}/quests`);
 			})
 			.catch((error) => {
-				console.error('Failed to delete scenario quest:', error);
+				console.error('Failed to delete quest:', error);
 			});
 	}
 </script>

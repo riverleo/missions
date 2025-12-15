@@ -14,22 +14,22 @@
 	import { IconSelector, IconCheck, IconPlus } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
-	const { store, fetch, init, openDialog } = useScenario();
+	const { store, fetch, openDialog } = useScenario();
 
 	const scenarios = $derived(Object.values($store.data));
-	const currentScenarioId = $derived($store.currentScenarioId);
-	const currentScenario = $derived(currentScenarioId ? $store.data[currentScenarioId] : undefined);
+	const scenarioId = $derived(page.params.scenarioId);
+	const currentScenario = $derived(scenarioId ? $store.data[scenarioId] : undefined);
 
 	onMount(() => {
 		fetch();
 	});
 
-	function onselect(scenarioId: string) {
-		if (scenarioId !== currentScenarioId) {
-			init(scenarioId);
-			goto(`/admin/scenarios/${scenarioId}/quests`);
+	function onselect(targetScenarioId: string) {
+		if (targetScenarioId !== scenarioId) {
+			goto(`/admin/scenarios/${targetScenarioId}/quests`);
 		}
 	}
 
@@ -84,7 +84,7 @@
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger onclick={() => onselect(scenario.id)}>
 							<IconCheck
-								class="mr-2 size-4 {scenario.id === currentScenarioId ? 'opacity-100' : 'opacity-0'}"
+								class="mr-2 size-4 {scenario.id === scenarioId ? 'opacity-100' : 'opacity-0'}"
 							/>
 							{scenario.title}
 						</DropdownMenuSubTrigger>

@@ -12,6 +12,7 @@
 	import { isEqual, sort, clone } from 'radash';
 	import { dndzone } from 'svelte-dnd-action';
 	import type { DndEvent } from 'svelte-dnd-action';
+	import { page } from '$app/state';
 
 	interface Props {
 		narrativeNodeId: string;
@@ -20,6 +21,8 @@
 	}
 
 	let { narrativeNodeId, narrativeNodeChoices, onchange }: Props = $props();
+
+	const scenarioId = $derived(page.params.scenarioId);
 
 	const TEMP_ID_PREFIX = 'temp-';
 
@@ -65,6 +68,7 @@
 	}
 
 	function onclickAddChoice(e: MouseEvent) {
+		if (!scenarioId) return;
 		// id 없이 추가 = 새로 생성될 항목
 		// svelte-dnd-action은 각 항목에 id가 필요하므로 임시 id 생성
 		current = [
@@ -72,6 +76,7 @@
 			{
 				id: `${TEMP_ID_PREFIX}${Date.now()}-${Math.random()}`,
 				narrative_node_id: narrativeNodeId,
+				scenario_id: scenarioId,
 				order_in_narrative_node: current.length,
 				title: '',
 			} as NarrativeNodeChoice,

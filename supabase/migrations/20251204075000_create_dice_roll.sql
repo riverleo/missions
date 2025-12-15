@@ -2,6 +2,7 @@ create type dice_roll_action as enum ('narrative_node_next', 'narrative_node_don
 
 create table narrative_dice_rolls (
   id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   narrative_id uuid not null references narratives(id) on delete cascade,
   difficulty_class integer not null default 0,
   success_action dice_roll_action not null default 'narrative_node_next',
@@ -43,14 +44,14 @@ create table player_rolled_dices (
   user_id uuid not null references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid references scenarios(id) on delete cascade,
-  player_scenario_quest_id uuid references player_scenario_quests(id) on delete cascade,
-  player_scenario_quest_branch_id uuid references player_scenario_quest_branches(id) on delete cascade,
+  player_quest_id uuid references player_quests(id) on delete cascade,
+  player_quest_branch_id uuid references player_quest_branches(id) on delete cascade,
   narrative_id uuid not null references narratives(id) on delete cascade,
   narrative_node_id uuid not null references narrative_nodes(id) on delete cascade,
   narrative_node_choice_id uuid references narrative_node_choices(id) on delete cascade,
   narrative_dice_roll_id uuid not null references narrative_dice_rolls(id) on delete cascade,
-  scenario_quest_id uuid references scenario_quests(id) on delete cascade,
-  scenario_quest_branch_id uuid references scenario_quest_branches(id) on delete cascade,
+  quest_id uuid references quests(id) on delete cascade,
+  quest_branch_id uuid references quest_branches(id) on delete cascade,
   dice_id uuid references dices(id) on delete cascade,
   value integer,
   created_at timestamptz not null default now()

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ScenarioQuestType } from '$lib/types';
+	import type { QuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -26,18 +26,18 @@
 		DropdownMenuSeparator,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconHeading, IconChevronDown, IconCategory, IconSortDescending } from '@tabler/icons-svelte';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
-	import { useScenarioChapter } from '$lib/hooks/use-scenario-chapter';
+	import { useQuest } from '$lib/hooks/use-quest';
+	import { useChapter } from '$lib/hooks/use-chapter';
 
-	const { admin, dialogStore, closeDialog } = useScenarioQuest();
-	const { store: chapterStore } = useScenarioChapter();
+	const { admin, dialogStore, closeDialog } = useQuest();
+	const { store: chapterStore } = useChapter();
 
 	const open = $derived($dialogStore?.type === 'create');
 	const chapters = $derived(Object.values($chapterStore.data));
 
 	let title = $state('');
-	let type = $state<ScenarioQuestType>('primary');
-	let scenarioChapterId = $state('');
+	let type = $state<QuestType>('primary');
+	let chapterId = $state('');
 	let orderInChapter = $state(0);
 	let isSubmitting = $state(false);
 
@@ -45,7 +45,7 @@
 		if (open) {
 			title = '';
 			type = 'primary';
-			scenarioChapterId = '';
+			chapterId = '';
 			orderInChapter = 0;
 		}
 	});
@@ -55,13 +55,13 @@
 	}
 
 	const chapterLabel = $derived.by(() => {
-		if (!scenarioChapterId) return '챕터 없음';
-		const chapter = chapters.find((c) => c.id === scenarioChapterId);
+		if (!chapterId) return '챕터 없음';
+		const chapter = chapters.find((c) => c.id === chapterId);
 		return chapter ? getChapterTitle(chapter) : '챕터 없음';
 	});
 
-	function getTypeLabel(scenarioQuestType: ScenarioQuestType) {
-		return scenarioQuestType === 'primary' ? '메인' : '보조';
+	function getTypeLabel(questType: QuestType) {
+		return questType === 'primary' ? '메인' : '보조';
 	}
 
 	function onOpenChange(value: boolean) {
@@ -80,14 +80,14 @@
 			.createQuest({
 				title: title.trim(),
 				type,
-				scenario_chapter_id: scenarioChapterId || null,
+				chapter_id: chapterId || null,
 				order_in_chapter: orderInChapter,
 			})
 			.then(() => {
 				closeDialog();
 			})
 			.catch((error) => {
-				console.error('Failed to create scenario quest:', error);
+				console.error('Failed to create quest:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -118,7 +118,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuRadioGroup bind:value={scenarioChapterId}>
+								<DropdownMenuRadioGroup bind:value={chapterId}>
 									<DropdownMenuRadioItem value="">챕터 해제</DropdownMenuRadioItem>
 									<DropdownMenuSeparator />
 									{#each chapters as chapter (chapter.id)}

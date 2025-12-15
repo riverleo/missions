@@ -2,12 +2,10 @@ import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type { RecordFetchState, Scenario, ScenarioInsert, ScenarioUpdate } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
-import { useScenarioQuest } from './use-scenario-quest';
-import { useScenarioChapter } from './use-scenario-chapter';
+import { useQuest } from './use-quest';
+import { useChapter } from './use-chapter';
 
-interface ScenarioStoreState extends RecordFetchState<Scenario> {
-	currentScenarioId?: string;
-}
+type ScenarioStoreState = RecordFetchState<Scenario>;
 
 type ScenarioDialogState =
 	| { type: 'create' }
@@ -56,16 +54,6 @@ function createScenarioStore() {
 				data: record,
 				error: undefined,
 			}));
-
-			// currentScenarioId가 없으면 첫 번째 시나리오 자동 선택
-			let currentState: ScenarioStoreState | undefined;
-			store.subscribe((s) => (currentState = s))();
-
-			const scenarios = data ?? [];
-			const firstScenario = scenarios[0];
-			if (!currentState?.currentScenarioId && firstScenario) {
-				await init(firstScenario.id);
-			}
 		} catch (error) {
 			store.update((state) => ({
 				...state,
@@ -76,19 +64,7 @@ function createScenarioStore() {
 	}
 
 	async function init(scenarioId: string) {
-		store.update((state) => ({ ...state, currentScenarioId: scenarioId }));
-
-		await Promise.all([
-			useScenarioQuest().fetch(scenarioId),
-			useScenarioChapter().fetch(scenarioId),
-		]);
-	}
-
-	function reset() {
-		store.update((state) => ({
-			...state,
-			currentScenarioId: undefined,
-		}));
+		await Promise.all([useQuest().fetch(scenarioId), useChapter().fetch(scenarioId)]);
 	}
 
 	const admin = {
@@ -129,11 +105,6 @@ function createScenarioStore() {
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[scenarioId];
-					}
-					// 삭제된 시나리오가 현재 선택된 시나리오인 경우 초기화
-					if (draft.currentScenarioId === scenarioId) {
-						const remainingIds = Object.keys(draft.data);
-						draft.currentScenarioId = remainingIds[0];
 					}
 				})
 			);
@@ -179,7 +150,6 @@ function createScenarioStore() {
 		dialogStore: dialogStore as Readable<ScenarioDialogState>,
 		fetch,
 		init,
-		reset,
 		openDialog,
 		closeDialog,
 		admin,

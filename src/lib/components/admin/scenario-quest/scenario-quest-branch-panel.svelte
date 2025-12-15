@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { ScenarioQuestBranch } from '$lib/types';
+	import type { QuestBranch } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -8,31 +8,31 @@
 		InputGroupInput,
 		InputGroupAddon,
 	} from '$lib/components/ui/input-group';
-	import { useScenarioQuest } from '$lib/hooks/use-scenario-quest';
+	import { useQuest } from '$lib/hooks/use-quest';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
 
 	interface Props {
-		scenarioQuestBranch: ScenarioQuestBranch | undefined;
-		onupdate?: (scenarioQuestBranch: ScenarioQuestBranch) => void;
+		questBranch: QuestBranch | undefined;
+		onupdate?: (questBranch: QuestBranch) => void;
 	}
 
-	let { scenarioQuestBranch, onupdate }: Props = $props();
+	let { questBranch, onupdate }: Props = $props();
 
-	const { admin } = useScenarioQuest();
+	const { admin } = useQuest();
 	const flowNodes = useNodes();
 
 	let isUpdating = $state(false);
-	let changes = $state<ScenarioQuestBranch | undefined>(undefined);
+	let changes = $state<QuestBranch | undefined>(undefined);
 	let titleInputRef = $state<HTMLInputElement | null>(null);
 	let currentBranchId = $state<string | undefined>(undefined);
 
 	// 선택된 브랜치가 변경되면 클론해서 로컬 상태 업데이트
 	$effect(() => {
-		if (scenarioQuestBranch && scenarioQuestBranch.id !== currentBranchId) {
-			currentBranchId = scenarioQuestBranch.id;
-			changes = clone(scenarioQuestBranch);
+		if (questBranch && questBranch.id !== currentBranchId) {
+			currentBranchId = questBranch.id;
+			changes = clone(questBranch);
 
 			tick().then(() => {
 				titleInputRef?.focus();
@@ -44,21 +44,21 @@
 		e.preventDefault();
 		if (!changes || isUpdating) return;
 
-		const scenarioQuestBranchId = changes.id;
-		const updatedScenarioQuestBranch = changes; // await 이전에 참조 저장
+		const questBranchId = changes.id;
+		const updatedQuestBranch = changes; // await 이전에 참조 저장
 		isUpdating = true;
 
 		admin
-			.updateScenarioQuestBranch(scenarioQuestBranchId, {
+			.updateQuestBranch(questBranchId, {
 				title: changes.title,
-				display_order_in_scenario_quest: changes.display_order_in_scenario_quest,
+				display_order_in_quest: changes.display_order_in_quest,
 			})
 			.then(() => {
 				// 부모 컴포넌트에 업데이트 알림
-				onupdate?.(updatedScenarioQuestBranch);
+				onupdate?.(updatedQuestBranch);
 			})
 			.catch((error: Error) => {
-				console.error('Failed to update scenario quest branch:', error);
+				console.error('Failed to update quest branch:', error);
 			})
 			.finally(() => {
 				isUpdating = false;
@@ -93,7 +93,7 @@
 							<InputGroupAddon align="inline-start">
 								<IconSortDescending class="size-4" />
 							</InputGroupAddon>
-							<InputGroupInput type="number" bind:value={changes.display_order_in_scenario_quest} />
+							<InputGroupInput type="number" bind:value={changes.display_order_in_quest} />
 						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">

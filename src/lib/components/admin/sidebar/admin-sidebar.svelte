@@ -13,23 +13,21 @@
 	} from '$lib/components/ui/sidebar';
 	import type { ComponentProps } from 'svelte';
 	import ScenarioSwitcher from './scenario-switcher.svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
 
-	const { store } = useScenario();
-	const currentScenarioId = $derived($store.currentScenarioId);
+	const scenarioId = $derived(page.params.scenarioId);
 
 	const scenarioMenuItems = $derived([
 		{
 			title: '챕터',
-			href: currentScenarioId ? `/admin/scenarios/${currentScenarioId}/chapters` : undefined,
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/chapters` : undefined,
 		},
 		{
 			title: '퀘스트',
-			href: currentScenarioId ? `/admin/scenarios/${currentScenarioId}/quests` : undefined,
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/quests` : undefined,
 		},
 		{
 			title: '대화 또는 효과',
-			href: '/admin/narratives',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/narratives` : undefined,
 		},
 	]);
 

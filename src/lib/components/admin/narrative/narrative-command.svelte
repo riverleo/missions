@@ -20,8 +20,11 @@
 	import { cn } from '$lib/utils';
 
 	const { narrativeStore, admin } = useNarrative();
+	const scenarioId = $derived(page.params.scenarioId);
 	const currentNarrativeId = $derived(page.params.narrativeId);
-	const narratives = $derived(Object.values($narrativeStore.data));
+	const narratives = $derived(
+		Object.values($narrativeStore.data).filter((n) => n.scenario_id === scenarioId)
+	);
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -31,7 +34,7 @@
 			<CommandEmpty />
 			<CommandGroup>
 				{#each narratives as narrative (narrative.id)}
-					<CommandLinkItem href={`/admin/narratives/${narrative.id}`} class="group pr-1">
+					<CommandLinkItem href={`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`} class="group pr-1">
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
