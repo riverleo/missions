@@ -108,13 +108,16 @@ export type Terrain = Tables<'terrains'>;
 export type TerrainInsert = TablesInsert<'terrains'>;
 export type TerrainUpdate = TablesUpdate<'terrains'>;
 
-// Character types
-export type Character = Tables<'characters'>;
-export type CharacterInsert = TablesInsert<'characters'>;
-export type CharacterUpdate = TablesUpdate<'characters'>;
-
 // CharacterState types
 export type CharacterStateType = Enums<'character_state_type'>;
 export type CharacterState = Tables<'character_states'>;
 export type CharacterStateInsert = TablesInsert<'character_states'>;
 export type CharacterStateUpdate = TablesUpdate<'character_states'>;
+
+// Character types
+type CharacterRow = Tables<'characters'>;
+export type Character = CharacterRow & {
+	character_states: CharacterState[];
+};
+export type CharacterInsert = TablesInsert<'characters'>;
+export type CharacterUpdate = TablesUpdate<'characters'>;

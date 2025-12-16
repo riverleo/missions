@@ -45,9 +45,7 @@
 		</InputGroupAddon>
 		<InputGroupInput bind:value={name} placeholder="캐릭터 이름" {onkeydown} />
 		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateName} variant="secondary" class="h-7">
-				저장
-			</InputGroupButton>
+			<InputGroupButton onclick={updateName} variant="secondary" class="h-7">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

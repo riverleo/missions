@@ -10,8 +10,18 @@ interface ImageSize {
 	height: number;
 }
 
+interface AtlasMetadata {
+	name: string;
+	frameWidth: number;
+	frameHeight: number;
+	columns: number;
+	rows: number;
+	frameCount: number;
+}
+
 const SOURCES_DIR = './src/lib/assets/atlas/sources';
 const GENERATED_DIR = './src/lib/assets/atlas/generated';
+const ATLASES_JSON_PATH = join(GENERATED_DIR, 'atlases.json');
 
 /**
  * ImageMagick identify로 이미지 크기 확인
@@ -47,7 +57,7 @@ function sortByNumber(files: string[]): string[] {
 /**
  * Sprite Sheet 생성 (동일 크기 이미지들)
  */
-async function generateSpriteSheet(groupName: string, files: string[]) {
+async function generateSpriteSheet(groupName: string, files: string[]): Promise<AtlasMetadata | undefined> {
 	const frameCount = files.length;
 	const columns = Math.ceil(Math.sqrt(frameCount));
 	const rows = Math.ceil(frameCount / columns);
@@ -62,32 +72,28 @@ async function generateSpriteSheet(groupName: string, files: string[]) {
 	const firstFile = files[0];
 	if (!firstFile) {
 		console.warn(`⚠ [${groupName}] No files to process`);
-		return;
+		return undefined;
 	}
 	const { width: frameWidth, height: frameHeight } = getImageSize(firstFile);
 
-	// 메타데이터 생성
-	const metadata = {
-		type: 'sprite',
+	console.log(
+		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${columns}x${rows} grid)`
+	);
+
+	return {
+		name: groupName,
 		frameWidth,
 		frameHeight,
 		columns,
 		rows,
 		frameCount,
 	};
-
-	const metadataPath = join(GENERATED_DIR, `${groupName}.json`);
-	await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-
-	console.log(
-		`✓ [Sprite Sheet] ${groupName}.png + ${groupName}.json (${frameCount} frames, ${columns}x${rows} grid)`
-	);
 }
 
 /**
  * 특정 그룹의 Atlas 생성
  */
-async function generateAtlas(groupName: string) {
+async function generateAtlas(groupName: string): Promise<AtlasMetadata | undefined> {
 	try {
 		const groupPath = join(SOURCES_DIR, groupName);
 
@@ -97,31 +103,41 @@ async function generateAtlas(groupName: string) {
 
 		if (imageFiles.length === 0) {
 			console.warn(`⚠ [${groupName}] No image files found`);
-			return;
+			return undefined;
 		}
 
 		// 파일명 정렬
 		const sortedFiles = sortByNumber(imageFiles);
 		const filePaths = sortedFiles.map((f) => join(groupPath, f));
 
-		await generateSpriteSheet(groupName, filePaths);
+		return await generateSpriteSheet(groupName, filePaths);
 	} catch (error) {
 		console.error(`Failed to generate atlas for ${groupName}:`, error);
+		return undefined;
 	}
 }
 
 /**
- * 모든 Atlas 생성
+ * 모든 Atlas 생성 및 메타데이터 저장
  */
 async function generateAtlases() {
 	try {
 		// sources 폴더의 하위 폴더들 탐색
 		const groups = await readdir(SOURCES_DIR, { withFileTypes: true });
+		const atlases: Record<string, Omit<AtlasMetadata, 'name'>> = {};
 
 		for (const group of groups) {
 			if (!group.isDirectory()) continue;
-			await generateAtlas(group.name);
+			const metadata = await generateAtlas(group.name);
+			if (metadata) {
+				const { name, ...rest } = metadata;
+				atlases[name] = rest;
+			}
 		}
+
+		// 전체 메타데이터를 하나의 파일로 저장
+		await writeFile(ATLASES_JSON_PATH, JSON.stringify(atlases, null, 2));
+		console.log(`✓ [Metadata] atlases.json (${Object.keys(atlases).length} atlases)`);
 	} catch (error) {
 		console.error('Failed to generate atlases:', error);
 	}
@@ -135,37 +151,23 @@ export function atlasPlugin(): Plugin {
 		name: 'vite-plugin-atlas',
 
 		configureServer(server) {
-			// 그룹별 debounce 맵
-			const debouncedGenerators = new Map<string, ReturnType<typeof debounce>>();
+			// 전체 재생성 debounce
+			const debouncedGenerateAll = debounce({ delay: 300 }, async () => {
+				await generateAtlases();
+
+				// HMR 트리거
+				server.ws.send({
+					type: 'full-reload',
+					path: '*',
+				});
+			});
 
 			// 개발 모드: sources 폴더 watch
 			const watcher = watch(SOURCES_DIR, { recursive: true }, (eventType, filename) => {
 				if (!filename || !isImageFile(filename)) return;
 
-				// 변경된 파일의 그룹명 추출
-				const groupName = filename.split('/')[0];
-				if (!groupName) return;
-
 				console.log(`\n📦 Atlas source changed: ${filename}`);
-
-				// 그룹별 debounce 생성 (없으면)
-				if (!debouncedGenerators.has(groupName)) {
-					debouncedGenerators.set(
-						groupName,
-						debounce({ delay: 300 }, async () => {
-							await generateAtlas(groupName);
-
-							// HMR 트리거
-							server.ws.send({
-								type: 'full-reload',
-								path: '*',
-							});
-						})
-					);
-				}
-
-				// 해당 그룹의 debounced 함수 실행
-				debouncedGenerators.get(groupName)?.();
+				debouncedGenerateAll();
 			});
 
 			// 서버 시작 시 한 번 생성

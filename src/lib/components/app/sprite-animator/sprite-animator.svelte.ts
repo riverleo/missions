@@ -1,4 +1,5 @@
 import type { LoopMode, SpriteAnimation, SpriteMetadata } from './index';
+import { atlases } from './index';
 
 const DEFAULT_FPS = 24;
 const DEFAULT_FRAME_COUNT = 1;
@@ -20,20 +21,24 @@ export class SpriteAnimator {
 
 	static async create(atlasName: string) {
 		const animator = new SpriteAnimator(atlasName);
-		await animator.loadMetadata();
+		await animator.loadAtlas();
 		return animator;
 	}
 
-	private async loadMetadata() {
+	private async loadAtlas() {
 		try {
-			const [metadataModule, atlasModule] = await Promise.all([
-				import(`$lib/assets/atlas/generated/${this.atlasName}.json`),
-				import(`$lib/assets/atlas/generated/${this.atlasName}.png`),
-			]);
-			this.metadata = metadataModule.default;
+			// atlases에서 메타데이터 찾기
+			this.metadata = atlases[this.atlasName];
+			if (!this.metadata) {
+				console.warn(`Atlas "${this.atlasName}" not found in atlases.json`);
+				return;
+			}
+
+			// 이미지만 동적 로드
+			const atlasModule = await import(`$lib/assets/atlas/generated/${this.atlasName}.png`);
 			this.atlasUrl = atlasModule.default;
 		} catch (error) {
-			console.error(`Failed to load metadata for ${this.atlasName}:`, error);
+			console.error(`Failed to load atlas for ${this.atlasName}:`, error);
 		}
 	}
 

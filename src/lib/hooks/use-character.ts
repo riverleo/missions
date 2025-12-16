@@ -1,6 +1,13 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type { RecordFetchState, Character, CharacterInsert, CharacterUpdate } from '$lib/types';
+import type {
+	RecordFetchState,
+	Character,
+	CharacterInsert,
+	CharacterUpdate,
+	CharacterStateInsert,
+	CharacterStateUpdate,
+} from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type CharacterDialogState =
@@ -30,9 +37,9 @@ function createCharacterStore() {
 		try {
 			const { data, error } = await supabase
 				.from('characters')
-				.select('*')
+				.select('*, character_states(*)')
 				.eq('scenario_id', scenarioId)
-				.order('display_order');
+				.order('name');
 
 			if (error) throw error;
 
@@ -76,7 +83,7 @@ function createCharacterStore() {
 					...character,
 					scenario_id: currentScenarioId,
 				})
-				.select()
+				.select('*, character_states(*)')
 				.single();
 
 			if (error) throw error;
@@ -113,6 +120,68 @@ function createCharacterStore() {
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
+					}
+				})
+			);
+		},
+
+		async createCharacterState(characterId: string, state: Omit<CharacterStateInsert, 'character_id'>) {
+			const { data, error } = await supabase
+				.from('character_states')
+				.insert({
+					...state,
+					character_id: characterId,
+				})
+				.select()
+				.single();
+
+			if (error) throw error;
+
+			store.update((s) =>
+				produce(s, (draft) => {
+					const character = draft.data[characterId];
+					if (character) {
+						character.character_states.push(data);
+					}
+				})
+			);
+
+			return data;
+		},
+
+		async updateCharacterState(stateId: string, characterId: string, updates: CharacterStateUpdate) {
+			const { error } = await supabase
+				.from('character_states')
+				.update(updates)
+				.eq('id', stateId);
+
+			if (error) throw error;
+
+			store.update((s) =>
+				produce(s, (draft) => {
+					const character = draft.data[characterId];
+					if (character) {
+						const state = character.character_states.find((cs) => cs.id === stateId);
+						if (state) {
+							Object.assign(state, updates);
+						}
+					}
+				})
+			);
+		},
+
+		async removeCharacterState(stateId: string, characterId: string) {
+			const { error } = await supabase.from('character_states').delete().eq('id', stateId);
+
+			if (error) throw error;
+
+			store.update((s) =>
+				produce(s, (draft) => {
+					const character = draft.data[characterId];
+					if (character) {
+						character.character_states = character.character_states.filter(
+							(cs) => cs.id !== stateId
+						);
 					}
 				})
 			);
