@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import type { Terrain, Character, PlayerCharacter, Building, PlayerBuilding } from '$lib/types';
+import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from '$lib/components/app/world/constants';
 
 interface TestWorldState {
 	selectedTerrain?: Terrain;
@@ -7,6 +8,11 @@ interface TestWorldState {
 	selectedBuilding?: Building;
 	characters: PlayerCharacter[];
 	buildings: PlayerBuilding[];
+	worldWidth: number;
+	worldHeight: number;
+	cameraX: number;
+	cameraY: number;
+	cameraZoom: number;
 	debug: boolean;
 }
 
@@ -19,6 +25,11 @@ function createTestWorldStore() {
 		selectedBuilding: undefined,
 		characters: [],
 		buildings: [],
+		worldWidth: VIEW_BOX_WIDTH,
+		worldHeight: VIEW_BOX_HEIGHT,
+		cameraX: 0,
+		cameraY: 0,
+		cameraZoom: 1,
 		debug: false,
 	});
 
@@ -47,6 +58,10 @@ function createTestWorldStore() {
 
 	function setDebug(debug: boolean) {
 		store.update((state) => ({ ...state, debug }));
+	}
+
+	function setCamera(x: number, y: number, zoom: number) {
+		store.update((state) => ({ ...state, cameraX: x, cameraY: y, cameraZoom: zoom }));
 	}
 
 	function placeCharacter(character: Character, x: number, y: number) {
@@ -117,6 +132,7 @@ function createTestWorldStore() {
 		selectCharacter,
 		selectBuilding,
 		setDebug,
+		setCamera,
 		placeCharacter,
 		placeBuilding,
 		removeCharacter,

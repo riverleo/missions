@@ -9,9 +9,18 @@
 		x: number;
 		y: number;
 		angle?: number;
+		worldWidth?: number;
+		worldHeight?: number;
 	}
 
-	let { playerCharacter, x, y, angle = 0 }: Props = $props();
+	let {
+		playerCharacter,
+		x,
+		y,
+		angle = 0,
+		worldWidth = VIEW_BOX_WIDTH,
+		worldHeight = VIEW_BOX_HEIGHT,
+	}: Props = $props();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -20,9 +29,9 @@
 		playerCharacter.character.character_states.find((s) => s.type === 'idle')
 	);
 
-	// 위치를 퍼센트로 변환
-	const left = $derived(`${(x / VIEW_BOX_WIDTH) * 100}%`);
-	const top = $derived(`${(y / VIEW_BOX_HEIGHT) * 100}%`);
+	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
+	const left = $derived(`${(x / worldWidth) * 100}%`);
+	const top = $derived(`${(y / worldHeight) * 100}%`);
 	const rotation = $derived(`${angle}rad`);
 
 	// atlas_name이 변경되면 animator 생성

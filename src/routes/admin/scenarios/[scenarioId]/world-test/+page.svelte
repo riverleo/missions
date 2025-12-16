@@ -5,7 +5,11 @@
 	import TestWorldMarker from '$lib/components/admin/test-world/test-world-marker.svelte';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 
-	const { store } = useTestWorld();
+	const { store, setCamera } = useTestWorld();
+
+	function oncamerachange(camera: { x: number; y: number; zoom: number }) {
+		setCamera(camera.x, camera.y, camera.zoom);
+	}
 </script>
 
 <div class="relative flex h-full items-center justify-center">
@@ -14,7 +18,10 @@
 			terrain={$store.selectedTerrain}
 			characters={$store.characters}
 			buildings={$store.buildings}
+			worldWidth={$store.worldWidth}
+			worldHeight={$store.worldHeight}
 			debug={$store.debug}
+			{oncamerachange}
 		>
 			<TestWorldMarker />
 		</World>

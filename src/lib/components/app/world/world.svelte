@@ -18,11 +18,23 @@
 		terrain?: Terrain;
 		characters?: PlayerCharacter[];
 		buildings?: PlayerBuilding[];
+		worldWidth?: number;
+		worldHeight?: number;
 		debug?: boolean;
 		children?: Snippet;
+		oncamerachange?: (camera: { x: number; y: number; zoom: number }) => void;
 	}
 
-	let { terrain, characters = [], buildings = [], debug = false, children }: Props = $props();
+	let {
+		terrain,
+		characters = [],
+		buildings = [],
+		worldWidth = VIEW_BOX_WIDTH,
+		worldHeight = VIEW_BOX_HEIGHT,
+		debug = false,
+		children,
+		oncamerachange,
+	}: Props = $props();
 
 	const { supabase } = useServerPayload();
 
@@ -30,8 +42,17 @@
 	let engine: Matter.Engine;
 	let render: Matter.Render;
 	let runner: Matter.Runner;
+	let mouseConstraint: Matter.MouseConstraint;
 	let canvasWidth = $state(VIEW_BOX_WIDTH);
 	let canvasHeight = $state(VIEW_BOX_HEIGHT);
+
+	// 카메라 상태
+	let cameraX = $state(0);
+	let cameraY = $state(0);
+	let cameraZoom = $state(1);
+	const MIN_ZOOM = 0.25;
+	const MAX_ZOOM = 2;
+	const ZOOM_SPEED = 0.1;
 
 	// 캐릭터 바디 관리 (Matter.js 객체는 $state.raw로 Proxy 방지)
 	let characterBodies = $state.raw<Record<string, Matter.Body>>({});
@@ -71,13 +92,25 @@
 	// SVG URL
 	const svgUrl = $derived(terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined);
 
-	// viewBox 좌표를 실제 캔버스 좌표로 변환
-	function scaleX(x: number): number {
-		return (x / VIEW_BOX_WIDTH) * canvasWidth;
+	// SVG viewBox 좌표를 월드 좌표로 변환 (지형 SVG용)
+	function svgToWorldX(x: number): number {
+		return (x / VIEW_BOX_WIDTH) * worldWidth;
 	}
 
-	function scaleY(y: number): number {
-		return (y / VIEW_BOX_HEIGHT) * canvasHeight;
+	function svgToWorldY(y: number): number {
+		return (y / VIEW_BOX_HEIGHT) * worldHeight;
+	}
+
+	// 화면 좌표를 월드 좌표로 변환 (픽셀 기반)
+	function screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+		const rect = container.getBoundingClientRect();
+		const containerX = screenX - rect.left;
+		const containerY = screenY - rect.top;
+		// CSS transform: scale(z) translate(-cx, -cy) 의 역변환
+		return {
+			x: containerX / cameraZoom + cameraX,
+			y: containerY / cameraZoom + cameraY,
+		};
 	}
 
 	interface PathStyle {
@@ -116,15 +149,16 @@
 		y2: number,
 		width: number
 	): Matter.Body {
-		const sx1 = scaleX(x1);
-		const sy1 = scaleY(y1);
-		const sx2 = scaleX(x2);
-		const sy2 = scaleY(y2);
+		// SVG 좌표를 월드 좌표로 변환
+		const wx1 = svgToWorldX(x1);
+		const wy1 = svgToWorldY(y1);
+		const wx2 = svgToWorldX(x2);
+		const wy2 = svgToWorldY(y2);
 
-		const cx = (sx1 + sx2) / 2;
-		const cy = (sy1 + sy2) / 2;
-		const dx = sx2 - sx1;
-		const dy = sy2 - sy1;
+		const cx = (wx1 + wx2) / 2;
+		const cy = (wy1 + wy2) / 2;
+		const dx = wx2 - wx1;
+		const dy = wy2 - wy1;
 		const length = Math.sqrt(dx * dx + dy * dy);
 		const angle = Math.atan2(dy, dx);
 
@@ -142,14 +176,14 @@
 	function createFilledBody(vertices: Matter.Vector[]): Matter.Body | undefined {
 		if (vertices.length < 3) return;
 
-		// 스케일 적용
-		const scaledVertices = vertices.map((v) => ({
-			x: scaleX(v.x),
-			y: scaleY(v.y),
+		// SVG 좌표를 월드 좌표로 변환
+		const worldVertices = vertices.map((v) => ({
+			x: svgToWorldX(v.x),
+			y: svgToWorldY(v.y),
 		}));
 
-		const center = Vertices.centre(scaledVertices);
-		const body = Bodies.fromVertices(center.x, center.y, [scaledVertices], {
+		const center = Vertices.centre(worldVertices);
+		const body = Bodies.fromVertices(center.x, center.y, [worldVertices], {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_TERRAIN,
@@ -239,11 +273,11 @@
 
 	function createCharacterBody(playerCharacter: PlayerCharacter): Matter.Body {
 		const { width, height } = getCharacterBodySize(playerCharacter);
-		const scaledX = scaleX(playerCharacter.x);
-		// y 좌표는 캐릭터 발 위치 기준이므로, 바디 중심은 높이의 절반만큼 위로
-		const scaledY = scaleY(playerCharacter.y) - height / 2;
+		// 월드 좌표 사용 (y는 발 위치 기준이므로 바디 중심은 높이의 절반만큼 위로)
+		const bodyX = playerCharacter.x;
+		const bodyY = playerCharacter.y - height / 2;
 
-		return Bodies.rectangle(scaledX, scaledY, width, height, {
+		return Bodies.rectangle(bodyX, bodyY, width, height, {
 			label: `character-${playerCharacter.id}`,
 			restitution: 0.1,
 			friction: 0.8,
@@ -260,10 +294,10 @@
 		for (const [id, body] of Object.entries(characterBodies)) {
 			const size = characterBodySizes[id];
 			const halfHeight = size ? size.height / 2 : 0;
-			// 바디 중심에서 발 위치(하단)로 변환 후 viewBox 좌표로 역변환
+			// 바디 중심에서 발 위치(하단)로 변환 (월드 좌표)
 			newPositions[id] = {
-				x: (body.position.x / canvasWidth) * VIEW_BOX_WIDTH,
-				y: ((body.position.y + halfHeight) / canvasHeight) * VIEW_BOX_HEIGHT,
+				x: body.position.x,
+				y: body.position.y + halfHeight,
 				angle: body.angle,
 			};
 		}
@@ -292,11 +326,11 @@
 
 	function createBuildingBody(playerBuilding: PlayerBuilding): Matter.Body {
 		const { width, height } = getBuildingBodySize(playerBuilding);
-		const scaledX = scaleX(playerBuilding.x);
-		// y 좌표는 건물 바닥 위치 기준이므로, 바디 중심은 높이의 절반만큼 위로
-		const scaledY = scaleY(playerBuilding.y) - height / 2;
+		// 월드 좌표 사용 (y는 바닥 위치 기준이므로 바디 중심은 높이의 절반만큼 위로)
+		const bodyX = playerBuilding.x;
+		const bodyY = playerBuilding.y - height / 2;
 
-		return Bodies.rectangle(scaledX, scaledY, width, height, {
+		return Bodies.rectangle(bodyX, bodyY, width, height, {
 			label: `building-${playerBuilding.id}`,
 			restitution: 0.1,
 			friction: 0.8,
@@ -314,10 +348,10 @@
 		for (const [id, body] of Object.entries(buildingBodies)) {
 			const size = buildingBodySizes[id];
 			const halfHeight = size ? size.height / 2 : 0;
-			// 바디 중심에서 바닥 위치(하단)로 변환 후 viewBox 좌표로 역변환
+			// 바디 중심에서 바닥 위치(하단)로 변환 (월드 좌표)
 			newPositions[id] = {
-				x: (body.position.x / canvasWidth) * VIEW_BOX_WIDTH,
-				y: ((body.position.y + halfHeight) / canvasHeight) * VIEW_BOX_HEIGHT,
+				x: body.position.x,
+				y: body.position.y + halfHeight,
 				angle: body.angle,
 			};
 		}
@@ -334,36 +368,128 @@
 			},
 		};
 
+		// 월드 경계에 벽 생성 (월드 좌표 기준)
 		const ground = Bodies.rectangle(
-			canvasWidth / 2,
-			canvasHeight - WALL_THICKNESS / 2,
-			canvasWidth,
+			worldWidth / 2,
+			worldHeight - WALL_THICKNESS / 2,
+			worldWidth,
 			WALL_THICKNESS,
 			wallOptions
 		);
 		const leftWall = Bodies.rectangle(
 			WALL_THICKNESS / 2,
-			canvasHeight / 2,
+			worldHeight / 2,
 			WALL_THICKNESS,
-			canvasHeight,
+			worldHeight,
 			wallOptions
 		);
 		const rightWall = Bodies.rectangle(
-			canvasWidth - WALL_THICKNESS / 2,
-			canvasHeight / 2,
+			worldWidth - WALL_THICKNESS / 2,
+			worldHeight / 2,
 			WALL_THICKNESS,
-			canvasHeight,
+			worldHeight,
 			wallOptions
 		);
 		const ceiling = Bodies.rectangle(
-			canvasWidth / 2,
+			worldWidth / 2,
 			WALL_THICKNESS / 2,
-			canvasWidth,
+			worldWidth,
 			WALL_THICKNESS,
 			wallOptions
 		);
 
 		return [ground, leftWall, rightWall, ceiling];
+	}
+
+	// 카메라 줌 핸들러
+	function handleWheel(e: WheelEvent) {
+		e.preventDefault();
+		const delta = e.deltaY > 0 ? -ZOOM_SPEED : ZOOM_SPEED;
+		const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, cameraZoom + delta));
+
+		// 마우스 위치를 중심으로 줌
+		const worldPos = screenToWorld(e.clientX, e.clientY);
+		const zoomRatio = newZoom / cameraZoom;
+
+		cameraX = worldPos.x - (worldPos.x - cameraX) / zoomRatio;
+		cameraY = worldPos.y - (worldPos.y - cameraY) / zoomRatio;
+		cameraZoom = newZoom;
+
+		updateRenderBounds();
+	}
+
+	// 카메라 팬 상태
+	let isPanning = $state(false);
+	let panStartX = 0;
+	let panStartY = 0;
+	let panStartCameraX = 0;
+	let panStartCameraY = 0;
+
+	// 호버 상태
+	let isOverDraggable = $state(false);
+
+	// 마우스 위치에서 드래그 가능한 바디 확인
+	function checkDraggableAtPosition(screenX: number, screenY: number): boolean {
+		if (!engine || !container) return false;
+
+		const worldPos = screenToWorld(screenX, screenY);
+		const bodies = Matter.Query.point(Composite.allBodies(engine.world), worldPos);
+		return bodies.some((b) => !b.isStatic);
+	}
+
+	function handleMouseDown(e: MouseEvent) {
+		// 중간 버튼 또는 좌클릭으로 팬 (Command 키가 눌려있지 않을 때)
+		if (e.button === 1 || (e.button === 0 && !e.metaKey)) {
+			// 드래그 가능한 바디 위면 카메라 이동하지 않음
+			if (isOverDraggable) return;
+
+			e.preventDefault();
+			isPanning = true;
+			panStartX = e.clientX;
+			panStartY = e.clientY;
+			panStartCameraX = cameraX;
+			panStartCameraY = cameraY;
+		}
+	}
+
+	function handleMouseMove(e: MouseEvent) {
+		// 호버 상태 업데이트
+		if (!isPanning) {
+			const newValue = checkDraggableAtPosition(e.clientX, e.clientY);
+			if (newValue !== isOverDraggable) {
+				isOverDraggable = newValue;
+			}
+		}
+
+		if (!isPanning) return;
+
+		const dx = e.clientX - panStartX;
+		const dy = e.clientY - panStartY;
+
+		// 화면 이동량을 월드 좌표로 변환 (픽셀 기반)
+		cameraX = panStartCameraX - dx / cameraZoom;
+		cameraY = panStartCameraY - dy / cameraZoom;
+
+		updateRenderBounds();
+	}
+
+	function handleMouseUp() {
+		isPanning = false;
+	}
+
+	// Matter.js render bounds 업데이트 및 카메라 변경 알림
+	function updateRenderBounds() {
+		if (!render) return;
+
+		const viewWidth = worldWidth / cameraZoom;
+		const viewHeight = worldHeight / cameraZoom;
+
+		render.bounds.min.x = cameraX;
+		render.bounds.min.y = cameraY;
+		render.bounds.max.x = cameraX + viewWidth;
+		render.bounds.max.y = cameraY + viewHeight;
+
+		oncamerachange?.({ x: cameraX, y: cameraY, zoom: cameraZoom });
 	}
 
 	onMount(() => {
@@ -408,7 +534,7 @@
 
 				// 마우스 컨트롤 재추가
 				const mouse = Mouse.create(render.canvas);
-				const mouseConstraint = MouseConstraint.create(engine, {
+				mouseConstraint = MouseConstraint.create(engine, {
 					mouse,
 					constraint: { stiffness: 0.2, render: { visible: false } },
 				});
@@ -429,8 +555,12 @@
 				height: canvasHeight,
 				wireframes: false,
 				background: 'transparent',
+				hasBounds: true,
 			},
 		});
+
+		// 초기 카메라 bounds 설정
+		updateRenderBounds();
 
 		Composite.add(engine.world, createWalls());
 
@@ -443,7 +573,7 @@
 		}
 
 		const mouse = Mouse.create(render.canvas);
-		const mouseConstraint = MouseConstraint.create(engine, {
+		mouseConstraint = MouseConstraint.create(engine, {
 			mouse,
 			constraint: { stiffness: 0.2, render: { visible: false } },
 		});
@@ -652,30 +782,61 @@
 	});
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={container}
 	data-slot="world-container"
-	class="relative h-full w-full border border-border"
+	class="relative h-full w-full overflow-hidden border border-border"
+	style="cursor: {isPanning ? 'grabbing' : isOverDraggable ? 'pointer' : 'grab'};"
+	onwheel={handleWheel}
+	onmousedown={handleMouseDown}
+	onmousemove={handleMouseMove}
+	onmouseup={handleMouseUp}
+	onmouseleave={handleMouseUp}
 >
-	{#if svgUrl}
-		<img
-			src={svgUrl}
-			alt="terrain"
-			class="pointer-events-none absolute inset-0 h-full w-full"
-			style="object-fit: fill; opacity: {debug ? 0 : 1};"
-		/>
-	{/if}
-	{#each buildings as playerBuilding (playerBuilding.id)}
-		{@const position = buildingPositions[playerBuilding.id]}
-		{#if position}
-			<WorldBuilding {playerBuilding} x={position.x} y={position.y} angle={position.angle} />
+	<!-- 월드 레이어: 카메라 transform 일괄 적용 -->
+	<div
+		class="pointer-events-none absolute origin-top-left"
+		style="
+			width: {worldWidth}px;
+			height: {worldHeight}px;
+			transform: scale({cameraZoom}) translate({-cameraX}px, {-cameraY}px);
+		"
+	>
+		{#if svgUrl}
+			<img
+				src={svgUrl}
+				alt="terrain"
+				class="absolute inset-0 h-full w-full"
+				style="opacity: {debug ? 0 : 1};"
+			/>
 		{/if}
-	{/each}
-	{#each characters as playerCharacter (playerCharacter.id)}
-		{@const position = characterPositions[playerCharacter.id]}
-		{#if position}
-			<WorldCharacter {playerCharacter} x={position.x} y={position.y} angle={position.angle} />
-		{/if}
-	{/each}
+		{#each buildings as playerBuilding (playerBuilding.id)}
+			{@const position = buildingPositions[playerBuilding.id]}
+			{#if position}
+				<WorldBuilding
+					{playerBuilding}
+					x={position.x}
+					y={position.y}
+					angle={position.angle}
+					{worldWidth}
+					{worldHeight}
+				/>
+			{/if}
+		{/each}
+		{#each characters as playerCharacter (playerCharacter.id)}
+			{@const position = characterPositions[playerCharacter.id]}
+			{#if position}
+				<WorldCharacter
+					{playerCharacter}
+					x={position.x}
+					y={position.y}
+					angle={position.angle}
+					{worldWidth}
+					{worldHeight}
+				/>
+			{/if}
+		{/each}
+	</div>
 	{@render children?.()}
 </div>
