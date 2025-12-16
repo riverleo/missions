@@ -144,6 +144,9 @@
 <Item variant="muted">
 	<ItemHeader>
 		<ItemTitle class="uppercase">{type}</ItemTitle>
+		<Button variant="ghost" size="icon-sm" disabled={!characterState} onclick={onDelete}>
+			<IconTrash />
+		</Button>
 	</ItemHeader>
 	<ItemContent class="w-full">
 		<AspectRatio ratio={4 / 3}>
@@ -157,11 +160,11 @@
 		</AspectRatio>
 	</ItemContent>
 	<ItemFooter>
-		<ButtonGroup>
+		<ButtonGroup class="w-full">
 			<DropdownMenu>
-				<DropdownMenuTrigger>
+				<DropdownMenuTrigger class="flex-1">
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-16" {...props}>
+						<Button variant="outline" size="sm" class="w-full" {...props}>
 							{characterState?.atlas_name ?? '선택'}
 						</Button>
 					{/snippet}
@@ -178,9 +181,9 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<DropdownMenu>
-				<DropdownMenuTrigger disabled={!characterState}>
+				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-12" disabled={!characterState} {...props}>
+						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
 							{characterState?.frame_from ?? '시작'}
 						</Button>
 					{/snippet}
@@ -197,9 +200,9 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<DropdownMenu>
-				<DropdownMenuTrigger disabled={!characterState}>
+				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-12" disabled={!characterState} {...props}>
+						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
 							{characterState?.frame_to ?? '종료'}
 						</Button>
 					{/snippet}
@@ -216,10 +219,10 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<DropdownMenu>
-				<DropdownMenuTrigger disabled={!characterState}>
+				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-20" disabled={!characterState} {...props}>
-							{characterState?.fps ? `${characterState.fps} 프레임` : 'FPS'}
+						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
+							{characterState?.fps ? `${characterState.fps} 프레임` : '프레임'}
 						</Button>
 					{/snippet}
 				</DropdownMenuTrigger>
@@ -235,9 +238,9 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<DropdownMenu>
-				<DropdownMenuTrigger disabled={!characterState}>
+				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-20" disabled={!characterState} {...props}>
+						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
 							{loopOptions.find((o) => o.value === characterState?.loop)?.label ?? '반복'}
 						</Button>
 					{/snippet}
@@ -253,11 +256,6 @@
 					</DropdownMenuRadioGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
-		</ButtonGroup>
-		<ButtonGroup>
-			<Button variant="outline" size="icon-sm" disabled={!characterState} onclick={onDelete}>
-				<IconTrash />
-			</Button>
 		</ButtonGroup>
 	</ItemFooter>
 </Item>
