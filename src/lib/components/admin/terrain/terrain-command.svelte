@@ -14,11 +14,14 @@
 		DropdownMenuItem,
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
-	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
+	import { IconDotsVertical } from '@tabler/icons-svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
+	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { getGameAssetUrl } from '$lib/utils/storage';
 	import { page } from '$app/state';
-	import { cn } from '$lib/utils';
 	import { sort } from 'radash';
+
+	const { supabase } = useServerPayload();
 
 	const { store, openDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId);
@@ -34,16 +37,16 @@
 			<CommandEmpty />
 			<CommandGroup>
 				{#each terrains as terrain (terrain.id)}
+					{@const assetUrl = getGameAssetUrl(supabase, 'terrain', terrain)}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`}
 						class="group pr-1"
 					>
-						<IconCheck
-							class={cn(
-								'mr-2 size-4',
-								terrain.id === currentTerrainId ? 'opacity-100' : 'opacity-0'
-							)}
-						/>
+						{#if assetUrl}
+							<img src={assetUrl} alt="" class="mr-2 size-6 rounded object-cover" />
+						{:else}
+							<div class="mr-2 size-6 rounded bg-muted"></div>
+						{/if}
 						<span class="flex-1 truncate">
 							{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
 						</span>
