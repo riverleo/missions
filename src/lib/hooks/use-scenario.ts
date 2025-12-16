@@ -6,6 +6,7 @@ import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
+import { useBuilding } from './use-building';
 
 type ScenarioStoreState = RecordFetchState<Scenario>;
 
@@ -71,6 +72,7 @@ function createScenarioStore() {
 			useChapter().fetch(scenarioId),
 			useTerrain().fetch(scenarioId),
 			useCharacter().fetch(scenarioId),
+			useBuilding().fetch(scenarioId),
 		]);
 	}
 

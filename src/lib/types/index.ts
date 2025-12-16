@@ -130,3 +130,17 @@ export type PlayerCharacter = PlayerCharacterRow & {
 };
 export type PlayerCharacterInsert = TablesInsert<'player_characters'>;
 export type PlayerCharacterUpdate = TablesUpdate<'player_characters'>;
+
+// BuildingState types
+export type BuildingStateType = Enums<'building_state_type'>;
+export type BuildingState = Tables<'building_states'>;
+export type BuildingStateInsert = TablesInsert<'building_states'>;
+export type BuildingStateUpdate = TablesUpdate<'building_states'>;
+
+// Building types
+type BuildingRow = Tables<'buildings'>;
+export type Building = BuildingRow & {
+	building_states: BuildingState[];
+};
+export type BuildingInsert = TablesInsert<'buildings'>;
+export type BuildingUpdate = TablesUpdate<'buildings'>;

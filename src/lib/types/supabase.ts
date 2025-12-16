@@ -34,6 +34,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_states: {
+        Row: {
+          atlas_name: string
+          building_id: string
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          loop: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["building_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          building_id: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["building_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          building_id?: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type?: Database["public"]["Enums"]["building_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_states_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      buildings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buildings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "buildings_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           created_at: string
@@ -1144,6 +1224,7 @@ export type Database = {
       }
     }
     Enums: {
+      building_state_type: "idle" | "damaged" | "planned"
       character_state_type: "idle" | "walk" | "jump"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
@@ -1284,6 +1365,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      building_state_type: ["idle", "damaged", "planned"],
       character_state_type: ["idle", "walk", "jump"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],

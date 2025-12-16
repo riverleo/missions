@@ -45,6 +45,10 @@
 			href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 		},
 		{
+			title: '건물',
+			href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
+		},
+		{
 			title: '아이템',
 			href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
 		},
