@@ -110,6 +110,7 @@ export type TerrainUpdate = TablesUpdate<'terrains'>;
 
 // CharacterState types
 export type CharacterStateType = Enums<'character_state_type'>;
+export type LoopMode = Enums<'loop_mode'>;
 export type CharacterState = Tables<'character_states'>;
 export type CharacterStateInsert = TablesInsert<'character_states'>;
 export type CharacterStateUpdate = TablesUpdate<'character_states'>;

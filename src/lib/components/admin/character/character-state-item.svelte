@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CharacterStateType } from '$lib/types';
+	import type { CharacterStateType, LoopMode } from '$lib/types';
 	import { Item, ItemContent, ItemTitle, ItemHeader } from '$lib/components/ui/item';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
@@ -15,7 +15,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
-	import { IconBodyScan, IconClock, IconTrash } from '@tabler/icons-svelte';
+	import { IconTrash } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { Button } from '$lib/components/ui/button';
 
@@ -29,6 +29,12 @@
 	const { store, admin } = useCharacter();
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
+	const loopOptions: { value: LoopMode; label: string }[] = [
+		{ value: 'loop', label: '반복' },
+		{ value: 'once', label: '1회' },
+		{ value: 'ping-pong', label: '핑퐁' },
+		{ value: 'ping-pong-once', label: '핑퐁 1회' },
+	];
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -61,7 +67,7 @@
 				to: characterState?.frame_to ?? undefined,
 				fps: characterState?.fps ?? undefined,
 			});
-			newAnimator.play({ name: type, loop: 'loop' });
+			newAnimator.play({ name: type, loop: characterState?.loop ?? 'loop' });
 			animator = newAnimator;
 		});
 
@@ -70,11 +76,12 @@
 		};
 	});
 
-	// frame_from, frame_to, fps가 변경되면 애니메이션 재시작
+	// frame_from, frame_to, fps, loop이 변경되면 애니메이션 재시작
 	$effect(() => {
 		const frameFrom = characterState?.frame_from;
 		const frameTo = characterState?.frame_to;
 		const fps = characterState?.fps;
+		const loop = characterState?.loop;
 
 		if (animator && characterState?.atlas_name) {
 			animator.init({
@@ -83,7 +90,7 @@
 				to: frameTo ?? undefined,
 				fps: fps ?? undefined,
 			});
-			animator.play({ name: type, loop: 'loop' });
+			animator.play({ name: type, loop: loop ?? 'loop' });
 		}
 	});
 
@@ -115,6 +122,14 @@
 		if (characterState) {
 			await admin.updateCharacterState(characterState.id, characterId, {
 				fps: parseInt(value),
+			});
+		}
+	}
+
+	async function onLoopChange(value: string) {
+		if (characterState) {
+			await admin.updateCharacterState(characterState.id, characterId, {
+				loop: value as LoopMode,
 			});
 		}
 	}
@@ -215,6 +230,25 @@
 					>
 						{#each fpsOptions as fps (fps)}
 							<DropdownMenuRadioItem value={fps.toString()}>{fps} 프레임</DropdownMenuRadioItem>
+						{/each}
+					</DropdownMenuRadioGroup>
+				</DropdownMenuContent>
+			</DropdownMenu>
+			<DropdownMenu>
+				<DropdownMenuTrigger disabled={!characterState}>
+					{#snippet child({ props })}
+						<Button variant="outline" size="sm" class="w-20" disabled={!characterState} {...props}>
+							{loopOptions.find((o) => o.value === characterState?.loop)?.label ?? '반복'}
+						</Button>
+					{/snippet}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent>
+					<DropdownMenuRadioGroup
+						value={characterState?.loop ?? 'loop'}
+						onValueChange={onLoopChange}
+					>
+						{#each loopOptions as option (option.value)}
+							<DropdownMenuRadioItem value={option.value}>{option.label}</DropdownMenuRadioItem>
 						{/each}
 					</DropdownMenuRadioGroup>
 				</DropdownMenuContent>

@@ -42,6 +42,9 @@ create policy "admins can delete characters"
 -- character_state_type enum
 create type character_state_type as enum ('idle', 'walk', 'jump');
 
+-- loop_mode enum
+create type loop_mode as enum ('loop', 'once', 'ping-pong', 'ping-pong-once');
+
 -- character_states 테이블
 create table character_states (
   id uuid primary key default gen_random_uuid(),
@@ -51,6 +54,7 @@ create table character_states (
   frame_from integer,
   frame_to integer,
   fps integer,
+  loop loop_mode not null default 'loop',
 
   constraint uq_character_states_character_id_type unique (character_id, type)
 );

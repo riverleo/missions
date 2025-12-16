@@ -97,6 +97,7 @@ export type Database = {
           frame_from: number | null
           frame_to: number | null
           id: string
+          loop: Database["public"]["Enums"]["loop_mode"]
           type: Database["public"]["Enums"]["character_state_type"]
         }
         Insert: {
@@ -106,6 +107,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
           type: Database["public"]["Enums"]["character_state_type"]
         }
         Update: {
@@ -115,6 +117,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
           type?: Database["public"]["Enums"]["character_state_type"]
         }
         Relationships: [
@@ -1143,6 +1146,7 @@ export type Database = {
     Enums: {
       character_state_type: "idle" | "walk" | "jump"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
+      loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
@@ -1282,6 +1286,7 @@ export const Constants = {
     Enums: {
       character_state_type: ["idle", "walk", "jump"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
+      loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],
