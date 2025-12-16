@@ -517,6 +517,51 @@ export type Database = {
           },
         ]
       }
+      player_buildings: {
+        Row: {
+          building_id: string
+          created_at: string
+          id: string
+          player_id: string
+          user_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          building_id: string
+          created_at?: string
+          id?: string
+          player_id: string
+          user_id?: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          building_id?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          user_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_buildings_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_buildings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_chapters: {
         Row: {
           chapter_id: string

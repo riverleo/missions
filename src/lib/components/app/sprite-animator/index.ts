@@ -1,7 +1,5 @@
 import atlasesJson from '$lib/assets/atlas/generated/atlases.json';
 
-export type LoopMode = 'loop' | 'once' | 'ping-pong' | 'ping-pong-once';
-
 export interface SpriteAnimation {
 	name: string;
 	from?: number; // 1-based

@@ -10,7 +10,12 @@
 
 <div class="relative flex h-full items-center justify-center">
 	<div class="h-[400px] w-[800px]">
-		<World terrain={$store.selectedTerrain} characters={$store.characters} debug={$store.debug}>
+		<World
+			terrain={$store.selectedTerrain}
+			characters={$store.characters}
+			buildings={$store.buildings}
+			debug={$store.debug}
+		>
 			<TestWorldMarker />
 		</World>
 	</div>

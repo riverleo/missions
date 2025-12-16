@@ -144,3 +144,11 @@ export type Building = BuildingRow & {
 };
 export type BuildingInsert = TablesInsert<'buildings'>;
 export type BuildingUpdate = TablesUpdate<'buildings'>;
+
+// PlayerBuilding types
+type PlayerBuildingRow = Tables<'player_buildings'>;
+export type PlayerBuilding = PlayerBuildingRow & {
+	building: Building;
+};
+export type PlayerBuildingInsert = TablesInsert<'player_buildings'>;
+export type PlayerBuildingUpdate = TablesUpdate<'player_buildings'>;

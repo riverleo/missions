@@ -1,23 +1,23 @@
 <script lang="ts">
-	import type { PlayerCharacter } from '$lib/types';
+	import type { PlayerBuilding } from '$lib/types';
 	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 
 	interface Props {
-		playerCharacter: PlayerCharacter;
+		playerBuilding: PlayerBuilding;
 		x: number;
 		y: number;
 		angle?: number;
 	}
 
-	let { playerCharacter, x, y, angle = 0 }: Props = $props();
+	let { playerBuilding, x, y, angle = 0 }: Props = $props();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
-	// idle 상태의 캐릭터 스프라이트 가져오기
+	// idle 상태의 건물 스프라이트 가져오기
 	const idleState = $derived(
-		playerCharacter.character.character_states.find((s) => s.type === 'idle')
+		playerBuilding.building.building_states.find((s) => s.type === 'idle')
 	);
 
 	// 위치를 퍼센트로 변환
@@ -42,7 +42,7 @@
 				to: idleState?.frame_to ?? undefined,
 				fps: idleState?.fps ?? undefined,
 			});
-			newAnimator.play({ name: 'idle', loop: 'loop' });
+			newAnimator.play({ name: 'idle', loop: idleState?.loop ?? 'loop' });
 			animator = newAnimator;
 		});
 

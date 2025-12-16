@@ -2,12 +2,13 @@
 	import { onMount, type Snippet } from 'svelte';
 	import 'pathseg';
 	import Matter from 'matter-js';
-	import type { Terrain, PlayerCharacter } from '$lib/types';
+	import type { Terrain, PlayerCharacter, PlayerBuilding } from '$lib/types';
 	import { getGameAssetUrl } from '$lib/utils/storage';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
 	import WorldCharacter from './world-character.svelte';
+	import WorldBuilding from './world-building.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 
 	const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Svg, Vertices } =
@@ -16,11 +17,12 @@
 	interface Props {
 		terrain?: Terrain;
 		characters?: PlayerCharacter[];
+		buildings?: PlayerBuilding[];
 		debug?: boolean;
 		children?: Snippet;
 	}
 
-	let { terrain, characters = [], debug = false, children }: Props = $props();
+	let { terrain, characters = [], buildings = [], debug = false, children }: Props = $props();
 
 	const { supabase } = useServerPayload();
 
@@ -34,12 +36,26 @@
 	// 캐릭터 바디 관리 (Matter.js 객체는 $state.raw로 Proxy 방지)
 	let characterBodies = $state.raw<Record<string, Matter.Body>>({});
 	let characterBodySizes = $state.raw<Record<string, { width: number; height: number }>>({});
-	let characterPositions = $state<Record<string, { x: number; y: number }>>({});
+	let characterPositions = $state<Record<string, { x: number; y: number; angle: number }>>({});
+
+	// 건물 바디 관리
+	let buildingBodies = $state.raw<Record<string, Matter.Body>>({});
+	let buildingBodySizes = $state.raw<Record<string, { width: number; height: number }>>({});
+	let buildingPositions = $state<Record<string, { x: number; y: number; angle: number }>>({});
+
 	let mounted = false;
 
 	const CHARACTER_RESOLUTION = 2; // 캐릭터 스프라이트 해상도
+	const BUILDING_RESOLUTION = 2; // 건물 스프라이트 해상도
 	const DEFAULT_CHARACTER_SIZE = 32; // 아틀라스 없을 때 기본 크기
+	const DEFAULT_BUILDING_SIZE = 64; // 건물 기본 크기
 	const WALL_THICKNESS = 1;
+
+	// 충돌 카테고리 (비트마스크)
+	const CATEGORY_WALL = 0x0001;
+	const CATEGORY_TERRAIN = 0x0002;
+	const CATEGORY_CHARACTER = 0x0004;
+	const CATEGORY_BUILDING = 0x0008;
 
 	// 디버그 모드일 때만 보이는 스타일
 	const debugBodyStyle = {
@@ -115,6 +131,10 @@
 		return Bodies.rectangle(cx, cy, length, width, {
 			isStatic: true,
 			angle,
+			collisionFilter: {
+				category: CATEGORY_TERRAIN,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING, // 캐릭터, 건물과 충돌
+			},
 			render: getBodyRenderStyle(),
 		});
 	}
@@ -131,6 +151,10 @@
 		const center = Vertices.centre(scaledVertices);
 		const body = Bodies.fromVertices(center.x, center.y, [scaledVertices], {
 			isStatic: true,
+			collisionFilter: {
+				category: CATEGORY_TERRAIN,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING, // 캐릭터, 건물과 충돌
+			},
 			render: getBodyRenderStyle(),
 		});
 
@@ -223,12 +247,16 @@
 			label: `character-${playerCharacter.id}`,
 			restitution: 0.1,
 			friction: 0.8,
+			collisionFilter: {
+				category: CATEGORY_CHARACTER,
+				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER, // 건물과 충돌하지 않음
+			},
 			render: debug ? { visible: true, fillStyle: 'rgba(0, 255, 0, 0.5)' } : { visible: false },
 		});
 	}
 
 	function updateCharacterPositions() {
-		const newPositions: Record<string, { x: number; y: number }> = {};
+		const newPositions: Record<string, { x: number; y: number; angle: number }> = {};
 		for (const [id, body] of Object.entries(characterBodies)) {
 			const size = characterBodySizes[id];
 			const halfHeight = size ? size.height / 2 : 0;
@@ -236,39 +264,103 @@
 			newPositions[id] = {
 				x: (body.position.x / canvasWidth) * VIEW_BOX_WIDTH,
 				y: ((body.position.y + halfHeight) / canvasHeight) * VIEW_BOX_HEIGHT,
+				angle: body.angle,
 			};
 		}
 		characterPositions = newPositions;
 	}
 
+	function getBuildingBodySize(playerBuilding: PlayerBuilding): {
+		width: number;
+		height: number;
+	} {
+		const idleState = playerBuilding.building.building_states.find((s) => s.type === 'idle');
+		if (!idleState?.atlas_name) {
+			return { width: DEFAULT_BUILDING_SIZE, height: DEFAULT_BUILDING_SIZE };
+		}
+
+		const metadata = atlases[idleState.atlas_name];
+		if (!metadata) {
+			return { width: DEFAULT_BUILDING_SIZE, height: DEFAULT_BUILDING_SIZE };
+		}
+
+		return {
+			width: metadata.frameWidth / BUILDING_RESOLUTION,
+			height: metadata.frameHeight / BUILDING_RESOLUTION,
+		};
+	}
+
+	function createBuildingBody(playerBuilding: PlayerBuilding): Matter.Body {
+		const { width, height } = getBuildingBodySize(playerBuilding);
+		const scaledX = scaleX(playerBuilding.x);
+		// y 좌표는 건물 바닥 위치 기준이므로, 바디 중심은 높이의 절반만큼 위로
+		const scaledY = scaleY(playerBuilding.y) - height / 2;
+
+		return Bodies.rectangle(scaledX, scaledY, width, height, {
+			label: `building-${playerBuilding.id}`,
+			restitution: 0.1,
+			friction: 0.8,
+			inertia: Infinity, // 회전 방지
+			collisionFilter: {
+				category: CATEGORY_BUILDING,
+				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_BUILDING, // 캐릭터와 충돌하지 않음
+			},
+			render: debug ? { visible: true, fillStyle: 'rgba(0, 0, 255, 0.5)' } : { visible: false },
+		});
+	}
+
+	function updateBuildingPositions() {
+		const newPositions: Record<string, { x: number; y: number; angle: number }> = {};
+		for (const [id, body] of Object.entries(buildingBodies)) {
+			const size = buildingBodySizes[id];
+			const halfHeight = size ? size.height / 2 : 0;
+			// 바디 중심에서 바닥 위치(하단)로 변환 후 viewBox 좌표로 역변환
+			newPositions[id] = {
+				x: (body.position.x / canvasWidth) * VIEW_BOX_WIDTH,
+				y: ((body.position.y + halfHeight) / canvasHeight) * VIEW_BOX_HEIGHT,
+				angle: body.angle,
+			};
+		}
+		buildingPositions = newPositions;
+	}
+
 	function createWalls(): Matter.Body[] {
+		const wallOptions = {
+			isStatic: true,
+			render: wallStyle,
+			collisionFilter: {
+				category: CATEGORY_WALL,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING, // 캐릭터, 건물과 충돌
+			},
+		};
+
 		const ground = Bodies.rectangle(
 			canvasWidth / 2,
 			canvasHeight - WALL_THICKNESS / 2,
 			canvasWidth,
 			WALL_THICKNESS,
-			{ isStatic: true, render: wallStyle }
+			wallOptions
 		);
 		const leftWall = Bodies.rectangle(
 			WALL_THICKNESS / 2,
 			canvasHeight / 2,
 			WALL_THICKNESS,
 			canvasHeight,
-			{ isStatic: true, render: wallStyle }
+			wallOptions
 		);
 		const rightWall = Bodies.rectangle(
 			canvasWidth - WALL_THICKNESS / 2,
 			canvasHeight / 2,
 			WALL_THICKNESS,
 			canvasHeight,
-			{ isStatic: true, render: wallStyle }
+			wallOptions
 		);
 		const ceiling = Bodies.rectangle(
 			canvasWidth / 2,
 			WALL_THICKNESS / 2,
 			canvasWidth,
 			WALL_THICKNESS,
-			{ isStatic: true, render: wallStyle }
+			wallOptions
 		);
 
 		return [ground, leftWall, rightWall, ceiling];
@@ -306,6 +398,11 @@
 
 				// 캐릭터 바디 재추가
 				for (const body of Object.values(characterBodies)) {
+					Composite.add(engine.world, body);
+				}
+
+				// 건물 바디 재추가
+				for (const body of Object.values(buildingBodies)) {
 					Composite.add(engine.world, body);
 				}
 
@@ -357,16 +454,21 @@
 		runner = Runner.create();
 		Runner.run(runner, engine);
 
-		// 물리 업데이트 후 캐릭터 위치 동기화
-		Matter.Events.on(engine, 'afterUpdate', updateCharacterPositions);
+		// 물리 업데이트 후 캐릭터/건물 위치 동기화
+		function onAfterUpdate() {
+			updateCharacterPositions();
+			updateBuildingPositions();
+		}
+		Matter.Events.on(engine, 'afterUpdate', onAfterUpdate);
 
-		// 초기 캐릭터 바디 생성
+		// 초기 캐릭터/건물 바디 생성
 		syncCharacterBodies();
+		syncBuildingBodies();
 		mounted = true;
 
 		return () => {
 			mounted = false;
-			Matter.Events.off(engine, 'afterUpdate', updateCharacterPositions);
+			Matter.Events.off(engine, 'afterUpdate', onAfterUpdate);
 			resizeObserver.disconnect();
 			Render.stop(render);
 			Runner.stop(runner);
@@ -418,6 +520,49 @@
 		}
 	}
 
+	// 건물 바디 동기화 함수
+	function syncBuildingBodies() {
+		if (!engine) return;
+
+		const currentIds = new Set(buildings.map((b) => b.id));
+		const existingIds = new Set(Object.keys(buildingBodies));
+
+		let newBodies = { ...buildingBodies };
+		let newSizes = { ...buildingBodySizes };
+		let hasChanges = false;
+
+		// 새로 추가된 건물 바디 생성
+		for (const building of buildings) {
+			if (!existingIds.has(building.id)) {
+				const size = getBuildingBodySize(building);
+				const body = createBuildingBody(building);
+				newBodies[building.id] = body;
+				newSizes[building.id] = size;
+				Composite.add(engine.world, body);
+				hasChanges = true;
+			}
+		}
+
+		// 제거된 건물 바디 삭제
+		for (const id of existingIds) {
+			if (!currentIds.has(id)) {
+				const body = buildingBodies[id];
+				if (body) {
+					Composite.remove(engine.world, body);
+					delete newBodies[id];
+					delete newSizes[id];
+					hasChanges = true;
+				}
+			}
+		}
+
+		// 변경이 있을 때만 상태 업데이트
+		if (hasChanges) {
+			buildingBodies = newBodies;
+			buildingBodySizes = newSizes;
+		}
+	}
+
 	// terrain.game_asset 변경 감지하여 재로드
 	let prevGameAsset: string | null | undefined = terrain?.game_asset;
 	$effect(() => {
@@ -439,6 +584,11 @@
 
 			// 캐릭터 바디 재추가
 			for (const body of Object.values(characterBodies)) {
+				Composite.add(engine.world, body);
+			}
+
+			// 건물 바디 재추가
+			for (const body of Object.values(buildingBodies)) {
 				Composite.add(engine.world, body);
 			}
 
@@ -475,6 +625,13 @@
 				body.render.fillStyle = 'rgba(0, 255, 0, 0.5)';
 			}
 		}
+		// 건물 바디도 디버그 모드에 따라 표시
+		for (const body of Object.values(buildingBodies)) {
+			body.render.visible = debug;
+			if (debug) {
+				body.render.fillStyle = 'rgba(0, 0, 255, 0.5)';
+			}
+		}
 	});
 
 	// characters prop 변경 시 바디 추가/제거
@@ -483,6 +640,14 @@
 		const _deps = characters.map((c) => c.id);
 		if (mounted) {
 			syncCharacterBodies();
+		}
+	});
+
+	// buildings prop 변경 시 바디 추가/제거
+	$effect(() => {
+		const _deps = buildings.map((b) => b.id);
+		if (mounted) {
+			syncBuildingBodies();
 		}
 	});
 </script>
@@ -500,10 +665,16 @@
 			style="object-fit: fill; opacity: {debug ? 0 : 1};"
 		/>
 	{/if}
+	{#each buildings as playerBuilding (playerBuilding.id)}
+		{@const position = buildingPositions[playerBuilding.id]}
+		{#if position}
+			<WorldBuilding {playerBuilding} x={position.x} y={position.y} angle={position.angle} />
+		{/if}
+	{/each}
 	{#each characters as playerCharacter (playerCharacter.id)}
 		{@const position = characterPositions[playerCharacter.id]}
 		{#if position}
-			<WorldCharacter {playerCharacter} x={position.x} y={position.y} />
+			<WorldCharacter {playerCharacter} x={position.x} y={position.y} angle={position.angle} />
 		{/if}
 	{/each}
 	{@render children?.()}

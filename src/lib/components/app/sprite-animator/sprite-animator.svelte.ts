@@ -1,4 +1,5 @@
-import type { LoopMode, SpriteAnimation, SpriteMetadata } from './index';
+import type { LoopMode } from '$lib/types';
+import type { SpriteAnimation, SpriteMetadata } from './index';
 import { atlases } from './index';
 
 const DEFAULT_FPS = 24;

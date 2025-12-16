@@ -1,10 +1,12 @@
 import { writable } from 'svelte/store';
-import type { Terrain, Character, PlayerCharacter } from '$lib/types';
+import type { Terrain, Character, PlayerCharacter, Building, PlayerBuilding } from '$lib/types';
 
 interface TestWorldState {
 	selectedTerrain?: Terrain;
 	selectedCharacter?: Character;
+	selectedBuilding?: Building;
 	characters: PlayerCharacter[];
+	buildings: PlayerBuilding[];
 	debug: boolean;
 }
 
@@ -14,7 +16,9 @@ function createTestWorldStore() {
 	const store = writable<TestWorldState>({
 		selectedTerrain: undefined,
 		selectedCharacter: undefined,
+		selectedBuilding: undefined,
 		characters: [],
+		buildings: [],
 		debug: false,
 	});
 
@@ -29,6 +33,15 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			selectedCharacter: state.selectedCharacter?.id === character.id ? undefined : character,
+			selectedBuilding: undefined, // 캐릭터 선택 시 건물 선택 해제
+		}));
+	}
+
+	function selectBuilding(building: Building) {
+		store.update((state) => ({
+			...state,
+			selectedBuilding: state.selectedBuilding?.id === building.id ? undefined : building,
+			selectedCharacter: undefined, // 건물 선택 시 캐릭터 선택 해제
 		}));
 	}
 
@@ -36,7 +49,7 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, debug }));
 	}
 
-	function place(character: Character, x: number, y: number) {
+	function placeCharacter(character: Character, x: number, y: number) {
 		const playerCharacter: PlayerCharacter = {
 			id: crypto.randomUUID(),
 			user_id: crypto.randomUUID(),
@@ -53,10 +66,34 @@ function createTestWorldStore() {
 		}));
 	}
 
+	function placeBuilding(building: Building, x: number, y: number) {
+		const playerBuilding: PlayerBuilding = {
+			id: crypto.randomUUID(),
+			user_id: crypto.randomUUID(),
+			player_id: crypto.randomUUID(),
+			building_id: building.id,
+			x,
+			y,
+			created_at: new Date().toISOString(),
+			building,
+		};
+		store.update((state) => ({
+			...state,
+			buildings: [...state.buildings, playerBuilding],
+		}));
+	}
+
 	function removeCharacter(id: string) {
 		store.update((state) => ({
 			...state,
 			characters: state.characters.filter((c) => c.id !== id),
+		}));
+	}
+
+	function removeBuilding(id: string) {
+		store.update((state) => ({
+			...state,
+			buildings: state.buildings.filter((b) => b.id !== id),
 		}));
 	}
 
@@ -67,14 +104,25 @@ function createTestWorldStore() {
 		}));
 	}
 
+	function clearBuildings() {
+		store.update((state) => ({
+			...state,
+			buildings: [],
+		}));
+	}
+
 	return {
 		store,
 		selectTerrain,
 		selectCharacter,
+		selectBuilding,
 		setDebug,
-		place,
+		placeCharacter,
+		placeBuilding,
 		removeCharacter,
+		removeBuilding,
 		clearCharacters,
+		clearBuildings,
 	};
 }
 
