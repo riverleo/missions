@@ -20,6 +20,12 @@ function createTerrainStore() {
 
 	const dialogStore = writable<TerrainDialogState>(undefined);
 
+	// 어드민 UI 상태
+	const uiStore = writable({
+		debug: false,
+		isSettingStartMarker: false,
+	});
+
 	let currentScenarioId: string | undefined;
 
 	async function fetch(scenarioId: string) {
@@ -65,6 +71,16 @@ function createTerrainStore() {
 	}
 
 	const admin = {
+		uiStore: uiStore as Readable<{ debug: boolean; isSettingStartMarker: boolean }>,
+
+		setDebug(value: boolean) {
+			uiStore.update((s) => ({ ...s, debug: value }));
+		},
+
+		setSettingStartMarker(value: boolean) {
+			uiStore.update((s) => ({ ...s, isSettingStartMarker: value }));
+		},
+
 		async create(terrain: Omit<TerrainInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useTerrain: currentScenarioId is not set.');

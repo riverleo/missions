@@ -10,25 +10,42 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconUpload, IconLoader2, IconBug, IconBugOff, IconHeading } from '@tabler/icons-svelte';
+	import {
+		IconUpload,
+		IconLoader2,
+		IconBug,
+		IconBugOff,
+		IconHeading,
+		IconMapPin,
+		IconMapPinOff,
+	} from '@tabler/icons-svelte';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { uploadGameAsset } from '$lib/utils/storage';
 
 	interface Props {
 		terrain: Terrain;
-		debug: boolean;
-		ontoggleDebug: () => void;
 	}
 
-	let { terrain, debug, ontoggleDebug }: Props = $props();
+	let { terrain }: Props = $props();
 
 	const { supabase } = useServerPayload();
 	const { admin } = useTerrain();
+	const uiStore = admin.uiStore;
 
 	let fileInput: HTMLInputElement;
 	let isUploading = $state(false);
 	let title = $state(terrain.title ?? '');
+
+	const hasStartMarker = $derived(terrain.start_x != null && terrain.start_y != null);
+
+	async function onclickStartMarker() {
+		if (hasStartMarker) {
+			await admin.update(terrain.id, { start_x: null, start_y: null });
+		} else {
+			admin.setSettingStartMarker(!$uiStore.isSettingStartMarker);
+		}
+	}
 
 	async function updateTitle() {
 		const trimmed = title.trim();
@@ -93,8 +110,13 @@
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}
-					<Button {...props} onclick={ontoggleDebug} size="icon-lg" variant="outline">
-						{#if debug}
+					<Button
+						{...props}
+						onclick={() => admin.setDebug(!$uiStore.debug)}
+						size="icon-lg"
+						variant="outline"
+					>
+						{#if $uiStore.debug}
 							<IconBug />
 						{:else}
 							<IconBugOff />
@@ -102,7 +124,38 @@
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>{debug ? '디버그 모드 끄기' : '디버그 모드 켜기'}</TooltipContent>
+			<TooltipContent>
+				{$uiStore.debug ? '디버그 모드 끄기' : '디버그 모드 켜기'}
+			</TooltipContent>
+		</Tooltip>
+	</ButtonGroup>
+	<ButtonGroup>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickStartMarker}
+						size="icon-lg"
+						variant={$uiStore.isSettingStartMarker || hasStartMarker ? 'default' : 'outline'}
+					>
+						{#if hasStartMarker}
+							<IconMapPinOff />
+						{:else}
+							<IconMapPin />
+						{/if}
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>
+				{#if hasStartMarker}
+					시작 위치 제거
+				{:else if $uiStore.isSettingStartMarker}
+					시작 위치 설정 중...
+				{:else}
+					시작 위치 설정
+				{/if}
+			</TooltipContent>
 		</Tooltip>
 	</ButtonGroup>
 	<InputGroup class="h-10">

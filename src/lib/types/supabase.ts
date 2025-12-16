@@ -914,6 +914,8 @@ export type Database = {
           game_asset: string | null
           id: string
           scenario_id: string
+          start_x: number | null
+          start_y: number | null
           title: string
         }
         Insert: {
@@ -923,6 +925,8 @@ export type Database = {
           game_asset?: string | null
           id?: string
           scenario_id: string
+          start_x?: number | null
+          start_y?: number | null
           title?: string
         }
         Update: {
@@ -932,6 +936,8 @@ export type Database = {
           game_asset?: string | null
           id?: string
           scenario_id?: string
+          start_x?: number | null
+          start_y?: number | null
           title?: string
         }
         Relationships: [

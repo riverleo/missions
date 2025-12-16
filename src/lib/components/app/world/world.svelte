@@ -1,24 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import 'pathseg';
 	import Matter from 'matter-js';
 	import type { Terrain } from '$lib/types';
 	import { getGameAssetUrl } from '$lib/utils/storage';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
+	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
+
 	const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Svg, Vertices } =
 		Matter;
-
-	// SVG viewBox 기준 크기
-	const VIEW_BOX_WIDTH = 800;
-	const VIEW_BOX_HEIGHT = 400;
 
 	interface Props {
 		terrain?: Terrain;
 		debug?: boolean;
+		children?: Snippet;
 	}
 
-	let { terrain, debug = false }: Props = $props();
+	let { terrain, debug = false, children }: Props = $props();
 
 	const { supabase } = useServerPayload();
 
@@ -350,7 +349,11 @@
 	});
 </script>
 
-<div bind:this={container} class="relative h-full w-full border border-border">
+<div
+	bind:this={container}
+	data-slot="world-container"
+	class="relative h-full w-full border border-border"
+>
 	{#if svgUrl}
 		<img
 			src={svgUrl}
@@ -359,4 +362,5 @@
 			style="object-fit: fill; opacity: {debug ? 0 : 1};"
 		/>
 	{/if}
+	{@render children?.()}
 </div>
