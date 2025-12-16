@@ -14,7 +14,8 @@
 		DropdownMenuItem,
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
-	import { IconDotsVertical } from '@tabler/icons-svelte';
+	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
+	import { cn } from '$lib/utils';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage';
@@ -42,6 +43,12 @@
 						href={`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`}
 						class="group pr-1"
 					>
+						<IconCheck
+							class={cn(
+								'mr-2 size-4',
+								terrain.id === currentTerrainId ? 'opacity-100' : 'opacity-0'
+							)}
+						/>
 						{#if assetUrl}
 							<img src={assetUrl} alt="" class="mr-2 size-6 rounded object-cover" />
 						{:else}
