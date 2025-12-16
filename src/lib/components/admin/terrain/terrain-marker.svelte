@@ -80,7 +80,7 @@
 		<TooltipTrigger
 			class="absolute -translate-x-1/2 -translate-y-1/2 cursor-grab text-primary active:cursor-grabbing {isDragging
 				? ''
-				: 'animate-pulse [animation-duration:0.8s]'}"
+				: 'animate-spin'}"
 			style="left: {left}; top: {top};"
 			{onmousedown}
 		>
