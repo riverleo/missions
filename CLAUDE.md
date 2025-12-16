@@ -152,10 +152,11 @@
    - 타입 생성 명령어: `pnpm supabase gen types typescript --local > src/lib/types/supabase.ts`
    - 이 파일을 직접 수정하지 말고, 필요한 타입 확장은 `src/lib/types/index.ts`에서 할 것
 
-4-1. **원격 DB 리셋 금지**
+4-1. **DB 리셋 전 확인 필수**
 
-- `supabase db reset --linked` 명령은 Claude가 실행하지 말 것
-- 원격 DB 변경은 사용자가 직접 수행
+- `supabase db reset` 명령 실행 전에 **반드시 사용자에게 확인**
+- 로컬 DB도 리셋하면 기존 데이터가 모두 삭제되므로 주의
+- `supabase db reset --linked` (원격 DB)는 Claude가 절대 실행하지 말 것
 
 5. **Constraint 및 Index 명명 규칙**
    - 모든 constraint와 index는 명시적으로 이름을 지정할 것
@@ -497,3 +498,53 @@
   - 파일 크기 제한: 10MB
   - public bucket (누구나 조회 가능)
   - 업로드/삭제는 admin만 가능
+
+## Atlas 빌드 시스템
+
+- **위치**: `vite/vite-plugin-atlas.ts`
+- **소스**: `src/lib/assets/atlas/sources/` 하위 폴더
+- **출력**: `src/lib/assets/atlas/generated/`
+- **동작**:
+  - sources 폴더 내 각 하위 폴더를 스프라이트 시트로 생성
+  - 이미지 파일들을 번호순으로 정렬하여 grid 형태로 배치
+  - ImageMagick `montage` 명령으로 PNG 생성
+  - 메타데이터 JSON 파일 동시 생성
+- **메타데이터 형식**:
+  ```json
+  {
+    "type": "sprite",
+    "frameWidth": 1080,
+    "frameHeight": 1080,
+    "columns": 3,
+    "rows": 2,
+    "frameCount": 5
+  }
+  ```
+- **개발 모드**: 파일 변경 시 자동 재생성 + HMR
+- **캐릭터 애니메이션**: 스토리지 없이 atlas에서 직접 로드
+
+## 어드민 페이지 구조
+
+- **패턴**: 각 도메인별로 동일한 구조 사용
+- **라우트 구조**:
+  ```
+  src/routes/admin/scenarios/[scenarioId]/{domain}/
+  ├── +layout.svelte      # {Domain}Aside 포함
+  ├── +page.svelte        # 선택 안내 메시지
+  └── [{domain}Id]/
+      └── +page.svelte    # 상세 페이지 + {Domain}Panel
+  ```
+- **컴포넌트 구조** (`src/lib/components/admin/{domain}/`):
+  - `{domain}-aside.svelte`: 사이드바 (목록 토글, 추가/삭제 버튼)
+  - `{domain}-command.svelte`: 검색 가능한 목록
+  - `{domain}-create-dialog.svelte`: 생성 다이얼로그
+  - `{domain}-delete-dialog.svelte`: 삭제 확인 다이얼로그
+  - `{domain}-panel.svelte`: 하단 패널 (편집 UI)
+- **Hook 구조** (`src/lib/hooks/use-{domain}.ts`):
+  - `store`: 데이터 스토어 (RecordFetchState)
+  - `dialogStore`: 다이얼로그 상태
+  - `fetch(scenarioId)`: 시나리오별 데이터 로드
+  - `openDialog/closeDialog`: 다이얼로그 제어
+  - `admin.create/update/remove`: CRUD 함수
+- **초기화**: `useScenario().init(scenarioId)`에서 모든 도메인 fetch 호출
+- supabase db reset은 진행 전 꼭 물어보고 진행하기.

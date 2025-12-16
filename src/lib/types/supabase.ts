@@ -89,6 +89,48 @@ export type Database = {
           },
         ]
       }
+      characters: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_order: number
+          id: string
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "characters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "characters_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dices: {
         Row: {
           created_at: string

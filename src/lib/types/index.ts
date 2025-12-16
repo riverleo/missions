@@ -107,3 +107,8 @@ export type UserRole = Tables<'user_roles'>;
 export type Terrain = Tables<'terrains'>;
 export type TerrainInsert = TablesInsert<'terrains'>;
 export type TerrainUpdate = TablesUpdate<'terrains'>;
+
+// Character types
+export type Character = Tables<'characters'>;
+export type CharacterInsert = TablesInsert<'characters'>;
+export type CharacterUpdate = TablesUpdate<'characters'>;
