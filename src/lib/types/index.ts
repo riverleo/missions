@@ -112,3 +112,9 @@ export type TerrainUpdate = TablesUpdate<'terrains'>;
 export type Character = Tables<'characters'>;
 export type CharacterInsert = TablesInsert<'characters'>;
 export type CharacterUpdate = TablesUpdate<'characters'>;
+
+// CharacterState types
+export type CharacterStateType = Enums<'character_state_type'>;
+export type CharacterState = Tables<'character_states'>;
+export type CharacterStateInsert = TablesInsert<'character_states'>;
+export type CharacterStateUpdate = TablesUpdate<'character_states'>;

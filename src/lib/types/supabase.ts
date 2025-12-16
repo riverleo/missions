@@ -89,11 +89,48 @@ export type Database = {
           },
         ]
       }
+      character_states: {
+        Row: {
+          atlas_name: string
+          character_id: string
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          type: Database["public"]["Enums"]["character_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          character_id: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          type: Database["public"]["Enums"]["character_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          character_id?: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          type?: Database["public"]["Enums"]["character_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_states_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       characters: {
         Row: {
           created_at: string
           created_by: string | null
-          display_order: number
           id: string
           name: string
           scenario_id: string
@@ -101,7 +138,6 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          display_order?: number
           id?: string
           name?: string
           scenario_id: string
@@ -109,7 +145,6 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          display_order?: number
           id?: string
           name?: string
           scenario_id?: string
@@ -1061,6 +1096,7 @@ export type Database = {
       }
     }
     Enums: {
+      character_state_type: "idle" | "walk" | "jump"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       narrative_node_type: "text" | "choice"
       player_chapter_status: "in_progress" | "completed"
@@ -1199,6 +1235,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      character_state_type: ["idle", "walk", "jump"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       narrative_node_type: ["text", "choice"],
       player_chapter_status: ["in_progress", "completed"],

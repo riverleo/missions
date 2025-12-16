@@ -18,13 +18,13 @@
 	import { cn } from '$lib/utils';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
-	import { sort } from 'radash';
+	import { alphabetical } from 'radash';
 
 	const { store, openDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId);
 	const currentCharacterId = $derived(page.params.characterId);
 
-	const characters = $derived(sort(Object.values($store.data), (c) => c.display_order));
+	const characters = $derived(alphabetical(Object.values($store.data), (c) => c.name));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
