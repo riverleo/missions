@@ -2,22 +2,25 @@
 	import { onMount, type Snippet } from 'svelte';
 	import 'pathseg';
 	import Matter from 'matter-js';
-	import type { Terrain } from '$lib/types';
+	import type { Terrain, PlayerCharacter } from '$lib/types';
 	import { getGameAssetUrl } from '$lib/utils/storage';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
+	import WorldCharacter from './world-character.svelte';
+	import { atlases } from '$lib/components/app/sprite-animator';
 
 	const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Svg, Vertices } =
 		Matter;
 
 	interface Props {
 		terrain?: Terrain;
+		characters?: PlayerCharacter[];
 		debug?: boolean;
 		children?: Snippet;
 	}
 
-	let { terrain, debug = false, children }: Props = $props();
+	let { terrain, characters = [], debug = false, children }: Props = $props();
 
 	const { supabase } = useServerPayload();
 
@@ -28,6 +31,14 @@
 	let canvasWidth = $state(VIEW_BOX_WIDTH);
 	let canvasHeight = $state(VIEW_BOX_HEIGHT);
 
+	// 캐릭터 바디 관리 (Matter.js 객체는 $state.raw로 Proxy 방지)
+	let characterBodies = $state.raw<Record<string, Matter.Body>>({});
+	let characterBodySizes = $state.raw<Record<string, { width: number; height: number }>>({});
+	let characterPositions = $state<Record<string, { x: number; y: number }>>({});
+	let mounted = false;
+
+	const CHARACTER_RESOLUTION = 2; // 캐릭터 스프라이트 해상도
+	const DEFAULT_CHARACTER_SIZE = 32; // 아틀라스 없을 때 기본 크기
 	const WALL_THICKNESS = 1;
 
 	// 디버그 모드일 때만 보이는 스타일
@@ -68,7 +79,8 @@
 
 		const fillValue = fillMatch?.[1]?.trim() || path.getAttribute('fill');
 		const strokeValue = strokeMatch?.[1]?.trim() || path.getAttribute('stroke');
-		const strokeWidthStr = strokeWidthMatch?.[1]?.trim() || path.getAttribute('stroke-width') || '1';
+		const strokeWidthStr =
+			strokeWidthMatch?.[1]?.trim() || path.getAttribute('stroke-width') || '1';
 
 		return {
 			fill: fillValue === 'none' ? null : fillValue,
@@ -181,6 +193,54 @@
 		}
 	}
 
+	function getCharacterBodySize(playerCharacter: PlayerCharacter): {
+		width: number;
+		height: number;
+	} {
+		const idleState = playerCharacter.character.character_states.find((s) => s.type === 'idle');
+		if (!idleState?.atlas_name) {
+			return { width: DEFAULT_CHARACTER_SIZE, height: DEFAULT_CHARACTER_SIZE };
+		}
+
+		const metadata = atlases[idleState.atlas_name];
+		if (!metadata) {
+			return { width: DEFAULT_CHARACTER_SIZE, height: DEFAULT_CHARACTER_SIZE };
+		}
+
+		return {
+			width: metadata.frameWidth / CHARACTER_RESOLUTION,
+			height: metadata.frameHeight / CHARACTER_RESOLUTION,
+		};
+	}
+
+	function createCharacterBody(playerCharacter: PlayerCharacter): Matter.Body {
+		const { width, height } = getCharacterBodySize(playerCharacter);
+		const scaledX = scaleX(playerCharacter.x);
+		// y 좌표는 캐릭터 발 위치 기준이므로, 바디 중심은 높이의 절반만큼 위로
+		const scaledY = scaleY(playerCharacter.y) - height / 2;
+
+		return Bodies.rectangle(scaledX, scaledY, width, height, {
+			label: `character-${playerCharacter.id}`,
+			restitution: 0.1,
+			friction: 0.8,
+			render: debug ? { visible: true, fillStyle: 'rgba(0, 255, 0, 0.5)' } : { visible: false },
+		});
+	}
+
+	function updateCharacterPositions() {
+		const newPositions: Record<string, { x: number; y: number }> = {};
+		for (const [id, body] of Object.entries(characterBodies)) {
+			const size = characterBodySizes[id];
+			const halfHeight = size ? size.height / 2 : 0;
+			// 바디 중심에서 발 위치(하단)로 변환 후 viewBox 좌표로 역변환
+			newPositions[id] = {
+				x: (body.position.x / canvasWidth) * VIEW_BOX_WIDTH,
+				y: ((body.position.y + halfHeight) / canvasHeight) * VIEW_BOX_HEIGHT,
+			};
+		}
+		characterPositions = newPositions;
+	}
+
 	function createWalls(): Matter.Body[] {
 		const ground = Bodies.rectangle(
 			canvasWidth / 2,
@@ -244,6 +304,11 @@
 					});
 				}
 
+				// 캐릭터 바디 재추가
+				for (const body of Object.values(characterBodies)) {
+					Composite.add(engine.world, body);
+				}
+
 				// 마우스 컨트롤 재추가
 				const mouse = Mouse.create(render.canvas);
 				const mouseConstraint = MouseConstraint.create(engine, {
@@ -292,7 +357,16 @@
 		runner = Runner.create();
 		Runner.run(runner, engine);
 
+		// 물리 업데이트 후 캐릭터 위치 동기화
+		Matter.Events.on(engine, 'afterUpdate', updateCharacterPositions);
+
+		// 초기 캐릭터 바디 생성
+		syncCharacterBodies();
+		mounted = true;
+
 		return () => {
+			mounted = false;
+			Matter.Events.off(engine, 'afterUpdate', updateCharacterPositions);
 			resizeObserver.disconnect();
 			Render.stop(render);
 			Runner.stop(runner);
@@ -300,6 +374,49 @@
 			render.canvas.remove();
 		};
 	});
+
+	// 캐릭터 바디 동기화 함수
+	function syncCharacterBodies() {
+		if (!engine) return;
+
+		const currentIds = new Set(characters.map((c) => c.id));
+		const existingIds = new Set(Object.keys(characterBodies));
+
+		let newBodies = { ...characterBodies };
+		let newSizes = { ...characterBodySizes };
+		let hasChanges = false;
+
+		// 새로 추가된 캐릭터 바디 생성
+		for (const char of characters) {
+			if (!existingIds.has(char.id)) {
+				const size = getCharacterBodySize(char);
+				const body = createCharacterBody(char);
+				newBodies[char.id] = body;
+				newSizes[char.id] = size;
+				Composite.add(engine.world, body);
+				hasChanges = true;
+			}
+		}
+
+		// 제거된 캐릭터 바디 삭제
+		for (const id of existingIds) {
+			if (!currentIds.has(id)) {
+				const body = characterBodies[id];
+				if (body) {
+					Composite.remove(engine.world, body);
+					delete newBodies[id];
+					delete newSizes[id];
+					hasChanges = true;
+				}
+			}
+		}
+
+		// 변경이 있을 때만 상태 업데이트
+		if (hasChanges) {
+			characterBodies = newBodies;
+			characterBodySizes = newSizes;
+		}
+	}
 
 	// terrain.game_asset 변경 감지하여 재로드
 	let prevGameAsset: string | null | undefined = terrain?.game_asset;
@@ -318,6 +435,11 @@
 						Composite.add(engine.world, terrainBodies);
 					}
 				});
+			}
+
+			// 캐릭터 바디 재추가
+			for (const body of Object.values(characterBodies)) {
+				Composite.add(engine.world, body);
 			}
 
 			// 마우스 컨트롤 재추가
@@ -346,6 +468,22 @@
 				}
 			}
 		}
+		// 캐릭터 바디도 디버그 모드에 따라 표시
+		for (const body of Object.values(characterBodies)) {
+			body.render.visible = debug;
+			if (debug) {
+				body.render.fillStyle = 'rgba(0, 255, 0, 0.5)';
+			}
+		}
+	});
+
+	// characters prop 변경 시 바디 추가/제거
+	// onMount 이후에만 실행 (초기 동기화는 onMount에서 처리)
+	$effect(() => {
+		const _deps = characters.map((c) => c.id);
+		if (mounted) {
+			syncCharacterBodies();
+		}
 	});
 </script>
 
@@ -362,5 +500,11 @@
 			style="object-fit: fill; opacity: {debug ? 0 : 1};"
 		/>
 	{/if}
+	{#each characters as playerCharacter (playerCharacter.id)}
+		{@const position = characterPositions[playerCharacter.id]}
+		{#if position}
+			<WorldCharacter {playerCharacter} x={position.x} y={position.y} />
+		{/if}
+	{/each}
 	{@render children?.()}
 </div>

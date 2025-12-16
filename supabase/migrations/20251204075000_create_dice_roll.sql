@@ -41,7 +41,7 @@ create policy "admins can delete narrative_dice_rolls"
 
 create table player_rolled_dices (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid references scenarios(id) on delete cascade,
   player_quest_id uuid references player_quests(id) on delete cascade,

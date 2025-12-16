@@ -13,7 +13,7 @@ create type player_scenario_status as enum ('in_progress', 'completed');
 
 create table player_scenarios (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid not null references scenarios(id) on delete cascade,
   status player_scenario_status not null default 'in_progress',

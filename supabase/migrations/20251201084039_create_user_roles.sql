@@ -4,7 +4,7 @@ create type user_role_type as enum ('admin');
 -- user_roles 테이블
 create table user_roles (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   type user_role_type not null,
   display_name text not null default '',
   created_at timestamptz not null default now(),

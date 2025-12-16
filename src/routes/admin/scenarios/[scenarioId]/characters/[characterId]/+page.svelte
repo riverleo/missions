@@ -9,10 +9,10 @@
 	const character = $derived(characterId ? $store.data[characterId] : undefined);
 </script>
 
-{#if character}
+{#if character && characterId}
 	<div class="flex h-full flex-col">
 		<div class="flex flex-1 items-center justify-center overflow-auto p-4">
-			<CharacterStateList {character} />
+			<CharacterStateList {characterId} />
 		</div>
 		<CharacterPanel {character} />
 	</div>

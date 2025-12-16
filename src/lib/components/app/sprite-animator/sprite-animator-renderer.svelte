@@ -8,8 +8,9 @@
 
 	let { animator, resolution = 2 }: Props = $props();
 
-	const metadata = animator.getMetadata();
-	const atlasUrl = animator.getAtlasUrl();
+	// animator prop이 변경될 때 반응하도록 $derived 사용
+	const metadata = $derived(animator.getMetadata());
+	const atlasUrl = $derived(animator.getAtlasUrl());
 
 	// 현재 프레임에 따른 background-position 계산
 	const backgroundPosition = $derived(() => {

@@ -23,7 +23,7 @@ create table quest_branches (
 
 create table player_quests (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid not null references scenarios(id) on delete cascade,
   quest_id uuid not null references quests(id) on delete cascade,
@@ -35,7 +35,7 @@ create table player_quests (
 
 create table player_quest_branches (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid not null references scenarios(id) on delete cascade,
   player_quest_id uuid not null references player_quests(id) on delete cascade,

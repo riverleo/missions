@@ -451,7 +451,7 @@ export type Database = {
           player_id: string
           scenario_id: string
           status?: Database["public"]["Enums"]["player_chapter_status"]
-          user_id: string
+          user_id?: string
         }
         Update: {
           chapter_id?: string
@@ -486,6 +486,51 @@ export type Database = {
           },
         ]
       }
+      player_characters: {
+        Row: {
+          character_id: string
+          created_at: string
+          id: string
+          player_id: string
+          user_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          id?: string
+          player_id: string
+          user_id?: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          user_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_characters_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_characters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_quest_branches: {
         Row: {
           created_at: string
@@ -505,7 +550,7 @@ export type Database = {
           quest_branch_id: string
           quest_id: string
           scenario_id: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -572,7 +617,7 @@ export type Database = {
           quest_id: string
           scenario_id: string
           status?: Database["public"]["Enums"]["player_quest_status"]
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -639,7 +684,7 @@ export type Database = {
           quest_branch_id?: string | null
           quest_id?: string | null
           scenario_id?: string | null
-          user_id: string
+          user_id?: string
           value?: number | null
         }
         Update: {
@@ -754,7 +799,7 @@ export type Database = {
           player_id: string
           scenario_id: string
           status?: Database["public"]["Enums"]["player_scenario_status"]
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string
@@ -816,7 +861,7 @@ export type Database = {
           strength?: number
           stress?: number
           updated_at?: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           appearance?: number
@@ -1053,7 +1098,7 @@ export type Database = {
           display_name?: string
           id?: string
           type: Database["public"]["Enums"]["user_role_type"]
-          user_id: string
+          user_id?: string
         }
         Update: {
           created_at?: string

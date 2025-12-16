@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Character, CharacterStateType } from '$lib/types';
+	import type { CharacterStateType } from '$lib/types';
 	import { Item, ItemContent, ItemTitle, ItemHeader } from '$lib/components/ui/item';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
@@ -20,19 +20,20 @@
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
-		character: Character;
+		characterId: string;
 		type: CharacterStateType;
 	}
 
-	let { character, type }: Props = $props();
+	let { characterId, type }: Props = $props();
 
-	const { admin } = useCharacter();
+	const { store, admin } = useCharacter();
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
-	const characterState = $derived(character.character_states.find((s) => s.type === type));
+	const character = $derived($store.data[characterId]);
+	const characterState = $derived(character?.character_states.find((s) => s.type === type));
 
 	function getFrameCount(atlasName: string | undefined) {
 		if (!atlasName) return 0;
@@ -88,15 +89,15 @@
 
 	async function onAtlasChange(atlasName: string) {
 		if (characterState) {
-			await admin.updateCharacterState(characterState.id, character.id, { atlas_name: atlasName });
+			await admin.updateCharacterState(characterState.id, characterId, { atlas_name: atlasName });
 		} else {
-			await admin.createCharacterState(character.id, { type, atlas_name: atlasName });
+			await admin.createCharacterState(characterId, { type, atlas_name: atlasName });
 		}
 	}
 
 	async function onFrameFromChange(value: string) {
 		if (characterState) {
-			await admin.updateCharacterState(characterState.id, character.id, {
+			await admin.updateCharacterState(characterState.id, characterId, {
 				frame_from: parseInt(value),
 			});
 		}
@@ -104,7 +105,7 @@
 
 	async function onFrameToChange(value: string) {
 		if (characterState) {
-			await admin.updateCharacterState(characterState.id, character.id, {
+			await admin.updateCharacterState(characterState.id, characterId, {
 				frame_to: parseInt(value),
 			});
 		}
@@ -112,7 +113,7 @@
 
 	async function onFpsChange(value: string) {
 		if (characterState) {
-			await admin.updateCharacterState(characterState.id, character.id, {
+			await admin.updateCharacterState(characterState.id, characterId, {
 				fps: parseInt(value),
 			});
 		}
@@ -120,7 +121,7 @@
 
 	async function onDelete() {
 		if (characterState) {
-			await admin.removeCharacterState(characterState.id, character.id);
+			await admin.removeCharacterState(characterState.id, characterId);
 		}
 	}
 </script>
@@ -133,7 +134,7 @@
 		<AspectRatio ratio={4 / 3}>
 			{#if animator}
 				<div class="flex h-full w-full items-center justify-center overflow-hidden">
-					<SpriteAnimatorRenderer {animator} resolution={3} />
+					<SpriteAnimatorRenderer {animator} resolution={2} />
 				</div>
 			{:else}
 				<Skeleton class="h-full w-full" />

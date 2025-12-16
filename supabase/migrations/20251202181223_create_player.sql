@@ -1,7 +1,7 @@
 -- player 테이블
 create table players (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   name text not null,
   bio text,                                       -- 자기소개
   avatar text,                                    -- 프로필 이미지 파일명

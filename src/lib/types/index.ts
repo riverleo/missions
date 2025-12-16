@@ -121,3 +121,11 @@ export type Character = CharacterRow & {
 };
 export type CharacterInsert = TablesInsert<'characters'>;
 export type CharacterUpdate = TablesUpdate<'characters'>;
+
+// PlayerCharacter types
+type PlayerCharacterRow = Tables<'player_characters'>;
+export type PlayerCharacter = PlayerCharacterRow & {
+	character: Character;
+};
+export type PlayerCharacterInsert = TablesInsert<'player_characters'>;
+export type PlayerCharacterUpdate = TablesUpdate<'player_characters'>;
