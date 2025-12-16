@@ -18,8 +18,6 @@
 		terrain?: Terrain;
 		characters?: PlayerCharacter[];
 		buildings?: PlayerBuilding[];
-		worldWidth?: number;
-		worldHeight?: number;
 		debug?: boolean;
 		children?: Snippet;
 		oncamerachange?: (camera: { x: number; y: number; zoom: number }) => void;
@@ -29,12 +27,14 @@
 		terrain,
 		characters = [],
 		buildings = [],
-		worldWidth = VIEW_BOX_WIDTH,
-		worldHeight = VIEW_BOX_HEIGHT,
 		debug = false,
 		children,
 		oncamerachange,
 	}: Props = $props();
+
+	// 월드 크기 (terrain SVG에서 자동 설정)
+	let worldWidth = $state(VIEW_BOX_WIDTH);
+	let worldHeight = $state(VIEW_BOX_HEIGHT);
 
 	const { supabase } = useServerPayload();
 
@@ -205,6 +205,20 @@
 
 			const parser = new DOMParser();
 			const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+
+			// SVG viewBox에서 월드 크기 추출
+			const svgElement = svgDoc.querySelector('svg');
+			if (svgElement) {
+				const viewBox = svgElement.getAttribute('viewBox');
+				if (viewBox) {
+					const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(Number);
+					if (vbWidth && vbHeight) {
+						worldWidth = vbWidth;
+						worldHeight = vbHeight;
+					}
+				}
+			}
+
 			const paths = svgDoc.querySelectorAll('path');
 
 			const bodies: Matter.Body[] = [];
@@ -508,38 +522,7 @@
 				render.canvas.height = height;
 				render.options.width = width;
 				render.options.height = height;
-
-				// 월드 재구성
-				Composite.clear(engine.world, false);
-
-				Composite.add(engine.world, createWalls());
-
-				if (terrain?.game_asset) {
-					loadTerrainSvg(terrain).then((terrainBodies) => {
-						if (terrainBodies.length > 0) {
-							Composite.add(engine.world, terrainBodies);
-						}
-					});
-				}
-
-				// 캐릭터 바디 재추가
-				for (const body of Object.values(characterBodies)) {
-					Composite.add(engine.world, body);
-				}
-
-				// 건물 바디 재추가
-				for (const body of Object.values(buildingBodies)) {
-					Composite.add(engine.world, body);
-				}
-
-				// 마우스 컨트롤 재추가
-				const mouse = Mouse.create(render.canvas);
-				mouseConstraint = MouseConstraint.create(engine, {
-					mouse,
-					constraint: { stiffness: 0.2, render: { visible: false } },
-				});
-				Composite.add(engine.world, mouseConstraint);
-				render.mouse = mouse;
+				updateRenderBounds();
 			}
 		});
 
@@ -559,18 +542,22 @@
 			},
 		});
 
-		// 초기 카메라 bounds 설정
-		updateRenderBounds();
-
-		Composite.add(engine.world, createWalls());
-
-		if (terrain?.game_asset) {
-			loadTerrainSvg(terrain).then((terrainBodies) => {
+		// 초기화 함수
+		async function initWorld() {
+			if (terrain?.game_asset) {
+				// SVG 로드 후 월드 크기 설정
+				const terrainBodies = await loadTerrainSvg(terrain);
+				Composite.add(engine.world, createWalls());
 				if (terrainBodies.length > 0) {
 					Composite.add(engine.world, terrainBodies);
 				}
-			});
+			} else {
+				Composite.add(engine.world, createWalls());
+			}
+			updateRenderBounds();
 		}
+
+		initWorld();
 
 		const mouse = Mouse.create(render.canvas);
 		mouseConstraint = MouseConstraint.create(engine, {
@@ -700,40 +687,54 @@
 		if (currentGameAsset !== prevGameAsset && engine) {
 			prevGameAsset = currentGameAsset;
 
-			// 기존 terrain bodies 제거 후 재로드
+			// 기존 bodies 제거
 			Composite.clear(engine.world, false);
-			Composite.add(engine.world, createWalls());
 
 			if (terrain?.game_asset) {
+				// SVG 로드 후 월드 크기가 설정되고 나서 벽 생성
 				loadTerrainSvg(terrain).then((terrainBodies) => {
+					Composite.add(engine.world, createWalls());
 					if (terrainBodies.length > 0) {
 						Composite.add(engine.world, terrainBodies);
 					}
+					rebuildWorld();
 				});
-			}
-
-			// 캐릭터 바디 재추가
-			for (const body of Object.values(characterBodies)) {
-				Composite.add(engine.world, body);
-			}
-
-			// 건물 바디 재추가
-			for (const body of Object.values(buildingBodies)) {
-				Composite.add(engine.world, body);
-			}
-
-			// 마우스 컨트롤 재추가
-			if (render) {
-				const mouse = Mouse.create(render.canvas);
-				const mouseConstraint = MouseConstraint.create(engine, {
-					mouse,
-					constraint: { stiffness: 0.2, render: { visible: false } },
-				});
-				Composite.add(engine.world, mouseConstraint);
-				render.mouse = mouse;
+			} else {
+				// terrain이 없으면 기본 크기로 벽 생성
+				worldWidth = VIEW_BOX_WIDTH;
+				worldHeight = VIEW_BOX_HEIGHT;
+				Composite.add(engine.world, createWalls());
+				rebuildWorld();
 			}
 		}
 	});
+
+	// 월드 재구성 (캐릭터, 건물, 마우스 컨트롤 추가)
+	function rebuildWorld() {
+		// 캐릭터 바디 재추가
+		for (const body of Object.values(characterBodies)) {
+			Composite.add(engine.world, body);
+		}
+
+		// 건물 바디 재추가
+		for (const body of Object.values(buildingBodies)) {
+			Composite.add(engine.world, body);
+		}
+
+		// 마우스 컨트롤 재추가
+		if (render) {
+			const mouse = Mouse.create(render.canvas);
+			const mc = MouseConstraint.create(engine, {
+				mouse,
+				constraint: { stiffness: 0.2, render: { visible: false } },
+			});
+			Composite.add(engine.world, mc);
+			render.mouse = mouse;
+		}
+
+		// 카메라 bounds 업데이트
+		updateRenderBounds();
+	}
 
 	// debug 변경 시 기존 바디들의 렌더 스타일만 업데이트
 	$effect(() => {
@@ -787,7 +788,6 @@
 	bind:this={container}
 	data-slot="world-container"
 	class="relative h-full w-full overflow-hidden border border-border"
-	style="cursor: {isPanning ? 'grabbing' : isOverDraggable ? 'pointer' : 'grab'};"
 	onwheel={handleWheel}
 	onmousedown={handleMouseDown}
 	onmousemove={handleMouseMove}

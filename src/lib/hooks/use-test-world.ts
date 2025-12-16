@@ -1,6 +1,5 @@
 import { writable } from 'svelte/store';
 import type { Terrain, Character, PlayerCharacter, Building, PlayerBuilding } from '$lib/types';
-import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from '$lib/components/app/world/constants';
 
 interface TestWorldState {
 	selectedTerrain?: Terrain;
@@ -8,8 +7,7 @@ interface TestWorldState {
 	selectedBuilding?: Building;
 	characters: PlayerCharacter[];
 	buildings: PlayerBuilding[];
-	worldWidth: number;
-	worldHeight: number;
+	// 카메라 상태: test-world-marker에서 클릭 좌표를 월드 좌표로 변환할 때 사용
 	cameraX: number;
 	cameraY: number;
 	cameraZoom: number;
@@ -25,8 +23,6 @@ function createTestWorldStore() {
 		selectedBuilding: undefined,
 		characters: [],
 		buildings: [],
-		worldWidth: VIEW_BOX_WIDTH,
-		worldHeight: VIEW_BOX_HEIGHT,
 		cameraX: 0,
 		cameraY: 0,
 		cameraZoom: 1,

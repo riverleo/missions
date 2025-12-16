@@ -18,8 +18,6 @@
 			terrain={$store.selectedTerrain}
 			characters={$store.characters}
 			buildings={$store.buildings}
-			worldWidth={$store.worldWidth}
-			worldHeight={$store.worldHeight}
 			debug={$store.debug}
 			{oncamerachange}
 		>
