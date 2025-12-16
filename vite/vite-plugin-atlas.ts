@@ -3,20 +3,11 @@ import { watch } from 'fs';
 import { readdir, writeFile } from 'fs/promises';
 import { join } from 'path';
 import type { Plugin } from 'vite';
-import potpack from 'potpack';
 import { debounce } from 'radash';
 
 interface ImageSize {
 	width: number;
 	height: number;
-}
-
-interface Box {
-	w: number;
-	h: number;
-	x?: number;
-	y?: number;
-	filename: string;
 }
 
 const SOURCES_DIR = './src/lib/assets/atlas/sources';
@@ -94,66 +85,6 @@ async function generateSpriteSheet(groupName: string, files: string[]) {
 }
 
 /**
- * Packed Atlas 생성 (다른 크기 이미지들)
- */
-async function generatePackedAtlas(groupName: string, files: string[]) {
-	// 1. 각 이미지의 크기 확인
-	const boxes: Box[] = files.map((file) => {
-		const size = getImageSize(file);
-		return {
-			w: size.width,
-			h: size.height,
-			filename: file,
-		};
-	});
-
-	// 2. potpack으로 좌표 계산
-	const { w: atlasWidth, h: atlasHeight } = potpack(boxes);
-
-	// 3. ImageMagick으로 이미지 합성
-	const outputPath = join(GENERATED_DIR, `${groupName}.png`);
-
-	// 빈 캔버스 생성
-	execSync(`magick -size ${atlasWidth}x${atlasHeight} xc:none "${outputPath}"`, {
-		stdio: 'inherit',
-	});
-
-	// 각 이미지를 계산된 위치에 합성
-	for (const box of boxes) {
-		execSync(
-			`magick composite -geometry +${box.x}+${box.y} "${box.filename}" "${outputPath}" "${outputPath}"`,
-			{ stdio: 'inherit' }
-		);
-	}
-
-	// 4. 메타데이터 JSON 생성
-	const frames: Record<string, { x: number; y: number; width: number; height: number }> = {};
-	for (const box of boxes) {
-		const filename = box.filename.split('/').pop()!;
-		// 확장명 제거
-		const nameWithoutExt = filename.replace(/\.(png|webp|jpe?g)$/i, '');
-		frames[nameWithoutExt] = {
-			x: box.x!,
-			y: box.y!,
-			width: box.w,
-			height: box.h,
-		};
-	}
-
-	const metadata = {
-		type: 'packed',
-		frames,
-	};
-
-	const metadataPath = join(GENERATED_DIR, `${groupName}.json`);
-	await writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-
-	console.log(
-		`✓ [Packed Atlas] ${groupName}.png + ${groupName}.json (${files.length} images, ${atlasWidth}x${atlasHeight})`
-	);
-}
-
-/**
  * 특정 그룹의 Atlas 생성
  */
 async function generateAtlas(groupName: string) {
@@ -173,20 +104,7 @@ async function generateAtlas(groupName: string) {
 		const sortedFiles = sortByNumber(imageFiles);
 		const filePaths = sortedFiles.map((f) => join(groupPath, f));
 
-		// 타입 파일 확인 (.sprite 또는 .packed)
-		const hasSprite = allFiles.includes('.sprite');
-		const hasPacked = allFiles.includes('.packed');
-
-		if (hasSprite && hasPacked) {
-			console.warn(`⚠ [${groupName}] Both .sprite and .packed found, using .sprite`);
-			await generateSpriteSheet(groupName, filePaths);
-		} else if (hasSprite) {
-			await generateSpriteSheet(groupName, filePaths);
-		} else if (hasPacked) {
-			await generatePackedAtlas(groupName, filePaths);
-		} else {
-			console.warn(`⚠ [${groupName}] No .sprite or .packed file found, skipping`);
-		}
+		await generateSpriteSheet(groupName, filePaths);
 	} catch (error) {
 		console.error(`Failed to generate atlas for ${groupName}:`, error);
 	}
