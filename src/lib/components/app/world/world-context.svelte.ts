@@ -34,6 +34,7 @@ export class WorldContext {
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
 	private resizeObserver: ResizeObserver | undefined;
+	private respawningIds = new Set<string>();
 
 	constructor(debug: boolean) {
 		this.debug = debug;
@@ -146,6 +147,7 @@ export class WorldContext {
 		this.initialized = true;
 
 		// 물리 시뮬레이션 시작
+		Matter.Events.on(this.engine, 'beforeUpdate', () => this.checkBounds());
 		Matter.Events.on(this.engine, 'afterUpdate', () => this.updatePositions());
 		Runner.run(this.runner, this.engine);
 
@@ -264,6 +266,73 @@ export class WorldContext {
 		if (changed) {
 			this.buildingBodies = { ...this.buildingBodies };
 		}
+	}
+
+	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 시작 위치에 다시 추가
+	private checkBounds(): void {
+		const { width, height } = this.terrainBody;
+		if (width === 0 || height === 0) return;
+
+		for (const [id, char] of Object.entries(this.characters)) {
+			const body = this.characterBodies[id];
+			if (body && this.isOutOfBounds(body.body, body.size, width, height)) {
+				this.respawnCharacter(id, char);
+			}
+		}
+
+		for (const [id, building] of Object.entries(this.buildings)) {
+			const body = this.buildingBodies[id];
+			if (body && this.isOutOfBounds(body.body, body.size, width, height)) {
+				this.respawnBuilding(id, building);
+			}
+		}
+	}
+
+	private isOutOfBounds(
+		body: Matter.Body,
+		size: { width: number; height: number },
+		worldWidth: number,
+		worldHeight: number
+	): boolean {
+		const halfWidth = size.width / 2;
+		const halfHeight = size.height / 2;
+		const { x, y } = body.position;
+
+		return x - halfWidth < 0 || x + halfWidth > worldWidth || y - halfHeight < 0 || y + halfHeight > worldHeight;
+	}
+
+	private respawnCharacter(id: string, char: WorldCharacter): void {
+		if (this.respawningIds.has(id)) return;
+		this.respawningIds.add(id);
+
+		// characters에서 제거 (바디도 자동 제거됨)
+		const { [id]: _, ...rest } = this.characters;
+		this.characters = rest;
+
+		// 0.2초 후 시작 위치로 다시 추가
+		setTimeout(() => {
+			const x = this.terrain?.start_x ?? 0;
+			const y = this.terrain?.start_y ?? 0;
+			this.characters = { ...this.characters, [id]: { ...char, x, y } };
+			this.respawningIds.delete(id);
+		}, 200);
+	}
+
+	private respawnBuilding(id: string, building: WorldBuilding): void {
+		if (this.respawningIds.has(id)) return;
+		this.respawningIds.add(id);
+
+		// buildings에서 제거 (바디도 자동 제거됨)
+		const { [id]: _, ...rest } = this.buildings;
+		this.buildings = rest;
+
+		// 0.2초 후 시작 위치로 다시 추가
+		setTimeout(() => {
+			const x = this.terrain?.start_x ?? 0;
+			const y = this.terrain?.start_y ?? 0;
+			this.buildings = { ...this.buildings, [id]: { ...building, x, y } };
+			this.respawningIds.delete(id);
+		}, 200);
 	}
 
 	// 물리 업데이트 후 위치 동기화
