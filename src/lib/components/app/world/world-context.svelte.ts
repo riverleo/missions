@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
+import type { Supabase, Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
 import { WorldEvent } from './world-event.svelte';
@@ -10,6 +10,7 @@ import { BuildingBody } from './building-body.svelte';
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
 
 export class WorldContext {
+	readonly supabase: Supabase;
 	readonly engine: Matter.Engine;
 	readonly runner: Matter.Runner;
 	readonly camera: Camera;
@@ -21,7 +22,7 @@ export class WorldContext {
 	characters = $state<Record<string, WorldCharacter>>({});
 
 	get terrainAssetUrl(): string | undefined {
-		return this.terrain ? getGameAssetUrl('terrain', this.terrain) : undefined;
+		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
 	buildingBodies = $state<Record<string, BuildingBody>>({});
 	characterBodies = $state<Record<string, CharacterBody>>({});
@@ -36,7 +37,8 @@ export class WorldContext {
 	private resizeObserver: ResizeObserver | undefined;
 	private respawningIds = new Set<string>();
 
-	constructor(debug: boolean) {
+	constructor(supabase: Supabase, debug: boolean) {
+		this.supabase = supabase;
 		this.debug = debug;
 		this.engine = Engine.create();
 		this.runner = Runner.create();
@@ -129,7 +131,7 @@ export class WorldContext {
 
 		// 지형 로드 (비동기)
 		if (this.terrain) {
-			this.terrainBody.load(this.terrain).then(() => {
+			this.terrainBody.load(this.supabase, this.terrain).then(() => {
 				if (this.terrainBody.bodies.length > 0) {
 					Composite.add(this.engine.world, this.terrainBody.bodies);
 					this.terrainBody.setDebug(this.debug);
@@ -171,7 +173,7 @@ export class WorldContext {
 		Composite.clear(this.engine.world, false);
 
 		// 지형 로드
-		await this.terrainBody.load(this.terrain);
+		await this.terrainBody.load(this.supabase, this.terrain);
 		if (this.terrainBody.bodies.length > 0) {
 			Composite.add(this.engine.world, this.terrainBody.bodies);
 			this.terrainBody.setDebug(this.debug);

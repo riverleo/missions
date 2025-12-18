@@ -27,6 +27,10 @@ function createBuildingStore() {
 
 	const dialogStore = writable<BuildingDialogState>(undefined);
 
+	const uiStore = writable({
+		showBodyPreview: false,
+	});
+
 	let currentScenarioId: string | undefined;
 
 	async function fetch(scenarioId: string) {
@@ -72,6 +76,12 @@ function createBuildingStore() {
 	}
 
 	const admin = {
+		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
+
+		setShowBodyPreview(value: boolean) {
+			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
+		},
+
 		async create(building: Omit<BuildingInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useBuilding: currentScenarioId is not set.');

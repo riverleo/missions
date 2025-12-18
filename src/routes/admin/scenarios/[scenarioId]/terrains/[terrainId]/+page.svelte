@@ -11,11 +11,16 @@
 	const terrain = $derived(terrainId ? $store.data[terrainId] : undefined);
 </script>
 
-<div class="relative flex h-full items-center justify-center">
+<div class="relative flex h-full flex-col items-center justify-center">
 	{#if terrain}
 		<World {terrain} debug={$uiStore.debug}>
 			<TerrainMarker {terrain} />
 		</World>
+		{#if terrain.game_asset}
+			<div class="px-2 py-1 text-xs text-muted-foreground">
+				지형 크기 - {terrain.width} × {terrain.height}
+			</div>
+		{/if}
 		<TerrainPanel {terrain} />
 	{:else}
 		<p class="text-sm text-muted-foreground">지형을 찾을 수 없습니다</p>

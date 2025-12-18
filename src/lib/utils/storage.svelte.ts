@@ -1,15 +1,17 @@
-import type { Player } from '$lib/types';
-import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+import type { Player, Supabase } from '$lib/types';
 
 /**
  * Player의 avatar를 접근 가능한 public URL로 변환합니다.
+ * @param supabase - Supabase 클라이언트
  * @param player - Player 데이터
  * @returns public URL
  */
-export function getAvatarUrl(player: Pick<Player, 'id' | 'avatar'>): string | undefined {
+export function getAvatarUrl(
+	supabase: Supabase,
+	player: Pick<Player, 'id' | 'avatar'>
+): string | undefined {
 	if (!player.avatar) return;
 
-	const { supabase } = useServerPayload();
 	const path = `${player.id}/${player.avatar}`;
 	const {
 		data: { publicUrl },
@@ -20,12 +22,16 @@ export function getAvatarUrl(player: Pick<Player, 'id' | 'avatar'>): string | un
 
 /**
  * 아바타 이미지를 업로드하고 Player 프로필을 업데이트합니다.
+ * @param supabase - Supabase 클라이언트
  * @param player - Player 데이터
  * @param file - 업로드할 File 또는 Blob 객체
  * @returns 업데이트된 Player 데이터 또는 에러
  */
-export async function uploadAvatar(player: Player, file: File | Blob): Promise<string> {
-	const { supabase } = useServerPayload();
+export async function uploadAvatar(
+	supabase: Supabase,
+	player: Player,
+	file: File | Blob
+): Promise<string> {
 	const filename = `avatar-${Date.now()}.${file.type.split('/')[1]}`;
 	const path = `${player.id}/${filename}`;
 
@@ -53,24 +59,25 @@ export async function uploadAvatar(player: Player, file: File | Blob): Promise<s
 		return '';
 	}
 
-	return getAvatarUrl(updatedPlayer) ?? '';
+	return getAvatarUrl(supabase, updatedPlayer) ?? '';
 }
 
 export type GameAssetType = 'terrain' | 'item';
 
 /**
  * 게임 에셋의 public URL을 반환합니다.
+ * @param supabase - Supabase 클라이언트
  * @param type - 에셋 타입
  * @param assetable - 에셋 대상
  * @returns public URL
  */
 export function getGameAssetUrl(
+	supabase: Supabase,
 	type: GameAssetType,
 	assetable: { id: string; game_asset: string | null }
 ): string | undefined {
 	if (!assetable.game_asset) return;
 
-	const { supabase } = useServerPayload();
 	const path = `${type}/${assetable.id}/${assetable.game_asset}`;
 	const {
 		data: { publicUrl },
@@ -81,17 +88,18 @@ export function getGameAssetUrl(
 
 /**
  * 게임 에셋 파일을 업로드합니다.
+ * @param supabase - Supabase 클라이언트
  * @param type - 에셋 타입
  * @param assetable - 에셋 대상
  * @param file - 업로드할 파일
  * @returns 업로드된 파일명 (실패 시 빈 문자열)
  */
 export async function uploadGameAsset(
+	supabase: Supabase,
 	type: GameAssetType,
 	assetable: { id: string; game_asset: string | null },
 	file: File | Blob
 ): Promise<string> {
-	const { supabase } = useServerPayload();
 	const ext = file.type.split('/')[1] || 'bin';
 	const filename = `${type}-${Date.now()}.${ext}`;
 	const path = `${type}/${assetable.id}/${filename}`;

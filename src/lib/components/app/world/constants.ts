@@ -1,11 +1,3 @@
-// 스프라이트 해상도
-export const CHARACTER_RESOLUTION = 2;
-export const BUILDING_RESOLUTION = 2;
-
-// 기본 크기 (아틀라스 없을 때)
-export const DEFAULT_CHARACTER_SIZE = 32;
-export const DEFAULT_BUILDING_SIZE = 64;
-
 // 물리 엔진 설정
 export const WALL_THICKNESS = 1;
 

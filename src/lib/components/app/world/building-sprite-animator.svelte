@@ -60,7 +60,7 @@
 </script>
 
 <div
-	class="pointer-events-none absolute -translate-x-1/2 -translate-y-full"
+	class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
 	style="left: {left}; top: {top}; rotate: {rotation};"
 >
 	{#if animator}

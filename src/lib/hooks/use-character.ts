@@ -27,6 +27,10 @@ function createCharacterStore() {
 
 	const dialogStore = writable<CharacterDialogState>(undefined);
 
+	const uiStore = writable({
+		showBodyPreview: false,
+	});
+
 	let currentScenarioId: string | undefined;
 
 	async function fetch(scenarioId: string) {
@@ -72,6 +76,12 @@ function createCharacterStore() {
 	}
 
 	const admin = {
+		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
+
+		setShowBodyPreview(value: boolean) {
+			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
+		},
+
 		async create(character: Omit<CharacterInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useCharacter: currentScenarioId is not set.');

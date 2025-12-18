@@ -17,6 +17,7 @@
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
 	import { IconTrash } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { DEBUG_BUILDING_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -27,6 +28,7 @@
 	let { buildingId, type }: Props = $props();
 
 	const { store, admin } = useBuilding();
+	const { uiStore } = admin;
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
 	const loopOptions: { value: LoopMode; label: string }[] = [
@@ -100,6 +102,17 @@
 		} else {
 			await admin.createBuildingState(buildingId, { type, atlas_name: atlasName });
 		}
+
+		// 건물의 width/height가 0이면 atlas frame 크기로 설정
+		if (building && building.width === 0 && building.height === 0) {
+			const metadata = atlases[atlasName];
+			if (metadata) {
+				await admin.update(buildingId, {
+					width: metadata.frameWidth / 2,
+					height: metadata.frameHeight / 2,
+				});
+			}
+		}
 	}
 
 	async function onFrameFromChange(value: string) {
@@ -151,8 +164,19 @@
 	<ItemContent class="w-full">
 		<AspectRatio ratio={4 / 3}>
 			{#if animator}
-				<div class="flex h-full w-full items-center justify-center overflow-hidden">
+				<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
 					<SpriteAnimatorRenderer {animator} resolution={2} />
+					{#if $uiStore.showBodyPreview && building && (building.width > 0 || building.height > 0)}
+						<svg class="pointer-events-none absolute inset-0 h-full w-full">
+							<ellipse
+								cx="50%"
+								cy="50%"
+								rx={building.width / 2}
+								ry={building.height / 2}
+								fill={DEBUG_BUILDING_FILL_STYLE}
+							/>
+						</svg>
+					{/if}
 				</div>
 			{:else}
 				<Skeleton class="h-full w-full" />

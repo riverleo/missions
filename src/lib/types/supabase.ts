@@ -79,23 +79,29 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          height: number
           id: string
           name: string
           scenario_id: string
+          width: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           name?: string
           scenario_id: string
+          width?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           name?: string
           scenario_id?: string
+          width?: number
         }
         Relationships: [
           {
@@ -214,23 +220,29 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          height: number
           id: string
           name: string
           scenario_id: string
+          width: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           name?: string
           scenario_id: string
+          width?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           name?: string
           scenario_id?: string
+          width?: number
         }
         Relationships: [
           {
@@ -1072,33 +1084,39 @@ export type Database = {
           created_by: string | null
           display_order: number
           game_asset: string | null
+          height: number
           id: string
           scenario_id: string
           start_x: number | null
           start_y: number | null
           title: string
+          width: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           display_order?: number
           game_asset?: string | null
+          height?: number
           id?: string
           scenario_id: string
           start_x?: number | null
           start_y?: number | null
           title?: string
+          width?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
           display_order?: number
           game_asset?: string | null
+          height?: number
           id?: string
           scenario_id?: string
           start_x?: number | null
           start_y?: number | null
           title?: string
+          width?: number
         }
         Relationships: [
           {

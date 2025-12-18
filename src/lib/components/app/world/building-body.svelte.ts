@@ -1,16 +1,31 @@
 import Matter from 'matter-js';
 import type { WorldBuilding } from '$lib/types';
-import { atlases } from '$lib/components/app/sprite-animator';
 import {
-	BUILDING_RESOLUTION,
-	DEFAULT_BUILDING_SIZE,
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
 	CATEGORY_BUILDING,
 	DEBUG_BUILDING_FILL_STYLE,
 } from './constants';
 
-const { Bodies, Composite } = Matter;
+const { Bodies, Body, Composite } = Matter;
+
+function createEllipseVertices(
+	cx: number,
+	cy: number,
+	rx: number,
+	ry: number,
+	segments: number = 24
+): Matter.Vector[] {
+	const vertices: Matter.Vector[] = [];
+	for (let i = 0; i < segments; i++) {
+		const angle = (i / segments) * Math.PI * 2;
+		vertices.push({
+			x: cx + rx * Math.cos(angle),
+			y: cy + ry * Math.sin(angle),
+		});
+	}
+	return vertices;
+}
 
 export interface BodyPosition {
 	x: number;
@@ -27,13 +42,17 @@ export class BuildingBody {
 
 	constructor(worldBuilding: WorldBuilding, debug: boolean) {
 		this.id = worldBuilding.id;
-		this.size = this.getBodySize(worldBuilding);
+		this.size = {
+			width: worldBuilding.building.width,
+			height: worldBuilding.building.height,
+		};
 
-		// 월드 좌표 사용 (y는 바닥 위치 기준이므로 바디 중심은 높이의 절반만큼 위로)
-		const bodyX = worldBuilding.x;
-		const bodyY = worldBuilding.y - this.size.height / 2;
+		// 타원형 바디 생성
+		const rx = this.size.width / 2;
+		const ry = this.size.height / 2;
+		const vertices = createEllipseVertices(0, 0, rx, ry);
 
-		this.body = Bodies.rectangle(bodyX, bodyY, this.size.width, this.size.height, {
+		this.body = Bodies.fromVertices(0, 0, [vertices], {
 			label: `building-${worldBuilding.id}`,
 			restitution: 0.1,
 			friction: 0.8,
@@ -45,33 +64,18 @@ export class BuildingBody {
 			render: debug ? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE } : { visible: false },
 		});
 
+		// 바디 위치 설정 (스프라이트 중심과 동일)
+		Body.setPosition(this.body, { x: worldBuilding.x, y: worldBuilding.y });
+
 		// 초기 위치 설정
 		this.position = { x: worldBuilding.x, y: worldBuilding.y, angle: 0 };
 	}
 
-	private getBodySize(worldBuilding: WorldBuilding): { width: number; height: number } {
-		const idleState = worldBuilding.building.building_states.find((s) => s.type === 'idle');
-		if (!idleState?.atlas_name) {
-			return { width: DEFAULT_BUILDING_SIZE, height: DEFAULT_BUILDING_SIZE };
-		}
-
-		const metadata = atlases[idleState.atlas_name];
-		if (!metadata) {
-			return { width: DEFAULT_BUILDING_SIZE, height: DEFAULT_BUILDING_SIZE };
-		}
-
-		return {
-			width: metadata.frameWidth / BUILDING_RESOLUTION,
-			height: metadata.frameHeight / BUILDING_RESOLUTION,
-		};
-	}
-
 	updatePosition(): void {
-		const halfHeight = this.size.height / 2;
-		// 바디 중심에서 바닥 위치(하단)로 변환 (월드 좌표)
+		// 바디 중심 위치를 그대로 사용
 		this.position = {
 			x: this.body.position.x,
-			y: this.body.position.y + halfHeight,
+			y: this.body.position.y,
 			angle: this.body.angle,
 		};
 	}

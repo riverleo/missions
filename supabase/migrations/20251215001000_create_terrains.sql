@@ -4,6 +4,8 @@ create table terrains (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   title text not null default '',
   game_asset text,
+  width real not null default 0,
+  height real not null default 0,
   start_x real,
   start_y real,
   display_order integer not null default 0,

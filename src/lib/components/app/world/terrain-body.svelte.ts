@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { Terrain } from '$lib/types';
+import type { Supabase, Terrain } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import {
 	WALL_THICKNESS,
@@ -124,11 +124,22 @@ export class TerrainBody {
 		return [ground, leftWall, rightWall, ceiling];
 	}
 
-	async load(terrain: Terrain): Promise<void> {
-		if (!terrain.game_asset) return;
+	async load(supabase: Supabase, terrain: Terrain): Promise<void> {
+		// 정적 크기 사용
+		this.width = terrain.width;
+		this.height = terrain.height;
 
-		const url = getGameAssetUrl('terrain', terrain);
-		if (!url) return;
+		if (!terrain.game_asset) {
+			// game_asset이 없어도 경계 벽은 생성
+			this.bodies = this.createBoundaryWalls();
+			return;
+		}
+
+		const url = getGameAssetUrl(supabase, 'terrain', terrain);
+		if (!url) {
+			this.bodies = this.createBoundaryWalls();
+			return;
+		}
 
 		try {
 			const response = await fetch(url);
@@ -136,19 +147,6 @@ export class TerrainBody {
 
 			const parser = new DOMParser();
 			const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-
-			// SVG viewBox에서 월드 크기 추출
-			const svgElement = svgDoc.querySelector('svg');
-			if (svgElement) {
-				const viewBox = svgElement.getAttribute('viewBox');
-				if (viewBox) {
-					const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(Number);
-					if (vbWidth && vbHeight) {
-						this.width = vbWidth;
-						this.height = vbHeight;
-					}
-				}
-			}
 
 			const paths = svgDoc.querySelectorAll('path');
 			const bodies: Matter.Body[] = [];

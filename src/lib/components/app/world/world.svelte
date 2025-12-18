@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 	import { setWorldContext } from '$lib/hooks/use-world.svelte';
+	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { WorldContext } from './world-context.svelte';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
@@ -28,7 +29,8 @@
 		oncamerachange,
 	}: Props = $props();
 
-	const worldContext = new WorldContext(debug);
+	const { supabase } = useServerPayload();
+	const worldContext = new WorldContext(supabase, debug);
 
 	// oncamerachange prop 변경 시 worldContext 업데이트
 	$effect(() => {

@@ -17,6 +17,7 @@
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
 	import { IconTrash } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -27,6 +28,7 @@
 	let { characterId, type }: Props = $props();
 
 	const { store, admin } = useCharacter();
+	const { uiStore } = admin;
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
 	const loopOptions: { value: LoopMode; label: string }[] = [
@@ -100,6 +102,17 @@
 		} else {
 			await admin.createCharacterState(characterId, { type, atlas_name: atlasName });
 		}
+
+		// 캐릭터의 width/height가 0이면 atlas frame 크기로 설정
+		if (character && character.width === 0 && character.height === 0) {
+			const metadata = atlases[atlasName];
+			if (metadata) {
+				await admin.update(characterId, {
+					width: metadata.frameWidth / 2,
+					height: metadata.frameHeight / 2,
+				});
+			}
+		}
 	}
 
 	async function onFrameFromChange(value: string) {
@@ -151,8 +164,19 @@
 	<ItemContent class="w-full">
 		<AspectRatio ratio={4 / 3}>
 			{#if animator}
-				<div class="flex h-full w-full items-center justify-center overflow-hidden">
+				<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
 					<SpriteAnimatorRenderer {animator} resolution={2} />
+					{#if $uiStore.showBodyPreview && character && (character.width > 0 || character.height > 0)}
+						<svg class="pointer-events-none absolute inset-0 h-full w-full">
+							<ellipse
+								cx="50%"
+								cy="50%"
+								rx={character.width / 2}
+								ry={character.height / 2}
+								fill={DEBUG_CHARACTER_FILL_STYLE}
+							/>
+						</svg>
+					{/if}
 				</div>
 			{:else}
 				<Skeleton class="h-full w-full" />
@@ -183,7 +207,13 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
+						<Button
+							variant="outline"
+							size="sm"
+							class="w-full"
+							disabled={!characterState}
+							{...props}
+						>
 							{characterState?.frame_from ?? '시작'}
 						</Button>
 					{/snippet}
@@ -202,7 +232,13 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
+						<Button
+							variant="outline"
+							size="sm"
+							class="w-full"
+							disabled={!characterState}
+							{...props}
+						>
 							{characterState?.frame_to ?? '종료'}
 						</Button>
 					{/snippet}
@@ -221,8 +257,14 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
-							{characterState?.fps ? `${characterState.fps} 프레임` : '프레임'}
+						<Button
+							variant="outline"
+							size="sm"
+							class="w-full"
+							disabled={!characterState}
+							{...props}
+						>
+							{characterState?.fps ? `${characterState.fps} fps` : '프레임'}
 						</Button>
 					{/snippet}
 				</DropdownMenuTrigger>
@@ -232,7 +274,7 @@
 						onValueChange={onFpsChange}
 					>
 						{#each fpsOptions as fps (fps)}
-							<DropdownMenuRadioItem value={fps.toString()}>{fps} 프레임</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value={fps.toString()}>{fps} fps</DropdownMenuRadioItem>
 						{/each}
 					</DropdownMenuRadioGroup>
 				</DropdownMenuContent>
@@ -240,7 +282,13 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-full" disabled={!characterState} {...props}>
+						<Button
+							variant="outline"
+							size="sm"
+							class="w-full"
+							disabled={!characterState}
+							{...props}
+						>
 							{loopOptions.find((o) => o.value === characterState?.loop)?.label ?? '반복'}
 						</Button>
 					{/snippet}

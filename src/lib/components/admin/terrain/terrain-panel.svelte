@@ -20,6 +20,7 @@
 		IconMapPinOff,
 	} from '@tabler/icons-svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
+	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { uploadGameAsset } from '$lib/utils/storage.svelte';
 
 	interface Props {
@@ -28,6 +29,7 @@
 
 	let { terrain }: Props = $props();
 
+	const { supabase } = useServerPayload();
 	const { admin } = useTerrain();
 	const uiStore = admin.uiStore;
 
@@ -62,6 +64,23 @@
 		fileInput.click();
 	}
 
+	function parseSvgSize(svgText: string): { width: number; height: number } | undefined {
+		const parser = new DOMParser();
+		const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+		const svgElement = svgDoc.querySelector('svg');
+		if (!svgElement) return undefined;
+
+		const viewBox = svgElement.getAttribute('viewBox');
+		if (viewBox) {
+			const [, , vbWidth, vbHeight] = viewBox.split(/\s+/).map(Number);
+			if (vbWidth && vbHeight) {
+				return { width: vbWidth, height: vbHeight };
+			}
+		}
+
+		return undefined;
+	}
+
 	async function onfilechange(e: Event) {
 		const input = e.target as HTMLInputElement;
 		const file = input.files?.[0];
@@ -70,10 +89,20 @@
 		isUploading = true;
 
 		try {
-			const filename = await uploadGameAsset('terrain', terrain, file);
-			if (filename) {
-				await admin.update(terrain.id, { game_asset: filename });
+			// SVG 파일에서 크기 추출
+			const svgText = await file.text();
+			const size = parseSvgSize(svgText);
+
+			// 파일 업로드
+			const filename = await uploadGameAsset(supabase, 'terrain', terrain, file);
+			if (!filename) {
+				throw new Error('Failed to upload file');
 			}
+
+			await admin.update(terrain.id, {
+				game_asset: filename,
+				...(size && { width: size.width, height: size.height }),
+			});
 		} catch (error) {
 			console.error('Failed to upload terrain file:', error);
 		} finally {
