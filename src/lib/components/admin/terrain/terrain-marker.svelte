@@ -23,16 +23,17 @@
 	const currentX = $derived(isDragging && dragX != null ? dragX : terrain.start_x);
 	const currentY = $derived(isDragging && dragY != null ? dragY : terrain.start_y);
 
-	// viewBox 좌표를 퍼센트로 변환
+	// 월드 좌표를 화면 좌표로 변환 (카메라 변환 적용)
 	const left = $derived(
-		currentX != null ? `${(currentX / world.terrainBody.width) * 100}%` : undefined
+		currentX != null ? `${(currentX - world.camera.x) * world.camera.zoom}px` : undefined
 	);
 	const top = $derived(
-		currentY != null ? `${(currentY / world.terrainBody.height) * 100}%` : undefined
+		currentY != null ? `${(currentY - world.camera.y) * world.camera.zoom}px` : undefined
 	);
 
 	function onmousedown(e: MouseEvent) {
 		e.preventDefault();
+		e.stopPropagation();
 		isDragging = true;
 		dragX = terrain.start_x ?? 0;
 		dragY = terrain.start_y ?? 0;
