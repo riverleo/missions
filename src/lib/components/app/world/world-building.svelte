@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WorldBuilding } from '$lib/types';
-	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 
@@ -9,18 +8,11 @@
 		x: number;
 		y: number;
 		angle?: number;
-		worldWidth?: number;
-		worldHeight?: number;
+		worldWidth: number;
+		worldHeight: number;
 	}
 
-	let {
-		worldBuilding,
-		x,
-		y,
-		angle = 0,
-		worldWidth = VIEW_BOX_WIDTH,
-		worldHeight = VIEW_BOX_HEIGHT,
-	}: Props = $props();
+	let { worldBuilding, x, y, angle = 0, worldWidth, worldHeight }: Props = $props();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 

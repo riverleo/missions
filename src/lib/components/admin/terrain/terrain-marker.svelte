@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Terrain } from '$lib/types';
-	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from '$lib/components/app/world/constants';
+	import { useWorld } from '$lib/hooks/use-world.svelte';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { useTerrain } from '$lib/hooks/use-terrain';
@@ -13,6 +13,7 @@
 
 	const { admin } = useTerrain();
 	const uiStore = admin.uiStore;
+	const world = useWorld();
 
 	let isDragging = $state(false);
 	let dragX = $state<number | undefined>(undefined);
@@ -23,8 +24,8 @@
 	const currentY = $derived(isDragging && dragY != null ? dragY : terrain.start_y);
 
 	// viewBox 좌표를 퍼센트로 변환
-	const left = $derived(currentX != null ? `${(currentX / VIEW_BOX_WIDTH) * 100}%` : undefined);
-	const top = $derived(currentY != null ? `${(currentY / VIEW_BOX_HEIGHT) * 100}%` : undefined);
+	const left = $derived(currentX != null ? `${(currentX / world.width) * 100}%` : undefined);
+	const top = $derived(currentY != null ? `${(currentY / world.height) * 100}%` : undefined);
 
 	function onmousedown(e: MouseEvent) {
 		e.preventDefault();
@@ -43,12 +44,12 @@
 		if (!container) return;
 
 		const rect = container.getBoundingClientRect();
-		dragX = ((e.clientX - rect.left) / rect.width) * VIEW_BOX_WIDTH;
-		dragY = ((e.clientY - rect.top) / rect.height) * VIEW_BOX_HEIGHT;
+		dragX = ((e.clientX - rect.left) / rect.width) * world.width;
+		dragY = ((e.clientY - rect.top) / rect.height) * world.height;
 
 		// 범위 제한
-		dragX = Math.max(0, Math.min(VIEW_BOX_WIDTH, dragX));
-		dragY = Math.max(0, Math.min(VIEW_BOX_HEIGHT, dragY));
+		dragX = Math.max(0, Math.min(world.width, dragX));
+		dragY = Math.max(0, Math.min(world.height, dragY));
 	}
 
 	async function onmouseup() {
@@ -67,8 +68,8 @@
 	async function onclickOverlay(e: MouseEvent) {
 		const target = e.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
-		const x = ((e.clientX - rect.left) / rect.width) * VIEW_BOX_WIDTH;
-		const y = ((e.clientY - rect.top) / rect.height) * VIEW_BOX_HEIGHT;
+		const x = ((e.clientX - rect.left) / rect.width) * world.width;
+		const y = ((e.clientY - rect.top) / rect.height) * world.height;
 
 		await admin.update(terrain.id, { start_x: x, start_y: y });
 		admin.setSettingStartMarker(false);

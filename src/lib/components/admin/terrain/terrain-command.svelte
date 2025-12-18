@@ -17,12 +17,9 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-	import { getGameAssetUrl } from '$lib/utils/storage';
+	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { page } from '$app/state';
 	import { sort } from 'radash';
-
-	const { supabase } = useServerPayload();
 
 	const { store, openDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId);
@@ -38,7 +35,7 @@
 			<CommandEmpty />
 			<CommandGroup>
 				{#each terrains as terrain (terrain.id)}
-					{@const assetUrl = getGameAssetUrl(supabase, 'terrain', terrain)}
+					{@const assetUrl = getGameAssetUrl('terrain', terrain)}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`}
 						class="group pr-1"

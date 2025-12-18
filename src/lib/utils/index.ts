@@ -11,5 +11,5 @@ export type WithoutChildrenOrChild<T> = WithoutChild<T> & WithoutChildren<T>;
 
 // Re-export utilities
 export { default as cn } from './cn';
-export { getAvatarUrl, uploadAvatar } from './storage';
+export { getAvatarUrl, uploadAvatar } from './storage.svelte';
 export { TreeMap, TreeNode, toTreeMap } from './tree';

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
 	import type { ServerPayload } from '$lib/types';
 	import type { Snippet } from 'svelte';
+	import { setServerPayloadContext } from '$lib/hooks/use-server-payload.svelte';
 
 	const { data, children }: { data: ServerPayload; children: Snippet } = $props();
 
-	setContext('serverPayload', data);
+	setServerPayloadContext(data);
 </script>
 
 {@render children()}

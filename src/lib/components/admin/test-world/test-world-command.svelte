@@ -13,11 +13,8 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-	import { getGameAssetUrl } from '$lib/utils/storage';
+	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
-
-	const { supabase } = useServerPayload();
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
@@ -35,7 +32,7 @@
 		{#if terrains.length > 0}
 			<CommandGroup heading="지형">
 				{#each terrains as terrain (terrain.id)}
-					{@const assetUrl = getGameAssetUrl(supabase, 'terrain', terrain)}
+					{@const assetUrl = getGameAssetUrl('terrain', terrain)}
 					<CommandItem onSelect={() => selectTerrain(terrain)}>
 						<IconCheck
 							class={cn(

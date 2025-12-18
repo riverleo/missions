@@ -3,10 +3,23 @@
 	import 'pathseg';
 	import Matter from 'matter-js';
 	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
-	import { getGameAssetUrl } from '$lib/utils/storage';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
+	import { setWorldContext } from '$lib/hooks/use-world.svelte';
 
-	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
+	import {
+		CHARACTER_RESOLUTION,
+		BUILDING_RESOLUTION,
+		DEFAULT_CHARACTER_SIZE,
+		DEFAULT_BUILDING_SIZE,
+		WALL_THICKNESS,
+		CATEGORY_WALL,
+		CATEGORY_TERRAIN,
+		CATEGORY_CHARACTER,
+		CATEGORY_BUILDING,
+		DEBUG_BODY_STYLE,
+		HIDDEN_BODY_STYLE,
+	} from './constants';
+	import { Camera } from './camera.svelte';
 	import WorldCharacterSprite from './world-character.svelte';
 	import WorldBuildingSprite from './world-building.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
@@ -20,7 +33,7 @@
 		buildings?: WorldBuilding[];
 		debug?: boolean;
 		children?: Snippet;
-		oncamerachange?: (camera: { x: number; y: number; zoom: number }) => void;
+		oncamerachange?: (camera: Camera) => void;
 	}
 
 	let {
@@ -32,27 +45,28 @@
 		oncamerachange,
 	}: Props = $props();
 
-	// 월드 크기 (terrain SVG에서 자동 설정)
-	let worldWidth = $state(VIEW_BOX_WIDTH);
-	let worldHeight = $state(VIEW_BOX_HEIGHT);
+	// 월드 크기 (terrain SVG에서 설정)
+	let worldWidth = $state(0);
+	let worldHeight = $state(0);
 
-	const { supabase } = useServerPayload();
+	// Context로 월드 크기 공유 (getter로 반응성 유지)
+	setWorldContext({
+		get width() {
+			return worldWidth;
+		},
+		get height() {
+			return worldHeight;
+		},
+	});
 
 	let container: HTMLDivElement;
 	let engine: Matter.Engine;
 	let render: Matter.Render;
 	let runner: Matter.Runner;
 	let mouseConstraint: Matter.MouseConstraint;
-	let canvasWidth = $state(VIEW_BOX_WIDTH);
-	let canvasHeight = $state(VIEW_BOX_HEIGHT);
 
-	// 카메라 상태
-	let cameraX = $state(0);
-	let cameraY = $state(0);
-	let cameraZoom = $state(1);
-	const MIN_ZOOM = 0.25;
-	const MAX_ZOOM = 2;
-	const ZOOM_SPEED = 0.1;
+	// 카메라
+	const camera = new Camera();
 
 	// 캐릭터 바디 관리 (Matter.js 객체는 $state.raw로 Proxy 방지)
 	let characterBodies = $state.raw<Record<string, Matter.Body>>({});
@@ -66,51 +80,9 @@
 
 	let mounted = false;
 
-	const CHARACTER_RESOLUTION = 2; // 캐릭터 스프라이트 해상도
-	const BUILDING_RESOLUTION = 2; // 건물 스프라이트 해상도
-	const DEFAULT_CHARACTER_SIZE = 32; // 아틀라스 없을 때 기본 크기
-	const DEFAULT_BUILDING_SIZE = 64; // 건물 기본 크기
-	const WALL_THICKNESS = 1;
+	const wallStyle = $derived(debug ? DEBUG_BODY_STYLE : HIDDEN_BODY_STYLE);
 
-	// 충돌 카테고리 (비트마스크)
-	const CATEGORY_WALL = 0x0001;
-	const CATEGORY_TERRAIN = 0x0002;
-	const CATEGORY_CHARACTER = 0x0004;
-	const CATEGORY_BUILDING = 0x0008;
-
-	// 디버그 모드일 때만 보이는 스타일
-	const debugBodyStyle = {
-		fillStyle: 'rgba(255, 0, 0, 0.5)',
-	};
-
-	const hiddenBodyStyle = {
-		visible: false,
-	};
-
-	const wallStyle = $derived(debug ? debugBodyStyle : hiddenBodyStyle);
-
-	const svgUrl = $derived(terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined);
-
-	// SVG viewBox 좌표를 월드 좌표로 변환 (지형 SVG용)
-	function svgToWorldX(x: number): number {
-		return (x / VIEW_BOX_WIDTH) * worldWidth;
-	}
-
-	function svgToWorldY(y: number): number {
-		return (y / VIEW_BOX_HEIGHT) * worldHeight;
-	}
-
-	// 화면 좌표를 월드 좌표로 변환 (픽셀 기반)
-	function screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
-		const rect = container.getBoundingClientRect();
-		const containerX = screenX - rect.left;
-		const containerY = screenY - rect.top;
-		// CSS transform: scale(z) translate(-cx, -cy) 의 역변환
-		return {
-			x: containerX / cameraZoom + cameraX,
-			y: containerY / cameraZoom + cameraY,
-		};
-	}
+	const svgUrl = $derived(terrain ? getGameAssetUrl('terrain', terrain) : undefined);
 
 	function getPathStyle(path: SVGPathElement) {
 		const style = path.getAttribute('style') || '';
@@ -132,7 +104,7 @@
 	}
 
 	function getBodyRenderStyle(): Matter.IBodyRenderOptions {
-		return debug ? debugBodyStyle : hiddenBodyStyle;
+		return debug ? DEBUG_BODY_STYLE : HIDDEN_BODY_STYLE;
 	}
 
 	function createLineBody(
@@ -142,16 +114,11 @@
 		y2: number,
 		width: number
 	): Matter.Body {
-		// SVG 좌표를 월드 좌표로 변환
-		const wx1 = svgToWorldX(x1);
-		const wy1 = svgToWorldY(y1);
-		const wx2 = svgToWorldX(x2);
-		const wy2 = svgToWorldY(y2);
-
-		const cx = (wx1 + wx2) / 2;
-		const cy = (wy1 + wy2) / 2;
-		const dx = wx2 - wx1;
-		const dy = wy2 - wy1;
+		// SVG 좌표 = 월드 좌표
+		const cx = (x1 + x2) / 2;
+		const cy = (y1 + y2) / 2;
+		const dx = x2 - x1;
+		const dy = y2 - y1;
 		const length = Math.sqrt(dx * dx + dy * dy);
 		const angle = Math.atan2(dy, dx);
 
@@ -169,14 +136,9 @@
 	function createFilledBody(vertices: Matter.Vector[]): Matter.Body | undefined {
 		if (vertices.length < 3) return;
 
-		// SVG 좌표를 월드 좌표로 변환
-		const worldVertices = vertices.map((v) => ({
-			x: svgToWorldX(v.x),
-			y: svgToWorldY(v.y),
-		}));
-
-		const center = Vertices.centre(worldVertices);
-		const body = Bodies.fromVertices(center.x, center.y, [worldVertices], {
+		// SVG 좌표 = 월드 좌표
+		const center = Vertices.centre(vertices);
+		const body = Bodies.fromVertices(center.x, center.y, [vertices], {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_TERRAIN,
@@ -189,7 +151,7 @@
 	}
 
 	async function loadTerrainSvg(terrain: Terrain): Promise<Matter.Body[]> {
-		const url = getGameAssetUrl(supabase, 'terrain', terrain);
+		const url = getGameAssetUrl('terrain', terrain);
 		if (!url) return [];
 
 		try {
@@ -411,26 +373,13 @@
 	// 카메라 줌 핸들러
 	function handleWheel(e: WheelEvent) {
 		e.preventDefault();
-		const delta = e.deltaY > 0 ? -ZOOM_SPEED : ZOOM_SPEED;
-		const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, cameraZoom + delta));
-
-		// 마우스 위치를 중심으로 줌
-		const worldPos = screenToWorld(e.clientX, e.clientY);
-		const zoomRatio = newZoom / cameraZoom;
-
-		cameraX = worldPos.x - (worldPos.x - cameraX) / zoomRatio;
-		cameraY = worldPos.y - (worldPos.y - cameraY) / zoomRatio;
-		cameraZoom = newZoom;
-
+		const rect = container.getBoundingClientRect();
+		camera.applyZoom(e.deltaY, rect, e.clientX, e.clientY);
 		updateRenderBounds();
 	}
 
 	// 카메라 팬 상태
 	let isPanning = $state(false);
-	let panStartX = 0;
-	let panStartY = 0;
-	let panStartCameraX = 0;
-	let panStartCameraY = 0;
 
 	// 호버 상태
 	let isOverDraggable = $state(false);
@@ -439,7 +388,8 @@
 	function checkDraggableAtPosition(screenX: number, screenY: number): boolean {
 		if (!engine || !container) return false;
 
-		const worldPos = screenToWorld(screenX, screenY);
+		const rect = container.getBoundingClientRect();
+		const worldPos = camera.screenToWorld(screenX, screenY, rect);
 		const bodies = Matter.Query.point(Composite.allBodies(engine.world), worldPos);
 		return bodies.some((b) => !b.isStatic);
 	}
@@ -452,10 +402,7 @@
 
 			e.preventDefault();
 			isPanning = true;
-			panStartX = e.clientX;
-			panStartY = e.clientY;
-			panStartCameraX = cameraX;
-			panStartCameraY = cameraY;
+			camera.startPan(e.clientX, e.clientY);
 		}
 	}
 
@@ -470,13 +417,7 @@
 
 		if (!isPanning) return;
 
-		const dx = e.clientX - panStartX;
-		const dy = e.clientY - panStartY;
-
-		// 화면 이동량을 월드 좌표로 변환 (픽셀 기반)
-		cameraX = panStartCameraX - dx / cameraZoom;
-		cameraY = panStartCameraY - dy / cameraZoom;
-
+		camera.updatePan(e.clientX, e.clientY);
 		updateRenderBounds();
 	}
 
@@ -488,15 +429,15 @@
 	function updateRenderBounds() {
 		if (!render) return;
 
-		const viewWidth = worldWidth / cameraZoom;
-		const viewHeight = worldHeight / cameraZoom;
+		const viewWidth = worldWidth / camera.zoom;
+		const viewHeight = worldHeight / camera.zoom;
 
-		render.bounds.min.x = cameraX;
-		render.bounds.min.y = cameraY;
-		render.bounds.max.x = cameraX + viewWidth;
-		render.bounds.max.y = cameraY + viewHeight;
+		render.bounds.min.x = camera.x;
+		render.bounds.min.y = camera.y;
+		render.bounds.max.x = camera.x + viewWidth;
+		render.bounds.max.y = camera.y + viewHeight;
 
-		oncamerachange?.({ x: cameraX, y: cameraY, zoom: cameraZoom });
+		oncamerachange?.(camera);
 	}
 
 	onMount(() => {
@@ -506,9 +447,6 @@
 
 			const { width, height } = entry.contentRect;
 			if (width === 0 || height === 0) return;
-
-			canvasWidth = width;
-			canvasHeight = height;
 
 			if (render) {
 				render.canvas.width = width;
@@ -527,8 +465,8 @@
 			element: container,
 			engine: engine,
 			options: {
-				width: canvasWidth,
-				height: canvasHeight,
+				width: container.clientWidth,
+				height: container.clientHeight,
 				wireframes: false,
 				background: 'transparent',
 				hasBounds: true,
@@ -692,12 +630,6 @@
 					}
 					rebuildWorld();
 				});
-			} else {
-				// terrain이 없으면 기본 크기로 벽 생성
-				worldWidth = VIEW_BOX_WIDTH;
-				worldHeight = VIEW_BOX_HEIGHT;
-				Composite.add(engine.world, createWalls());
-				rebuildWorld();
 			}
 		}
 	});
@@ -793,7 +725,7 @@
 		style="
 			width: {worldWidth}px;
 			height: {worldHeight}px;
-			transform: scale({cameraZoom}) translate({-cameraX}px, {-cameraY}px);
+			transform: scale({camera.zoom}) translate({-camera.x}px, {-camera.y}px);
 		"
 	>
 		{#if svgUrl}

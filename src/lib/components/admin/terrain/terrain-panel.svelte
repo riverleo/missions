@@ -19,9 +19,8 @@
 		IconMapPin,
 		IconMapPinOff,
 	} from '@tabler/icons-svelte';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { uploadGameAsset } from '$lib/utils/storage';
+	import { uploadGameAsset } from '$lib/utils/storage.svelte';
 
 	interface Props {
 		terrain: Terrain;
@@ -29,7 +28,6 @@
 
 	let { terrain }: Props = $props();
 
-	const { supabase } = useServerPayload();
 	const { admin } = useTerrain();
 	const uiStore = admin.uiStore;
 
@@ -72,7 +70,7 @@
 		isUploading = true;
 
 		try {
-			const filename = await uploadGameAsset(supabase, 'terrain', terrain, file);
+			const filename = await uploadGameAsset('terrain', terrain, file);
 			if (filename) {
 				await admin.update(terrain.id, { game_asset: filename });
 			}
