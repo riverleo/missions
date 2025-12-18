@@ -4,28 +4,12 @@ import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
 	CATEGORY_BUILDING,
+	CATEGORY_CHARACTER,
 	DEBUG_BUILDING_FILL_STYLE,
+	TILE_SIZE,
 } from './constants';
 
-const { Bodies, Body, Composite } = Matter;
-
-function createEllipseVertices(
-	cx: number,
-	cy: number,
-	rx: number,
-	ry: number,
-	segments: number = 24
-): Matter.Vector[] {
-	const vertices: Matter.Vector[] = [];
-	for (let i = 0; i < segments; i++) {
-		const angle = (i / segments) * Math.PI * 2;
-		vertices.push({
-			x: cx + rx * Math.cos(angle),
-			y: cy + ry * Math.sin(angle),
-		});
-	}
-	return vertices;
-}
+const { Bodies, Composite } = Matter;
 
 export interface BodyPosition {
 	x: number;
@@ -42,37 +26,34 @@ export class BuildingBody {
 
 	constructor(worldBuilding: WorldBuilding, debug: boolean) {
 		this.id = worldBuilding.id;
-		this.size = {
-			width: worldBuilding.building.width,
-			height: worldBuilding.building.height,
-		};
 
-		// 타원형 바디 생성
-		const rx = this.size.width / 2;
-		const ry = this.size.height / 2;
-		const vertices = createEllipseVertices(0, 0, rx, ry);
+		// 타일 기반 크기 계산
+		const width = worldBuilding.building.tile_cols * TILE_SIZE;
+		const height = worldBuilding.building.tile_rows * TILE_SIZE;
+		this.size = { width, height };
 
-		this.body = Bodies.fromVertices(0, 0, [vertices], {
+		// 타일 좌표를 픽셀 좌표로 변환 (중앙 기준)
+		const x = worldBuilding.tile_x * TILE_SIZE + TILE_SIZE / 2;
+		const y = worldBuilding.tile_y * TILE_SIZE + TILE_SIZE / 2;
+
+		// 사각형 static 바디 생성
+		this.body = Bodies.rectangle(x, y, width, height, {
 			label: `building-${worldBuilding.id}`,
-			restitution: 0.1,
-			friction: 0.8,
-			inertia: Infinity, // 회전 방지
+			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_BUILDING,
+				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
 			render: debug ? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE } : { visible: false },
 		});
 
-		// 바디 위치 설정 (스프라이트 중심과 동일)
-		Body.setPosition(this.body, { x: worldBuilding.x, y: worldBuilding.y });
-
 		// 초기 위치 설정
-		this.position = { x: worldBuilding.x, y: worldBuilding.y, angle: 0 };
+		this.position = { x, y, angle: 0 };
 	}
 
 	updatePosition(): void {
-		// 바디 중심 위치를 그대로 사용
+		// static body이므로 위치 업데이트 불필요
+		// 하지만 인터페이스 일관성을 위해 유지
 		this.position = {
 			x: this.body.position.x,
 			y: this.body.position.y,

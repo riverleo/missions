@@ -3,8 +3,8 @@ create table buildings (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   name text not null default '',
-  width real not null default 0,
-  height real not null default 0,
+  tile_cols integer not null default 1,
+  tile_rows integer not null default 1,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 

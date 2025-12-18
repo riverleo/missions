@@ -79,14 +79,18 @@ function createTestWorldStore() {
 	}
 
 	function placeBuilding(building: Building, x: number, y: number) {
+		// 픽셀 좌표를 타일 좌표로 변환
+		const tile_x = Math.floor(x / 32);
+		const tile_y = Math.floor(y / 32);
+
 		const worldBuilding: WorldBuilding = {
 			id: crypto.randomUUID(),
 			user_id: crypto.randomUUID(),
 			player_id: crypto.randomUUID(),
 			world_id: crypto.randomUUID(),
 			building_id: building.id,
-			x,
-			y,
+			tile_x,
+			tile_y,
 			created_at: new Date().toISOString(),
 			building,
 		};

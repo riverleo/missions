@@ -335,9 +335,12 @@ export class WorldContext {
 
 		// 0.2초 후 시작 위치로 다시 추가
 		setTimeout(() => {
-			const x = this.terrain?.start_x ?? 0;
-			const y = this.terrain?.start_y ?? 0;
-			this.buildings = { ...this.buildings, [id]: { ...building, x, y } };
+			const startX = this.terrain?.start_x ?? 0;
+			const startY = this.terrain?.start_y ?? 0;
+			// 픽셀 좌표를 타일 좌표로 변환
+			const tile_x = Math.floor(startX / 32);
+			const tile_y = Math.floor(startY / 32);
+			this.buildings = { ...this.buildings, [id]: { ...building, tile_x, tile_y } };
 			this.respawningIds.delete(id);
 		}, 200);
 	}

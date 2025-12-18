@@ -17,7 +17,7 @@
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
 	import { IconTrash } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { DEBUG_BUILDING_FILL_STYLE } from '$lib/components/app/world/constants';
+	import { DEBUG_BUILDING_FILL_STYLE, TILE_SIZE } from '$lib/components/app/world/constants';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -102,17 +102,6 @@
 		} else {
 			await admin.createBuildingState(buildingId, { type, atlas_name: atlasName });
 		}
-
-		// 건물의 width/height가 0이면 atlas frame 크기로 설정
-		if (building && building.width === 0 && building.height === 0) {
-			const metadata = atlases[atlasName];
-			if (metadata) {
-				await admin.update(buildingId, {
-					width: metadata.frameWidth / 2,
-					height: metadata.frameHeight / 2,
-				});
-			}
-		}
 	}
 
 	async function onFrameFromChange(value: string) {
@@ -166,13 +155,16 @@
 			{#if animator}
 				<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
 					<SpriteAnimatorRenderer {animator} resolution={2} />
-					{#if $uiStore.showBodyPreview && building && (building.width > 0 || building.height > 0)}
-						<svg class="pointer-events-none absolute inset-0 h-full w-full">
-							<ellipse
-								cx="50%"
-								cy="50%"
-								rx={building.width / 2}
-								ry={building.height / 2}
+					{#if $uiStore.showBodyPreview && building}
+						{@const tileWidth = building.tile_cols * TILE_SIZE}
+						{@const tileHeight = building.tile_rows * TILE_SIZE}
+						<svg class="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+							<rect
+								x="50%"
+								y="50%"
+								width={tileWidth}
+								height={tileHeight}
+								transform="translate({-tileWidth / 2}, {-tileHeight / 2})"
 								fill={DEBUG_BUILDING_FILL_STYLE}
 							/>
 						</svg>

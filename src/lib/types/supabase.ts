@@ -79,29 +79,29 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          height: number
           id: string
           name: string
           scenario_id: string
-          width: number
+          tile_cols: number
+          tile_rows: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id: string
-          width?: number
+          tile_cols?: number
+          tile_rows?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id?: string
-          width?: number
+          tile_cols?: number
+          tile_rows?: number
         }
         Relationships: [
           {
@@ -1189,30 +1189,30 @@ export type Database = {
           created_at: string
           id: string
           player_id: string
+          tile_x: number
+          tile_y: number
           user_id: string
           world_id: string
-          x: number
-          y: number
         }
         Insert: {
           building_id: string
           created_at?: string
           id?: string
           player_id: string
+          tile_x?: number
+          tile_y?: number
           user_id?: string
           world_id: string
-          x?: number
-          y?: number
         }
         Update: {
           building_id?: string
           created_at?: string
           id?: string
           player_id?: string
+          tile_x?: number
+          tile_y?: number
           user_id?: string
           world_id?: string
-          x?: number
-          y?: number
         }
         Relationships: [
           {

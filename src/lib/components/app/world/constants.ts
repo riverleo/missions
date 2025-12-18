@@ -1,3 +1,6 @@
+// 타일 설정
+export const TILE_SIZE = 6;
+
 // 물리 엔진 설정
 export const WALL_THICKNESS = 1;
 

@@ -8,7 +8,7 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconEye, IconEyeOff, IconHeading, IconRuler2, IconX } from '@tabler/icons-svelte';
+	import { IconEye, IconEyeOff, IconHeading, IconGrid4x4, IconX } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
@@ -21,15 +21,15 @@
 	const { uiStore } = admin;
 
 	let name = $state(building.name ?? '');
-	let width = $state(building.width === 0 ? '' : building.width.toString());
-	let height = $state(building.height === 0 ? '' : building.height.toString());
+	let tileCols = $state(building.tile_cols.toString());
+	let tileRows = $state(building.tile_rows.toString());
 
 	// building prop 변경 시 상태 동기화
 	$effect(() => {
-		width = building.width === 0 ? '' : building.width.toString();
+		tileCols = building.tile_cols.toString();
 	});
 	$effect(() => {
-		height = building.height === 0 ? '' : building.height.toString();
+		tileRows = building.tile_rows.toString();
 	});
 
 	async function updateName() {
@@ -38,11 +38,11 @@
 		await admin.update(building.id, { name: trimmed || undefined });
 	}
 
-	async function updateSize() {
-		const newWidth = parseFloat(width) || 0;
-		const newHeight = parseFloat(height) || 0;
-		if (newWidth === building.width && newHeight === building.height) return;
-		await admin.update(building.id, { width: newWidth, height: newHeight });
+	async function updateTileSize() {
+		const newCols = parseInt(tileCols) || 1;
+		const newRows = parseInt(tileRows) || 1;
+		if (newCols === building.tile_cols && newRows === building.tile_rows) return;
+		await admin.update(building.id, { tile_cols: newCols, tile_rows: newRows });
 	}
 
 	function onkeydownName(e: KeyboardEvent) {
@@ -52,10 +52,10 @@
 		}
 	}
 
-	function onkeydownSize(e: KeyboardEvent) {
+	function onkeydownTileSize(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
-			updateSize();
+			updateTileSize();
 		}
 	}
 
@@ -79,23 +79,25 @@
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>
-				<IconRuler2 class="size-4" />
+				<IconGrid4x4 class="size-4" />
 			</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput
-			bind:value={width}
+			bind:value={tileCols}
 			type="number"
+			min="1"
 			class="w-16"
-			placeholder="넓이"
-			onkeydown={onkeydownSize}
+			placeholder="가로"
+			onkeydown={onkeydownTileSize}
 		/>
 		<InputGroupText><IconX /></InputGroupText>
 		<InputGroupInput
-			bind:value={height}
+			bind:value={tileRows}
 			type="number"
+			min="1"
 			class="w-16"
-			placeholder="높이"
-			onkeydown={onkeydownSize}
+			placeholder="세로"
+			onkeydown={onkeydownTileSize}
 		/>
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
@@ -110,7 +112,7 @@
 				</TooltipTrigger>
 				<TooltipContent>바디 영역 미리보기</TooltipContent>
 			</Tooltip>
-			<InputGroupButton onclick={updateSize} variant="ghost">저장</InputGroupButton>
+			<InputGroupButton onclick={updateTileSize} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

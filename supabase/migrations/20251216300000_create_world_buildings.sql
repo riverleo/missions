@@ -5,8 +5,8 @@ create table world_buildings (
   player_id uuid not null references players(id) on delete cascade,
   world_id uuid not null references worlds(id) on delete cascade,
   building_id uuid not null references buildings(id) on delete cascade,
-  x real not null default 0,
-  y real not null default 0,
+  tile_x integer not null default 0,
+  tile_y integer not null default 0,
   created_at timestamptz not null default now()
 );
 
