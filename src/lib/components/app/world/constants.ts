@@ -15,6 +15,9 @@ export const DEBUG_TERRAIN_FILL_STYLE = 'rgba(255, 0, 0, 0.5)';
 export const DEBUG_CHARACTER_FILL_STYLE = 'rgba(0, 255, 0, 0.5)';
 export const DEBUG_BUILDING_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
+// 플래닝 타일 스타일
+export const PLANNING_TILE_FILL_STYLE = 'rgba(34, 197, 94, 0.8)';
+
 export const HIDDEN_BODY_STYLE = {
 	visible: false,
 };

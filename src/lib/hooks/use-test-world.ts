@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import type { Terrain, Character, WorldCharacter, Building, WorldBuilding } from '$lib/types';
+import { TILE_SIZE } from '$lib/components/app/world/constants';
 
 interface TestWorldState {
 	selectedTerrain?: Terrain;
@@ -80,8 +81,8 @@ function createTestWorldStore() {
 
 	function placeBuilding(building: Building, x: number, y: number) {
 		// 픽셀 좌표를 타일 좌표로 변환
-		const tile_x = Math.floor(x / 32);
-		const tile_y = Math.floor(y / 32);
+		const tile_x = Math.floor(x / TILE_SIZE);
+		const tile_y = Math.floor(y / TILE_SIZE);
 
 		const worldBuilding: WorldBuilding = {
 			id: crypto.randomUUID(),

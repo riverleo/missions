@@ -100,7 +100,10 @@
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
 				<TooltipTrigger>
-					<InputGroupButton onclick={toggleShowBodyPreview} variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}>
+					<InputGroupButton
+						onclick={toggleShowBodyPreview}
+						variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}
+					>
 						{#if $uiStore.showBodyPreview}
 							<IconEye />
 						{:else}
@@ -108,7 +111,7 @@
 						{/if}
 					</InputGroupButton>
 				</TooltipTrigger>
-				<TooltipContent>바디 영역 미리보기</TooltipContent>
+				<TooltipContent>크기 확인하기</TooltipContent>
 			</Tooltip>
 			<InputGroupButton onclick={updateSize} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>

@@ -1,13 +1,25 @@
 import Matter from 'matter-js';
-import type { Supabase, Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
+import type { Supabase, Terrain, WorldCharacter, WorldBuilding, Building } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
 import { WorldEvent } from './world-event.svelte';
 import { TerrainBody } from './terrain-body.svelte';
 import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
+import { TILE_SIZE } from './constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
+
+export interface WorldPlanningPlacement {
+	building: Building;
+	x: number;
+	y: number;
+}
+
+export class WorldPlanning {
+	showGrid = $state(false);
+	placement = $state<WorldPlanningPlacement | undefined>(undefined);
+}
 
 export class WorldContext {
 	readonly supabase: Supabase;
@@ -27,6 +39,7 @@ export class WorldContext {
 	buildingBodies = $state<Record<string, BuildingBody>>({});
 	characterBodies = $state<Record<string, CharacterBody>>({});
 
+	readonly planning = new WorldPlanning();
 	debug = $state(false);
 	initialized = $state(false);
 	container: HTMLDivElement | undefined = $state.raw(undefined);
@@ -338,8 +351,8 @@ export class WorldContext {
 			const startX = this.terrain?.start_x ?? 0;
 			const startY = this.terrain?.start_y ?? 0;
 			// 픽셀 좌표를 타일 좌표로 변환
-			const tile_x = Math.floor(startX / 32);
-			const tile_y = Math.floor(startY / 32);
+			const tile_x = Math.floor(startX / TILE_SIZE);
+			const tile_y = Math.floor(startY / TILE_SIZE);
 			this.buildings = { ...this.buildings, [id]: { ...building, tile_x, tile_y } };
 			this.respawningIds.delete(id);
 		}, 200);

@@ -8,7 +8,7 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconEye, IconEyeOff, IconHeading, IconGrid4x4, IconX } from '@tabler/icons-svelte';
+	import { IconGridDots, IconHeading, IconGrid4x4, IconX } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
@@ -21,15 +21,15 @@
 	const { uiStore } = admin;
 
 	let name = $state(building.name ?? '');
-	let tileCols = $state(building.tile_cols.toString());
-	let tileRows = $state(building.tile_rows.toString());
+	let tileCols = $state(building.tile_cols === 0 ? '' : building.tile_cols.toString());
+	let tileRows = $state(building.tile_rows === 0 ? '' : building.tile_rows.toString());
 
 	// building prop 변경 시 상태 동기화
 	$effect(() => {
-		tileCols = building.tile_cols.toString();
+		tileCols = building.tile_cols === 0 ? '' : building.tile_cols.toString();
 	});
 	$effect(() => {
-		tileRows = building.tile_rows.toString();
+		tileRows = building.tile_rows === 0 ? '' : building.tile_rows.toString();
 	});
 
 	async function updateName() {
@@ -102,15 +102,14 @@
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
 				<TooltipTrigger>
-					<InputGroupButton onclick={toggleShowBodyPreview} variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}>
-						{#if $uiStore.showBodyPreview}
-							<IconEye />
-						{:else}
-							<IconEyeOff />
-						{/if}
+					<InputGroupButton
+						onclick={toggleShowBodyPreview}
+						variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}
+					>
+						<IconGridDots />
 					</InputGroupButton>
 				</TooltipTrigger>
-				<TooltipContent>바디 영역 미리보기</TooltipContent>
+				<TooltipContent>그리드 확인하기</TooltipContent>
 			</Tooltip>
 			<InputGroupButton onclick={updateTileSize} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>

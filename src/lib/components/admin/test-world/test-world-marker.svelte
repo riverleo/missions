@@ -5,9 +5,15 @@
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
+	import { snapPointToTileCenter } from '$lib/components/app/world/tiles';
 
 	const { store, placeCharacter, placeBuilding } = useTestWorld();
 	const world = useWorld();
+
+	// 건물 선택 시 planning 그리드 표시
+	$effect(() => {
+		world.planning.showGrid = !!$store.selectedBuilding;
+	});
 
 	// 시작지점 좌표 (카메라 변환 적용)
 	const startLeft = $derived(
@@ -22,33 +28,64 @@
 	);
 
 	let isCommandPressed = $state(false);
+	let containerRef = $state<HTMLElement | undefined>(undefined);
 	let mouseX = $state(0);
 	let mouseY = $state(0);
-	let animator = $state<SpriteAnimator | undefined>(undefined);
+	let characterAnimator = $state<SpriteAnimator | undefined>(undefined);
 
-	// 선택된 캐릭터/건물의 idle 상태 가져오기
-	const selectedIdleState = $derived(() => {
+	// 마우스의 월드 좌표 계산
+	const mouseWorldPos = $derived(() => {
+		if (!containerRef) return { x: 0, y: 0 };
+		const rect = containerRef.getBoundingClientRect();
+		const containerX = mouseX - rect.left;
+		const containerY = mouseY - rect.top;
+		return {
+			x: containerX / world.camera.zoom + world.camera.x,
+			y: containerY / world.camera.zoom + world.camera.y,
+		};
+	});
+
+	// 스냅된 타일 중심 좌표 (월드 좌표)
+	const snappedWorldPos = $derived(() => {
+		const pos = mouseWorldPos();
+		return snapPointToTileCenter(pos.x, pos.y);
+	});
+
+	// 건물 선택 시 world.planning.placement 업데이트
+	$effect(() => {
+		if ($store.selectedBuilding) {
+			const pos = snappedWorldPos();
+			world.planning.placement = {
+				building: $store.selectedBuilding,
+				x: pos.x,
+				y: pos.y,
+			};
+		} else {
+			world.planning.placement = undefined;
+		}
+	});
+
+	// 선택된 캐릭터의 idle 상태 가져오기
+	const selectedCharacterIdleState = $derived(() => {
 		if ($store.selectedCharacter) {
 			return $store.selectedCharacter.character_states.find((s) => s.type === 'idle');
-		} else if ($store.selectedBuilding) {
-			return $store.selectedBuilding.building_states.find((s) => s.type === 'idle');
 		}
 		return undefined;
 	});
 
-	// idle 상태가 변경되면 animator 생성
+	// 캐릭터 idle 상태가 변경되면 animator 생성
 	$effect(() => {
-		const idleState = selectedIdleState();
+		const idleState = selectedCharacterIdleState();
 		const atlasName = idleState?.atlas_name;
 
 		if (!atlasName) {
-			animator?.stop();
-			animator = undefined;
+			characterAnimator?.stop();
+			characterAnimator = undefined;
 			return;
 		}
 
 		SpriteAnimator.create(atlasName).then((newAnimator) => {
-			animator?.stop();
+			characterAnimator?.stop();
 			newAnimator.init({
 				name: 'idle',
 				from: idleState?.frame_from ?? undefined,
@@ -56,27 +93,30 @@
 				fps: idleState?.fps ?? undefined,
 			});
 			newAnimator.play({ name: 'idle', loop: idleState?.loop ?? 'loop' });
-			animator = newAnimator;
+			characterAnimator = newAnimator;
 		});
 
 		return () => {
-			animator?.stop();
+			characterAnimator?.stop();
 		};
 	});
 
-	function onclickOverlay(e: MouseEvent) {
-		const target = e.currentTarget as HTMLElement;
-		const rect = target.getBoundingClientRect();
-		// 화면 좌표를 월드 좌표로 변환 (카메라 적용)
-		const containerX = e.clientX - rect.left;
-		const containerY = e.clientY - rect.top;
-		const x = containerX / $store.cameraZoom + $store.cameraX;
-		const y = containerY / $store.cameraZoom + $store.cameraY;
+	// 컨테이너 참조 가져오기
+	$effect(() => {
+		containerRef = document.querySelector('[data-slot="world-container"]') as HTMLElement;
+	});
 
+	function onclickBuildingOverlay() {
+		const pos = snappedWorldPos();
+		if ($store.selectedBuilding) {
+			placeBuilding($store.selectedBuilding, pos.x, pos.y);
+		}
+	}
+
+	function onclickCharacterOverlay(e: MouseEvent) {
+		const pos = mouseWorldPos();
 		if ($store.selectedCharacter) {
-			placeCharacter($store.selectedCharacter, x, y);
-		} else if ($store.selectedBuilding) {
-			placeBuilding($store.selectedBuilding, x, y);
+			placeCharacter($store.selectedCharacter, pos.x, pos.y);
 		}
 	}
 
@@ -109,25 +149,34 @@
 	});
 </script>
 
-<!-- 캐릭터 또는 건물 선택 시 클릭 오버레이 -->
-{#if $store.selectedCharacter || $store.selectedBuilding}
+<!-- 건물 선택 시 클릭 오버레이 -->
+{#if $store.selectedBuilding}
+	<button
+		type="button"
+		class="absolute inset-0 cursor-pointer bg-transparent"
+		aria-label="건물 배치"
+		onclick={onclickBuildingOverlay}
+	></button>
+{/if}
+
+<!-- 캐릭터 선택 시 클릭 오버레이 -->
+{#if $store.selectedCharacter}
 	<button
 		type="button"
 		class="absolute inset-0 bg-transparent"
 		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed ? 'auto' : 'none'};"
-		aria-label={$store.selectedCharacter ? '캐릭터 배치' : '건물 배치'}
-		onclick={onclickOverlay}
+		aria-label="캐릭터 배치"
+		onclick={onclickCharacterOverlay}
 	></button>
-{/if}
-
-<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-{#if isCommandPressed && animator && ($store.selectedCharacter || $store.selectedBuilding)}
-	<div
-		class="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2 opacity-70"
-		style="left: {mouseX}px; top: {mouseY}px;"
-	>
-		<SpriteAnimatorRenderer {animator} resolution={2} />
-	</div>
+	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
+	{#if isCommandPressed && characterAnimator}
+		<div
+			class="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2 opacity-70"
+			style="left: {mouseX}px; top: {mouseY}px;"
+		>
+			<SpriteAnimatorRenderer animator={characterAnimator} resolution={2} />
+		</div>
+	{/if}
 {/if}
 
 <!-- 디버그 모드일 때 시작지점 표시 -->

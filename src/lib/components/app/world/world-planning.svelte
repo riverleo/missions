@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { TILE_SIZE } from './constants';
+	import WorldPlanningPlacement from './world-planning-placement.svelte';
 
 	interface Props {
 		width: number;
@@ -21,7 +22,7 @@
 			y1={0}
 			x2={i * TILE_SIZE}
 			y2={height}
-			stroke="rgba(255, 255, 255, 0.2)"
+			stroke="rgba(255, 255, 255, 0.05)"
 			stroke-width="1"
 		/>
 	{/each}
@@ -32,8 +33,10 @@
 			y1={i * TILE_SIZE}
 			x2={width}
 			y2={i * TILE_SIZE}
-			stroke="rgba(255, 255, 255, 0.2)"
+			stroke="rgba(255, 255, 255, 0.05)"
 			stroke-width="1"
 		/>
 	{/each}
 </svg>
+
+<WorldPlanningPlacement />

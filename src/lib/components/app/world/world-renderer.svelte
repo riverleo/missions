@@ -5,7 +5,7 @@
 	import { useWorld } from '$lib/hooks/use-world.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
-	import WorldGrid from './world-grid.svelte';
+	import WorldPlanning from './world-planning.svelte';
 
 	interface Props {
 		width: number;
@@ -82,8 +82,8 @@
 				style="opacity: {world.debug ? 0 : 1};"
 			/>
 		{/if}
-		{#if world.debug}
-			<WorldGrid width={terrainBody.width} height={terrainBody.height} />
+		{#if world.planning.showGrid}
+			<WorldPlanning width={terrainBody.width} height={terrainBody.height} />
 		{/if}
 		{#each buildings as building (building.id)}
 			{@const body = world.buildingBodies[building.id]}
