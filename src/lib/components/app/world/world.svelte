@@ -2,13 +2,13 @@
 	import { onMount, type Snippet } from 'svelte';
 	import 'pathseg';
 	import Matter from 'matter-js';
-	import type { Terrain, PlayerCharacter, PlayerBuilding } from '$lib/types';
+	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 	import { getGameAssetUrl } from '$lib/utils/storage';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
-	import WorldCharacter from './world-character.svelte';
-	import WorldBuilding from './world-building.svelte';
+	import WorldCharacterSprite from './world-character.svelte';
+	import WorldBuildingSprite from './world-building.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 
 	const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Svg, Vertices } =
@@ -16,8 +16,8 @@
 
 	interface Props {
 		terrain?: Terrain;
-		characters?: PlayerCharacter[];
-		buildings?: PlayerBuilding[];
+		characters?: WorldCharacter[];
+		buildings?: WorldBuilding[];
 		debug?: boolean;
 		children?: Snippet;
 		oncamerachange?: (camera: { x: number; y: number; zoom: number }) => void;
@@ -89,7 +89,6 @@
 
 	const wallStyle = $derived(debug ? debugBodyStyle : hiddenBodyStyle);
 
-	// SVG URL
 	const svgUrl = $derived(terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined);
 
 	// SVG viewBox 좌표를 월드 좌표로 변환 (지형 SVG용)
@@ -113,13 +112,7 @@
 		};
 	}
 
-	interface PathStyle {
-		fill: string | null;
-		stroke: string | null;
-		strokeWidth: number;
-	}
-
-	function getPathStyle(path: SVGPathElement): PathStyle {
+	function getPathStyle(path: SVGPathElement) {
 		const style = path.getAttribute('style') || '';
 
 		const fillMatch = style.match(/fill\s*:\s*([^;]+)/);
@@ -132,8 +125,8 @@
 			strokeWidthMatch?.[1]?.trim() || path.getAttribute('stroke-width') || '1';
 
 		return {
-			fill: fillValue === 'none' ? null : fillValue,
-			stroke: strokeValue === 'none' ? null : strokeValue,
+			fill: fillValue === 'none' ? undefined : fillValue,
+			stroke: strokeValue === 'none' ? undefined : strokeValue,
 			strokeWidth: parseFloat(strokeWidthStr) || 1,
 		};
 	}
@@ -265,11 +258,11 @@
 		}
 	}
 
-	function getCharacterBodySize(playerCharacter: PlayerCharacter): {
+	function getCharacterBodySize(worldCharacter: WorldCharacter): {
 		width: number;
 		height: number;
 	} {
-		const idleState = playerCharacter.character.character_states.find((s) => s.type === 'idle');
+		const idleState = worldCharacter.character.character_states.find((s) => s.type === 'idle');
 		if (!idleState?.atlas_name) {
 			return { width: DEFAULT_CHARACTER_SIZE, height: DEFAULT_CHARACTER_SIZE };
 		}
@@ -285,14 +278,14 @@
 		};
 	}
 
-	function createCharacterBody(playerCharacter: PlayerCharacter): Matter.Body {
-		const { width, height } = getCharacterBodySize(playerCharacter);
+	function createCharacterBody(worldCharacter: WorldCharacter): Matter.Body {
+		const { width, height } = getCharacterBodySize(worldCharacter);
 		// 월드 좌표 사용 (y는 발 위치 기준이므로 바디 중심은 높이의 절반만큼 위로)
-		const bodyX = playerCharacter.x;
-		const bodyY = playerCharacter.y - height / 2;
+		const bodyX = worldCharacter.x;
+		const bodyY = worldCharacter.y - height / 2;
 
 		return Bodies.rectangle(bodyX, bodyY, width, height, {
-			label: `character-${playerCharacter.id}`,
+			label: `character-${worldCharacter.id}`,
 			restitution: 0.1,
 			friction: 0.8,
 			collisionFilter: {
@@ -318,11 +311,11 @@
 		characterPositions = newPositions;
 	}
 
-	function getBuildingBodySize(playerBuilding: PlayerBuilding): {
+	function getBuildingBodySize(worldBuilding: WorldBuilding): {
 		width: number;
 		height: number;
 	} {
-		const idleState = playerBuilding.building.building_states.find((s) => s.type === 'idle');
+		const idleState = worldBuilding.building.building_states.find((s) => s.type === 'idle');
 		if (!idleState?.atlas_name) {
 			return { width: DEFAULT_BUILDING_SIZE, height: DEFAULT_BUILDING_SIZE };
 		}
@@ -338,14 +331,14 @@
 		};
 	}
 
-	function createBuildingBody(playerBuilding: PlayerBuilding): Matter.Body {
-		const { width, height } = getBuildingBodySize(playerBuilding);
+	function createBuildingBody(worldBuilding: WorldBuilding): Matter.Body {
+		const { width, height } = getBuildingBodySize(worldBuilding);
 		// 월드 좌표 사용 (y는 바닥 위치 기준이므로 바디 중심은 높이의 절반만큼 위로)
-		const bodyX = playerBuilding.x;
-		const bodyY = playerBuilding.y - height / 2;
+		const bodyX = worldBuilding.x;
+		const bodyY = worldBuilding.y - height / 2;
 
 		return Bodies.rectangle(bodyX, bodyY, width, height, {
-			label: `building-${playerBuilding.id}`,
+			label: `building-${worldBuilding.id}`,
 			restitution: 0.1,
 			friction: 0.8,
 			inertia: Infinity, // 회전 방지
@@ -811,11 +804,11 @@
 				style="opacity: {debug ? 0 : 1};"
 			/>
 		{/if}
-		{#each buildings as playerBuilding (playerBuilding.id)}
-			{@const position = buildingPositions[playerBuilding.id]}
+		{#each buildings as worldBuilding (worldBuilding.id)}
+			{@const position = buildingPositions[worldBuilding.id]}
 			{#if position}
-				<WorldBuilding
-					{playerBuilding}
+				<WorldBuildingSprite
+					{worldBuilding}
 					x={position.x}
 					y={position.y}
 					angle={position.angle}
@@ -824,11 +817,11 @@
 				/>
 			{/if}
 		{/each}
-		{#each characters as playerCharacter (playerCharacter.id)}
-			{@const position = characterPositions[playerCharacter.id]}
+		{#each characters as worldCharacter (worldCharacter.id)}
+			{@const position = characterPositions[worldCharacter.id]}
 			{#if position}
-				<WorldCharacter
-					{playerCharacter}
+				<WorldCharacterSprite
+					{worldCharacter}
 					x={position.x}
 					y={position.y}
 					angle={position.angle}

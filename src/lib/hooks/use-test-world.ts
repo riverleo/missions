@@ -1,12 +1,12 @@
 import { writable } from 'svelte/store';
-import type { Terrain, Character, PlayerCharacter, Building, PlayerBuilding } from '$lib/types';
+import type { Terrain, Character, WorldCharacter, Building, WorldBuilding } from '$lib/types';
 
 interface TestWorldState {
 	selectedTerrain?: Terrain;
 	selectedCharacter?: Character;
 	selectedBuilding?: Building;
-	characters: PlayerCharacter[];
-	buildings: PlayerBuilding[];
+	characters: WorldCharacter[];
+	buildings: WorldBuilding[];
 	// 카메라 상태: test-world-marker에서 클릭 좌표를 월드 좌표로 변환할 때 사용
 	cameraX: number;
 	cameraY: number;
@@ -61,10 +61,11 @@ function createTestWorldStore() {
 	}
 
 	function placeCharacter(character: Character, x: number, y: number) {
-		const playerCharacter: PlayerCharacter = {
+		const worldCharacter: WorldCharacter = {
 			id: crypto.randomUUID(),
 			user_id: crypto.randomUUID(),
 			player_id: crypto.randomUUID(),
+			world_id: crypto.randomUUID(),
 			character_id: character.id,
 			x,
 			y,
@@ -73,15 +74,16 @@ function createTestWorldStore() {
 		};
 		store.update((state) => ({
 			...state,
-			characters: [...state.characters, playerCharacter],
+			characters: [...state.characters, worldCharacter],
 		}));
 	}
 
 	function placeBuilding(building: Building, x: number, y: number) {
-		const playerBuilding: PlayerBuilding = {
+		const worldBuilding: WorldBuilding = {
 			id: crypto.randomUUID(),
 			user_id: crypto.randomUUID(),
 			player_id: crypto.randomUUID(),
+			world_id: crypto.randomUUID(),
 			building_id: building.id,
 			x,
 			y,
@@ -90,7 +92,7 @@ function createTestWorldStore() {
 		};
 		store.update((state) => ({
 			...state,
-			buildings: [...state.buildings, playerBuilding],
+			buildings: [...state.buildings, worldBuilding],
 		}));
 	}
 

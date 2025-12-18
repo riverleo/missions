@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { PlayerCharacter } from '$lib/types';
+	import type { WorldCharacter } from '$lib/types';
 	import { VIEW_BOX_WIDTH, VIEW_BOX_HEIGHT } from './constants';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 
 	interface Props {
-		playerCharacter: PlayerCharacter;
+		worldCharacter: WorldCharacter;
 		x: number;
 		y: number;
 		angle?: number;
@@ -14,7 +14,7 @@
 	}
 
 	let {
-		playerCharacter,
+		worldCharacter,
 		x,
 		y,
 		angle = 0,
@@ -26,7 +26,7 @@
 
 	// idle 상태의 캐릭터 스프라이트 가져오기
 	const idleState = $derived(
-		playerCharacter.character.character_states.find((s) => s.type === 'idle')
+		worldCharacter.character.character_states.find((s) => s.type === 'idle')
 	);
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)

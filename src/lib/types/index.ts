@@ -123,13 +123,18 @@ export type Character = CharacterRow & {
 export type CharacterInsert = TablesInsert<'characters'>;
 export type CharacterUpdate = TablesUpdate<'characters'>;
 
-// PlayerCharacter types
-type PlayerCharacterRow = Tables<'player_characters'>;
-export type PlayerCharacter = PlayerCharacterRow & {
+// World types
+export type World = Tables<'worlds'>;
+export type WorldInsert = TablesInsert<'worlds'>;
+export type WorldUpdate = TablesUpdate<'worlds'>;
+
+// WorldCharacter types
+type WorldCharacterRow = Tables<'world_characters'>;
+export type WorldCharacter = WorldCharacterRow & {
 	character: Character;
 };
-export type PlayerCharacterInsert = TablesInsert<'player_characters'>;
-export type PlayerCharacterUpdate = TablesUpdate<'player_characters'>;
+export type WorldCharacterInsert = TablesInsert<'world_characters'>;
+export type WorldCharacterUpdate = TablesUpdate<'world_characters'>;
 
 // BuildingState types
 export type BuildingStateType = Enums<'building_state_type'>;
@@ -145,10 +150,10 @@ export type Building = BuildingRow & {
 export type BuildingInsert = TablesInsert<'buildings'>;
 export type BuildingUpdate = TablesUpdate<'buildings'>;
 
-// PlayerBuilding types
-type PlayerBuildingRow = Tables<'player_buildings'>;
-export type PlayerBuilding = PlayerBuildingRow & {
+// WorldBuilding types
+type WorldBuildingRow = Tables<'world_buildings'>;
+export type WorldBuilding = WorldBuildingRow & {
 	building: Building;
 };
-export type PlayerBuildingInsert = TablesInsert<'player_buildings'>;
-export type PlayerBuildingUpdate = TablesUpdate<'player_buildings'>;
+export type WorldBuildingInsert = TablesInsert<'world_buildings'>;
+export type WorldBuildingUpdate = TablesUpdate<'world_buildings'>;

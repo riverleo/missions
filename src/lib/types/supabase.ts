@@ -517,51 +517,6 @@ export type Database = {
           },
         ]
       }
-      player_buildings: {
-        Row: {
-          building_id: string
-          created_at: string
-          id: string
-          player_id: string
-          user_id: string
-          x: number
-          y: number
-        }
-        Insert: {
-          building_id: string
-          created_at?: string
-          id?: string
-          player_id: string
-          user_id?: string
-          x?: number
-          y?: number
-        }
-        Update: {
-          building_id?: string
-          created_at?: string
-          id?: string
-          player_id?: string
-          user_id?: string
-          x?: number
-          y?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_buildings_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_buildings_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       player_chapters: {
         Row: {
           chapter_id: string
@@ -610,51 +565,6 @@ export type Database = {
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_characters: {
-        Row: {
-          character_id: string
-          created_at: string
-          id: string
-          player_id: string
-          user_id: string
-          x: number
-          y: number
-        }
-        Insert: {
-          character_id: string
-          created_at?: string
-          id?: string
-          player_id: string
-          user_id?: string
-          x?: number
-          y?: number
-        }
-        Update: {
-          character_id?: string
-          created_at?: string
-          id?: string
-          player_id?: string
-          user_id?: string
-          x?: number
-          y?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_characters_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_characters_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
             referencedColumns: ["id"]
           },
         ]
@@ -1255,6 +1165,158 @@ export type Database = {
           },
         ]
       }
+      world_buildings: {
+        Row: {
+          building_id: string
+          created_at: string
+          id: string
+          player_id: string
+          user_id: string
+          world_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          building_id: string
+          created_at?: string
+          id?: string
+          player_id: string
+          user_id?: string
+          world_id: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          building_id?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          user_id?: string
+          world_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_buildings_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_buildings_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_buildings_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      world_characters: {
+        Row: {
+          character_id: string
+          created_at: string
+          id: string
+          player_id: string
+          user_id: string
+          world_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          id?: string
+          player_id: string
+          user_id?: string
+          world_id: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          user_id?: string
+          world_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_characters_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_characters_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_characters_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worlds: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          player_id: string
+          terrain_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          player_id: string
+          terrain_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          player_id?: string
+          terrain_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worlds_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worlds_terrain_id_fkey"
+            columns: ["terrain_id"]
+            isOneToOne: false
+            referencedRelation: "terrains"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1267,6 +1329,7 @@ export type Database = {
         Args: { target_player_id: string; target_user_id: string }
         Returns: boolean
       }
+      is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
       building_state_type: "idle" | "damaged" | "planned"
