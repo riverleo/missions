@@ -8,6 +8,7 @@ export class Camera {
 	x = $state(0);
 	y = $state(0);
 	zoom = $state(1);
+	isPanning = $state(false);
 
 	// 팬 시작 시 저장할 상태
 	private panStartX = 0;
@@ -51,6 +52,7 @@ export class Camera {
 
 	// 팬 시작
 	startPan(screenX: number, screenY: number): void {
+		this.isPanning = true;
 		this.panStartX = screenX;
 		this.panStartY = screenY;
 		this.panStartCameraX = this.x;
@@ -63,5 +65,10 @@ export class Camera {
 		const dy = screenY - this.panStartY;
 		this.x = this.panStartCameraX - dx / this.zoom;
 		this.y = this.panStartCameraY - dy / this.zoom;
+	}
+
+	// 팬 종료
+	stopPan(): void {
+		this.isPanning = false;
 	}
 }

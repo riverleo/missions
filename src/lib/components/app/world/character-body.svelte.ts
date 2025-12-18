@@ -37,9 +37,10 @@ export class CharacterBody {
 			label: `character-${worldCharacter.id}`,
 			restitution: 0.1,
 			friction: 0.8,
+			inertia: Infinity,
 			collisionFilter: {
 				category: CATEGORY_CHARACTER,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
+				mask: CATEGORY_WALL | CATEGORY_TERRAIN,
 			},
 			render: debug ? { visible: true, fillStyle: DEBUG_CHARACTER_FILL_STYLE } : { visible: false },
 		});

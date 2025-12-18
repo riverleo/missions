@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
-import { Interact } from './interact.svelte';
+import { WorldEvent } from './world-event.svelte';
 import { TerrainBody } from './terrain-body.svelte';
 import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
@@ -13,7 +13,7 @@ export class WorldContext {
 	readonly engine: Matter.Engine;
 	readonly runner: Matter.Runner;
 	readonly camera: Camera;
-	readonly event: Interact;
+	readonly event: WorldEvent;
 	readonly terrainBody = new TerrainBody();
 
 	terrain = $state<Terrain | undefined>();
@@ -41,7 +41,7 @@ export class WorldContext {
 		this.engine = Engine.create();
 		this.runner = Runner.create();
 		this.camera = new Camera(this);
-		this.event = new Interact(this, this.camera);
+		this.event = new WorldEvent(this, this.camera);
 
 		// terrain 변경 감지하여 재로드
 		$effect(() => {
@@ -298,7 +298,12 @@ export class WorldContext {
 		const halfHeight = size.height / 2;
 		const { x, y } = body.position;
 
-		return x - halfWidth < 0 || x + halfWidth > worldWidth || y - halfHeight < 0 || y + halfHeight > worldHeight;
+		return (
+			x - halfWidth < 0 ||
+			x + halfWidth > worldWidth ||
+			y - halfHeight < 0 ||
+			y + halfHeight > worldHeight
+		);
 	}
 
 	private respawnCharacter(id: string, char: WorldCharacter): void {

@@ -4,8 +4,11 @@ import type { Camera } from './camera.svelte';
 
 const { Query, Composite } = Matter;
 
-export class Interact {
-	isPanning = $state(false);
+const MOUSE_BUTTON_LEFT = 0;
+const MOUSE_BUTTON_MIDDLE = 1;
+
+export class WorldEvent {
+	/** 마우스가 드래그 가능한 바디 위에 있는지 여부 */
 	isOverDraggable = $state(false);
 
 	private world: WorldContext;
@@ -29,31 +32,30 @@ export class Interact {
 
 	onmousedown = (e: MouseEvent) => {
 		// 중간 버튼 또는 좌클릭으로 팬 (Command 키가 눌려있지 않을 때)
-		if (e.button === 1 || (e.button === 0 && !e.metaKey)) {
+		if (e.button === MOUSE_BUTTON_MIDDLE || (e.button === MOUSE_BUTTON_LEFT && !e.metaKey)) {
 			// 드래그 가능한 바디 위면 카메라 이동하지 않음
 			if (this.isOverDraggable) return;
 
 			e.preventDefault();
-			this.isPanning = true;
 			this.camera.startPan(e.clientX, e.clientY);
 		}
 	};
 
 	onmousemove = (e: MouseEvent) => {
 		// 호버 상태 업데이트
-		if (!this.isPanning) {
+		if (!this.camera.isPanning) {
 			const newValue = this.checkDraggableAtPosition(e.clientX, e.clientY);
 			if (newValue !== this.isOverDraggable) {
 				this.isOverDraggable = newValue;
 			}
 		}
 
-		if (!this.isPanning) return;
+		if (!this.camera.isPanning) return;
 
 		this.camera.updatePan(e.clientX, e.clientY);
 	};
 
 	onmouseup = () => {
-		this.isPanning = false;
+		this.camera.stopPan();
 	};
 }
