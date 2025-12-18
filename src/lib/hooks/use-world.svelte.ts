@@ -1,8 +1,4 @@
 import { createContext } from 'svelte';
-
-interface WorldContext {
-	readonly width: number;
-	readonly height: number;
-}
+import type { WorldContext } from '$lib/components/app/world/world-context.svelte';
 
 export const [useWorld, setWorldContext] = createContext<WorldContext>();

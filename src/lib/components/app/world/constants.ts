@@ -16,9 +16,9 @@ export const CATEGORY_CHARACTER = 0x0004;
 export const CATEGORY_BUILDING = 0x0008;
 
 // 디버그 렌더링 스타일
-export const DEBUG_BODY_STYLE = {
-	fillStyle: 'rgba(255, 0, 0, 0.5)',
-};
+export const DEBUG_TERRAIN_FILL_STYLE = 'rgba(255, 0, 0, 0.5)';
+export const DEBUG_CHARACTER_FILL_STYLE = 'rgba(0, 255, 0, 0.5)';
+export const DEBUG_BUILDING_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
 
 export const HIDDEN_BODY_STYLE = {
 	visible: false,

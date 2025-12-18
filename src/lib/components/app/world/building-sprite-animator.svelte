@@ -2,17 +2,18 @@
 	import type { WorldBuilding } from '$lib/types';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
+	import { useWorld } from '$lib/hooks/use-world.svelte';
 
 	interface Props {
 		worldBuilding: WorldBuilding;
 		x: number;
 		y: number;
 		angle?: number;
-		worldWidth: number;
-		worldHeight: number;
 	}
 
-	let { worldBuilding, x, y, angle = 0, worldWidth, worldHeight }: Props = $props();
+	let { worldBuilding, x, y, angle = 0 }: Props = $props();
+
+	const world = useWorld();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -22,13 +23,18 @@
 	);
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
-	const left = $derived(`${(x / worldWidth) * 100}%`);
-	const top = $derived(`${(y / worldHeight) * 100}%`);
+	const left = $derived(`${(x / world.terrainBody.width) * 100}%`);
+	const top = $derived(`${(y / world.terrainBody.height) * 100}%`);
 	const rotation = $derived(`${angle}rad`);
 
-	// atlas_name이 변경되면 animator 생성
+	// idleState가 변경되면 animator 생성
 	$effect(() => {
 		const atlasName = idleState?.atlas_name;
+		const frameFrom = idleState?.frame_from;
+		const frameTo = idleState?.frame_to;
+		const fps = idleState?.fps;
+		const loop = idleState?.loop;
+
 		if (!atlasName) {
 			animator?.stop();
 			animator = undefined;
@@ -39,11 +45,11 @@
 			animator?.stop();
 			newAnimator.init({
 				name: 'idle',
-				from: idleState?.frame_from ?? undefined,
-				to: idleState?.frame_to ?? undefined,
-				fps: idleState?.fps ?? undefined,
+				from: frameFrom ?? undefined,
+				to: frameTo ?? undefined,
+				fps: fps ?? undefined,
 			});
-			newAnimator.play({ name: 'idle', loop: idleState?.loop ?? 'loop' });
+			newAnimator.play({ name: 'idle', loop: loop ?? 'loop' });
 			animator = newAnimator;
 		});
 

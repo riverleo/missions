@@ -1,11 +1,4 @@
 {
-  "test": {
-    "frameWidth": 1080,
-    "frameHeight": 1080,
-    "columns": 3,
-    "rows": 2,
-    "frameCount": 5
-  },
   "test2": {
     "frameWidth": 70,
     "frameHeight": 80,

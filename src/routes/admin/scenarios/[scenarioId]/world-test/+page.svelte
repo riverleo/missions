@@ -4,8 +4,26 @@
 	import TestWorldAside from '$lib/components/admin/test-world/test-world-aside.svelte';
 	import TestWorldMarker from '$lib/components/admin/test-world/test-world-marker.svelte';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useBuilding } from '$lib/hooks/use-building';
 
 	const { store, setCamera } = useTestWorld();
+	const { store: characterStore } = useCharacter();
+	const { store: buildingStore } = useBuilding();
+
+	// 배치된 캐릭터/건물의 데이터를 최신 원본 데이터로 교체
+	const characters = $derived(
+		$store.characters.map((wc) => ({
+			...wc,
+			character: $characterStore.data[wc.character_id] ?? wc.character,
+		}))
+	);
+	const buildings = $derived(
+		$store.buildings.map((wb) => ({
+			...wb,
+			building: $buildingStore.data[wb.building_id] ?? wb.building,
+		}))
+	);
 
 	function oncamerachange(camera: { x: number; y: number; zoom: number }) {
 		setCamera(camera.x, camera.y, camera.zoom);
@@ -14,15 +32,17 @@
 
 <div class="relative flex h-full items-center justify-center">
 	<div class="h-[400px] w-[800px]">
-		<World
-			terrain={$store.selectedTerrain}
-			characters={$store.characters}
-			buildings={$store.buildings}
-			debug={$store.debug}
-			{oncamerachange}
-		>
-			<TestWorldMarker />
-		</World>
+		{#if $store.selectedTerrain}
+			<World
+				terrain={$store.selectedTerrain}
+				{characters}
+				{buildings}
+				debug={$store.debug}
+				{oncamerachange}
+			>
+				<TestWorldMarker />
+			</World>
+		{/if}
 	</div>
 	<TestWorldPanel />
 	<TestWorldAside />

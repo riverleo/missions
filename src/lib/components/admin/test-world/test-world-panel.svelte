@@ -15,9 +15,9 @@
 				{#snippet child({ props })}
 					<Button {...props} onclick={() => setDebug(!$store.debug)} size="icon-lg" variant="outline">
 						{#if $store.debug}
-							<IconBug />
-						{:else}
 							<IconBugOff />
+						{:else}
+							<IconBug />
 						{/if}
 					</Button>
 				{/snippet}

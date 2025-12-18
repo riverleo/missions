@@ -57,7 +57,50 @@
      admin.createScenarioQuestBranch({ ... });  // 하위 도메인이라 이름 포함
      ```
 
-4. **스토어 업데이트는 Immer 사용**
+4. **외부 라이브러리 객체는 `$state.raw()` 사용**
+   - Matter.js 엔진, DOM 요소 등 외부 라이브러리 객체는 `$state()`가 아닌 `$state.raw()` 사용
+   - `$state()`는 값을 Proxy로 감싸서 reactivity를 추적하는데, 외부 라이브러리 객체는 Proxy와 호환되지 않음
+   - 예시:
+     ```typescript
+     // ❌ 나쁜 예: Proxy로 감싸져서 Matter.js가 제대로 동작하지 않음
+     engine: Matter.Engine | undefined = $state(undefined);
+     container: HTMLDivElement | undefined = $state(undefined);
+
+     // ✅ 좋은 예: Proxy 없이 원본 객체 저장
+     engine: Matter.Engine | undefined = $state.raw(undefined);
+     container: HTMLDivElement | undefined = $state.raw(undefined);
+     ```
+   - **증상**: `===` 비교 시 같은 객체인데 `false` 반환, `state_proxy_equality_mismatch` 경고
+
+5. **Context는 컴포넌트 초기화 시점에만 접근 가능**
+   - `createContext()`로 생성한 훅(예: `useWorld()`)은 컴포넌트 초기화 시점에만 호출 가능
+   - 이벤트 핸들러나 클래스 메서드에서 직접 호출하면 context를 찾지 못함
+   - 클래스에서 context가 필요하면 생성자로 전달:
+     ```typescript
+     // ❌ 나쁜 예: 메서드에서 context 호출 (이벤트 핸들러에서 실패)
+     class Camera {
+       screenToWorld() {
+         const container = useWorld().container; // 에러!
+       }
+     }
+
+     // ✅ 좋은 예: 생성자로 context 전달
+     class Camera {
+       private world: WorldContext;
+       constructor(world: WorldContext) {
+         this.world = world;
+       }
+       screenToWorld() {
+         const container = this.world.container; // OK
+       }
+     }
+
+     // 컴포넌트에서 초기화 시점에 context 획득 후 전달
+     const world = useWorld();
+     const camera = new Camera(world);
+     ```
+
+6. **스토어 업데이트는 Immer 사용**
    - Svelte의 reactivity는 참조 변경을 감지하므로 항상 새로운 객체/배열을 생성해야 함
    - **Immer의 `produce`를 사용하여 불변성을 유지하면서 mutable한 코드 작성 가능**
    - Immer는 structural sharing을 통해 성능을 최적화하고, 중첩된 업데이트를 간단하게 만듦

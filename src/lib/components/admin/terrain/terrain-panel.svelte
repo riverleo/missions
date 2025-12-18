@@ -115,9 +115,9 @@
 						variant="outline"
 					>
 						{#if $uiStore.debug}
-							<IconBug />
-						{:else}
 							<IconBugOff />
+						{:else}
+							<IconBug />
 						{/if}
 					</Button>
 				{/snippet}

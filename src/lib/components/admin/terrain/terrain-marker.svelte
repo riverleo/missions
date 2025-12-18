@@ -24,8 +24,12 @@
 	const currentY = $derived(isDragging && dragY != null ? dragY : terrain.start_y);
 
 	// viewBox 좌표를 퍼센트로 변환
-	const left = $derived(currentX != null ? `${(currentX / world.width) * 100}%` : undefined);
-	const top = $derived(currentY != null ? `${(currentY / world.height) * 100}%` : undefined);
+	const left = $derived(
+		currentX != null ? `${(currentX / world.terrainBody.width) * 100}%` : undefined
+	);
+	const top = $derived(
+		currentY != null ? `${(currentY / world.terrainBody.height) * 100}%` : undefined
+	);
 
 	function onmousedown(e: MouseEvent) {
 		e.preventDefault();
@@ -44,12 +48,12 @@
 		if (!container) return;
 
 		const rect = container.getBoundingClientRect();
-		dragX = ((e.clientX - rect.left) / rect.width) * world.width;
-		dragY = ((e.clientY - rect.top) / rect.height) * world.height;
+		dragX = ((e.clientX - rect.left) / rect.width) * world.terrainBody.width;
+		dragY = ((e.clientY - rect.top) / rect.height) * world.terrainBody.height;
 
 		// 범위 제한
-		dragX = Math.max(0, Math.min(world.width, dragX));
-		dragY = Math.max(0, Math.min(world.height, dragY));
+		dragX = Math.max(0, Math.min(world.terrainBody.width, dragX));
+		dragY = Math.max(0, Math.min(world.terrainBody.height, dragY));
 	}
 
 	async function onmouseup() {
@@ -68,8 +72,8 @@
 	async function onclickOverlay(e: MouseEvent) {
 		const target = e.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
-		const x = ((e.clientX - rect.left) / rect.width) * world.width;
-		const y = ((e.clientY - rect.top) / rect.height) * world.height;
+		const x = ((e.clientX - rect.left) / rect.width) * world.terrainBody.width;
+		const y = ((e.clientY - rect.top) / rect.height) * world.terrainBody.height;
 
 		await admin.update(terrain.id, { start_x: x, start_y: y });
 		admin.setSettingStartMarker(false);
