@@ -7,6 +7,8 @@
 	import WorldRenderer from './world-renderer.svelte';
 
 	interface Props {
+		width?: number;
+		height?: number;
 		terrain: Terrain;
 		characters?: WorldCharacter[];
 		buildings?: WorldBuilding[];
@@ -16,6 +18,8 @@
 	}
 
 	let {
+		width = 800,
+		height = 400,
 		terrain,
 		characters = [],
 		buildings = [],
@@ -49,6 +53,6 @@
 	setWorldContext(worldContext);
 </script>
 
-<WorldRenderer {characters} {buildings}>
+<WorldRenderer {width} {height} {characters} {buildings}>
 	{@render children?.()}
 </WorldRenderer>

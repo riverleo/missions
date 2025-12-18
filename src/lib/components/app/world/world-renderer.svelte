@@ -7,12 +7,14 @@
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 
 	interface Props {
+		width: number;
+		height: number;
 		characters?: WorldCharacter[];
 		buildings?: WorldBuilding[];
 		children?: Snippet;
 	}
 
-	let { characters = [], buildings = [], children }: Props = $props();
+	let { width, height, characters = [], buildings = [], children }: Props = $props();
 
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
@@ -52,7 +54,8 @@
 <div
 	bind:this={container}
 	data-slot="world-container"
-	class="relative h-full w-full overflow-hidden border border-border"
+	class="relative overflow-hidden border border-border"
+	style="width: {width}px; height: {height}px;"
 	role="application"
 	tabindex="0"
 	{onwheel}

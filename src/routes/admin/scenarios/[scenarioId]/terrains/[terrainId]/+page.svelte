@@ -13,11 +13,9 @@
 
 <div class="relative flex h-full items-center justify-center">
 	{#if terrain}
-		<div class="h-[400px] w-[800px]">
-			<World {terrain} debug={$uiStore.debug}>
-				<TerrainMarker {terrain} />
-			</World>
-		</div>
+		<World {terrain} debug={$uiStore.debug}>
+			<TerrainMarker {terrain} />
+		</World>
 		<TerrainPanel {terrain} />
 	{:else}
 		<p class="text-sm text-muted-foreground">지형을 찾을 수 없습니다</p>

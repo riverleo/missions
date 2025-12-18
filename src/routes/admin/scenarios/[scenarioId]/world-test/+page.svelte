@@ -31,19 +31,17 @@
 </script>
 
 <div class="relative flex h-full items-center justify-center">
-	<div class="h-[400px] w-[800px]">
-		{#if $store.selectedTerrain}
-			<World
-				terrain={$store.selectedTerrain}
-				{characters}
-				{buildings}
-				debug={$store.debug}
-				{oncamerachange}
-			>
-				<TestWorldMarker />
-			</World>
-		{/if}
-	</div>
+	{#if $store.selectedTerrain}
+		<World
+			terrain={$store.selectedTerrain}
+			{characters}
+			{buildings}
+			debug={$store.debug}
+			{oncamerachange}
+		>
+			<TestWorldMarker />
+		</World>
+	{/if}
 	<TestWorldPanel />
 	<TestWorldAside />
 </div>
