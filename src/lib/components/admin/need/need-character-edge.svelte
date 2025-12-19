@@ -2,6 +2,7 @@
 	import { getBezierPath, BaseEdge, EdgeLabel, useEdges } from '@xyflow/svelte';
 	import type { Position } from '@xyflow/svelte';
 	import type { CharacterNeed } from '$lib/types';
+	import { useNeed } from '$lib/hooks/use-need';
 
 	interface Props {
 		id: string;
@@ -28,6 +29,7 @@
 	}: Props = $props();
 
 	const edges = useEdges();
+	const { needStore } = useNeed();
 
 	const [edgePath, labelX, labelY] = $derived(
 		getBezierPath({
@@ -39,13 +41,20 @@
 			targetPosition,
 		})
 	);
+
+	const calculatedDecrease = $derived(() => {
+		if (!data?.characterNeed) return 0;
+		const need = $needStore.data[data.characterNeed.need_id];
+		if (!need) return 0;
+		return need.decrease_per_tick * data.characterNeed.decay_multiplier;
+	});
 </script>
 
 <BaseEdge path={edgePath} {style} />
 {#if data?.characterNeed}
 	<EdgeLabel x={labelX} y={labelY}>
 		<div class="rounded-full bg-blue-500 p-1 px-2 text-[10px] text-white">
-			{data.characterNeed.decay_multiplier}배
+			{parseFloat(calculatedDecrease().toFixed(2))} / 시간당 감소
 		</div>
 	</EdgeLabel>
 {/if}
