@@ -5,37 +5,69 @@
 		Background,
 		BackgroundVariant,
 		MiniMap,
+		useNodes,
+		useEdges,
+		useSvelteFlow,
 	} from '@xyflow/svelte';
-	import type { Node, Edge, Connection } from '@xyflow/svelte';
+	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import NeedNode from './need-node.svelte';
 	import NeedCharacterNode from './need-character-node.svelte';
-	import NeedBuildingNode from './need-building-node.svelte';
-	import NeedPanel from './need-panel.svelte';
+	import NeedFulfillmentNode from './need-fulfillment-node.svelte';
+	import NeedActionPanel from './need-action-panel.svelte';
+	import NeedNodePanel from './need-node-panel.svelte';
+	import NeedCharacterEdgePanel from './need-character-edge-panel.svelte';
+	import NeedFulfillmentNodePanel from './need-fulfillment-node-panel.svelte';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
 	const { store: characterStore } = useCharacter();
-	const { store: buildingStore } = useBuilding();
+
+	const flowNodes = useNodes();
+	const flowEdges = useEdges();
+	const { screenToFlowPosition } = useSvelteFlow();
 
 	// 데이터
 	const needs = $derived(Object.values($needStore.data));
 	const needFulfillments = $derived(Object.values($needFulfillmentStore.data));
 	const characterNeeds = $derived(Object.values($characterNeedStore.data));
 	const characters = $derived(Object.values($characterStore.data));
-	const buildings = $derived(Object.values($buildingStore.data));
+
+	// 선택된 노드/엣지
+	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
+	const selectedEdge = $derived(flowEdges.current.find((e) => e.selected));
+
+	// 선택된 항목에 따른 데이터
+	const selectedNeed = $derived(
+		selectedNode?.type === 'need'
+			? needs.find((n) => n.id === selectedNode.id.replace('need-', ''))
+			: undefined
+	);
+
+	const selectedFulfillment = $derived(
+		selectedNode?.type === 'fulfillment'
+			? needFulfillments.find((nf) => nf.id === selectedNode.id.replace('fulfillment-', ''))
+			: undefined
+	);
+
+	const selectedCharacterNeed = $derived(() => {
+		if (!selectedEdge?.id.startsWith('character-need-')) return undefined;
+		return characterNeeds.find(
+			(cn) => `character-need-${cn.character_id}-${cn.need_id}` === selectedEdge.id
+		);
+	});
 
 	const nodeTypes = {
 		need: NeedNode,
 		character: NeedCharacterNode,
-		building: NeedBuildingNode,
+		fulfillment: NeedFulfillmentNode,
 	};
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let layoutApplied = $state(false);
+	let skipConvertEffect = $state(false);
 
 	function isValidConnection(connection: Connection | Edge) {
 		const sourceNode = nodes.find((n) => n.id === connection.source);
@@ -45,11 +77,6 @@
 
 		// character → need 연결만 허용
 		if (sourceNode.type === 'character' && targetNode.type === 'need') {
-			return true;
-		}
-
-		// need → building 연결만 허용
-		if (sourceNode.type === 'need' && targetNode.type === 'building') {
 			return true;
 		}
 
@@ -83,35 +110,62 @@
 					},
 				];
 			}
-
-			// need → building 연결: need_fulfillments 생성
-			if (sourceNode.type === 'need' && targetNode.type === 'building') {
-				const needId = connection.source.replace('need-', '');
-				const buildingId = connection.target.replace('building-', '');
-
-				await admin.createNeedFulfillment({
-					need_id: needId,
-					fulfillment_type: 'building',
-					building_id: buildingId,
-					amount: 10,
-				});
-
-				edges = [
-					...edges,
-					{
-						id: `need-building-${needId}-${buildingId}`,
-						source: connection.source,
-						target: connection.target,
-						deletable: true,
-					},
-				];
-			}
 		} catch (error) {
 			console.error('Failed to connect:', error);
 		}
 	}
 
-	async function ondelete({ nodes: nodesToDelete, edges: edgesToDelete }: { nodes: Node[]; edges: Edge[] }) {
+	const onconnectend: OnConnectEnd = async (event, connectionState) => {
+		// 유효한 연결이면 무시 (onconnect에서 처리)
+		if (connectionState.isValid) return;
+
+		const sourceNode = connectionState.fromNode;
+		if (!sourceNode || sourceNode.type !== 'need') return;
+
+		// 마우스/터치 위치를 플로우 좌표로 변환
+		const clientX =
+			'changedTouches' in event ? (event.changedTouches[0]?.clientX ?? 0) : event.clientX;
+		const clientY =
+			'changedTouches' in event ? (event.changedTouches[0]?.clientY ?? 0) : event.clientY;
+		const position = screenToFlowPosition({ x: clientX, y: clientY });
+
+		// 스토어 업데이트 중 effect 건너뛰기
+		skipConvertEffect = true;
+
+		try {
+			const needId = sourceNode.id.replace('need-', '');
+
+			// 새 fulfillment 생성
+			const newFulfillment = await admin.createNeedFulfillment({
+				need_id: needId,
+				fulfillment_type: 'building',
+				amount: 10,
+			});
+
+			// 모든 업데이트 완료 후 노드/엣지 재생성
+			skipConvertEffect = false;
+			convertToNodesAndEdges();
+
+			// 새 노드의 위치를 드롭 위치로 설정
+			if (newFulfillment) {
+				nodes = nodes.map((n) =>
+					n.id === `fulfillment-${newFulfillment.id}` ? { ...n, position } : n
+				);
+				layoutApplied = true;
+			}
+		} catch (error) {
+			skipConvertEffect = false;
+			console.error('Failed to create fulfillment on edge drop:', error);
+		}
+	};
+
+	async function ondelete({
+		nodes: nodesToDelete,
+		edges: edgesToDelete,
+	}: {
+		nodes: Node[];
+		edges: Edge[];
+	}) {
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
@@ -124,18 +178,6 @@
 						await admin.removeCharacterNeed(characterNeed.id);
 					}
 				}
-				// need_fulfillments 삭제
-				else if (edge.id.startsWith('need-building-')) {
-					const parts = edge.id.replace('need-building-', '').split('-');
-					const needId = parts[0];
-					const buildingId = parts[1];
-					const fulfillment = needFulfillments.find(
-						(nf) => nf.need_id === needId && nf.building_id === buildingId
-					);
-					if (fulfillment) {
-						await admin.removeNeedFulfillment(fulfillment.id);
-					}
-				}
 			}
 
 			// 노드 삭제 처리
@@ -143,6 +185,9 @@
 				if (node.type === 'need') {
 					const needId = node.id.replace('need-', '');
 					await admin.removeNeed(needId);
+				} else if (node.type === 'fulfillment') {
+					const fulfillmentId = node.id.replace('fulfillment-', '');
+					await admin.removeNeedFulfillment(fulfillmentId);
 				}
 			}
 
@@ -187,14 +232,14 @@
 			});
 		});
 
-		// 3. Building 노드 (오른쪽 열)
-		buildings.forEach((building, index) => {
+		// 3. Fulfillment 노드 (오른쪽 열)
+		needFulfillments.forEach((fulfillment, index) => {
 			newNodes.push({
-				id: `building-${building.id}`,
-				type: 'building',
-				data: { building },
+				id: `fulfillment-${fulfillment.id}`,
+				type: 'fulfillment',
+				data: { fulfillment },
 				position: { x: COLUMN_GAP * 2, y: index * ROW_GAP },
-				deletable: false,
+				deletable: true,
 			});
 		});
 
@@ -208,17 +253,15 @@
 			});
 		});
 
-		// 5. need_fulfillments (building 타입) 엣지
-		needFulfillments
-			.filter((nf) => nf.fulfillment_type === 'building' && nf.building_id)
-			.forEach((nf) => {
-				newEdges.push({
-					id: `need-building-${nf.need_id}-${nf.building_id}`,
-					source: `need-${nf.need_id}`,
-					target: `building-${nf.building_id}`,
-					deletable: true,
-				});
+		// 5. need → fulfillment 엣지
+		needFulfillments.forEach((nf) => {
+			newEdges.push({
+				id: `need-fulfillment-${nf.need_id}-${nf.id}`,
+				source: `need-${nf.need_id}`,
+				target: `fulfillment-${nf.id}`,
+				deletable: false,
 			});
+		});
 
 		nodes = newNodes;
 		edges = newEdges;
@@ -227,9 +270,10 @@
 
 	// 데이터 변경 시 노드/엣지 재생성
 	$effect(() => {
+		if (skipConvertEffect) return;
+
 		needs;
 		characters;
-		buildings;
 		characterNeeds;
 		needFulfillments;
 
@@ -244,6 +288,7 @@
 	{isValidConnection}
 	colorMode={mode.current}
 	{onconnect}
+	{onconnectend}
 	{ondelete}
 	fitView
 >
@@ -251,5 +296,13 @@
 	<Background variant={BackgroundVariant.Dots} />
 	<MiniMap />
 
-	<NeedPanel onlayout={convertToNodesAndEdges} />
+	{#if selectedNeed}
+		<NeedNodePanel need={selectedNeed} />
+	{:else if selectedFulfillment}
+		<NeedFulfillmentNodePanel fulfillment={selectedFulfillment} />
+	{:else if selectedCharacterNeed()}
+		<NeedCharacterEdgePanel characterNeed={selectedCharacterNeed()!} />
+	{:else}
+		<NeedActionPanel onlayout={convertToNodesAndEdges} />
+	{/if}
 </SvelteFlow>

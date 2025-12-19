@@ -14,8 +14,8 @@
 	import { page } from '$app/state';
 	import type { QuestBranch } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
-	import QuestPanel from './quest-panel.svelte';
-	import QuestBranchPanel from './quest-branch-panel.svelte';
+	import QuestActionPanel from './quest-action-panel.svelte';
+	import QuestBranchNodePanel from './quest-branch-node-panel.svelte';
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
@@ -248,8 +248,8 @@
 	<MiniMap />
 
 	{#if selectedQuestBranch}
-		<QuestBranchPanel questBranch={selectedQuestBranch} onupdate={onupdateQuestBranch} />
+		<QuestBranchNodePanel questBranch={selectedQuestBranch} onupdate={onupdateQuestBranch} />
 	{:else}
-		<QuestPanel {onlayout} />
+		<QuestActionPanel {onlayout} />
 	{/if}
 </SvelteFlow>

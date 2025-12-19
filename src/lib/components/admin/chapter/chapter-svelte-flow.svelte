@@ -13,8 +13,8 @@
 	import { mode } from 'mode-watcher';
 	import type { Chapter } from '$lib/types';
 	import ChapterNode from './chapter-node.svelte';
-	import ChapterFlowPanel from './chapter-flow-panel.svelte';
-	import ChapterDetailPanel from './chapter-detail-panel.svelte';
+	import ChapterActionPanel from './chapter-action-panel.svelte';
+	import ChapterNodePanel from './chapter-node-panel.svelte';
 	import { useChapter } from '$lib/hooks/use-chapter';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
@@ -237,8 +237,8 @@
 	<MiniMap />
 
 	{#if selectedChapter}
-		<ChapterDetailPanel chapter={selectedChapter} onupdate={onupdateChapter} />
+		<ChapterNodePanel chapter={selectedChapter} onupdate={onupdateChapter} />
 	{:else}
-		<ChapterFlowPanel {onlayout} />
+		<ChapterActionPanel {onlayout} />
 	{/if}
 </SvelteFlow>

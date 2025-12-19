@@ -15,9 +15,9 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodeNode from './narrative-node-node.svelte';
 	import NarrativeDiceRollNode from './narrative-dice-roll-node.svelte';
-	import NarrativePanel from './narrative-panel.svelte';
+	import NarrativeActionPanel from './narrative-action-panel.svelte';
 	import NarrativeNodePanel from './narrative-node-panel.svelte';
-	import NarrativeDiceRollPanel from './narrative-dice-roll-panel.svelte';
+	import NarrativeDiceRollNodePanel from './narrative-dice-roll-node-panel.svelte';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import {
 		createNarrativeNodeId,
@@ -562,9 +562,9 @@
 		{#if selectedNarrativeNode}
 			<NarrativeNodePanel narrativeNode={selectedNarrativeNode} />
 		{:else if selectedNarrativeDiceRoll}
-			<NarrativeDiceRollPanel narrativeDiceRoll={selectedNarrativeDiceRoll} />
+			<NarrativeDiceRollNodePanel narrativeDiceRoll={selectedNarrativeDiceRoll} />
 		{:else}
-			<NarrativePanel {onlayout} />
+			<NarrativeActionPanel {onlayout} />
 		{/if}
 	</SvelteFlow>
 {/if}
