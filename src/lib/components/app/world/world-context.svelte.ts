@@ -7,6 +7,7 @@ import { TerrainBody } from './terrain-body.svelte';
 import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
 import { TILE_SIZE } from './constants';
+import { Pathfinder } from './pathfinder';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
 
@@ -33,13 +34,18 @@ export class WorldContext {
 	buildings = $state<Record<string, WorldBuilding>>({});
 	characters = $state<Record<string, WorldCharacter>>({});
 
-	get terrainAssetUrl(): string | undefined {
+	get terrainAssetUrl() {
 		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
 	buildingBodies = $state<Record<string, BuildingBody>>({});
 	characterBodies = $state<Record<string, CharacterBody>>({});
 
+	private get allBodies() {
+		return [...Object.values(this.characterBodies), ...Object.values(this.buildingBodies)];
+	}
+
 	readonly planning = new WorldPlanning();
+	pathfinder = $state<Pathfinder | undefined>(undefined);
 	debug = $state(false);
 	initialized = $state(false);
 	container: HTMLDivElement | undefined = $state.raw(undefined);
@@ -60,8 +66,7 @@ export class WorldContext {
 
 		// terrain 변경 감지하여 재로드
 		$effect(() => {
-			const terrain = this.terrain;
-			if (this.initialized && terrain) {
+			if (this.initialized && this.terrain) {
 				this.reload();
 			}
 		});
@@ -69,39 +74,29 @@ export class WorldContext {
 		// debug 변경 시 바디들의 렌더 스타일 업데이트
 		$effect(() => {
 			this.terrainBody.setDebug(this.debug);
-			for (const characterBody of Object.values(this.characterBodies)) {
-				characterBody.setDebug(this.debug);
-			}
-			for (const buildingBody of Object.values(this.buildingBodies)) {
-				buildingBody.setDebug(this.debug);
+			for (const body of this.allBodies) {
+				body.setDebug(this.debug);
 			}
 		});
 
 		// characters 변경 시 바디 동기화
 		$effect(() => {
-			const _ = Object.keys(this.characters).join(',');
-			if (this.initialized) {
-				this.syncCharacterBodies();
-			}
+			this.syncCharacterBodies(this.characters, this.initialized);
 		});
 
 		// buildings 변경 시 바디 동기화
 		$effect(() => {
-			const _ = Object.keys(this.buildings).join(',');
-			if (this.initialized) {
-				this.syncBuildingBodies();
-			}
+			this.syncBuildingBodies(this.buildings, this.initialized);
 		});
 
 		// 카메라 변경 시 렌더 바운드 업데이트
 		$effect(() => {
-			const _ = [this.camera.x, this.camera.y, this.camera.zoom];
-			this.updateRenderBounds();
+			this.updateRenderBounds(this.render, this.terrainBody, this.camera);
 		});
 	}
 
 	// 월드 마운트, cleanup 함수 반환
-	mount(container: HTMLDivElement): () => void {
+	mount(container: HTMLDivElement) {
 		this.container = container;
 
 		this.render = Render.create({
@@ -137,7 +132,7 @@ export class WorldContext {
 				this.render.canvas.height = height;
 				this.render.options.width = width;
 				this.render.options.height = height;
-				this.updateRenderBounds();
+				this.updateRenderBounds(this.render, this.terrainBody, this.camera);
 			}
 		});
 		this.resizeObserver.observe(container);
@@ -149,16 +144,17 @@ export class WorldContext {
 					Composite.add(this.engine.world, this.terrainBody.bodies);
 					this.terrainBody.setDebug(this.debug);
 				}
-				this.updateRenderBounds();
+				this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
+				this.updateRenderBounds(this.render, this.terrainBody, this.camera);
 			});
 		}
 
 		// 초기 캐릭터/건물 바디 생성
-		this.syncCharacterBodies();
-		this.syncBuildingBodies();
+		this.syncCharacterBodies(this.characters);
+		this.syncBuildingBodies(this.buildings);
 
 		Render.run(this.render);
-		this.updateRenderBounds();
+		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
 		this.initialized = true;
 
 		// 물리 시뮬레이션 시작
@@ -179,7 +175,7 @@ export class WorldContext {
 		};
 	}
 
-	async reload(): Promise<void> {
+	async reload() {
 		if (!this.terrain) return;
 
 		// 기존 bodies 제거
@@ -192,12 +188,12 @@ export class WorldContext {
 			this.terrainBody.setDebug(this.debug);
 		}
 
+		// pathfinder 재생성
+		this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
+
 		// 캐릭터/건물 바디 재추가
-		for (const characterBody of Object.values(this.characterBodies)) {
-			characterBody.addToWorld(this.engine.world);
-		}
-		for (const buildingBody of Object.values(this.buildingBodies)) {
-			buildingBody.addToWorld(this.engine.world);
+		for (const body of this.allBodies) {
+			body.addToWorld(this.engine.world);
 		}
 
 		// mouseConstraint 재추가
@@ -205,31 +201,33 @@ export class WorldContext {
 			Composite.add(this.engine.world, this.mouseConstraint);
 		}
 
-		this.updateRenderBounds();
+		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
-	private updateRenderBounds(): void {
-		if (!this.render) return;
+	private updateRenderBounds(render: Matter.Render | undefined, terrainBody: TerrainBody, camera: Camera) {
+		if (!render) return;
 
-		const viewWidth = this.terrainBody.width / this.camera.zoom;
-		const viewHeight = this.terrainBody.height / this.camera.zoom;
+		const viewWidth = terrainBody.width / camera.zoom;
+		const viewHeight = terrainBody.height / camera.zoom;
 
-		this.render.bounds.min.x = this.camera.x;
-		this.render.bounds.min.y = this.camera.y;
-		this.render.bounds.max.x = this.camera.x + viewWidth;
-		this.render.bounds.max.y = this.camera.y + viewHeight;
+		render.bounds.min.x = camera.x;
+		render.bounds.min.y = camera.y;
+		render.bounds.max.x = camera.x + viewWidth;
+		render.bounds.max.y = camera.y + viewHeight;
 
-		this.oncamerachange?.(this.camera);
+		this.oncamerachange?.(camera);
 	}
 
 	// 캐릭터 바디 동기화
-	private syncCharacterBodies(): void {
-		const currentIds = new Set(Object.keys(this.characters));
+	private syncCharacterBodies(characters: Record<string, WorldCharacter>, initialized = true) {
+		if (!initialized) return;
+
+		const currentIds = new Set(Object.keys(characters));
 		let changed = false;
 
 		// 새로 추가된 캐릭터
-		for (const char of Object.values(this.characters)) {
+		for (const char of Object.values(characters)) {
 			if (!this.characterBodies[char.id]) {
 				const characterBody = new CharacterBody(char, this.debug);
 				characterBody.addToWorld(this.engine.world);
@@ -254,12 +252,14 @@ export class WorldContext {
 	}
 
 	// 건물 바디 동기화
-	private syncBuildingBodies(): void {
-		const currentIds = new Set(Object.keys(this.buildings));
+	private syncBuildingBodies(buildings: Record<string, WorldBuilding>, initialized = true) {
+		if (!initialized) return;
+
+		const currentIds = new Set(Object.keys(buildings));
 		let changed = false;
 
 		// 새로 추가된 건물
-		for (const building of Object.values(this.buildings)) {
+		for (const building of Object.values(buildings)) {
 			if (!this.buildingBodies[building.id]) {
 				const buildingBody = new BuildingBody(building, this.debug);
 				buildingBody.addToWorld(this.engine.world);
@@ -284,21 +284,14 @@ export class WorldContext {
 	}
 
 	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 시작 위치에 다시 추가
-	private checkBounds(): void {
+	private checkBounds() {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
 
-		for (const [id, char] of Object.entries(this.characters)) {
-			const body = this.characterBodies[id];
+		for (const character of Object.values(this.characters)) {
+			const body = this.characterBodies[character.id];
 			if (body && this.isOutOfBounds(body.body, body.size, width, height)) {
-				this.respawnCharacter(id, char);
-			}
-		}
-
-		for (const [id, building] of Object.entries(this.buildings)) {
-			const body = this.buildingBodies[id];
-			if (body && this.isOutOfBounds(body.body, body.size, width, height)) {
-				this.respawnBuilding(id, building);
+				this.respawnCharacter(character);
 			}
 		}
 	}
@@ -308,7 +301,7 @@ export class WorldContext {
 		size: { width: number; height: number },
 		worldWidth: number,
 		worldHeight: number
-	): boolean {
+	) {
 		const halfWidth = size.width / 2;
 		const halfHeight = size.height / 2;
 		const { x, y } = body.position;
@@ -321,7 +314,8 @@ export class WorldContext {
 		);
 	}
 
-	private respawnCharacter(id: string, char: WorldCharacter): void {
+	private respawnCharacter(character: WorldCharacter) {
+		const { id } = character;
 		if (this.respawningIds.has(id)) return;
 		this.respawningIds.add(id);
 
@@ -329,42 +323,19 @@ export class WorldContext {
 		const { [id]: _, ...rest } = this.characters;
 		this.characters = rest;
 
-		// 0.2초 후 시작 위치로 다시 추가
+		// 1초 후 시작 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.start_x ?? 0;
 			const y = this.terrain?.start_y ?? 0;
-			this.characters = { ...this.characters, [id]: { ...char, x, y } };
+			this.characters = { ...this.characters, [id]: { ...character, x, y } };
 			this.respawningIds.delete(id);
-		}, 200);
-	}
-
-	private respawnBuilding(id: string, building: WorldBuilding): void {
-		if (this.respawningIds.has(id)) return;
-		this.respawningIds.add(id);
-
-		// buildings에서 제거 (바디도 자동 제거됨)
-		const { [id]: _, ...rest } = this.buildings;
-		this.buildings = rest;
-
-		// 0.2초 후 시작 위치로 다시 추가
-		setTimeout(() => {
-			const startX = this.terrain?.start_x ?? 0;
-			const startY = this.terrain?.start_y ?? 0;
-			// 픽셀 좌표를 타일 좌표로 변환
-			const tile_x = Math.floor(startX / TILE_SIZE);
-			const tile_y = Math.floor(startY / TILE_SIZE);
-			this.buildings = { ...this.buildings, [id]: { ...building, tile_x, tile_y } };
-			this.respawningIds.delete(id);
-		}, 200);
+		}, 1000);
 	}
 
 	// 물리 업데이트 후 위치 동기화
-	private updatePositions(): void {
-		for (const characterBody of Object.values(this.characterBodies)) {
-			characterBody.updatePosition();
-		}
-		for (const buildingBody of Object.values(this.buildingBodies)) {
-			buildingBody.updatePosition();
+	private updatePositions() {
+		for (const body of this.allBodies) {
+			body.updatePosition();
 		}
 	}
 }

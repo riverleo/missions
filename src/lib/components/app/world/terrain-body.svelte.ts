@@ -124,7 +124,7 @@ export class TerrainBody {
 		return [ground, leftWall, rightWall, ceiling];
 	}
 
-	async load(supabase: Supabase, terrain: Terrain): Promise<void> {
+	async load(supabase: Supabase, terrain: Terrain) {
 		// 정적 크기 사용
 		this.width = terrain.width;
 		this.height = terrain.height;
@@ -191,7 +191,7 @@ export class TerrainBody {
 		}
 	}
 
-	setDebug(debug: boolean): void {
+	setDebug(debug: boolean) {
 		for (const body of this.bodies) {
 			body.render.visible = debug;
 			if (debug) {

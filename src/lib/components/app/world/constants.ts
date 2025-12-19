@@ -1,6 +1,9 @@
 // 타일 설정
 export const TILE_SIZE = 6;
 
+// 경로 탐색 타일 설정
+export const PATHFINDING_TILE_SIZE = 4;
+
 // 물리 엔진 설정
 export const WALL_THICKNESS = 1;
 
