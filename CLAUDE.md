@@ -433,15 +433,70 @@
 
 ### 앱 개요
 
-- **기본**: 할일 목록 앱
-- **게임 요소**: 할일 완료에 동기부여를 주는 재미 요소
+- **기본**: 할일 관리 앱
+- **게임 요소**: 할일 완료에 동기부여를 주는 게임화(gamification) 요소
+- **핵심 구조**: Mission → Foundation → Task
+  - **Mission**: 최상위 목표 (예: "건강한 생활")
+  - **Foundation**: 미션을 달성하기 위한 기반, 각각 고유한 World를 가짐
+  - **Task**: 실제 수행할 할일 항목
 
 ### 게임 루프
 
-1. 유저가 할일을 완료함
-2. 돈(자원)을 벌음
-3. 돈으로 주민들에게 밥/집을 제공
-4. 주민들이 살아남음 (또는 굶어 죽음)
+1. 유저가 할일(Task)을 완료함
+2. 코인(자원)을 획득
+3. 코인으로 World에 건물을 짓고 캐릭터 욕구 충족
+4. 캐릭터들이 살아남음 (또는 굶어 죽음)
+5. **할일 완료 → 캐릭터들의 신앙(Faith) 상승**
+
+### 핵심 메카닉: 기도(Prayer)
+
+- 캐릭터들은 플레이어를 "신"처럼 여김
+- 캐릭터들이 플레이어에게 할일 완료를 "기도"함
+- 플레이어가 할일을 완료하면 캐릭터들의 신앙이 높아짐
+- **동기부여**: "내 캐릭터들이 나를 믿고 기다리고 있다" → 할일 완료 동기
+
+### 캐릭터 욕구 시스템 (Utility AI)
+
+캐릭터들은 여러 욕구(Needs)를 가지며, 각 욕구의 충족도에 따라 행동을 결정함
+
+| 욕구 | 설명 | 충족 방법 |
+|------|------|----------|
+| Hunger (배고픔) | 음식이 필요함 | 음식 건물에서 식사 |
+| Fatigue (피로) | 휴식이 필요함 | 집에서 수면 |
+| Faith (신앙) | 플레이어에 대한 믿음 | **할일 완료 시 상승** |
+| Happiness (행복) | 전반적인 만족도 | 다른 욕구 충족 시 상승 |
+
+- **Faith가 핵심**: 다른 욕구는 게임 내에서 충족 가능하지만, Faith는 플레이어의 할일 완료에만 의존
+- Faith가 낮으면 캐릭터들이 절망하거나 떠날 수 있음
+
+### 욕구 시스템 DB 설계
+
+```
+needs (욕구 정의)
+├── need_fulfillments (충족 방법)
+├── character_needs (캐릭터 타입별 스켈레톤)
+└── world_character_needs (런타임 값)
+```
+
+**needs 테이블**:
+- `scenario_id`: not null, 시나리오별 욕구 정의
+- `decay_per_tick`: tick당 감소량 (게임 루프에서 고정 간격으로 처리)
+- `max_value`, `initial_value`: 욕구 값 범위
+
+**need_fulfillments 테이블**:
+- 하나의 욕구에 여러 충족 방법 가능
+- `fulfillment_type`: enum (`'building'`, `'task'`, `'item'`, `'idle'`)
+- `building_id`: type이 `'building'`일 때 설정
+- `amount`: 충족 시 증가량
+
+**character_needs 테이블** (어드민 설정):
+- 캐릭터 타입이 어떤 욕구를 가지는지 정의
+- `decay_multiplier`: 캐릭터별 감소 속도 배율 (예: 농부는 1.5배 빨리 배고파짐)
+
+**world_character_needs 테이블** (런타임):
+- 월드에 배치된 캐릭터의 실제 욕구 값
+- `scenario_id`, `user_id`, `player_id`, `world_id`, `character_id`, `world_character_id`, `need_id`
+- `value`: 현재 충족도 (0 ~ max_value)
 
 ### 시나리오 시스템
 
@@ -478,6 +533,10 @@
 ### World 컴포넌트 (Matter.js 물리 월드)
 
 - **위치**: `$lib/components/app/world/world.svelte`
+- **스타일**: **횡스크롤 2D 사이드뷰** (산소미포함과 유사)
+  - 중력 기반 이동
+  - 바닥과 사다리를 통한 이동
+  - 점프 불가능 (y축 자유 이동 제한)
 - **주요 기능**:
   - SVG 지형 로딩 및 물리 바디 생성
   - 반응형 캔버스 (ResizeObserver로 컨테이너 크기 감지)
@@ -490,6 +549,23 @@
   - `fill`만 또는 `stroke`만 있으면: 선으로 처리 (벡터 브러쉬 대응)
   - 선은 얇은 사각형(rectangle)으로 생성
 - **pathseg 폴리필**: Matter.js의 `Svg.pathToVertices` 사용을 위해 필요
+
+### Pathfinder (경로 탐색)
+
+- **위치**: `$lib/components/app/world/pathfinder.ts`
+- **라이브러리**: PathFinding.js (A* 알고리즘)
+- **설정**:
+  - `PATHFINDING_TILE_SIZE = 4` (경로 탐색용 타일 크기)
+  - `allowDiagonal: false` (횡스크롤이므로 대각선 이동 없음)
+- **좌표 변환**:
+  - `pixelToTileIndex(pixel)`: 픽셀 → 타일 인덱스
+  - `tileIndexToPixel(tile)`: 타일 인덱스 → 타일 중심 픽셀
+- **주요 메서드**:
+  - `findPath(fromX, fromY, toX, toY)`: 픽셀 좌표로 경로 탐색, PathPoint[] 반환
+  - `smoothPath(path)`: 불필요한 중간점 제거
+  - `setWalkable(tileX, tileY, walkable)`: 타일 이동 가능 여부 설정
+  - `blockRect(tileX, tileY, tileCols, tileRows)`: 사각형 영역 이동 불가 설정
+- **TODO**: 사다리 시스템 구현 시 walkable 그리드 로직 추가 필요
 
 ## Storage 유틸리티
 

@@ -157,3 +157,22 @@ export type WorldBuilding = WorldBuildingRow & {
 };
 export type WorldBuildingInsert = TablesInsert<'world_buildings'>;
 export type WorldBuildingUpdate = TablesUpdate<'world_buildings'>;
+
+// Need types
+export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
+export type Need = Tables<'needs'>;
+export type NeedInsert = TablesInsert<'needs'>;
+export type NeedUpdate = TablesUpdate<'needs'>;
+export type NeedFulfillment = Tables<'need_fulfillments'>;
+export type NeedFulfillmentInsert = TablesInsert<'need_fulfillments'>;
+export type NeedFulfillmentUpdate = TablesUpdate<'need_fulfillments'>;
+
+// CharacterNeed types (skeleton)
+export type CharacterNeed = Tables<'character_needs'>;
+export type CharacterNeedInsert = TablesInsert<'character_needs'>;
+export type CharacterNeedUpdate = TablesUpdate<'character_needs'>;
+
+// WorldCharacterNeed types (runtime)
+export type WorldCharacterNeed = Tables<'world_character_needs'>;
+export type WorldCharacterNeedInsert = TablesInsert<'world_character_needs'>;
+export type WorldCharacterNeedUpdate = TablesUpdate<'world_character_needs'>;

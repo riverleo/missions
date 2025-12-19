@@ -175,6 +175,65 @@ export type Database = {
           },
         ]
       }
+      character_needs: {
+        Row: {
+          character_id: string
+          created_at: string
+          created_by: string | null
+          decay_multiplier: number
+          id: string
+          need_id: string
+          scenario_id: string
+        }
+        Insert: {
+          character_id: string
+          created_at?: string
+          created_by?: string | null
+          decay_multiplier?: number
+          id?: string
+          need_id: string
+          scenario_id: string
+        }
+        Update: {
+          character_id?: string
+          created_at?: string
+          created_by?: string | null
+          decay_multiplier?: number
+          id?: string
+          need_id?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_needs_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_needs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_needs_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_needs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       character_states: {
         Row: {
           atlas_name: string
@@ -522,6 +581,116 @@ export type Database = {
           },
           {
             foreignKeyName: "narratives_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      need_fulfillments: {
+        Row: {
+          amount: number
+          building_id: string | null
+          created_at: string
+          created_by: string | null
+          fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
+          id: string
+          need_id: string
+          scenario_id: string
+        }
+        Insert: {
+          amount: number
+          building_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
+          id?: string
+          need_id: string
+          scenario_id: string
+        }
+        Update: {
+          amount?: number
+          building_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fulfillment_type?: Database["public"]["Enums"]["need_fulfillment_type"]
+          id?: string
+          need_id?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "need_fulfillments_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_fulfillments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_fulfillments_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_fulfillments_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      needs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decay_per_tick: number
+          id: string
+          initial_value: number
+          max_value: number
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decay_per_tick?: number
+          id?: string
+          initial_value?: number
+          max_value?: number
+          name: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decay_per_tick?: number
+          id?: string
+          initial_value?: number
+          max_value?: number
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "needs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "needs_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
@@ -1238,6 +1407,85 @@ export type Database = {
           },
         ]
       }
+      world_character_needs: {
+        Row: {
+          character_id: string
+          id: string
+          need_id: string
+          player_id: string
+          scenario_id: string
+          user_id: string
+          value: number
+          world_character_id: string
+          world_id: string
+        }
+        Insert: {
+          character_id: string
+          id?: string
+          need_id: string
+          player_id: string
+          scenario_id: string
+          user_id?: string
+          value: number
+          world_character_id: string
+          world_id: string
+        }
+        Update: {
+          character_id?: string
+          id?: string
+          need_id?: string
+          player_id?: string
+          scenario_id?: string
+          user_id?: string
+          value?: number
+          world_character_id?: string
+          world_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_character_needs_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_character_needs_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_character_needs_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_character_needs_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_character_needs_world_character_id_fkey"
+            columns: ["world_character_id"]
+            isOneToOne: false
+            referencedRelation: "world_characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_character_needs_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       world_characters: {
         Row: {
           character_id: string
@@ -1355,6 +1603,7 @@ export type Database = {
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
+      need_fulfillment_type: "building" | "task" | "item" | "idle"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
       player_scenario_status: "in_progress" | "completed"
@@ -1496,6 +1745,7 @@ export const Constants = {
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
+      need_fulfillment_type: ["building", "task", "item", "idle"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],
       player_scenario_status: ["in_progress", "completed"],
