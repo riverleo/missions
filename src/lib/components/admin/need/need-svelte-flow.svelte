@@ -20,6 +20,7 @@
 	import NeedNodePanel from './need-node-panel.svelte';
 	import NeedCharacterEdgePanel from './need-character-edge-panel.svelte';
 	import NeedFulfillmentNodePanel from './need-fulfillment-node-panel.svelte';
+	import NeedCharacterEdge from './need-character-edge.svelte';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
 	const { store: characterStore } = useCharacter();
@@ -64,6 +65,10 @@
 		fulfillment: NeedFulfillmentNode,
 	};
 
+	const edgeTypes = {
+		characterNeed: NeedCharacterEdge,
+	};
+
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let layoutApplied = $state(false);
@@ -95,7 +100,7 @@
 				const characterId = connection.source.replace('character-', '');
 				const needId = connection.target.replace('need-', '');
 
-				await admin.createCharacterNeed({
+				const newCharacterNeed = await admin.createCharacterNeed({
 					character_id: characterId,
 					need_id: needId,
 				});
@@ -104,9 +109,12 @@
 					...edges,
 					{
 						id: `character-need-${characterId}-${needId}`,
+						type: 'characterNeed',
 						source: connection.source,
 						target: connection.target,
+						data: { characterNeed: newCharacterNeed },
 						deletable: true,
+						style: 'stroke: var(--color-blue-500)',
 					},
 				];
 			}
@@ -139,7 +147,7 @@
 			const newFulfillment = await admin.createNeedFulfillment({
 				need_id: needId,
 				fulfillment_type: 'building',
-				amount: 10,
+				increase_per_tick: 10,
 			});
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
@@ -182,10 +190,7 @@
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				if (node.type === 'need') {
-					const needId = node.id.replace('need-', '');
-					await admin.removeNeed(needId);
-				} else if (node.type === 'fulfillment') {
+				if (node.type === 'fulfillment') {
 					const fulfillmentId = node.id.replace('fulfillment-', '');
 					await admin.removeNeedFulfillment(fulfillmentId);
 				}
@@ -228,7 +233,7 @@
 				type: 'need',
 				data: { need },
 				position: { x: COLUMN_GAP, y: index * ROW_GAP },
-				deletable: true,
+				deletable: false,
 			});
 		});
 
@@ -247,9 +252,12 @@
 		characterNeeds.forEach((cn) => {
 			newEdges.push({
 				id: `character-need-${cn.character_id}-${cn.need_id}`,
+				type: 'characterNeed',
 				source: `character-${cn.character_id}`,
 				target: `need-${cn.need_id}`,
+				data: { characterNeed: cn },
 				deletable: true,
+				style: 'stroke: var(--color-blue-500)',
 			});
 		});
 
@@ -285,6 +293,7 @@
 	{nodes}
 	{edges}
 	{nodeTypes}
+	{edgeTypes}
 	{isValidConnection}
 	colorMode={mode.current}
 	{onconnect}

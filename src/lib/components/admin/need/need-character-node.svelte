@@ -20,5 +20,5 @@
 		{character.name}
 	</span>
 
-	<Handle type="source" position={Position.Right} />
+	<Handle type="source" position={Position.Right} style="background-color: var(--color-blue-500)" />
 </div>

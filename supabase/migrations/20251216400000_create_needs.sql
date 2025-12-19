@@ -14,7 +14,7 @@ create table needs (
 
   max_value float not null default 100,
   initial_value float not null default 50,
-  decay_per_tick float not null default 0,
+  decrease_per_tick float not null default 0,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
@@ -56,7 +56,7 @@ create table need_fulfillments (
 
   fulfillment_type need_fulfillment_type not null,
   building_id uuid references buildings(id) on delete cascade,
-  amount float not null,
+  increase_per_tick float not null default 0,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null

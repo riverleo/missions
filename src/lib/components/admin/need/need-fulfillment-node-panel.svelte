@@ -13,7 +13,7 @@
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { IconCategory, IconBuilding } from '@tabler/icons-svelte';
+	import { IconCategory } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -30,9 +30,9 @@
 
 	const fulfillmentTypeOptions: { value: NeedFulfillmentType; label: string }[] = [
 		{ value: 'building', label: '건물' },
-		{ value: 'task', label: '작업' },
+		{ value: 'task', label: '할 일' },
 		{ value: 'item', label: '아이템' },
-		{ value: 'idle', label: '휴식' },
+		{ value: 'idle', label: '대기' },
 	];
 
 	function getTypeLabel(type: NeedFulfillmentType) {
@@ -65,7 +65,7 @@
 			.updateNeedFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
 				building_id: changes.fulfillment_type === 'building' ? changes.building_id : null,
-				amount: changes.amount,
+				increase_per_tick: changes.increase_per_tick,
 			})
 			.then(() => {
 				// 선택 해제
@@ -109,27 +109,29 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>
-								<IconCategory class="size-4" />
-							</ButtonGroupText>
-							<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
-								<SelectTrigger class="flex-1">
-									{getTypeLabel(changes.fulfillment_type)}
-								</SelectTrigger>
-								<SelectContent>
-									{#each fulfillmentTypeOptions as option (option.value)}
-										<SelectItem value={option.value}>{option.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-
-						{#if changes.fulfillment_type === 'building'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>
-									<IconBuilding class="size-4" />
+									<IconCategory class="size-4" />
 								</ButtonGroupText>
-								<Select type="single" value={changes.building_id ?? undefined} onValueChange={onBuildingChange}>
+								<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
+									<SelectTrigger class="flex-1">
+										{getTypeLabel(changes.fulfillment_type)}
+									</SelectTrigger>
+									<SelectContent>
+										{#each fulfillmentTypeOptions as option (option.value)}
+											<SelectItem value={option.value}>{option.label}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+
+							<ButtonGroup class="w-full">
+								<Select
+									type="single"
+									value={changes.building_id ?? undefined}
+									onValueChange={onBuildingChange}
+									disabled={changes.fulfillment_type !== 'building'}
+								>
 									<SelectTrigger class="flex-1">
 										{selectedBuildingName}
 									</SelectTrigger>
@@ -140,13 +142,13 @@
 									</SelectContent>
 								</Select>
 							</ButtonGroup>
-						{/if}
+						</ButtonGroup>
 
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>충족량</InputGroupText>
+								<InputGroupText>시간당 증가</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" step="0.1" bind:value={changes.amount} />
+							<InputGroupInput type="number" step="0.1" bind:value={changes.increase_per_tick} />
 						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">

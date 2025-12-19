@@ -51,7 +51,7 @@
 				name: changes.name,
 				max_value: changes.max_value,
 				initial_value: changes.initial_value,
-				decay_per_tick: changes.decay_per_tick,
+				decrease_per_tick: changes.decrease_per_tick,
 			})
 			.then(() => {
 				// 선택 해제
@@ -110,7 +110,7 @@
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>시간당 감소</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" step="0.01" bind:value={changes.decay_per_tick} />
+							<InputGroupInput type="number" step="0.01" bind:value={changes.decrease_per_tick} />
 						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">

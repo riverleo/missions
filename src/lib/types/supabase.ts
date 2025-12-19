@@ -590,32 +590,32 @@ export type Database = {
       }
       need_fulfillments: {
         Row: {
-          amount: number
           building_id: string | null
           created_at: string
           created_by: string | null
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id: string
+          increase_per_tick: number
           need_id: string
           scenario_id: string
         }
         Insert: {
-          amount: number
           building_id?: string | null
           created_at?: string
           created_by?: string | null
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
+          increase_per_tick?: number
           need_id: string
           scenario_id: string
         }
         Update: {
-          amount?: number
           building_id?: string | null
           created_at?: string
           created_by?: string | null
           fulfillment_type?: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
+          increase_per_tick?: number
           need_id?: string
           scenario_id?: string
         }
@@ -654,7 +654,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          decay_per_tick: number
+          decrease_per_tick: number
           id: string
           initial_value: number
           max_value: number
@@ -664,7 +664,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          decay_per_tick?: number
+          decrease_per_tick?: number
           id?: string
           initial_value?: number
           max_value?: number
@@ -674,7 +674,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          decay_per_tick?: number
+          decrease_per_tick?: number
           id?: string
           initial_value?: number
           max_value?: number

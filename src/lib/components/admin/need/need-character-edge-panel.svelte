@@ -7,14 +7,11 @@
 		InputGroup,
 		InputGroupInput,
 		InputGroupAddon,
+		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { IconUser, IconTrendingDown } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
-	import { tick } from 'svelte';
 
 	interface Props {
 		characterNeed: CharacterNeed | undefined;
@@ -58,9 +55,7 @@
 			})
 			.then(() => {
 				// 선택 해제
-				flowEdges.update((es) =>
-					es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e))
-				);
+				flowEdges.update((es) => es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e)));
 			})
 			.catch((error: Error) => {
 				console.error('Failed to update character need:', error);
@@ -74,9 +69,7 @@
 		if (!characterNeed) return;
 
 		const edgeId = `character-need-${characterNeed.character_id}-${characterNeed.need_id}`;
-		flowEdges.update((es) =>
-			es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e))
-		);
+		flowEdges.update((es) => es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e)));
 	}
 
 	function onCharacterChange(value: string | undefined) {
@@ -91,29 +84,20 @@
 		<CardContent class="px-4">
 			{#if changes}
 				<form {onsubmit} class="space-y-4">
-					<div class="space-y-2">
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>
-								<IconUser class="size-4" />
-							</ButtonGroupText>
-							<Select type="single" value={changes.character_id} onValueChange={onCharacterChange}>
-								<SelectTrigger class="flex-1">
-									{selectedCharacterName}
-								</SelectTrigger>
-								<SelectContent>
-									{#each characters as character (character.id)}
-										<SelectItem value={character.id}>{character.name}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-						<InputGroup>
-							<InputGroupAddon align="inline-start">
-								<IconTrendingDown class="size-4" />
-							</InputGroupAddon>
-							<InputGroupInput type="number" step="0.1" bind:value={changes.decay_multiplier} placeholder="감소 배율" />
-						</InputGroup>
-					</div>
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>시간당 감소</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput
+							type="number"
+							step="0.1"
+							bind:value={changes.decay_multiplier}
+							placeholder="감소 배율"
+						/>
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>배</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
 					<div class="flex justify-end gap-2">
 						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
 							취소
