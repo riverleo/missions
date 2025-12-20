@@ -12,7 +12,7 @@
 	const stateTypes: CharacterStateType[] = ['idle', 'walk', 'jump'];
 </script>
 
-<ItemGroup class="grid grid-cols-4 gap-4">
+<ItemGroup class="grid grid-cols-5 gap-4">
 	{#each stateTypes as type (type)}
 		<CharacterStateItem {characterId} {type} />
 	{/each}
