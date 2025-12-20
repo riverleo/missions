@@ -1,9 +1,8 @@
 import type { LoopMode } from '$lib/types';
 import type { SpriteAnimation, SpriteMetadata } from './index';
-import { atlases } from './index';
+import { atlases, DEFAULT_FPS, DEFAULT_FRAME_FROM } from './index';
 
-const DEFAULT_FPS = 24;
-const DEFAULT_FRAME_COUNT = 1;
+const DEFAULT_FRAME_COUNT = 1; // fallback when metadata is missing
 
 export class SpriteAnimator {
 	private atlasName: string;

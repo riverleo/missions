@@ -1,21 +1,25 @@
 <script lang="ts">
 	import type { CharacterStateType, LoopMode } from '$lib/types';
 	import { Item, ItemContent, ItemTitle, ItemHeader } from '$lib/components/ui/item';
-	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
 		DropdownMenu,
 		DropdownMenuTrigger,
 		DropdownMenuContent,
 		DropdownMenuRadioGroup,
 		DropdownMenuRadioItem,
+		DropdownMenuSub,
+		DropdownMenuSubTrigger,
+		DropdownMenuSubContent,
+		DropdownMenuItem,
+		DropdownMenuSeparator,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
-	import { atlases } from '$lib/components/app/sprite-animator';
+	import { atlases, DEFAULT_FPS, DEFAULT_FRAME_FROM } from '$lib/components/app/sprite-animator';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
-	import { IconTrash } from '@tabler/icons-svelte';
+	import { IconAdjustmentsHorizontal } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { Button } from '$lib/components/ui/button';
@@ -157,9 +161,6 @@
 <Item variant="muted">
 	<ItemHeader>
 		<ItemTitle class="uppercase">{type}</ItemTitle>
-		<Button variant="ghost" size="icon-sm" disabled={!characterState} onclick={onDelete}>
-			<IconTrash />
-		</Button>
 	</ItemHeader>
 	<ItemContent class="w-full">
 		<AspectRatio ratio={4 / 3}>
@@ -184,12 +185,12 @@
 		</AspectRatio>
 	</ItemContent>
 	<ItemFooter>
-		<ButtonGroup class="w-full">
+		<div class="flex w-full justify-between">
 			<DropdownMenu>
-				<DropdownMenuTrigger class="flex-1">
+				<DropdownMenuTrigger>
 					{#snippet child({ props })}
-						<Button variant="outline" size="sm" class="w-full" {...props}>
-							{characterState?.atlas_name ?? '선택'}
+						<Button variant="ghost" size="sm" {...props}>
+							{characterState?.atlas_name ?? '애니메이션 선택'}
 						</Button>
 					{/snippet}
 				</DropdownMenuTrigger>
@@ -205,105 +206,79 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<DropdownMenu>
-				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
+				<DropdownMenuTrigger disabled={!characterState}>
 					{#snippet child({ props })}
-						<Button
-							variant="outline"
-							size="sm"
-							class="w-full"
-							disabled={!characterState}
-							{...props}
-						>
-							{characterState?.frame_from ?? '시작'}
+						<Button variant="ghost" size="icon-sm" disabled={!characterState} {...props}>
+							<IconAdjustmentsHorizontal class="size-4" />
 						</Button>
 					{/snippet}
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuRadioGroup
-						value={characterState?.frame_from?.toString() ?? ''}
-						onValueChange={onFrameFromChange}
-					>
-						{#each range(getFrameCount(characterState?.atlas_name)) as frame (frame)}
-							<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
-						{/each}
-					</DropdownMenuRadioGroup>
+					<DropdownMenuSub>
+						<DropdownMenuSubTrigger>
+							시작 프레임 ({characterState?.frame_from ?? DEFAULT_FRAME_FROM})
+						</DropdownMenuSubTrigger>
+						<DropdownMenuSubContent>
+							<DropdownMenuRadioGroup
+								value={characterState?.frame_from?.toString() ?? ''}
+								onValueChange={onFrameFromChange}
+							>
+								{#each range(getFrameCount(characterState?.atlas_name)) as frame (frame)}
+									<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
+								{/each}
+							</DropdownMenuRadioGroup>
+						</DropdownMenuSubContent>
+					</DropdownMenuSub>
+					<DropdownMenuSub>
+						<DropdownMenuSubTrigger>
+							종료 프레임 ({characterState?.frame_to ?? getFrameCount(characterState?.atlas_name)})
+						</DropdownMenuSubTrigger>
+						<DropdownMenuSubContent>
+							<DropdownMenuRadioGroup
+								value={characterState?.frame_to?.toString() ?? ''}
+								onValueChange={onFrameToChange}
+							>
+								{#each range(getFrameCount(characterState?.atlas_name)) as frame (frame)}
+									<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
+								{/each}
+							</DropdownMenuRadioGroup>
+						</DropdownMenuSubContent>
+					</DropdownMenuSub>
+					<DropdownMenuSub>
+						<DropdownMenuSubTrigger>
+							FPS ({characterState?.fps ?? DEFAULT_FPS})
+						</DropdownMenuSubTrigger>
+						<DropdownMenuSubContent>
+							<DropdownMenuRadioGroup
+								value={characterState?.fps?.toString() ?? ''}
+								onValueChange={onFpsChange}
+							>
+								{#each fpsOptions as fps (fps)}
+									<DropdownMenuRadioItem value={fps.toString()}>{fps} fps</DropdownMenuRadioItem>
+								{/each}
+							</DropdownMenuRadioGroup>
+						</DropdownMenuSubContent>
+					</DropdownMenuSub>
+					<DropdownMenuSub>
+						<DropdownMenuSubTrigger>
+							동작 흐름 ({loopOptions.find((o) => o.value === (characterState?.loop ?? 'loop'))
+								?.label})
+						</DropdownMenuSubTrigger>
+						<DropdownMenuSubContent>
+							<DropdownMenuRadioGroup
+								value={characterState?.loop ?? 'loop'}
+								onValueChange={onLoopChange}
+							>
+								{#each loopOptions as option (option.value)}
+									<DropdownMenuRadioItem value={option.value}>{option.label}</DropdownMenuRadioItem>
+								{/each}
+							</DropdownMenuRadioGroup>
+						</DropdownMenuSubContent>
+					</DropdownMenuSub>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem onclick={onDelete}>초기화</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
-			<DropdownMenu>
-				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
-					{#snippet child({ props })}
-						<Button
-							variant="outline"
-							size="sm"
-							class="w-full"
-							disabled={!characterState}
-							{...props}
-						>
-							{characterState?.frame_to ?? '종료'}
-						</Button>
-					{/snippet}
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuRadioGroup
-						value={characterState?.frame_to?.toString() ?? ''}
-						onValueChange={onFrameToChange}
-					>
-						{#each range(getFrameCount(characterState?.atlas_name)) as frame (frame)}
-							<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
-						{/each}
-					</DropdownMenuRadioGroup>
-				</DropdownMenuContent>
-			</DropdownMenu>
-			<DropdownMenu>
-				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
-					{#snippet child({ props })}
-						<Button
-							variant="outline"
-							size="sm"
-							class="w-full"
-							disabled={!characterState}
-							{...props}
-						>
-							{characterState?.fps ? `${characterState.fps} fps` : '프레임'}
-						</Button>
-					{/snippet}
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuRadioGroup
-						value={characterState?.fps?.toString() ?? ''}
-						onValueChange={onFpsChange}
-					>
-						{#each fpsOptions as fps (fps)}
-							<DropdownMenuRadioItem value={fps.toString()}>{fps} fps</DropdownMenuRadioItem>
-						{/each}
-					</DropdownMenuRadioGroup>
-				</DropdownMenuContent>
-			</DropdownMenu>
-			<DropdownMenu>
-				<DropdownMenuTrigger class="flex-1" disabled={!characterState}>
-					{#snippet child({ props })}
-						<Button
-							variant="outline"
-							size="sm"
-							class="w-full"
-							disabled={!characterState}
-							{...props}
-						>
-							{loopOptions.find((o) => o.value === characterState?.loop)?.label ?? '반복'}
-						</Button>
-					{/snippet}
-				</DropdownMenuTrigger>
-				<DropdownMenuContent>
-					<DropdownMenuRadioGroup
-						value={characterState?.loop ?? 'loop'}
-						onValueChange={onLoopChange}
-					>
-						{#each loopOptions as option (option.value)}
-							<DropdownMenuRadioItem value={option.value}>{option.label}</DropdownMenuRadioItem>
-						{/each}
-					</DropdownMenuRadioGroup>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		</ButtonGroup>
+		</div>
 	</ItemFooter>
 </Item>

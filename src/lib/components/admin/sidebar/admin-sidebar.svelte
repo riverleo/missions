@@ -58,8 +58,11 @@
 				{ title: '지형', href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined },
 				{
 					title: '캐릭터',
-					href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 					subItems: [
+						{
+							title: '애니메이션',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
+						},
 						{
 							title: '욕구',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
@@ -98,12 +101,21 @@
 					{#snippet child({ props })}
 						<SidebarMenuButton {...props} class={activeClass} isActive={isActive(item.href)}>
 							{#snippet child({ props: buttonProps })}
-								<a href={item.href} {...buttonProps}>
-									<span>{item.title}</span>
-									<IconChevronRight
-										class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-									/>
-								</a>
+								{#if item.href}
+									<a href={item.href} {...buttonProps}>
+										<span>{item.title}</span>
+										<IconChevronRight
+											class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+										/>
+									</a>
+								{:else}
+									<span {...buttonProps}>
+										<span>{item.title}</span>
+										<IconChevronRight
+											class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+										/>
+									</span>
+								{/if}
 							{/snippet}
 						</SidebarMenuButton>
 					{/snippet}
