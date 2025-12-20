@@ -162,7 +162,7 @@
 	<ItemHeader>
 		<ItemTitle class="uppercase">{type}</ItemTitle>
 	</ItemHeader>
-	<ItemContent class="w-full">
+	<ItemContent class="w-full overflow-hidden">
 		<AspectRatio ratio={4 / 3}>
 			{#if animator}
 				<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
@@ -189,8 +189,8 @@
 			<DropdownMenu>
 				<DropdownMenuTrigger>
 					{#snippet child({ props })}
-						<Button variant="ghost" size="sm" {...props}>
-							{characterState?.atlas_name ?? '애니메이션 선택'}
+						<Button variant="ghost" size="sm" class="justify-start truncate" {...props}>
+							{characterState?.atlas_name ?? '스프라이트 선택'}
 						</Button>
 					{/snippet}
 				</DropdownMenuTrigger>
