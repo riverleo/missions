@@ -588,6 +588,156 @@ export type Database = {
           },
         ]
       }
+      need_behavior_actions: {
+        Row: {
+          behavior_id: string
+          building_id: string | null
+          character_state_type:
+            | Database["public"]["Enums"]["character_state_type"]
+            | null
+          duration_per_second: number
+          failure_need_behavior_action_id: string | null
+          id: string
+          need_id: string
+          scenario_id: string
+          success_need_behavior_action_id: string | null
+          type: Database["public"]["Enums"]["need_behavior_action_type"]
+        }
+        Insert: {
+          behavior_id: string
+          building_id?: string | null
+          character_state_type?:
+            | Database["public"]["Enums"]["character_state_type"]
+            | null
+          duration_per_second?: number
+          failure_need_behavior_action_id?: string | null
+          id?: string
+          need_id: string
+          scenario_id: string
+          success_need_behavior_action_id?: string | null
+          type?: Database["public"]["Enums"]["need_behavior_action_type"]
+        }
+        Update: {
+          behavior_id?: string
+          building_id?: string | null
+          character_state_type?:
+            | Database["public"]["Enums"]["character_state_type"]
+            | null
+          duration_per_second?: number
+          failure_need_behavior_action_id?: string | null
+          id?: string
+          need_id?: string
+          scenario_id?: string
+          success_need_behavior_action_id?: string | null
+          type?: Database["public"]["Enums"]["need_behavior_action_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "need_behavior_actions_behavior_id_fkey"
+            columns: ["behavior_id"]
+            isOneToOne: false
+            referencedRelation: "need_behaviors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_failure_need_behavior_action_id_fkey"
+            columns: ["failure_need_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "need_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_success_need_behavior_action_id_fkey"
+            columns: ["success_need_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "need_behavior_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      need_behaviors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          first_action_id: string | null
+          id: string
+          name: string
+          need_id: string
+          need_threshold: number
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          first_action_id?: string | null
+          id?: string
+          name: string
+          need_id: string
+          need_threshold?: number
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          first_action_id?: string | null
+          id?: string
+          name?: string
+          need_id?: string
+          need_threshold?: number
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "need_behaviors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behaviors_first_action_id_fkey"
+            columns: ["first_action_id"]
+            isOneToOne: false
+            referencedRelation: "need_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behaviors_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behaviors_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       need_fulfillments: {
         Row: {
           building_id: string | null
@@ -1599,10 +1749,19 @@ export type Database = {
     }
     Enums: {
       building_state_type: "idle" | "damaged" | "planned"
-      character_state_type: "idle" | "walk" | "jump"
+      character_state_type:
+        | "idle"
+        | "walk"
+        | "jump"
+        | "eating"
+        | "sleeping"
+        | "angry"
+        | "sad"
+        | "happy"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
+      need_behavior_action_type: "go_to" | "wait" | "state"
       need_fulfillment_type: "building" | "task" | "item" | "idle"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
@@ -1741,10 +1900,20 @@ export const Constants = {
   public: {
     Enums: {
       building_state_type: ["idle", "damaged", "planned"],
-      character_state_type: ["idle", "walk", "jump"],
+      character_state_type: [
+        "idle",
+        "walk",
+        "jump",
+        "eating",
+        "sleeping",
+        "angry",
+        "sad",
+        "happy",
+      ],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
+      need_behavior_action_type: ["go_to", "wait", "state"],
       need_fulfillment_type: ["building", "task", "item", "idle"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],

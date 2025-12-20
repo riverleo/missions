@@ -211,6 +211,9 @@
 6. **테이블 생성 스타일**
    - 가능하면 `create table` 문 안에서 모든 constraint를 한번에 정의
    - `alter table`로 나중에 추가하는 것보다 inline constraint 선호
+   - **쿼리 편의를 위해 조인용 ID 컬럼 추가**: 하위 테이블에서 상위 테이블을 직접 조인할 수 있도록 중간 테이블의 ID도 함께 저장
+     - 예: `need_behavior_actions`에서 `behavior_id`뿐만 아니라 `scenario_id`, `need_id`도 추가
+     - 이렇게 하면 중간 조인 없이 바로 쿼리 가능
    - 예:
 
      ```sql
