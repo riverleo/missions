@@ -14,8 +14,9 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { IconAxisX, IconAxisY, IconMathXy } from '@tabler/icons-svelte';
+	import { IconAxisX, IconAxisY } from '@tabler/icons-svelte';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { debounce } from 'radash';
 
 	interface Props {
 		characterId: string;
@@ -70,12 +71,7 @@
 		});
 	}
 
-	function onkeydownOffset(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			(e.target as HTMLInputElement).blur();
-			updateOffset();
-		}
-	}
+	const debouncedUpdateOffset = debounce({ delay: 300 }, updateOffset);
 </script>
 
 <SpriteStateItem
@@ -99,14 +95,13 @@
 										</InputGroupButton>
 									{/snippet}
 								</TooltipTrigger>
-								<TooltipContent>X축 기준 미세 조정</TooltipContent>
+								<TooltipContent>X축 미세 조정</TooltipContent>
 							</Tooltip>
 						</InputGroupAddon>
 						<InputGroupInput
 							type="number"
 							bind:value={offsetX}
-							onkeydown={onkeydownOffset}
-							onblur={updateOffset}
+							oninput={debouncedUpdateOffset}
 							placeholder="X"
 						/>
 					</InputGroup>
@@ -122,14 +117,13 @@
 										</InputGroupButton>
 									{/snippet}
 								</TooltipTrigger>
-								<TooltipContent>Y축 기준 미세 조정</TooltipContent>
+								<TooltipContent>Y축 미세 조정</TooltipContent>
 							</Tooltip>
 						</InputGroupAddon>
 						<InputGroupInput
 							type="number"
 							bind:value={offsetY}
-							onkeydown={onkeydownOffset}
-							onblur={updateOffset}
+							oninput={debouncedUpdateOffset}
 							placeholder="Y"
 						/>
 					</InputGroup>
