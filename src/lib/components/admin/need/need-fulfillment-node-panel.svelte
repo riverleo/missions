@@ -7,10 +7,11 @@
 		InputGroup,
 		InputGroupInput,
 		InputGroupAddon,
-		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { IconCategory } from '@tabler/icons-svelte';
@@ -110,9 +111,6 @@
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>
-									<IconCategory class="size-4" />
-								</ButtonGroupText>
 								<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
 									<SelectTrigger class="flex-1">
 										{getTypeLabel(changes.fulfillment_type)}
@@ -146,7 +144,16 @@
 
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>시간당 증가</InputGroupText>
+								<Tooltip>
+									<TooltipTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton {...props} variant="ghost">시간당 증가</InputGroupButton>
+										{/snippet}
+									</TooltipTrigger>
+									<TooltipContent>
+										캐릭터가 이 충족 수단을 이용할 때 틱당 증가하는 욕구 수치입니다
+									</TooltipContent>
+								</Tooltip>
 							</InputGroupAddon>
 							<InputGroupInput type="number" step="0.1" bind:value={changes.increase_per_tick} />
 						</InputGroup>

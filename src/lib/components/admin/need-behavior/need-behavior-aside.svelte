@@ -3,11 +3,12 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
+	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import NeedBehaviorCommand from './need-behavior-command.svelte';
 	import NeedBehaviorCreateDialog from './need-behavior-create-dialog.svelte';
+	import NeedBehaviorUpdateDialog from './need-behavior-update-dialog.svelte';
 	import NeedBehaviorDeleteDialog from './need-behavior-delete-dialog.svelte';
 
 	const { openDialog } = useNeedBehavior();
@@ -47,6 +48,23 @@
 					</TooltipTrigger>
 					<TooltipContent>새로운 행동 생성</TooltipContent>
 				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button
+								{...props}
+								variant="outline"
+								size="icon"
+								disabled={!currentBehaviorId}
+								onclick={() =>
+									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId })}
+							>
+								<IconEditCircle class="size-4" />
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>행동 수정</TooltipContent>
+				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
 		<ButtonGroup>
@@ -76,4 +94,5 @@
 </aside>
 
 <NeedBehaviorCreateDialog />
+<NeedBehaviorUpdateDialog />
 <NeedBehaviorDeleteDialog />

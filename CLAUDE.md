@@ -405,6 +405,33 @@
   });
   ```
 
+## Flow ID 유틸리티
+
+- **위치**: `$lib/utils/flow-id.ts`
+- **목적**: SvelteFlow에서 사용하는 노드/엣지 ID의 생성 및 파싱을 중앙화
+- **규칙**: 모든 SvelteFlow 노드/엣지 ID 생성 로직은 이 파일에 정의
+- **함수 패턴**:
+  - `create{Type}NodeId(entity)`: 노드 ID 생성 (예: `createNeedNodeId(need)` → `"need-{id}"`)
+  - `parse{Type}NodeId(nodeId)`: 노드 ID에서 entity ID 추출
+  - `is{Type}NodeId(nodeId)`: 노드 ID 타입 체크
+  - `create{Type}EdgeId(...)`: 엣지 ID 생성
+  - `is{Type}EdgeId(edgeId)`: 엣지 ID 타입 체크
+- **예시**:
+  ```typescript
+  // ❌ 나쁜 예: 컴포넌트에서 직접 ID 생성
+  const nodeId = `need-${need.id}`;
+  const entityId = nodeId.replace('need-', '');
+
+  // ✅ 좋은 예: 유틸리티 함수 사용
+  import { createNeedNodeId, parseNeedNodeId } from '$lib/utils/flow-id';
+  const nodeId = createNeedNodeId(need);
+  const entityId = parseNeedNodeId(nodeId);
+  ```
+- **이점**:
+  - ID 형식 변경 시 한 곳만 수정
+  - 타입 안전성 보장
+  - 일관된 ID 형식 유지
+
 ## RecordFetchState 타입
 
 - `data` 필드는 **항상 정의됨** (non-optional)

@@ -13,6 +13,7 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconCategory } from '@tabler/icons-svelte';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { createActionNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -84,8 +85,9 @@
 			})
 			.then(() => {
 				// 선택 해제
+				const nodeId = `action-${actionId}`;
 				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === `action-${actionId}` ? { ...n, selected: false } : n))
+					ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n))
 				);
 			})
 			.catch((error: Error) => {
@@ -100,7 +102,7 @@
 		if (!action) return;
 
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === `action-${action.id}` ? { ...n, selected: false } : n))
+			ns.map((n) => (n.id === createActionNodeId(action) ? { ...n, selected: false } : n))
 		);
 	}
 </script>

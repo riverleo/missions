@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CharacterStateType } from '$lib/types';
-	import { ItemGroup } from '$lib/components/ui/item';
+	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import CharacterStateItem from './character-state-item.svelte';
 
 	interface Props {
@@ -12,8 +12,8 @@
 	const stateTypes: CharacterStateType[] = ['idle', 'walk', 'jump'];
 </script>
 
-<ItemGroup class="grid w-full grid-cols-5 gap-4">
-	{#each stateTypes as type (type)}
-		<CharacterStateItem {characterId} {type} />
-	{/each}
-</ItemGroup>
+<SpriteStateItemGroup types={stateTypes}>
+	{#snippet item(type)}
+		<CharacterStateItem {characterId} type={type as CharacterStateType} />
+	{/snippet}
+</SpriteStateItemGroup>

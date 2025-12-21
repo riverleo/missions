@@ -11,8 +11,20 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
+	import { page } from '$app/state';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import {
+		createCharacterNodeId,
+		parseCharacterNodeId,
+		createNeedNodeId,
+		parseNeedNodeId,
+		createFulfillmentNodeId,
+		parseFulfillmentNodeId,
+		createCharacterNeedEdgeId,
+		isCharacterNeedEdgeId,
+		createNeedFulfillmentEdgeId,
+	} from '$lib/utils/flow-id';
 	import NeedNode from './need-node.svelte';
 	import NeedCharacterNode from './need-character-node.svelte';
 	import NeedFulfillmentNode from './need-fulfillment-node.svelte';
@@ -29,10 +41,17 @@
 	const flowEdges = useEdges();
 	const { screenToFlowPosition } = useSvelteFlow();
 
-	// 데이터
-	const needs = $derived(Object.values($needStore.data));
-	const needFulfillments = $derived(Object.values($needFulfillmentStore.data));
-	const characterNeeds = $derived(Object.values($characterNeedStore.data));
+	// URL에서 선택된 욕구 ID
+	const needId = $derived(page.params.needId);
+
+	// 데이터 (선택된 욕구 기준으로 필터링)
+	const need = $derived(needId ? $needStore.data[needId] : undefined);
+	const needFulfillments = $derived(
+		Object.values($needFulfillmentStore.data).filter((nf) => nf.need_id === needId)
+	);
+	const characterNeeds = $derived(
+		Object.values($characterNeedStore.data).filter((cn) => cn.need_id === needId)
+	);
 	const characters = $derived(Object.values($characterStore.data));
 
 	// 선택된 노드/엣지
@@ -41,22 +60,20 @@
 
 	// 선택된 항목에 따른 데이터
 	const selectedNeed = $derived(
-		selectedNode?.type === 'need'
-			? needs.find((n) => n.id === selectedNode.id.replace('need-', ''))
+		selectedNode?.type === 'need' && need && selectedNode.id === createNeedNodeId(need)
+			? need
 			: undefined
 	);
 
 	const selectedFulfillment = $derived(
 		selectedNode?.type === 'fulfillment'
-			? needFulfillments.find((nf) => nf.id === selectedNode.id.replace('fulfillment-', ''))
+			? needFulfillments.find((nf) => nf.id === parseFulfillmentNodeId(selectedNode.id))
 			: undefined
 	);
 
 	const selectedCharacterNeed = $derived(() => {
-		if (!selectedEdge?.id.startsWith('character-need-')) return undefined;
-		return characterNeeds.find(
-			(cn) => `character-need-${cn.character_id}-${cn.need_id}` === selectedEdge.id
-		);
+		if (!selectedEdge || !isCharacterNeedEdgeId(selectedEdge.id)) return undefined;
+		return characterNeeds.find((cn) => createCharacterNeedEdgeId(cn) === selectedEdge.id);
 	});
 
 	const nodeTypes = {
@@ -97,8 +114,8 @@
 
 			// character → need 연결: character_needs 생성
 			if (sourceNode.type === 'character' && targetNode.type === 'need') {
-				const characterId = connection.source.replace('character-', '');
-				const needId = connection.target.replace('need-', '');
+				const characterId = parseCharacterNodeId(connection.source);
+				const needId = parseNeedNodeId(connection.target);
 
 				const newCharacterNeed = await admin.createCharacterNeed({
 					character_id: characterId,
@@ -108,7 +125,7 @@
 				edges = [
 					...edges,
 					{
-						id: `character-need-${characterId}-${needId}`,
+						id: createCharacterNeedEdgeId(newCharacterNeed),
 						type: 'characterNeed',
 						source: connection.source,
 						target: connection.target,
@@ -141,7 +158,7 @@
 		skipConvertEffect = true;
 
 		try {
-			const needId = sourceNode.id.replace('need-', '');
+			const needId = parseNeedNodeId(sourceNode.id);
 
 			// 새 fulfillment 생성
 			const newFulfillment = await admin.createNeedFulfillment({
@@ -157,7 +174,7 @@
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newFulfillment) {
 				nodes = nodes.map((n) =>
-					n.id === `fulfillment-${newFulfillment.id}` ? { ...n, position } : n
+					n.id === createFulfillmentNodeId(newFulfillment) ? { ...n, position } : n
 				);
 				layoutApplied = true;
 			}
@@ -178,9 +195,9 @@
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
 				// character_needs 삭제
-				if (edge.id.startsWith('character-need-')) {
+				if (isCharacterNeedEdgeId(edge.id)) {
 					const characterNeed = characterNeeds.find(
-						(cn) => `character-need-${cn.character_id}-${cn.need_id}` === edge.id
+						(cn) => createCharacterNeedEdgeId(cn) === edge.id
 					);
 					if (characterNeed) {
 						await admin.removeCharacterNeed(characterNeed.id);
@@ -191,7 +208,7 @@
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'fulfillment') {
-					const fulfillmentId = node.id.replace('fulfillment-', '');
+					const fulfillmentId = parseFulfillmentNodeId(node.id);
 					await admin.removeNeedFulfillment(fulfillmentId);
 				}
 			}
@@ -218,7 +235,7 @@
 		// 1. Character 노드 (왼쪽 열)
 		characters.forEach((character, index) => {
 			newNodes.push({
-				id: `character-${character.id}`,
+				id: createCharacterNodeId(character),
 				type: 'character',
 				data: { character },
 				position: { x: 0, y: index * ROW_GAP },
@@ -226,21 +243,21 @@
 			});
 		});
 
-		// 2. Need 노드 (가운데 열)
-		needs.forEach((need, index) => {
+		// 2. Need 노드 (가운데)
+		if (need) {
 			newNodes.push({
-				id: `need-${need.id}`,
+				id: createNeedNodeId(need),
 				type: 'need',
 				data: { need },
-				position: { x: COLUMN_GAP, y: index * ROW_GAP },
+				position: { x: COLUMN_GAP, y: 0 },
 				deletable: false,
 			});
-		});
+		}
 
 		// 3. Fulfillment 노드 (오른쪽 열)
 		needFulfillments.forEach((fulfillment, index) => {
 			newNodes.push({
-				id: `fulfillment-${fulfillment.id}`,
+				id: createFulfillmentNodeId(fulfillment),
 				type: 'fulfillment',
 				data: { fulfillment },
 				position: { x: COLUMN_GAP * 2, y: index * ROW_GAP },
@@ -250,11 +267,15 @@
 
 		// 4. character_needs 엣지
 		characterNeeds.forEach((cn) => {
+			const character = characters.find((c) => c.id === cn.character_id);
+			const targetNeed = need && cn.need_id === need.id ? need : undefined;
+			if (!character || !targetNeed) return;
+
 			newEdges.push({
-				id: `character-need-${cn.character_id}-${cn.need_id}`,
+				id: createCharacterNeedEdgeId(cn),
 				type: 'characterNeed',
-				source: `character-${cn.character_id}`,
-				target: `need-${cn.need_id}`,
+				source: createCharacterNodeId(character),
+				target: createNeedNodeId(targetNeed),
 				data: { characterNeed: cn },
 				deletable: true,
 				style: 'stroke: var(--color-blue-500)',
@@ -263,10 +284,11 @@
 
 		// 5. need → fulfillment 엣지
 		needFulfillments.forEach((nf) => {
+			if (!need) return;
 			newEdges.push({
-				id: `need-fulfillment-${nf.need_id}-${nf.id}`,
-				source: `need-${nf.need_id}`,
-				target: `fulfillment-${nf.id}`,
+				id: createNeedFulfillmentEdgeId(nf),
+				source: createNeedNodeId(need),
+				target: createFulfillmentNodeId(nf),
 				deletable: false,
 			});
 		});
@@ -280,7 +302,7 @@
 	$effect(() => {
 		if (skipConvertEffect) return;
 
-		needs;
+		need;
 		characters;
 		characterNeeds;
 		needFulfillments;

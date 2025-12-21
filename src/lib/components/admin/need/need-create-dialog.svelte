@@ -10,8 +10,11 @@
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNeed } from '$lib/hooks/use-need';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	const { dialogStore, closeDialog, admin } = useNeed();
+	const scenarioId = $derived(page.params.scenarioId);
 
 	const open = $derived($dialogStore?.type === 'create');
 
@@ -38,8 +41,9 @@
 
 		admin
 			.createNeed({ name: name.trim() })
-			.then(() => {
+			.then((need) => {
 				closeDialog();
+				goto(`/admin/scenarios/${scenarioId}/needs/${need.id}`);
 			})
 			.catch((error) => {
 				console.error('Failed to create need:', error);

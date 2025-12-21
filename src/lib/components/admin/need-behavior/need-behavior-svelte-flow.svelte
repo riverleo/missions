@@ -13,6 +13,11 @@
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import {
+		createActionNodeId,
+		parseActionNodeId,
+		isActionSuccessEdgeId,
+	} from '$lib/utils/flow-id';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
 	import NeedBehaviorActionNodePanel from './need-behavior-action-node-panel.svelte';
@@ -35,7 +40,7 @@
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
 	const selectedAction = $derived(
 		selectedNode?.type === 'action'
-			? actions.find((a) => a.id === selectedNode.id.replace('action-', ''))
+			? actions.find((a) => a.id === parseActionNodeId(selectedNode.id))
 			: undefined
 	);
 
@@ -63,8 +68,8 @@
 
 	async function onconnect(connection: Connection) {
 		try {
-			const sourceId = connection.source.replace('action-', '');
-			const targetId = connection.target.replace('action-', '');
+			const sourceId = parseActionNodeId(connection.source);
+			const targetId = parseActionNodeId(connection.target);
 
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
@@ -108,7 +113,7 @@
 		skipConvertEffect = true;
 
 		try {
-			const sourceActionId = sourceNode.id.replace('action-', '');
+			const sourceActionId = parseActionNodeId(sourceNode.id);
 			const isSuccess = connectionState.fromHandle?.id === 'success';
 
 			// 새 액션 생성
@@ -131,7 +136,7 @@
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newAction) {
 				nodes = nodes.map((n) =>
-					n.id === `action-${newAction.id}` ? { ...n, position } : n
+					n.id === createActionNodeId(newAction) ? { ...n, position } : n
 				);
 			}
 		} catch (error) {
@@ -150,8 +155,8 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				const sourceId = edge.source.replace('action-', '');
-				const isSuccess = edge.sourceHandle === 'success';
+				const sourceId = parseActionNodeId(edge.source);
+				const isSuccess = isActionSuccessEdgeId(edge.id);
 
 				await admin.updateAction(sourceId, {
 					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
@@ -162,7 +167,7 @@
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
-					const actionId = node.id.replace('action-', '');
+					const actionId = parseActionNodeId(node.id);
 					await admin.removeAction(actionId);
 				}
 			}
@@ -192,7 +197,7 @@
 			const col = index % 3;
 
 			newNodes.push({
-				id: `action-${action.id}`,
+				id: createActionNodeId(action),
 				type: 'action',
 				data: { action },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
@@ -203,27 +208,37 @@
 		// 성공/실패 엣지
 		actions.forEach((action) => {
 			if (action.success_need_behavior_action_id) {
-				newEdges.push({
-					id: `action-${action.id}-success-action-${action.success_need_behavior_action_id}`,
-					source: `action-${action.id}`,
-					sourceHandle: 'success',
-					target: `action-${action.success_need_behavior_action_id}`,
-					targetHandle: 'target',
-					style: 'stroke: var(--color-green-500)',
-					deletable: true,
-				});
+				const targetAction = actions.find(
+					(a) => a.id === action.success_need_behavior_action_id
+				);
+				if (targetAction) {
+					newEdges.push({
+						id: `${createActionNodeId(action)}-success-${createActionNodeId(targetAction)}`,
+						source: createActionNodeId(action),
+						sourceHandle: 'success',
+						target: createActionNodeId(targetAction),
+						targetHandle: 'target',
+						style: 'stroke: var(--color-green-500)',
+						deletable: true,
+					});
+				}
 			}
 
 			if (action.failure_need_behavior_action_id) {
-				newEdges.push({
-					id: `action-${action.id}-failure-action-${action.failure_need_behavior_action_id}`,
-					source: `action-${action.id}`,
-					sourceHandle: 'failure',
-					target: `action-${action.failure_need_behavior_action_id}`,
-					targetHandle: 'target',
-					style: 'stroke: var(--color-red-500)',
-					deletable: true,
-				});
+				const targetAction = actions.find(
+					(a) => a.id === action.failure_need_behavior_action_id
+				);
+				if (targetAction) {
+					newEdges.push({
+						id: `${createActionNodeId(action)}-failure-${createActionNodeId(targetAction)}`,
+						source: createActionNodeId(action),
+						sourceHandle: 'failure',
+						target: createActionNodeId(targetAction),
+						targetHandle: 'target',
+						style: 'stroke: var(--color-red-500)',
+						deletable: true,
+					});
+				}
 			}
 		});
 

@@ -8,7 +8,9 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
@@ -108,7 +110,16 @@
 						</div>
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>시간당 감소</InputGroupText>
+								<Tooltip>
+									<TooltipTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton {...props} variant="ghost">시간당 감소</InputGroupButton>
+										{/snippet}
+									</TooltipTrigger>
+									<TooltipContent>
+										게임 틱(tick)당 감소하는 욕구 수치입니다
+									</TooltipContent>
+								</Tooltip>
 							</InputGroupAddon>
 							<InputGroupInput type="number" step="0.01" bind:value={changes.decrease_per_tick} />
 						</InputGroup>

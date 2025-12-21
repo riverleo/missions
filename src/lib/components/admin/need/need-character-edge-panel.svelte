@@ -8,7 +8,9 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { clone } from 'radash';
@@ -86,11 +88,22 @@
 				<form {onsubmit} class="space-y-4">
 					<InputGroup>
 						<InputGroupAddon align="inline-start">
-							<InputGroupText>시간당 감소</InputGroupText>
+							<Tooltip>
+								<TooltipTrigger>
+									{#snippet child({ props })}
+										<InputGroupButton {...props} variant="ghost">시간당 감소</InputGroupButton>
+									{/snippet}
+								</TooltipTrigger>
+								<TooltipContent>
+									캐릭터별 욕구 감소 속도 배율입니다.
+									<br />
+									 기본값 1.0이며, 2.0은 두 배 빠르게 감소합니다.
+								</TooltipContent>
+							</Tooltip>
 						</InputGroupAddon>
 						<InputGroupInput
 							type="number"
-							step="0.1"
+							step="0.01"
 							bind:value={changes.decay_multiplier}
 							placeholder="감소 배율"
 						/>

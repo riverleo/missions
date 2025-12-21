@@ -8,6 +8,7 @@ import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
 import { useNeed } from './use-need';
+import { useNeedBehavior } from './use-need-behavior';
 
 type ScenarioStoreState = RecordFetchState<Scenario>;
 
@@ -75,6 +76,7 @@ function createScenarioStore() {
 			useCharacter().fetch(scenarioId),
 			useBuilding().fetch(scenarioId),
 			useNeed().fetch(scenarioId),
+			useNeedBehavior().fetch(scenarioId),
 		]);
 	}
 

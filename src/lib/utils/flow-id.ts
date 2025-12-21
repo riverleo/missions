@@ -2,7 +2,16 @@
  * Flow 노드 및 엣지의 ID를 생성/파싱하는 유틸리티 함수
  */
 
-import type { NarrativeDiceRoll, NarrativeNode, NarrativeNodeChoice } from '$lib/types';
+import type {
+	Character,
+	CharacterNeed,
+	NarrativeDiceRoll,
+	NarrativeNode,
+	NarrativeNodeChoice,
+	Need,
+	NeedBehaviorAction,
+	NeedFulfillment,
+} from '$lib/types';
 
 // Node IDs
 export function createNarrativeNodeId(narrativeNode: NarrativeNode): string {
@@ -120,4 +129,122 @@ export function isNarrativeDiceRollToSuccessEdge(edgeId: string): boolean {
 
 export function isNarrativeDiceRollToFailureEdge(edgeId: string): boolean {
 	return edgeId.includes('-failure-');
+}
+
+// ============================================
+// Need Flow Node/Edge IDs
+// ============================================
+
+// Character Node
+export function createCharacterNodeId(character: Character): string {
+	return `character-${character.id}`;
+}
+
+export function parseCharacterNodeId(nodeId: string): string {
+	return nodeId.replace('character-', '');
+}
+
+export function isCharacterNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('character-');
+}
+
+// Need Node
+export function createNeedNodeId(need: Need): string {
+	return `need-${need.id}`;
+}
+
+export function parseNeedNodeId(nodeId: string): string {
+	return nodeId.replace('need-', '');
+}
+
+export function isNeedNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('need-');
+}
+
+// Fulfillment Node
+export function createFulfillmentNodeId(fulfillment: NeedFulfillment): string {
+	return `fulfillment-${fulfillment.id}`;
+}
+
+export function parseFulfillmentNodeId(nodeId: string): string {
+	return nodeId.replace('fulfillment-', '');
+}
+
+export function isFulfillmentNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('fulfillment-');
+}
+
+// Character-Need Edge
+export function createCharacterNeedEdgeId(characterNeed: CharacterNeed): string {
+	return `character-need-${characterNeed.character_id}-${characterNeed.need_id}`;
+}
+
+export function parseCharacterNeedEdgeId(edgeId: string): {
+	characterId: string;
+	needId: string;
+} {
+	const parts = edgeId.replace('character-need-', '').split('-');
+	return { characterId: parts[0] ?? '', needId: parts[1] ?? '' };
+}
+
+export function isCharacterNeedEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('character-need-');
+}
+
+// Need-Fulfillment Edge
+export function createNeedFulfillmentEdgeId(fulfillment: NeedFulfillment): string {
+	return `need-fulfillment-${fulfillment.need_id}-${fulfillment.id}`;
+}
+
+export function parseNeedFulfillmentEdgeId(edgeId: string): {
+	needId: string;
+	fulfillmentId: string;
+} {
+	const parts = edgeId.replace('need-fulfillment-', '').split('-');
+	return { needId: parts[0] ?? '', fulfillmentId: parts[1] ?? '' };
+}
+
+export function isNeedFulfillmentEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('need-fulfillment-');
+}
+
+// ============================================
+// Need Behavior Flow Node/Edge IDs
+// ============================================
+
+// Action Node
+export function createActionNodeId(action: NeedBehaviorAction): string {
+	return `action-${action.id}`;
+}
+
+export function parseActionNodeId(nodeId: string): string {
+	return nodeId.replace('action-', '');
+}
+
+export function isActionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('action-');
+}
+
+// Action Success Edge
+export function createActionSuccessEdgeId(
+	sourceAction: NeedBehaviorAction,
+	targetAction: NeedBehaviorAction
+): string {
+	return `action-${sourceAction.id}-success-action-${targetAction.id}`;
+}
+
+export function isActionSuccessEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-success-action-');
+}
+
+// Action Failure Edge
+export function createActionFailureEdgeId(
+	sourceAction: NeedBehaviorAction,
+	targetAction: NeedBehaviorAction
+): string {
+	return `action-${sourceAction.id}-failure-action-${targetAction.id}`;
+}
+
+export function isActionFailureEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-failure-action-');
 }

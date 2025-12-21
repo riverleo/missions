@@ -25,15 +25,14 @@
 	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 
-	const { dialogStore, closeDialog, admin } = useNeedBehavior();
-	const scenarioId = $derived(page.params.scenarioId);
+	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
 	const { needStore } = useNeed();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($dialogStore?.type === 'update');
+	const behaviorId = $derived($dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined);
+	const currentBehavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
 
 	let name = $state('');
@@ -45,10 +44,10 @@
 	const selectedNeedName = $derived(selectedNeed?.name ?? '욕구 선택');
 
 	$effect(() => {
-		if (open) {
-			name = '';
-			needId = undefined;
-			needThreshold = 0;
+		if (open && currentBehavior) {
+			name = currentBehavior.name;
+			needId = currentBehavior.need_id;
+			needThreshold = currentBehavior.need_threshold;
 		}
 	});
 
@@ -64,22 +63,21 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!name.trim() || !needId || isSubmitting) return;
+		if (!behaviorId || !name.trim() || !needId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({
+			.update(behaviorId, {
 				name: name.trim(),
 				need_id: needId,
 				need_threshold: needThreshold,
 			})
-			.then((behavior) => {
+			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/behaviors/${behavior.id}`);
 			})
 			.catch((error) => {
-				console.error('Failed to create behavior:', error);
+				console.error('Failed to update behavior:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -90,7 +88,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 행동 생성</DialogTitle>
+			<DialogTitle>행동 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<InputGroup>
@@ -142,7 +140,7 @@
 			</InputGroup>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !needId}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>
 			</DialogFooter>
 		</form>

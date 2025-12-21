@@ -16,6 +16,7 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type NeedDialogState =
 	| { type: 'create' }
+	| { type: 'update'; needId: string }
 	| { type: 'delete'; needId: string }
 	| undefined;
 
