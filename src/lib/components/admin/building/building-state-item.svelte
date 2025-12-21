@@ -7,6 +7,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import WorldPlanningPlacementRect from '$lib/components/app/world/world-planning-placement-rect.svelte';
 	import { TILE_SIZE } from '$lib/components/app/world/constants';
+	import { getBuildingStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		buildingId: string;
@@ -46,7 +47,7 @@
 	}
 </script>
 
-<SpriteStateItem {type} spriteState={buildingState} {onchange} {ondelete}>
+<SpriteStateItem {type} label={getBuildingStateLabel(type)} spriteState={buildingState} {onchange} {ondelete}>
 	{#snippet bodyPreview()}
 		{#if $uiStore.showBodyPreview && building}
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

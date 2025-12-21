@@ -9,7 +9,16 @@
 
 	let { characterId }: Props = $props();
 
-	const stateTypes: CharacterStateType[] = ['idle', 'walk', 'jump'];
+	const stateTypes: CharacterStateType[] = [
+		'idle',
+		'walk',
+		'jump',
+		'eating',
+		'sleeping',
+		'angry',
+		'sad',
+		'happy',
+	];
 </script>
 
 <SpriteStateItemGroup types={stateTypes}>

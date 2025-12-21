@@ -1751,7 +1751,7 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
-      building_state_type: "idle" | "damaged" | "planned"
+      building_state_type: "idle" | "damaged" | "planning"
       character_state_type:
         | "idle"
         | "walk"
@@ -1902,7 +1902,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      building_state_type: ["idle", "damaged", "planned"],
+      building_state_type: ["idle", "damaged", "planning"],
       character_state_type: [
         "idle",
         "walk",

@@ -6,11 +6,13 @@
 		BackgroundVariant,
 		MiniMap,
 		useNodes,
+		useNodesInitialized,
 		useEdges,
 		useSvelteFlow,
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
+	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import {
@@ -18,6 +20,7 @@
 		parseActionNodeId,
 		isActionSuccessEdgeId,
 	} from '$lib/utils/flow-id';
+	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
 	import NeedBehaviorActionNodePanel from './need-behavior-action-node-panel.svelte';
@@ -28,13 +31,19 @@
 	const behavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
+			? Object.values($needBehaviorActionStore.data)
+					.filter((a) => a.behavior_id === behaviorId)
+					.sort((a, b) => a.order_in_need_behavior - b.order_in_need_behavior)
 			: []
 	);
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
+	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
+
+	// 레이아웃 적용 여부 추적
+	let layoutApplied = $state(false);
 
 	// 선택된 노드
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
@@ -74,7 +83,7 @@
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
 
-			await admin.updateAction(sourceId, {
+			await admin.updateNeedBehaviorAction(sourceId, {
 				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
 					targetId,
 			});
@@ -113,24 +122,33 @@
 		skipConvertEffect = true;
 
 		try {
-			const sourceActionId = parseActionNodeId(sourceNode.id);
-			const isSuccess = connectionState.fromHandle?.id === 'success';
+			const fromActionId = parseActionNodeId(sourceNode.id);
+			const fromHandleId = connectionState.fromHandle?.id;
 
 			// 새 액션 생성
-			const newAction = await admin.createAction({
+			const newAction = await admin.createNeedBehaviorAction({
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'wait',
-				order_in_need_behavior: actions.length,
 			});
 
 			// 연결 업데이트
-			await admin.updateAction(sourceActionId, {
-				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
-					newAction.id,
-			});
+			if (fromHandleId === 'target') {
+				// 좌측 핸들(target)에서 드래그: 새 액션의 성공이 기존 액션을 가리킴
+				await admin.updateNeedBehaviorAction(newAction.id, {
+					success_need_behavior_action_id: fromActionId,
+				});
+			} else {
+				// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
+				const isSuccess = fromHandleId === 'success';
+				await admin.updateNeedBehaviorAction(fromActionId, {
+					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
+						newAction.id,
+				});
+			}
 
 			skipConvertEffect = false;
+			await tick();
 			convertToNodesAndEdges();
 
 			// 새 노드의 위치를 드롭 위치로 설정
@@ -158,7 +176,7 @@
 				const sourceId = parseActionNodeId(edge.source);
 				const isSuccess = isActionSuccessEdgeId(edge.id);
 
-				await admin.updateAction(sourceId, {
+				await admin.updateNeedBehaviorAction(sourceId, {
 					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
 						null,
 				});
@@ -168,7 +186,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseActionNodeId(node.id);
-					await admin.removeAction(actionId);
+					await admin.removeNeedBehaviorAction(actionId);
 				}
 			}
 
@@ -196,10 +214,19 @@
 			const row = Math.floor(index / 3);
 			const col = index % 3;
 
+			// 이 액션을 가리키는 부모 액션 찾기
+			const parentAction = actions.find(
+				(a) =>
+					a.success_need_behavior_action_id === action.id ||
+					a.failure_need_behavior_action_id === action.id
+			);
+			const isSuccessTarget = parentAction?.success_need_behavior_action_id === action.id;
+			const isRoot = behavior?.first_action_id === action.id;
+
 			newNodes.push({
 				id: createActionNodeId(action),
 				type: 'action',
-				data: { action },
+				data: { action, isRoot, parentAction, isSuccessTarget },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
 				deletable: true,
 			});
@@ -244,6 +271,28 @@
 
 		nodes = newNodes;
 		edges = newEdges;
+		layoutApplied = false;
+	}
+
+	async function onlayout() {
+		if (nodes.length === 0) return;
+
+		try {
+			// flowNodes.current에서 측정된 크기를 가져옴
+			const nodesWithMeasured = flowNodes.current;
+
+			// success 엣지를 먼저 배치하여 위쪽에 오도록 정렬
+			const sortedEdges = [...edges].sort((a, b) => {
+				if (a.sourceHandle === 'success' && b.sourceHandle === 'failure') return -1;
+				if (a.sourceHandle === 'failure' && b.sourceHandle === 'success') return 1;
+				return 0;
+			});
+
+			const layoutedNodes = await applyElkLayout(nodesWithMeasured, sortedEdges);
+			nodes = layoutedNodes;
+		} catch (error) {
+			console.error('Failed to layout:', error);
+		}
 	}
 
 	// 데이터 변경 시 노드/엣지 재생성
@@ -252,6 +301,15 @@
 
 		actions;
 		convertToNodesAndEdges();
+	});
+
+	// 노드 측정 완료 후 레이아웃 자동 적용
+	$effect(() => {
+		if (nodesInitialized.current && !layoutApplied && nodes.length > 0) {
+			onlayout().then(() => {
+				layoutApplied = true;
+			});
+		}
 	});
 </script>
 
@@ -273,6 +331,6 @@
 	{#if selectedAction}
 		<NeedBehaviorActionNodePanel action={selectedAction} />
 	{:else}
-		<NeedBehaviorActionPanel {behavior} onlayout={convertToNodesAndEdges} />
+		<NeedBehaviorActionPanel {behavior} {onlayout} />
 	{/if}
 </SvelteFlow>

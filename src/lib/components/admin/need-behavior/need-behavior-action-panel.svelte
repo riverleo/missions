@@ -14,13 +14,7 @@
 
 	let { behavior, onlayout }: Props = $props();
 
-	const { needBehaviorActionStore, admin } = useNeedBehavior();
-
-	const actions = $derived(
-		behavior
-			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === behavior.id)
-			: []
-	);
+	const { admin } = useNeedBehavior();
 
 	let isLayouting = $state(false);
 	let isCreating = $state(false);
@@ -43,11 +37,10 @@
 		isCreating = true;
 
 		try {
-			await admin.createAction({
+			await admin.createNeedBehaviorAction({
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'wait',
-				order_in_need_behavior: actions.length,
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

@@ -9,7 +9,7 @@
 
 	let { buildingId }: Props = $props();
 
-	const stateTypes: BuildingStateType[] = ['idle', 'damaged', 'planned'];
+	const stateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
 </script>
 
 <SpriteStateItemGroup types={stateTypes}>

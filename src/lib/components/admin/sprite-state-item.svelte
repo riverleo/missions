@@ -42,13 +42,14 @@
 
 	interface Props {
 		type: string;
+		label?: string;
 		spriteState: SpriteState | undefined;
 		onchange: (change: SpriteStateChange) => void;
 		ondelete?: () => void;
 		bodyPreview?: Snippet;
 	}
 
-	let { type, spriteState, onchange, ondelete, bodyPreview }: Props = $props();
+	let { type, label, spriteState, onchange, ondelete, bodyPreview }: Props = $props();
 
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
@@ -137,7 +138,7 @@
 
 <Item variant="muted">
 	<ItemHeader>
-		<ItemTitle class="uppercase">{type}</ItemTitle>
+		<ItemTitle>{label ?? type}</ItemTitle>
 	</ItemHeader>
 	<ItemContent class="w-full overflow-hidden">
 		<AspectRatio ratio={4 / 3}>

@@ -6,6 +6,7 @@
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { getCharacterStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		characterId: string;
@@ -46,7 +47,7 @@
 	}
 </script>
 
-<SpriteStateItem {type} spriteState={characterState} {onchange} {ondelete}>
+<SpriteStateItem {type} label={getCharacterStateLabel(type)} spriteState={characterState} {onchange} {ondelete}>
 	{#snippet bodyPreview()}
 		{#if $uiStore.showBodyPreview && character && (character.width > 0 || character.height > 0)}
 			<svg class="pointer-events-none absolute inset-0 h-full w-full">

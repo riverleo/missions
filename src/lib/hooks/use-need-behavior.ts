@@ -148,7 +148,7 @@ function createNeedBehaviorStore() {
 		},
 
 		// NeedBehaviorAction CRUD
-		async createAction(action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
+		async createNeedBehaviorAction(action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useNeedBehavior: currentScenarioId is not set.');
 			}
@@ -170,7 +170,7 @@ function createNeedBehaviorStore() {
 			return data;
 		},
 
-		async updateAction(id: string, action: NeedBehaviorActionUpdate) {
+		async updateNeedBehaviorAction(id: string, action: NeedBehaviorActionUpdate) {
 			const { error } = await supabase.from('need_behavior_actions').update(action).eq('id', id);
 
 			if (error) throw error;
@@ -184,7 +184,7 @@ function createNeedBehaviorStore() {
 			);
 		},
 
-		async removeAction(id: string) {
+		async removeNeedBehaviorAction(id: string) {
 			const { error } = await supabase.from('need_behavior_actions').delete().eq('id', id);
 
 			if (error) throw error;

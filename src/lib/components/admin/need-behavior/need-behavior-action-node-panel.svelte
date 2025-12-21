@@ -11,9 +11,10 @@
 	} from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconCategory } from '@tabler/icons-svelte';
+	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { createActionNodeId } from '$lib/utils/flow-id';
+	import { getCharacterStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -49,7 +50,11 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
-	const selectedStateLabel = $derived(changes?.character_state_type ?? '상태 선택');
+	const selectedStateLabel = $derived(
+		changes?.character_state_type
+			? getCharacterStateLabel(changes.character_state_type)
+			: '상태 선택'
+	);
 
 	$effect(() => {
 		if (action && action.id !== currentActionId) {
@@ -78,17 +83,16 @@
 		isUpdating = true;
 
 		admin
-			.updateAction(actionId, {
+			.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
+				order_in_need_behavior: changes.order_in_need_behavior,
 				duration_per_second: changes.duration_per_second,
 				character_state_type: changes.character_state_type,
 			})
 			.then(() => {
 				// 선택 해제
 				const nodeId = `action-${actionId}`;
-				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n))
-				);
+				flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 			})
 			.catch((error: Error) => {
 				console.error('Failed to update action:', error);
@@ -114,11 +118,16 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>
-								<IconCategory class="size-4" />
-							</ButtonGroupText>
+							<Tooltip>
+								<TooltipTrigger>
+									{#snippet child({ props })}
+										<ButtonGroupText {...props}>타입</ButtonGroupText>
+									{/snippet}
+								</TooltipTrigger>
+								<TooltipContent>액션 유형을 선택합니다</TooltipContent>
+							</Tooltip>
 							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
-								<SelectTrigger class="w-full">
+								<SelectTrigger class="flex-1">
 									{selectedTypeLabel}
 								</SelectTrigger>
 								<SelectContent>
@@ -128,6 +137,13 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
+
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<InputGroupText>실행 순서</InputGroupText>
+							</InputGroupAddon>
+							<InputGroupInput type="number" min="0" bind:value={changes.order_in_need_behavior} />
+						</InputGroup>
 
 						{#if changes.type === 'wait'}
 							<InputGroup>
@@ -143,18 +159,18 @@
 							</InputGroup>
 						{:else if changes.type === 'state'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>상태</ButtonGroupText>
+								<ButtonGroupText>캐릭터 상태</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.character_state_type ?? undefined}
 									onValueChange={onStateChange}
 								>
-									<SelectTrigger class="w-full">
+									<SelectTrigger class="flex-1">
 										{selectedStateLabel}
 									</SelectTrigger>
 									<SelectContent>
 										{#each stateTypes as stateType (stateType)}
-											<SelectItem value={stateType}>{stateType}</SelectItem>
+											<SelectItem value={stateType}>{getCharacterStateLabel(stateType)}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>
