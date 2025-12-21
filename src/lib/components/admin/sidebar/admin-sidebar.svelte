@@ -64,7 +64,7 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
-							title: '몸통',
+							title: '바디',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
 						},
 						{

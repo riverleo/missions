@@ -56,7 +56,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 몸통</DialogTitle>
+			<DialogTitle>새로운 바디</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
 			<InputGroup class="w-full">
@@ -65,7 +65,7 @@
 						<IconHeading class="size-4" />
 					</InputGroupText>
 				</InputGroupAddon>
-				<InputGroupInput placeholder="몸통 이름" bind:value={name} />
+				<InputGroupInput placeholder="바디 이름" bind:value={name} />
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="button" variant="outline" onclick={() => onOpenChange(false)}>취소</Button>

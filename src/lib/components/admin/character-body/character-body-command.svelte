@@ -28,7 +28,7 @@
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
-	<CommandInput placeholder="몸통 검색..." />
+	<CommandInput placeholder="바디 검색..." />
 	{#if bodies.length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />

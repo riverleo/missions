@@ -33,7 +33,7 @@
 	let isSubmitting = $state(false);
 
 	const selectedBodyLabel = $derived(
-		bodyId ? (bodies.find((b) => b.id === bodyId)?.name ?? '몸통 선택') : '몸통 선택'
+		bodyId ? (bodies.find((b) => b.id === bodyId)?.name ?? '바디 선택') : '바디 선택'
 	);
 
 	$effect(() => {
@@ -79,32 +79,35 @@
 		<DialogHeader>
 			<DialogTitle>새로운 캐릭터 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit} class="space-y-4">
-			<InputGroup class="w-full">
-				<InputGroupAddon align="inline-start">
-					<InputGroupText>
-						<IconHeading class="size-4" />
-					</InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
-			</InputGroup>
+		<form {onsubmit}>
 			<ButtonGroup class="w-full">
-				<ButtonGroupText>몸통</ButtonGroupText>
-				<Select type="single" value={bodyId} onValueChange={onBodyChange}>
-					<SelectTrigger class="flex-1">
-						{selectedBodyLabel}
-					</SelectTrigger>
-					<SelectContent>
-						{#each bodies as body (body.id)}
-							<SelectItem value={body.id}>{body.name}</SelectItem>
-						{/each}
-					</SelectContent>
-				</Select>
+				<ButtonGroup>
+					<Select type="single" value={bodyId} onValueChange={onBodyChange}>
+						<SelectTrigger>
+							{selectedBodyLabel}
+						</SelectTrigger>
+						<SelectContent>
+							{#each bodies as body (body.id)}
+								<SelectItem value={body.id}>{body.name}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+				</ButtonGroup>
+				<ButtonGroup class="flex-1">
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>
+								<IconHeading />
+							</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
+					</InputGroup>
+				</ButtonGroup>
 			</ButtonGroup>
 			{#if bodies.length === 0}
-				<p class="text-sm text-muted-foreground">먼저 몸통을 생성해주세요.</p>
+				<p class="text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
 			{/if}
-			<DialogFooter>
+			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting || !bodyId || !name.trim()}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>

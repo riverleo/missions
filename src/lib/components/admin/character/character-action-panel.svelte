@@ -28,8 +28,8 @@
 
 	const selectedBodyLabel = $derived(
 		character.body_id
-			? (bodies.find((b) => b.id === character.body_id)?.name ?? '몸통 선택')
-			: '몸통 선택'
+			? (bodies.find((b) => b.id === character.body_id)?.name ?? '바디 선택')
+			: '바디 선택'
 	);
 
 	async function updateName() {
@@ -64,7 +64,7 @@
 		</InputGroupAddon>
 	</InputGroup>
 	<ButtonGroup>
-		<ButtonGroupText class="whitespace-nowrap">몸통</ButtonGroupText>
+		<ButtonGroupText class="whitespace-nowrap">바디</ButtonGroupText>
 		<Select type="single" value={character.body_id} onValueChange={onBodyChange}>
 			<SelectTrigger class="min-w-40">
 				{selectedBodyLabel}

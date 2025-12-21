@@ -94,7 +94,7 @@
 								</Toggle>
 							{/snippet}
 						</TooltipTrigger>
-						<TooltipContent>활성화 시 몸통이 얼굴 앞에 렌더링됩니다.</TooltipContent>
+						<TooltipContent>활성화 시 바디가 얼굴 앞에 렌더링됩니다.</TooltipContent>
 					</Tooltip>
 					<Select
 						type="single"

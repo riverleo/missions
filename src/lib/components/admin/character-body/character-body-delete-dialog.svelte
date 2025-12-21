@@ -49,14 +49,14 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>몸통 삭제</DialogTitle>
+			<DialogTitle>바디 삭제</DialogTitle>
 			<DialogDescription>
 				{#if bodyToDelete}
-					<strong>{bodyToDelete.name || '이름없음'}</strong> 몸통을 삭제하시겠습니까?
+					<strong>{bodyToDelete.name || '이름없음'}</strong> 바디를 삭제하시겠습니까?
 					<br />
-					이 몸통을 사용하는 캐릭터가 있다면 삭제할 수 없습니다.
+					이 바디를 사용하는 캐릭터가 있다면 삭제할 수 없습니다.
 				{:else}
-					삭제할 몸통을 찾을 수 없습니다.
+					삭제할 바디를 찾을 수 없습니다.
 				{/if}
 			</DialogDescription>
 		</DialogHeader>

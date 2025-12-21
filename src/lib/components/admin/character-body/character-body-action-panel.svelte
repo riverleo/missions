@@ -71,7 +71,7 @@
 				<IconHeading class="size-4" />
 			</InputGroupText>
 		</InputGroupAddon>
-		<InputGroupInput bind:value={name} placeholder="몸통 이름" onkeydown={onkeydownName} />
+		<InputGroupInput bind:value={name} placeholder="바디 이름" onkeydown={onkeydownName} />
 		<InputGroupAddon align="inline-end">
 			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>

@@ -18,6 +18,6 @@
 	</div>
 {:else}
 	<div class="flex h-full items-center justify-center">
-		<p class="text-sm text-muted-foreground">몸통을 찾을 수 없습니다</p>
+		<p class="text-sm text-muted-foreground">바디를 찾을 수 없습니다</p>
 	</div>
 {/if}

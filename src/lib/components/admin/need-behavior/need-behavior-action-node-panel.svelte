@@ -219,7 +219,7 @@
 							</InputGroup>
 						{:else if changes.type === 'state'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText class="w-[72px]">몸통</ButtonGroupText>
+								<ButtonGroupText class="w-[72px]">바디</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.character_body_state_type ?? ''}

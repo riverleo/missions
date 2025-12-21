@@ -45,7 +45,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 몸통</TooltipContent>
+					<TooltipContent>새로운 바디</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
@@ -64,7 +64,7 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>몸통 삭제</TooltipContent>
+				<TooltipContent>바디 삭제</TooltipContent>
 			</Tooltip>
 		</ButtonGroup>
 	</ButtonGroup>

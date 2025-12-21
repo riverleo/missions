@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { CharacterFaceStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
-	import CharacterStateItem from './character-state-item.svelte';
+	import CharacterFaceStateItem from './character-face-state-item.svelte';
 
 	interface Props {
 		characterId: string;
@@ -14,6 +14,6 @@
 
 <SpriteStateItemGroup types={stateTypes}>
 	{#snippet item(type)}
-		<CharacterStateItem {characterId} type={type as CharacterFaceStateType} />
+		<CharacterFaceStateItem {characterId} type={type as CharacterFaceStateType} />
 	{/snippet}
 </SpriteStateItemGroup>

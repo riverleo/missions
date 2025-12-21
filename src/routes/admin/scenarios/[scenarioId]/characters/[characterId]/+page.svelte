@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterPanel from '$lib/components/admin/character/character-action-panel.svelte';
-	import CharacterStateItemGroup from '$lib/components/admin/character/character-state-item-group.svelte';
+	import CharacterFaceStateItemGroup from '$lib/components/admin/character/character-face-state-item-group.svelte';
 
 	const { store } = useCharacter();
 	const characterId = $derived(page.params.characterId);
@@ -12,7 +12,7 @@
 {#if character && characterId}
 	<div class="flex h-full flex-col">
 		<div class="flex p-4 pt-16">
-			<CharacterStateItemGroup {characterId} />
+			<CharacterFaceStateItemGroup {characterId} />
 		</div>
 		<CharacterPanel {character} />
 	</div>
