@@ -6,6 +6,7 @@ import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
+import { useCharacterBody } from './use-character-body';
 import { useBuilding } from './use-building';
 import { useNeed } from './use-need';
 import { useNeedBehavior } from './use-need-behavior';
@@ -74,6 +75,7 @@ function createScenarioStore() {
 			useChapter().fetch(scenarioId),
 			useTerrain().fetch(scenarioId),
 			useCharacter().fetch(scenarioId),
+			useCharacterBody().fetch(scenarioId),
 			useBuilding().fetch(scenarioId),
 			useNeed().fetch(scenarioId),
 			useNeedBehavior().fetch(scenarioId),

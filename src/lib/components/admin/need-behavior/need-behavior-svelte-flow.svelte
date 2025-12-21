@@ -31,9 +31,7 @@
 	const behavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($needBehaviorActionStore.data)
-					.filter((a) => a.behavior_id === behaviorId)
-					.sort((a, b) => a.order_in_need_behavior - b.order_in_need_behavior)
+			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
 			: []
 	);
 

@@ -335,6 +335,24 @@
     </InputGroup>
     ```
 
+- **ButtonGroup/InputGroup 내부 요소 스타일 금지**
+  - ButtonGroup이나 InputGroup 안에 Button, Toggle, Select 등을 넣을 때 스타일을 커스텀하지 말 것
+  - 이 컴포넌트들은 이미 그룹 내에서 적절한 스타일이 적용되도록 설계됨
+  - 예시:
+    ```svelte
+    <!-- ❌ 나쁜 예: 스타일 커스텀 -->
+    <ButtonGroup>
+      <Button variant="ghost" size="icon-sm" class="px-2">...</Button>
+      <SelectTrigger class="h-8 w-auto gap-1 border-0 px-2">...</SelectTrigger>
+    </ButtonGroup>
+
+    <!-- ✅ 좋은 예: 기본 스타일 사용 -->
+    <ButtonGroup>
+      <Button>...</Button>
+      <SelectTrigger>...</SelectTrigger>
+    </ButtonGroup>
+    ```
+
 - **InputGroup 내 DropdownMenu 사용 패턴**
   - `InputGroup` 내에서 `DropdownMenu`를 사용할 때는 `InputGroupButton`을 트리거로 사용
   - `DropdownMenuTrigger`의 `child` snippet을 사용하여 props 전달

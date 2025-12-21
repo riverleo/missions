@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import BuildingPanel from '$lib/components/admin/building/building-panel.svelte';
+	import BuildingPanel from '$lib/components/admin/building/building-action-panel.svelte';
 	import BuildingStateItemGroup from '$lib/components/admin/building/building-state-item-group.svelte';
 
 	const { store } = useBuilding();

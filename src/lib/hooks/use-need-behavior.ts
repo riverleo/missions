@@ -49,11 +49,7 @@ function createNeedBehaviorStore() {
 					.select('*')
 					.eq('scenario_id', scenarioId)
 					.order('name'),
-				supabase
-					.from('need_behavior_actions')
-					.select('*')
-					.eq('scenario_id', scenarioId)
-					.order('order_in_need_behavior'),
+				supabase.from('need_behavior_actions').select('*').eq('scenario_id', scenarioId),
 			]);
 
 			if (behaviorsResult.error) throw behaviorsResult.error;

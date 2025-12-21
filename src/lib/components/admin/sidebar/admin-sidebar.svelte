@@ -60,8 +60,12 @@
 					title: '캐릭터',
 					subItems: [
 						{
-							title: '스프라이트',
+							title: '관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
+						},
+						{
+							title: '몸통',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
 						},
 						{
 							title: '욕구',

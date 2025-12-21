@@ -48,7 +48,7 @@
 </script>
 
 <SpriteStateItem {type} label={getBuildingStateLabel(type)} spriteState={buildingState} {onchange} {ondelete}>
-	{#snippet bodyPreview()}
+	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && building}
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 				<WorldPlanningPlacementRect cols={building.tile_cols} rows={building.tile_rows} />

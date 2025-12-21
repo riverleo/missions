@@ -108,17 +108,31 @@ export type Terrain = Tables<'terrains'>;
 export type TerrainInsert = TablesInsert<'terrains'>;
 export type TerrainUpdate = TablesUpdate<'terrains'>;
 
-// CharacterState types
-export type CharacterStateType = Enums<'character_state_type'>;
+// CharacterBody types
+export type CharacterBodyStateType = Enums<'character_body_state_type'>;
 export type LoopMode = Enums<'loop_mode'>;
-export type CharacterState = Tables<'character_states'>;
-export type CharacterStateInsert = TablesInsert<'character_states'>;
-export type CharacterStateUpdate = TablesUpdate<'character_states'>;
+export type CharacterBodyState = Tables<'character_body_states'>;
+export type CharacterBodyStateInsert = TablesInsert<'character_body_states'>;
+export type CharacterBodyStateUpdate = TablesUpdate<'character_body_states'>;
+
+type CharacterBodyRow = Tables<'character_bodies'>;
+export type CharacterBody = CharacterBodyRow & {
+	character_body_states: CharacterBodyState[];
+};
+export type CharacterBodyInsert = TablesInsert<'character_bodies'>;
+export type CharacterBodyUpdate = TablesUpdate<'character_bodies'>;
+
+// CharacterFaceState types
+export type CharacterFaceStateType = Enums<'character_face_state_type'>;
+export type CharacterFaceState = Tables<'character_face_states'>;
+export type CharacterFaceStateInsert = TablesInsert<'character_face_states'>;
+export type CharacterFaceStateUpdate = TablesUpdate<'character_face_states'>;
 
 // Character types
 type CharacterRow = Tables<'characters'>;
 export type Character = CharacterRow & {
-	character_states: CharacterState[];
+	character_body: CharacterBody;
+	character_face_states: CharacterFaceState[];
 };
 export type CharacterInsert = TablesInsert<'characters'>;
 export type CharacterUpdate = TablesUpdate<'characters'>;

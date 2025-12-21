@@ -1,13 +1,19 @@
 import { execSync } from 'child_process';
 import { watch } from 'fs';
-import { readdir, writeFile } from 'fs/promises';
+import { readdir, writeFile, rename, unlink } from 'fs/promises';
 import { join } from 'path';
 import type { Plugin } from 'vite';
 import { debounce } from 'radash';
+import sharp from 'sharp';
 
 interface ImageSize {
 	width: number;
 	height: number;
+}
+
+interface FaceOffset {
+	x: number;
+	y: number;
 }
 
 interface AtlasMetadata {
@@ -17,7 +23,11 @@ interface AtlasMetadata {
 	columns: number;
 	rows: number;
 	frameCount: number;
+	faceOffsets?: FaceOffset[];
 }
+
+// 마커 색상 (마젠타 #FF00FF)
+const MARKER_COLOR = { r: 255, g: 0, b: 255 };
 
 const SOURCES_DIR = './src/lib/assets/atlas/sources';
 const GENERATED_DIR = './src/lib/assets/atlas/generated';
@@ -55,6 +65,135 @@ function sortByNumber(files: string[]): string[] {
 }
 
 /**
+ * 이미지에서 마커 색상 픽셀들의 중심점 찾기
+ * @returns 프레임 중앙 기준 offset, 마커가 없으면 undefined
+ */
+async function findMarkerOffset(imagePath: string): Promise<FaceOffset | undefined> {
+	try {
+		const image = sharp(imagePath);
+		const { width, height, channels } = await image.metadata();
+
+		if (!width || !height || !channels) return undefined;
+
+		const { data } = await image.raw().toBuffer({ resolveWithObject: true });
+
+		const centerX = width / 2;
+		const centerY = height / 2;
+
+		// 모든 마커 픽셀 수집
+		const markerPixels: { x: number; y: number }[] = [];
+
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				const idx = (y * width + x) * channels;
+				const r = data[idx];
+				const g = data[idx + 1];
+				const b = data[idx + 2];
+
+				if (r === MARKER_COLOR.r && g === MARKER_COLOR.g && b === MARKER_COLOR.b) {
+					markerPixels.push({ x, y });
+				}
+			}
+		}
+
+		if (markerPixels.length === 0) return undefined;
+
+		// 마커 픽셀들의 중심점 계산
+		const sumX = markerPixels.reduce((sum, p) => sum + p.x, 0);
+		const sumY = markerPixels.reduce((sum, p) => sum + p.y, 0);
+		const avgX = sumX / markerPixels.length;
+		const avgY = sumY / markerPixels.length;
+
+		return {
+			x: Math.round(avgX - centerX),
+			y: Math.round(avgY - centerY),
+		};
+	} catch (error) {
+		console.warn(`Failed to find marker in ${imagePath}:`, error);
+		return undefined;
+	}
+}
+
+/**
+ * 여러 이미지에서 마커 offset 추출
+ * 마커가 없는 프레임은 가장 가까운 마커 있는 프레임의 값 사용
+ */
+async function extractFaceOffsets(filePaths: string[]): Promise<FaceOffset[] | undefined> {
+	// 먼저 모든 프레임의 마커 추출 (없으면 undefined)
+	const rawOffsets: (FaceOffset | undefined)[] = [];
+
+	for (const filePath of filePaths) {
+		const offset = await findMarkerOffset(filePath);
+		rawOffsets.push(offset);
+	}
+
+	// 마커가 하나도 없으면 undefined 반환
+	const hasAnyMarker = rawOffsets.some((o) => o !== undefined);
+	if (!hasAnyMarker) return undefined;
+
+	// 마커 없는 프레임은 가장 가까운 마커 있는 프레임의 값으로 채움
+	const offsets: FaceOffset[] = rawOffsets.map((offset, idx) => {
+		if (offset) return offset;
+
+		// 앞뒤로 가장 가까운 마커 찾기
+		let nearestOffset: FaceOffset | undefined;
+		let nearestDistance = Infinity;
+
+		for (let i = 0; i < rawOffsets.length; i++) {
+			if (rawOffsets[i]) {
+				const distance = Math.abs(i - idx);
+				if (distance < nearestDistance) {
+					nearestDistance = distance;
+					nearestOffset = rawOffsets[i];
+				}
+			}
+		}
+
+		return nearestOffset ?? { x: 0, y: 0 };
+	});
+
+	return offsets;
+}
+
+/**
+ * 이미지에서 마젠타 마커 픽셀을 투명하게 교체
+ */
+async function removeMarkerPixels(imagePath: string): Promise<void> {
+	const image = sharp(imagePath);
+	const { width, height, channels } = await image.metadata();
+
+	if (!width || !height || !channels || channels < 4) return;
+
+	const { data } = await image.raw().toBuffer({ resolveWithObject: true });
+
+	// 마커 픽셀을 투명하게 교체
+	let markersRemoved = 0;
+	for (let i = 0; i < data.length; i += channels) {
+		const r = data[i];
+		const g = data[i + 1];
+		const b = data[i + 2];
+
+		if (r === MARKER_COLOR.r && g === MARKER_COLOR.g && b === MARKER_COLOR.b) {
+			// 투명하게 설정 (RGBA)
+			data[i] = 0; // R
+			data[i + 1] = 0; // G
+			data[i + 2] = 0; // B
+			data[i + 3] = 0; // A (투명)
+			markersRemoved++;
+		}
+	}
+
+	if (markersRemoved > 0) {
+		const tempPath = `${imagePath}.tmp`;
+		await sharp(data, { raw: { width, height, channels } })
+			.png()
+			.toFile(tempPath);
+		await unlink(imagePath);
+		await rename(tempPath, imagePath);
+	}
+}
+
+/**
  * Sprite Sheet 생성 (동일 크기 이미지들)
  */
 async function generateSpriteSheet(groupName: string, files: string[]): Promise<AtlasMetadata | undefined> {
@@ -76,8 +215,17 @@ async function generateSpriteSheet(groupName: string, files: string[]): Promise<
 	}
 	const { width: frameWidth, height: frameHeight } = getImageSize(firstFile);
 
+	// 마커에서 얼굴 위치 offset 추출
+	const faceOffsets = await extractFaceOffsets(files);
+
+	// 생성된 스프라이트 시트에서 마커 픽셀 제거
+	if (faceOffsets) {
+		await removeMarkerPixels(outputPath);
+	}
+
+	const hasMarkers = faceOffsets !== undefined;
 	console.log(
-		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${columns}x${rows} grid)`
+		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${columns}x${rows} grid${hasMarkers ? ', face markers removed' : ''})`
 	);
 
 	return {
@@ -87,6 +235,7 @@ async function generateSpriteSheet(groupName: string, files: string[]): Promise<
 		columns,
 		rows,
 		frameCount,
+		faceOffsets,
 	};
 }
 

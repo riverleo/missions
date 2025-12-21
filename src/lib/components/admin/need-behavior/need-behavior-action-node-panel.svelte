@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { NeedBehaviorAction, NeedBehaviorActionType, CharacterStateType } from '$lib/types';
+	import type {
+		NeedBehaviorAction,
+		NeedBehaviorActionType,
+		CharacterBodyStateType,
+		CharacterFaceStateType,
+	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -8,15 +13,15 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
-		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
+	import { IconCircleDashedNumber1, IconInfoCircle } from '@tabler/icons-svelte';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getCharacterStateLabel } from '$lib/utils/state-label';
+	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -27,24 +32,20 @@
 	let { action, hasParent = false }: Props = $props();
 
 	const { needBehaviorActionStore, admin } = useNeedBehavior();
+	const { store: buildingStore } = useBuilding();
 	const flowNodes = useNodes();
 
+	const buildings = $derived(Object.values($buildingStore.data));
+
 	const actionTypes: { value: NeedBehaviorActionType; label: string }[] = [
-		{ value: 'go_to', label: '이동' },
+		{ value: 'go', label: '이동' },
+		{ value: 'interact', label: '상호작용' },
 		{ value: 'wait', label: '대기' },
-		{ value: 'state', label: '상태' },
+		{ value: 'state', label: '캐릭터 상태' },
 	];
 
-	const stateTypes: CharacterStateType[] = [
-		'idle',
-		'walk',
-		'jump',
-		'eating',
-		'sleeping',
-		'angry',
-		'sad',
-		'happy',
-	];
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
+	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
@@ -53,10 +54,20 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
-	const selectedStateLabel = $derived(
-		changes?.character_state_type
-			? getCharacterStateLabel(changes.character_state_type)
-			: '상태 선택'
+	const selectedBodyStateLabel = $derived(
+		changes?.character_body_state_type
+			? getCharacterBodyStateLabel(changes.character_body_state_type)
+			: '선택 안함'
+	);
+	const selectedFaceStateLabel = $derived(
+		changes?.character_face_state_type
+			? getCharacterFaceStateLabel(changes.character_face_state_type)
+			: '선택 안함'
+	);
+	const selectedBuildingLabel = $derived(
+		changes?.building_id
+			? (buildings.find((b) => b.id === changes?.building_id)?.name ?? '건물 선택')
+			: '자동 선택'
 	);
 
 	$effect(() => {
@@ -72,9 +83,21 @@
 		}
 	}
 
-	function onStateChange(value: string | undefined) {
+	function onBodyStateChange(value: string | undefined) {
 		if (changes) {
-			changes.character_state_type = (value as CharacterStateType) ?? null;
+			changes.character_body_state_type = (value as CharacterBodyStateType) || null;
+		}
+	}
+
+	function onFaceStateChange(value: string | undefined) {
+		if (changes) {
+			changes.character_face_state_type = (value as CharacterFaceStateType) || null;
+		}
+	}
+
+	function onBuildingChange(value: string | undefined) {
+		if (changes) {
+			changes.building_id = value || null;
 		}
 	}
 
@@ -100,9 +123,10 @@
 
 			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
-				order_in_need_behavior: changes.order_in_need_behavior,
 				duration_per_second: changes.duration_per_second,
-				character_state_type: changes.character_state_type,
+				character_body_state_type: changes.character_body_state_type,
+				character_face_state_type: changes.character_face_state_type,
+				building_id: changes.building_id,
 				root: changes.root,
 			});
 
@@ -132,14 +156,7 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
-							<Tooltip>
-								<TooltipTrigger>
-									{#snippet child({ props })}
-										<ButtonGroupText {...props}>타입</ButtonGroupText>
-									{/snippet}
-								</TooltipTrigger>
-								<TooltipContent>액션 유형을 선택합니다</TooltipContent>
-							</Tooltip>
+							<ButtonGroupText class="w-[72px]">타입</ButtonGroupText>
 							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
 								<SelectTrigger class="flex-1">
 									{selectedTypeLabel}
@@ -152,41 +169,43 @@
 							</Select>
 						</ButtonGroup>
 
-						<InputGroup>
-							<InputGroupAddon align="inline-start">
-								<InputGroupText>실행 순서</InputGroupText>
-							</InputGroupAddon>
-							<InputGroupInput
-								type="number"
-								min="0"
-								bind:value={changes.order_in_need_behavior}
-								disabled={changes.root}
-							/>
-							<InputGroupAddon align="inline-end">
-								<Tooltip>
-									<TooltipTrigger>
-										{#snippet child({ props })}
-											<InputGroupButton
-												{...props}
-												variant={changes?.root ? 'secondary' : 'ghost'}
-												size="icon-xs"
-												aria-label="최초 실행 액션으로 지정"
-												onclick={() => {
-													if (changes && !hasParent) changes.root = !changes.root;
-												}}
-												disabled={hasParent}
-												class="rounded-full"
-											>
-												<IconCircleDashedNumber1 />
-											</InputGroupButton>
-										{/snippet}
-									</TooltipTrigger>
-									<TooltipContent>최초 실행 액션으로 지정</TooltipContent>
-								</Tooltip>
-							</InputGroupAddon>
-						</InputGroup>
-
-						{#if changes.type === 'wait'}
+						{#if changes.type === 'go' || changes.type === 'interact'}
+							<ButtonGroup class="w-full">
+								<ButtonGroup class="flex-1">
+									<ButtonGroupText class="w-[72px]">대상</ButtonGroupText>
+									<Select
+										type="single"
+										value={changes.building_id ?? ''}
+										onValueChange={onBuildingChange}
+									>
+										<SelectTrigger class="flex-1">
+											{selectedBuildingLabel}
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="">자동 선택</SelectItem>
+											{#each buildings as building (building.id)}
+												<SelectItem value={building.id}>{building.name}</SelectItem>
+											{/each}
+										</SelectContent>
+									</Select>
+								</ButtonGroup>
+								<ButtonGroup>
+									<Tooltip>
+										<TooltipTrigger>
+											{#snippet child({ props })}
+												<Button {...props} variant="ghost" size="icon" class="rounded-full">
+													<IconInfoCircle class="size-4" />
+												</Button>
+											{/snippet}
+										</TooltipTrigger>
+										<TooltipContent>
+											자동 선택 시 욕구를 가장 많이 채워주는 <br />
+											건물 또는 캐릭터를 찾아 자동으로 선택합니다.
+										</TooltipContent>
+									</Tooltip>
+								</ButtonGroup>
+							</ButtonGroup>
+						{:else if changes.type === 'wait'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<InputGroupText>대기 시간(초)</InputGroupText>
@@ -200,18 +219,41 @@
 							</InputGroup>
 						{:else if changes.type === 'state'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>캐릭터 상태</ButtonGroupText>
+								<ButtonGroupText class="w-[72px]">몸통</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.character_state_type ?? undefined}
-									onValueChange={onStateChange}
+									value={changes.character_body_state_type ?? ''}
+									onValueChange={onBodyStateChange}
 								>
 									<SelectTrigger class="flex-1">
-										{selectedStateLabel}
+										{selectedBodyStateLabel}
 									</SelectTrigger>
 									<SelectContent>
-										{#each stateTypes as stateType (stateType)}
-											<SelectItem value={stateType}>{getCharacterStateLabel(stateType)}</SelectItem>
+										<SelectItem value="">선택 안함</SelectItem>
+										{#each bodyStateTypes as stateType (stateType)}
+											<SelectItem value={stateType}
+												>{getCharacterBodyStateLabel(stateType)}</SelectItem
+											>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+							<ButtonGroup class="w-full">
+								<ButtonGroupText class="w-[72px]">표정</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_face_state_type ?? ''}
+									onValueChange={onFaceStateChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedFaceStateLabel}
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="">선택 안함</SelectItem>
+										{#each faceStateTypes as stateType (stateType)}
+											<SelectItem value={stateType}
+												>{getCharacterFaceStateLabel(stateType)}</SelectItem
+											>
 										{/each}
 									</SelectContent>
 								</Select>
@@ -229,13 +271,35 @@
 							</InputGroup>
 						{/if}
 					</div>
-					<div class="flex justify-end gap-2">
-						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
-							취소
-						</Button>
-						<Button type="submit" disabled={isUpdating}>
-							{isUpdating ? '저장 중...' : '저장'}
-						</Button>
+					<div class="flex justify-between gap-2">
+						<Tooltip>
+							<TooltipTrigger>
+								{#snippet child({ props })}
+									<Button
+										{...props}
+										type="button"
+										variant={changes?.root ? 'secondary' : 'ghost'}
+										size="icon"
+										aria-label="시작 액션으로 지정"
+										onclick={() => {
+											if (changes && !hasParent) changes.root = !changes.root;
+										}}
+										disabled={hasParent}
+									>
+										<IconCircleDashedNumber1 />
+									</Button>
+								{/snippet}
+							</TooltipTrigger>
+							<TooltipContent>시작 액션으로 지정</TooltipContent>
+						</Tooltip>
+						<div class="flex gap-2">
+							<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
+								취소
+							</Button>
+							<Button type="submit" disabled={isUpdating}>
+								{isUpdating ? '저장 중...' : '저장'}
+							</Button>
+						</div>
 					</div>
 				</form>
 			{/if}

@@ -175,6 +175,151 @@ export type Database = {
           },
         ]
       }
+      character_bodies: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          height: number
+          id: string
+          name: string
+          scenario_id: string
+          width: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          height?: number
+          id?: string
+          name?: string
+          scenario_id: string
+          width?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          height?: number
+          id?: string
+          name?: string
+          scenario_id?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_bodies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_bodies_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_body_states: {
+        Row: {
+          atlas_name: string
+          body_id: string
+          character_face_state:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          in_front: boolean
+          loop: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["character_body_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          body_id: string
+          character_face_state?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          in_front?: boolean
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["character_body_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          body_id?: string
+          character_face_state?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          in_front?: boolean
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type?: Database["public"]["Enums"]["character_body_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_body_states_body_id_fkey"
+            columns: ["body_id"]
+            isOneToOne: false
+            referencedRelation: "character_bodies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_face_states: {
+        Row: {
+          atlas_name: string
+          character_id: string
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          loop: Database["public"]["Enums"]["loop_mode"]
+          offset_x: number
+          offset_y: number
+          type: Database["public"]["Enums"]["character_face_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          character_id: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          offset_x?: number
+          offset_y?: number
+          type: Database["public"]["Enums"]["character_face_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          character_id?: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          offset_x?: number
+          offset_y?: number
+          type?: Database["public"]["Enums"]["character_face_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_face_states_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       character_needs: {
         Row: {
           character_id: string
@@ -234,76 +379,39 @@ export type Database = {
           },
         ]
       }
-      character_states: {
-        Row: {
-          atlas_name: string
-          character_id: string
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
-          type: Database["public"]["Enums"]["character_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          character_id: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          type: Database["public"]["Enums"]["character_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          character_id?: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          type?: Database["public"]["Enums"]["character_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "character_states_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       characters: {
         Row: {
+          body_id: string
           created_at: string
           created_by: string | null
-          height: number
           id: string
           name: string
           scenario_id: string
-          width: number
         }
         Insert: {
+          body_id: string
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id: string
-          width?: number
         }
         Update: {
+          body_id?: string
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id?: string
-          width?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "characters_body_id_fkey"
+            columns: ["body_id"]
+            isOneToOne: false
+            referencedRelation: "character_bodies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "characters_created_by_fkey"
             columns: ["created_by"]
@@ -592,14 +700,17 @@ export type Database = {
         Row: {
           behavior_id: string
           building_id: string | null
-          character_state_type:
-            | Database["public"]["Enums"]["character_state_type"]
+          character_body_state_type:
+            | Database["public"]["Enums"]["character_body_state_type"]
             | null
+          character_face_state_type:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          character_id: string | null
           duration_per_second: number
           failure_need_behavior_action_id: string | null
           id: string
           need_id: string
-          order_in_need_behavior: number
           root: boolean
           scenario_id: string
           success_need_behavior_action_id: string | null
@@ -608,14 +719,17 @@ export type Database = {
         Insert: {
           behavior_id: string
           building_id?: string | null
-          character_state_type?:
-            | Database["public"]["Enums"]["character_state_type"]
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
             | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          character_id?: string | null
           duration_per_second?: number
           failure_need_behavior_action_id?: string | null
           id?: string
           need_id: string
-          order_in_need_behavior?: number
           root?: boolean
           scenario_id: string
           success_need_behavior_action_id?: string | null
@@ -624,14 +738,17 @@ export type Database = {
         Update: {
           behavior_id?: string
           building_id?: string | null
-          character_state_type?:
-            | Database["public"]["Enums"]["character_state_type"]
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
             | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          character_id?: string | null
           duration_per_second?: number
           failure_need_behavior_action_id?: string | null
           id?: string
           need_id?: string
-          order_in_need_behavior?: number
           root?: boolean
           scenario_id?: string
           success_need_behavior_action_id?: string | null
@@ -650,6 +767,13 @@ export type Database = {
             columns: ["building_id"]
             isOneToOne: false
             referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
             referencedColumns: ["id"]
           },
           {
@@ -1745,19 +1869,17 @@ export type Database = {
     }
     Enums: {
       building_state_type: "idle" | "damaged" | "planning"
-      character_state_type:
+      character_body_state_type:
         | "idle"
         | "walk"
         | "jump"
         | "eating"
         | "sleeping"
-        | "angry"
-        | "sad"
-        | "happy"
+      character_face_state_type: "neutral" | "happy" | "sad" | "angry"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
-      need_behavior_action_type: "go_to" | "wait" | "state"
+      need_behavior_action_type: "go" | "interact" | "wait" | "state"
       need_fulfillment_type: "building" | "task" | "item" | "idle"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
@@ -1896,20 +2018,12 @@ export const Constants = {
   public: {
     Enums: {
       building_state_type: ["idle", "damaged", "planning"],
-      character_state_type: [
-        "idle",
-        "walk",
-        "jump",
-        "eating",
-        "sleeping",
-        "angry",
-        "sad",
-        "happy",
-      ],
+      character_body_state_type: ["idle", "walk", "jump", "eating", "sleeping"],
+      character_face_state_type: ["neutral", "happy", "sad", "angry"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
-      need_behavior_action_type: ["go_to", "wait", "state"],
+      need_behavior_action_type: ["go", "interact", "wait", "state"],
       need_fulfillment_type: ["building", "task", "item", "idle"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],

@@ -22,14 +22,14 @@
 				const building = fulfillment.building_id
 					? $buildingStore.data[fulfillment.building_id]
 					: undefined;
-				return building ? `캐릭터가 ${building.name}에서 대기` : '캐릭터가 건물에서 대기';
+				return building ? `${building.name} 사용` : '건물 미선택';
 			}
 			case 'task':
 				return '플레이어가 할 일을 완료';
 			case 'item':
-				return '캐릭터가 아이템을 획득';
+				return '아이템을 획득';
 			case 'idle':
-				return '캐릭터가 대기 중';
+				return '대기 중';
 			default:
 				return fulfillment.fulfillment_type;
 		}

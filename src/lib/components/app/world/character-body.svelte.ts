@@ -43,8 +43,8 @@ export class CharacterBody {
 	constructor(worldCharacter: WorldCharacter, debug: boolean) {
 		this.id = worldCharacter.id;
 		this.size = {
-			width: worldCharacter.character.width,
-			height: worldCharacter.character.height,
+			width: worldCharacter.character.character_body.width,
+			height: worldCharacter.character.character_body.height,
 		};
 
 		// 타원형 바디 생성

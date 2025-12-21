@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import CharacterPanel from '$lib/components/admin/character/character-panel.svelte';
+	import CharacterPanel from '$lib/components/admin/character/character-action-panel.svelte';
 	import CharacterStateItemGroup from '$lib/components/admin/character/character-state-item-group.svelte';
 
 	const { store } = useCharacter();

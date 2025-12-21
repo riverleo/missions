@@ -150,8 +150,10 @@
 											<InputGroupButton {...props} variant="ghost">시간당 증가</InputGroupButton>
 										{/snippet}
 									</TooltipTrigger>
-									<TooltipContent>
-										캐릭터가 이 충족 수단을 이용할 때 틱당 증가하는 욕구 수치입니다
+									<TooltipContent side="bottom">
+										캐릭터가 이 충족 수단을 이용할 때
+										<br />
+										틱당 증가하는 욕구 수치입니다
 									</TooltipContent>
 								</Tooltip>
 							</InputGroupAddon>

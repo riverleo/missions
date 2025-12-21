@@ -1,13 +1,11 @@
--- 행동 상태를 character_state_type에 추가
-alter type character_state_type add value 'eating';
-alter type character_state_type add value 'sleeping';
-alter type character_state_type add value 'angry';
-alter type character_state_type add value 'sad';
-alter type character_state_type add value 'happy';
+-- 행동 상태를 character_body_state_type에 추가
+alter type character_body_state_type add value 'eating';
+alter type character_body_state_type add value 'sleeping';
 
 -- need_behavior_action_type enum (액션의 종류)
 create type need_behavior_action_type as enum (
-  'go_to',      -- 특정 건물로 이동
+  'go',         -- 특정 건물로 이동
+  'interact',   -- 건물/아이템과 상호작용
   'wait',       -- 대기
   'state'       -- 캐릭터 상태 변경
 );
@@ -58,15 +56,16 @@ create table need_behavior_actions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
-  order_in_need_behavior integer not null default 0,
   type need_behavior_action_type not null default 'wait'::need_behavior_action_type,
   root boolean not null default false,
 
-  -- go_to 타입용
+  -- go/interact 타입용: 대상 지정
   building_id uuid references buildings(id) on delete set null,
+  character_id uuid references characters(id) on delete set null,
 
   -- state 타입용
-  character_state_type character_state_type,
+  character_body_state_type character_body_state_type,
+  character_face_state_type character_face_state_type,
 
   -- 지속 시간 (초 단위)
   duration_per_second float not null default 0,

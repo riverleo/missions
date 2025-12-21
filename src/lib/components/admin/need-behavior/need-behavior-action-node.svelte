@@ -2,6 +2,8 @@
 	import type { NeedBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
+	import { useBuilding } from '$lib/hooks/use-building';
+	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -18,22 +20,56 @@
 	const parentAction = $derived(data.parentAction);
 	const isSuccessTarget = $derived(data.isSuccessTarget);
 
-	const typeLabels: Record<string, { label: string }> = {
-		go_to: { label: '이동' },
-		wait: { label: '대기' },
-		state: { label: '상태' },
+	const { store: buildingStore } = useBuilding();
+
+	const typeLabels: Record<string, string> = {
+		go: '이동',
+		interact: '상호작용',
+		wait: '대기',
+		state: '상태',
 	};
+
+	const typeLabel = $derived(() => {
+		if (action.type === 'go') {
+			if (action.building_id) {
+				const building = $buildingStore.data[action.building_id];
+				return `${building?.name ?? '건물'}으로 이동`;
+			}
+			return '자동 이동';
+		}
+		if (action.type === 'interact') {
+			if (action.building_id) {
+				const building = $buildingStore.data[action.building_id];
+				return `${building?.name ?? '건물'} 상호작용`;
+			}
+			return '자동 상호작용';
+		}
+		if (action.type === 'wait') {
+			return `${action.duration_per_second}초 대기`;
+		}
+		if (action.type === 'state') {
+			const bodyLabel = action.character_body_state_type
+				? getCharacterBodyStateLabel(action.character_body_state_type)
+				: undefined;
+			const faceLabel = action.character_face_state_type
+				? getCharacterFaceStateLabel(action.character_face_state_type)
+				: undefined;
+			const stateLabel = [bodyLabel, faceLabel].filter(Boolean).join(' + ') || '상태';
+			return `${stateLabel} (${action.duration_per_second}초)`;
+		}
+		return action.type;
+	});
 
 	const description = $derived(() => {
 		if (action.root) {
-			return '최초 실행';
+			return '시작 액션';
 		}
 		if (parentAction) {
-			const parentType = typeLabels[parentAction.type]?.label ?? parentAction.type;
+			const parentType = typeLabels[parentAction.type] ?? parentAction.type;
 			const result = isSuccessTarget ? '성공' : '실패';
-			return `${parentType} ${result} 시 ${action.order_in_need_behavior}순위 실행`;
+			return `${parentType} ${result} 시 실행`;
 		}
-		return `${action.order_in_need_behavior}순위 실행`;
+		return '';
 	});
 </script>
 
@@ -52,14 +88,16 @@
 			{#if action.root}
 				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			{typeLabels[action.type]?.label}
+			{typeLabel()}
 		</div>
-		<div class="text-xs text-neutral-400">
-			{description()}
-		</div>
+		{#if description()}
+			<div class="text-xs text-neutral-400">
+				{description()}
+			</div>
+		{/if}
 	</div>
 
-	{#if action.type === 'go_to'}
+	{#if action.type === 'go' || action.type === 'interact'}
 		<Handle
 			type="source"
 			position={Position.Right}

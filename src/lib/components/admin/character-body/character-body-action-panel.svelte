@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Character } from '$lib/types';
+	import type { CharacterBody } from '$lib/types';
 	import {
 		InputGroup,
 		InputGroupAddon,
@@ -9,40 +9,40 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEye, IconEyeOff, IconHeading, IconRuler2, IconX } from '@tabler/icons-svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 
 	interface Props {
-		character: Character;
+		body: CharacterBody;
 	}
 
-	let { character }: Props = $props();
+	let { body }: Props = $props();
 
-	const { admin } = useCharacter();
+	const { admin } = useCharacterBody();
 	const { uiStore } = admin;
 
-	let name = $state(character.name ?? '');
-	let width = $state(character.width === 0 ? '' : character.width.toString());
-	let height = $state(character.height === 0 ? '' : character.height.toString());
+	let name = $state(body.name ?? '');
+	let width = $state(body.width === 0 ? '' : body.width.toString());
+	let height = $state(body.height === 0 ? '' : body.height.toString());
 
-	// character prop 변경 시 상태 동기화
+	// body prop 변경 시 상태 동기화
 	$effect(() => {
-		width = character.width === 0 ? '' : character.width.toString();
+		width = body.width === 0 ? '' : body.width.toString();
 	});
 	$effect(() => {
-		height = character.height === 0 ? '' : character.height.toString();
+		height = body.height === 0 ? '' : body.height.toString();
 	});
 
 	async function updateName() {
 		const trimmed = name.trim();
-		if (trimmed === (character.name ?? '')) return;
-		await admin.update(character.id, { name: trimmed || undefined });
+		if (trimmed === (body.name ?? '')) return;
+		await admin.update(body.id, { name: trimmed || undefined });
 	}
 
 	async function updateSize() {
 		const newWidth = parseFloat(width) || 0;
 		const newHeight = parseFloat(height) || 0;
-		if (newWidth === character.width && newHeight === character.height) return;
-		await admin.update(character.id, { width: newWidth, height: newHeight });
+		if (newWidth === body.width && newHeight === body.height) return;
+		await admin.update(body.id, { width: newWidth, height: newHeight });
 	}
 
 	function onkeydownName(e: KeyboardEvent) {
@@ -71,7 +71,7 @@
 				<IconHeading class="size-4" />
 			</InputGroupText>
 		</InputGroupAddon>
-		<InputGroupInput bind:value={name} placeholder="캐릭터 이름" onkeydown={onkeydownName} />
+		<InputGroupInput bind:value={name} placeholder="몸통 이름" onkeydown={onkeydownName} />
 		<InputGroupAddon align="inline-end">
 			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>

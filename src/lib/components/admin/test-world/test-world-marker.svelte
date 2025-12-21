@@ -65,10 +65,12 @@
 		}
 	});
 
-	// 선택된 캐릭터의 idle 상태 가져오기
+	// 선택된 캐릭터의 idle 상태 가져오기 (body에서)
 	const selectedCharacterIdleState = $derived(() => {
-		if ($store.selectedCharacter) {
-			return $store.selectedCharacter.character_states.find((s) => s.type === 'idle');
+		if ($store.selectedCharacter?.character_body) {
+			return $store.selectedCharacter.character_body.character_body_states.find(
+				(s) => s.type === 'idle'
+			);
 		}
 		return undefined;
 	});

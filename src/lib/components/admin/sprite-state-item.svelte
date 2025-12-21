@@ -46,10 +46,12 @@
 		spriteState: SpriteState | undefined;
 		onchange: (change: SpriteStateChange) => void;
 		ondelete?: () => void;
-		bodyPreview?: Snippet;
+		preview?: Snippet;
+		overlay?: Snippet;
+		headerAction?: Snippet;
 	}
 
-	let { type, label, spriteState, onchange, ondelete, bodyPreview }: Props = $props();
+	let { type, label, spriteState, onchange, ondelete, preview, overlay, headerAction }: Props = $props();
 
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
@@ -139,19 +141,24 @@
 <Item variant="muted">
 	<ItemHeader>
 		<ItemTitle>{label ?? type}</ItemTitle>
+		{#if headerAction}
+			{@render headerAction()}
+		{/if}
 	</ItemHeader>
 	<ItemContent class="w-full overflow-hidden">
 		<AspectRatio ratio={4 / 3}>
-			{#if animator}
-				<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
+			<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
+				{#if preview}
+					{@render preview()}
+				{:else if animator}
 					<SpriteAnimatorRenderer {animator} resolution={2} />
-					{#if bodyPreview}
-						{@render bodyPreview()}
-					{/if}
-				</div>
-			{:else}
-				<Skeleton class="h-full w-full" />
-			{/if}
+				{:else}
+					<Skeleton class="h-full w-full" />
+				{/if}
+				{#if overlay}
+					{@render overlay()}
+				{/if}
+			</div>
 		</AspectRatio>
 	</ItemContent>
 	<ItemFooter>

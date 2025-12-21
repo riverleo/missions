@@ -17,9 +17,9 @@
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
-	// idle 상태의 캐릭터 스프라이트 가져오기
+	// idle 상태의 캐릭터 스프라이트 가져오기 (body에서)
 	const idleState = $derived(
-		worldCharacter.character.character_states.find((s) => s.type === 'idle')
+		worldCharacter.character.character_body?.character_body_states.find((s) => s.type === 'idle')
 	);
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)

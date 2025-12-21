@@ -2,30 +2,30 @@ import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
-	Character,
-	CharacterInsert,
-	CharacterUpdate,
-	CharacterFaceStateInsert,
-	CharacterFaceStateUpdate,
+	CharacterBody,
+	CharacterBodyInsert,
+	CharacterBodyUpdate,
+	CharacterBodyStateInsert,
+	CharacterBodyStateUpdate,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
-type CharacterDialogState =
+type CharacterBodyDialogState =
 	| { type: 'create' }
-	| { type: 'delete'; characterId: string }
+	| { type: 'delete'; bodyId: string }
 	| undefined;
 
-let instance: ReturnType<typeof createCharacterStore> | null = null;
+let instance: ReturnType<typeof createCharacterBodyStore> | null = null;
 
-function createCharacterStore() {
+function createCharacterBodyStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<Character>>({
+	const store = writable<RecordFetchState<CharacterBody>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const dialogStore = writable<CharacterDialogState>(undefined);
+	const dialogStore = writable<CharacterBodyDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -40,20 +40,14 @@ function createCharacterStore() {
 
 		try {
 			const { data, error } = await supabase
-				.from('characters')
-				.select(
-					`
-					*,
-					character_body:character_bodies(*, character_body_states(*)),
-					character_face_states(*)
-				`
-				)
+				.from('character_bodies')
+				.select('*, character_body_states(*)')
 				.eq('scenario_id', scenarioId)
 				.order('name');
 
 			if (error) throw error;
 
-			const record: Record<string, Character> = {};
+			const record: Record<string, CharacterBody> = {};
 			for (const item of data ?? []) {
 				record[item.id] = item;
 			}
@@ -73,7 +67,7 @@ function createCharacterStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<CharacterDialogState>) {
+	function openDialog(state: NonNullable<CharacterBodyDialogState>) {
 		dialogStore.set(state);
 	}
 
@@ -88,24 +82,18 @@ function createCharacterStore() {
 			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async create(character: Omit<CharacterInsert, 'scenario_id'>) {
+		async create(body: Omit<CharacterBodyInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
-				throw new Error('useCharacter: currentScenarioId is not set.');
+				throw new Error('useCharacterBody: currentScenarioId is not set.');
 			}
 
 			const { data, error } = await supabase
-				.from('characters')
+				.from('character_bodies')
 				.insert({
-					...character,
+					...body,
 					scenario_id: currentScenarioId,
 				})
-				.select(
-					`
-					*,
-					character_body:character_bodies(*, character_body_states(*)),
-					character_face_states(*)
-				`
-				)
+				.select('*, character_body_states(*)')
 				.single();
 
 			if (error) throw error;
@@ -119,22 +107,22 @@ function createCharacterStore() {
 			return data;
 		},
 
-		async update(id: string, character: CharacterUpdate) {
-			const { error } = await supabase.from('characters').update(character).eq('id', id);
+		async update(id: string, body: CharacterBodyUpdate) {
+			const { error } = await supabase.from('character_bodies').update(body).eq('id', id);
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data?.[id]) {
-						Object.assign(draft.data[id], character);
+						Object.assign(draft.data[id], body);
 					}
 				})
 			);
 		},
 
 		async remove(id: string) {
-			const { error } = await supabase.from('characters').delete().eq('id', id);
+			const { error } = await supabase.from('character_bodies').delete().eq('id', id);
 
 			if (error) throw error;
 
@@ -147,15 +135,15 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterFaceState(
-			characterId: string,
-			state: Omit<CharacterFaceStateInsert, 'character_id'>
+		async createCharacterBodyState(
+			bodyId: string,
+			state: Omit<CharacterBodyStateInsert, 'body_id'>
 		) {
 			const { data, error } = await supabase
-				.from('character_face_states')
+				.from('character_body_states')
 				.insert({
 					...state,
-					character_id: characterId,
+					body_id: bodyId,
 				})
 				.select()
 				.single();
@@ -164,9 +152,9 @@ function createCharacterStore() {
 
 			store.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						character.character_face_states.push(data);
+					const body = draft.data[bodyId];
+					if (body) {
+						body.character_body_states.push(data);
 					}
 				})
 			);
@@ -174,13 +162,13 @@ function createCharacterStore() {
 			return data;
 		},
 
-		async updateCharacterFaceState(
+		async updateCharacterBodyState(
 			stateId: string,
-			characterId: string,
-			updates: CharacterFaceStateUpdate
+			bodyId: string,
+			updates: CharacterBodyStateUpdate
 		) {
 			const { error } = await supabase
-				.from('character_face_states')
+				.from('character_body_states')
 				.update(updates)
 				.eq('id', stateId);
 
@@ -188,9 +176,9 @@ function createCharacterStore() {
 
 			store.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						const state = character.character_face_states.find((cs) => cs.id === stateId);
+					const body = draft.data[bodyId];
+					if (body) {
+						const state = body.character_body_states.find((cs) => cs.id === stateId);
 						if (state) {
 							Object.assign(state, updates);
 						}
@@ -199,16 +187,16 @@ function createCharacterStore() {
 			);
 		},
 
-		async removeCharacterFaceState(stateId: string, characterId: string) {
-			const { error } = await supabase.from('character_face_states').delete().eq('id', stateId);
+		async removeCharacterBodyState(stateId: string, bodyId: string) {
+			const { error } = await supabase.from('character_body_states').delete().eq('id', stateId);
 
 			if (error) throw error;
 
 			store.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						character.character_face_states = character.character_face_states.filter(
+					const body = draft.data[bodyId];
+					if (body) {
+						body.character_body_states = body.character_body_states.filter(
 							(cs) => cs.id !== stateId
 						);
 					}
@@ -218,8 +206,8 @@ function createCharacterStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<Character>>,
-		dialogStore: dialogStore as Readable<CharacterDialogState>,
+		store: store as Readable<RecordFetchState<CharacterBody>>,
+		dialogStore: dialogStore as Readable<CharacterBodyDialogState>,
 		fetch,
 		openDialog,
 		closeDialog,
@@ -227,9 +215,9 @@ function createCharacterStore() {
 	};
 }
 
-export function useCharacter() {
+export function useCharacterBody() {
 	if (!instance) {
-		instance = createCharacterStore();
+		instance = createCharacterBodyStore();
 	}
 	return instance;
 }
