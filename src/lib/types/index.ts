@@ -176,3 +176,14 @@ export type CharacterNeedUpdate = TablesUpdate<'character_needs'>;
 export type WorldCharacterNeed = Tables<'world_character_needs'>;
 export type WorldCharacterNeedInsert = TablesInsert<'world_character_needs'>;
 export type WorldCharacterNeedUpdate = TablesUpdate<'world_character_needs'>;
+
+// NeedBehavior types
+export type NeedBehavior = Tables<'need_behaviors'>;
+export type NeedBehaviorInsert = TablesInsert<'need_behaviors'>;
+export type NeedBehaviorUpdate = TablesUpdate<'need_behaviors'>;
+
+// NeedBehaviorAction types
+export type NeedBehaviorActionType = Enums<'need_behavior_action_type'>;
+export type NeedBehaviorAction = Tables<'need_behavior_actions'>;
+export type NeedBehaviorActionInsert = TablesInsert<'need_behavior_actions'>;
+export type NeedBehaviorActionUpdate = TablesUpdate<'need_behavior_actions'>;

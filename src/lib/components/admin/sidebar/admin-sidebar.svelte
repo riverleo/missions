@@ -60,12 +60,16 @@
 					title: '캐릭터',
 					subItems: [
 						{
-							title: '애니메이션',
+							title: '스프라이트',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
 							title: '욕구',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
+						},
+						{
+							title: '행동',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/behaviors` : undefined,
 						},
 					],
 				},

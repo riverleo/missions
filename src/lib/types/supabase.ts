@@ -599,6 +599,7 @@ export type Database = {
           failure_need_behavior_action_id: string | null
           id: string
           need_id: string
+          order_in_need_behavior: number
           scenario_id: string
           success_need_behavior_action_id: string | null
           type: Database["public"]["Enums"]["need_behavior_action_type"]
@@ -613,6 +614,7 @@ export type Database = {
           failure_need_behavior_action_id?: string | null
           id?: string
           need_id: string
+          order_in_need_behavior?: number
           scenario_id: string
           success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]
@@ -627,6 +629,7 @@ export type Database = {
           failure_need_behavior_action_id?: string | null
           id?: string
           need_id?: string
+          order_in_need_behavior?: number
           scenario_id?: string
           success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]

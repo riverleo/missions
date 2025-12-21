@@ -60,7 +60,7 @@
 				<InputGroupAddon align="inline-start">
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
-				<InputGroupInput placeholder="이름 (예: 배고픔, 신앙)" bind:value={name} />
+				<InputGroupInput placeholder="이름" bind:value={name} />
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>

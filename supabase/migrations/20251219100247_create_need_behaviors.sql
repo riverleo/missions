@@ -58,6 +58,7 @@ create table need_behavior_actions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
+  order_in_need_behavior integer not null default 0,
   type need_behavior_action_type not null default 'wait'::need_behavior_action_type,
 
   -- go_to 타입용

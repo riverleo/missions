@@ -1,0 +1,95 @@
+<script lang="ts">
+	import type { NeedBehavior } from '$lib/types';
+	import { Panel } from '@xyflow/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
+	import { IconLayoutDistributeHorizontal, IconPlus } from '@tabler/icons-svelte';
+	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+
+	interface Props {
+		behavior: NeedBehavior | undefined;
+		onlayout?: () => void;
+	}
+
+	let { behavior, onlayout }: Props = $props();
+
+	const { needBehaviorActionStore, admin } = useNeedBehavior();
+
+	const actions = $derived(
+		behavior
+			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === behavior.id)
+			: []
+	);
+
+	let isLayouting = $state(false);
+	let isCreating = $state(false);
+
+	function onclickLayout() {
+		if (isLayouting || !onlayout) return;
+
+		isLayouting = true;
+
+		try {
+			onlayout();
+		} finally {
+			isLayouting = false;
+		}
+	}
+
+	async function onclickCreate() {
+		if (isCreating || !behavior) return;
+
+		isCreating = true;
+
+		try {
+			await admin.createAction({
+				need_id: behavior.need_id,
+				behavior_id: behavior.id,
+				type: 'wait',
+				order_in_need_behavior: actions.length,
+			});
+		} catch (error) {
+			console.error('Failed to create action:', error);
+		} finally {
+			isCreating = false;
+		}
+	}
+</script>
+
+<Panel position="bottom-center">
+	<ButtonGroup>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickCreate}
+						disabled={isCreating || !behavior}
+						size="icon-lg"
+						variant="outline"
+					>
+						<IconPlus />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>액션 추가</TooltipContent>
+		</Tooltip>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={onclickLayout}
+						disabled={isLayouting}
+						size="icon-lg"
+						variant="outline"
+					>
+						<IconLayoutDistributeHorizontal />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>자동 정렬</TooltipContent>
+		</Tooltip>
+	</ButtonGroup>
+</Panel>
