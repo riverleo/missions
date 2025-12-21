@@ -147,6 +147,10 @@
 		const sourceNode = connectionState.fromNode;
 		if (!sourceNode || sourceNode.type !== 'need') return;
 
+		// source 핸들(오른쪽)에서만 새 노드 생성 가능
+		const fromHandleType = connectionState.fromHandle?.type;
+		if (fromHandleType !== 'source') return;
+
 		// 마우스/터치 위치를 플로우 좌표로 변환
 		const clientX =
 			'changedTouches' in event ? (event.changedTouches[0]?.clientX ?? 0) : event.clientX;
