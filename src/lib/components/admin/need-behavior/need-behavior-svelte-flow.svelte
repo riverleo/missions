@@ -52,6 +52,15 @@
 			? actions.find((a) => a.id === parseActionNodeId(selectedNode.id))
 			: undefined
 	);
+	const selectedActionHasParent = $derived(
+		selectedAction
+			? actions.some(
+					(a) =>
+						a.success_need_behavior_action_id === selectedAction.id ||
+						a.failure_need_behavior_action_id === selectedAction.id
+				)
+			: false
+	);
 
 	const nodeTypes = {
 		action: NeedBehaviorActionNode,
@@ -69,7 +78,21 @@
 
 		// action → action 연결 허용
 		if (sourceNode.type === 'action' && targetNode.type === 'action') {
-			return connection.source !== connection.target;
+			// 자기 자신에게 연결 불가
+			if (connection.source === connection.target) return false;
+
+			// 이미 연결된 핸들에는 새로운 연결 불가
+			const sourceActionId = parseActionNodeId(connection.source);
+			const sourceAction = actions.find((a) => a.id === sourceActionId);
+			if (sourceAction) {
+				const isSuccess = connection.sourceHandle === 'success';
+				const existingConnection = isSuccess
+					? sourceAction.success_need_behavior_action_id
+					: sourceAction.failure_need_behavior_action_id;
+				if (existingConnection) return false;
+			}
+
+			return true;
 		}
 
 		return false;
@@ -112,6 +135,21 @@
 		if (!sourceNode || sourceNode.type !== 'action') return;
 		if (!behavior) return;
 
+		const fromActionId = parseActionNodeId(sourceNode.id);
+		const fromHandleId = connectionState.fromHandle?.id;
+		const fromAction = actions.find((a) => a.id === fromActionId);
+		if (!fromAction) return;
+
+		// target 핸들에서는 새 액션 생성 불가
+		if (fromHandleId === 'target') return;
+
+		// 이미 연결된 핸들에서는 새 액션 생성 불가
+		if (fromHandleId === 'success') {
+			if (fromAction.success_need_behavior_action_id) return;
+		} else if (fromHandleId === 'failure') {
+			if (fromAction.failure_need_behavior_action_id) return;
+		}
+
 		// 마우스/터치 위치를 플로우 좌표로 변환
 		const clientX =
 			'changedTouches' in event ? (event.changedTouches[0]?.clientX ?? 0) : event.clientX;
@@ -122,9 +160,6 @@
 		skipConvertEffect = true;
 
 		try {
-			const fromActionId = parseActionNodeId(sourceNode.id);
-			const fromHandleId = connectionState.fromHandle?.id;
-
 			// 새 액션 생성
 			const newAction = await admin.createNeedBehaviorAction({
 				need_id: behavior.need_id,
@@ -132,20 +167,12 @@
 				type: 'wait',
 			});
 
-			// 연결 업데이트
-			if (fromHandleId === 'target') {
-				// 좌측 핸들(target)에서 드래그: 새 액션의 성공이 기존 액션을 가리킴
-				await admin.updateNeedBehaviorAction(newAction.id, {
-					success_need_behavior_action_id: fromActionId,
-				});
-			} else {
-				// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
-				const isSuccess = fromHandleId === 'success';
-				await admin.updateNeedBehaviorAction(fromActionId, {
-					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
-						newAction.id,
-				});
-			}
+			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
+			const isSuccess = fromHandleId === 'success';
+			await admin.updateNeedBehaviorAction(fromActionId, {
+				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
+					newAction.id,
+			});
 
 			skipConvertEffect = false;
 			await tick();
@@ -221,12 +248,11 @@
 					a.failure_need_behavior_action_id === action.id
 			);
 			const isSuccessTarget = parentAction?.success_need_behavior_action_id === action.id;
-			const isRoot = behavior?.first_action_id === action.id;
 
 			newNodes.push({
 				id: createActionNodeId(action),
 				type: 'action',
-				data: { action, isRoot, parentAction, isSuccessTarget },
+				data: { action, parentAction, isSuccessTarget },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
 				deletable: true,
 			});
@@ -329,7 +355,7 @@
 	<MiniMap />
 
 	{#if selectedAction}
-		<NeedBehaviorActionNodePanel action={selectedAction} />
+		<NeedBehaviorActionNodePanel action={selectedAction} hasParent={selectedActionHasParent} />
 	{:else}
 		<NeedBehaviorActionPanel {behavior} {onlayout} />
 	{/if}

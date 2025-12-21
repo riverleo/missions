@@ -60,6 +60,7 @@ create table need_behavior_actions (
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
   order_in_need_behavior integer not null default 0,
   type need_behavior_action_type not null default 'wait'::need_behavior_action_type,
+  root boolean not null default false,
 
   -- go_to 타입용
   building_id uuid references buildings(id) on delete set null,
@@ -100,7 +101,3 @@ create policy "admins can delete need_behavior_actions"
   for delete
   to authenticated
   using (is_admin());
-
--- need_behaviors에 first_action_id 추가 (순환 참조 해결을 위해 alter table 사용)
-alter table need_behaviors
-  add column first_action_id uuid references need_behavior_actions(id) on delete set null;

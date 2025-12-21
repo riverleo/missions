@@ -8,7 +8,9 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
@@ -19,11 +21,12 @@
 
 	interface Props {
 		action: NeedBehaviorAction | undefined;
+		hasParent?: boolean;
 	}
 
-	let { action }: Props = $props();
+	let { action, hasParent = false }: Props = $props();
 
-	const { admin } = useNeedBehavior();
+	const { needBehaviorActionStore, admin } = useNeedBehavior();
 	const flowNodes = useNodes();
 
 	const actionTypes: { value: NeedBehaviorActionType; label: string }[] = [
@@ -75,31 +78,42 @@
 		}
 	}
 
-	function onsubmit(e: SubmitEvent) {
+	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!changes || isUpdating) return;
 
 		const actionId = changes.id;
+		const behaviorId = changes.behavior_id;
 		isUpdating = true;
 
-		admin
-			.updateNeedBehaviorAction(actionId, {
+		try {
+			// root로 설정할 때 다른 root 액션들을 먼저 해제
+			if (changes.root) {
+				const allActions = Object.values($needBehaviorActionStore.data);
+				const otherRootActions = allActions.filter(
+					(a) => a.behavior_id === behaviorId && a.id !== actionId && a.root
+				);
+				await Promise.all(
+					otherRootActions.map((a) => admin.updateNeedBehaviorAction(a.id, { root: false }))
+				);
+			}
+
+			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
 				order_in_need_behavior: changes.order_in_need_behavior,
 				duration_per_second: changes.duration_per_second,
 				character_state_type: changes.character_state_type,
-			})
-			.then(() => {
-				// 선택 해제
-				const nodeId = `action-${actionId}`;
-				flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
-			})
-			.catch((error: Error) => {
-				console.error('Failed to update action:', error);
-			})
-			.finally(() => {
-				isUpdating = false;
+				root: changes.root,
 			});
+
+			// 선택 해제
+			const nodeId = `action-${actionId}`;
+			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
+		} catch (error) {
+			console.error('Failed to update action:', error);
+		} finally {
+			isUpdating = false;
+		}
 	}
 
 	function onclickCancel() {
@@ -142,7 +156,34 @@
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>실행 순서</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" min="0" bind:value={changes.order_in_need_behavior} />
+							<InputGroupInput
+								type="number"
+								min="0"
+								bind:value={changes.order_in_need_behavior}
+								disabled={changes.root}
+							/>
+							<InputGroupAddon align="inline-end">
+								<Tooltip>
+									<TooltipTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton
+												{...props}
+												variant={changes?.root ? 'secondary' : 'ghost'}
+												size="icon-xs"
+												aria-label="최초 실행 액션으로 지정"
+												onclick={() => {
+													if (changes && !hasParent) changes.root = !changes.root;
+												}}
+												disabled={hasParent}
+												class="rounded-full"
+											>
+												<IconCircleDashedNumber1 />
+											</InputGroupButton>
+										{/snippet}
+									</TooltipTrigger>
+									<TooltipContent>최초 실행 액션으로 지정</TooltipContent>
+								</Tooltip>
+							</InputGroupAddon>
 						</InputGroup>
 
 						{#if changes.type === 'wait'}

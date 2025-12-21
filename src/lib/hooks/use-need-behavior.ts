@@ -1,4 +1,4 @@
-import { writable, type Readable } from 'svelte/store';
+import { get, writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
@@ -153,9 +153,13 @@ function createNeedBehaviorStore() {
 				throw new Error('useNeedBehavior: currentScenarioId is not set.');
 			}
 
+			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
+			const existingActions = Object.values(get(needBehaviorActionStore).data);
+			const isFirstAction = !existingActions.some((a) => a.behavior_id === action.behavior_id);
+
 			const { data, error } = await supabase
 				.from('need_behavior_actions')
-				.insert({ ...action, scenario_id: currentScenarioId })
+				.insert({ ...action, scenario_id: currentScenarioId, root: isFirstAction })
 				.select()
 				.single();
 

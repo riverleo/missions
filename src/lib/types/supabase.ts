@@ -600,6 +600,7 @@ export type Database = {
           id: string
           need_id: string
           order_in_need_behavior: number
+          root: boolean
           scenario_id: string
           success_need_behavior_action_id: string | null
           type: Database["public"]["Enums"]["need_behavior_action_type"]
@@ -615,6 +616,7 @@ export type Database = {
           id?: string
           need_id: string
           order_in_need_behavior?: number
+          root?: boolean
           scenario_id: string
           success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]
@@ -630,6 +632,7 @@ export type Database = {
           id?: string
           need_id?: string
           order_in_need_behavior?: number
+          root?: boolean
           scenario_id?: string
           success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]
@@ -683,7 +686,6 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          first_action_id: string | null
           id: string
           name: string
           need_id: string
@@ -693,7 +695,6 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
-          first_action_id?: string | null
           id?: string
           name: string
           need_id: string
@@ -703,7 +704,6 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
-          first_action_id?: string | null
           id?: string
           name?: string
           need_id?: string
@@ -716,13 +716,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behaviors_first_action_id_fkey"
-            columns: ["first_action_id"]
-            isOneToOne: false
-            referencedRelation: "need_behavior_actions"
             referencedColumns: ["id"]
           },
           {

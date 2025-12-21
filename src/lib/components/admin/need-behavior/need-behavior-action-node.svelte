@@ -1,12 +1,11 @@
 <script lang="ts">
 	import type { NeedBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
-	import { getCharacterStateLabel } from '$lib/utils/state-label';
+	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 
 	interface Props {
 		data: {
 			action: NeedBehaviorAction;
-			isRoot?: boolean;
 			parentAction?: NeedBehaviorAction;
 			isSuccessTarget?: boolean;
 		};
@@ -16,7 +15,6 @@
 
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
-	const isRoot = $derived(data.isRoot);
 	const parentAction = $derived(data.parentAction);
 	const isSuccessTarget = $derived(data.isSuccessTarget);
 
@@ -27,7 +25,7 @@
 	};
 
 	const description = $derived(() => {
-		if (isRoot) {
+		if (action.root) {
 			return '최초 실행';
 		}
 		if (parentAction) {
@@ -40,15 +38,20 @@
 </script>
 
 <div class="min-w-44 px-3 py-2">
-	<Handle
-		type="target"
-		position={Position.Left}
-		id="target"
-		style="background-color: var(--color-neutral-500)"
-	/>
+	{#if !action.root}
+		<Handle
+			type="target"
+			position={Position.Left}
+			id="target"
+			style="background-color: var(--color-neutral-500)"
+		/>
+	{/if}
 
 	<div class="flex flex-col">
-		<div class="text-sm font-medium">
+		<div class="flex items-center gap-1 text-sm font-medium">
+			{#if action.root}
+				<IconCircleDashedNumber1 class="size-3.5" />
+			{/if}
 			{typeLabels[action.type]?.label}
 		</div>
 		<div class="text-xs text-neutral-400">
