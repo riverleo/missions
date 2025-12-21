@@ -18,6 +18,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
 
 	const { store: scenarioStore } = useScenario();
 	const { store: chapterStore } = useChapter();
@@ -125,7 +126,7 @@
 
 <header class="flex h-16 shrink-0 items-center gap-5 border-b px-4">
 	<SidebarTrigger />
-	<Breadcrumb>
+	<Breadcrumb class="flex-1">
 		<BreadcrumbList>
 			{#each breadcrumbs() as crumb, i}
 				{#if i > 0}
@@ -141,4 +142,5 @@
 			{/each}
 		</BreadcrumbList>
 	</Breadcrumb>
+	<TestWorldPopover />
 </header>

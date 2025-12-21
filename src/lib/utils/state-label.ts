@@ -18,7 +18,7 @@ const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
 const buildingStateLabels: Record<BuildingStateType, string> = {
 	idle: '대기',
 	damaged: '손상됨',
-	planning: '계획됨',
+	planning: '건설 중',
 };
 
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
