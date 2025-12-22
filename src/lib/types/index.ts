@@ -212,3 +212,36 @@ export type BuildingBehaviorUpdate = TablesUpdate<'building_behaviors'>;
 export type BuildingBehaviorAction = Tables<'building_behavior_actions'>;
 export type BuildingBehaviorActionInsert = TablesInsert<'building_behavior_actions'>;
 export type BuildingBehaviorActionUpdate = TablesUpdate<'building_behavior_actions'>;
+
+// ItemState types
+export type ItemStateType = Enums<'item_state_type'>;
+export type ItemState = Tables<'item_states'>;
+export type ItemStateInsert = TablesInsert<'item_states'>;
+export type ItemStateUpdate = TablesUpdate<'item_states'>;
+
+// Item types
+type ItemRow = Tables<'items'>;
+export type Item = ItemRow & {
+	item_states: ItemState[];
+};
+export type ItemInsert = TablesInsert<'items'>;
+export type ItemUpdate = TablesUpdate<'items'>;
+
+// WorldItem types
+type WorldItemRow = Tables<'world_items'>;
+export type WorldItem = WorldItemRow & {
+	item: Item;
+};
+export type WorldItemInsert = TablesInsert<'world_items'>;
+export type WorldItemUpdate = TablesUpdate<'world_items'>;
+
+// ItemBehavior types
+export type ItemBehaviorType = Enums<'item_behavior_type'>;
+export type ItemBehavior = Tables<'item_behaviors'>;
+export type ItemBehaviorInsert = TablesInsert<'item_behaviors'>;
+export type ItemBehaviorUpdate = TablesUpdate<'item_behaviors'>;
+
+// ItemBehaviorAction types
+export type ItemBehaviorAction = Tables<'item_behavior_actions'>;
+export type ItemBehaviorActionInsert = TablesInsert<'item_behavior_actions'>;
+export type ItemBehaviorActionUpdate = TablesUpdate<'item_behavior_actions'>;

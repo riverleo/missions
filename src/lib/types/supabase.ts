@@ -607,6 +607,228 @@ export type Database = {
           },
         ]
       }
+      item_behavior_actions: {
+        Row: {
+          behavior_id: string
+          character_body_state_type:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second: number
+          failure_item_behavior_action_id: string | null
+          id: string
+          item_state_type: Database["public"]["Enums"]["item_state_type"] | null
+          offset_x: number
+          offset_y: number
+          root: boolean
+          scenario_id: string
+          success_item_behavior_action_id: string | null
+        }
+        Insert: {
+          behavior_id: string
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second?: number
+          failure_item_behavior_action_id?: string | null
+          id?: string
+          item_state_type?:
+            | Database["public"]["Enums"]["item_state_type"]
+            | null
+          offset_x?: number
+          offset_y?: number
+          root?: boolean
+          scenario_id: string
+          success_item_behavior_action_id?: string | null
+        }
+        Update: {
+          behavior_id?: string
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second?: number
+          failure_item_behavior_action_id?: string | null
+          id?: string
+          item_state_type?:
+            | Database["public"]["Enums"]["item_state_type"]
+            | null
+          offset_x?: number
+          offset_y?: number
+          root?: boolean
+          scenario_id?: string
+          success_item_behavior_action_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_behavior_actions_behavior_id_fkey"
+            columns: ["behavior_id"]
+            isOneToOne: false
+            referencedRelation: "item_behaviors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_behavior_actions_failure_item_behavior_action_id_fkey"
+            columns: ["failure_item_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "item_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_behavior_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_behavior_actions_success_item_behavior_action_id_fkey"
+            columns: ["success_item_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "item_behavior_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_behaviors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          item_id: string
+          scenario_id: string
+          type: Database["public"]["Enums"]["item_behavior_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          item_id: string
+          scenario_id: string
+          type: Database["public"]["Enums"]["item_behavior_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          item_id?: string
+          scenario_id?: string
+          type?: Database["public"]["Enums"]["item_behavior_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_behaviors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_behaviors_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_behaviors_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_states: {
+        Row: {
+          atlas_name: string
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          item_id: string
+          loop: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["item_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          item_id: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type: Database["public"]["Enums"]["item_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          item_id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          type?: Database["public"]["Enums"]["item_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_states_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       narrative_dice_rolls: {
         Row: {
           created_at: string
@@ -1955,6 +2177,64 @@ export type Database = {
           },
         ]
       }
+      world_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          player_id: string
+          rotation: number
+          user_id: string
+          world_id: string
+          x: number
+          y: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          player_id: string
+          rotation?: number
+          user_id?: string
+          world_id: string
+          x?: number
+          y?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          player_id?: string
+          rotation?: number
+          user_id?: string
+          world_id?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_items_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_items_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       worlds: {
         Row: {
           created_at: string
@@ -2022,6 +2302,8 @@ export type Database = {
         | "sleeping"
       character_face_state_type: "neutral" | "happy" | "sad" | "angry"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
+      item_behavior_type: "idle" | "using"
+      item_state_type: "idle" | "used" | "rotted"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_behavior_action_type: "go" | "interact" | "wait" | "state"
@@ -2167,6 +2449,8 @@ export const Constants = {
       character_body_state_type: ["idle", "walk", "jump", "eating", "sleeping"],
       character_face_state_type: ["neutral", "happy", "sad", "angry"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
+      item_behavior_type: ["idle", "using"],
+      item_state_type: ["idle", "used", "rotted"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_behavior_action_type: ["go", "interact", "wait", "state"],
