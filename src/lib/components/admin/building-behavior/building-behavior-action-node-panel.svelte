@@ -302,6 +302,7 @@
 												bodyState={previewBodyState}
 												faceState={previewFaceState}
 												resolution={PREVIEW_RESOLUTION}
+												flip={changes.offset_x < 0}
 											/>
 										</div>
 									</div>

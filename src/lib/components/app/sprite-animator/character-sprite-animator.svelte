@@ -7,9 +7,10 @@
 		bodyState: CharacterBodyState;
 		faceState?: CharacterFaceState;
 		resolution?: 1 | 2 | 3;
+		flip?: boolean;
 	}
 
-	let { bodyState, faceState, resolution = 1 }: Props = $props();
+	let { bodyState, faceState, resolution = 1, flip = false }: Props = $props();
 
 	// Body가 앞에 렌더링되는지
 	const isBodyInFront = $derived(bodyState.in_front);
@@ -90,7 +91,7 @@
 	);
 </script>
 
-<div class="relative inline-flex items-center justify-center">
+<div class="relative inline-flex items-center justify-center" style:transform={flip ? 'scaleX(-1)' : undefined}>
 	{#if isBodyInFront}
 		{#if faceAnimator}
 			<div class="absolute" style:transform={faceTransform}>
