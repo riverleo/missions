@@ -11,8 +11,9 @@
 		InputGroup,
 		InputGroupInput,
 		InputGroupAddon,
+		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { IconBuilding } from '@tabler/icons-svelte';
+	import { IconBuilding, IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -66,7 +67,7 @@
 		<form {onsubmit} class="space-y-6">
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
-					<IconBuilding class="size-4" />
+					<InputGroupText><IconHeading /></InputGroupText>
 				</InputGroupAddon>
 				<InputGroupInput placeholder="이름" bind:value={name} />
 			</InputGroup>
