@@ -1,5 +1,5 @@
 -- character_body_state_type enum
-create type character_body_state_type as enum ('idle', 'walk', 'jump');
+create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump');
 
 -- character_face_state_type enum
 create type character_face_state_type as enum ('neutral', 'happy', 'sad', 'angry');

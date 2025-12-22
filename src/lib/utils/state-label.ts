@@ -3,14 +3,15 @@ import type {
 	CharacterFaceStateType,
 	BuildingStateType,
 	BuildingBehaviorType,
+	ItemStateType,
+	ItemBehaviorType,
 } from '$lib/types';
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
 	idle: '대기',
 	walk: '걷기',
+	run: '달리기',
 	jump: '점프',
-	eating: '먹기',
-	sleeping: '수면',
 };
 
 const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
@@ -47,4 +48,24 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 
 export function getBuildingBehaviorTypeLabel(type: BuildingBehaviorType): string {
 	return buildingBehaviorTypeLabels[type];
+}
+
+const itemStateLabels: Record<ItemStateType, string> = {
+	idle: '대기',
+	using: '사용 중',
+	rotted: '썩음',
+};
+
+const itemBehaviorTypeLabels: Record<ItemBehaviorType, string> = {
+	pickup: '집기',
+	using: '사용',
+	drop: '놓기',
+};
+
+export function getItemStateLabel(state: ItemStateType): string {
+	return itemStateLabels[state];
+}
+
+export function getItemBehaviorTypeLabel(type: ItemBehaviorType): string {
+	return itemBehaviorTypeLabels[type];
 }

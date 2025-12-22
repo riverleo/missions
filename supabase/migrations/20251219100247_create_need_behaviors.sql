@@ -1,11 +1,7 @@
--- 행동 상태를 character_body_state_type에 추가
-alter type character_body_state_type add value 'eating';
-alter type character_body_state_type add value 'sleeping';
-
 -- need_behavior_action_type enum (액션의 종류)
 create type need_behavior_action_type as enum (
-  'go',         -- 특정 건물로 이동
-  'interact',   -- 건물/아이템과 상호작용
+  'go',         -- 건물/아이템/캐릭터로 이동
+  'interact',   -- 건물/아이템/캐릭터와 상호작용
   'wait',       -- 대기
   'state'       -- 캐릭터 상태 변경
 );

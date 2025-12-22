@@ -57,8 +57,8 @@ create table building_behavior_actions (
   building_state_type building_state_type,
 
   -- 캐릭터 상태
-  character_body_state_type character_body_state_type,
-  character_face_state_type character_face_state_type,
+  character_body_state_type character_body_state_type not null default 'idle',
+  character_face_state_type character_face_state_type not null default 'neutral',
 
   -- 건물 바닥 중앙 기준 캐릭터 위치 오프셋
   offset_x integer not null default 0,

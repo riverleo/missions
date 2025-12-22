@@ -36,7 +36,7 @@ create policy "admins can delete items"
   using (is_admin());
 
 -- item_state_type enum
-create type item_state_type as enum ('idle', 'used', 'rotted');
+create type item_state_type as enum ('idle', 'using', 'rotted');
 
 -- item_states 테이블
 create table item_states (
@@ -77,3 +77,10 @@ create policy "admins can delete item_states"
   for delete
   to authenticated
   using (is_admin());
+
+-- 기존 테이블에 item_id 컬럼 추가
+alter table need_fulfillments
+  add column item_id uuid references items(id) on delete cascade;
+
+alter table need_behavior_actions
+  add column item_id uuid references items(id) on delete set null;

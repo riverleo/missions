@@ -1,7 +1,8 @@
 -- item_behavior_type enum (아이템 행동 종류)
 create type item_behavior_type as enum (
-  'idle',   -- 대기
-  'using'   -- 사용
+  'pickup',  -- 집기
+  'using',   -- 사용
+  'drop'     -- 놓기
 );
 
 -- item_behaviors 테이블
@@ -55,12 +56,8 @@ create table item_behavior_actions (
   item_state_type item_state_type,
 
   -- 캐릭터 상태
-  character_body_state_type character_body_state_type,
-  character_face_state_type character_face_state_type,
-
-  -- 아이템 기준 캐릭터 위치 오프셋
-  offset_x integer not null default 0,
-  offset_y integer not null default 0,
+  character_body_state_type character_body_state_type not null default 'idle',
+  character_face_state_type character_face_state_type not null default 'neutral',
 
   -- 지속 시간 (초 단위)
   duration_per_second float not null default 0,

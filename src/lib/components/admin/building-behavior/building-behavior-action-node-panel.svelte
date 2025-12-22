@@ -49,7 +49,7 @@
 	const characters = $derived(Object.values($characterStore.data));
 
 	const buildingStateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
-	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
 	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
