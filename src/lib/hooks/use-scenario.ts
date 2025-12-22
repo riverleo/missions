@@ -11,6 +11,8 @@ import { useBuilding } from './use-building';
 import { useNeed } from './use-need';
 import { useNeedBehavior } from './use-need-behavior';
 import { useBuildingBehavior } from './use-building-behavior';
+import { useItem } from './use-item';
+import { useItemBehavior } from './use-item-behavior';
 
 type ScenarioStoreState = RecordFetchState<Scenario>;
 
@@ -81,6 +83,8 @@ function createScenarioStore() {
 			useNeed().fetch(scenarioId),
 			useNeedBehavior().fetch(scenarioId),
 			useBuildingBehavior().fetch(scenarioId),
+			useItem().fetch(scenarioId),
+			useItemBehavior().fetch(scenarioId),
 		]);
 	}
 

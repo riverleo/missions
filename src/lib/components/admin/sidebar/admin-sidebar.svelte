@@ -68,7 +68,7 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
 						},
 						{
-							title: '욕구',
+							title: '욕구와 충족',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
 						},
 						{
@@ -90,7 +90,19 @@
 						},
 					],
 				},
-				{ title: '아이템', href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined },
+				{
+					title: '아이템',
+					subItems: [
+						{
+							title: '관리',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
+						},
+						{
+							title: '행동',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/item-behaviors` : undefined,
+						},
+					],
+				},
 			],
 		},
 	]);

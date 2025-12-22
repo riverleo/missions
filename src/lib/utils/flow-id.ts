@@ -6,6 +6,7 @@ import type {
 	BuildingBehaviorAction,
 	Character,
 	CharacterNeed,
+	ItemBehaviorAction,
 	NarrativeDiceRoll,
 	NarrativeNode,
 	NarrativeNodeChoice,
@@ -288,5 +289,46 @@ export function createBuildingBehaviorActionFailureEdgeId(
 }
 
 export function isBuildingBehaviorActionFailureEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-failure-');
+}
+
+// ============================================
+// Item Behavior Flow Node/Edge IDs
+// ============================================
+
+// Item Behavior Action Node
+export function createItemBehaviorActionNodeId(action: ItemBehaviorAction): string {
+	return `item-behavior-action-${action.id}`;
+}
+
+export function parseItemBehaviorActionNodeId(nodeId: string): string {
+	return nodeId.replace('item-behavior-action-', '');
+}
+
+export function isItemBehaviorActionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('item-behavior-action-');
+}
+
+// Item Behavior Action Success Edge
+export function createItemBehaviorActionSuccessEdgeId(
+	sourceAction: ItemBehaviorAction,
+	targetAction: ItemBehaviorAction
+): string {
+	return `item-behavior-action-${sourceAction.id}-success-item-behavior-action-${targetAction.id}`;
+}
+
+export function isItemBehaviorActionSuccessEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-success-');
+}
+
+// Item Behavior Action Failure Edge
+export function createItemBehaviorActionFailureEdgeId(
+	sourceAction: ItemBehaviorAction,
+	targetAction: ItemBehaviorAction
+): string {
+	return `item-behavior-action-${sourceAction.id}-failure-item-behavior-action-${targetAction.id}`;
+}
+
+export function isItemBehaviorActionFailureEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-failure-');
 }
