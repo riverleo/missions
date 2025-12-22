@@ -15,7 +15,11 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
+	import { useItem } from '$lib/hooks/use-item';
+	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
@@ -26,7 +30,11 @@
 	const { narrativeStore } = useNarrative();
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
+	const { store: characterBodyStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
+	const { buildingBehaviorStore } = useBuildingBehavior();
+	const { store: itemStore } = useItem();
+	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
 	const { needBehaviorStore } = useNeedBehavior();
 
@@ -50,8 +58,20 @@
 		if (prevSegment === 'characters') {
 			return $characterStore.data?.[id]?.name;
 		}
+		if (prevSegment === 'character-bodies') {
+			return $characterBodyStore.data?.[id]?.name;
+		}
 		if (prevSegment === 'buildings') {
 			return $buildingStore.data?.[id]?.name;
+		}
+		if (prevSegment === 'building-behaviors') {
+			return $buildingBehaviorStore.data?.[id]?.type;
+		}
+		if (prevSegment === 'items') {
+			return $itemStore.data?.[id]?.name;
+		}
+		if (prevSegment === 'item-behaviors') {
+			return $itemBehaviorStore.data?.[id]?.type;
 		}
 		if (prevSegment === 'needs') {
 			return $needStore.data?.[id]?.name;
@@ -97,9 +117,13 @@
 			else if (segment === 'narratives') label = '내러티브';
 			else if (segment === 'terrains') label = '지형';
 			else if (segment === 'characters') label = '캐릭터';
+			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
+			else if (segment === 'building-behaviors') label = '건물 행동';
+			else if (segment === 'items') label = '아이템';
+			else if (segment === 'item-behaviors') label = '아이템 행동';
 			else if (segment === 'needs') label = '욕구';
-			else if (segment === 'behaviors') label = '행동';
+			else if (segment === 'behaviors') label = '욕구 행동';
 			else if (segment === 'world-test') label = '월드 테스트';
 			// UUID 형태의 ID는 title로 표시
 			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
