@@ -83,12 +83,12 @@
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
 			? getCharacterBodyStateLabel(changes.character_body_state_type)
-			: '자동'
+			: '바디 선택'
 	);
 	const selectedFaceStateLabel = $derived(
 		changes?.character_face_state_type
 			? getCharacterFaceStateLabel(changes.character_face_state_type)
-			: '자동'
+			: '표정 선택'
 	);
 
 	// 선택된 바디/얼굴 상태로 미리보기
@@ -242,7 +242,7 @@
 							</Select>
 						</ButtonGroup>
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>바디</ButtonGroupText>
+							<ButtonGroupText>캐릭터 바디</ButtonGroupText>
 							<Select
 								type="single"
 								value={changes.character_body_state_type ?? ''}
@@ -252,7 +252,6 @@
 									{selectedBodyStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each bodyStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getCharacterBodyStateLabel(stateType)}
@@ -262,7 +261,7 @@
 							</Select>
 						</ButtonGroup>
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>표정</ButtonGroupText>
+							<ButtonGroupText>캐릭터 표정</ButtonGroupText>
 							<Select
 								type="single"
 								value={changes.character_face_state_type ?? ''}
@@ -272,7 +271,6 @@
 									{selectedFaceStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each faceStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getCharacterFaceStateLabel(stateType)}

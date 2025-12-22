@@ -54,7 +54,7 @@
 			{#if stateLabel()}
 				{stateLabel()}
 			{:else}
-				<span class="text-neutral-400">상태 미설정</span>
+				<span class="text-neutral-400">캐릭터 상태 미설정</span>
 			{/if}
 		</div>
 		{#if durationLabel()}
