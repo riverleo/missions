@@ -6,18 +6,6 @@ create type building_behavior_type as enum (
   'refill'     -- 보충
 );
 
--- building_behavior_action_type enum (건물 행동 액션)
-create type building_behavior_action_type as enum (
-  'hammering',   -- 망치질
-  'breaking',    -- 부수기
-  'eating',      -- 먹기
-  'sleeping',    -- 자기
-  'sitting',     -- 앉기
-  'welding',     -- 용접
-  'filling',     -- 채우기
-  'waiting'      -- 대기
-);
-
 -- building_behaviors 테이블
 create table building_behaviors (
   id uuid primary key default gen_random_uuid(),
@@ -63,7 +51,6 @@ create table building_behavior_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   behavior_id uuid not null references building_behaviors(id) on delete cascade,
-  type building_behavior_action_type not null,
   root boolean not null default false,
 
   -- 건물 상태

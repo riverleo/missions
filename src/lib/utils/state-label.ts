@@ -3,7 +3,6 @@ import type {
 	CharacterFaceStateType,
 	BuildingStateType,
 	BuildingBehaviorType,
-	BuildingBehaviorActionType,
 } from '$lib/types';
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
@@ -34,17 +33,6 @@ const buildingBehaviorTypeLabels: Record<BuildingBehaviorType, string> = {
 	refill: '보충',
 };
 
-const buildingBehaviorActionTypeLabels: Record<BuildingBehaviorActionType, string> = {
-	hammering: '망치질',
-	breaking: '부수기',
-	eating: '먹기',
-	sleeping: '자기',
-	sitting: '앉기',
-	welding: '용접',
-	filling: '채우기',
-	waiting: '대기',
-};
-
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
 	return characterBodyStateLabels[state];
 }
@@ -59,8 +47,4 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 
 export function getBuildingBehaviorTypeLabel(type: BuildingBehaviorType): string {
 	return buildingBehaviorTypeLabels[type];
-}
-
-export function getBuildingBehaviorActionTypeLabel(type: BuildingBehaviorActionType): string {
-	return buildingBehaviorActionTypeLabels[type];
 }

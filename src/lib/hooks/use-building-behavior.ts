@@ -44,11 +44,7 @@ function createBuildingBehaviorStore() {
 
 		try {
 			const [behaviorsResult, actionsResult] = await Promise.all([
-				supabase
-					.from('building_behaviors')
-					.select('*')
-					.eq('scenario_id', scenarioId)
-					.order('name'),
+				supabase.from('building_behaviors').select('*').eq('scenario_id', scenarioId),
 				supabase.from('building_behavior_actions').select('*').eq('scenario_id', scenarioId),
 			]);
 

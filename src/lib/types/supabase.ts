@@ -54,7 +54,6 @@ export type Database = {
           root: boolean
           scenario_id: string
           success_building_behavior_action_id: string | null
-          type: Database["public"]["Enums"]["building_behavior_action_type"]
         }
         Insert: {
           behavior_id: string
@@ -75,7 +74,6 @@ export type Database = {
           root?: boolean
           scenario_id: string
           success_building_behavior_action_id?: string | null
-          type: Database["public"]["Enums"]["building_behavior_action_type"]
         }
         Update: {
           behavior_id?: string
@@ -96,7 +94,6 @@ export type Database = {
           root?: boolean
           scenario_id?: string
           success_building_behavior_action_id?: string | null
-          type?: Database["public"]["Enums"]["building_behavior_action_type"]
         }
         Relationships: [
           {
@@ -2015,15 +2012,6 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
-      building_behavior_action_type:
-        | "hammering"
-        | "breaking"
-        | "eating"
-        | "sleeping"
-        | "sitting"
-        | "welding"
-        | "filling"
-        | "waiting"
       building_behavior_type: "demolish" | "use" | "repair" | "refill"
       building_state_type: "idle" | "damaged" | "planning"
       character_body_state_type:
@@ -2174,16 +2162,6 @@ export const Constants = {
   },
   public: {
     Enums: {
-      building_behavior_action_type: [
-        "hammering",
-        "breaking",
-        "eating",
-        "sleeping",
-        "sitting",
-        "welding",
-        "filling",
-        "waiting",
-      ],
       building_behavior_type: ["demolish", "use", "repair", "refill"],
       building_state_type: ["idle", "damaged", "planning"],
       character_body_state_type: ["idle", "walk", "jump", "eating", "sleeping"],

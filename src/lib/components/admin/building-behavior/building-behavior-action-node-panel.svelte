@@ -2,7 +2,6 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		BuildingBehaviorAction,
-		BuildingBehaviorActionType,
 		BuildingStateType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
@@ -29,7 +28,6 @@
 	} from '$lib/components/app/sprite-animator';
 	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import {
-		getBuildingBehaviorActionTypeLabel,
 		getBuildingStateLabel,
 		getCharacterBodyStateLabel,
 		getCharacterFaceStateLabel,
@@ -49,17 +47,6 @@
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));
-
-	const actionTypes: { value: BuildingBehaviorActionType; label: string }[] = [
-		{ value: 'hammering', label: '망치질' },
-		{ value: 'breaking', label: '부수기' },
-		{ value: 'eating', label: '먹기' },
-		{ value: 'sleeping', label: '자기' },
-		{ value: 'sitting', label: '앉기' },
-		{ value: 'welding', label: '용접' },
-		{ value: 'filling', label: '채우기' },
-		{ value: 'waiting', label: '대기' },
-	];
 
 	const buildingStateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
@@ -90,9 +77,6 @@
 		) ?? currentBuilding?.building_states[0]
 	);
 
-	const selectedTypeLabel = $derived(
-		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
-	);
 	const selectedBuildingStateLabel = $derived(
 		changes?.building_state_type ? getBuildingStateLabel(changes.building_state_type) : '자동'
 	);
@@ -137,12 +121,6 @@
 		}
 	});
 
-	function onTypeChange(value: string | undefined) {
-		if (changes && value) {
-			changes.type = value as BuildingBehaviorActionType;
-		}
-	}
-
 	function onBuildingStateChange(value: string | undefined) {
 		if (changes) {
 			changes.building_state_type = (value as BuildingStateType) || null;
@@ -182,7 +160,6 @@
 			}
 
 			await admin.updateBuildingBehaviorAction(actionId, {
-				type: changes.type,
 				duration_per_second: changes.duration_per_second,
 				building_state_type: changes.building_state_type,
 				character_body_state_type: changes.character_body_state_type,
@@ -219,20 +196,6 @@
 			{#if changes}
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>타입</ButtonGroupText>
-							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
-								<SelectTrigger class="flex-1">
-									{selectedTypeLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each actionTypes as actionType (actionType.value)}
-										<SelectItem value={actionType.value}>{actionType.label}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>지속 시간(초)</InputGroupText>

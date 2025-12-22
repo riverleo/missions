@@ -39,7 +39,6 @@
 		try {
 			await admin.createBuildingBehaviorAction({
 				behavior_id: behavior.id,
-				type: 'waiting',
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

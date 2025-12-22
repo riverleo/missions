@@ -164,7 +164,6 @@
 			// 새 액션 생성
 			const newAction = await admin.createBuildingBehaviorAction({
 				behavior_id: behavior.id,
-				type: 'waiting',
 			});
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴

@@ -2,11 +2,7 @@
 	import type { BuildingBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
-	import {
-		getBuildingBehaviorActionTypeLabel,
-		getCharacterBodyStateLabel,
-		getCharacterFaceStateLabel,
-	} from '$lib/utils/state-label';
+	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -32,12 +28,11 @@
 		return [bodyLabel, faceLabel].filter(Boolean).join(' + ');
 	});
 
-	const typeLabel = $derived(() => {
-		const actionLabel = getBuildingBehaviorActionTypeLabel(action.type);
+	const durationLabel = $derived(() => {
 		if (action.duration_per_second > 0) {
-			return `${actionLabel} (${action.duration_per_second}초)`;
+			return `${action.duration_per_second}초`;
 		}
-		return actionLabel;
+		return undefined;
 	});
 </script>
 
@@ -56,11 +51,15 @@
 			{#if action.root}
 				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			{typeLabel()}
-		</div>
-		{#if stateLabel()}
-			<div class="text-xs text-neutral-500">
+			{#if stateLabel()}
 				{stateLabel()}
+			{:else}
+				<span class="text-neutral-400">상태 미설정</span>
+			{/if}
+		</div>
+		{#if durationLabel()}
+			<div class="text-xs text-neutral-500">
+				{durationLabel()}
 			</div>
 		{/if}
 	</div>

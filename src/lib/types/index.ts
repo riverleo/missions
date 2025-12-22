@@ -209,7 +209,6 @@ export type BuildingBehaviorInsert = TablesInsert<'building_behaviors'>;
 export type BuildingBehaviorUpdate = TablesUpdate<'building_behaviors'>;
 
 // BuildingBehaviorAction types
-export type BuildingBehaviorActionType = Enums<'building_behavior_action_type'>;
 export type BuildingBehaviorAction = Tables<'building_behavior_actions'>;
 export type BuildingBehaviorActionInsert = TablesInsert<'building_behavior_actions'>;
 export type BuildingBehaviorActionUpdate = TablesUpdate<'building_behavior_actions'>;
