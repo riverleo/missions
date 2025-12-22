@@ -11,9 +11,15 @@ interface ImageSize {
 	height: number;
 }
 
-interface FaceOffset {
+interface MarkerOffset {
 	x: number;
 	y: number;
+}
+
+interface MarkerColor {
+	r: number;
+	g: number;
+	b: number;
 }
 
 interface AtlasMetadata {
@@ -23,11 +29,13 @@ interface AtlasMetadata {
 	columns: number;
 	rows: number;
 	frameCount: number;
-	faceOffsets?: FaceOffset[];
+	faceOffsets?: MarkerOffset[];
+	handOffsets?: MarkerOffset[];
 }
 
-// 마커 색상 (마젠타 #FF00FF)
-const MARKER_COLOR = { r: 255, g: 0, b: 255 };
+// 마커 색상
+const FACE_MARKER_COLOR: MarkerColor = { r: 255, g: 0, b: 255 }; // 마젠타 #FF00FF
+const HAND_MARKER_COLOR: MarkerColor = { r: 0, g: 255, b: 0 }; // 초록 #00FF00
 
 const SOURCES_DIR = './src/lib/assets/atlas/sources';
 const GENERATED_DIR = './src/lib/assets/atlas/generated';
@@ -65,10 +73,13 @@ function sortByNumber(files: string[]): string[] {
 }
 
 /**
- * 이미지에서 마커 색상 픽셀들의 중심점 찾기
+ * 이미지에서 특정 색상 마커 픽셀들의 중심점 찾기
  * @returns 프레임 중앙 기준 offset, 마커가 없으면 undefined
  */
-async function findMarkerOffset(imagePath: string): Promise<FaceOffset | undefined> {
+async function findMarkerOffset(
+	imagePath: string,
+	markerColor: MarkerColor
+): Promise<MarkerOffset | undefined> {
 	try {
 		const image = sharp(imagePath);
 		const { width, height, channels } = await image.metadata();
@@ -90,7 +101,7 @@ async function findMarkerOffset(imagePath: string): Promise<FaceOffset | undefin
 				const g = data[idx + 1];
 				const b = data[idx + 2];
 
-				if (r === MARKER_COLOR.r && g === MARKER_COLOR.g && b === MARKER_COLOR.b) {
+				if (r === markerColor.r && g === markerColor.g && b === markerColor.b) {
 					markerPixels.push({ x, y });
 				}
 			}
@@ -118,12 +129,15 @@ async function findMarkerOffset(imagePath: string): Promise<FaceOffset | undefin
  * 여러 이미지에서 마커 offset 추출
  * 마커가 없는 프레임은 가장 가까운 마커 있는 프레임의 값 사용
  */
-async function extractFaceOffsets(filePaths: string[]): Promise<FaceOffset[] | undefined> {
+async function extractMarkerOffsets(
+	filePaths: string[],
+	markerColor: MarkerColor
+): Promise<MarkerOffset[] | undefined> {
 	// 먼저 모든 프레임의 마커 추출 (없으면 undefined)
-	const rawOffsets: (FaceOffset | undefined)[] = [];
+	const rawOffsets: (MarkerOffset | undefined)[] = [];
 
 	for (const filePath of filePaths) {
-		const offset = await findMarkerOffset(filePath);
+		const offset = await findMarkerOffset(filePath, markerColor);
 		rawOffsets.push(offset);
 	}
 
@@ -132,11 +146,11 @@ async function extractFaceOffsets(filePaths: string[]): Promise<FaceOffset[] | u
 	if (!hasAnyMarker) return undefined;
 
 	// 마커 없는 프레임은 가장 가까운 마커 있는 프레임의 값으로 채움
-	const offsets: FaceOffset[] = rawOffsets.map((offset, idx) => {
+	const offsets: MarkerOffset[] = rawOffsets.map((offset, idx) => {
 		if (offset) return offset;
 
 		// 앞뒤로 가장 가까운 마커 찾기
-		let nearestOffset: FaceOffset | undefined;
+		let nearestOffset: MarkerOffset | undefined;
 		let nearestDistance = Infinity;
 
 		for (let i = 0; i < rawOffsets.length; i++) {
@@ -156,7 +170,14 @@ async function extractFaceOffsets(filePaths: string[]): Promise<FaceOffset[] | u
 }
 
 /**
- * 이미지에서 마젠타 마커 픽셀을 투명하게 교체
+ * 특정 색상이 마커 색상인지 확인
+ */
+function isMarkerColor(r: number, g: number, b: number, markerColor: MarkerColor): boolean {
+	return r === markerColor.r && g === markerColor.g && b === markerColor.b;
+}
+
+/**
+ * 이미지에서 모든 마커 픽셀을 투명하게 교체
  */
 async function removeMarkerPixels(imagePath: string): Promise<void> {
 	const image = sharp(imagePath);
@@ -173,7 +194,11 @@ async function removeMarkerPixels(imagePath: string): Promise<void> {
 		const g = data[i + 1];
 		const b = data[i + 2];
 
-		if (r === MARKER_COLOR.r && g === MARKER_COLOR.g && b === MARKER_COLOR.b) {
+		// 얼굴 마커 또는 손 마커인 경우 투명하게
+		if (
+			isMarkerColor(r!, g!, b!, FACE_MARKER_COLOR) ||
+			isMarkerColor(r!, g!, b!, HAND_MARKER_COLOR)
+		) {
 			// 투명하게 설정 (RGBA)
 			data[i] = 0; // R
 			data[i + 1] = 0; // G
@@ -215,17 +240,22 @@ async function generateSpriteSheet(groupName: string, files: string[]): Promise<
 	}
 	const { width: frameWidth, height: frameHeight } = getImageSize(firstFile);
 
-	// 마커에서 얼굴 위치 offset 추출
-	const faceOffsets = await extractFaceOffsets(files);
+	// 마커에서 얼굴/손 위치 offset 추출
+	const faceOffsets = await extractMarkerOffsets(files, FACE_MARKER_COLOR);
+	const handOffsets = await extractMarkerOffsets(files, HAND_MARKER_COLOR);
 
 	// 생성된 스프라이트 시트에서 마커 픽셀 제거
-	if (faceOffsets) {
+	if (faceOffsets || handOffsets) {
 		await removeMarkerPixels(outputPath);
 	}
 
-	const hasMarkers = faceOffsets !== undefined;
+	const markerInfo: string[] = [];
+	if (faceOffsets) markerInfo.push('face');
+	if (handOffsets) markerInfo.push('hand');
+	const markerLog = markerInfo.length > 0 ? `, ${markerInfo.join('/')} markers removed` : '';
+
 	console.log(
-		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${columns}x${rows} grid${hasMarkers ? ', face markers removed' : ''})`
+		`✓ [Sprite Sheet] ${groupName}.png (${frameCount} frames, ${columns}x${rows} grid${markerLog})`
 	);
 
 	return {
@@ -236,6 +266,7 @@ async function generateSpriteSheet(groupName: string, files: string[]): Promise<
 		rows,
 		frameCount,
 		faceOffsets,
+		handOffsets,
 	};
 }
 

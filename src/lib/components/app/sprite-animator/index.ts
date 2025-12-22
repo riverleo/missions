@@ -25,7 +25,8 @@ export interface SpriteMetadata {
 	columns: number;
 	rows: number;
 	frameCount: number;
-	faceOffsets?: FaceOffset[]; // 프레임별 얼굴 위치 offset (마커에서 추출)
+	faceOffsets?: FaceOffset[]; // 프레임별 얼굴 위치 offset (마젠타 마커에서 추출)
+	handOffsets?: FaceOffset[]; // 프레임별 손 위치 offset (초록 마커에서 추출)
 }
 
 export const atlases: Record<string, SpriteMetadata> = atlasesJson;
