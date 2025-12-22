@@ -201,3 +201,15 @@ export type NeedBehaviorActionType = Enums<'need_behavior_action_type'>;
 export type NeedBehaviorAction = Tables<'need_behavior_actions'>;
 export type NeedBehaviorActionInsert = TablesInsert<'need_behavior_actions'>;
 export type NeedBehaviorActionUpdate = TablesUpdate<'need_behavior_actions'>;
+
+// BuildingBehavior types
+export type BuildingBehaviorType = Enums<'building_behavior_type'>;
+export type BuildingBehavior = Tables<'building_behaviors'>;
+export type BuildingBehaviorInsert = TablesInsert<'building_behaviors'>;
+export type BuildingBehaviorUpdate = TablesUpdate<'building_behaviors'>;
+
+// BuildingBehaviorAction types
+export type BuildingBehaviorActionType = Enums<'building_behavior_action_type'>;
+export type BuildingBehaviorAction = Tables<'building_behavior_actions'>;
+export type BuildingBehaviorActionInsert = TablesInsert<'building_behavior_actions'>;
+export type BuildingBehaviorActionUpdate = TablesUpdate<'building_behavior_actions'>;

@@ -30,9 +30,11 @@
 	const character = $derived($store.data[characterId]);
 	const faceState = $derived(character?.character_face_states.find((s) => s.type === type));
 
-	// 바디의 idle 상태 가져오기
-	const bodyIdleState = $derived(
-		character?.character_body?.character_body_states.find((s) => s.type === 'idle')
+	// 선택된 바디 상태 가져오기
+	const uiStore = admin.uiStore;
+	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
+	const previewBodyState = $derived(
+		character?.character_body?.character_body_states.find((s) => s.type === previewBodyStateType)
 	);
 
 	let offsetX = $state('');
@@ -132,8 +134,8 @@
 		{/if}
 	{/snippet}
 	{#snippet preview()}
-		{#if bodyIdleState}
-			<CharacterSpriteAnimator bodyState={bodyIdleState} {faceState} resolution={2} />
+		{#if previewBodyState}
+			<CharacterSpriteAnimator bodyState={previewBodyState} {faceState} resolution={2} />
 		{/if}
 	{/snippet}
 </SpriteStateItem>

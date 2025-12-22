@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
-		NeedBehaviorAction,
-		NeedBehaviorActionType,
+		BuildingBehaviorAction,
+		BuildingBehaviorActionType,
+		BuildingStateType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -14,33 +15,59 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { IconCircleDashedNumber1, IconInfoCircle } from '@tabler/icons-svelte';
+	import { IconCircleDashedNumber1, IconX } from '@tabler/icons-svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import {
+		CharacterSpriteAnimator,
+		BuildingSpriteAnimator,
+	} from '$lib/components/app/sprite-animator';
+	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
+	import {
+		getBuildingBehaviorActionTypeLabel,
+		getBuildingStateLabel,
+		getCharacterBodyStateLabel,
+		getCharacterFaceStateLabel,
+	} from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
-		action: NeedBehaviorAction | undefined;
+		action: BuildingBehaviorAction | undefined;
 		hasParent?: boolean;
 	}
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorActionStore, admin } = useNeedBehavior();
+	const { buildingBehaviorStore, buildingBehaviorActionStore, admin } = useBuildingBehavior();
 	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
-	const buildings = $derived(Object.values($buildingStore.data));
 	const characters = $derived(Object.values($characterStore.data));
+
+	const actionTypes: { value: BuildingBehaviorActionType; label: string }[] = [
+		{ value: 'hammering', label: '망치질' },
+		{ value: 'breaking', label: '부수기' },
+		{ value: 'eating', label: '먹기' },
+		{ value: 'sleeping', label: '자기' },
+		{ value: 'sitting', label: '앉기' },
+		{ value: 'welding', label: '용접' },
+		{ value: 'filling', label: '채우기' },
+		{ value: 'waiting', label: '대기' },
+	];
+
+	const buildingStateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
+	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+
+	let isUpdating = $state(false);
+	let changes = $state<BuildingBehaviorAction | undefined>(undefined);
+	let currentActionId = $state<string | undefined>(undefined);
 
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
@@ -49,21 +76,25 @@
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
-	const actionTypes: { value: NeedBehaviorActionType; label: string }[] = [
-		{ value: 'go', label: '이동' },
-		{ value: 'interact', label: '상호작용' },
-		{ value: 'wait', label: '대기' },
-	];
-
-	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
-	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
-
-	let isUpdating = $state(false);
-	let changes = $state<NeedBehaviorAction | undefined>(undefined);
-	let currentActionId = $state<string | undefined>(undefined);
+	// 현재 액션의 행동 -> 건물 가져오기
+	const currentBehavior = $derived(
+		changes?.behavior_id ? $buildingBehaviorStore.data[changes.behavior_id] : undefined
+	);
+	const currentBuilding = $derived(
+		currentBehavior?.building_id ? $buildingStore.data[currentBehavior.building_id] : undefined
+	);
+	// 건물 상태 (선택된 상태 또는 idle)
+	const previewBuildingState = $derived(
+		currentBuilding?.building_states.find(
+			(s) => s.type === (changes?.building_state_type ?? 'idle')
+		) ?? currentBuilding?.building_states[0]
+	);
 
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
+	);
+	const selectedBuildingStateLabel = $derived(
+		changes?.building_state_type ? getBuildingStateLabel(changes.building_state_type) : '자동'
 	);
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -75,14 +106,8 @@
 			? getCharacterFaceStateLabel(changes.character_face_state_type)
 			: '자동'
 	);
-	const selectedBuildingLabel = $derived(
-		changes?.building_id
-			? (buildings.find((b) => b.id === changes?.building_id)?.name ?? '건물 선택')
-			: '자동 선택'
-	);
 
 	// 선택된 바디/얼굴 상태로 미리보기
-	// 바디가 자동일 때는 idle로 미리보기
 	const previewBodyState = $derived(
 		previewCharacter?.character_body
 			? previewCharacter.character_body.character_body_states.find(
@@ -98,6 +123,9 @@
 			: undefined
 	);
 
+	// 미리보기 해상도
+	const PREVIEW_RESOLUTION = 2;
+
 	function onPreviewCharacterChange(value: string | undefined) {
 		previewCharacterId = value || undefined;
 	}
@@ -111,7 +139,13 @@
 
 	function onTypeChange(value: string | undefined) {
 		if (changes && value) {
-			changes.type = value as NeedBehaviorActionType;
+			changes.type = value as BuildingBehaviorActionType;
+		}
+	}
+
+	function onBuildingStateChange(value: string | undefined) {
+		if (changes) {
+			changes.building_state_type = (value as BuildingStateType) || null;
 		}
 	}
 
@@ -127,12 +161,6 @@
 		}
 	}
 
-	function onBuildingChange(value: string | undefined) {
-		if (changes) {
-			changes.building_id = value || null;
-		}
-	}
-
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!changes || isUpdating) return;
@@ -144,26 +172,28 @@
 		try {
 			// root로 설정할 때 다른 root 액션들을 먼저 해제
 			if (changes.root) {
-				const allActions = Object.values($needBehaviorActionStore.data);
+				const allActions = Object.values($buildingBehaviorActionStore.data);
 				const otherRootActions = allActions.filter(
 					(a) => a.behavior_id === behaviorId && a.id !== actionId && a.root
 				);
 				await Promise.all(
-					otherRootActions.map((a) => admin.updateNeedBehaviorAction(a.id, { root: false }))
+					otherRootActions.map((a) => admin.updateBuildingBehaviorAction(a.id, { root: false }))
 				);
 			}
 
-			await admin.updateNeedBehaviorAction(actionId, {
+			await admin.updateBuildingBehaviorAction(actionId, {
 				type: changes.type,
 				duration_per_second: changes.duration_per_second,
+				building_state_type: changes.building_state_type,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
-				building_id: changes.building_id,
+				offset_x: changes.offset_x,
+				offset_y: changes.offset_y,
 				root: changes.root,
 			});
 
 			// 선택 해제
-			const nodeId = `action-${actionId}`;
+			const nodeId = `building-behavior-action-${actionId}`;
 			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 		} catch (error) {
 			console.error('Failed to update action:', error);
@@ -176,7 +206,9 @@
 		if (!action) return;
 
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === createActionNodeId(action) ? { ...n, selected: false } : n))
+			ns.map((n) =>
+				n.id === createBuildingBehaviorActionNodeId(action) ? { ...n, selected: false } : n
+			)
 		);
 	}
 </script>
@@ -201,58 +233,51 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if changes.type === 'go' || changes.type === 'interact'}
-							<ButtonGroup class="w-full">
-								<ButtonGroup class="flex-1">
-									<ButtonGroupText>대상</ButtonGroupText>
-									<Select
-										type="single"
-										value={changes.building_id ?? ''}
-										onValueChange={onBuildingChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedBuildingLabel}
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="">자동 선택</SelectItem>
-											{#each buildings as building (building.id)}
-												<SelectItem value={building.id}>{building.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
-								<ButtonGroup>
-									<Tooltip>
-										<TooltipTrigger>
-											{#snippet child({ props })}
-												<Button {...props} variant="ghost" size="icon" class="rounded-full">
-													<IconInfoCircle class="size-4" />
-												</Button>
-											{/snippet}
-										</TooltipTrigger>
-										<TooltipContent>
-											자동 선택 시 욕구를 가장 많이 채워주는 <br />
-											건물 또는 캐릭터를 찾아 자동으로 선택합니다.
-										</TooltipContent>
-									</Tooltip>
-								</ButtonGroup>
-							</ButtonGroup>
-						{:else if changes.type === 'wait' || changes.type === 'state'}
-							<InputGroup>
-								<InputGroupAddon align="inline-start">
-									<InputGroupText>대기 시간(초)</InputGroupText>
-								</InputGroupAddon>
-								<InputGroupInput
-									type="number"
-									step="0.1"
-									min="0"
-									bind:value={changes.duration_per_second}
-								/>
-							</InputGroup>
-						{/if}
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<InputGroupText>지속 시간(초)</InputGroupText>
+							</InputGroupAddon>
+							<InputGroupInput
+								type="number"
+								step="0.1"
+								min="0"
+								bind:value={changes.duration_per_second}
+							/>
+						</InputGroup>
+
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<InputGroupText>오프셋</InputGroupText>
+							</InputGroupAddon>
+							<InputGroupInput type="number" bind:value={changes.offset_x} placeholder="x" />
+							<InputGroupText>
+								<IconX />
+							</InputGroupText>
+							<InputGroupInput type="number" bind:value={changes.offset_y} placeholder="y" />
+						</InputGroup>
 
 						<Separator />
 
+						<ButtonGroup class="w-full">
+							<ButtonGroupText>건물</ButtonGroupText>
+							<Select
+								type="single"
+								value={changes.building_state_type ?? ''}
+								onValueChange={onBuildingStateChange}
+							>
+								<SelectTrigger class="flex-1">
+									{selectedBuildingStateLabel}
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="">자동</SelectItem>
+									{#each buildingStateTypes as stateType (stateType)}
+										<SelectItem value={stateType}>
+											{getBuildingStateLabel(stateType)}
+										</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>바디</ButtonGroupText>
 							<Select
@@ -294,16 +319,35 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if previewBodyState && (changes?.character_body_state_type || changes?.character_face_state_type)}
-							<div class="mt-6 flex flex-col gap-2">
-								<CharacterSpriteAnimator
-									bodyState={previewBodyState}
-									faceState={previewFaceState}
-									resolution={2}
-								/>
+						{#if previewBuildingState && previewBodyState}
+							<Separator />
+
+							<div class="flex flex-col gap-2">
+								<div
+									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
+									style:height="120px"
+								>
+									<div class="relative">
+										<BuildingSpriteAnimator
+											buildingState={previewBuildingState}
+											resolution={PREVIEW_RESOLUTION}
+										/>
+										<div
+											class="absolute bottom-0 left-1/2"
+											style:transform="translate(calc(-50% + {changes.offset_x /
+												PREVIEW_RESOLUTION}px), {-changes.offset_y / PREVIEW_RESOLUTION}px)"
+										>
+											<CharacterSpriteAnimator
+												bodyState={previewBodyState}
+												faceState={previewFaceState}
+												resolution={PREVIEW_RESOLUTION}
+											/>
+										</div>
+									</div>
+								</div>
 
 								<ButtonGroup class="w-full">
-									<ButtonGroupText>미리보기</ButtonGroupText>
+									<ButtonGroupText>캐릭터</ButtonGroupText>
 									<Select
 										type="single"
 										value={previewCharacterId ?? previewCharacter?.id ?? ''}

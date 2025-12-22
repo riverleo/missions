@@ -1,17 +1,9 @@
 <script lang="ts">
-	import type { Character } from '$lib/types';
-	import {
-		InputGroup,
-		InputGroupAddon,
-		InputGroupButton,
-		InputGroupInput,
-		InputGroupText,
-	} from '$lib/components/ui/input-group';
+	import type { Character, CharacterBodyStateType } from '$lib/types';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
-	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { getCharacterBodyStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		character: Character;
@@ -20,59 +12,31 @@
 	let { character }: Props = $props();
 
 	const { admin } = useCharacter();
-	const { store: bodyStore } = useCharacterBody();
 
-	const bodies = $derived(Object.values($bodyStore.data));
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'jump', 'eating', 'sleeping'];
 
-	let name = $state(character.name ?? '');
+	const uiStore = admin.uiStore;
+	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
+	const selectedBodyStateLabel = $derived(getCharacterBodyStateLabel(previewBodyStateType));
 
-	const selectedBodyLabel = $derived(
-		character.body_id
-			? (bodies.find((b) => b.id === character.body_id)?.name ?? '바디 선택')
-			: '바디 선택'
-	);
-
-	async function updateName() {
-		const trimmed = name.trim();
-		if (trimmed === (character.name ?? '')) return;
-		await admin.update(character.id, { name: trimmed || undefined });
-	}
-
-	async function onBodyChange(value: string | undefined) {
-		if (!value || value === character.body_id) return;
-		await admin.update(character.id, { body_id: value });
-	}
-
-	function onkeydownName(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			(e.target as HTMLInputElement).blur();
-			updateName();
+	function onBodyStateChange(value: string | undefined) {
+		if (value) {
+			admin.setPreviewBodyStateType(value as CharacterBodyStateType);
 		}
 	}
 </script>
 
 <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
-	<InputGroup>
-		<InputGroupAddon>
-			<InputGroupText>
-				<IconHeading class="size-4" />
-			</InputGroupText>
-		</InputGroupAddon>
-		<InputGroupInput bind:value={name} placeholder="캐릭터 이름" onkeydown={onkeydownName} />
-		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
-		</InputGroupAddon>
-	</InputGroup>
 	<ButtonGroup>
 		<ButtonGroupText class="whitespace-nowrap">바디</ButtonGroupText>
-		<Select type="single" value={character.body_id} onValueChange={onBodyChange}>
-			<SelectTrigger class="min-w-40">
-				{selectedBodyLabel}
+		<Select type="single" value={previewBodyStateType} onValueChange={onBodyStateChange}>
+			<SelectTrigger class="min-w-32">
+				{selectedBodyStateLabel}
 			</SelectTrigger>
 			<SelectContent>
-				{#each bodies as body (body.id)}
-					<SelectItem value={body.id}>
-						{body.name || `이름없음 (${body.id.split('-')[0]})`}
+				{#each bodyStateTypes as stateType (stateType)}
+					<SelectItem value={stateType}>
+						{getCharacterBodyStateLabel(stateType)}
 					</SelectItem>
 				{/each}
 			</SelectContent>

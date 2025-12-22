@@ -34,6 +34,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      building_behavior_actions: {
+        Row: {
+          behavior_id: string
+          building_state_type:
+            | Database["public"]["Enums"]["building_state_type"]
+            | null
+          character_body_state_type:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second: number
+          failure_building_behavior_action_id: string | null
+          id: string
+          offset_x: number
+          offset_y: number
+          root: boolean
+          scenario_id: string
+          success_building_behavior_action_id: string | null
+          type: Database["public"]["Enums"]["building_behavior_action_type"]
+        }
+        Insert: {
+          behavior_id: string
+          building_state_type?:
+            | Database["public"]["Enums"]["building_state_type"]
+            | null
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second?: number
+          failure_building_behavior_action_id?: string | null
+          id?: string
+          offset_x?: number
+          offset_y?: number
+          root?: boolean
+          scenario_id: string
+          success_building_behavior_action_id?: string | null
+          type: Database["public"]["Enums"]["building_behavior_action_type"]
+        }
+        Update: {
+          behavior_id?: string
+          building_state_type?:
+            | Database["public"]["Enums"]["building_state_type"]
+            | null
+          character_body_state_type?:
+            | Database["public"]["Enums"]["character_body_state_type"]
+            | null
+          character_face_state_type?:
+            | Database["public"]["Enums"]["character_face_state_type"]
+            | null
+          duration_per_second?: number
+          failure_building_behavior_action_id?: string | null
+          id?: string
+          offset_x?: number
+          offset_y?: number
+          root?: boolean
+          scenario_id?: string
+          success_building_behavior_action_id?: string | null
+          type?: Database["public"]["Enums"]["building_behavior_action_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_behavior_actions_behavior_id_fkey"
+            columns: ["behavior_id"]
+            isOneToOne: false
+            referencedRelation: "building_behaviors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_behavior_actions_failure_building_behavior_action_fkey"
+            columns: ["failure_building_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "building_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_behavior_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_behavior_actions_success_building_behavior_action_fkey"
+            columns: ["success_building_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "building_behavior_actions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_behaviors: {
+        Row: {
+          building_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          scenario_id: string
+          type: Database["public"]["Enums"]["building_behavior_type"]
+        }
+        Insert: {
+          building_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id: string
+          type: Database["public"]["Enums"]["building_behavior_type"]
+        }
+        Update: {
+          building_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id?: string
+          type?: Database["public"]["Enums"]["building_behavior_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_behaviors_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_behaviors_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_behaviors_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       building_states: {
         Row: {
           atlas_name: string
@@ -1868,6 +2015,16 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
+      building_behavior_action_type:
+        | "hammering"
+        | "breaking"
+        | "eating"
+        | "sleeping"
+        | "sitting"
+        | "welding"
+        | "filling"
+        | "waiting"
+      building_behavior_type: "demolish" | "use" | "repair" | "refill"
       building_state_type: "idle" | "damaged" | "planning"
       character_body_state_type:
         | "idle"
@@ -2017,6 +2174,17 @@ export const Constants = {
   },
   public: {
     Enums: {
+      building_behavior_action_type: [
+        "hammering",
+        "breaking",
+        "eating",
+        "sleeping",
+        "sitting",
+        "welding",
+        "filling",
+        "waiting",
+      ],
+      building_behavior_type: ["demolish", "use", "repair", "refill"],
       building_state_type: ["idle", "damaged", "planning"],
       character_body_state_type: ["idle", "walk", "jump", "eating", "sleeping"],
       character_face_state_type: ["neutral", "happy", "sad", "angry"],

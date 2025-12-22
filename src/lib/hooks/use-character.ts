@@ -7,11 +7,13 @@ import type {
 	CharacterUpdate,
 	CharacterFaceStateInsert,
 	CharacterFaceStateUpdate,
+	CharacterBodyStateType,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type CharacterDialogState =
 	| { type: 'create' }
+	| { type: 'update'; characterId: string }
 	| { type: 'delete'; characterId: string }
 	| undefined;
 
@@ -27,8 +29,10 @@ function createCharacterStore() {
 
 	const dialogStore = writable<CharacterDialogState>(undefined);
 
-	const uiStore = writable({
-		showBodyPreview: false,
+	const uiStore = writable<{
+		previewBodyStateType: CharacterBodyStateType;
+	}>({
+		previewBodyStateType: 'idle',
 	});
 
 	let currentScenarioId: string | undefined;
@@ -82,10 +86,12 @@ function createCharacterStore() {
 	}
 
 	const admin = {
-		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
+		uiStore: uiStore as Readable<{
+			previewBodyStateType: CharacterBodyStateType;
+		}>,
 
-		setShowBodyPreview(value: boolean) {
-			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
+		setPreviewBodyStateType(value: CharacterBodyStateType) {
+			uiStore.update((s) => ({ ...s, previewBodyStateType: value }));
 		},
 
 		async create(character: Omit<CharacterInsert, 'scenario_id'>) {

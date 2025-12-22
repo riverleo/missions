@@ -79,7 +79,16 @@
 				},
 				{
 					title: '건물',
-					href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
+					subItems: [
+						{
+							title: '관리',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
+						},
+						{
+							title: '행동',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/building-behaviors` : undefined,
+						},
+					],
 				},
 				{ title: '아이템', href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined },
 			],

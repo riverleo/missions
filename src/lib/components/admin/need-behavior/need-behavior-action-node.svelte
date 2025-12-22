@@ -17,60 +17,41 @@
 
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
-	const parentAction = $derived(data.parentAction);
-	const isSuccessTarget = $derived(data.isSuccessTarget);
 
 	const { store: buildingStore } = useBuilding();
 
-	const typeLabels: Record<string, string> = {
-		go: '이동',
-		interact: '상호작용',
-		wait: '대기',
-		state: '상태',
-	};
+	// 바디/표정 상태 라벨 생성
+	const stateLabel = $derived(() => {
+		const bodyLabel = action.character_body_state_type
+			? getCharacterBodyStateLabel(action.character_body_state_type)
+			: undefined;
+		const faceLabel = action.character_face_state_type
+			? getCharacterFaceStateLabel(action.character_face_state_type)
+			: undefined;
+		return [bodyLabel, faceLabel].filter(Boolean).join(' + ');
+	});
 
 	const typeLabel = $derived(() => {
 		if (action.type === 'go') {
 			if (action.building_id) {
 				const building = $buildingStore.data[action.building_id];
-				return `${building?.name ?? '건물'}으로 이동`;
+				return `"${building?.name ?? '건물'}" 건물로 이동`;
 			}
 			return '자동 이동';
 		}
 		if (action.type === 'interact') {
 			if (action.building_id) {
 				const building = $buildingStore.data[action.building_id];
-				return `${building?.name ?? '건물'} 상호작용`;
+				return `"${building?.name ?? '건물'}" 건물과 상호작용`;
 			}
 			return '자동 상호작용';
 		}
-		if (action.type === 'wait') {
+		if (action.type === 'wait' || action.type === 'state') {
 			return `${action.duration_per_second}초 대기`;
-		}
-		if (action.type === 'state') {
-			const bodyLabel = action.character_body_state_type
-				? getCharacterBodyStateLabel(action.character_body_state_type)
-				: undefined;
-			const faceLabel = action.character_face_state_type
-				? getCharacterFaceStateLabel(action.character_face_state_type)
-				: undefined;
-			const stateLabel = [bodyLabel, faceLabel].filter(Boolean).join(' + ') || '상태';
-			return `${stateLabel} (${action.duration_per_second}초)`;
 		}
 		return action.type;
 	});
 
-	const description = $derived(() => {
-		if (action.root) {
-			return '시작 액션';
-		}
-		if (parentAction) {
-			const parentType = typeLabels[parentAction.type] ?? parentAction.type;
-			const result = isSuccessTarget ? '성공' : '실패';
-			return `${parentType} ${result} 시 실행`;
-		}
-		return '';
-	});
 </script>
 
 <div class="min-w-44 px-3 py-2">
@@ -90,9 +71,9 @@
 			{/if}
 			{typeLabel()}
 		</div>
-		{#if description()}
-			<div class="text-xs text-neutral-400">
-				{description()}
+		{#if stateLabel()}
+			<div class="text-xs text-neutral-500">
+				{stateLabel()}
 			</div>
 		{/if}
 	</div>

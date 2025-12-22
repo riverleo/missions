@@ -1,4 +1,10 @@
-import type { CharacterBodyStateType, CharacterFaceStateType, BuildingStateType } from '$lib/types';
+import type {
+	CharacterBodyStateType,
+	CharacterFaceStateType,
+	BuildingStateType,
+	BuildingBehaviorType,
+	BuildingBehaviorActionType,
+} from '$lib/types';
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
 	idle: '대기',
@@ -21,6 +27,24 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 	planning: '건설 중',
 };
 
+const buildingBehaviorTypeLabels: Record<BuildingBehaviorType, string> = {
+	demolish: '철거',
+	use: '사용',
+	repair: '수리',
+	refill: '보충',
+};
+
+const buildingBehaviorActionTypeLabels: Record<BuildingBehaviorActionType, string> = {
+	hammering: '망치질',
+	breaking: '부수기',
+	eating: '먹기',
+	sleeping: '자기',
+	sitting: '앉기',
+	welding: '용접',
+	filling: '채우기',
+	waiting: '대기',
+};
+
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
 	return characterBodyStateLabels[state];
 }
@@ -31,4 +55,12 @@ export function getCharacterFaceStateLabel(state: CharacterFaceStateType): strin
 
 export function getBuildingStateLabel(state: BuildingStateType): string {
 	return buildingStateLabels[state];
+}
+
+export function getBuildingBehaviorTypeLabel(type: BuildingBehaviorType): string {
+	return buildingBehaviorTypeLabels[type];
+}
+
+export function getBuildingBehaviorActionTypeLabel(type: BuildingBehaviorActionType): string {
+	return buildingBehaviorActionTypeLabels[type];
 }

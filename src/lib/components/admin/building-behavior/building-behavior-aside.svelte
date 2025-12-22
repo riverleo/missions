@@ -3,16 +3,16 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
+	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import CharacterCommand from './character-command.svelte';
-	import CharacterCreateDialog from './character-create-dialog.svelte';
-	import CharacterUpdateDialog from './character-update-dialog.svelte';
-	import CharacterDeleteDialog from './character-delete-dialog.svelte';
+	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
+	import BuildingBehaviorCommand from './building-behavior-command.svelte';
+	import BuildingBehaviorCreateDialog from './building-behavior-create-dialog.svelte';
+	import BuildingBehaviorUpdateDialog from './building-behavior-update-dialog.svelte';
+	import BuildingBehaviorDeleteDialog from './building-behavior-delete-dialog.svelte';
 
-	const { openDialog } = useCharacter();
-	const currentCharacterId = $derived(page.params.characterId);
+	const { openDialog } = useBuildingBehavior();
+	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -46,7 +46,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 캐릭터</TooltipContent>
+					<TooltipContent>새로운 건물 행동 생성</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger>
@@ -55,16 +55,15 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								disabled={!currentCharacterId}
+								disabled={!currentBehaviorId}
 								onclick={() =>
-									currentCharacterId &&
-									openDialog({ type: 'update', characterId: currentCharacterId })}
+									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>캐릭터 수정</TooltipContent>
+					<TooltipContent>건물 행동 수정</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
@@ -76,25 +75,24 @@
 							{...props}
 							variant="outline"
 							size="icon"
-							disabled={!currentCharacterId}
+							disabled={!currentBehaviorId}
 							onclick={() =>
-								currentCharacterId &&
-								openDialog({ type: 'delete', characterId: currentCharacterId })}
+								currentBehaviorId && openDialog({ type: 'delete', behaviorId: currentBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>캐릭터 삭제</TooltipContent>
+				<TooltipContent>건물 행동 삭제</TooltipContent>
 			</Tooltip>
 		</ButtonGroup>
 	</ButtonGroup>
 
 	{#if toggleValue.includes('list')}
-		<CharacterCommand />
+		<BuildingBehaviorCommand />
 	{/if}
 </aside>
 
-<CharacterCreateDialog />
-<CharacterUpdateDialog />
-<CharacterDeleteDialog />
+<BuildingBehaviorCreateDialog />
+<BuildingBehaviorUpdateDialog />
+<BuildingBehaviorDeleteDialog />

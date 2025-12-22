@@ -13,19 +13,20 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 
-	const { admin, dialogStore, closeDialog } = useCharacter();
+	const { store, admin, dialogStore, closeDialog } = useCharacter();
 	const { store: bodyStore } = useCharacterBody();
-	const scenarioId = $derived(page.params.scenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($dialogStore?.type === 'update');
+	const characterId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.characterId : undefined
+	);
+	const character = $derived(characterId ? $store.data[characterId] : undefined);
 	const bodies = $derived(Object.values($bodyStore.data));
 
 	let name = $state('');
@@ -37,9 +38,9 @@
 	);
 
 	$effect(() => {
-		if (open) {
-			name = '';
-			bodyId = undefined;
+		if (open && character) {
+			name = character.name ?? '';
+			bodyId = character.body_id ?? undefined;
 		}
 	});
 
@@ -55,18 +56,17 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!name.trim() || !bodyId || isSubmitting) return;
+		if (!characterId || !name.trim() || !bodyId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim(), body_id: bodyId })
-			.then((character) => {
+			.update(characterId, { name: name.trim(), body_id: bodyId })
+			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/characters/${character.id}`);
 			})
 			.catch((error) => {
-				console.error('Failed to create character:', error);
+				console.error('Failed to update character:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -77,11 +77,12 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 캐릭터 생성</DialogTitle>
+			<DialogTitle>캐릭터 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
 			<ButtonGroup class="w-full">
 				<ButtonGroup>
+					<ButtonGroupText>바디</ButtonGroupText>
 					<Select type="single" value={bodyId} onValueChange={onBodyChange}>
 						<SelectTrigger>
 							{selectedBodyLabel}
@@ -104,12 +105,9 @@
 					</InputGroup>
 				</ButtonGroup>
 			</ButtonGroup>
-			{#if bodies.length === 0}
-				<p class="mt-4 text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
-			{/if}
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting || !bodyId || !name.trim()}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? '저장 중...' : '저장'}
 				</Button>
 			</DialogFooter>
 		</form>
