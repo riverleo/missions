@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { NeedFulfillment, NeedFulfillmentType } from '$lib/types';
+	import type {
+		NeedFulfillment,
+		NeedFulfillmentType,
+		NeedFulfillmentTaskCondition,
+	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -8,13 +12,22 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupButton,
+		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuRadioGroup,
+		DropdownMenuRadioItem,
+		DropdownMenuTrigger,
+	} from '$lib/components/ui/dropdown-menu';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { IconCategory } from '@tabler/icons-svelte';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useItem } from '$lib/hooks/use-item';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -25,28 +38,55 @@
 
 	const { admin } = useNeed();
 	const { store: buildingStore } = useBuilding();
+	const { store: characterStore } = useCharacter();
+	const { store: itemStore } = useItem();
 	const flowNodes = useNodes();
 
 	const buildings = $derived(Object.values($buildingStore.data));
+	const characters = $derived(Object.values($characterStore.data));
+	const items = $derived(Object.values($itemStore.data));
 
 	const fulfillmentTypeOptions: { value: NeedFulfillmentType; label: string }[] = [
 		{ value: 'building', label: '건물' },
-		{ value: 'task', label: '할 일' },
+		{ value: 'character', label: '캐릭터' },
 		{ value: 'item', label: '아이템' },
+		{ value: 'task', label: '할 일' },
 		{ value: 'idle', label: '대기' },
+	];
+
+	const taskConditionOptions: { value: NeedFulfillmentTaskCondition; label: string }[] = [
+		{ value: 'completed', label: '완료' },
+		{ value: 'created', label: '생성' },
 	];
 
 	function getTypeLabel(type: NeedFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
 	}
 
+	function getTaskConditionLabel(condition: NeedFulfillmentTaskCondition | null | undefined) {
+		if (!condition) return '조건 선택';
+		return taskConditionOptions.find((o) => o.value === condition)?.label ?? condition;
+	}
+
 	let isUpdating = $state(false);
 	let changes = $state<NeedFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
-	const selectedBuildingName = $derived(
-		buildings.find((b) => b.id === changes?.building_id)?.name ?? '선택...'
-	);
+	const selectedTargetLabel = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building' && changes?.building_id) {
+			const building = buildings.find((b) => b.id === changes?.building_id);
+			return building?.name ?? '건물 선택';
+		}
+		if (changes?.fulfillment_type === 'character' && changes?.character_id) {
+			const character = characters.find((c) => c.id === changes?.character_id);
+			return character?.name ?? '캐릭터 선택';
+		}
+		if (changes?.fulfillment_type === 'item' && changes?.item_id) {
+			const item = items.find((i) => i.id === changes?.item_id);
+			return item?.name ?? '아이템 선택';
+		}
+		return '선택...';
+	});
 
 	$effect(() => {
 		if (fulfillment && fulfillment.id !== currentFulfillmentId) {
@@ -66,6 +106,11 @@
 			.updateNeedFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
 				building_id: changes.fulfillment_type === 'building' ? changes.building_id : null,
+				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
+				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
+				task_condition: changes.fulfillment_type === 'task' ? changes.task_condition : null,
+				task_count: changes.fulfillment_type === 'task' ? changes.task_count : 1,
+				duration_ticks: changes.fulfillment_type === 'task' ? changes.duration_ticks : 0,
 				increase_per_tick: changes.increase_per_tick,
 			})
 			.then(() => {
@@ -93,14 +138,57 @@
 	function onTypeChange(value: string | undefined) {
 		if (value && changes) {
 			changes.fulfillment_type = value as NeedFulfillmentType;
+			// 타입 변경 시 대상 ID 초기화
+			changes.building_id = null;
+			changes.character_id = null;
+			changes.item_id = null;
+			changes.task_condition = null;
 		}
 	}
 
-	function onBuildingChange(value: string | undefined) {
+	function onTaskConditionChange(value: string | undefined) {
 		if (changes) {
-			changes.building_id = value ?? null;
+			changes.task_condition = (value as NeedFulfillmentTaskCondition) || null;
 		}
 	}
+
+	function onTargetChange(value: string | undefined) {
+		if (!changes) return;
+		const id = value ?? null;
+		if (changes.fulfillment_type === 'building') {
+			changes.building_id = id;
+		} else if (changes.fulfillment_type === 'character') {
+			changes.character_id = id;
+		} else if (changes.fulfillment_type === 'item') {
+			changes.item_id = id;
+		}
+	}
+
+	const targetOptions = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building') {
+			return buildings.map((b) => ({ id: b.id, name: b.name }));
+		}
+		if (changes?.fulfillment_type === 'character') {
+			return characters.map((c) => ({ id: c.id, name: c.name }));
+		}
+		if (changes?.fulfillment_type === 'item') {
+			return items.map((i) => ({ id: i.id, name: i.name }));
+		}
+		return [];
+	});
+
+	const selectedTargetId = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building') return changes.building_id;
+		if (changes?.fulfillment_type === 'character') return changes.character_id;
+		if (changes?.fulfillment_type === 'item') return changes.item_id;
+		return undefined;
+	});
+
+	const hasTargetSelector = $derived(
+		changes?.fulfillment_type === 'building' ||
+			changes?.fulfillment_type === 'character' ||
+			changes?.fulfillment_type === 'item'
+	);
 </script>
 
 <Panel position="top-right">
@@ -110,37 +198,80 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
-							<ButtonGroup class="w-full">
-								<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
-									<SelectTrigger class="flex-1">
-										{getTypeLabel(changes.fulfillment_type)}
-									</SelectTrigger>
-									<SelectContent>
-										{#each fulfillmentTypeOptions as option (option.value)}
-											<SelectItem value={option.value}>{option.label}</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
+							<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
+								<SelectTrigger class="flex-1">
+									{getTypeLabel(changes.fulfillment_type)}
+								</SelectTrigger>
+								<SelectContent>
+									{#each fulfillmentTypeOptions as option (option.value)}
+										<SelectItem value={option.value}>{option.label}</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
 
+						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
 								<Select
 									type="single"
-									value={changes.building_id ?? undefined}
-									onValueChange={onBuildingChange}
-									disabled={changes.fulfillment_type !== 'building'}
+									value={selectedTargetId ?? undefined}
+									onValueChange={onTargetChange}
 								>
 									<SelectTrigger class="flex-1">
-										{selectedBuildingName}
+										{selectedTargetLabel}
 									</SelectTrigger>
 									<SelectContent>
-										{#each buildings as building (building.id)}
-											<SelectItem value={building.id}>{building.name}</SelectItem>
+										{#each targetOptions as option (option.id)}
+											<SelectItem value={option.id}>{option.name}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>
 							</ButtonGroup>
-						</ButtonGroup>
+						{/if}
+
+						{#if changes.fulfillment_type === 'task'}
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>할 일</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput type="number" min="1" bind:value={changes.task_count} />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>개</InputGroupText>
+									<DropdownMenu>
+										<DropdownMenuTrigger>
+											{#snippet child({ props })}
+												<InputGroupButton {...props} variant="ghost">
+													{getTaskConditionLabel(changes?.task_condition)}
+												</InputGroupButton>
+											{/snippet}
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuRadioGroup
+												value={changes.task_condition ?? ''}
+												onValueChange={onTaskConditionChange}
+											>
+												{#each taskConditionOptions as option (option.value)}
+													<DropdownMenuRadioItem value={option.value}>
+														{option.label}
+													</DropdownMenuRadioItem>
+												{/each}
+											</DropdownMenuRadioGroup>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</InputGroupAddon>
+							</InputGroup>
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>지속 시간(틱)</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput
+									type="number"
+									step="0.1"
+									min="0"
+									bind:value={changes.duration_ticks}
+								/>
+							</InputGroup>
+						{/if}
 
 						<InputGroup>
 							<InputGroupAddon align="inline-start">

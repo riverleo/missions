@@ -22,10 +22,7 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import {
-		CharacterSpriteAnimator,
-		ItemSpriteAnimator,
-	} from '$lib/components/app/sprite-animator';
+	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createItemBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import {
 		getItemStateLabel,
@@ -70,15 +67,13 @@
 	const currentItem = $derived(
 		currentBehavior?.item_id ? $itemStore.data[currentBehavior.item_id] : undefined
 	);
-	// 아이템 상태 (선택된 상태 또는 idle)
+	// 아이템 상태
 	const previewItemState = $derived(
-		currentItem?.item_states.find(
-			(s) => s.type === (changes?.item_state_type ?? 'idle')
-		) ?? currentItem?.item_states[0]
+		currentItem?.item_states.find((s) => s.type === changes?.item_state_type)
 	);
 
 	const selectedItemStateLabel = $derived(
-		changes?.item_state_type ? getItemStateLabel(changes.item_state_type) : '자동'
+		changes?.item_state_type ? getItemStateLabel(changes.item_state_type) : '상태 선택'
 	);
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -160,7 +155,7 @@
 			}
 
 			await admin.updateItemBehaviorAction(actionId, {
-				duration_per_second: changes.duration_per_second,
+				duration_ticks: changes.duration_ticks,
 				item_state_type: changes.item_state_type,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
@@ -196,13 +191,13 @@
 					<div class="space-y-2">
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>지속 시간(초)</InputGroupText>
+								<InputGroupText>지속 시간(틱)</InputGroupText>
 							</InputGroupAddon>
 							<InputGroupInput
 								type="number"
 								step="0.1"
 								min="0"
-								bind:value={changes.duration_per_second}
+								bind:value={changes.duration_ticks}
 							/>
 						</InputGroup>
 
@@ -219,7 +214,6 @@
 									{selectedItemStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each itemStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getItemStateLabel(stateType)}
@@ -275,17 +269,12 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									<div class="relative flex items-end">
-										<ItemSpriteAnimator
-											itemState={previewItemState}
-											resolution={PREVIEW_RESOLUTION}
-										/>
-										<CharacterSpriteAnimator
-											bodyState={previewBodyState}
-											faceState={previewFaceState}
-											resolution={PREVIEW_RESOLUTION}
-										/>
-									</div>
+									<CharacterSpriteAnimator
+										bodyState={previewBodyState}
+										faceState={previewFaceState}
+										heldItemState={previewItemState}
+										resolution={PREVIEW_RESOLUTION}
+									/>
 								</div>
 
 								<ButtonGroup class="w-full">

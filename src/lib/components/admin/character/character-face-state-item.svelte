@@ -9,13 +9,10 @@
 	import {
 		InputGroup,
 		InputGroupAddon,
-		InputGroupButton,
 		InputGroupInput,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { IconAxisX, IconAxisY } from '@tabler/icons-svelte';
-	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { IconX } from '@tabler/icons-svelte';
 	import { debounce } from 'radash';
 
 	interface Props {
@@ -85,52 +82,26 @@
 >
 	{#snippet headerAction()}
 		{#if faceState}
-			<ButtonGroup class="max-w-40">
-				<ButtonGroup>
-					<InputGroup>
-						<InputGroupAddon>
-							<Tooltip>
-								<TooltipTrigger>
-									{#snippet child({ props })}
-										<InputGroupButton {...props} variant="ghost" size="icon-sm">
-											<IconAxisX />
-										</InputGroupButton>
-									{/snippet}
-								</TooltipTrigger>
-								<TooltipContent>X축 미세 조정</TooltipContent>
-							</Tooltip>
-						</InputGroupAddon>
-						<InputGroupInput
-							type="number"
-							bind:value={offsetX}
-							oninput={debouncedUpdateOffset}
-							placeholder="X"
-						/>
-					</InputGroup>
-				</ButtonGroup>
-				<ButtonGroup>
-					<InputGroup class="max-w-44">
-						<InputGroupAddon>
-							<Tooltip>
-								<TooltipTrigger>
-									{#snippet child({ props })}
-										<InputGroupButton {...props} variant="ghost" size="icon-sm">
-											<IconAxisY />
-										</InputGroupButton>
-									{/snippet}
-								</TooltipTrigger>
-								<TooltipContent>Y축 미세 조정</TooltipContent>
-							</Tooltip>
-						</InputGroupAddon>
-						<InputGroupInput
-							type="number"
-							bind:value={offsetY}
-							oninput={debouncedUpdateOffset}
-							placeholder="Y"
-						/>
-					</InputGroup>
-				</ButtonGroup>
-			</ButtonGroup>
+			<InputGroup class="max-w-44">
+				<InputGroupAddon align="inline-start">
+					<InputGroupText>오프셋</InputGroupText>
+				</InputGroupAddon>
+				<InputGroupInput
+					type="number"
+					bind:value={offsetX}
+					oninput={debouncedUpdateOffset}
+					placeholder="x"
+				/>
+				<InputGroupText>
+					<IconX class="size-3" />
+				</InputGroupText>
+				<InputGroupInput
+					type="number"
+					bind:value={offsetY}
+					oninput={debouncedUpdateOffset}
+					placeholder="y"
+				/>
+			</InputGroup>
 		{/if}
 	{/snippet}
 	{#snippet preview()}

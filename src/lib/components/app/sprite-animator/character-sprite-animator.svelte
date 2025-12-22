@@ -1,22 +1,24 @@
 <script lang="ts">
-	import type { CharacterBodyState, CharacterFaceState, LoopMode } from '$lib/types';
+	import type { CharacterBodyState, CharacterFaceState, ItemState, LoopMode } from '$lib/types';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 
 	interface Props {
 		bodyState: CharacterBodyState;
 		faceState?: CharacterFaceState;
+		heldItemState?: ItemState;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 	}
 
-	let { bodyState, faceState, resolution = 1, flip = false }: Props = $props();
+	let { bodyState, faceState, heldItemState, resolution = 1, flip = false }: Props = $props();
 
 	// Body가 앞에 렌더링되는지
 	const isBodyInFront = $derived(bodyState.in_front);
 
 	let bodyAnimator = $state<SpriteAnimator | undefined>(undefined);
 	let faceAnimator = $state<SpriteAnimator | undefined>(undefined);
+	let heldItemAnimator = $state<SpriteAnimator | undefined>(undefined);
 
 	// Body animator 생성 및 재생
 	$effect(() => {
@@ -71,6 +73,35 @@
 		};
 	});
 
+	// Held item animator 생성 및 재생
+	$effect(() => {
+		const atlasName = heldItemState?.atlas_name;
+		if (!atlasName) {
+			heldItemAnimator?.stop();
+			heldItemAnimator = undefined;
+			return;
+		}
+
+		SpriteAnimator.create(atlasName).then((newAnimator) => {
+			heldItemAnimator?.stop();
+			newAnimator.init({
+				name: heldItemState.type,
+				from: heldItemState.frame_from ?? undefined,
+				to: heldItemState.frame_to ?? undefined,
+				fps: heldItemState.fps ?? undefined,
+			});
+			newAnimator.play({
+				name: heldItemState.type,
+				loop: (heldItemState.loop as LoopMode) ?? 'loop',
+			});
+			heldItemAnimator = newAnimator;
+		});
+
+		return () => {
+			heldItemAnimator?.stop();
+		};
+	});
+
 	// 현재 프레임의 faceOffset 계산 (atlas 메타데이터 + DB offset)
 	const faceOffset = $derived.by(() => {
 		if (!bodyAnimator) return { x: 0, y: 0 };
@@ -88,6 +119,21 @@
 	// Transform 스타일 계산
 	const faceTransform = $derived(
 		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px)`
+	);
+
+	// 현재 프레임의 handOffset 계산 (atlas 메타데이터)
+	const handOffset = $derived.by(() => {
+		if (!bodyAnimator) return { x: 0, y: 0 };
+
+		const metadata = bodyAnimator.getMetadata();
+		const atlasOffset = metadata?.handOffsets?.[bodyAnimator.currentFrame];
+
+		return { x: atlasOffset?.x ?? 0, y: atlasOffset?.y ?? 0 };
+	});
+
+	// Transform 스타일 계산
+	const handTransform = $derived(
+		`translate(${handOffset.x / resolution}px, ${handOffset.y / resolution}px)`
 	);
 </script>
 
@@ -110,5 +156,10 @@
 				<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
 			</div>
 		{/if}
+	{/if}
+	{#if heldItemAnimator}
+		<div class="absolute" style:transform={handTransform}>
+			<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
+		</div>
 	{/if}
 </div>

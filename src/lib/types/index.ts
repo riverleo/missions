@@ -174,6 +174,7 @@ export type WorldBuildingUpdate = TablesUpdate<'world_buildings'>;
 
 // Need types
 export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
+export type NeedFulfillmentTaskCondition = Enums<'need_fulfillment_task_condition'>;
 export type Need = Tables<'needs'>;
 export type NeedInsert = TablesInsert<'needs'>;
 export type NeedUpdate = TablesUpdate<'needs'>;

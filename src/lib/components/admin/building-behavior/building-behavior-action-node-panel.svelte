@@ -70,15 +70,13 @@
 	const currentBuilding = $derived(
 		currentBehavior?.building_id ? $buildingStore.data[currentBehavior.building_id] : undefined
 	);
-	// 건물 상태 (선택된 상태 또는 idle)
+	// 건물 상태
 	const previewBuildingState = $derived(
-		currentBuilding?.building_states.find(
-			(s) => s.type === (changes?.building_state_type ?? 'idle')
-		) ?? currentBuilding?.building_states[0]
+		currentBuilding?.building_states.find((s) => s.type === changes?.building_state_type)
 	);
 
 	const selectedBuildingStateLabel = $derived(
-		changes?.building_state_type ? getBuildingStateLabel(changes.building_state_type) : '자동'
+		changes?.building_state_type ? getBuildingStateLabel(changes.building_state_type) : '상태 선택'
 	);
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -160,7 +158,7 @@
 			}
 
 			await admin.updateBuildingBehaviorAction(actionId, {
-				duration_per_second: changes.duration_per_second,
+				duration_ticks: changes.duration_ticks,
 				building_state_type: changes.building_state_type,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
@@ -198,13 +196,13 @@
 					<div class="space-y-2">
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>지속 시간(초)</InputGroupText>
+								<InputGroupText>지속 시간(틱)</InputGroupText>
 							</InputGroupAddon>
 							<InputGroupInput
 								type="number"
 								step="0.1"
 								min="0"
-								bind:value={changes.duration_per_second}
+								bind:value={changes.duration_ticks}
 							/>
 						</InputGroup>
 
@@ -232,7 +230,6 @@
 									{selectedBuildingStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each buildingStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getBuildingStateLabel(stateType)}

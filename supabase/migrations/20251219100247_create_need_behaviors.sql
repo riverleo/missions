@@ -60,11 +60,11 @@ create table need_behavior_actions (
   character_id uuid references characters(id) on delete set null,
 
   -- state 타입용
-  character_body_state_type character_body_state_type,
-  character_face_state_type character_face_state_type,
+  character_body_state_type character_body_state_type, -- nullable: 물리엔진에서 유추
+  character_face_state_type character_face_state_type not null default 'neutral',
 
-  -- 지속 시간 (초 단위)
-  duration_per_second float not null default 0,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 0,
 
   -- 노드 구조: 성공/실패 시 다음 액션
   success_need_behavior_action_id uuid references need_behavior_actions(id) on delete set null,

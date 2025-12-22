@@ -54,7 +54,7 @@ create table building_behavior_actions (
   root boolean not null default false,
 
   -- 건물 상태
-  building_state_type building_state_type,
+  building_state_type building_state_type not null default 'idle',
 
   -- 캐릭터 상태
   character_body_state_type character_body_state_type not null default 'idle',
@@ -64,8 +64,8 @@ create table building_behavior_actions (
   offset_x integer not null default 0,
   offset_y integer not null default 0,
 
-  -- 지속 시간 (초 단위)
-  duration_per_second float not null default 0,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 0,
 
   -- 다음 액션
   success_building_behavior_action_id uuid references building_behavior_actions(id) on delete set null,

@@ -53,14 +53,14 @@ create table item_behavior_actions (
   root boolean not null default false,
 
   -- 아이템 상태
-  item_state_type item_state_type,
+  item_state_type item_state_type not null default 'idle',
 
   -- 캐릭터 상태
   character_body_state_type character_body_state_type not null default 'idle',
   character_face_state_type character_face_state_type not null default 'neutral',
 
-  -- 지속 시간 (초 단위)
-  duration_per_second float not null default 0,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 0,
 
   -- 다음 액션
   success_item_behavior_action_id uuid references item_behavior_actions(id) on delete set null,

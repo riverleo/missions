@@ -1,9 +1,16 @@
 -- 욕구 충족 소스 타입
 create type need_fulfillment_type as enum (
-  'building',  -- 건물 방문
-  'task',      -- 할일 완료
-  'item',      -- 아이템 소비
-  'idle'       -- 가만히 있으면 회복
+  'building',   -- 건물 방문
+  'character',  -- 캐릭터와 상호작용
+  'task',       -- 할일 완료
+  'item',       -- 아이템 소비
+  'idle'        -- 가만히 있으면 회복
+);
+
+-- 할일 조건 타입
+create type need_fulfillment_task_condition as enum (
+  'completed',  -- 할일 완료
+  'created'     -- 할일 생성
 );
 
 -- needs 테이블 (욕구 정의)
@@ -56,6 +63,10 @@ create table need_fulfillments (
 
   fulfillment_type need_fulfillment_type not null,
   building_id uuid references buildings(id) on delete cascade,
+  character_id uuid references characters(id) on delete cascade,
+  task_condition need_fulfillment_task_condition,
+  task_count integer not null default 1,
+  duration_ticks float not null default 0,
   increase_per_tick float not null default 0,
 
   created_at timestamptz not null default now(),

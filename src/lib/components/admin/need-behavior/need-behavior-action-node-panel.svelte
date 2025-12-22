@@ -18,10 +18,20 @@
 	import { Separator } from '$lib/components/ui/separator';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuItem,
+		DropdownMenuTrigger,
+		DropdownMenuSub,
+		DropdownMenuSubTrigger,
+		DropdownMenuSubContent,
+	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useItem } from '$lib/hooks/use-item';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createActionNodeId } from '$lib/utils/flow-id';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
@@ -37,10 +47,12 @@
 	const { needBehaviorActionStore, admin } = useNeedBehavior();
 	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
+	const { store: itemStore } = useItem();
 	const flowNodes = useNodes();
 
 	const buildings = $derived(Object.values($buildingStore.data));
 	const characters = $derived(Object.values($characterStore.data));
+	const items = $derived(Object.values($itemStore.data));
 
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
@@ -73,13 +85,23 @@
 	const selectedFaceStateLabel = $derived(
 		changes?.character_face_state_type
 			? getCharacterFaceStateLabel(changes.character_face_state_type)
-			: '자동'
+			: '표정 선택'
 	);
-	const selectedBuildingLabel = $derived(
-		changes?.building_id
-			? (buildings.find((b) => b.id === changes?.building_id)?.name ?? '건물 선택')
-			: '자동 선택'
-	);
+	const selectedTargetLabel = $derived.by(() => {
+		if (changes?.building_id) {
+			const building = buildings.find((b) => b.id === changes?.building_id);
+			return building ? `${building.name} (건물)` : '건물 선택';
+		}
+		if (changes?.character_id) {
+			const character = characters.find((c) => c.id === changes?.character_id);
+			return character ? `${character.name} (캐릭터)` : '캐릭터 선택';
+		}
+		if (changes?.item_id) {
+			const item = items.find((i) => i.id === changes?.item_id);
+			return item ? `${item.name} (아이템)` : '아이템 선택';
+		}
+		return '자동 선택';
+	});
 
 	// 선택된 바디/얼굴 상태로 미리보기
 	// 바디가 자동일 때는 idle로 미리보기
@@ -91,11 +113,9 @@
 			: undefined
 	);
 	const previewFaceState = $derived(
-		changes?.character_face_state_type && previewCharacter
-			? previewCharacter.character_face_states.find(
-					(s) => s.type === changes!.character_face_state_type
-				)
-			: undefined
+		previewCharacter?.character_face_states.find(
+			(s) => s.type === changes?.character_face_state_type
+		)
 	);
 
 	function onPreviewCharacterChange(value: string | undefined) {
@@ -127,9 +147,35 @@
 		}
 	}
 
-	function onBuildingChange(value: string | undefined) {
+	function onSelectBuilding(buildingId: string) {
 		if (changes) {
-			changes.building_id = value || null;
+			changes.building_id = buildingId;
+			changes.character_id = null;
+			changes.item_id = null;
+		}
+	}
+
+	function onSelectCharacter(characterId: string) {
+		if (changes) {
+			changes.character_id = characterId;
+			changes.building_id = null;
+			changes.item_id = null;
+		}
+	}
+
+	function onSelectItem(itemId: string) {
+		if (changes) {
+			changes.item_id = itemId;
+			changes.building_id = null;
+			changes.character_id = null;
+		}
+	}
+
+	function onSelectAutoTarget() {
+		if (changes) {
+			changes.building_id = null;
+			changes.character_id = null;
+			changes.item_id = null;
 		}
 	}
 
@@ -155,10 +201,12 @@
 
 			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
-				duration_per_second: changes.duration_per_second,
+				duration_ticks: changes.duration_ticks,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				building_id: changes.building_id,
+				character_id: changes.character_id,
+				item_id: changes.item_id,
 				root: changes.root,
 			});
 
@@ -205,21 +253,46 @@
 							<ButtonGroup class="w-full">
 								<ButtonGroup class="flex-1">
 									<ButtonGroupText>대상</ButtonGroupText>
-									<Select
-										type="single"
-										value={changes.building_id ?? ''}
-										onValueChange={onBuildingChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedBuildingLabel}
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="">자동 선택</SelectItem>
-											{#each buildings as building (building.id)}
-												<SelectItem value={building.id}>{building.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
+									<DropdownMenu>
+										<DropdownMenuTrigger class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+											{selectedTargetLabel}
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="start" class="w-56">
+											<DropdownMenuItem onclick={onSelectAutoTarget}>
+												자동 선택
+											</DropdownMenuItem>
+											<DropdownMenuSub>
+												<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
+												<DropdownMenuSubContent>
+													{#each buildings as building (building.id)}
+														<DropdownMenuItem onclick={() => onSelectBuilding(building.id)}>
+															{building.name}
+														</DropdownMenuItem>
+													{/each}
+												</DropdownMenuSubContent>
+											</DropdownMenuSub>
+											<DropdownMenuSub>
+												<DropdownMenuSubTrigger>캐릭터</DropdownMenuSubTrigger>
+												<DropdownMenuSubContent>
+													{#each characters as character (character.id)}
+														<DropdownMenuItem onclick={() => onSelectCharacter(character.id)}>
+															{character.name}
+														</DropdownMenuItem>
+													{/each}
+												</DropdownMenuSubContent>
+											</DropdownMenuSub>
+											<DropdownMenuSub>
+												<DropdownMenuSubTrigger>아이템</DropdownMenuSubTrigger>
+												<DropdownMenuSubContent>
+													{#each items as item (item.id)}
+														<DropdownMenuItem onclick={() => onSelectItem(item.id)}>
+															{item.name}
+														</DropdownMenuItem>
+													{/each}
+												</DropdownMenuSubContent>
+											</DropdownMenuSub>
+										</DropdownMenuContent>
+									</DropdownMenu>
 								</ButtonGroup>
 								<ButtonGroup>
 									<Tooltip>
@@ -232,7 +305,7 @@
 										</TooltipTrigger>
 										<TooltipContent>
 											자동 선택 시 욕구를 가장 많이 채워주는 <br />
-											건물 또는 캐릭터를 찾아 자동으로 선택합니다.
+											건물, 캐릭터, 아이템을 찾아 자동으로 선택합니다.
 										</TooltipContent>
 									</Tooltip>
 								</ButtonGroup>
@@ -240,13 +313,13 @@
 						{:else if changes.type === 'wait' || changes.type === 'state'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
-									<InputGroupText>대기 시간(초)</InputGroupText>
+									<InputGroupText>지속 시간(틱)</InputGroupText>
 								</InputGroupAddon>
 								<InputGroupInput
 									type="number"
 									step="0.1"
 									min="0"
-									bind:value={changes.duration_per_second}
+									bind:value={changes.duration_ticks}
 								/>
 							</InputGroup>
 						{/if}
@@ -284,7 +357,6 @@
 									{selectedFaceStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each faceStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getCharacterFaceStateLabel(stateType)}

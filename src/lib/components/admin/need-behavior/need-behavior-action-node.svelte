@@ -3,6 +3,8 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useItem } from '$lib/hooks/use-item';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
@@ -19,6 +21,8 @@
 	const action = $derived(data.action);
 
 	const { store: buildingStore } = useBuilding();
+	const { store: characterStore } = useCharacter();
+	const { store: itemStore } = useItem();
 
 	// 바디/표정 상태 라벨 생성
 	const stateLabel = $derived(() => {
@@ -31,23 +35,32 @@
 		return [bodyLabel, faceLabel].filter(Boolean).join(' + ');
 	});
 
+	const targetLabel = $derived(() => {
+		if (action.building_id) {
+			const building = $buildingStore.data[action.building_id];
+			return `"${building?.name ?? '건물'}" 건물`;
+		}
+		if (action.character_id) {
+			const character = $characterStore.data[action.character_id];
+			return `"${character?.name ?? '캐릭터'}" 캐릭터`;
+		}
+		if (action.item_id) {
+			const item = $itemStore.data[action.item_id];
+			return `"${item?.name ?? '아이템'}" 아이템`;
+		}
+		return undefined;
+	});
+
 	const typeLabel = $derived(() => {
+		const target = targetLabel();
 		if (action.type === 'go') {
-			if (action.building_id) {
-				const building = $buildingStore.data[action.building_id];
-				return `"${building?.name ?? '건물'}" 건물로 이동`;
-			}
-			return '자동 이동';
+			return target ? `${target}으로 이동` : '자동 이동';
 		}
 		if (action.type === 'interact') {
-			if (action.building_id) {
-				const building = $buildingStore.data[action.building_id];
-				return `"${building?.name ?? '건물'}" 건물과 상호작용`;
-			}
-			return '자동 상호작용';
+			return target ? `${target}과 상호작용` : '자동 상호작용';
 		}
 		if (action.type === 'wait' || action.type === 'state') {
-			return `${action.duration_per_second}초 대기`;
+			return `${action.duration_ticks}틱 대기`;
 		}
 		return action.type;
 	});

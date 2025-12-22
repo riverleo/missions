@@ -29,8 +29,8 @@
 	});
 
 	const durationLabel = $derived(() => {
-		if (action.duration_per_second > 0) {
-			return `${action.duration_per_second}초`;
+		if (action.duration_ticks > 0) {
+			return `${action.duration_ticks}틱`;
 		}
 		return undefined;
 	});

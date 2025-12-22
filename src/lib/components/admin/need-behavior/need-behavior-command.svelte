@@ -83,6 +83,11 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
+										onclick={() => openDialog({ type: 'update', behaviorId: behavior.id })}
+									>
+										수정
+									</DropdownMenuItem>
+									<DropdownMenuItem
 										onclick={() => openDialog({ type: 'delete', behaviorId: behavior.id })}
 									>
 										삭제
