@@ -5,7 +5,7 @@
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { snapPointToTileCenter } from '$lib/components/app/world/tiles';
+	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
 
 	const { store, placeCharacter, placeBuilding } = useTestWorld();
 	const world = useWorld();
@@ -45,10 +45,12 @@
 		};
 	});
 
-	// 스냅된 타일 중심 좌표 (월드 좌표)
+	// 스냅된 건물 배치 좌표 (월드 좌표)
 	const snappedWorldPos = $derived(() => {
 		const pos = mouseWorldPos();
-		return snapPointToTileCenter(pos.x, pos.y);
+		const building = $store.selectedBuilding;
+		if (!building) return { x: pos.x, y: pos.y };
+		return snapPointToBuildingCenter(pos.x, pos.y, building.tile_cols, building.tile_rows);
 	});
 
 	// 건물 선택 시 world.planning.placement 업데이트
@@ -109,6 +111,9 @@
 	});
 
 	function onclickBuildingOverlay() {
+		// 겹치는 셀이 있으면 배치하지 않음
+		if (!world.planning.canPlace) return;
+
 		const pos = snappedWorldPos();
 		if ($store.selectedBuilding) {
 			placeBuilding($store.selectedBuilding, pos.x, pos.y);
