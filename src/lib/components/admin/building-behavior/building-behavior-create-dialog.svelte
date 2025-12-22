@@ -33,7 +33,7 @@
 
 	const behaviorTypes: BuildingBehaviorType[] = ['demolish', 'use', 'repair', 'refill'];
 
-	let name = $state('');
+	let description = $state('');
 	let buildingId = $state<string | undefined>(undefined);
 	let behaviorType = $state<BuildingBehaviorType>('use');
 	let isSubmitting = $state(false);
@@ -44,7 +44,7 @@
 
 	$effect(() => {
 		if (open) {
-			name = '';
+			description = '';
 			buildingId = undefined;
 			behaviorType = 'use';
 		}
@@ -68,13 +68,13 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!name.trim() || !buildingId || isSubmitting) return;
+		if (!buildingId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
 			.create({
-				name: name.trim(),
+				description: description.trim(),
 				building_id: buildingId,
 				type: behaviorType,
 			})
@@ -98,17 +98,9 @@
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<InputGroupText>
-							<IconHeading />
-						</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
-				</InputGroup>
 				<ButtonGroup class="w-full gap-2">
 					<ButtonGroup class="flex-1">
-						<ButtonGroupText>타입</ButtonGroupText>
+						<ButtonGroupText>행동</ButtonGroupText>
 						<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
 							<SelectTrigger class="flex-1">
 								{selectedTypeName}
@@ -136,6 +128,14 @@
 						</Select>
 					</ButtonGroup>
 				</ButtonGroup>
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput placeholder="설명" bind:value={description} />
+				</InputGroup>
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !buildingId}>

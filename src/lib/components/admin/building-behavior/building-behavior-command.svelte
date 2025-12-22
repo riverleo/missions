@@ -36,7 +36,7 @@
 		return sortedBuildings
 			.map((building) => ({
 				building,
-				behaviors: alphabetical(grouped[building.id] ?? [], (b) => b.name),
+				behaviors: alphabetical(grouped[building.id] ?? [], (b) => b.type),
 			}))
 			.filter((g) => g.behaviors.length > 0);
 	});
@@ -62,11 +62,13 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
+									"{building.name}" 건물을 "{getBuildingBehaviorTypeLabel(behavior.type)}"
 								</span>
-								<span class="text-muted-foreground text-xs truncate">
-									{getBuildingBehaviorTypeLabel(behavior.type)}
-								</span>
+								{#if behavior.description}
+									<span class="text-muted-foreground text-xs truncate">
+										{behavior.description}
+									</span>
+								{/if}
 							</div>
 							<DropdownMenu>
 								<DropdownMenuTrigger>

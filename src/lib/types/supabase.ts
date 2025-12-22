@@ -134,8 +134,8 @@ export type Database = {
           building_id: string
           created_at: string
           created_by: string | null
+          description: string
           id: string
-          name: string
           scenario_id: string
           type: Database["public"]["Enums"]["building_behavior_type"]
         }
@@ -143,8 +143,8 @@ export type Database = {
           building_id: string
           created_at?: string
           created_by?: string | null
+          description?: string
           id?: string
-          name?: string
           scenario_id: string
           type: Database["public"]["Enums"]["building_behavior_type"]
         }
@@ -152,8 +152,8 @@ export type Database = {
           building_id?: string
           created_at?: string
           created_by?: string | null
+          description?: string
           id?: string
-          name?: string
           scenario_id?: string
           type?: Database["public"]["Enums"]["building_behavior_type"]
         }

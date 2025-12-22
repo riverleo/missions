@@ -24,13 +24,12 @@ create table building_behaviors (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   building_id uuid not null references buildings(id) on delete cascade,
   type building_behavior_type not null,
-  name text not null default '',
+  description text not null default '',
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_building_behaviors_building_id_type unique (building_id, type),
-  constraint uq_building_behaviors_scenario_id_name unique (scenario_id, name)
+  constraint uq_building_behaviors_building_id_type unique (building_id, type)
 );
 
 alter table building_behaviors enable row level security;
