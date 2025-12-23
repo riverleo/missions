@@ -57,7 +57,7 @@
 						/>
 						<div class="flex flex-1 flex-col truncate">
 							<span class="truncate">
-								"{item?.name}" 아이템 사용
+								{item?.name}
 							</span>
 							{#if behavior.description}
 								<span class="text-muted-foreground text-xs truncate">

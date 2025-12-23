@@ -260,6 +260,7 @@
 										bodyState={previewBodyState}
 										faceState={previewFaceState}
 										heldItemState={previewItemState}
+										heldItemOffset={{ x: changes.offset_x, y: changes.offset_y }}
 										resolution={PREVIEW_RESOLUTION}
 									/>
 								</div>

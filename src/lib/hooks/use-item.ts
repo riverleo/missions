@@ -16,6 +16,7 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type ItemDialogState =
 	| { type: 'create' }
+	| { type: 'update'; itemId: ItemId }
 	| { type: 'delete'; itemId: ItemId }
 	| undefined;
 

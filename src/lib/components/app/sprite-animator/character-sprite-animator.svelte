@@ -7,11 +7,19 @@
 		bodyState: CharacterBodyState;
 		faceState?: CharacterFaceState;
 		heldItemState?: ItemState;
+		heldItemOffset?: { x: number; y: number };
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 	}
 
-	let { bodyState, faceState, heldItemState, resolution = 1, flip = false }: Props = $props();
+	let {
+		bodyState,
+		faceState,
+		heldItemState,
+		heldItemOffset,
+		resolution = 1,
+		flip = false,
+	}: Props = $props();
 
 	// Body가 앞에 렌더링되는지
 	const isBodyInFront = $derived(bodyState.in_front);
@@ -121,14 +129,18 @@
 		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px)`
 	);
 
-	// 현재 프레임의 handOffset 계산 (atlas 메타데이터)
+	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
 	const handOffset = $derived.by(() => {
 		if (!bodyAnimator) return { x: 0, y: 0 };
 
 		const metadata = bodyAnimator.getMetadata();
 		const atlasOffset = metadata?.handOffsets?.[bodyAnimator.currentFrame];
 
-		return { x: atlasOffset?.x ?? 0, y: atlasOffset?.y ?? 0 };
+		// Atlas에서 추출한 offset + DB에서 세밀 조정한 offset
+		const x = (atlasOffset?.x ?? 0) + (heldItemOffset?.x ?? 0);
+		const y = (atlasOffset?.y ?? 0) + (heldItemOffset?.y ?? 0);
+
+		return { x, y };
 	});
 
 	// Transform 스타일 계산

@@ -64,6 +64,11 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
+									onclick={() => openDialog({ type: 'update', itemId: item.id })}
+								>
+									수정
+								</DropdownMenuItem>
+								<DropdownMenuItem
 									onclick={() => openDialog({ type: 'delete', itemId: item.id })}
 								>
 									삭제

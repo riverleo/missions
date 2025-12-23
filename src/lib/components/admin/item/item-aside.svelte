@@ -4,11 +4,12 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
+	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useItem } from '$lib/hooks/use-item';
 	import ItemCommand from './item-command.svelte';
 	import ItemCreateDialog from './item-create-dialog.svelte';
+	import ItemUpdateDialog from './item-update-dialog.svelte';
 	import ItemDeleteDialog from './item-delete-dialog.svelte';
 
 	const { openDialog } = useItem();
@@ -48,6 +49,24 @@
 					</TooltipTrigger>
 					<TooltipContent>새로운 아이템</TooltipContent>
 				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button
+								{...props}
+								variant="outline"
+								size="icon"
+								disabled={!currentItemId}
+								onclick={() =>
+									currentItemId &&
+									openDialog({ type: 'update', itemId: currentItemId as ItemId })}
+							>
+								<IconEditCircle class="size-4" />
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>아이템 수정</TooltipContent>
+				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
 		<ButtonGroup>
@@ -78,4 +97,5 @@
 </aside>
 
 <ItemCreateDialog />
+<ItemUpdateDialog />
 <ItemDeleteDialog />

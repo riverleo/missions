@@ -15,23 +15,21 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { useItem } from '$lib/hooks/use-item';
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
-	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useItem();
-	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+	const { store, admin, dialogStore, closeDialog } = useItem();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($dialogStore?.type === 'update');
+	const itemId = $derived($dialogStore?.type === 'update' ? $dialogStore.itemId : undefined);
+	const item = $derived(itemId ? $store.data[itemId] : undefined);
 
 	let name = $state('');
 	let decayTicks = $state<number | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
-		if (open) {
-			name = '';
-			decayTicks = undefined;
+		if (open && item) {
+			name = item.name ?? '';
+			decayTicks = item.decay_ticks ?? undefined;
 		}
 	});
 
@@ -43,21 +41,20 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!name.trim() || isSubmitting) return;
+		if (!itemId || !name.trim() || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({
+			.update(itemId, {
 				name: name.trim(),
 				decay_ticks: decayTicks ?? null,
 			})
-			.then((item) => {
+			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/items/${item.id}`);
 			})
 			.catch((error) => {
-				console.error('Failed to create item:', error);
+				console.error('Failed to update item:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -68,7 +65,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 아이템 생성</DialogTitle>
+			<DialogTitle>아이템 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="space-y-4">
 			<InputGroup>
@@ -93,8 +90,8 @@
 				/>
 			</InputGroup>
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+				<Button type="submit" disabled={isSubmitting || !name.trim()}>
+					{isSubmitting ? '저장 중...' : '저장'}
 				</Button>
 			</DialogFooter>
 		</form>
