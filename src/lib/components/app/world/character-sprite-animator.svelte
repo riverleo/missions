@@ -7,16 +7,19 @@
 
 	interface Props {
 		worldCharacter: WorldCharacter;
-		x: number;
-		y: number;
-		angle?: number;
 	}
 
-	let { worldCharacter, x, y, angle = 0 }: Props = $props();
+	let { worldCharacter }: Props = $props();
 
 	const world = useWorld();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+
+	// 물리 바디에서 위치 가져오기
+	const body = $derived(world.characterBodies[worldCharacter.id]);
+	const x = $derived(body?.position.x ?? 0);
+	const y = $derived(body?.position.y ?? 0);
+	const angle = $derived(body?.position.angle ?? 0);
 
 	// 캐릭터 -> 바디 -> 바디 상태 조회
 	const character = $derived($characterStore.data[worldCharacter.character_id]);

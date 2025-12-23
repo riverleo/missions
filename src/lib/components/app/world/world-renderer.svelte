@@ -79,26 +79,10 @@
 			<WorldPlanning width={terrainBody.width} height={terrainBody.height} />
 		{/if}
 		{#each buildings as building (building.id)}
-			{@const body = world.buildingBodies[building.id]}
-			{#if body}
-				<BuildingSpriteAnimator
-					worldBuilding={building}
-					x={body.position.x}
-					y={body.position.y}
-					angle={body.position.angle}
-				/>
-			{/if}
+			<BuildingSpriteAnimator worldBuilding={building} />
 		{/each}
 		{#each characters as character (character.id)}
-			{@const body = world.characterBodies[character.id]}
-			{#if body}
-				<CharacterSpriteAnimator
-					worldCharacter={character}
-					x={body.position.x}
-					y={body.position.y}
-					angle={body.position.angle}
-				/>
-			{/if}
+			<CharacterSpriteAnimator worldCharacter={character} />
 		{/each}
 	</div>
 	{@render children?.()}

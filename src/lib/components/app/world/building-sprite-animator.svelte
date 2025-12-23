@@ -7,17 +7,20 @@
 
 	interface Props {
 		worldBuilding: WorldBuilding;
-		x: number;
-		y: number;
-		angle?: number;
 	}
 
-	let { worldBuilding, x, y, angle = 0 }: Props = $props();
+	let { worldBuilding }: Props = $props();
 
 	const world = useWorld();
 	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
+
+	// 물리 바디에서 위치 가져오기
+	const body = $derived(world.buildingBodies[worldBuilding.id]);
+	const x = $derived(body?.position.x ?? 0);
+	const y = $derived(body?.position.y ?? 0);
+	const angle = $derived(body?.position.angle ?? 0);
 
 	// 건물 -> 건물 상태 조회
 	const building = $derived($buildingStore.data[worldBuilding.building_id]);
