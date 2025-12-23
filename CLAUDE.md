@@ -264,6 +264,102 @@
   - 왜냐하면 Supabase 쿼리에서 `quest_branch:quest_branches!fk_name (*)` 형태로 alias를 사용하기 때문
 - `any` 타입은 최후의 수단이 아닌 이상 절대 사용하지 않기. 항상 명시적인 타입을 정의하거나 추론하도록 작성
 
+### 브랜드 ID 타입 (Branded ID Types)
+
+**목적**: 컴파일 타임에 서로 다른 엔티티의 ID가 섞이는 것을 방지
+
+**브랜드 타입 정의**:
+```typescript
+type Brand<T, B extends string> = T & { readonly __brand: B };
+
+export type BuildingId = Brand<string, 'BuildingId'>;
+export type CharacterId = Brand<string, 'CharacterId'>;
+export type ScenarioId = Brand<string, 'ScenarioId'>;
+// ... 모든 엔티티 ID
+```
+
+**도메인 타입에 적용**:
+```typescript
+// Row 타입 (Supabase에서 가져온 원본)
+type BuildingRow = Tables<'buildings'>;
+
+// 메인 타입: ID 필드들을 브랜드 타입으로 교체
+export type Building = Omit<BuildingRow, 'id' | 'scenario_id' | 'created_by'> & {
+  id: BuildingId;
+  scenario_id: ScenarioId;
+  created_by: UserRoleId | null;
+};
+
+// Insert 타입: 외래 키 ID들을 브랜드 타입으로 교체 (id 제외)
+type BuildingInsertRow = TablesInsert<'buildings'>;
+export type BuildingInsert = Omit<BuildingInsertRow, 'scenario_id' | 'created_by'> & {
+  scenario_id: ScenarioId;
+  created_by?: UserRoleId | null;
+};
+
+// Update 타입: 모든 ID 필드를 옵셔널 브랜드 타입으로 교체
+type BuildingUpdateRow = TablesUpdate<'buildings'>;
+export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+  id?: BuildingId;
+  scenario_id?: ScenarioId;
+  created_by?: UserRoleId | null;
+};
+```
+
+**Supabase 쿼리에서 제네릭 타입 사용**:
+```typescript
+// ❌ 나쁜 예: 타입 캐스팅
+const { data, error } = await supabase
+  .from('buildings')
+  .insert({ ...building, scenario_id: currentScenarioId })
+  .select()
+  .single();
+
+store.update((state) =>
+  produce(state, (draft) => {
+    draft.data[data.id as BuildingId] = data as Building; // 강제 캐스팅
+  })
+);
+
+// ✅ 좋은 예: 제네릭 타입 명시
+const { data, error } = await supabase
+  .from('buildings')
+  .insert({ ...building, scenario_id: currentScenarioId })
+  .select()
+  .single<Building>(); // 제네릭으로 타입 지정
+
+store.update((state) =>
+  produce(state, (draft) => {
+    draft.data[data.id as BuildingId] = data; // data는 이미 Building 타입
+  })
+);
+```
+
+**타입 캐스팅 패턴**:
+```typescript
+// Record 인덱싱 시
+const building = $buildingStore.data[buildingId as BuildingId];
+
+// Route params 사용 시
+const buildingId = page.params.buildingId as BuildingId;
+
+// 함수 호출 시
+await admin.update(id as BuildingId, changes);
+
+// crypto.randomUUID() 사용 시
+const newId = crypto.randomUUID() as WorldId;
+```
+
+**금지 사항**:
+- ❌ `as any` 사용 절대 금지 - 타입 안전성을 완전히 무시함
+- ❌ Insert/Update에서 일반 TablesInsert/TablesUpdate 직접 사용 금지
+- ❌ `.single()` 호출 후 `as Type` 캐스팅 금지 - 대신 `.single<Type>()` 사용
+
+**장점**:
+- 컴파일 타임에 잘못된 ID 사용 감지
+- IDE 자동완성으로 올바른 타입만 제안
+- 리팩토링 시 타입 에러로 놓친 부분 발견 가능
+
 ## UI 컴포넌트
 
 - **shadcn-svelte 컴포넌트 우선 사용**
