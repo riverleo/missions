@@ -27,10 +27,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import {
-		CharacterSpriteAnimator,
-		BuildingSpriteAnimator,
-	} from '$lib/components/app/sprite-animator';
+	import { BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import {
 		getBuildingStateLabel,
@@ -122,9 +119,6 @@
 			? previewFaceStates.find((s) => s.type === changes!.character_face_state_type)
 			: undefined
 	);
-
-	// 미리보기 해상도
-	const PREVIEW_RESOLUTION = 2;
 
 	function onPreviewCharacterChange(value: string | undefined) {
 		previewCharacterId = value || undefined;
@@ -303,24 +297,12 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									<div class="relative">
-										<BuildingSpriteAnimator
-											buildingState={previewBuildingState}
-											resolution={PREVIEW_RESOLUTION}
-										/>
-										<div
-											class="absolute bottom-0 left-1/2"
-											style:transform="translate(calc(-50% + {changes.offset_x /
-												PREVIEW_RESOLUTION}px), {-changes.offset_y / PREVIEW_RESOLUTION}px)"
-										>
-											<CharacterSpriteAnimator
-												bodyState={previewBodyState}
-												faceState={previewFaceState}
-												resolution={PREVIEW_RESOLUTION}
-												flip={changes.offset_x < 0}
-											/>
-										</div>
-									</div>
+									<BuildingSpriteAnimator
+										buildingState={previewBuildingState}
+										characterBodyState={previewBodyState}
+										characterFaceState={previewFaceState}
+										characterOffset={{ x: changes.offset_x, y: changes.offset_y }}
+									/>
 								</div>
 
 								<ButtonGroup class="w-full">

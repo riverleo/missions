@@ -8,7 +8,7 @@
 		class?: string;
 	}
 
-	let { types, item, class: className = 'grid w-full grid-cols-5 gap-4' }: Props = $props();
+	let { types, item, class: className = 'grid w-full grid-cols-4 gap-4' }: Props = $props();
 </script>
 
 <ItemGroup class={className}>

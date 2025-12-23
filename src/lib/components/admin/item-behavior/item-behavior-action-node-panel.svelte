@@ -102,9 +102,6 @@
 			: undefined
 	);
 
-	// 미리보기 해상도
-	const PREVIEW_RESOLUTION = 2;
-
 	function onPreviewCharacterChange(value: string | undefined) {
 		previewCharacterId = value || undefined;
 	}
@@ -261,7 +258,6 @@
 										faceState={previewFaceState}
 										heldItemState={previewItemState}
 										heldItemOffset={{ x: changes.offset_x, y: changes.offset_y }}
-										resolution={PREVIEW_RESOLUTION}
 									/>
 								</div>
 

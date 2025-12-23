@@ -4,6 +4,9 @@
 	import 'pathseg';
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 	import WorldPlanning from './world-planning.svelte';
@@ -21,6 +24,9 @@
 
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
+	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
+	const { store: characterStore, faceStateStore } = useCharacter();
+	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 
 	let container: HTMLDivElement;
 
@@ -79,10 +85,36 @@
 			<WorldPlanning width={terrainBody.width} height={terrainBody.height} />
 		{/if}
 		{#each buildings as building (building.id)}
-			<BuildingSpriteAnimator worldBuilding={building} />
+			{@const body = world.buildingBodies[building.id]}
+			{@const buildingData = $buildingStore.data[building.building_id]}
+			{@const buildingStates = buildingData ? ($buildingStateStore.data[buildingData.id] ?? []) : []}
+			{@const buildingState = buildingStates.find((s) => s.type === 'idle')}
+			{#if body && buildingState}
+				<BuildingSpriteAnimator
+					x={body.position.x}
+					y={body.position.y}
+					angle={body.position.angle}
+					{buildingState}
+				/>
+			{/if}
 		{/each}
 		{#each characters as character (character.id)}
-			<CharacterSpriteAnimator worldCharacter={character} />
+			{@const body = world.characterBodies[character.id]}
+			{@const characterData = $characterStore.data[character.character_id]}
+			{@const characterBody = characterData ? $characterBodyStore.data[characterData.body_id] : undefined}
+			{@const bodyStates = characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []}
+			{@const bodyState = bodyStates.find((s) => s.type === 'idle')}
+			{@const faceStates = characterData ? ($faceStateStore.data[characterData.id] ?? []) : []}
+			{@const faceState = faceStates.find((s) => s.type === 'idle')}
+			{#if body && bodyState}
+				<CharacterSpriteAnimator
+					x={body.position.x}
+					y={body.position.y}
+					angle={body.position.angle}
+					characterBodyState={bodyState}
+					characterFaceState={faceState}
+				/>
+			{/if}
 		{/each}
 	</div>
 	{@render children?.()}

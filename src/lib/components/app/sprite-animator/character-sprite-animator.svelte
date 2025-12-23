@@ -17,7 +17,7 @@
 		faceState,
 		heldItemState,
 		heldItemOffset,
-		resolution = 1,
+		resolution = 2,
 		flip = false,
 	}: Props = $props();
 
