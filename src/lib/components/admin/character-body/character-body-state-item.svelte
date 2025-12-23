@@ -28,7 +28,7 @@
 	const bodyStates = $derived($bodyStateStore.data[bodyId as CharacterBodyId] ?? []);
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
-	const faceStateOptions: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	async function onchange(change: SpriteStateChange) {
 		if (bodyState) {

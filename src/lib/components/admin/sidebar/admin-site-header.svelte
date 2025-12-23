@@ -86,7 +86,11 @@
 			return $itemStore.data?.[id as ItemId]?.name;
 		}
 		if (prevSegment === 'item-behaviors') {
-			return $itemBehaviorStore.data?.[id as ItemBehaviorId]?.type;
+			const behavior = $itemBehaviorStore.data?.[id as ItemBehaviorId];
+			if (behavior) {
+				return $itemStore.data?.[behavior.item_id]?.name;
+			}
+			return undefined;
 		}
 		if (prevSegment === 'needs') {
 			return $needStore.data?.[id as NeedId]?.name;

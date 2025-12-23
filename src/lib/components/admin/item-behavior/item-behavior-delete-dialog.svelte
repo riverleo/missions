@@ -13,7 +13,6 @@
 	import { page } from '$app/state';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getItemBehaviorTypeLabel } from '$lib/utils/state-label';
 	import type { ScenarioId } from '$lib/types';
 
 	const { itemBehaviorStore, dialogStore, closeDialog, admin } = useItemBehavior();
@@ -63,8 +62,7 @@
 		<DialogHeader>
 			<DialogTitle>아이템 행동 삭제</DialogTitle>
 			<DialogDescription>
-				정말로 "{item?.name}" 아이템의 "{behavior ? getItemBehaviorTypeLabel(behavior.type) : ''}"
-				행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+				정말로 "{item?.name}" 아이템의 사용 행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
 			</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>

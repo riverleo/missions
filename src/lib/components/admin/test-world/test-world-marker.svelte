@@ -101,7 +101,7 @@
 	const selectedFaceStates = $derived(
 		selectedCharacter ? ($faceStateStore.data[selectedCharacter.id] ?? []) : []
 	);
-	const selectedCharacterFaceState = $derived(selectedFaceStates.find((s) => s.type === 'neutral'));
+	const selectedCharacterFaceState = $derived(selectedFaceStates.find((s) => s.type === 'idle'));
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {

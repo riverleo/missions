@@ -59,7 +59,7 @@
 		if (action.type === 'interact') {
 			return target ? `${target}과 상호작용` : '자동 상호작용';
 		}
-		if (action.type === 'wait' || action.type === 'state') {
+		if (action.type === 'idle') {
 			return `${action.duration_ticks}틱 대기`;
 		}
 		return action.type;

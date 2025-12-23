@@ -2,7 +2,7 @@
 create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump');
 
 -- character_face_state_type enum
-create type character_face_state_type as enum ('neutral', 'happy', 'sad', 'angry');
+create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 
 -- loop_mode enum
 create type loop_mode as enum ('loop', 'once', 'ping-pong', 'ping-pong-once');

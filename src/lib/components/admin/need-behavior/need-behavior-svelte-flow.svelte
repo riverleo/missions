@@ -163,7 +163,7 @@
 			const newAction = await admin.createNeedBehaviorAction({
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
-				type: 'wait',
+				type: 'idle',
 			});
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴

@@ -69,11 +69,11 @@
 	const actionTypes: { value: NeedBehaviorActionType; label: string }[] = [
 		{ value: 'go', label: '이동' },
 		{ value: 'interact', label: '상호작용' },
-		{ value: 'wait', label: '대기' },
+		{ value: 'idle', label: '대기' },
 	];
 
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
-	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
@@ -85,7 +85,7 @@
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
 			? getCharacterBodyStateLabel(changes.character_body_state_type)
-			: '자동'
+			: '바디 선택'
 	);
 	const selectedFaceStateLabel = $derived(
 		changes?.character_face_state_type
@@ -109,7 +109,6 @@
 	});
 
 	// 선택된 바디/얼굴 상태로 미리보기
-	// 바디가 자동일 때는 idle로 미리보기
 	const previewCharacterBody = $derived(
 		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id] : undefined
 	);
@@ -117,7 +116,9 @@
 		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
 	);
 	const previewBodyState = $derived(
-		previewBodyStates.find((s) => s.type === (changes?.character_body_state_type ?? 'idle'))
+		changes?.character_body_state_type
+			? previewBodyStates.find((s) => s.type === changes!.character_body_state_type)
+			: undefined
 	);
 	const previewFaceStates = $derived(
 		previewCharacter ? ($faceStateStore.data[previewCharacter.id] ?? []) : []
@@ -244,7 +245,7 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>타입</ButtonGroupText>
+							<ButtonGroupText>행동</ButtonGroupText>
 							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
 								<SelectTrigger class="flex-1">
 									{selectedTypeLabel}
@@ -262,13 +263,13 @@
 								<ButtonGroup class="flex-1">
 									<ButtonGroupText>대상</ButtonGroupText>
 									<DropdownMenu>
-										<DropdownMenuTrigger class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm">
+										<DropdownMenuTrigger
+											class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+										>
 											{selectedTargetLabel}
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="start" class="w-56">
-											<DropdownMenuItem onclick={onSelectAutoTarget}>
-												자동 선택
-											</DropdownMenuItem>
+											<DropdownMenuItem onclick={onSelectAutoTarget}>자동 선택</DropdownMenuItem>
 											<DropdownMenuSub>
 												<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
 												<DropdownMenuSubContent>
@@ -318,7 +319,7 @@
 									</Tooltip>
 								</ButtonGroup>
 							</ButtonGroup>
-						{:else if changes.type === 'wait' || changes.type === 'state'}
+						{:else if changes.type === 'idle'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<InputGroupText>지속 시간(틱)</InputGroupText>
@@ -334,6 +335,7 @@
 
 						<Separator />
 
+					{#if changes.type === 'idle'}
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>바디</ButtonGroupText>
 							<Select
@@ -345,7 +347,6 @@
 									{selectedBodyStateLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">자동</SelectItem>
 									{#each bodyStateTypes as stateType (stateType)}
 										<SelectItem value={stateType}>
 											{getCharacterBodyStateLabel(stateType)}
@@ -354,6 +355,7 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
+					{/if}
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>표정</ButtonGroupText>
 							<Select
@@ -374,33 +376,40 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if previewBodyState && (changes?.character_body_state_type || changes?.character_face_state_type)}
-							<div class="mt-6 flex flex-col gap-2">
-								<CharacterSpriteAnimator
-									bodyState={previewBodyState}
-									faceState={previewFaceState}
-									resolution={2}
-								/>
+				{#if previewBodyState}
+					<Separator />
 
-								<ButtonGroup class="w-full">
-									<ButtonGroupText>미리보기</ButtonGroupText>
-									<Select
-										type="single"
-										value={previewCharacterId ?? previewCharacter?.id ?? ''}
-										onValueChange={onPreviewCharacterChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedPreviewCharacterLabel}
-										</SelectTrigger>
-										<SelectContent>
-											{#each characters as character (character.id)}
-												<SelectItem value={character.id}>{character.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
-							</div>
-						{/if}
+					<div class="flex flex-col gap-2">
+						<div
+							class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
+							style:height="120px"
+						>
+							<CharacterSpriteAnimator
+								bodyState={previewBodyState}
+								faceState={previewFaceState}
+								resolution={2}
+							/>
+						</div>
+
+						<ButtonGroup class="w-full">
+							<ButtonGroupText>캐릭터</ButtonGroupText>
+							<Select
+								type="single"
+								value={previewCharacterId ?? previewCharacter?.id ?? ''}
+								onValueChange={onPreviewCharacterChange}
+							>
+								<SelectTrigger class="flex-1">
+									{selectedPreviewCharacterLabel}
+								</SelectTrigger>
+								<SelectContent>
+									{#each characters as character (character.id)}
+										<SelectItem value={character.id}>{character.name}</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
+					</div>
+				{/if}
 					</div>
 					<div class="flex justify-between">
 						<Tooltip>

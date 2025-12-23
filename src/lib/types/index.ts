@@ -65,6 +65,7 @@ export type ItemStateId = Brand<string, 'ItemStateId'>;
 export type ItemBehaviorId = Brand<string, 'ItemBehaviorId'>;
 export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
 export type WorldItemId = Brand<string, 'WorldItemId'>;
+export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
 
 // Bulk update types
 export interface BulkChanges<T> {
@@ -1013,7 +1014,6 @@ export type WorldItemUpdate = Omit<
 };
 
 // ItemBehavior types
-export type ItemBehaviorType = Enums<'item_behavior_type'>;
 type ItemBehaviorRow = Tables<'item_behaviors'>;
 export type ItemBehavior = Omit<ItemBehaviorRow, 'id' | 'scenario_id' | 'item_id' | 'created_by'> & {
 	id: ItemBehaviorId;
@@ -1077,4 +1077,51 @@ export type ItemBehaviorActionUpdate = Omit<
 	behavior_id?: ItemBehaviorId;
 	success_item_behavior_action_id?: ItemBehaviorActionId | null;
 	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+};
+
+// BehaviorPriority types
+type BehaviorPriorityRow = Tables<'behavior_priorities'>;
+export type BehaviorPriority = Omit<
+	BehaviorPriorityRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_behavior_id'
+	| 'building_behavior_id'
+	| 'item_behavior_id'
+	| 'created_by'
+> & {
+	id: BehaviorPriorityId;
+	scenario_id: ScenarioId;
+	need_behavior_id: NeedBehaviorId | null;
+	building_behavior_id: BuildingBehaviorId | null;
+	item_behavior_id: ItemBehaviorId | null;
+	created_by: UserRoleId | null;
+};
+type BehaviorPriorityInsertRow = TablesInsert<'behavior_priorities'>;
+export type BehaviorPriorityInsert = Omit<
+	BehaviorPriorityInsertRow,
+	'scenario_id' | 'need_behavior_id' | 'building_behavior_id' | 'item_behavior_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	need_behavior_id?: NeedBehaviorId | null;
+	building_behavior_id?: BuildingBehaviorId | null;
+	item_behavior_id?: ItemBehaviorId | null;
+	created_by?: UserRoleId | null;
+};
+type BehaviorPriorityUpdateRow = TablesUpdate<'behavior_priorities'>;
+export type BehaviorPriorityUpdate = Omit<
+	BehaviorPriorityUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_behavior_id'
+	| 'building_behavior_id'
+	| 'item_behavior_id'
+	| 'created_by'
+> & {
+	id?: BehaviorPriorityId;
+	scenario_id?: ScenarioId;
+	need_behavior_id?: NeedBehaviorId | null;
+	building_behavior_id?: BuildingBehaviorId | null;
+	item_behavior_id?: ItemBehaviorId | null;
+	created_by?: UserRoleId | null;
 };

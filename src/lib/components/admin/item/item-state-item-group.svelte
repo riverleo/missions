@@ -9,7 +9,7 @@
 
 	let { itemId }: Props = $props();
 
-	const stateTypes: ItemStateType[] = ['idle', 'using', 'rotted'];
+	const stateTypes: ItemStateType[] = ['idle', 'rotten'];
 </script>
 
 <SpriteStateItemGroup types={stateTypes}>

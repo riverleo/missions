@@ -56,7 +56,7 @@
 
 	const buildingStateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
-	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
 	let changes = $state<BuildingBehaviorAction | undefined>(undefined);
@@ -71,10 +71,14 @@
 
 	// 현재 액션의 행동 -> 건물 가져오기
 	const currentBehavior = $derived(
-		changes?.behavior_id ? $buildingBehaviorStore.data[changes.behavior_id as BuildingBehaviorId] : undefined
+		changes?.behavior_id
+			? $buildingBehaviorStore.data[changes.behavior_id as BuildingBehaviorId]
+			: undefined
 	);
 	const currentBuilding = $derived(
-		currentBehavior?.building_id ? $buildingStore.data[currentBehavior.building_id as BuildingId] : undefined
+		currentBehavior?.building_id
+			? $buildingStore.data[currentBehavior.building_id as BuildingId]
+			: undefined
 	);
 	// 건물 상태
 	const buildingStates = $derived(
@@ -100,7 +104,9 @@
 
 	// 선택된 바디/얼굴 상태로 미리보기
 	const previewCharacterBody = $derived(
-		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id as CharacterBodyId] : undefined
+		previewCharacter
+			? $characterBodyStore.data[previewCharacter.body_id as CharacterBodyId]
+			: undefined
 	);
 	const previewBodyStates = $derived(
 		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
@@ -232,7 +238,7 @@
 						<Separator />
 
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>건물</ButtonGroupText>
+							<ButtonGroupText>건물 상태</ButtonGroupText>
 							<Select
 								type="single"
 								value={changes.building_state_type ?? ''}

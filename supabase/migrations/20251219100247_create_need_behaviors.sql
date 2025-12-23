@@ -2,8 +2,7 @@
 create type need_behavior_action_type as enum (
   'go',         -- 건물/아이템/캐릭터로 이동
   'interact',   -- 건물/아이템/캐릭터와 상호작용
-  'wait',       -- 대기
-  'state'       -- 캐릭터 상태 변경
+  'idle'        -- 대기
 );
 
 -- need_behaviors 테이블 (언제/왜 행동이 발동되는지)
@@ -52,16 +51,17 @@ create table need_behavior_actions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
-  type need_behavior_action_type not null default 'wait'::need_behavior_action_type,
+  type need_behavior_action_type not null default 'idle'::need_behavior_action_type,
   root boolean not null default false,
 
   -- go/interact 타입용: 대상 지정
   building_id uuid references buildings(id) on delete set null,
   character_id uuid references characters(id) on delete set null,
+  item_id uuid references items(id) on delete set null,
 
-  -- state 타입용
-  character_body_state_type character_body_state_type, -- nullable: 물리엔진에서 유추
-  character_face_state_type character_face_state_type not null default 'neutral',
+  -- 캐릭터 상태
+  character_body_state_type character_body_state_type not null default 'idle'::character_body_state_type,
+  character_face_state_type character_face_state_type not null default 'idle'::character_face_state_type,
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 0,

@@ -9,7 +9,7 @@
 
 	let { characterId }: Props = $props();
 
-	const stateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+	const stateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 </script>
 
 <SpriteStateItemGroup types={stateTypes}>

@@ -26,7 +26,7 @@
 
 	// 캐릭터 -> 얼굴 상태 조회
 	const faceStates = $derived(character ? ($faceStateStore.data[character.id] ?? []) : []);
-	const faceNeutralState = $derived(faceStates.find((s) => s.type === 'neutral'));
+	const faceNeutralState = $derived(faceStates.find((s) => s.type === 'idle'));
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
 	const left = $derived(`${(x / world.terrainBody.width) * 100}%`);

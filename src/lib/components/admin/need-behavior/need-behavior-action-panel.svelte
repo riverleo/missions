@@ -40,7 +40,7 @@
 			await admin.createNeedBehaviorAction({
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
-				type: 'wait',
+				type: 'idle',
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

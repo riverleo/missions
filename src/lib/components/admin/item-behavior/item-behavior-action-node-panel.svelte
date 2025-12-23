@@ -15,7 +15,7 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
+	import { IconCircleDashedNumber1, IconX } from '@tabler/icons-svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
@@ -48,9 +48,8 @@
 
 	const characters = $derived(Object.values($characterStore.data));
 
-	const itemStateTypes: ItemStateType[] = ['idle', 'using', 'rotted'];
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
-	const faceStateTypes: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
+	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
 	let changes = $state<ItemBehaviorAction | undefined>(undefined);
@@ -70,13 +69,9 @@
 	const currentItem = $derived(
 		currentBehavior?.item_id ? $itemStore.data[currentBehavior.item_id] : undefined
 	);
-	// 아이템 상태
+	// 아이템 상태 (미리보기용 - 항상 idle)
 	const itemStates = $derived(currentItem ? ($itemStateStore.data[currentItem.id] ?? []) : []);
-	const previewItemState = $derived(itemStates.find((s) => s.type === changes?.item_state_type));
-
-	const selectedItemStateLabel = $derived(
-		changes?.item_state_type ? getItemStateLabel(changes.item_state_type) : '상태 선택'
-	);
+	const previewItemState = $derived(itemStates.find((s) => s.type === 'idle'));
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
 			? getCharacterBodyStateLabel(changes.character_body_state_type)
@@ -121,12 +116,6 @@
 		}
 	});
 
-	function onItemStateChange(value: string | undefined) {
-		if (changes) {
-			changes.item_state_type = (value as ItemStateType) || null;
-		}
-	}
-
 	function onBodyStateChange(value: string | undefined) {
 		if (changes) {
 			changes.character_body_state_type = (value as CharacterBodyStateType) || null;
@@ -161,9 +150,10 @@
 
 			await admin.updateItemBehaviorAction(actionId, {
 				duration_ticks: changes.duration_ticks,
-				item_state_type: changes.item_state_type,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
+				offset_x: changes.offset_x,
+				offset_y: changes.offset_y,
 				root: changes.root,
 			});
 
@@ -206,27 +196,19 @@
 							/>
 						</InputGroup>
 
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<InputGroupText>오프셋</InputGroupText>
+							</InputGroupAddon>
+							<InputGroupInput type="number" bind:value={changes.offset_x} placeholder="x" />
+							<InputGroupText>
+								<IconX />
+							</InputGroupText>
+							<InputGroupInput type="number" bind:value={changes.offset_y} placeholder="y" />
+						</InputGroup>
+
 						<Separator />
 
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>아이템</ButtonGroupText>
-							<Select
-								type="single"
-								value={changes.item_state_type ?? ''}
-								onValueChange={onItemStateChange}
-							>
-								<SelectTrigger class="flex-1">
-									{selectedItemStateLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each itemStateTypes as stateType (stateType)}
-										<SelectItem value={stateType}>
-											{getItemStateLabel(stateType)}
-										</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>캐릭터 바디</ButtonGroupText>
 							<Select
