@@ -6,8 +6,16 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
 
-	const { store, placeCharacter, placeBuilding } = useTestWorld();
+	const { store, placeCharacter, placeBuilding, syncPositions } = useTestWorld();
 	const world = useWorld();
+
+	// 1초마다 body 위치를 testWorld 스토어에 동기화
+	$effect(() => {
+		const interval = setInterval(() => {
+			syncPositions(world.characterBodies, world.buildingBodies);
+		}, 1000);
+		return () => clearInterval(interval);
+	});
 
 	// 건물 선택 시 planning 그리드 표시
 	$effect(() => {
