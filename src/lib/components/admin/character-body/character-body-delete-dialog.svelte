@@ -11,9 +11,10 @@
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import type { ScenarioId } from '$lib/types';
 
 	const { store, dialogStore, closeDialog, admin } = useCharacterBody();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBodyId = $derived(page.params.bodyId);
 
 	const deleteState = $derived(

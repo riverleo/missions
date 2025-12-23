@@ -13,6 +13,7 @@
 	import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '$lib/components/ui/sidebar';
 	import { IconSelector, IconCheck, IconPlus } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
+	import type { ScenarioId } from '$lib/types';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -20,14 +21,14 @@
 	const { store, fetch, openDialog } = useScenario();
 
 	const scenarios = $derived(Object.values($store.data));
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentScenario = $derived(scenarioId ? $store.data[scenarioId] : undefined);
 
 	onMount(() => {
 		fetch();
 	});
 
-	function onselect(targetScenarioId: string) {
+	function onselect(targetScenarioId: ScenarioId) {
 		if (targetScenarioId !== scenarioId) {
 			goto(`/admin/scenarios/${targetScenarioId}/quests`);
 		}
@@ -37,15 +38,15 @@
 		openDialog({ type: 'create' });
 	}
 
-	function onclickUpdate(scenarioId: string) {
+	function onclickUpdate(scenarioId: ScenarioId) {
 		openDialog({ type: 'update', scenarioId });
 	}
 
-	function onclickDelete(scenarioId: string) {
+	function onclickDelete(scenarioId: ScenarioId) {
 		openDialog({ type: 'delete', scenarioId });
 	}
 
-	function onclickPublish(scenarioId: string) {
+	function onclickPublish(scenarioId: ScenarioId) {
 		openDialog({ type: 'publish', scenarioId });
 	}
 </script>
@@ -79,7 +80,7 @@
 					</SidebarMenuButton>
 				{/snippet}
 			</DropdownMenuTrigger>
-			<DropdownMenuContent class="min-w-[var(--bits-floating-anchor-width)]" align="start">
+			<DropdownMenuContent class="min-w-(--bits-floating-anchor-width)" align="start">
 				{#each scenarios as scenario (scenario.id)}
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger onclick={() => onselect(scenario.id)}>
@@ -89,15 +90,11 @@
 							{scenario.title}
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuItem onclick={() => onclickUpdate(scenario.id)}>
-								수정
-							</DropdownMenuItem>
+							<DropdownMenuItem onclick={() => onclickUpdate(scenario.id)}>수정</DropdownMenuItem>
 							<DropdownMenuItem onclick={() => onclickPublish(scenario.id)}>
 								{scenario.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
 							</DropdownMenuItem>
-							<DropdownMenuItem onclick={() => onclickDelete(scenario.id)}>
-								삭제
-							</DropdownMenuItem>
+							<DropdownMenuItem onclick={() => onclickDelete(scenario.id)}>삭제</DropdownMenuItem>
 						</DropdownMenuSubContent>
 					</DropdownMenuSub>
 				{/each}

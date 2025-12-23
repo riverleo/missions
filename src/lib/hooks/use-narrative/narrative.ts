@@ -1,4 +1,4 @@
-import type { NarrativeInsert, NarrativeUpdate, Supabase } from '$lib/types';
+import type { NarrativeInsert, NarrativeUpdate, Supabase, NarrativeId, Narrative } from '$lib/types';
 import type { NarrativeStore } from '.';
 import { produce } from 'immer';
 
@@ -14,9 +14,9 @@ export const fetchNarratives = async (supabase: Supabase, store: NarrativeStore)
 		if (error) throw error;
 
 		// Convert array to Record
-		const record: Record<string, (typeof data)[number]> = {};
+		const record: Record<NarrativeId, Narrative> = {};
 		for (const item of data ?? []) {
-			record[item.id] = item;
+			record[item.id as NarrativeId] = item as Narrative;
 		}
 
 		store.set({
@@ -42,7 +42,7 @@ export const createNarrative =
 				.from('narratives')
 				.insert(narrative)
 				.select()
-				.single();
+				.single<Narrative>();
 
 			if (error) throw error;
 
@@ -51,7 +51,7 @@ export const createNarrative =
 					if (!draft.data) {
 						draft.data = {};
 					}
-					draft.data[data.id] = data;
+					draft.data[data.id as NarrativeId] = data;
 				})
 			);
 
@@ -66,7 +66,7 @@ export const createNarrative =
 	};
 
 export const updateNarrative =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string, narrative: NarrativeUpdate) => {
+	(supabase: Supabase, store: NarrativeStore) => async (id: NarrativeId, narrative: NarrativeUpdate) => {
 		try {
 			const { error } = await supabase.from('narratives').update(narrative).eq('id', id);
 
@@ -89,7 +89,7 @@ export const updateNarrative =
 	};
 
 export const removeNarrative =
-	(supabase: Supabase, store: NarrativeStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeStore) => async (id: NarrativeId) => {
 		try {
 			const { error } = await supabase.from('narratives').delete().eq('id', id);
 

@@ -33,6 +33,7 @@
 	import NeedCharacterEdgePanel from './need-character-edge-panel.svelte';
 	import NeedFulfillmentNodePanel from './need-fulfillment-node-panel.svelte';
 	import NeedCharacterEdge from './need-character-edge.svelte';
+	import type { NeedId, NeedFulfillmentId } from '$lib/types';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
 	const { store: characterStore } = useCharacter();
@@ -42,7 +43,7 @@
 	const { screenToFlowPosition } = useSvelteFlow();
 
 	// URL에서 선택된 욕구 ID
-	const needId = $derived(page.params.needId);
+	const needId = $derived(page.params.needId as NeedId);
 
 	// 데이터 (선택된 욕구 기준으로 필터링)
 	const need = $derived(needId ? $needStore.data[needId] : undefined);
@@ -213,7 +214,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'fulfillment') {
 					const fulfillmentId = parseFulfillmentNodeId(node.id);
-					await admin.removeNeedFulfillment(fulfillmentId);
+					await admin.removeNeedFulfillment(fulfillmentId as NeedFulfillmentId);
 				}
 			}
 

@@ -20,10 +20,11 @@
 	import { useNeed } from '$lib/hooks/use-need';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { needBehaviorStore, openDialog } = useNeedBehavior();
 	const { needStore } = useNeed();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	const behaviorsGroupedByNeed = $derived(() => {

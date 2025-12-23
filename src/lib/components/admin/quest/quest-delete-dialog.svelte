@@ -12,9 +12,10 @@
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useQuest();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'delete');
 	const questId = $derived($dialogStore?.type === 'delete' ? $dialogStore.questId : undefined);

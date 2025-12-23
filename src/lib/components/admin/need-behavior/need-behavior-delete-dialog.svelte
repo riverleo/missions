@@ -11,9 +11,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import type { ScenarioId } from '$lib/types';
 
 	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
 		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined

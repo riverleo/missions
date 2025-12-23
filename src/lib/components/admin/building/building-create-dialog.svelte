@@ -17,9 +17,10 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useBuilding();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'create');
 

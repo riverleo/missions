@@ -17,9 +17,10 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import type { ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useCharacterBody();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	let open = $derived($dialogStore?.type === 'create');
 	let name = $state('');

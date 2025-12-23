@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { CharacterId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -58,7 +59,7 @@
 								disabled={!currentCharacterId}
 								onclick={() =>
 									currentCharacterId &&
-									openDialog({ type: 'update', characterId: currentCharacterId })}
+									openDialog({ type: 'update', characterId: currentCharacterId as CharacterId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +80,7 @@
 							disabled={!currentCharacterId}
 							onclick={() =>
 								currentCharacterId &&
-								openDialog({ type: 'delete', characterId: currentCharacterId })}
+								openDialog({ type: 'delete', characterId: currentCharacterId as CharacterId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

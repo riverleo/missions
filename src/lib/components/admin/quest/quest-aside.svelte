@@ -13,6 +13,7 @@
 	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useQuest } from '$lib/hooks/use-quest';
+	import type { QuestId } from '$lib/types';
 	import QuestCommand from './quest-command.svelte';
 	import QuestCreateDialog from './quest-create-dialog.svelte';
 	import QuestUpdateDialog from './quest-update-dialog.svelte';
@@ -21,7 +22,7 @@
 
 	const { questStore, openDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
-	const currentQuest = $derived(currentQuestId ? $questStore.data?.[currentQuestId] : undefined);
+	const currentQuest = $derived(currentQuestId ? $questStore.data?.[currentQuestId as QuestId] : undefined);
 	const isPublished = $derived(currentQuest?.status === 'published');
 
 	let toggleValue = $state<string[]>(['list']);
@@ -67,7 +68,7 @@
 								size="icon"
 								disabled={!currentQuestId}
 								onclick={() =>
-									currentQuestId && openDialog({ type: 'update', questId: currentQuestId })}
+									currentQuestId && openDialog({ type: 'update', questId: currentQuestId as QuestId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -84,7 +85,7 @@
 								size="icon"
 								disabled={!currentQuestId}
 								onclick={() =>
-									currentQuestId && openDialog({ type: 'publish', questId: currentQuestId })}
+									currentQuestId && openDialog({ type: 'publish', questId: currentQuestId as QuestId })}
 							>
 								{#if isPublished}
 									<IconEyeClosed class="size-4" />
@@ -108,7 +109,7 @@
 							size="icon"
 							disabled={!currentQuestId}
 							onclick={() =>
-								currentQuestId && openDialog({ type: 'delete', questId: currentQuestId })}
+								currentQuestId && openDialog({ type: 'delete', questId: currentQuestId as QuestId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

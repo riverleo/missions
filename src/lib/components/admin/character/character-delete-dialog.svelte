@@ -12,9 +12,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useCharacter();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'delete');
 	const characterId = $derived(

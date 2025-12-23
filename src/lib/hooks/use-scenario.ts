@@ -1,6 +1,12 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type { RecordFetchState, Scenario, ScenarioInsert, ScenarioUpdate } from '$lib/types';
+import type {
+	RecordFetchState,
+	Scenario,
+	ScenarioInsert,
+	ScenarioUpdate,
+	ScenarioId,
+} from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
@@ -14,13 +20,13 @@ import { useBuildingBehavior } from './use-building-behavior';
 import { useItem } from './use-item';
 import { useItemBehavior } from './use-item-behavior';
 
-type ScenarioStoreState = RecordFetchState<Scenario>;
+type ScenarioStoreState = RecordFetchState<ScenarioId, Scenario>;
 
 type ScenarioDialogState =
 	| { type: 'create' }
-	| { type: 'update'; scenarioId: string }
-	| { type: 'delete'; scenarioId: string }
-	| { type: 'publish'; scenarioId: string }
+	| { type: 'update'; scenarioId: ScenarioId }
+	| { type: 'delete'; scenarioId: ScenarioId }
+	| { type: 'publish'; scenarioId: ScenarioId }
 	| undefined;
 
 let instance: ReturnType<typeof createScenarioStore> | null = null;
@@ -52,9 +58,9 @@ function createScenarioStore() {
 			if (error) throw error;
 
 			// Convert array to Record
-			const record: Record<string, Scenario> = {};
+			const record: Record<ScenarioId, Scenario> = {};
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				record[item.id as ScenarioId] = item as Scenario;
 			}
 
 			store.update((state) => ({
@@ -72,7 +78,7 @@ function createScenarioStore() {
 		}
 	}
 
-	async function init(scenarioId: string) {
+	async function init(scenarioId: ScenarioId) {
 		await Promise.all([
 			useQuest().fetch(scenarioId),
 			useChapter().fetch(scenarioId),
@@ -90,20 +96,20 @@ function createScenarioStore() {
 
 	const admin = {
 		async create(input: Omit<ScenarioInsert, 'display_order'>) {
-			const { data, error } = await supabase.from('scenarios').insert(input).select().single();
+			const { data, error } = await supabase.from('scenarios').insert(input).select().single<Scenario>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as ScenarioId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async update(scenarioId: string, input: ScenarioUpdate) {
+		async update(scenarioId: ScenarioId, input: ScenarioUpdate) {
 			const { error } = await supabase.from('scenarios').update(input).eq('id', scenarioId);
 
 			if (error) throw error;
@@ -117,7 +123,7 @@ function createScenarioStore() {
 			);
 		},
 
-		async remove(scenarioId: string) {
+		async remove(scenarioId: ScenarioId) {
 			const { error } = await supabase.from('scenarios').delete().eq('id', scenarioId);
 
 			if (error) throw error;
@@ -131,7 +137,7 @@ function createScenarioStore() {
 			);
 		},
 
-		async publish(scenarioId: string) {
+		async publish(scenarioId: ScenarioId) {
 			const { error } = await supabase
 				.from('scenarios')
 				.update({ status: 'published' })
@@ -148,7 +154,7 @@ function createScenarioStore() {
 			);
 		},
 
-		async unpublish(scenarioId: string) {
+		async unpublish(scenarioId: ScenarioId) {
 			const { error } = await supabase
 				.from('scenarios')
 				.update({ status: 'draft' })

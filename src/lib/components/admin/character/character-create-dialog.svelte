@@ -20,10 +20,11 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useCharacter();
 	const { store: bodyStore } = useCharacterBody();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'create');
 	const bodies = $derived(Object.values($bodyStore.data));

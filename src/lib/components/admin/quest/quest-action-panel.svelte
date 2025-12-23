@@ -9,6 +9,7 @@
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { QuestBranch } from '$lib/types';
+	import type { QuestId } from '$lib/types';
 
 	interface Props {
 		onlayout?: (nodes: Node[], edges: Edge[]) => void;
@@ -18,7 +19,7 @@
 
 	const { admin } = useQuest();
 	const flowNodes = useNodes();
-	const questId = $derived(page.params.questId);
+	const questId = $derived(page.params.questId as QuestId);
 
 	let isCreating = $state(false);
 	let isLayouting = $state(false);

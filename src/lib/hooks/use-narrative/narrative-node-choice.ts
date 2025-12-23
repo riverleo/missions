@@ -1,4 +1,4 @@
-import type { NarrativeNodeChoiceInsert, NarrativeNodeChoiceUpdate, Supabase } from '$lib/types';
+import type { NarrativeNodeChoiceInsert, NarrativeNodeChoiceUpdate, Supabase, NarrativeNodeChoiceId, NarrativeNodeChoice } from '$lib/types';
 import type { NarrativeNodeChoiceStore } from '.';
 import { produce } from 'immer';
 
@@ -14,9 +14,9 @@ export const fetchNarrativeNodeChoices = async (supabase: Supabase, store: Narra
 		if (error) throw error;
 
 		// Convert array to Record
-		const record: Record<string, (typeof data)[number]> = {};
+		const record: Record<NarrativeNodeChoiceId, NarrativeNodeChoice> = {};
 		for (const item of data ?? []) {
-			record[item.id] = item;
+			record[item.id as NarrativeNodeChoiceId] = item as NarrativeNodeChoice;
 		}
 
 		store.set({
@@ -43,7 +43,7 @@ export const createNarrativeNodeChoice =
 				.from('narrative_node_choices')
 				.insert(narrativeNodeChoice)
 				.select()
-				.single();
+				.single<NarrativeNodeChoice>();
 
 			if (error) throw error;
 
@@ -52,7 +52,7 @@ export const createNarrativeNodeChoice =
 					if (!draft.data) {
 						draft.data = {};
 					}
-					draft.data[data.id] = data;
+					draft.data[data.id as NarrativeNodeChoiceId] = data;
 				})
 			);
 
@@ -68,7 +68,7 @@ export const createNarrativeNodeChoice =
 
 export const updateNarrativeNodeChoice =
 	(supabase: Supabase, store: NarrativeNodeChoiceStore) =>
-	async (id: string, narrativeNodeChoice: NarrativeNodeChoiceUpdate) => {
+	async (id: NarrativeNodeChoiceId, narrativeNodeChoice: NarrativeNodeChoiceUpdate) => {
 		try {
 			const { error } = await supabase
 				.from('narrative_node_choices')
@@ -94,7 +94,7 @@ export const updateNarrativeNodeChoice =
 	};
 
 export const removeNarrativeNodeChoice =
-	(supabase: Supabase, store: NarrativeNodeChoiceStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeNodeChoiceStore) => async (id: NarrativeNodeChoiceId) => {
 		try {
 			const { error } = await supabase.from('narrative_node_choices').delete().eq('id', id);
 

@@ -8,6 +8,7 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
+	import type { ScenarioId, NarrativeId } from '$lib/types';
 	import {
 		createNarrativeNodeId,
 		createNarrativeDiceRollNodeId,
@@ -23,8 +24,8 @@
 
 	let { onlayout }: Props = $props();
 
-	const scenarioId = $derived(page.params.scenarioId);
-	const narrativeId = $derived(page.params.narrativeId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+	const narrativeId = $derived(page.params.narrativeId as NarrativeId);
 	const { admin } = useNarrative();
 	const flowNodes = useNodes();
 

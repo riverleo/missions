@@ -20,13 +20,13 @@
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';
-	import type { Quest } from '$lib/types';
+	import type { Quest, ScenarioId, ChapterId } from '$lib/types';
 
 	const NO_CHAPTER = 'no-chapter';
 
 	const { questStore, openDialog } = useQuest();
 	const { store: chapterStore } = useChapter();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentQuestId = $derived(page.params.questId);
 
 	const quests = $derived(Object.values($questStore.data));
@@ -39,12 +39,12 @@
 		// 챕터 순서대로 정렬
 		const sortedEntries = sort(Object.entries(grouped), ([chapterId]) => {
 			if (chapterId === NO_CHAPTER) return Infinity;
-			const chapter = chapters[chapterId];
+			const chapter = chapters[chapterId as ChapterId];
 			return chapter?.display_order_in_scenario ?? Infinity;
 		});
 
 		return sortedEntries.map(([chapterId, chapterQuests]) => {
-			const chapter = chapterId !== NO_CHAPTER ? chapters[chapterId] : undefined;
+			const chapter = chapterId !== NO_CHAPTER ? chapters[chapterId as ChapterId] : undefined;
 			let chapterTitle = '챕터 없음';
 			if (chapter) {
 				chapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;

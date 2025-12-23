@@ -2,12 +2,13 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { useScenario } from '$lib/hooks/use-scenario';
+	import type { ScenarioId } from '$lib/types';
 
 	let { children } = $props();
 
 	const { store, init } = useScenario();
 
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const isValidScenario = $derived(scenarioId ? !!$store.data?.[scenarioId] : false);
 
 	// scenarioId 변경 시 init 호출 추적

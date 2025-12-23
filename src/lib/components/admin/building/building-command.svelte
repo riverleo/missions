@@ -19,9 +19,10 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { store, openDialog } = useBuilding();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBuildingId = $derived(page.params.buildingId);
 
 	const buildings = $derived(alphabetical(Object.values($store.data), (b) => b.name));

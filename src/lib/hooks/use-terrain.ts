@@ -1,11 +1,18 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type { RecordFetchState, Terrain, TerrainInsert, TerrainUpdate } from '$lib/types';
+import type {
+	RecordFetchState,
+	Terrain,
+	TerrainInsert,
+	TerrainUpdate,
+	TerrainId,
+	ScenarioId,
+} from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type TerrainDialogState =
 	| { type: 'create' }
-	| { type: 'delete'; terrainId: string }
+	| { type: 'delete'; terrainId: TerrainId }
 	| undefined;
 
 let instance: ReturnType<typeof createTerrainStore> | null = null;
@@ -13,7 +20,7 @@ let instance: ReturnType<typeof createTerrainStore> | null = null;
 function createTerrainStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<Terrain>>({
+	const store = writable<RecordFetchState<TerrainId, Terrain>>({
 		status: 'idle',
 		data: {},
 	});
@@ -26,9 +33,9 @@ function createTerrainStore() {
 		isSettingStartMarker: false,
 	});
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -42,9 +49,9 @@ function createTerrainStore() {
 
 			if (error) throw error;
 
-			const record: Record<string, Terrain> = {};
+			const record: Record<TerrainId, Terrain> = {};
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				record[item.id as TerrainId] = item as Terrain;
 			}
 
 			store.set({
@@ -93,20 +100,20 @@ function createTerrainStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select()
-				.single();
+				.single<Terrain>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as TerrainId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, terrain: TerrainUpdate) {
+		async update(id: TerrainId, terrain: TerrainUpdate) {
 			const { error } = await supabase.from('terrains').update(terrain).eq('id', id);
 
 			if (error) throw error;
@@ -120,7 +127,7 @@ function createTerrainStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: TerrainId) {
 			const { error } = await supabase.from('terrains').delete().eq('id', id);
 
 			if (error) throw error;
@@ -136,7 +143,7 @@ function createTerrainStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<Terrain>>,
+		store: store as Readable<RecordFetchState<TerrainId, Terrain>>,
 		dialogStore: dialogStore as Readable<TerrainDialogState>,
 		fetch,
 		openDialog,

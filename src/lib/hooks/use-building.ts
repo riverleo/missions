@@ -8,12 +8,15 @@ import type {
 	BuildingState,
 	BuildingStateInsert,
 	BuildingStateUpdate,
+	BuildingId,
+	BuildingStateId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type BuildingDialogState =
 	| { type: 'create' }
-	| { type: 'delete'; buildingId: string }
+	| { type: 'delete'; buildingId: BuildingId }
 	| undefined;
 
 let instance: ReturnType<typeof createBuildingStore> | null = null;
@@ -21,13 +24,13 @@ let instance: ReturnType<typeof createBuildingStore> | null = null;
 function createBuildingStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<Building>>({
+	const store = writable<RecordFetchState<BuildingId, Building>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// building_id를 키로, 해당 빌딩의 states 배열을 값으로
-	const stateStore = writable<RecordFetchState<BuildingState[]>>({
+	const stateStore = writable<RecordFetchState<BuildingId, BuildingState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -38,9 +41,9 @@ function createBuildingStore() {
 		showBodyPreview: false,
 	});
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -54,13 +57,13 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			const buildingRecord: Record<string, Building> = {};
-			const stateRecord: Record<string, BuildingState[]> = {};
+			const buildingRecord: Record<BuildingId, Building> = {};
+			const stateRecord: Record<BuildingId, BuildingState[]> = {};
 
 			for (const item of data ?? []) {
 				const { building_states, ...building } = item;
-				buildingRecord[item.id] = building;
-				stateRecord[item.id] = building_states ?? [];
+				buildingRecord[item.id as BuildingId] = building as Building;
+				stateRecord[item.id as BuildingId] = (building_states ?? []) as BuildingState[];
 			}
 
 			store.set({
@@ -116,26 +119,26 @@ function createBuildingStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select('*')
-				.single();
+				.single<Building>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as BuildingId] = data;
 				})
 			);
 
 			stateStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = [];
+					draft.data[data.id as BuildingId] = [];
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, building: BuildingUpdate) {
+		async update(id: BuildingId, building: BuildingUpdate) {
 			const { error } = await supabase.from('buildings').update(building).eq('id', id);
 
 			if (error) throw error;
@@ -149,7 +152,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: BuildingId) {
 			const { error } = await supabase.from('buildings').delete().eq('id', id);
 
 			if (error) throw error;
@@ -171,7 +174,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async createBuildingState(buildingId: string, state: Omit<BuildingStateInsert, 'building_id'>) {
+		async createBuildingState(buildingId: BuildingId, state: Omit<BuildingStateInsert, 'building_id'>) {
 			const { data, error } = await supabase
 				.from('building_states')
 				.insert({
@@ -179,7 +182,7 @@ function createBuildingStore() {
 					building_id: buildingId,
 				})
 				.select()
-				.single();
+				.single<BuildingState>();
 
 			if (error) throw error;
 
@@ -196,7 +199,7 @@ function createBuildingStore() {
 			return data;
 		},
 
-		async updateBuildingState(stateId: string, buildingId: string, updates: BuildingStateUpdate) {
+		async updateBuildingState(stateId: BuildingStateId, buildingId: BuildingId, updates: BuildingStateUpdate) {
 			const { error } = await supabase
 				.from('building_states')
 				.update(updates)
@@ -217,7 +220,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async removeBuildingState(stateId: string, buildingId: string) {
+		async removeBuildingState(stateId: BuildingStateId, buildingId: BuildingId) {
 			const { error } = await supabase.from('building_states').delete().eq('id', stateId);
 
 			if (error) throw error;
@@ -234,8 +237,8 @@ function createBuildingStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<Building>>,
-		stateStore: stateStore as Readable<RecordFetchState<BuildingState[]>>,
+		store: store as Readable<RecordFetchState<BuildingId, Building>>,
+		stateStore: stateStore as Readable<RecordFetchState<BuildingId, BuildingState[]>>,
 		dialogStore: dialogStore as Readable<BuildingDialogState>,
 		fetch,
 		openDialog,

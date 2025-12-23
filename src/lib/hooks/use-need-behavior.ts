@@ -8,13 +8,16 @@ import type {
 	NeedBehaviorAction,
 	NeedBehaviorActionInsert,
 	NeedBehaviorActionUpdate,
+	NeedBehaviorId,
+	NeedBehaviorActionId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type NeedBehaviorDialogState =
 	| { type: 'create' }
-	| { type: 'update'; behaviorId: string }
-	| { type: 'delete'; behaviorId: string }
+	| { type: 'update'; behaviorId: NeedBehaviorId }
+	| { type: 'delete'; behaviorId: NeedBehaviorId }
 	| undefined;
 
 let instance: ReturnType<typeof createNeedBehaviorStore> | null = null;
@@ -22,21 +25,21 @@ let instance: ReturnType<typeof createNeedBehaviorStore> | null = null;
 function createNeedBehaviorStore() {
 	const { supabase } = useServerPayload();
 
-	const needBehaviorStore = writable<RecordFetchState<NeedBehavior>>({
+	const needBehaviorStore = writable<RecordFetchState<NeedBehaviorId, NeedBehavior>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const needBehaviorActionStore = writable<RecordFetchState<NeedBehaviorAction>>({
+	const needBehaviorActionStore = writable<RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>>({
 		status: 'idle',
 		data: {},
 	});
 
 	const dialogStore = writable<NeedBehaviorDialogState>(undefined);
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		needBehaviorStore.update((state) => ({ ...state, status: 'loading' }));
@@ -55,14 +58,14 @@ function createNeedBehaviorStore() {
 			if (behaviorsResult.error) throw behaviorsResult.error;
 			if (actionsResult.error) throw actionsResult.error;
 
-			const behaviorRecord: Record<string, NeedBehavior> = {};
+			const behaviorRecord: Record<NeedBehaviorId, NeedBehavior> = {};
 			for (const item of behaviorsResult.data ?? []) {
-				behaviorRecord[item.id] = item;
+				behaviorRecord[item.id as NeedBehaviorId] = item as NeedBehavior;
 			}
 
-			const actionRecord: Record<string, NeedBehaviorAction> = {};
+			const actionRecord: Record<NeedBehaviorActionId, NeedBehaviorAction> = {};
 			for (const item of actionsResult.data ?? []) {
-				actionRecord[item.id] = item;
+				actionRecord[item.id as NeedBehaviorActionId] = item as NeedBehaviorAction;
 			}
 
 			needBehaviorStore.set({ status: 'success', data: behaviorRecord });
@@ -93,20 +96,20 @@ function createNeedBehaviorStore() {
 				.from('need_behaviors')
 				.insert({ ...behavior, scenario_id: currentScenarioId })
 				.select()
-				.single();
+				.single<NeedBehavior>();
 
 			if (error) throw error;
 
 			needBehaviorStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as NeedBehaviorId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, behavior: NeedBehaviorUpdate) {
+		async update(id: NeedBehaviorId, behavior: NeedBehaviorUpdate) {
 			const { error } = await supabase.from('need_behaviors').update(behavior).eq('id', id);
 
 			if (error) throw error;
@@ -120,7 +123,7 @@ function createNeedBehaviorStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: NeedBehaviorId) {
 			const { error } = await supabase.from('need_behaviors').delete().eq('id', id);
 
 			if (error) throw error;
@@ -134,7 +137,7 @@ function createNeedBehaviorStore() {
 			// Also remove related actions from the store
 			needBehaviorActionStore.update((state) =>
 				produce(state, (draft) => {
-					for (const actionId of Object.keys(draft.data)) {
+					for (const actionId of Object.keys(draft.data) as NeedBehaviorActionId[]) {
 						if (draft.data[actionId]?.behavior_id === id) {
 							delete draft.data[actionId];
 						}
@@ -157,20 +160,20 @@ function createNeedBehaviorStore() {
 				.from('need_behavior_actions')
 				.insert({ ...action, scenario_id: currentScenarioId, root: isFirstAction })
 				.select()
-				.single();
+				.single<NeedBehaviorAction>();
 
 			if (error) throw error;
 
 			needBehaviorActionStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as NeedBehaviorActionId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateNeedBehaviorAction(id: string, action: NeedBehaviorActionUpdate) {
+		async updateNeedBehaviorAction(id: NeedBehaviorActionId, action: NeedBehaviorActionUpdate) {
 			const { error } = await supabase.from('need_behavior_actions').update(action).eq('id', id);
 
 			if (error) throw error;
@@ -184,7 +187,7 @@ function createNeedBehaviorStore() {
 			);
 		},
 
-		async removeNeedBehaviorAction(id: string) {
+		async removeNeedBehaviorAction(id: NeedBehaviorActionId) {
 			const { error } = await supabase.from('need_behavior_actions').delete().eq('id', id);
 
 			if (error) throw error;
@@ -198,9 +201,9 @@ function createNeedBehaviorStore() {
 	};
 
 	return {
-		needBehaviorStore: needBehaviorStore as Readable<RecordFetchState<NeedBehavior>>,
+		needBehaviorStore: needBehaviorStore as Readable<RecordFetchState<NeedBehaviorId, NeedBehavior>>,
 		needBehaviorActionStore: needBehaviorActionStore as Readable<
-			RecordFetchState<NeedBehaviorAction>
+			RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>
 		>,
 		dialogStore: dialogStore as Readable<NeedBehaviorDialogState>,
 		fetch,

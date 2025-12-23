@@ -4,10 +4,11 @@
 	import World from '$lib/components/app/world/world.svelte';
 	import TerrainPanel from '$lib/components/admin/terrain/terrain-panel.svelte';
 	import TerrainMarker from '$lib/components/admin/terrain/terrain-marker.svelte';
+	import type { TerrainId } from '$lib/types';
 
 	const { store, admin } = useTerrain();
 	const uiStore = admin.uiStore;
-	const terrainId = $derived(page.params.terrainId);
+	const terrainId = $derived(page.params.terrainId as TerrainId);
 	const terrain = $derived(terrainId ? $store.data[terrainId] : undefined);
 </script>
 

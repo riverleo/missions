@@ -12,9 +12,10 @@
 	import { useNeed } from '$lib/hooks/use-need';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useNeed();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'create');
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BuildingStateType } from '$lib/types';
+	import type { BuildingStateType, BuildingId, BuildingState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
@@ -19,15 +19,15 @@
 	const { store, stateStore, admin } = useBuilding();
 	const { uiStore } = admin;
 
-	const building = $derived($store.data[buildingId]);
-	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
-	const buildingState = $derived(buildingStates.find((s) => s.type === type));
+	const building = $derived($store.data[buildingId as BuildingId]);
+	const buildingStates = $derived($stateStore.data[buildingId as BuildingId] ?? []);
+	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
 
 	async function onchange(change: SpriteStateChange) {
 		if (buildingState) {
-			await admin.updateBuildingState(buildingState.id, buildingId, change);
+			await admin.updateBuildingState(buildingState.id, buildingId as BuildingId, change);
 		} else if (change.atlas_name) {
-			await admin.createBuildingState(buildingId, { type, atlas_name: change.atlas_name });
+			await admin.createBuildingState(buildingId as BuildingId, { type, atlas_name: change.atlas_name });
 		}
 
 		// 타일 값이 0이면 atlas 크기로 자동 계산
@@ -36,14 +36,14 @@
 			if (atlas) {
 				const tile_cols = Math.max(1, Math.round(atlas.frameWidth / TILE_SIZE));
 				const tile_rows = Math.max(1, Math.round(atlas.frameHeight / TILE_SIZE));
-				await admin.update(buildingId, { tile_cols, tile_rows });
+				await admin.update(buildingId as BuildingId, { tile_cols, tile_rows });
 			}
 		}
 	}
 
 	async function ondelete() {
 		if (buildingState) {
-			await admin.removeBuildingState(buildingState.id, buildingId);
+			await admin.removeBuildingState(buildingState.id, buildingId as BuildingId);
 		}
 	}
 </script>

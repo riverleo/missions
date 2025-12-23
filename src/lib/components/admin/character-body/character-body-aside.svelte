@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { CharacterBodyId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -58,7 +59,8 @@
 							variant="outline"
 							size="icon"
 							disabled={!currentBodyId}
-							onclick={() => currentBodyId && openDialog({ type: 'delete', bodyId: currentBodyId })}
+							onclick={() =>
+								currentBodyId && openDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

@@ -13,6 +13,7 @@
 	import { dndzone } from 'svelte-dnd-action';
 	import type { DndEvent } from 'svelte-dnd-action';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	interface Props {
 		narrativeNodeId: string;
@@ -22,7 +23,7 @@
 
 	let { narrativeNodeId, narrativeNodeChoices, onchange }: Props = $props();
 
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const TEMP_ID_PREFIX = 'temp-';
 

@@ -3,7 +3,7 @@
 	import type {
 		NeedFulfillment,
 		NeedFulfillmentType,
-		NeedFulfillmentTaskCondition,
+		NeedFulfillmentTaskCondition, BuildingId, CharacterId, ItemId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -156,11 +156,11 @@
 		if (!changes) return;
 		const id = value ?? null;
 		if (changes.fulfillment_type === 'building') {
-			changes.building_id = id;
+			changes.building_id = id as BuildingId;
 		} else if (changes.fulfillment_type === 'character') {
-			changes.character_id = id;
+			changes.character_id = id as CharacterId;
 		} else if (changes.fulfillment_type === 'item') {
-			changes.item_id = id;
+			changes.item_id = id as ItemId;
 		}
 	}
 

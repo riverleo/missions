@@ -13,10 +13,11 @@
 	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { buildingBehaviorStore, dialogStore, closeDialog, admin } = useBuildingBehavior();
 	const { store: buildingStore } = useBuilding();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
 		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined

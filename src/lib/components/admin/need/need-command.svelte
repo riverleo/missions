@@ -19,9 +19,10 @@
 	import { useNeed } from '$lib/hooks/use-need';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { needStore, openDialog } = useNeed();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentNeedId = $derived(page.params.needId);
 
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));

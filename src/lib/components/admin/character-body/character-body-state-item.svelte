@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CharacterBodyStateType, CharacterFaceStateType } from '$lib/types';
+	import type { CharacterBodyStateType, CharacterFaceStateType, CharacterBodyId, CharacterBodyState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
@@ -24,24 +24,24 @@
 	const { store, bodyStateStore, admin } = useCharacterBody();
 	const { uiStore } = admin;
 
-	const body = $derived($store.data[bodyId]);
-	const bodyStates = $derived($bodyStateStore.data[bodyId] ?? []);
-	const bodyState = $derived(bodyStates.find((s) => s.type === type));
+	const body = $derived($store.data[bodyId as CharacterBodyId]);
+	const bodyStates = $derived($bodyStateStore.data[bodyId as CharacterBodyId] ?? []);
+	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
 	const faceStateOptions: CharacterFaceStateType[] = ['neutral', 'happy', 'sad', 'angry'];
 
 	async function onchange(change: SpriteStateChange) {
 		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId, change);
+			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterBodyState(bodyId, { type, atlas_name: change.atlas_name });
+			await admin.createCharacterBodyState(bodyId as CharacterBodyId, { type, atlas_name: change.atlas_name });
 		}
 
 		// body의 width/height가 0이면 atlas frame 크기로 설정
 		if (change.atlas_name && body && body.width === 0 && body.height === 0) {
 			const metadata = atlases[change.atlas_name];
 			if (metadata) {
-				await admin.update(bodyId, {
+				await admin.update(bodyId as CharacterBodyId, {
 					width: metadata.frameWidth / 2,
 					height: metadata.frameHeight / 2,
 				});
@@ -51,20 +51,20 @@
 
 	async function ondelete() {
 		if (bodyState) {
-			await admin.removeCharacterBodyState(bodyState.id, bodyId);
+			await admin.removeCharacterBodyState(bodyState.id, bodyId as CharacterBodyId);
 		}
 	}
 
 	async function onInFrontChange(pressed: boolean) {
 		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId, { in_front: pressed });
+			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, { in_front: pressed });
 		}
 	}
 
 	async function onFaceStateChange(value: string) {
 		if (bodyState) {
 			const faceState = value === '' ? null : (value as CharacterFaceStateType);
-			await admin.updateCharacterBodyState(bodyState.id, bodyId, {
+			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, {
 				character_face_state: faceState,
 			});
 		}

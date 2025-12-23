@@ -24,10 +24,11 @@
 	import BuildingBehaviorActionNode from './building-behavior-action-node.svelte';
 	import BuildingBehaviorActionPanel from './building-behavior-action-panel.svelte';
 	import BuildingBehaviorActionNodePanel from './building-behavior-action-node-panel.svelte';
+	import type { BuildingBehaviorId, BuildingBehaviorActionId } from '$lib/types';
 
 	const { buildingBehaviorStore, buildingBehaviorActionStore, admin } = useBuildingBehavior();
 
-	const behaviorId = $derived(page.params.behaviorId);
+	const behaviorId = $derived(page.params.behaviorId as BuildingBehaviorId);
 	const behavior = $derived(behaviorId ? $buildingBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
@@ -106,7 +107,7 @@
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
 
-			await admin.updateBuildingBehaviorAction(sourceId, {
+			await admin.updateBuildingBehaviorAction(sourceId as BuildingBehaviorActionId, {
 				[isSuccess
 					? 'success_building_behavior_action_id'
 					: 'failure_building_behavior_action_id']: targetId,
@@ -168,7 +169,7 @@
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
-			await admin.updateBuildingBehaviorAction(fromActionId, {
+			await admin.updateBuildingBehaviorAction(fromActionId as BuildingBehaviorActionId, {
 				[isSuccess
 					? 'success_building_behavior_action_id'
 					: 'failure_building_behavior_action_id']: newAction.id,
@@ -203,7 +204,7 @@
 				const sourceId = parseBuildingBehaviorActionNodeId(edge.source);
 				const isSuccess = isBuildingBehaviorActionSuccessEdgeId(edge.id);
 
-				await admin.updateBuildingBehaviorAction(sourceId, {
+				await admin.updateBuildingBehaviorAction(sourceId as BuildingBehaviorActionId, {
 					[isSuccess
 						? 'success_building_behavior_action_id'
 						: 'failure_building_behavior_action_id']: null,
@@ -214,7 +215,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseBuildingBehaviorActionNodeId(node.id);
-					await admin.removeBuildingBehaviorAction(actionId);
+					await admin.removeBuildingBehaviorAction(actionId as BuildingBehaviorActionId);
 				}
 			}
 

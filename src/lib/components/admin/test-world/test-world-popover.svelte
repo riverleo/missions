@@ -50,7 +50,7 @@
 	<PopoverTrigger>
 		{#snippet child({ props })}
 			<Button {...props} variant="outline" size="sm">
-				월드에서 확인하기
+				테스트 월드
 				<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
 			</Button>
 		{/snippet}
@@ -64,7 +64,13 @@
 		<!-- 우측: 월드 -->
 		<div class="relative flex flex-1 items-center justify-center">
 			{#if selectedTerrain}
-				<World class="border-0" terrain={selectedTerrain} {characters} {buildings} debug={$store.debug}>
+				<World
+					class="border-0"
+					terrain={selectedTerrain}
+					{characters}
+					{buildings}
+					debug={$store.debug}
+				>
 					<TestWorldMarker />
 				</World>
 				<TestWorldPanel />

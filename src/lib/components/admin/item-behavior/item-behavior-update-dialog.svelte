@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,

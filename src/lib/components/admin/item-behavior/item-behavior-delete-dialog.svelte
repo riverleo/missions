@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -13,10 +14,11 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getItemBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { itemBehaviorStore, dialogStore, closeDialog, admin } = useItemBehavior();
 	const { store: itemStore } = useItem();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
 		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined

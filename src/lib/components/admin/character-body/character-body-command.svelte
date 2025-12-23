@@ -19,9 +19,10 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { store, openDialog } = useCharacterBody();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBodyId = $derived(page.params.bodyId);
 
 	const bodies = $derived(alphabetical(Object.values($store.data), (b) => b.name));

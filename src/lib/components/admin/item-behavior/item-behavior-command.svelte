@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -21,10 +22,11 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import { getItemBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { itemBehaviorStore, openDialog } = useItemBehavior();
 	const { store: itemStore } = useItem();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	const behaviorsGroupedByItem = $derived(() => {

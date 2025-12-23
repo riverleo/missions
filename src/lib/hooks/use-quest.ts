@@ -8,12 +8,15 @@ import type {
 	QuestBranch,
 	QuestBranchInsert,
 	QuestBranchUpdate,
+	QuestId,
+	QuestBranchId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type QuestDialogState =
 	| { type: 'create' }
-	| { type: 'update' | 'delete' | 'publish'; questId: string }
+	| { type: 'update' | 'delete' | 'publish'; questId: QuestId }
 	| undefined;
 
 let instance: ReturnType<typeof createQuestStore> | null = null;
@@ -21,21 +24,21 @@ let instance: ReturnType<typeof createQuestStore> | null = null;
 function createQuestStore() {
 	const { supabase } = useServerPayload();
 
-	const questStore = writable<RecordFetchState<Quest>>({
+	const questStore = writable<RecordFetchState<QuestId, Quest>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const questBranchStore = writable<RecordFetchState<QuestBranch>>({
+	const questBranchStore = writable<RecordFetchState<QuestBranchId, QuestBranch>>({
 		status: 'idle',
 		data: {},
 	});
 
 	const dialogStore = writable<QuestDialogState>(undefined);
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		questStore.update((state) => ({ ...state, status: 'loading' }));
@@ -52,17 +55,17 @@ function createQuestStore() {
 			if (branchesResult.error) throw branchesResult.error;
 
 			// Convert arrays to Records
-			const questRecord: Record<string, Quest> = {};
+			const questRecord: Record<QuestId, Quest> = {};
 			for (const item of questsResult.data ?? []) {
-				questRecord[item.id] = item;
+				questRecord[item.id as QuestId] = item as Quest;
 			}
 
 			// Filter branches that belong to quests in this scenario
 			const questIds = new Set(Object.keys(questRecord));
-			const branchRecord: Record<string, QuestBranch> = {};
+			const branchRecord: Record<QuestBranchId, QuestBranch> = {};
 			for (const item of branchesResult.data ?? []) {
 				if (questIds.has(item.quest_id)) {
-					branchRecord[item.id] = item;
+					branchRecord[item.id as QuestBranchId] = item as QuestBranch;
 				}
 			}
 
@@ -115,20 +118,20 @@ function createQuestStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select()
-				.single();
+				.single<Quest>();
 
 			if (error) throw error;
 
 			questStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as QuestId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateQuest(id: string, quest: QuestUpdate) {
+		async updateQuest(id: QuestId, quest: QuestUpdate) {
 			const { error } = await supabase.from('quests').update(quest).eq('id', id);
 
 			if (error) throw error;
@@ -142,7 +145,7 @@ function createQuestStore() {
 			);
 		},
 
-		async removeQuest(id: string) {
+		async removeQuest(id: QuestId) {
 			const { error } = await supabase.from('quests').delete().eq('id', id);
 
 			if (error) throw error;
@@ -159,7 +162,7 @@ function createQuestStore() {
 			questBranchStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
-						for (const branchId of Object.keys(draft.data)) {
+						for (const branchId of Object.keys(draft.data) as QuestBranchId[]) {
 							if (draft.data[branchId]?.quest_id === id) {
 								delete draft.data[branchId];
 							}
@@ -169,7 +172,7 @@ function createQuestStore() {
 			);
 		},
 
-		async publishQuest(id: string) {
+		async publishQuest(id: QuestId) {
 			const { error } = await supabase.from('quests').update({ status: 'published' }).eq('id', id);
 
 			if (error) throw error;
@@ -183,7 +186,7 @@ function createQuestStore() {
 			);
 		},
 
-		async unpublishQuest(id: string) {
+		async unpublishQuest(id: QuestId) {
 			const { error } = await supabase.from('quests').update({ status: 'draft' }).eq('id', id);
 
 			if (error) throw error;
@@ -202,20 +205,20 @@ function createQuestStore() {
 				.from('quest_branches')
 				.insert(questBranch)
 				.select()
-				.single();
+				.single<QuestBranch>();
 
 			if (error) throw error;
 
 			questBranchStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as QuestBranchId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateQuestBranch(id: string, questBranch: QuestBranchUpdate) {
+		async updateQuestBranch(id: QuestBranchId, questBranch: QuestBranchUpdate) {
 			const { error } = await supabase.from('quest_branches').update(questBranch).eq('id', id);
 
 			if (error) throw error;
@@ -229,7 +232,7 @@ function createQuestStore() {
 			);
 		},
 
-		async removeQuestBranch(id: string) {
+		async removeQuestBranch(id: QuestBranchId) {
 			const { error } = await supabase.from('quest_branches').delete().eq('id', id);
 
 			if (error) throw error;
@@ -245,8 +248,8 @@ function createQuestStore() {
 	};
 
 	return {
-		questStore: questStore as Readable<RecordFetchState<Quest>>,
-		questBranchStore: questBranchStore as Readable<RecordFetchState<QuestBranch>>,
+		questStore: questStore as Readable<RecordFetchState<QuestId, Quest>>,
+		questBranchStore: questBranchStore as Readable<RecordFetchState<QuestBranchId, QuestBranch>>,
 		dialogStore: dialogStore as Readable<QuestDialogState>,
 		fetch,
 		openDialog,

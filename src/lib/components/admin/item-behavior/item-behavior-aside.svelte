@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -57,7 +58,7 @@
 								size="icon"
 								disabled={!currentBehaviorId}
 								onclick={() =>
-									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId })}
+									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId as ItemBehaviorId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -77,7 +78,7 @@
 							size="icon"
 							disabled={!currentBehaviorId}
 							onclick={() =>
-								currentBehaviorId && openDialog({ type: 'delete', behaviorId: currentBehaviorId })}
+								currentBehaviorId && openDialog({ type: 'delete', behaviorId: currentBehaviorId as ItemBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

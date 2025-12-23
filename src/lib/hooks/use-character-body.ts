@@ -8,12 +8,15 @@ import type {
 	CharacterBodyState,
 	CharacterBodyStateInsert,
 	CharacterBodyStateUpdate,
+	CharacterBodyId,
+	CharacterBodyStateId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type CharacterBodyDialogState =
 	| { type: 'create' }
-	| { type: 'delete'; bodyId: string }
+	| { type: 'delete'; bodyId: CharacterBodyId }
 	| undefined;
 
 let instance: ReturnType<typeof createCharacterBodyStore> | null = null;
@@ -21,13 +24,13 @@ let instance: ReturnType<typeof createCharacterBodyStore> | null = null;
 function createCharacterBodyStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<CharacterBody>>({
+	const store = writable<RecordFetchState<CharacterBodyId, CharacterBody>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// body_id를 키로, 해당 바디의 states 배열을 값으로
-	const bodyStateStore = writable<RecordFetchState<CharacterBodyState[]>>({
+	const bodyStateStore = writable<RecordFetchState<CharacterBodyId, CharacterBodyState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -38,9 +41,9 @@ function createCharacterBodyStore() {
 		showBodyPreview: false,
 	});
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -54,13 +57,13 @@ function createCharacterBodyStore() {
 
 			if (error) throw error;
 
-			const bodyRecord: Record<string, CharacterBody> = {};
-			const stateRecord: Record<string, CharacterBodyState[]> = {};
+			const bodyRecord: Record<CharacterBodyId, CharacterBody> = {};
+			const stateRecord: Record<CharacterBodyId, CharacterBodyState[]> = {};
 
 			for (const item of data ?? []) {
 				const { character_body_states, ...body } = item;
-				bodyRecord[item.id] = body;
-				stateRecord[item.id] = character_body_states ?? [];
+				bodyRecord[item.id as CharacterBodyId] = body as CharacterBody;
+				stateRecord[item.id as CharacterBodyId] = (character_body_states ?? []) as CharacterBodyState[];
 			}
 
 			store.set({
@@ -116,26 +119,26 @@ function createCharacterBodyStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select('*')
-				.single();
+				.single<CharacterBody>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as CharacterBodyId] = data;
 				})
 			);
 
 			bodyStateStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = [];
+					draft.data[data.id as CharacterBodyId] = [];
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, body: CharacterBodyUpdate) {
+		async update(id: CharacterBodyId, body: CharacterBodyUpdate) {
 			const { error } = await supabase.from('character_bodies').update(body).eq('id', id);
 
 			if (error) throw error;
@@ -149,7 +152,7 @@ function createCharacterBodyStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: CharacterBodyId) {
 			const { error } = await supabase.from('character_bodies').delete().eq('id', id);
 
 			if (error) throw error;
@@ -172,7 +175,7 @@ function createCharacterBodyStore() {
 		},
 
 		async createCharacterBodyState(
-			bodyId: string,
+			bodyId: CharacterBodyId,
 			state: Omit<CharacterBodyStateInsert, 'body_id'>
 		) {
 			const { data, error } = await supabase
@@ -182,7 +185,7 @@ function createCharacterBodyStore() {
 					body_id: bodyId,
 				})
 				.select()
-				.single();
+				.single<CharacterBodyState>();
 
 			if (error) throw error;
 
@@ -200,8 +203,8 @@ function createCharacterBodyStore() {
 		},
 
 		async updateCharacterBodyState(
-			stateId: string,
-			bodyId: string,
+			stateId: CharacterBodyStateId,
+			bodyId: CharacterBodyId,
 			updates: CharacterBodyStateUpdate
 		) {
 			const { error } = await supabase
@@ -224,7 +227,7 @@ function createCharacterBodyStore() {
 			);
 		},
 
-		async removeCharacterBodyState(stateId: string, bodyId: string) {
+		async removeCharacterBodyState(stateId: CharacterBodyStateId, bodyId: CharacterBodyId) {
 			const { error } = await supabase.from('character_body_states').delete().eq('id', stateId);
 
 			if (error) throw error;
@@ -241,8 +244,8 @@ function createCharacterBodyStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<CharacterBody>>,
-		bodyStateStore: bodyStateStore as Readable<RecordFetchState<CharacterBodyState[]>>,
+		store: store as Readable<RecordFetchState<CharacterBodyId, CharacterBody>>,
+		bodyStateStore: bodyStateStore as Readable<RecordFetchState<CharacterBodyId, CharacterBodyState[]>>,
 		dialogStore: dialogStore as Readable<CharacterBodyDialogState>,
 		fetch,
 		openDialog,

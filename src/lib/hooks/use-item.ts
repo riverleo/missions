@@ -8,12 +8,15 @@ import type {
 	ItemState,
 	ItemStateInsert,
 	ItemStateUpdate,
+	ItemId,
+	ItemStateId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type ItemDialogState =
 	| { type: 'create' }
-	| { type: 'delete'; itemId: string }
+	| { type: 'delete'; itemId: ItemId }
 	| undefined;
 
 let instance: ReturnType<typeof createItemStore> | null = null;
@@ -21,22 +24,22 @@ let instance: ReturnType<typeof createItemStore> | null = null;
 function createItemStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<Item>>({
+	const store = writable<RecordFetchState<ItemId, Item>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// item_id를 키로, 해당 아이템의 states 배열을 값으로
-	const stateStore = writable<RecordFetchState<ItemState[]>>({
+	const stateStore = writable<RecordFetchState<ItemId, ItemState[]>>({
 		status: 'idle',
 		data: {},
 	});
 
 	const dialogStore = writable<ItemDialogState>(undefined);
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -50,13 +53,13 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			const itemRecord: Record<string, Item> = {};
-			const stateRecord: Record<string, ItemState[]> = {};
+			const itemRecord: Record<ItemId, Item> = {};
+			const stateRecord: Record<ItemId, ItemState[]> = {};
 
 			for (const item of data ?? []) {
 				const { item_states, ...itemData } = item;
-				itemRecord[item.id] = itemData;
-				stateRecord[item.id] = item_states ?? [];
+				itemRecord[item.id as ItemId] = itemData as Item;
+				stateRecord[item.id as ItemId] = (item_states ?? []) as ItemState[];
 			}
 
 			store.set({
@@ -106,26 +109,26 @@ function createItemStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select('*')
-				.single();
+				.single<Item>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as ItemId] = data;
 				})
 			);
 
 			stateStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = [];
+					draft.data[data.id as ItemId] = [];
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, item: ItemUpdate) {
+		async update(id: ItemId, item: ItemUpdate) {
 			const { error } = await supabase.from('items').update(item).eq('id', id);
 
 			if (error) throw error;
@@ -139,7 +142,7 @@ function createItemStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: ItemId) {
 			const { error } = await supabase.from('items').delete().eq('id', id);
 
 			if (error) throw error;
@@ -161,7 +164,7 @@ function createItemStore() {
 			);
 		},
 
-		async createItemState(itemId: string, state: Omit<ItemStateInsert, 'item_id'>) {
+		async createItemState(itemId: ItemId, state: Omit<ItemStateInsert, 'item_id'>) {
 			const { data, error } = await supabase
 				.from('item_states')
 				.insert({
@@ -169,7 +172,7 @@ function createItemStore() {
 					item_id: itemId,
 				})
 				.select()
-				.single();
+				.single<ItemState>();
 
 			if (error) throw error;
 
@@ -186,7 +189,7 @@ function createItemStore() {
 			return data;
 		},
 
-		async updateItemState(stateId: string, itemId: string, updates: ItemStateUpdate) {
+		async updateItemState(stateId: ItemStateId, itemId: ItemId, updates: ItemStateUpdate) {
 			const { error } = await supabase.from('item_states').update(updates).eq('id', stateId);
 
 			if (error) throw error;
@@ -204,7 +207,7 @@ function createItemStore() {
 			);
 		},
 
-		async removeItemState(stateId: string, itemId: string) {
+		async removeItemState(stateId: ItemStateId, itemId: ItemId) {
 			const { error } = await supabase.from('item_states').delete().eq('id', stateId);
 
 			if (error) throw error;
@@ -221,8 +224,8 @@ function createItemStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<Item>>,
-		stateStore: stateStore as Readable<RecordFetchState<ItemState[]>>,
+		store: store as Readable<RecordFetchState<ItemId, Item>>,
+		stateStore: stateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
 		dialogStore: dialogStore as Readable<ItemDialogState>,
 		fetch,
 		openDialog,

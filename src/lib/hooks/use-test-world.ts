@@ -1,5 +1,5 @@
 import { writable, get } from 'svelte/store';
-import type { Terrain, Character, WorldCharacter, Building, WorldBuilding } from '$lib/types';
+import type { Terrain, Character, WorldCharacter, Building, WorldBuilding, WorldCharacterId, WorldBuildingId, WorldId, PlayerId } from '$lib/types';
 import { TILE_SIZE } from '$lib/components/app/world/constants';
 import { browser } from '$app/environment';
 
@@ -143,15 +143,15 @@ function createTestWorldStore() {
 
 	function placeCharacter(character: Character, x: number, y: number) {
 		const worldCharacter: WorldCharacter = {
-			id: crypto.randomUUID(),
+			id: crypto.randomUUID() as WorldCharacterId,
 			user_id: crypto.randomUUID(),
-			player_id: crypto.randomUUID(),
-			world_id: crypto.randomUUID(),
+			player_id: crypto.randomUUID() as PlayerId,
+			world_id: crypto.randomUUID() as WorldId,
 			character_id: character.id,
 			x,
 			y,
 			created_at: new Date().toISOString(),
-		};
+		} as WorldCharacter;
 		store.update((state) => ({
 			...state,
 			characters: [...state.characters, worldCharacter],
@@ -164,15 +164,15 @@ function createTestWorldStore() {
 		const tile_y = Math.floor(y / TILE_SIZE);
 
 		const worldBuilding: WorldBuilding = {
-			id: crypto.randomUUID(),
+			id: crypto.randomUUID() as WorldBuildingId,
 			user_id: crypto.randomUUID(),
-			player_id: crypto.randomUUID(),
-			world_id: crypto.randomUUID(),
+			player_id: crypto.randomUUID() as PlayerId,
+			world_id: crypto.randomUUID() as WorldId,
 			building_id: building.id,
 			tile_x,
 			tile_y,
 			created_at: new Date().toISOString(),
-		};
+		} as WorldBuilding;
 		store.update((state) => ({
 			...state,
 			buildings: [...state.buildings, worldBuilding],

@@ -3,9 +3,10 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingPanel from '$lib/components/admin/building/building-action-panel.svelte';
 	import BuildingStateItemGroup from '$lib/components/admin/building/building-state-item-group.svelte';
+	import type { BuildingId } from '$lib/types';
 
 	const { store } = useBuilding();
-	const buildingId = $derived(page.params.buildingId);
+	const buildingId = $derived(page.params.buildingId as BuildingId);
 	const building = $derived(buildingId ? $store.data[buildingId] : undefined);
 </script>
 

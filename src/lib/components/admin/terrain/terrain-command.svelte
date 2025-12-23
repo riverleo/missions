@@ -21,10 +21,11 @@
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { page } from '$app/state';
 	import { sort } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { supabase } = useServerPayload();
 	const { store, openDialog } = useTerrain();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentTerrainId = $derived(page.params.terrainId);
 
 	const terrains = $derived(sort(Object.values($store.data), (t) => t.display_order));

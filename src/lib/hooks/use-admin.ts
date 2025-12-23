@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import type { PlayerRolledDice, NarrativeNode, NarrativeDiceRoll } from '$lib/types';
+import type { PlayerRolledDice, NarrativeNode, NarrativeDiceRoll, PlayerRolledDiceId } from '$lib/types';
 import { useCurrentUser } from './use-current-user';
 
 export type AdminMode = 'admin' | 'player';
@@ -33,7 +33,7 @@ export function useAdmin() {
 			}
 
 			return {
-				id: crypto.randomUUID(),
+				id: crypto.randomUUID() as PlayerRolledDiceId,
 				created_at: new Date().toISOString(),
 				user_id: user.id,
 				player_id: currentPlayer.id,
@@ -48,7 +48,7 @@ export function useAdmin() {
 				quest_branch_id: null,
 				quest_id: null,
 				value: Math.floor(Math.random() * 20) + 1, // 1-20 (d20)
-			};
+			} as PlayerRolledDice;
 		},
 	};
 

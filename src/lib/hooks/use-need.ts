@@ -11,13 +11,17 @@ import type {
 	CharacterNeed,
 	CharacterNeedInsert,
 	CharacterNeedUpdate,
+	NeedId,
+	NeedFulfillmentId,
+	CharacterNeedId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type NeedDialogState =
 	| { type: 'create' }
-	| { type: 'update'; needId: string }
-	| { type: 'delete'; needId: string }
+	| { type: 'update'; needId: NeedId }
+	| { type: 'delete'; needId: NeedId }
 	| undefined;
 
 let instance: ReturnType<typeof createNeedStore> | null = null;
@@ -25,26 +29,26 @@ let instance: ReturnType<typeof createNeedStore> | null = null;
 function createNeedStore() {
 	const { supabase } = useServerPayload();
 
-	const needStore = writable<RecordFetchState<Need>>({
+	const needStore = writable<RecordFetchState<NeedId, Need>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const needFulfillmentStore = writable<RecordFetchState<NeedFulfillment>>({
+	const needFulfillmentStore = writable<RecordFetchState<NeedFulfillmentId, NeedFulfillment>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const characterNeedStore = writable<RecordFetchState<CharacterNeed>>({
+	const characterNeedStore = writable<RecordFetchState<CharacterNeedId, CharacterNeed>>({
 		status: 'idle',
 		data: {},
 	});
 
 	const dialogStore = writable<NeedDialogState>(undefined);
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		needStore.update((state) => ({ ...state, status: 'loading' }));
@@ -62,19 +66,19 @@ function createNeedStore() {
 			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
 			if (characterNeedsResult.error) throw characterNeedsResult.error;
 
-			const needRecord: Record<string, Need> = {};
+			const needRecord: Record<NeedId, Need> = {};
 			for (const item of needsResult.data ?? []) {
-				needRecord[item.id] = item;
+				needRecord[item.id as NeedId] = item as Need;
 			}
 
-			const fulfillmentRecord: Record<string, NeedFulfillment> = {};
+			const fulfillmentRecord: Record<NeedFulfillmentId, NeedFulfillment> = {};
 			for (const item of fulfillmentsResult.data ?? []) {
-				fulfillmentRecord[item.id] = item;
+				fulfillmentRecord[item.id as NeedFulfillmentId] = item as NeedFulfillment;
 			}
 
-			const characterNeedRecord: Record<string, CharacterNeed> = {};
+			const characterNeedRecord: Record<CharacterNeedId, CharacterNeed> = {};
 			for (const item of characterNeedsResult.data ?? []) {
-				characterNeedRecord[item.id] = item;
+				characterNeedRecord[item.id as CharacterNeedId] = item as CharacterNeed;
 			}
 
 			needStore.set({ status: 'success', data: needRecord });
@@ -107,20 +111,20 @@ function createNeedStore() {
 				.from('needs')
 				.insert({ ...need, scenario_id: currentScenarioId })
 				.select()
-				.single();
+				.single<Need>();
 
 			if (error) throw error;
 
 			needStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as NeedId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateNeed(id: string, need: NeedUpdate) {
+		async updateNeed(id: NeedId, need: NeedUpdate) {
 			const { error } = await supabase.from('needs').update(need).eq('id', id);
 
 			if (error) throw error;
@@ -134,7 +138,7 @@ function createNeedStore() {
 			);
 		},
 
-		async removeNeed(id: string) {
+		async removeNeed(id: NeedId) {
 			const { error } = await supabase.from('needs').delete().eq('id', id);
 
 			if (error) throw error;
@@ -156,20 +160,20 @@ function createNeedStore() {
 				.from('need_fulfillments')
 				.insert({ ...fulfillment, scenario_id: currentScenarioId })
 				.select()
-				.single();
+				.single<NeedFulfillment>();
 
 			if (error) throw error;
 
 			needFulfillmentStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as NeedFulfillmentId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateNeedFulfillment(id: string, fulfillment: NeedFulfillmentUpdate) {
+		async updateNeedFulfillment(id: NeedFulfillmentId, fulfillment: NeedFulfillmentUpdate) {
 			const { error } = await supabase.from('need_fulfillments').update(fulfillment).eq('id', id);
 
 			if (error) throw error;
@@ -183,7 +187,7 @@ function createNeedStore() {
 			);
 		},
 
-		async removeNeedFulfillment(id: string) {
+		async removeNeedFulfillment(id: NeedFulfillmentId) {
 			const { error } = await supabase.from('need_fulfillments').delete().eq('id', id);
 
 			if (error) throw error;
@@ -205,20 +209,20 @@ function createNeedStore() {
 				.from('character_needs')
 				.insert({ ...characterNeed, scenario_id: currentScenarioId })
 				.select()
-				.single();
+				.single<CharacterNeed>();
 
 			if (error) throw error;
 
 			characterNeedStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as CharacterNeedId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateCharacterNeed(id: string, characterNeed: CharacterNeedUpdate) {
+		async updateCharacterNeed(id: CharacterNeedId, characterNeed: CharacterNeedUpdate) {
 			const { error } = await supabase.from('character_needs').update(characterNeed).eq('id', id);
 
 			if (error) throw error;
@@ -232,7 +236,7 @@ function createNeedStore() {
 			);
 		},
 
-		async removeCharacterNeed(id: string) {
+		async removeCharacterNeed(id: CharacterNeedId) {
 			const { error } = await supabase.from('character_needs').delete().eq('id', id);
 
 			if (error) throw error;
@@ -246,9 +250,13 @@ function createNeedStore() {
 	};
 
 	return {
-		needStore: needStore as Readable<RecordFetchState<Need>>,
-		needFulfillmentStore: needFulfillmentStore as Readable<RecordFetchState<NeedFulfillment>>,
-		characterNeedStore: characterNeedStore as Readable<RecordFetchState<CharacterNeed>>,
+		needStore: needStore as Readable<RecordFetchState<NeedId, Need>>,
+		needFulfillmentStore: needFulfillmentStore as Readable<
+			RecordFetchState<NeedFulfillmentId, NeedFulfillment>
+		>,
+		characterNeedStore: characterNeedStore as Readable<
+			RecordFetchState<CharacterNeedId, CharacterNeed>
+		>,
 		dialogStore: dialogStore as Readable<NeedDialogState>,
 		fetch,
 		openDialog,

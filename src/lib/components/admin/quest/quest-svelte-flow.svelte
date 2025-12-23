@@ -12,7 +12,7 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
-	import type { QuestBranch } from '$lib/types';
+	import type { QuestBranch, QuestId, QuestBranchId } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
 	import QuestActionPanel from './quest-action-panel.svelte';
 	import QuestBranchNodePanel from './quest-branch-node-panel.svelte';
@@ -21,7 +21,7 @@
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
 
-	const questId = $derived(page.params.questId);
+	const questId = $derived(page.params.questId as QuestId);
 	const { questBranchStore, admin } = useQuest();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
@@ -71,12 +71,12 @@
 			const targetQuestBranch = questBranches.find((b) => b.id === connection.target);
 			if (!targetQuestBranch) return;
 
-			await admin.updateQuestBranch(connection.target, {
+			await admin.updateQuestBranch(connection.target as QuestBranchId, {
 				parent_quest_branch_id: connection.source,
 			});
 
 			// 로컬 데이터 업데이트
-			targetQuestBranch.parent_quest_branch_id = connection.source;
+			targetQuestBranch.parent_quest_branch_id = connection.source as QuestBranchId;
 
 			// 엣지 추가
 			edges = [
@@ -106,14 +106,14 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				await admin.updateQuestBranch(edge.target, {
+				await admin.updateQuestBranch(edge.target as QuestBranchId, {
 					parent_quest_branch_id: null,
 				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				await admin.removeQuestBranch(node.id);
+				await admin.removeQuestBranch(node.id as QuestBranchId);
 			}
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성

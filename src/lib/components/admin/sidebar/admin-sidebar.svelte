@@ -22,6 +22,7 @@
 	import { IconChevronRight } from '@tabler/icons-svelte';
 	import type { ComponentProps } from 'svelte';
 	import ScenarioSwitcher from './scenario-switcher.svelte';
+	import type { ScenarioId } from '$lib/types';
 
 	interface MenuItem {
 		title: string;
@@ -34,7 +35,7 @@
 		items: MenuItem[];
 	}
 
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const menuGroups = $derived<MenuGroup[]>([
 		{

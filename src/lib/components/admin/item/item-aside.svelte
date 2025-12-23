@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -60,7 +61,7 @@
 							disabled={!currentItemId}
 							onclick={() =>
 								currentItemId &&
-								openDialog({ type: 'delete', itemId: currentItemId })}
+								openDialog({ type: 'delete', itemId: currentItemId as ItemId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

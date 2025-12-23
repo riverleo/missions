@@ -24,10 +24,11 @@
 	import ItemBehaviorActionNode from './item-behavior-action-node.svelte';
 	import ItemBehaviorActionPanel from './item-behavior-action-panel.svelte';
 	import ItemBehaviorActionNodePanel from './item-behavior-action-node-panel.svelte';
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 
 	const { itemBehaviorStore, itemBehaviorActionStore, admin } = useItemBehavior();
 
-	const behaviorId = $derived(page.params.behaviorId);
+	const behaviorId = $derived(page.params.behaviorId as ItemBehaviorId);
 	const behavior = $derived(behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
@@ -106,7 +107,7 @@
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
 
-			await admin.updateItemBehaviorAction(sourceId, {
+			await admin.updateItemBehaviorAction(sourceId as ItemBehaviorActionId, {
 				[isSuccess
 					? 'success_item_behavior_action_id'
 					: 'failure_item_behavior_action_id']: targetId,
@@ -168,7 +169,7 @@
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
-			await admin.updateItemBehaviorAction(fromActionId, {
+			await admin.updateItemBehaviorAction(fromActionId as ItemBehaviorActionId, {
 				[isSuccess
 					? 'success_item_behavior_action_id'
 					: 'failure_item_behavior_action_id']: newAction.id,
@@ -203,7 +204,7 @@
 				const sourceId = parseItemBehaviorActionNodeId(edge.source);
 				const isSuccess = isItemBehaviorActionSuccessEdgeId(edge.id);
 
-				await admin.updateItemBehaviorAction(sourceId, {
+				await admin.updateItemBehaviorAction(sourceId as ItemBehaviorActionId, {
 					[isSuccess
 						? 'success_item_behavior_action_id'
 						: 'failure_item_behavior_action_id']: null,
@@ -214,7 +215,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseItemBehaviorActionNodeId(node.id);
-					await admin.removeItemBehaviorAction(actionId);
+					await admin.removeItemBehaviorAction(actionId as ItemBehaviorActionId);
 				}
 			}
 

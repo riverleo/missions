@@ -14,6 +14,7 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
+	import type { ScenarioId } from '$lib/types';
 	import { goto } from '$app/navigation';
 
 	const { admin, dialogStore, closeDialog, init } = useScenario();

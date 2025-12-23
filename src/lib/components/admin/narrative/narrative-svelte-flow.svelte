@@ -37,10 +37,10 @@
 		isNarrativeDiceRollToSuccessEdge,
 		isNarrativeDiceRollToFailureEdge,
 	} from '$lib/utils/flow-id';
-	import type { NarrativeNode, NarrativeDiceRoll } from '$lib/types';
+	import type { NarrativeNode, NarrativeDiceRoll, NarrativeId, NarrativeNodeId, NarrativeDiceRollId, NarrativeNodeChoiceId, ScenarioId } from '$lib/types';
 
-	const scenarioId = $derived(page.params.scenarioId);
-	const narrativeId = $derived(page.params.narrativeId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+	const narrativeId = $derived(page.params.narrativeId as NarrativeId);
 	const { narrativeNodeStore, narrativeDiceRollStore, narrativeNodeChoiceStore, admin } =
 		useNarrative();
 	const flowNodes = useNodes();
@@ -161,7 +161,7 @@
 
 				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
 				if (narrativeNode.type === 'text') {
-					await admin.updateNode(narrativeNodeId, {
+					await admin.updateNode(narrativeNodeId as NarrativeNodeId, {
 						narrative_dice_roll_id: narrativeDiceRollId,
 					});
 
@@ -181,11 +181,11 @@
 					const choiceId = connection.sourceHandle;
 					if (!choiceId) return;
 
-					await admin.updateChoice(choiceId, {
+					await admin.updateChoice(choiceId as NarrativeNodeChoiceId, {
 						narrative_dice_roll_id: narrativeDiceRollId,
 					});
 
-					const choice = $narrativeNodeChoiceStore.data?.[choiceId];
+					const choice = $narrativeNodeChoiceStore.data?.[choiceId as NarrativeNodeChoiceId];
 					if (choice) {
 						// 엣지 추가
 						edges = [
@@ -210,7 +210,7 @@
 				const handle = connection.sourceHandle;
 
 				if (handle === 'success') {
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
 						success_narrative_node_id: narrativeNodeId,
 					});
 
@@ -227,7 +227,7 @@
 						},
 					];
 				} else if (handle === 'failure') {
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
 						failure_narrative_node_id: narrativeNodeId,
 					});
 
@@ -263,26 +263,26 @@
 				// 1. narrative_node → narrative_dice_roll 엣지
 				if (isNarrativeNodeToNarrativeDiceRollEdge(edge.id)) {
 					const { nodeId } = parseNarrativeNodeToNarrativeDiceRollEdgeId(edge.id);
-					await admin.updateNode(nodeId, { narrative_dice_roll_id: null });
+					await admin.updateNode(nodeId as NarrativeNodeId, { narrative_dice_roll_id: null });
 				}
 				// 2. narrative_node_choice → narrative_dice_roll 엣지
 				else if (isNarrativeNodeChoiceToNarrativeDiceRollEdge(edge.id)) {
 					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
 						edge.id
 					);
-					await admin.updateChoice(narrativeNodeChoiceId, { narrative_dice_roll_id: null });
+					await admin.updateChoice(narrativeNodeChoiceId as NarrativeNodeChoiceId, { narrative_dice_roll_id: null });
 				}
 				// 3. narrative_dice_roll → success 엣지
 				else if (isNarrativeDiceRollToSuccessEdge(edge.id)) {
 					const { narrativeDiceRollId } = parseNarrativeDiceRollToSuccessEdgeId(edge.id);
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
 						success_narrative_node_id: null,
 					});
 				}
 				// 4. narrative_dice_roll → failure 엣지
 				else if (isNarrativeDiceRollToFailureEdge(edge.id)) {
 					const { narrativeDiceRollId } = parseNarrativeDiceRollToFailureEdgeId(edge.id);
-					await admin.updateNarrativeDiceRoll(narrativeDiceRollId, {
+					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
 						failure_narrative_node_id: null,
 					});
 				}
@@ -292,10 +292,10 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'narrativeNode') {
 					const narrativeNodeId = parseNarrativeNodeId(node.id);
-					await admin.removeNode(narrativeNodeId);
+					await admin.removeNode(narrativeNodeId as NarrativeNodeId);
 				} else if (node.type === 'narrativeDiceRoll') {
 					const narrativeDiceRollId = parseNarrativeDiceRollNodeId(node.id);
-					await admin.removeNarrativeDiceRoll(narrativeDiceRollId);
+					await admin.removeNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId);
 				}
 			}
 
@@ -354,7 +354,7 @@
 				}
 				// choice 타입: sourceHandle로 어느 choice인지 확인
 				else if (narrativeNode.type === 'choice' && sourceHandle) {
-					await admin.updateChoice(sourceHandle, {
+					await admin.updateChoice(sourceHandle as NarrativeNodeChoiceId, {
 						narrative_dice_roll_id: newDiceRoll.id,
 					});
 				}

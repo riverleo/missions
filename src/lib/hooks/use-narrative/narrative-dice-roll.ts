@@ -1,4 +1,4 @@
-import type { NarrativeDiceRollInsert, NarrativeDiceRollUpdate, Supabase } from '$lib/types';
+import type { NarrativeDiceRollInsert, NarrativeDiceRollUpdate, Supabase, NarrativeDiceRollId, NarrativeDiceRoll } from '$lib/types';
 import type { NarrativeDiceRollStore } from '.';
 import { produce } from 'immer';
 
@@ -14,9 +14,9 @@ export const fetchNarrativeDiceRolls = async (supabase: Supabase, store: Narrati
 		if (error) throw error;
 
 		// Convert array to Record
-		const record: Record<string, (typeof data)[number]> = {};
+		const record: Record<NarrativeDiceRollId, NarrativeDiceRoll> = {};
 		for (const item of data ?? []) {
-			record[item.id] = item;
+			record[item.id as NarrativeDiceRollId] = item as NarrativeDiceRoll;
 		}
 
 		store.set({
@@ -43,7 +43,7 @@ export const createNarrativeDiceRoll =
 				.from('narrative_dice_rolls')
 				.insert(narrativeDiceRoll)
 				.select()
-				.single();
+				.single<NarrativeDiceRoll>();
 
 			if (error) throw error;
 
@@ -52,7 +52,7 @@ export const createNarrativeDiceRoll =
 					if (!draft.data) {
 						draft.data = {};
 					}
-					draft.data[data.id] = data;
+					draft.data[data.id as NarrativeDiceRollId] = data;
 				})
 			);
 
@@ -68,7 +68,7 @@ export const createNarrativeDiceRoll =
 
 export const updateNarrativeDiceRoll =
 	(supabase: Supabase, store: NarrativeDiceRollStore) =>
-	async (id: string, narrativeDiceRoll: NarrativeDiceRollUpdate) => {
+	async (id: NarrativeDiceRollId, narrativeDiceRoll: NarrativeDiceRollUpdate) => {
 		try {
 			const { error } = await supabase
 				.from('narrative_dice_rolls')
@@ -94,7 +94,7 @@ export const updateNarrativeDiceRoll =
 	};
 
 export const removeNarrativeDiceRoll =
-	(supabase: Supabase, store: NarrativeDiceRollStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeDiceRollStore) => async (id: NarrativeDiceRollId) => {
 		try {
 			const { error } = await supabase.from('narrative_dice_rolls').delete().eq('id', id);
 

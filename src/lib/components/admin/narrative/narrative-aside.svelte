@@ -6,6 +6,7 @@
 	import { IconEditCircle, IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useNarrative } from '$lib/hooks/use-narrative';
+	import type { NarrativeId } from '$lib/types';
 	import NarrativeCommand from './narrative-command.svelte';
 	import NarrativeCreateDialog from './narrative-create-dialog.svelte';
 	import NarrativeUpdateDialog from './narrative-update-dialog.svelte';
@@ -58,7 +59,7 @@
 								disabled={!currentNarrativeId}
 								onclick={() =>
 									currentNarrativeId &&
-									admin.openDialog({ type: 'update', narrativeId: currentNarrativeId })}
+									admin.openDialog({ type: 'update', narrativeId: currentNarrativeId as NarrativeId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +80,7 @@
 							disabled={!currentNarrativeId}
 							onclick={() =>
 								currentNarrativeId &&
-								admin.openDialog({ type: 'delete', narrativeId: currentNarrativeId })}
+								admin.openDialog({ type: 'delete', narrativeId: currentNarrativeId as NarrativeId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

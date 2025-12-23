@@ -21,10 +21,11 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { buildingBehaviorStore, openDialog } = useBuildingBehavior();
 	const { store: buildingStore } = useBuilding();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	const behaviorsGroupedByBuilding = $derived(() => {

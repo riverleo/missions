@@ -24,10 +24,11 @@
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
 	import NeedBehaviorActionNodePanel from './need-behavior-action-node-panel.svelte';
+	import type { NeedBehaviorId, NeedBehaviorActionId } from '$lib/types';
 
 	const { needBehaviorStore, needBehaviorActionStore, admin } = useNeedBehavior();
 
-	const behaviorId = $derived(page.params.behaviorId);
+	const behaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
 	const behavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
@@ -104,7 +105,7 @@
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
 
-			await admin.updateNeedBehaviorAction(sourceId, {
+			await admin.updateNeedBehaviorAction(sourceId as NeedBehaviorActionId, {
 				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
 					targetId,
 			});
@@ -167,7 +168,7 @@
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
-			await admin.updateNeedBehaviorAction(fromActionId, {
+			await admin.updateNeedBehaviorAction(fromActionId as NeedBehaviorActionId, {
 				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
 					newAction.id,
 			});
@@ -201,7 +202,7 @@
 				const sourceId = parseActionNodeId(edge.source);
 				const isSuccess = isActionSuccessEdgeId(edge.id);
 
-				await admin.updateNeedBehaviorAction(sourceId, {
+				await admin.updateNeedBehaviorAction(sourceId as NeedBehaviorActionId, {
 					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
 						null,
 				});
@@ -211,7 +212,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseActionNodeId(node.id);
-					await admin.removeNeedBehaviorAction(actionId);
+					await admin.removeNeedBehaviorAction(actionId as NeedBehaviorActionId);
 				}
 			}
 

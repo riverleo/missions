@@ -1,5 +1,12 @@
 import { get } from 'svelte/store';
-import type { NarrativeDiceRoll, NarrativeNode, PlayerRolledDice } from '$lib/types';
+import type {
+	NarrativeDiceRoll,
+	NarrativeNode,
+	PlayerRolledDice,
+	NarrativeNodeId,
+	NarrativeNodeChoiceId,
+	NarrativeDiceRollId,
+} from '$lib/types';
 import type {
 	NarrativeStore,
 	NarrativeNodeStore,
@@ -33,7 +40,7 @@ export interface PlayStoreState {
 export const run = (params: Params) => (narrativeNodeId: string) => {
 	const { narrativeNodeStore, playStore } = params;
 
-	const narrativeNode = get(narrativeNodeStore).data?.[narrativeNodeId];
+	const narrativeNode = get(narrativeNodeStore).data?.[narrativeNodeId as NarrativeNodeId];
 	if (!narrativeNode) return;
 
 	playStore.set({
@@ -86,7 +93,7 @@ export const roll = (params: Params) => {
 					narrative_dice_roll_id: narrativeDiceRoll.id,
 				})
 				.select()
-				.single();
+				.single<PlayerRolledDice>();
 
 			if (error) {
 				console.error('Error inserting player_rolled_dice:', error);
@@ -143,7 +150,7 @@ export const next = (params: Params) => (narrativeNodeChoiceId?: string) => {
 	let narrativeDiceRollId: string | null = null;
 
 	if (narrativeNode.type === 'choice' && narrativeNodeChoiceId) {
-		const narrativeNodeChoice = narrativeNodeChoices[narrativeNodeChoiceId];
+		const narrativeNodeChoice = narrativeNodeChoices[narrativeNodeChoiceId as NarrativeNodeChoiceId];
 
 		narrativeDiceRollId = narrativeNodeChoice?.narrative_dice_roll_id ?? null;
 	} else if (narrativeNode.type === 'text') {
@@ -156,7 +163,7 @@ export const next = (params: Params) => (narrativeNodeChoiceId?: string) => {
 	}
 
 	const { data: narrativeDiceRolls } = get(narrativeDiceRollStore);
-	const newNarrativeDiceRoll = narrativeDiceRolls[narrativeDiceRollId];
+	const newNarrativeDiceRoll = narrativeDiceRolls[narrativeDiceRollId as NarrativeDiceRollId];
 
 	if (!newNarrativeDiceRoll) {
 		console.warn('narrativeDiceRoll not found:', narrativeDiceRollId);

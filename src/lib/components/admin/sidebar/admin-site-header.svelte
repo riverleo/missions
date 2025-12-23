@@ -22,6 +22,21 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import type {
+		ScenarioId,
+		ChapterId,
+		QuestId,
+		NarrativeId,
+		TerrainId,
+		CharacterId,
+		CharacterBodyId,
+		BuildingId,
+		BuildingBehaviorId,
+		ItemId,
+		ItemBehaviorId,
+		NeedId,
+		NeedBehaviorId,
+	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
 
 	const { store: scenarioStore } = useScenario();
@@ -41,43 +56,43 @@
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
 		if (prevSegment === 'scenarios') {
-			return $scenarioStore.data?.[id]?.title;
+			return $scenarioStore.data?.[id as ScenarioId]?.title;
 		}
 		if (prevSegment === 'chapters') {
-			return $chapterStore.data?.[id]?.title;
+			return $chapterStore.data?.[id as ChapterId]?.title;
 		}
 		if (prevSegment === 'quests') {
-			return $questStore.data?.[id]?.title;
+			return $questStore.data?.[id as QuestId]?.title;
 		}
 		if (prevSegment === 'narratives') {
-			return $narrativeStore.data?.[id]?.title;
+			return $narrativeStore.data?.[id as NarrativeId]?.title;
 		}
 		if (prevSegment === 'terrains') {
-			return $terrainStore.data?.[id]?.title;
+			return $terrainStore.data?.[id as TerrainId]?.title;
 		}
 		if (prevSegment === 'characters') {
-			return $characterStore.data?.[id]?.name;
+			return $characterStore.data?.[id as CharacterId]?.name;
 		}
 		if (prevSegment === 'character-bodies') {
-			return $characterBodyStore.data?.[id]?.name;
+			return $characterBodyStore.data?.[id as CharacterBodyId]?.name;
 		}
 		if (prevSegment === 'buildings') {
-			return $buildingStore.data?.[id]?.name;
+			return $buildingStore.data?.[id as BuildingId]?.name;
 		}
 		if (prevSegment === 'building-behaviors') {
-			return $buildingBehaviorStore.data?.[id]?.type;
+			return $buildingBehaviorStore.data?.[id as BuildingBehaviorId]?.type;
 		}
 		if (prevSegment === 'items') {
-			return $itemStore.data?.[id]?.name;
+			return $itemStore.data?.[id as ItemId]?.name;
 		}
 		if (prevSegment === 'item-behaviors') {
-			return $itemBehaviorStore.data?.[id]?.type;
+			return $itemBehaviorStore.data?.[id as ItemBehaviorId]?.type;
 		}
 		if (prevSegment === 'needs') {
-			return $needStore.data?.[id]?.name;
+			return $needStore.data?.[id as NeedId]?.name;
 		}
 		if (prevSegment === 'behaviors') {
-			return $needBehaviorStore.data?.[id]?.name;
+			return $needBehaviorStore.data?.[id as NeedBehaviorId]?.name;
 		}
 		return undefined;
 	}

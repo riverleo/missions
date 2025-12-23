@@ -2,9 +2,10 @@
 	import { page } from '$app/state';
 	import { useItem } from '$lib/hooks/use-item';
 	import ItemStateItemGroup from '$lib/components/admin/item/item-state-item-group.svelte';
+	import type { ItemId } from '$lib/types';
 
 	const { store } = useItem();
-	const itemId = $derived(page.params.itemId);
+	const itemId = $derived(page.params.itemId as ItemId);
 	const item = $derived(itemId ? $store.data[itemId] : undefined);
 </script>
 

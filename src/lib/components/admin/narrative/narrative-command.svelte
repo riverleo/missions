@@ -18,9 +18,10 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
+	import type { ScenarioId } from '$lib/types';
 
 	const { narrativeStore, admin } = useNarrative();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentNarrativeId = $derived(page.params.narrativeId);
 	const narratives = $derived(
 		Object.values($narrativeStore.data).filter((n) => n.scenario_id === scenarioId)

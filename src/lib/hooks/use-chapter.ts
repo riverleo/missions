@@ -1,17 +1,24 @@
 import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
-import type { RecordFetchState, Chapter, ChapterInsert, ChapterUpdate } from '$lib/types';
+import type {
+	RecordFetchState,
+	Chapter,
+	ChapterInsert,
+	ChapterUpdate,
+	ChapterId,
+	ScenarioId,
+} from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 let instance: ReturnType<typeof createChapterStore> | null = null;
 
 function createChapterStore() {
 	const { supabase } = useServerPayload();
-	const store = writable<RecordFetchState<Chapter>>({ status: 'idle', data: {} });
+	const store = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 		store.update((state) => ({ ...state, status: 'loading' }));
 
@@ -25,9 +32,9 @@ function createChapterStore() {
 			if (error) throw error;
 
 			// Convert array to Record
-			const record: Record<string, Chapter> = {};
+			const record: Record<ChapterId, Chapter> = {};
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				record[item.id as ChapterId] = item as Chapter;
 			}
 
 			store.set({
@@ -55,20 +62,20 @@ function createChapterStore() {
 				scenario_id: currentScenarioId,
 			})
 			.select()
-			.single();
+			.single<Chapter>();
 
 		if (error) throw error;
 
 		store.update((state) =>
 			produce(state, (draft) => {
-				draft.data[data.id] = data;
+				draft.data[data.id as ChapterId] = data;
 			})
 		);
 
 		return data;
 	}
 
-	async function update(id: string, chapter: ChapterUpdate) {
+	async function update(id: ChapterId, chapter: ChapterUpdate) {
 		const { error } = await supabase.from('chapters').update(chapter).eq('id', id);
 
 		if (error) throw error;
@@ -82,7 +89,7 @@ function createChapterStore() {
 		);
 	}
 
-	async function remove(id: string) {
+	async function remove(id: ChapterId) {
 		const { error } = await supabase.from('chapters').delete().eq('id', id);
 
 		if (error) throw error;
@@ -96,7 +103,7 @@ function createChapterStore() {
 		);
 	}
 
-	async function publish(id: string) {
+	async function publish(id: ChapterId) {
 		const { error } = await supabase.from('chapters').update({ status: 'published' }).eq('id', id);
 
 		if (error) throw error;
@@ -110,7 +117,7 @@ function createChapterStore() {
 		);
 	}
 
-	async function unpublish(id: string) {
+	async function unpublish(id: ChapterId) {
 		const { error } = await supabase.from('chapters').update({ status: 'draft' }).eq('id', id);
 
 		if (error) throw error;
@@ -125,7 +132,7 @@ function createChapterStore() {
 	}
 
 	return {
-		store: store as Readable<RecordFetchState<Chapter>>,
+		store: store as Readable<RecordFetchState<ChapterId, Chapter>>,
 		fetch,
 		admin: {
 			create,

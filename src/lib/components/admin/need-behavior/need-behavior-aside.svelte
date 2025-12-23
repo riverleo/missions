@@ -6,6 +6,7 @@
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import type { NeedBehaviorId } from '$lib/types';
 	import NeedBehaviorCommand from './need-behavior-command.svelte';
 	import NeedBehaviorCreateDialog from './need-behavior-create-dialog.svelte';
 	import NeedBehaviorUpdateDialog from './need-behavior-update-dialog.svelte';
@@ -57,7 +58,7 @@
 								size="icon"
 								disabled={!currentBehaviorId}
 								onclick={() =>
-									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId })}
+									currentBehaviorId && openDialog({ type: 'update', behaviorId: currentBehaviorId as NeedBehaviorId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -77,7 +78,7 @@
 							size="icon"
 							disabled={!currentBehaviorId}
 							onclick={() =>
-								currentBehaviorId && openDialog({ type: 'delete', behaviorId: currentBehaviorId })}
+								currentBehaviorId && openDialog({ type: 'delete', behaviorId: currentBehaviorId as NeedBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

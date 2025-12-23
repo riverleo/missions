@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Panel, useEdges } from '@xyflow/svelte';
-	import type { CharacterNeed } from '$lib/types';
+	import type { CharacterNeed, CharacterId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -76,7 +76,7 @@
 
 	function onCharacterChange(value: string | undefined) {
 		if (value && changes) {
-			changes.character_id = value;
+			changes.character_id = value as CharacterId;
 		}
 	}
 </script>

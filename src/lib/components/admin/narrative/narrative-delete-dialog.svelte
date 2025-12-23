@@ -12,11 +12,12 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin } = useNarrative();
 	const { store } = admin;
 
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const open = $derived($store.dialog?.type === 'delete');
 	const narrativeId = $derived(
 		$store.dialog?.type === 'delete' ? $store.dialog.narrativeId : undefined

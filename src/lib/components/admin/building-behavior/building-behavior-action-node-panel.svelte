@@ -5,6 +5,10 @@
 		BuildingStateType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
+		CharacterId,
+		BuildingBehaviorId,
+		BuildingId,
+		CharacterBodyId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -61,16 +65,16 @@
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId] : characters[0]
+		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
 	// 현재 액션의 행동 -> 건물 가져오기
 	const currentBehavior = $derived(
-		changes?.behavior_id ? $buildingBehaviorStore.data[changes.behavior_id] : undefined
+		changes?.behavior_id ? $buildingBehaviorStore.data[changes.behavior_id as BuildingBehaviorId] : undefined
 	);
 	const currentBuilding = $derived(
-		currentBehavior?.building_id ? $buildingStore.data[currentBehavior.building_id] : undefined
+		currentBehavior?.building_id ? $buildingStore.data[currentBehavior.building_id as BuildingId] : undefined
 	);
 	// 건물 상태
 	const buildingStates = $derived(
@@ -96,7 +100,7 @@
 
 	// 선택된 바디/얼굴 상태로 미리보기
 	const previewCharacterBody = $derived(
-		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id] : undefined
+		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id as CharacterBodyId] : undefined
 	);
 	const previewBodyStates = $derived(
 		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []

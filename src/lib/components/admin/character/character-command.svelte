@@ -19,9 +19,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { store, openDialog } = useCharacter();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentCharacterId = $derived(page.params.characterId);
 
 	const characters = $derived(alphabetical(Object.values($store.data), (c) => c.name));

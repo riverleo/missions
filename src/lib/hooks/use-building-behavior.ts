@@ -8,13 +8,16 @@ import type {
 	BuildingBehaviorAction,
 	BuildingBehaviorActionInsert,
 	BuildingBehaviorActionUpdate,
+	BuildingBehaviorId,
+	BuildingBehaviorActionId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type BuildingBehaviorDialogState =
 	| { type: 'create' }
-	| { type: 'update'; behaviorId: string }
-	| { type: 'delete'; behaviorId: string }
+	| { type: 'update'; behaviorId: BuildingBehaviorId }
+	| { type: 'delete'; behaviorId: BuildingBehaviorId }
 	| undefined;
 
 let instance: ReturnType<typeof createBuildingBehaviorStore> | null = null;
@@ -22,21 +25,23 @@ let instance: ReturnType<typeof createBuildingBehaviorStore> | null = null;
 function createBuildingBehaviorStore() {
 	const { supabase } = useServerPayload();
 
-	const buildingBehaviorStore = writable<RecordFetchState<BuildingBehavior>>({
+	const buildingBehaviorStore = writable<RecordFetchState<BuildingBehaviorId, BuildingBehavior>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const buildingBehaviorActionStore = writable<RecordFetchState<BuildingBehaviorAction>>({
+	const buildingBehaviorActionStore = writable<
+		RecordFetchState<BuildingBehaviorActionId, BuildingBehaviorAction>
+	>({
 		status: 'idle',
 		data: {},
 	});
 
 	const dialogStore = writable<BuildingBehaviorDialogState>(undefined);
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		buildingBehaviorStore.update((state) => ({ ...state, status: 'loading' }));
@@ -51,14 +56,14 @@ function createBuildingBehaviorStore() {
 			if (behaviorsResult.error) throw behaviorsResult.error;
 			if (actionsResult.error) throw actionsResult.error;
 
-			const behaviorRecord: Record<string, BuildingBehavior> = {};
+			const behaviorRecord: Record<BuildingBehaviorId, BuildingBehavior> = {};
 			for (const item of behaviorsResult.data ?? []) {
-				behaviorRecord[item.id] = item;
+				behaviorRecord[item.id as BuildingBehaviorId] = item as BuildingBehavior;
 			}
 
-			const actionRecord: Record<string, BuildingBehaviorAction> = {};
+			const actionRecord: Record<BuildingBehaviorActionId, BuildingBehaviorAction> = {};
 			for (const item of actionsResult.data ?? []) {
-				actionRecord[item.id] = item;
+				actionRecord[item.id as BuildingBehaviorActionId] = item as BuildingBehaviorAction;
 			}
 
 			buildingBehaviorStore.set({ status: 'success', data: behaviorRecord });
@@ -89,20 +94,20 @@ function createBuildingBehaviorStore() {
 				.from('building_behaviors')
 				.insert({ ...behavior, scenario_id: currentScenarioId })
 				.select()
-				.single();
+				.single<BuildingBehavior>();
 
 			if (error) throw error;
 
 			buildingBehaviorStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as BuildingBehaviorId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, behavior: BuildingBehaviorUpdate) {
+		async update(id: BuildingBehaviorId, behavior: BuildingBehaviorUpdate) {
 			const { error } = await supabase.from('building_behaviors').update(behavior).eq('id', id);
 
 			if (error) throw error;
@@ -116,7 +121,7 @@ function createBuildingBehaviorStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: BuildingBehaviorId) {
 			const { error } = await supabase.from('building_behaviors').delete().eq('id', id);
 
 			if (error) throw error;
@@ -130,7 +135,7 @@ function createBuildingBehaviorStore() {
 			// Also remove related actions from the store
 			buildingBehaviorActionStore.update((state) =>
 				produce(state, (draft) => {
-					for (const actionId of Object.keys(draft.data)) {
+					for (const actionId of Object.keys(draft.data) as BuildingBehaviorActionId[]) {
 						if (draft.data[actionId]?.behavior_id === id) {
 							delete draft.data[actionId];
 						}
@@ -153,20 +158,20 @@ function createBuildingBehaviorStore() {
 				.from('building_behavior_actions')
 				.insert({ ...action, scenario_id: currentScenarioId, root: isFirstAction })
 				.select()
-				.single();
+				.single<BuildingBehaviorAction>();
 
 			if (error) throw error;
 
 			buildingBehaviorActionStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as BuildingBehaviorActionId] = data;
 				})
 			);
 
 			return data;
 		},
 
-		async updateBuildingBehaviorAction(id: string, action: BuildingBehaviorActionUpdate) {
+		async updateBuildingBehaviorAction(id: BuildingBehaviorActionId, action: BuildingBehaviorActionUpdate) {
 			const { error } = await supabase
 				.from('building_behavior_actions')
 				.update(action)
@@ -183,7 +188,7 @@ function createBuildingBehaviorStore() {
 			);
 		},
 
-		async removeBuildingBehaviorAction(id: string) {
+		async removeBuildingBehaviorAction(id: BuildingBehaviorActionId) {
 			const { error } = await supabase.from('building_behavior_actions').delete().eq('id', id);
 
 			if (error) throw error;
@@ -197,9 +202,11 @@ function createBuildingBehaviorStore() {
 	};
 
 	return {
-		buildingBehaviorStore: buildingBehaviorStore as Readable<RecordFetchState<BuildingBehavior>>,
+		buildingBehaviorStore: buildingBehaviorStore as Readable<
+			RecordFetchState<BuildingBehaviorId, BuildingBehavior>
+		>,
 		buildingBehaviorActionStore: buildingBehaviorActionStore as Readable<
-			RecordFetchState<BuildingBehaviorAction>
+			RecordFetchState<BuildingBehaviorActionId, BuildingBehaviorAction>
 		>,
 		dialogStore: dialogStore as Readable<BuildingBehaviorDialogState>,
 		fetch,

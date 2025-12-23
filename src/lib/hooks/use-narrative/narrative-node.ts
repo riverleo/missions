@@ -1,4 +1,4 @@
-import type { NarrativeNodeInsert, NarrativeNodeUpdate, Supabase } from '$lib/types';
+import type { NarrativeNodeInsert, NarrativeNodeUpdate, Supabase, NarrativeNodeId, NarrativeNode } from '$lib/types';
 import type { NarrativeNodeStore } from '.';
 import { produce } from 'immer';
 
@@ -14,9 +14,9 @@ export const fetchNarrativeNodes = async (supabase: Supabase, store: NarrativeNo
 		if (error) throw error;
 
 		// Convert array to Record
-		const record: Record<string, (typeof data)[number]> = {};
+		const record: Record<NarrativeNodeId, NarrativeNode> = {};
 		for (const item of data ?? []) {
-			record[item.id] = item;
+			record[item.id as NarrativeNodeId] = item as NarrativeNode;
 		}
 
 		store.set({
@@ -42,7 +42,7 @@ export const createNarrativeNode =
 				.from('narrative_nodes')
 				.insert(narrativeNode)
 				.select()
-				.single();
+				.single<NarrativeNode>();
 
 			if (error) throw error;
 
@@ -51,7 +51,7 @@ export const createNarrativeNode =
 					if (!draft.data) {
 						draft.data = {};
 					}
-					draft.data[data.id] = data;
+					draft.data[data.id as NarrativeNodeId] = data;
 				})
 			);
 
@@ -67,7 +67,7 @@ export const createNarrativeNode =
 
 export const updateNarrativeNode =
 	(supabase: Supabase, store: NarrativeNodeStore) =>
-	async (id: string, narrativeNode: NarrativeNodeUpdate) => {
+	async (id: NarrativeNodeId, narrativeNode: NarrativeNodeUpdate) => {
 		try {
 			const { error } = await supabase.from('narrative_nodes').update(narrativeNode).eq('id', id);
 
@@ -90,7 +90,7 @@ export const updateNarrativeNode =
 	};
 
 export const removeNarrativeNode =
-	(supabase: Supabase, store: NarrativeNodeStore) => async (id: string) => {
+	(supabase: Supabase, store: NarrativeNodeStore) => async (id: NarrativeNodeId) => {
 		try {
 			const { error } = await supabase.from('narrative_nodes').delete().eq('id', id);
 

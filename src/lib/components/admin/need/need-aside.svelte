@@ -5,6 +5,7 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
+	import type { NeedId } from '$lib/types';
 	import { useNeed } from '$lib/hooks/use-need';
 	import NeedCommand from './need-command.svelte';
 	import NeedCreateDialog from './need-create-dialog.svelte';
@@ -56,7 +57,7 @@
 								variant="outline"
 								size="icon"
 								disabled={!currentNeedId}
-								onclick={() => currentNeedId && openDialog({ type: 'update', needId: currentNeedId })}
+								onclick={() => currentNeedId && openDialog({ type: 'update', needId: currentNeedId as NeedId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -75,7 +76,7 @@
 							variant="outline"
 							size="icon"
 							disabled={!currentNeedId}
-							onclick={() => currentNeedId && openDialog({ type: 'delete', needId: currentNeedId })}
+							onclick={() => currentNeedId && openDialog({ type: 'delete', needId: currentNeedId as NeedId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

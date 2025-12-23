@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CharacterFaceStateType } from '$lib/types';
+	import type { CharacterFaceStateType, CharacterId, CharacterBodyId, CharacterFaceState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
@@ -26,14 +26,14 @@
 	const { store, faceStateStore, admin } = useCharacter();
 	const { bodyStateStore } = useCharacterBody();
 
-	const character = $derived($store.data[characterId]);
-	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
-	const faceState = $derived(faceStates.find((s) => s.type === type));
+	const character = $derived($store.data[characterId as CharacterId]);
+	const faceStates = $derived($faceStateStore.data[characterId as CharacterId] ?? []);
+	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
 
 	// 선택된 바디 상태 가져오기
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-	const bodyStates = $derived(character ? ($bodyStateStore.data[character.body_id] ?? []) : []);
+	const bodyStates = $derived(character ? ($bodyStateStore.data[character.body_id as CharacterBodyId] ?? []) : []);
 	const previewBodyState = $derived(bodyStates.find((s) => s.type === previewBodyStateType));
 
 	let offsetX = $state('');
@@ -49,15 +49,15 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (faceState) {
-			await admin.updateCharacterFaceState(faceState.id, characterId, change);
+			await admin.updateCharacterFaceState(faceState.id, characterId as CharacterId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterFaceState(characterId, { type, atlas_name: change.atlas_name });
+			await admin.createCharacterFaceState(characterId as CharacterId, { type, atlas_name: change.atlas_name });
 		}
 	}
 
 	async function ondelete() {
 		if (faceState) {
-			await admin.removeCharacterFaceState(faceState.id, characterId);
+			await admin.removeCharacterFaceState(faceState.id, characterId as CharacterId);
 		}
 	}
 
@@ -66,7 +66,7 @@
 		const newOffsetX = parseInt(offsetX) || 0;
 		const newOffsetY = parseInt(offsetY) || 0;
 		if (newOffsetX === faceState.offset_x && newOffsetY === faceState.offset_y) return;
-		await admin.updateCharacterFaceState(faceState.id, characterId, {
+		await admin.updateCharacterFaceState(faceState.id, characterId as CharacterId, {
 			offset_x: newOffsetX,
 			offset_y: newOffsetY,
 		});

@@ -9,13 +9,16 @@ import type {
 	CharacterFaceStateInsert,
 	CharacterFaceStateUpdate,
 	CharacterBodyStateType,
+	CharacterId,
+	CharacterFaceStateId,
+	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
 type CharacterDialogState =
 	| { type: 'create' }
-	| { type: 'update'; characterId: string }
-	| { type: 'delete'; characterId: string }
+	| { type: 'update'; characterId: CharacterId }
+	| { type: 'delete'; characterId: CharacterId }
 	| undefined;
 
 let instance: ReturnType<typeof createCharacterStore> | null = null;
@@ -23,13 +26,13 @@ let instance: ReturnType<typeof createCharacterStore> | null = null;
 function createCharacterStore() {
 	const { supabase } = useServerPayload();
 
-	const store = writable<RecordFetchState<Character>>({
+	const store = writable<RecordFetchState<CharacterId, Character>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// character_id를 키로, 해당 캐릭터의 face states 배열을 값으로
-	const faceStateStore = writable<RecordFetchState<CharacterFaceState[]>>({
+	const faceStateStore = writable<RecordFetchState<CharacterId, CharacterFaceState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -42,9 +45,9 @@ function createCharacterStore() {
 		previewBodyStateType: 'idle',
 	});
 
-	let currentScenarioId: string | undefined;
+	let currentScenarioId: ScenarioId | undefined;
 
-	async function fetch(scenarioId: string) {
+	async function fetch(scenarioId: ScenarioId) {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -63,13 +66,13 @@ function createCharacterStore() {
 
 			if (error) throw error;
 
-			const characterRecord: Record<string, Character> = {};
-			const faceStateRecord: Record<string, CharacterFaceState[]> = {};
+			const characterRecord: Record<CharacterId, Character> = {};
+			const faceStateRecord: Record<CharacterId, CharacterFaceState[]> = {};
 
 			for (const item of data ?? []) {
 				const { character_face_states, ...character } = item;
-				characterRecord[item.id] = character;
-				faceStateRecord[item.id] = character_face_states ?? [];
+				characterRecord[item.id as CharacterId] = character as Character;
+				faceStateRecord[item.id as CharacterId] = (character_face_states ?? []) as CharacterFaceState[];
 			}
 
 			store.set({
@@ -127,26 +130,26 @@ function createCharacterStore() {
 					scenario_id: currentScenarioId,
 				})
 				.select('*')
-				.single();
+				.single<Character>();
 
 			if (error) throw error;
 
 			store.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = data;
+					draft.data[data.id as CharacterId] = data;
 				})
 			);
 
 			faceStateStore.update((state) =>
 				produce(state, (draft) => {
-					draft.data[data.id] = [];
+					draft.data[data.id as CharacterId] = [];
 				})
 			);
 
 			return data;
 		},
 
-		async update(id: string, character: CharacterUpdate) {
+		async update(id: CharacterId, character: CharacterUpdate) {
 			const { error } = await supabase.from('characters').update(character).eq('id', id);
 
 			if (error) throw error;
@@ -160,7 +163,7 @@ function createCharacterStore() {
 			);
 		},
 
-		async remove(id: string) {
+		async remove(id: CharacterId) {
 			const { error } = await supabase.from('characters').delete().eq('id', id);
 
 			if (error) throw error;
@@ -183,7 +186,7 @@ function createCharacterStore() {
 		},
 
 		async createCharacterFaceState(
-			characterId: string,
+			characterId: CharacterId,
 			state: Omit<CharacterFaceStateInsert, 'character_id'>
 		) {
 			const { data, error } = await supabase
@@ -193,7 +196,7 @@ function createCharacterStore() {
 					character_id: characterId,
 				})
 				.select()
-				.single();
+				.single<CharacterFaceState>();
 
 			if (error) throw error;
 
@@ -211,8 +214,8 @@ function createCharacterStore() {
 		},
 
 		async updateCharacterFaceState(
-			stateId: string,
-			characterId: string,
+			stateId: CharacterFaceStateId,
+			characterId: CharacterId,
 			updates: CharacterFaceStateUpdate
 		) {
 			const { error } = await supabase
@@ -235,7 +238,7 @@ function createCharacterStore() {
 			);
 		},
 
-		async removeCharacterFaceState(stateId: string, characterId: string) {
+		async removeCharacterFaceState(stateId: CharacterFaceStateId, characterId: CharacterId) {
 			const { error } = await supabase.from('character_face_states').delete().eq('id', stateId);
 
 			if (error) throw error;
@@ -252,8 +255,8 @@ function createCharacterStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<Character>>,
-		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterFaceState[]>>,
+		store: store as Readable<RecordFetchState<CharacterId, Character>>,
+		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterId, CharacterFaceState[]>>,
 		dialogStore: dialogStore as Readable<CharacterDialogState>,
 		fetch,
 		openDialog,

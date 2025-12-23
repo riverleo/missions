@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import type { ItemBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';

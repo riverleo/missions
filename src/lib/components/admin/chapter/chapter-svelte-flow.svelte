@@ -11,7 +11,7 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import type { Chapter } from '$lib/types';
+	import type { Chapter, ChapterId } from '$lib/types';
 	import ChapterNode from './chapter-node.svelte';
 	import ChapterActionPanel from './chapter-action-panel.svelte';
 	import ChapterNodePanel from './chapter-node-panel.svelte';
@@ -65,7 +65,7 @@
 			const targetChapter = chapters.find((c: Chapter) => c.id === connection.target);
 			if (!targetChapter) return;
 
-			await admin.update(connection.target, {
+			await admin.update(connection.target as ChapterId, {
 				parent_chapter_id: connection.source,
 			});
 
@@ -97,14 +97,14 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				await admin.update(edge.target, {
+				await admin.update(edge.target as ChapterId, {
 					parent_chapter_id: null,
 				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				await admin.remove(node.id);
+				await admin.remove(node.id as ChapterId);
 			}
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
@@ -172,7 +172,7 @@
 
 		// 노드 생성
 		sortedChapters.forEach((chapter) => {
-			const treeNode = treeMap.get(chapter.id);
+			const treeNode = treeMap.get(chapter.id as ChapterId);
 			newNodes.push({
 				id: chapter.id,
 				type: 'chapter',

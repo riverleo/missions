@@ -28,9 +28,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useNeedBehavior();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { needStore } = useNeed();
 
 	const open = $derived($dialogStore?.type === 'create');

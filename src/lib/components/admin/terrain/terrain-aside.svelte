@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { TerrainId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -59,7 +60,7 @@
 							size="icon"
 							disabled={!currentTerrainId}
 							onclick={() =>
-								currentTerrainId && openDialog({ type: 'delete', terrainId: currentTerrainId })}
+								currentTerrainId && openDialog({ type: 'delete', terrainId: currentTerrainId as TerrainId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

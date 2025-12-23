@@ -69,13 +69,13 @@ function createCurrentUserStore() {
 					.order('created_at', { ascending: true }),
 			]);
 
-			const playerList = players ?? [];
+			const playerList = (players ?? []) as Player[];
 
 			store.set({
 				status: 'success',
 				data: {
 					user: user,
-					role: role ?? undefined,
+					role: (role ?? undefined) as UserRole | undefined,
 					players: playerList,
 					currentPlayer: playerList[0],
 				},
@@ -95,7 +95,7 @@ function createCurrentUserStore() {
 			.from('players')
 			.insert({ ...player })
 			.select()
-			.single();
+			.single<Player>();
 
 		if (error) throw error;
 

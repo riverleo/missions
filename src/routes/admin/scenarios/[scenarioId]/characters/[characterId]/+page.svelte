@@ -3,9 +3,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterPanel from '$lib/components/admin/character/character-action-panel.svelte';
 	import CharacterFaceStateItemGroup from '$lib/components/admin/character/character-face-state-item-group.svelte';
+	import type { CharacterId } from '$lib/types';
 
 	const { store } = useCharacter();
-	const characterId = $derived(page.params.characterId);
+	const characterId = $derived(page.params.characterId as CharacterId);
 	const character = $derived(characterId ? $store.data[characterId] : undefined);
 </script>
 

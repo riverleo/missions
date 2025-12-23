@@ -5,6 +5,9 @@
 		NeedBehaviorActionType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
+		CharacterId,
+		BuildingId,
+		ItemId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -59,7 +62,7 @@
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId] : characters[0]
+		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
@@ -154,7 +157,7 @@
 
 	function onSelectBuilding(buildingId: string) {
 		if (changes) {
-			changes.building_id = buildingId;
+			changes.building_id = buildingId as BuildingId;
 			changes.character_id = null;
 			changes.item_id = null;
 		}
@@ -162,7 +165,7 @@
 
 	function onSelectCharacter(characterId: string) {
 		if (changes) {
-			changes.character_id = characterId;
+			changes.character_id = characterId as CharacterId;
 			changes.building_id = null;
 			changes.item_id = null;
 		}
@@ -170,7 +173,7 @@
 
 	function onSelectItem(itemId: string) {
 		if (changes) {
-			changes.item_id = itemId;
+			changes.item_id = itemId as ItemId;
 			changes.building_id = null;
 			changes.character_id = null;
 		}

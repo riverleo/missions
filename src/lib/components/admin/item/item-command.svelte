@@ -19,9 +19,10 @@
 	import { useItem } from '$lib/hooks/use-item';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
+	import type { ScenarioId } from '$lib/types';
 
 	const { store, openDialog } = useItem();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentItemId = $derived(page.params.itemId);
 
 	const items = $derived(alphabetical(Object.values($store.data), (i) => i.name));

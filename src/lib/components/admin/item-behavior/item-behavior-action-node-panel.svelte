@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId, CharacterId } from '$lib/types';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		ItemBehaviorAction,
@@ -58,7 +59,7 @@
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId] : characters[0]
+		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import type { ItemBehavior } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';

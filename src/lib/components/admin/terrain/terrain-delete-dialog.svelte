@@ -12,9 +12,10 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useTerrain();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'delete');
 	const terrainId = $derived($dialogStore?.type === 'delete' ? $dialogStore.terrainId : undefined);

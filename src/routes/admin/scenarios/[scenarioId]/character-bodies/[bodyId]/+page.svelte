@@ -3,9 +3,10 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import CharacterBodyPanel from '$lib/components/admin/character-body/character-body-action-panel.svelte';
 	import CharacterBodyStateItemGroup from '$lib/components/admin/character-body/character-body-state-item-group.svelte';
+	import type { CharacterBodyId } from '$lib/types';
 
 	const { store } = useCharacterBody();
-	const bodyId = $derived(page.params.bodyId);
+	const bodyId = $derived(page.params.bodyId as CharacterBodyId);
 	const body = $derived(bodyId ? $store.data[bodyId] : undefined);
 </script>
 

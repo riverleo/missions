@@ -23,9 +23,10 @@
 	import { alphabetical } from 'radash';
 	import type { BuildingBehaviorType } from '$lib/types';
 	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useBuildingBehavior();
-	const scenarioId = $derived(page.params.scenarioId);
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { store: buildingStore } = useBuilding();
 
 	const open = $derived($dialogStore?.type === 'create');
