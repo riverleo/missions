@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
-	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
-	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
+	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
@@ -31,17 +30,23 @@
 	let containerRef = $state<HTMLElement | undefined>(undefined);
 	let mouseX = $state(0);
 	let mouseY = $state(0);
-	let characterAnimator = $state<SpriteAnimator | undefined>(undefined);
+
+	// 컨테이너 기준 마우스 좌표 계산
+	const mouseContainerPos = $derived(() => {
+		if (!containerRef) return { x: 0, y: 0 };
+		const rect = containerRef.getBoundingClientRect();
+		return {
+			x: mouseX - rect.left,
+			y: mouseY - rect.top,
+		};
+	});
 
 	// 마우스의 월드 좌표 계산
 	const mouseWorldPos = $derived(() => {
-		if (!containerRef) return { x: 0, y: 0 };
-		const rect = containerRef.getBoundingClientRect();
-		const containerX = mouseX - rect.left;
-		const containerY = mouseY - rect.top;
+		const containerPos = mouseContainerPos();
 		return {
-			x: containerX / world.camera.zoom + world.camera.x,
-			y: containerY / world.camera.zoom + world.camera.y,
+			x: containerPos.x / world.camera.zoom + world.camera.x,
+			y: containerPos.y / world.camera.zoom + world.camera.y,
 		};
 	});
 
@@ -67,43 +72,15 @@
 		}
 	});
 
-	// 선택된 캐릭터의 idle 상태 가져오기 (body에서)
-	const selectedCharacterIdleState = $derived(() => {
-		if ($store.selectedCharacter?.character_body) {
-			return $store.selectedCharacter.character_body.character_body_states.find(
-				(s) => s.type === 'idle'
-			);
-		}
-		return undefined;
-	});
+	// 선택된 캐릭터의 body idle 상태 가져오기
+	const selectedCharacterBodyState = $derived(
+		$store.selectedCharacter?.character_body?.character_body_states.find((s) => s.type === 'idle')
+	);
 
-	// 캐릭터 idle 상태가 변경되면 animator 생성
-	$effect(() => {
-		const idleState = selectedCharacterIdleState();
-		const atlasName = idleState?.atlas_name;
-
-		if (!atlasName) {
-			characterAnimator?.stop();
-			characterAnimator = undefined;
-			return;
-		}
-
-		SpriteAnimator.create(atlasName).then((newAnimator) => {
-			characterAnimator?.stop();
-			newAnimator.init({
-				name: 'idle',
-				from: idleState?.frame_from ?? undefined,
-				to: idleState?.frame_to ?? undefined,
-				fps: idleState?.fps ?? undefined,
-			});
-			newAnimator.play({ name: 'idle', loop: idleState?.loop ?? 'loop' });
-			characterAnimator = newAnimator;
-		});
-
-		return () => {
-			characterAnimator?.stop();
-		};
-	});
+	// 선택된 캐릭터의 face neutral 상태 가져오기
+	const selectedCharacterFaceState = $derived(
+		$store.selectedCharacter?.character_face_states?.find((s) => s.type === 'neutral')
+	);
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {
@@ -176,12 +153,17 @@
 		onclick={onclickCharacterOverlay}
 	></button>
 	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-	{#if isCommandPressed && characterAnimator}
+	{#if isCommandPressed && selectedCharacterBodyState}
+		{@const pos = mouseContainerPos()}
 		<div
-			class="pointer-events-none fixed -translate-x-1/2 -translate-y-1/2 opacity-70"
-			style="left: {mouseX}px; top: {mouseY}px;"
+			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
+			style="left: {pos.x}px; top: {pos.y}px;"
 		>
-			<SpriteAnimatorRenderer animator={characterAnimator} resolution={2} />
+			<CharacterSpriteAnimator
+				bodyState={selectedCharacterBodyState}
+				faceState={selectedCharacterFaceState}
+				resolution={2}
+			/>
 		</div>
 	{/if}
 {/if}

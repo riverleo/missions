@@ -60,11 +60,7 @@
 			</Button>
 		{/snippet}
 	</PopoverTrigger>
-	<PopoverContent
-		class="flex h-[420px] w-[1140px] gap-0 p-0"
-		align="end"
-		onInteractOutside={(e) => e.preventDefault()}
-	>
+	<PopoverContent class="flex h-[420px] w-[1140px] gap-0 p-0" align="end">
 		<!-- 좌측: 커맨드 목록 -->
 		<div class="w-80 shrink-0 border-r">
 			<TestWorldCommand />

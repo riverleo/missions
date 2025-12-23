@@ -5,7 +5,7 @@
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import WorldPlanningPlacementRect from '$lib/components/app/world/world-planning-placement-rect.svelte';
+	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { TILE_SIZE } from '$lib/components/app/world/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
 
@@ -51,7 +51,7 @@
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && building}
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				<WorldPlanningPlacementRect cols={building.tile_cols} rows={building.tile_rows} />
+				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
 			</div>
 		{/if}
 	{/snippet}
