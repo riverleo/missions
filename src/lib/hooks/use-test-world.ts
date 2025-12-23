@@ -16,6 +16,7 @@ interface TestWorldState {
 	cameraY: number;
 	cameraZoom: number;
 	debug: boolean;
+	eraser: boolean;
 }
 
 const defaultState: TestWorldState = {
@@ -28,6 +29,7 @@ const defaultState: TestWorldState = {
 	cameraY: 0,
 	cameraZoom: 1,
 	debug: false,
+	eraser: false,
 };
 
 // localStorage에 저장할 필드만 정의
@@ -108,7 +110,8 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			selectedCharacter: state.selectedCharacter?.id === character.id ? undefined : character,
-			selectedBuilding: undefined, // 캐릭터 선택 시 건물 선택 해제
+			selectedBuilding: undefined,
+			eraser: false,
 		}));
 	}
 
@@ -116,12 +119,22 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			selectedBuilding: state.selectedBuilding?.id === building.id ? undefined : building,
-			selectedCharacter: undefined, // 건물 선택 시 캐릭터 선택 해제
+			selectedCharacter: undefined,
+			eraser: false,
 		}));
 	}
 
 	function setDebug(debug: boolean) {
 		store.update((state) => ({ ...state, debug }));
+	}
+
+	function setEraser(eraser: boolean) {
+		store.update((state) => ({
+			...state,
+			eraser,
+			selectedCharacter: undefined,
+			selectedBuilding: undefined,
+		}));
 	}
 
 	function setCamera(x: number, y: number, zoom: number) {
@@ -138,7 +151,6 @@ function createTestWorldStore() {
 			x,
 			y,
 			created_at: new Date().toISOString(),
-			character,
 		};
 		store.update((state) => ({
 			...state,
@@ -160,7 +172,6 @@ function createTestWorldStore() {
 			tile_x,
 			tile_y,
 			created_at: new Date().toISOString(),
-			building,
 		};
 		store.update((state) => ({
 			...state,
@@ -227,6 +238,7 @@ function createTestWorldStore() {
 		selectCharacter,
 		selectBuilding,
 		setDebug,
+		setEraser,
 		setCamera,
 		placeCharacter,
 		placeBuilding,

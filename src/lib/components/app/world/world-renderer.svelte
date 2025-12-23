@@ -30,23 +30,13 @@
 		camera.applyZoom(e.deltaY, e.clientX, e.clientY);
 	}
 
-	// characters/buildings prop을 world에 동기화 (id가 변경되었을 때만)
-	let prevCharacterIds = '';
+	// characters/buildings prop을 world에 동기화
 	$effect(() => {
-		const ids = characters.map((c) => c.id).join(',');
-		if (ids !== prevCharacterIds) {
-			prevCharacterIds = ids;
-			world.characters = Object.fromEntries(characters.map((c) => [c.id, c]));
-		}
+		world.characters = Object.fromEntries(characters.map((c) => [c.id, c]));
 	});
 
-	let prevBuildingIds = '';
 	$effect(() => {
-		const ids = buildings.map((b) => b.id).join(',');
-		if (ids !== prevBuildingIds) {
-			prevBuildingIds = ids;
-			world.buildings = Object.fromEntries(buildings.map((b) => [b.id, b]));
-		}
+		world.buildings = Object.fromEntries(buildings.map((b) => [b.id, b]));
 	});
 
 	onMount(() => world.mount(container));

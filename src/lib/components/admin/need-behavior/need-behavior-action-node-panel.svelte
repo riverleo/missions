@@ -31,6 +31,7 @@
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useItem } from '$lib/hooks/use-item';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createActionNodeId } from '$lib/utils/flow-id';
@@ -46,7 +47,8 @@
 
 	const { needBehaviorActionStore, admin } = useNeedBehavior();
 	const { store: buildingStore } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { store: characterStore, faceStateStore } = useCharacter();
+	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: itemStore } = useItem();
 	const flowNodes = useNodes();
 
@@ -105,17 +107,20 @@
 
 	// 선택된 바디/얼굴 상태로 미리보기
 	// 바디가 자동일 때는 idle로 미리보기
+	const previewCharacterBody = $derived(
+		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id] : undefined
+	);
+	const previewBodyStates = $derived(
+		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
+	);
 	const previewBodyState = $derived(
-		previewCharacter?.character_body
-			? previewCharacter.character_body.character_body_states.find(
-					(s) => s.type === (changes?.character_body_state_type ?? 'idle')
-				)
-			: undefined
+		previewBodyStates.find((s) => s.type === (changes?.character_body_state_type ?? 'idle'))
+	);
+	const previewFaceStates = $derived(
+		previewCharacter ? ($faceStateStore.data[previewCharacter.id] ?? []) : []
 	);
 	const previewFaceState = $derived(
-		previewCharacter?.character_face_states.find(
-			(s) => s.type === changes?.character_face_state_type
-		)
+		previewFaceStates.find((s) => s.type === changes?.character_face_state_type)
 	);
 
 	function onPreviewCharacterChange(value: string | undefined) {

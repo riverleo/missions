@@ -5,6 +5,7 @@ import type {
 	Character,
 	CharacterInsert,
 	CharacterUpdate,
+	CharacterFaceState,
 	CharacterFaceStateInsert,
 	CharacterFaceStateUpdate,
 	CharacterBodyStateType,
@@ -23,6 +24,12 @@ function createCharacterStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<RecordFetchState<Character>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// character_id를 키로, 해당 캐릭터의 face states 배열을 값으로
+	const faceStateStore = writable<RecordFetchState<CharacterFaceState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -48,7 +55,6 @@ function createCharacterStore() {
 				.select(
 					`
 					*,
-					character_body:character_bodies(*, character_body_states(*)),
 					character_face_states(*)
 				`
 				)
@@ -57,19 +63,34 @@ function createCharacterStore() {
 
 			if (error) throw error;
 
-			const record: Record<string, Character> = {};
+			const characterRecord: Record<string, Character> = {};
+			const faceStateRecord: Record<string, CharacterFaceState[]> = {};
+
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				const { character_face_states, ...character } = item;
+				characterRecord[item.id] = character;
+				faceStateRecord[item.id] = character_face_states ?? [];
 			}
 
 			store.set({
 				status: 'success',
-				data: record,
+				data: characterRecord,
+				error: undefined,
+			});
+
+			faceStateStore.set({
+				status: 'success',
+				data: faceStateRecord,
 				error: undefined,
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			faceStateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -105,13 +126,7 @@ function createCharacterStore() {
 					...character,
 					scenario_id: currentScenarioId,
 				})
-				.select(
-					`
-					*,
-					character_body:character_bodies(*, character_body_states(*)),
-					character_face_states(*)
-				`
-				)
+				.select('*')
 				.single();
 
 			if (error) throw error;
@@ -119,6 +134,12 @@ function createCharacterStore() {
 			store.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id] = data;
+				})
+			);
+
+			faceStateStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id] = [];
 				})
 			);
 
@@ -151,6 +172,14 @@ function createCharacterStore() {
 					}
 				})
 			);
+
+			faceStateStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
 		},
 
 		async createCharacterFaceState(
@@ -168,11 +197,12 @@ function createCharacterStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			faceStateStore.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						character.character_face_states.push(data);
+					if (draft.data[characterId]) {
+						draft.data[characterId].push(data);
+					} else {
+						draft.data[characterId] = [data];
 					}
 				})
 			);
@@ -192,11 +222,11 @@ function createCharacterStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			faceStateStore.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						const state = character.character_face_states.find((cs) => cs.id === stateId);
+					const states = draft.data[characterId];
+					if (states) {
+						const state = states.find((cs) => cs.id === stateId);
 						if (state) {
 							Object.assign(state, updates);
 						}
@@ -210,13 +240,11 @@ function createCharacterStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			faceStateStore.update((s) =>
 				produce(s, (draft) => {
-					const character = draft.data[characterId];
-					if (character) {
-						character.character_face_states = character.character_face_states.filter(
-							(cs) => cs.id !== stateId
-						);
+					const states = draft.data[characterId];
+					if (states) {
+						draft.data[characterId] = states.filter((cs) => cs.id !== stateId);
 					}
 				})
 			);
@@ -225,6 +253,7 @@ function createCharacterStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<Character>>,
+		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterFaceState[]>>,
 		dialogStore: dialogStore as Readable<CharacterDialogState>,
 		fetch,
 		openDialog,

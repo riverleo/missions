@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
 
-	const { store, placeCharacter, placeBuilding, syncPositions } = useTestWorld();
+	const { store, placeCharacter, placeBuilding, removeCharacter, removeBuilding, syncPositions } =
+		useTestWorld();
 	const world = useWorld();
+	const { store: characterStore, faceStateStore } = useCharacter();
+	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 
 	// 1초마다 body 위치를 testWorld 스토어에 동기화
 	$effect(() => {
@@ -80,15 +85,23 @@
 		}
 	});
 
-	// 선택된 캐릭터의 body idle 상태 가져오기
-	const selectedCharacterBodyState = $derived(
-		$store.selectedCharacter?.character_body?.character_body_states.find((s) => s.type === 'idle')
+	// 선택된 캐릭터 -> 바디 -> 바디 상태 조회
+	const selectedCharacter = $derived(
+		$store.selectedCharacter ? $characterStore.data[$store.selectedCharacter.id] : undefined
 	);
+	const selectedCharacterBody = $derived(
+		selectedCharacter ? $characterBodyStore.data[selectedCharacter.body_id] : undefined
+	);
+	const selectedBodyStates = $derived(
+		selectedCharacterBody ? ($bodyStateStore.data[selectedCharacterBody.id] ?? []) : []
+	);
+	const selectedCharacterBodyState = $derived(selectedBodyStates.find((s) => s.type === 'idle'));
 
-	// 선택된 캐릭터의 face neutral 상태 가져오기
-	const selectedCharacterFaceState = $derived(
-		$store.selectedCharacter?.character_face_states?.find((s) => s.type === 'neutral')
+	// 선택된 캐릭터 -> 얼굴 상태 조회
+	const selectedFaceStates = $derived(
+		selectedCharacter ? ($faceStateStore.data[selectedCharacter.id] ?? []) : []
 	);
+	const selectedCharacterFaceState = $derived(selectedFaceStates.find((s) => s.type === 'neutral'));
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {
@@ -109,6 +122,34 @@
 		const pos = mouseWorldPos();
 		if ($store.selectedCharacter) {
 			placeCharacter($store.selectedCharacter, pos.x, pos.y);
+		}
+	}
+
+	function onclickEraserOverlay() {
+		const pos = mouseWorldPos();
+
+		// 클릭 위치에 있는 캐릭터 찾기
+		for (const [id, body] of Object.entries(world.characterBodies)) {
+			const dx = pos.x - body.position.x;
+			const dy = pos.y - body.position.y;
+			const halfWidth = body.size.width / 2;
+			const halfHeight = body.size.height / 2;
+			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
+				removeCharacter(id);
+				return;
+			}
+		}
+
+		// 클릭 위치에 있는 건물 찾기
+		for (const [id, body] of Object.entries(world.buildingBodies)) {
+			const dx = pos.x - body.position.x;
+			const dy = pos.y - body.position.y;
+			const halfWidth = body.size.width / 2;
+			const halfHeight = body.size.height / 2;
+			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
+				removeBuilding(id);
+				return;
+			}
 		}
 	}
 
@@ -140,6 +181,16 @@
 		};
 	});
 </script>
+
+<!-- 지우개 활성화 시 클릭 오버레이 -->
+{#if $store.eraser}
+	<button
+		type="button"
+		class="absolute inset-0 cursor-pointer bg-transparent"
+		aria-label="지우개"
+		onclick={onclickEraserOverlay}
+	></button>
+{/if}
 
 <!-- 건물 선택 시 클릭 오버레이 -->
 {#if $store.selectedBuilding}

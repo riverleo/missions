@@ -22,6 +22,7 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createItemBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import {
@@ -39,8 +40,9 @@
 	let { action, hasParent = false }: Props = $props();
 
 	const { itemBehaviorStore, itemBehaviorActionStore, admin } = useItemBehavior();
-	const { store: itemStore } = useItem();
-	const { store: characterStore } = useCharacter();
+	const { store: itemStore, stateStore: itemStateStore } = useItem();
+	const { store: characterStore, faceStateStore } = useCharacter();
+	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));
@@ -68,9 +70,8 @@
 		currentBehavior?.item_id ? $itemStore.data[currentBehavior.item_id] : undefined
 	);
 	// 아이템 상태
-	const previewItemState = $derived(
-		currentItem?.item_states.find((s) => s.type === changes?.item_state_type)
-	);
+	const itemStates = $derived(currentItem ? ($itemStateStore.data[currentItem.id] ?? []) : []);
+	const previewItemState = $derived(itemStates.find((s) => s.type === changes?.item_state_type));
 
 	const selectedItemStateLabel = $derived(
 		changes?.item_state_type ? getItemStateLabel(changes.item_state_type) : '상태 선택'
@@ -87,18 +88,21 @@
 	);
 
 	// 선택된 바디/얼굴 상태로 미리보기
+	const previewCharacterBody = $derived(
+		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id] : undefined
+	);
+	const previewBodyStates = $derived(
+		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
+	);
 	const previewBodyState = $derived(
-		previewCharacter?.character_body
-			? previewCharacter.character_body.character_body_states.find(
-					(s) => s.type === (changes?.character_body_state_type ?? 'idle')
-				)
-			: undefined
+		previewBodyStates.find((s) => s.type === (changes?.character_body_state_type ?? 'idle'))
+	);
+	const previewFaceStates = $derived(
+		previewCharacter ? ($faceStateStore.data[previewCharacter.id] ?? []) : []
 	);
 	const previewFaceState = $derived(
-		changes?.character_face_state_type && previewCharacter
-			? previewCharacter.character_face_states.find(
-					(s) => s.type === changes!.character_face_state_type
-				)
+		changes?.character_face_state_type
+			? previewFaceStates.find((s) => s.type === changes!.character_face_state_type)
 			: undefined
 	);
 

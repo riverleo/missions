@@ -5,6 +5,7 @@ import type {
 	Item,
 	ItemInsert,
 	ItemUpdate,
+	ItemState,
 	ItemStateInsert,
 	ItemStateUpdate,
 } from '$lib/types';
@@ -21,6 +22,12 @@ function createItemStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<RecordFetchState<Item>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// item_id를 키로, 해당 아이템의 states 배열을 값으로
+	const stateStore = writable<RecordFetchState<ItemState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -43,19 +50,34 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			const record: Record<string, Item> = {};
+			const itemRecord: Record<string, Item> = {};
+			const stateRecord: Record<string, ItemState[]> = {};
+
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				const { item_states, ...itemData } = item;
+				itemRecord[item.id] = itemData;
+				stateRecord[item.id] = item_states ?? [];
 			}
 
 			store.set({
 				status: 'success',
-				data: record,
+				data: itemRecord,
+				error: undefined,
+			});
+
+			stateStore.set({
+				status: 'success',
+				data: stateRecord,
 				error: undefined,
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			stateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -83,7 +105,7 @@ function createItemStore() {
 					...item,
 					scenario_id: currentScenarioId,
 				})
-				.select('*, item_states(*)')
+				.select('*')
 				.single();
 
 			if (error) throw error;
@@ -91,6 +113,12 @@ function createItemStore() {
 			store.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id] = data;
+				})
+			);
+
+			stateStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id] = [];
 				})
 			);
 
@@ -123,6 +151,14 @@ function createItemStore() {
 					}
 				})
 			);
+
+			stateStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
 		},
 
 		async createItemState(itemId: string, state: Omit<ItemStateInsert, 'item_id'>) {
@@ -137,11 +173,12 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const item = draft.data[itemId];
-					if (item) {
-						item.item_states.push(data);
+					if (draft.data[itemId]) {
+						draft.data[itemId].push(data);
+					} else {
+						draft.data[itemId] = [data];
 					}
 				})
 			);
@@ -154,11 +191,11 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const item = draft.data[itemId];
-					if (item) {
-						const state = item.item_states.find((is) => is.id === stateId);
+					const states = draft.data[itemId];
+					if (states) {
+						const state = states.find((is) => is.id === stateId);
 						if (state) {
 							Object.assign(state, updates);
 						}
@@ -172,11 +209,11 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const item = draft.data[itemId];
-					if (item) {
-						item.item_states = item.item_states.filter((is) => is.id !== stateId);
+					const states = draft.data[itemId];
+					if (states) {
+						draft.data[itemId] = states.filter((is) => is.id !== stateId);
 					}
 				})
 			);
@@ -185,6 +222,7 @@ function createItemStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<Item>>,
+		stateStore: stateStore as Readable<RecordFetchState<ItemState[]>>,
 		dialogStore: dialogStore as Readable<ItemDialogState>,
 		fetch,
 		openDialog,

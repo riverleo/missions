@@ -41,19 +41,9 @@
 		$store.selectedTerrain ? $terrainStore.data[$store.selectedTerrain.id] : undefined
 	);
 
-	// 배치된 캐릭터/건물의 데이터를 최신 원본 데이터로 교체
-	const characters = $derived(
-		$store.characters.map((wc) => ({
-			...wc,
-			character: $characterStore.data[wc.character_id] ?? wc.character,
-		}))
-	);
-	const buildings = $derived(
-		$store.buildings.map((wb) => ({
-			...wb,
-			building: $buildingStore.data[wb.building_id] ?? wb.building,
-		}))
-	);
+	// 배치된 캐릭터/건물 (WorldContext가 스토어에서 원본 데이터를 조회함)
+	const characters = $derived($store.characters);
+	const buildings = $derived($store.buildings);
 </script>
 
 <Popover bind:open>

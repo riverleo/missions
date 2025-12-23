@@ -5,6 +5,7 @@ import type {
 	Building,
 	BuildingInsert,
 	BuildingUpdate,
+	BuildingState,
 	BuildingStateInsert,
 	BuildingStateUpdate,
 } from '$lib/types';
@@ -21,6 +22,12 @@ function createBuildingStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<RecordFetchState<Building>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// building_id를 키로, 해당 빌딩의 states 배열을 값으로
+	const stateStore = writable<RecordFetchState<BuildingState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -47,19 +54,34 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			const record: Record<string, Building> = {};
+			const buildingRecord: Record<string, Building> = {};
+			const stateRecord: Record<string, BuildingState[]> = {};
+
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				const { building_states, ...building } = item;
+				buildingRecord[item.id] = building;
+				stateRecord[item.id] = building_states ?? [];
 			}
 
 			store.set({
 				status: 'success',
-				data: record,
+				data: buildingRecord,
+				error: undefined,
+			});
+
+			stateStore.set({
+				status: 'success',
+				data: stateRecord,
 				error: undefined,
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			stateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -93,7 +115,7 @@ function createBuildingStore() {
 					...building,
 					scenario_id: currentScenarioId,
 				})
-				.select('*, building_states(*)')
+				.select('*')
 				.single();
 
 			if (error) throw error;
@@ -101,6 +123,12 @@ function createBuildingStore() {
 			store.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id] = data;
+				})
+			);
+
+			stateStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id] = [];
 				})
 			);
 
@@ -133,6 +161,14 @@ function createBuildingStore() {
 					}
 				})
 			);
+
+			stateStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
 		},
 
 		async createBuildingState(buildingId: string, state: Omit<BuildingStateInsert, 'building_id'>) {
@@ -147,11 +183,12 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const building = draft.data[buildingId];
-					if (building) {
-						building.building_states.push(data);
+					if (draft.data[buildingId]) {
+						draft.data[buildingId].push(data);
+					} else {
+						draft.data[buildingId] = [data];
 					}
 				})
 			);
@@ -167,11 +204,11 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const building = draft.data[buildingId];
-					if (building) {
-						const state = building.building_states.find((bs) => bs.id === stateId);
+					const states = draft.data[buildingId];
+					if (states) {
+						const state = states.find((bs) => bs.id === stateId);
 						if (state) {
 							Object.assign(state, updates);
 						}
@@ -185,13 +222,11 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			stateStore.update((s) =>
 				produce(s, (draft) => {
-					const building = draft.data[buildingId];
-					if (building) {
-						building.building_states = building.building_states.filter(
-							(bs) => bs.id !== stateId
-						);
+					const states = draft.data[buildingId];
+					if (states) {
+						draft.data[buildingId] = states.filter((bs) => bs.id !== stateId);
 					}
 				})
 			);
@@ -200,6 +235,7 @@ function createBuildingStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<Building>>,
+		stateStore: stateStore as Readable<RecordFetchState<BuildingState[]>>,
 		dialogStore: dialogStore as Readable<BuildingDialogState>,
 		fetch,
 		openDialog,

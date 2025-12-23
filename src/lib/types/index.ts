@@ -36,7 +36,7 @@ export type Supabase = SupabaseClient<Database>;
 
 export interface ServerPayload {
 	supabase: Supabase;
-	user: User | undefined;
+	user?: User;
 }
 
 // Enums
@@ -115,10 +115,7 @@ export type CharacterBodyState = Tables<'character_body_states'>;
 export type CharacterBodyStateInsert = TablesInsert<'character_body_states'>;
 export type CharacterBodyStateUpdate = TablesUpdate<'character_body_states'>;
 
-type CharacterBodyRow = Tables<'character_bodies'>;
-export type CharacterBody = CharacterBodyRow & {
-	character_body_states: CharacterBodyState[];
-};
+export type CharacterBody = Tables<'character_bodies'>;
 export type CharacterBodyInsert = TablesInsert<'character_bodies'>;
 export type CharacterBodyUpdate = TablesUpdate<'character_bodies'>;
 
@@ -129,11 +126,7 @@ export type CharacterFaceStateInsert = TablesInsert<'character_face_states'>;
 export type CharacterFaceStateUpdate = TablesUpdate<'character_face_states'>;
 
 // Character types
-type CharacterRow = Tables<'characters'>;
-export type Character = CharacterRow & {
-	character_body: CharacterBody;
-	character_face_states: CharacterFaceState[];
-};
+export type Character = Tables<'characters'>;
 export type CharacterInsert = TablesInsert<'characters'>;
 export type CharacterUpdate = TablesUpdate<'characters'>;
 
@@ -143,10 +136,7 @@ export type WorldInsert = TablesInsert<'worlds'>;
 export type WorldUpdate = TablesUpdate<'worlds'>;
 
 // WorldCharacter types
-type WorldCharacterRow = Tables<'world_characters'>;
-export type WorldCharacter = WorldCharacterRow & {
-	character: Character;
-};
+export type WorldCharacter = Tables<'world_characters'>;
 export type WorldCharacterInsert = TablesInsert<'world_characters'>;
 export type WorldCharacterUpdate = TablesUpdate<'world_characters'>;
 
@@ -157,18 +147,12 @@ export type BuildingStateInsert = TablesInsert<'building_states'>;
 export type BuildingStateUpdate = TablesUpdate<'building_states'>;
 
 // Building types
-type BuildingRow = Tables<'buildings'>;
-export type Building = BuildingRow & {
-	building_states: BuildingState[];
-};
+export type Building = Tables<'buildings'>;
 export type BuildingInsert = TablesInsert<'buildings'>;
 export type BuildingUpdate = TablesUpdate<'buildings'>;
 
 // WorldBuilding types
-type WorldBuildingRow = Tables<'world_buildings'>;
-export type WorldBuilding = WorldBuildingRow & {
-	building: Building;
-};
+export type WorldBuilding = Tables<'world_buildings'>;
 export type WorldBuildingInsert = TablesInsert<'world_buildings'>;
 export type WorldBuildingUpdate = TablesUpdate<'world_buildings'>;
 
@@ -221,18 +205,12 @@ export type ItemStateInsert = TablesInsert<'item_states'>;
 export type ItemStateUpdate = TablesUpdate<'item_states'>;
 
 // Item types
-type ItemRow = Tables<'items'>;
-export type Item = ItemRow & {
-	item_states: ItemState[];
-};
+export type Item = Tables<'items'>;
 export type ItemInsert = TablesInsert<'items'>;
 export type ItemUpdate = TablesUpdate<'items'>;
 
 // WorldItem types
-type WorldItemRow = Tables<'world_items'>;
-export type WorldItem = WorldItemRow & {
-	item: Item;
-};
+export type WorldItem = Tables<'world_items'>;
 export type WorldItemInsert = TablesInsert<'world_items'>;
 export type WorldItemUpdate = TablesUpdate<'world_items'>;
 

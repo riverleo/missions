@@ -5,6 +5,7 @@
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import {
 		InputGroup,
@@ -22,17 +23,18 @@
 
 	let { characterId, type }: Props = $props();
 
-	const { store, admin } = useCharacter();
+	const { store, faceStateStore, admin } = useCharacter();
+	const { bodyStateStore } = useCharacterBody();
 
 	const character = $derived($store.data[characterId]);
-	const faceState = $derived(character?.character_face_states.find((s) => s.type === type));
+	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
+	const faceState = $derived(faceStates.find((s) => s.type === type));
 
 	// 선택된 바디 상태 가져오기
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-	const previewBodyState = $derived(
-		character?.character_body?.character_body_states.find((s) => s.type === previewBodyStateType)
-	);
+	const bodyStates = $derived(character ? ($bodyStateStore.data[character.body_id] ?? []) : []);
+	const previewBodyState = $derived(bodyStates.find((s) => s.type === previewBodyStateType));
 
 	let offsetX = $state('');
 	let offsetY = $state('');

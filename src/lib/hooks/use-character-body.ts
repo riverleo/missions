@@ -5,6 +5,7 @@ import type {
 	CharacterBody,
 	CharacterBodyInsert,
 	CharacterBodyUpdate,
+	CharacterBodyState,
 	CharacterBodyStateInsert,
 	CharacterBodyStateUpdate,
 } from '$lib/types';
@@ -21,6 +22,12 @@ function createCharacterBodyStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<RecordFetchState<CharacterBody>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// body_id를 키로, 해당 바디의 states 배열을 값으로
+	const bodyStateStore = writable<RecordFetchState<CharacterBodyState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -47,19 +54,34 @@ function createCharacterBodyStore() {
 
 			if (error) throw error;
 
-			const record: Record<string, CharacterBody> = {};
+			const bodyRecord: Record<string, CharacterBody> = {};
+			const stateRecord: Record<string, CharacterBodyState[]> = {};
+
 			for (const item of data ?? []) {
-				record[item.id] = item;
+				const { character_body_states, ...body } = item;
+				bodyRecord[item.id] = body;
+				stateRecord[item.id] = character_body_states ?? [];
 			}
 
 			store.set({
 				status: 'success',
-				data: record,
+				data: bodyRecord,
+				error: undefined,
+			});
+
+			bodyStateStore.set({
+				status: 'success',
+				data: stateRecord,
 				error: undefined,
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			bodyStateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -93,7 +115,7 @@ function createCharacterBodyStore() {
 					...body,
 					scenario_id: currentScenarioId,
 				})
-				.select('*, character_body_states(*)')
+				.select('*')
 				.single();
 
 			if (error) throw error;
@@ -101,6 +123,12 @@ function createCharacterBodyStore() {
 			store.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id] = data;
+				})
+			);
+
+			bodyStateStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id] = [];
 				})
 			);
 
@@ -133,6 +161,14 @@ function createCharacterBodyStore() {
 					}
 				})
 			);
+
+			bodyStateStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
 		},
 
 		async createCharacterBodyState(
@@ -150,11 +186,12 @@ function createCharacterBodyStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			bodyStateStore.update((s) =>
 				produce(s, (draft) => {
-					const body = draft.data[bodyId];
-					if (body) {
-						body.character_body_states.push(data);
+					if (draft.data[bodyId]) {
+						draft.data[bodyId].push(data);
+					} else {
+						draft.data[bodyId] = [data];
 					}
 				})
 			);
@@ -174,11 +211,11 @@ function createCharacterBodyStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			bodyStateStore.update((s) =>
 				produce(s, (draft) => {
-					const body = draft.data[bodyId];
-					if (body) {
-						const state = body.character_body_states.find((cs) => cs.id === stateId);
+					const states = draft.data[bodyId];
+					if (states) {
+						const state = states.find((cs) => cs.id === stateId);
 						if (state) {
 							Object.assign(state, updates);
 						}
@@ -192,13 +229,11 @@ function createCharacterBodyStore() {
 
 			if (error) throw error;
 
-			store.update((s) =>
+			bodyStateStore.update((s) =>
 				produce(s, (draft) => {
-					const body = draft.data[bodyId];
-					if (body) {
-						body.character_body_states = body.character_body_states.filter(
-							(cs) => cs.id !== stateId
-						);
+					const states = draft.data[bodyId];
+					if (states) {
+						draft.data[bodyId] = states.filter((cs) => cs.id !== stateId);
 					}
 				})
 			);
@@ -207,6 +242,7 @@ function createCharacterBodyStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<CharacterBody>>,
+		bodyStateStore: bodyStateStore as Readable<RecordFetchState<CharacterBodyState[]>>,
 		dialogStore: dialogStore as Readable<CharacterBodyDialogState>,
 		fetch,
 		openDialog,

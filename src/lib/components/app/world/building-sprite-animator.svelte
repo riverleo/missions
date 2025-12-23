@@ -3,6 +3,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
 		worldBuilding: WorldBuilding;
@@ -14,13 +15,14 @@
 	let { worldBuilding, x, y, angle = 0 }: Props = $props();
 
 	const world = useWorld();
+	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
-	// idle 상태의 건물 스프라이트 가져오기
-	const idleState = $derived(
-		worldBuilding.building.building_states.find((s) => s.type === 'idle')
-	);
+	// 건물 -> 건물 상태 조회
+	const building = $derived($buildingStore.data[worldBuilding.building_id]);
+	const buildingStates = $derived(building ? ($buildingStateStore.data[building.id] ?? []) : []);
+	const idleState = $derived(buildingStates.find((s) => s.type === 'idle'));
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
 	const left = $derived(`${(x / world.terrainBody.width) * 100}%`);

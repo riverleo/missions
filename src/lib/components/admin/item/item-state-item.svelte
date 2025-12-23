@@ -13,10 +13,11 @@
 
 	let { itemId, type }: Props = $props();
 
-	const { store, admin } = useItem();
+	const { store, stateStore, admin } = useItem();
 
 	const item = $derived($store.data[itemId]);
-	const itemState = $derived(item?.item_states.find((s) => s.type === type));
+	const itemStates = $derived($stateStore.data[itemId] ?? []);
+	const itemState = $derived(itemStates.find((s) => s.type === type));
 
 	async function onchange(change: SpriteStateChange) {
 		if (itemState) {

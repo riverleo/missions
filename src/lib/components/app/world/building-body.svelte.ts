@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldBuilding } from '$lib/types';
+import type { WorldBuilding, Building } from '$lib/types';
 import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
@@ -24,12 +24,12 @@ export class BuildingBody {
 
 	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
 
-	constructor(worldBuilding: WorldBuilding, debug: boolean) {
+	constructor(worldBuilding: WorldBuilding, building: Building, debug: boolean) {
 		this.id = worldBuilding.id;
 
 		// 타일 기반 크기 계산
-		const width = worldBuilding.building.tile_cols * TILE_SIZE;
-		const height = worldBuilding.building.tile_rows * TILE_SIZE;
+		const width = building.tile_cols * TILE_SIZE;
+		const height = building.tile_rows * TILE_SIZE;
 		this.size = { width, height };
 
 		// 타일 좌표를 픽셀 좌표로 변환 (중앙 기준)

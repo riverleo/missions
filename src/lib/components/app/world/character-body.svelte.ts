@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldCharacter } from '$lib/types';
+import type { WorldCharacter, CharacterBody as CharacterBodyType } from '$lib/types';
 import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
@@ -40,11 +40,11 @@ export class CharacterBody {
 
 	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
 
-	constructor(worldCharacter: WorldCharacter, debug: boolean) {
+	constructor(worldCharacter: WorldCharacter, characterBody: CharacterBodyType, debug: boolean) {
 		this.id = worldCharacter.id;
 		this.size = {
-			width: worldCharacter.character.character_body.width,
-			height: worldCharacter.character.character_body.height,
+			width: characterBody.width,
+			height: characterBody.height,
 		};
 
 		// 타원형 바디 생성

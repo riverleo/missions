@@ -1,14 +1,23 @@
 import Matter from 'matter-js';
-import type { Supabase, Terrain, WorldCharacter, WorldBuilding, Building } from '$lib/types';
+import { get } from 'svelte/store';
+import type {
+	Supabase,
+	Terrain,
+	WorldCharacter,
+	WorldBuilding,
+	Building,
+} from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
 import { WorldEvent } from './world-event.svelte';
 import { TerrainBody } from './terrain-body.svelte';
 import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
-import { TILE_SIZE } from './constants';
 import { Pathfinder } from './pathfinder';
 import { getBuildingOccupiedCells, getOverlappingCells, tileToCenterPixel, type TileCell } from './tiles';
+import { useBuilding } from '$lib/hooks/use-building';
+import { useCharacter } from '$lib/hooks/use-character';
+import { useCharacterBody } from '$lib/hooks/use-character-body';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
 
@@ -38,16 +47,20 @@ export class WorldPlanning {
 		const placementCells = getBuildingOccupiedCells(x, y, building.tile_cols, building.tile_rows);
 
 		// 기존 건물들이 차지하는 모든 셀 수집
+		const buildingStore = get(useBuilding().store).data;
 		const existingCells: TileCell[] = [];
 		for (const worldBuilding of Object.values(this.worldContext.buildings)) {
+			const buildingData = buildingStore[worldBuilding.building_id];
+			if (!buildingData) continue;
+
 			// tile_x, tile_y는 타일 인덱스이므로 픽셀 좌표로 변환
 			const centerX = tileToCenterPixel(worldBuilding.tile_x);
 			const centerY = tileToCenterPixel(worldBuilding.tile_y);
 			const cells = getBuildingOccupiedCells(
 				centerX,
 				centerY,
-				worldBuilding.building.tile_cols,
-				worldBuilding.building.tile_rows
+				buildingData.tile_cols,
+				buildingData.tile_rows
 			);
 			existingCells.push(...cells);
 		}
@@ -269,12 +282,20 @@ export class WorldContext {
 		let changed = false;
 
 		// 새로 추가된 캐릭터
-		for (const char of Object.values(characters)) {
-			if (!this.characterBodies[char.id]) {
-				const characterBody = new CharacterBody(char, this.debug);
-				characterBody.addToWorld(this.engine.world);
-				this.characterBodies[char.id] = characterBody;
-				changed = true;
+		const characterStore = get(useCharacter().store).data;
+		const characterBodyStore = get(useCharacterBody().store).data;
+		for (const worldCharacter of Object.values(characters)) {
+			if (!this.characterBodies[worldCharacter.id]) {
+				// worldCharacter.character_id -> character.body_id -> characterBody
+				const character = characterStore[worldCharacter.character_id];
+				const bodyData = character ? characterBodyStore[character.body_id] : undefined;
+
+				if (bodyData) {
+					const body = new CharacterBody(worldCharacter, bodyData, this.debug);
+					body.addToWorld(this.engine.world);
+					this.characterBodies[worldCharacter.id] = body;
+					changed = true;
+				}
 			}
 		}
 
@@ -301,12 +322,16 @@ export class WorldContext {
 		let changed = false;
 
 		// 새로 추가된 건물
-		for (const building of Object.values(buildings)) {
-			if (!this.buildingBodies[building.id]) {
-				const buildingBody = new BuildingBody(building, this.debug);
-				buildingBody.addToWorld(this.engine.world);
-				this.buildingBodies[building.id] = buildingBody;
-				changed = true;
+		const buildingStore = get(useBuilding().store).data;
+		for (const worldBuilding of Object.values(buildings)) {
+			if (!this.buildingBodies[worldBuilding.id]) {
+				const buildingData = buildingStore[worldBuilding.building_id];
+				if (buildingData) {
+					const buildingBody = new BuildingBody(worldBuilding, buildingData, this.debug);
+					buildingBody.addToWorld(this.engine.world);
+					this.buildingBodies[worldBuilding.id] = buildingBody;
+					changed = true;
+				}
 			}
 		}
 

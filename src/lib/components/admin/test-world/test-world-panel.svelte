@@ -2,14 +2,31 @@
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconBug, IconBugOff } from '@tabler/icons-svelte';
+	import { IconBug, IconBugOff, IconEraser } from '@tabler/icons-svelte';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 
-	const { store, setDebug } = useTestWorld();
+	const { store, setDebug, setEraser } = useTestWorld();
 </script>
 
 <div class="absolute top-2 right-2 flex items-center gap-2">
 	<ButtonGroup>
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						onclick={() => setEraser(!$store.eraser)}
+						size="icon-sm"
+						variant={$store.eraser ? 'default' : 'ghost'}
+					>
+						<IconEraser />
+					</Button>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>
+				{$store.eraser ? '지우개 끄기' : '지우개 켜기'}
+			</TooltipContent>
+		</Tooltip>
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}
