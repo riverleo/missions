@@ -51,10 +51,6 @@
 		{
 			label: '세계',
 			items: [
-				{
-					title: '테스트',
-					href: scenarioId ? `/admin/scenarios/${scenarioId}/world-test` : undefined,
-				},
 				{ title: '지형', href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined },
 				{
 					title: '캐릭터',

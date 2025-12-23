@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Popover, PopoverContent, PopoverTrigger } from '$lib/components/ui/popover';
-	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
-	import { IconDeviceGamepad2 } from '@tabler/icons-svelte';
 	import World from '$lib/components/app/world/world.svelte';
+	import TestWorldCommand from './test-world-command.svelte';
+	import TestWorldMarker from './test-world-marker.svelte';
+	import TestWorldPanel from './test-world-panel.svelte';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -51,38 +52,33 @@
 </script>
 
 <Popover bind:open>
-	<Tooltip>
-		<TooltipTrigger>
-			{#snippet child({ props })}
-				<PopoverTrigger>
-					{#snippet child({ props: popoverProps })}
-						<Button
-							{...props}
-							{...popoverProps}
-							variant={open ? 'secondary' : 'ghost'}
-							size="icon"
-						>
-							<IconDeviceGamepad2 />
-						</Button>
-					{/snippet}
-				</PopoverTrigger>
-			{/snippet}
-		</TooltipTrigger>
-		<TooltipContent class="flex items-center gap-2">
-			월드 미리보기
-			<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
-		</TooltipContent>
-	</Tooltip>
+	<PopoverTrigger>
+		{#snippet child({ props })}
+			<Button {...props} variant="outline" size="sm">
+				월드에서 확인하기
+				<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
+			</Button>
+		{/snippet}
+	</PopoverTrigger>
 	<PopoverContent
-		class="h-[420px] w-[820px] p-0"
+		class="flex h-[420px] w-[1140px] gap-0 p-0"
 		align="end"
 		onInteractOutside={(e) => e.preventDefault()}
 	>
-		<div class="flex h-full items-center justify-center">
+		<!-- 좌측: 커맨드 목록 -->
+		<div class="w-80 shrink-0 border-r">
+			<TestWorldCommand />
+		</div>
+
+		<!-- 우측: 월드 -->
+		<div class="relative flex flex-1 items-center justify-center">
 			{#if selectedTerrain}
-				<World terrain={selectedTerrain} {characters} {buildings} debug={$store.debug} />
+				<World terrain={selectedTerrain} {characters} {buildings} debug={$store.debug}>
+					<TestWorldMarker />
+				</World>
+				<TestWorldPanel />
 			{:else}
-				<p class="text-sm text-muted-foreground">테스트 메뉴에서 지형을 선택해주세요</p>
+				<p class="text-sm text-muted-foreground">지형을 선택해주세요</p>
 			{/if}
 		</div>
 	</PopoverContent>

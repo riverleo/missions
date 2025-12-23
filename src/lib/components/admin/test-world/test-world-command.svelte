@@ -28,9 +28,9 @@
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 </script>
 
-<Command class="w-full rounded-lg border shadow-md">
+<Command class="h-full w-full rounded-none border-none bg-transparent">
 	<CommandInput placeholder="검색..." />
-	<CommandList class="max-h-96">
+	<CommandList class="max-h-none flex-1">
 		<CommandEmpty />
 		{#if terrains.length > 0}
 			<CommandGroup heading="지형">
