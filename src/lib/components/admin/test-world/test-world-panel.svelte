@@ -8,12 +8,12 @@
 	const { store, setDebug } = useTestWorld();
 </script>
 
-<div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
+<div class="absolute top-2 right-2 flex items-center gap-2">
 	<ButtonGroup>
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}
-					<Button {...props} onclick={() => setDebug(!$store.debug)} size="icon-lg" variant="outline">
+					<Button {...props} onclick={() => setDebug(!$store.debug)} size="icon-sm" variant="ghost">
 						{#if $store.debug}
 							<IconBugOff />
 						{:else}
