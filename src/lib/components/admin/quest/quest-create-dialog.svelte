@@ -30,7 +30,7 @@
 	import { useChapter } from '$lib/hooks/use-chapter';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { ScenarioId } from '$lib/types';
+	import type { ChapterId, ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -84,7 +84,7 @@
 			.createQuest({
 				title: title.trim(),
 				type,
-				chapter_id: chapterId || null,
+				chapter_id: (chapterId as ChapterId) || null,
 				order_in_chapter: orderInChapter,
 			})
 			.then((quest) => {

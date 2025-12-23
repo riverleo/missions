@@ -94,15 +94,23 @@ export type NarrativeNodeType = Enums<'narrative_node_type'>;
 // Scenario types
 type ScenarioRow = Tables<'scenarios'>;
 export type Scenario = Omit<ScenarioRow, 'id'> & { id: ScenarioId };
-export type ScenarioInsert = TablesInsert<'scenarios'>;
-export type ScenarioUpdate = TablesUpdate<'scenarios'>;
+type ScenarioInsertRow = TablesInsert<'scenarios'>;
+export type ScenarioInsert = ScenarioInsertRow;
+type ScenarioUpdateRow = TablesUpdate<'scenarios'>;
+export type ScenarioUpdate = Omit<ScenarioUpdateRow, 'id'> & {
+	id?: ScenarioId;
+};
 type PlayerScenarioRow = Tables<'player_scenarios'>;
 export type PlayerScenario = Omit<PlayerScenarioRow, 'id' | 'player_id' | 'scenario_id'> & {
 	id: PlayerScenarioId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 };
-export type PlayerScenarioInsert = TablesInsert<'player_scenarios'>;
+type PlayerScenarioInsertRow = TablesInsert<'player_scenarios'>;
+export type PlayerScenarioInsert = Omit<PlayerScenarioInsertRow, 'player_id' | 'scenario_id'> & {
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
 
 // Chapter types
 type ChapterRow = Tables<'chapters'>;
@@ -110,8 +118,15 @@ export type Chapter = Omit<ChapterRow, 'id' | 'scenario_id'> & {
 	id: ChapterId;
 	scenario_id: ScenarioId;
 };
-export type ChapterInsert = TablesInsert<'chapters'>;
-export type ChapterUpdate = TablesUpdate<'chapters'>;
+type ChapterInsertRow = TablesInsert<'chapters'>;
+export type ChapterInsert = Omit<ChapterInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type ChapterUpdateRow = TablesUpdate<'chapters'>;
+export type ChapterUpdate = Omit<ChapterUpdateRow, 'id' | 'scenario_id'> & {
+	id?: ChapterId;
+	scenario_id?: ScenarioId;
+};
 type PlayerChapterRow = Tables<'player_chapters'>;
 export type PlayerChapter = Omit<
 	PlayerChapterRow,
@@ -122,7 +137,15 @@ export type PlayerChapter = Omit<
 	scenario_id: ScenarioId;
 	chapter_id: ChapterId;
 };
-export type PlayerChapterInsert = TablesInsert<'player_chapters'>;
+type PlayerChapterInsertRow = TablesInsert<'player_chapters'>;
+export type PlayerChapterInsert = Omit<
+	PlayerChapterInsertRow,
+	'player_id' | 'scenario_id' | 'chapter_id'
+> & {
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	chapter_id: ChapterId;
+};
 
 // Quest types
 type QuestRow = Tables<'quests'>;
@@ -132,8 +155,21 @@ export type Quest = Omit<QuestRow, 'id' | 'scenario_id' | 'chapter_id' | 'create
 	chapter_id: ChapterId | null;
 	created_by: UserRoleId | null;
 };
-export type QuestInsert = TablesInsert<'quests'>;
-export type QuestUpdate = TablesUpdate<'quests'>;
+type QuestInsertRow = TablesInsert<'quests'>;
+export type QuestInsert = Omit<QuestInsertRow, 'scenario_id' | 'chapter_id'> & {
+	scenario_id: ScenarioId;
+	chapter_id?: ChapterId | null;
+};
+type QuestUpdateRow = TablesUpdate<'quests'>;
+export type QuestUpdate = Omit<
+	QuestUpdateRow,
+	'id' | 'scenario_id' | 'chapter_id' | 'created_by'
+> & {
+	id?: QuestId;
+	scenario_id?: ScenarioId;
+	chapter_id?: ChapterId | null;
+	created_by?: UserRoleId | null;
+};
 type QuestBranchRow = Tables<'quest_branches'>;
 export type QuestBranch = Omit<
 	QuestBranchRow,
@@ -144,8 +180,24 @@ export type QuestBranch = Omit<
 	parent_quest_branch_id: QuestBranchId | null;
 	created_by: UserRoleId | null;
 };
-export type QuestBranchInsert = TablesInsert<'quest_branches'>;
-export type QuestBranchUpdate = TablesUpdate<'quest_branches'>;
+type QuestBranchInsertRow = TablesInsert<'quest_branches'>;
+export type QuestBranchInsert = Omit<
+	QuestBranchInsertRow,
+	'quest_id' | 'parent_quest_branch_id'
+> & {
+	quest_id: QuestId;
+	parent_quest_branch_id?: QuestBranchId | null;
+};
+type QuestBranchUpdateRow = TablesUpdate<'quest_branches'>;
+export type QuestBranchUpdate = Omit<
+	QuestBranchUpdateRow,
+	'id' | 'quest_id' | 'parent_quest_branch_id' | 'created_by'
+> & {
+	id?: QuestBranchId;
+	quest_id?: QuestId;
+	parent_quest_branch_id?: QuestBranchId | null;
+	created_by?: UserRoleId | null;
+};
 type PlayerQuestRow = Tables<'player_quests'>;
 export type PlayerQuest = Omit<PlayerQuestRow, 'id' | 'player_id' | 'scenario_id' | 'quest_id'> & {
 	id: PlayerQuestId;
@@ -153,7 +205,15 @@ export type PlayerQuest = Omit<PlayerQuestRow, 'id' | 'player_id' | 'scenario_id
 	scenario_id: ScenarioId;
 	quest_id: QuestId;
 };
-export type PlayerQuestInsert = TablesInsert<'player_quests'>;
+type PlayerQuestInsertRow = TablesInsert<'player_quests'>;
+export type PlayerQuestInsert = Omit<
+	PlayerQuestInsertRow,
+	'player_id' | 'scenario_id' | 'quest_id'
+> & {
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+};
 type PlayerQuestBranchRow = Tables<'player_quest_branches'>;
 export type PlayerQuestBranch = Omit<
 	PlayerQuestBranchRow,
@@ -166,7 +226,17 @@ export type PlayerQuestBranch = Omit<
 	quest_branch_id: QuestBranchId;
 	player_quest_id: PlayerQuestId;
 };
-export type PlayerQuestBranchInsert = TablesInsert<'player_quest_branches'>;
+type PlayerQuestBranchInsertRow = TablesInsert<'player_quest_branches'>;
+export type PlayerQuestBranchInsert = Omit<
+	PlayerQuestBranchInsertRow,
+	'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id' | 'player_quest_id'
+> & {
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+	quest_branch_id: QuestBranchId;
+	player_quest_id: PlayerQuestId;
+};
 
 // Narrative types
 type NarrativeRow = Tables<'narratives'>;
@@ -175,8 +245,16 @@ export type Narrative = Omit<NarrativeRow, 'id' | 'scenario_id' | 'created_by'> 
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type NarrativeInsert = TablesInsert<'narratives'>;
-export type NarrativeUpdate = TablesUpdate<'narratives'>;
+type NarrativeInsertRow = TablesInsert<'narratives'>;
+export type NarrativeInsert = Omit<NarrativeInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type NarrativeUpdateRow = TablesUpdate<'narratives'>;
+export type NarrativeUpdate = Omit<NarrativeUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 type NarrativeNodeRow = Tables<'narrative_nodes'>;
 export type NarrativeNode = Omit<
 	NarrativeNodeRow,
@@ -187,8 +265,25 @@ export type NarrativeNode = Omit<
 	scenario_id: ScenarioId;
 	narrative_dice_roll_id: NarrativeDiceRollId | null;
 };
-export type NarrativeNodeInsert = TablesInsert<'narrative_nodes'>;
-export type NarrativeNodeUpdate = TablesUpdate<'narrative_nodes'>;
+type NarrativeNodeInsertRow = TablesInsert<'narrative_nodes'>;
+export type NarrativeNodeInsert = Omit<
+	NarrativeNodeInsertRow,
+	'narrative_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
+type NarrativeNodeUpdateRow = TablesUpdate<'narrative_nodes'>;
+export type NarrativeNodeUpdate = Omit<
+	NarrativeNodeUpdateRow,
+	'id' | 'narrative_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id?: NarrativeNodeId;
+	narrative_id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
 type NarrativeNodeChoiceRow = Tables<'narrative_node_choices'>;
 export type NarrativeNodeChoice = Omit<
 	NarrativeNodeChoiceRow,
@@ -199,8 +294,25 @@ export type NarrativeNodeChoice = Omit<
 	scenario_id: ScenarioId;
 	narrative_dice_roll_id: NarrativeDiceRollId | null;
 };
-export type NarrativeNodeChoiceInsert = TablesInsert<'narrative_node_choices'>;
-export type NarrativeNodeChoiceUpdate = TablesUpdate<'narrative_node_choices'>;
+type NarrativeNodeChoiceInsertRow = TablesInsert<'narrative_node_choices'>;
+export type NarrativeNodeChoiceInsert = Omit<
+	NarrativeNodeChoiceInsertRow,
+	'narrative_node_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	narrative_node_id: NarrativeNodeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
+type NarrativeNodeChoiceUpdateRow = TablesUpdate<'narrative_node_choices'>;
+export type NarrativeNodeChoiceUpdate = Omit<
+	NarrativeNodeChoiceUpdateRow,
+	'id' | 'narrative_node_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id?: NarrativeNodeChoiceId;
+	narrative_node_id?: NarrativeNodeId;
+	scenario_id?: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
 
 // Dice types
 type DiceRow = Tables<'dices'>;
@@ -208,8 +320,13 @@ export type Dice = Omit<DiceRow, 'id' | 'created_by'> & {
 	id: DiceId;
 	created_by: UserRoleId | null;
 };
-export type DiceInsert = TablesInsert<'dices'>;
-export type DiceUpdate = TablesUpdate<'dices'>;
+type DiceInsertRow = TablesInsert<'dices'>;
+export type DiceInsert = DiceInsertRow;
+type DiceUpdateRow = TablesUpdate<'dices'>;
+export type DiceUpdate = Omit<DiceUpdateRow, 'id' | 'created_by'> & {
+	id?: DiceId;
+	created_by?: UserRoleId | null;
+};
 type NarrativeDiceRollRow = Tables<'narrative_dice_rolls'>;
 export type NarrativeDiceRoll = Omit<
 	NarrativeDiceRollRow,
@@ -227,8 +344,33 @@ export type NarrativeDiceRoll = Omit<
 	failure_narrative_node_id: NarrativeNodeId | null;
 	created_by: UserRoleId | null;
 };
-export type NarrativeDiceRollInsert = TablesInsert<'narrative_dice_rolls'>;
-export type NarrativeDiceRollUpdate = TablesUpdate<'narrative_dice_rolls'>;
+type NarrativeDiceRollInsertRow = TablesInsert<'narrative_dice_rolls'>;
+export type NarrativeDiceRollInsert = Omit<
+	NarrativeDiceRollInsertRow,
+	'narrative_id' | 'scenario_id' | 'success_narrative_node_id' | 'failure_narrative_node_id'
+> & {
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	success_narrative_node_id?: NarrativeNodeId | null;
+	failure_narrative_node_id?: NarrativeNodeId | null;
+};
+type NarrativeDiceRollUpdateRow = TablesUpdate<'narrative_dice_rolls'>;
+export type NarrativeDiceRollUpdate = Omit<
+	NarrativeDiceRollUpdateRow,
+	| 'id'
+	| 'narrative_id'
+	| 'scenario_id'
+	| 'success_narrative_node_id'
+	| 'failure_narrative_node_id'
+	| 'created_by'
+> & {
+	id?: NarrativeDiceRollId;
+	narrative_id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	success_narrative_node_id?: NarrativeNodeId | null;
+	failure_narrative_node_id?: NarrativeNodeId | null;
+	created_by?: UserRoleId | null;
+};
 type PlayerRolledDiceRow = Tables<'player_rolled_dices'>;
 export type PlayerRolledDice = Omit<
 	PlayerRolledDiceRow,
@@ -258,15 +400,45 @@ export type PlayerRolledDice = Omit<
 	player_quest_branch_id: PlayerQuestBranchId | null;
 	dice_id: DiceId | null;
 };
-export type PlayerRolledDiceInsert = TablesInsert<'player_rolled_dices'>;
+type PlayerRolledDiceInsertRow = TablesInsert<'player_rolled_dices'>;
+export type PlayerRolledDiceInsert = Omit<
+	PlayerRolledDiceInsertRow,
+	| 'player_id'
+	| 'scenario_id'
+	| 'narrative_id'
+	| 'narrative_node_id'
+	| 'narrative_node_choice_id'
+	| 'narrative_dice_roll_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+	| 'player_quest_branch_id'
+	| 'dice_id'
+> & {
+	player_id: PlayerId;
+	scenario_id?: ScenarioId | null;
+	narrative_id: NarrativeId;
+	narrative_node_id: NarrativeNodeId;
+	narrative_node_choice_id?: NarrativeNodeChoiceId | null;
+	narrative_dice_roll_id: NarrativeDiceRollId;
+	quest_id?: QuestId | null;
+	quest_branch_id?: QuestBranchId | null;
+	player_quest_id?: PlayerQuestId | null;
+	player_quest_branch_id?: PlayerQuestBranchId | null;
+	dice_id?: DiceId | null;
+};
 
 // Player types
 type PlayerRow = Tables<'players'>;
 export type Player = Omit<PlayerRow, 'id'> & {
 	id: PlayerId;
 };
-export type PlayerInsert = TablesInsert<'players'>;
-export type PlayerUpdate = TablesUpdate<'players'>;
+type PlayerInsertRow = TablesInsert<'players'>;
+export type PlayerInsert = PlayerInsertRow;
+type PlayerUpdateRow = TablesUpdate<'players'>;
+export type PlayerUpdate = Omit<PlayerUpdateRow, 'id'> & {
+	id?: PlayerId;
+};
 
 // User types
 type UserRoleRow = Tables<'user_roles'>;
@@ -283,8 +455,16 @@ export type Terrain = Omit<TerrainRow, 'id' | 'scenario_id' | 'created_by'> & {
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type TerrainInsert = TablesInsert<'terrains'>;
-export type TerrainUpdate = TablesUpdate<'terrains'>;
+type TerrainInsertRow = TablesInsert<'terrains'>;
+export type TerrainInsert = Omit<TerrainInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type TerrainUpdateRow = TablesUpdate<'terrains'>;
+export type TerrainUpdate = Omit<TerrainUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: TerrainId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 
 // CharacterBody types
 export type CharacterBodyStateType = Enums<'character_body_state_type'>;
@@ -294,8 +474,15 @@ export type CharacterBodyState = Omit<CharacterBodyStateRow, 'id' | 'body_id'> &
 	id: CharacterBodyStateId;
 	body_id: CharacterBodyId;
 };
-export type CharacterBodyStateInsert = TablesInsert<'character_body_states'>;
-export type CharacterBodyStateUpdate = TablesUpdate<'character_body_states'>;
+type CharacterBodyStateInsertRow = TablesInsert<'character_body_states'>;
+export type CharacterBodyStateInsert = Omit<CharacterBodyStateInsertRow, 'body_id'> & {
+	body_id: CharacterBodyId;
+};
+type CharacterBodyStateUpdateRow = TablesUpdate<'character_body_states'>;
+export type CharacterBodyStateUpdate = Omit<CharacterBodyStateUpdateRow, 'id' | 'body_id'> & {
+	id?: CharacterBodyStateId;
+	body_id?: CharacterBodyId;
+};
 
 type CharacterBodyRow = Tables<'character_bodies'>;
 export type CharacterBody = Omit<CharacterBodyRow, 'id' | 'scenario_id' | 'created_by'> & {
@@ -303,8 +490,19 @@ export type CharacterBody = Omit<CharacterBodyRow, 'id' | 'scenario_id' | 'creat
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type CharacterBodyInsert = TablesInsert<'character_bodies'>;
-export type CharacterBodyUpdate = TablesUpdate<'character_bodies'>;
+type CharacterBodyInsertRow = TablesInsert<'character_bodies'>;
+export type CharacterBodyInsert = Omit<CharacterBodyInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type CharacterBodyUpdateRow = TablesUpdate<'character_bodies'>;
+export type CharacterBodyUpdate = Omit<
+	CharacterBodyUpdateRow,
+	'id' | 'scenario_id' | 'created_by'
+> & {
+	id?: CharacterBodyId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 
 // CharacterFaceState types
 export type CharacterFaceStateType = Enums<'character_face_state_type'>;
@@ -313,8 +511,15 @@ export type CharacterFaceState = Omit<CharacterFaceStateRow, 'id' | 'character_i
 	id: CharacterFaceStateId;
 	character_id: CharacterId;
 };
-export type CharacterFaceStateInsert = TablesInsert<'character_face_states'>;
-export type CharacterFaceStateUpdate = TablesUpdate<'character_face_states'>;
+type CharacterFaceStateInsertRow = TablesInsert<'character_face_states'>;
+export type CharacterFaceStateInsert = Omit<CharacterFaceStateInsertRow, 'character_id'> & {
+	character_id: CharacterId;
+};
+type CharacterFaceStateUpdateRow = TablesUpdate<'character_face_states'>;
+export type CharacterFaceStateUpdate = Omit<CharacterFaceStateUpdateRow, 'id' | 'character_id'> & {
+	id?: CharacterFaceStateId;
+	character_id?: CharacterId;
+};
 
 // Character types
 type CharacterRow = Tables<'characters'>;
@@ -324,8 +529,21 @@ export type Character = Omit<CharacterRow, 'id' | 'scenario_id' | 'body_id' | 'c
 	body_id: CharacterBodyId;
 	created_by: UserRoleId | null;
 };
-export type CharacterInsert = TablesInsert<'characters'>;
-export type CharacterUpdate = TablesUpdate<'characters'>;
+type CharacterInsertRow = TablesInsert<'characters'>;
+export type CharacterInsert = Omit<CharacterInsertRow, 'scenario_id' | 'body_id'> & {
+	scenario_id: ScenarioId;
+	body_id: CharacterBodyId;
+};
+type CharacterUpdateRow = TablesUpdate<'characters'>;
+export type CharacterUpdate = Omit<
+	CharacterUpdateRow,
+	'id' | 'scenario_id' | 'body_id' | 'created_by'
+> & {
+	id?: CharacterId;
+	scenario_id?: ScenarioId;
+	body_id?: CharacterBodyId;
+	created_by?: UserRoleId | null;
+};
 
 // World types
 type WorldRow = Tables<'worlds'>;
@@ -334,8 +552,17 @@ export type World = Omit<WorldRow, 'id' | 'player_id' | 'terrain_id'> & {
 	player_id: PlayerId;
 	terrain_id: TerrainId | null;
 };
-export type WorldInsert = TablesInsert<'worlds'>;
-export type WorldUpdate = TablesUpdate<'worlds'>;
+type WorldInsertRow = TablesInsert<'worlds'>;
+export type WorldInsert = Omit<WorldInsertRow, 'player_id' | 'terrain_id'> & {
+	player_id: PlayerId;
+	terrain_id?: TerrainId | null;
+};
+type WorldUpdateRow = TablesUpdate<'worlds'>;
+export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'terrain_id'> & {
+	id?: WorldId;
+	player_id?: PlayerId;
+	terrain_id?: TerrainId | null;
+};
 
 // WorldCharacter types
 type WorldCharacterRow = Tables<'world_characters'>;
@@ -345,8 +572,25 @@ export type WorldCharacter = Omit<WorldCharacterRow, 'id' | 'world_id' | 'charac
 	character_id: CharacterId;
 	player_id: PlayerId;
 };
-export type WorldCharacterInsert = TablesInsert<'world_characters'>;
-export type WorldCharacterUpdate = TablesUpdate<'world_characters'>;
+type WorldCharacterInsertRow = TablesInsert<'world_characters'>;
+export type WorldCharacterInsert = Omit<
+	WorldCharacterInsertRow,
+	'world_id' | 'character_id' | 'player_id'
+> & {
+	world_id: WorldId;
+	character_id: CharacterId;
+	player_id: PlayerId;
+};
+type WorldCharacterUpdateRow = TablesUpdate<'world_characters'>;
+export type WorldCharacterUpdate = Omit<
+	WorldCharacterUpdateRow,
+	'id' | 'world_id' | 'character_id' | 'player_id'
+> & {
+	id?: WorldCharacterId;
+	world_id?: WorldId;
+	character_id?: CharacterId;
+	player_id?: PlayerId;
+};
 
 // BuildingState types
 export type BuildingStateType = Enums<'building_state_type'>;
@@ -355,8 +599,15 @@ export type BuildingState = Omit<BuildingStateRow, 'id' | 'building_id'> & {
 	id: BuildingStateId;
 	building_id: BuildingId;
 };
-export type BuildingStateInsert = TablesInsert<'building_states'>;
-export type BuildingStateUpdate = TablesUpdate<'building_states'>;
+type BuildingStateInsertRow = TablesInsert<'building_states'>;
+export type BuildingStateInsert = Omit<BuildingStateInsertRow, 'building_id'> & {
+	building_id: BuildingId;
+};
+type BuildingStateUpdateRow = TablesUpdate<'building_states'>;
+export type BuildingStateUpdate = Omit<BuildingStateUpdateRow, 'id' | 'building_id'> & {
+	id?: BuildingStateId;
+	building_id?: BuildingId;
+};
 
 // Building types
 type BuildingRow = Tables<'buildings'>;
@@ -365,8 +616,16 @@ export type Building = Omit<BuildingRow, 'id' | 'scenario_id' | 'created_by'> & 
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type BuildingInsert = TablesInsert<'buildings'>;
-export type BuildingUpdate = TablesUpdate<'buildings'>;
+type BuildingInsertRow = TablesInsert<'buildings'>;
+export type BuildingInsert = Omit<BuildingInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type BuildingUpdateRow = TablesUpdate<'buildings'>;
+export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: BuildingId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 
 // WorldBuilding types
 type WorldBuildingRow = Tables<'world_buildings'>;
@@ -376,8 +635,25 @@ export type WorldBuilding = Omit<WorldBuildingRow, 'id' | 'world_id' | 'building
 	building_id: BuildingId;
 	player_id: PlayerId;
 };
-export type WorldBuildingInsert = TablesInsert<'world_buildings'>;
-export type WorldBuildingUpdate = TablesUpdate<'world_buildings'>;
+type WorldBuildingInsertRow = TablesInsert<'world_buildings'>;
+export type WorldBuildingInsert = Omit<
+	WorldBuildingInsertRow,
+	'world_id' | 'building_id' | 'player_id'
+> & {
+	world_id: WorldId;
+	building_id: BuildingId;
+	player_id: PlayerId;
+};
+type WorldBuildingUpdateRow = TablesUpdate<'world_buildings'>;
+export type WorldBuildingUpdate = Omit<
+	WorldBuildingUpdateRow,
+	'id' | 'world_id' | 'building_id' | 'player_id'
+> & {
+	id?: WorldBuildingId;
+	world_id?: WorldId;
+	building_id?: BuildingId;
+	player_id?: PlayerId;
+};
 
 // Need types
 export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
@@ -388,8 +664,16 @@ export type Need = Omit<NeedRow, 'id' | 'scenario_id' | 'created_by'> & {
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type NeedInsert = TablesInsert<'needs'>;
-export type NeedUpdate = TablesUpdate<'needs'>;
+type NeedInsertRow = TablesInsert<'needs'>;
+export type NeedInsert = Omit<NeedInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type NeedUpdateRow = TablesUpdate<'needs'>;
+export type NeedUpdate = Omit<NeedUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: NeedId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 type NeedFulfillmentRow = Tables<'need_fulfillments'>;
 export type NeedFulfillment = Omit<
 	NeedFulfillmentRow,
@@ -403,8 +687,30 @@ export type NeedFulfillment = Omit<
 	character_id: CharacterId | null;
 	created_by: UserRoleId | null;
 };
-export type NeedFulfillmentInsert = TablesInsert<'need_fulfillments'>;
-export type NeedFulfillmentUpdate = TablesUpdate<'need_fulfillments'>;
+type NeedFulfillmentInsertRow = TablesInsert<'need_fulfillments'>;
+export type NeedFulfillmentInsert = Omit<
+	NeedFulfillmentInsertRow,
+	'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id'
+> & {
+	need_id: NeedId;
+	scenario_id: ScenarioId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+};
+type NeedFulfillmentUpdateRow = TablesUpdate<'need_fulfillments'>;
+export type NeedFulfillmentUpdate = Omit<
+	NeedFulfillmentUpdateRow,
+	'id' | 'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+> & {
+	id?: NeedFulfillmentId;
+	need_id?: NeedId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	created_by?: UserRoleId | null;
+};
 
 // CharacterNeed types (skeleton)
 type CharacterNeedRow = Tables<'character_needs'>;
@@ -418,8 +724,26 @@ export type CharacterNeed = Omit<
 	need_id: NeedId;
 	created_by: UserRoleId | null;
 };
-export type CharacterNeedInsert = TablesInsert<'character_needs'>;
-export type CharacterNeedUpdate = TablesUpdate<'character_needs'>;
+type CharacterNeedInsertRow = TablesInsert<'character_needs'>;
+export type CharacterNeedInsert = Omit<
+	CharacterNeedInsertRow,
+	'scenario_id' | 'character_id' | 'need_id'
+> & {
+	scenario_id: ScenarioId;
+	character_id: CharacterId;
+	need_id: NeedId;
+};
+type CharacterNeedUpdateRow = TablesUpdate<'character_needs'>;
+export type CharacterNeedUpdate = Omit<
+	CharacterNeedUpdateRow,
+	'id' | 'scenario_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id?: CharacterNeedId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId;
+	need_id?: NeedId;
+	created_by?: UserRoleId | null;
+};
 
 // WorldCharacterNeed types (runtime)
 type WorldCharacterNeedRow = Tables<'world_character_needs'>;
@@ -435,8 +759,31 @@ export type WorldCharacterNeed = Omit<
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 };
-export type WorldCharacterNeedInsert = TablesInsert<'world_character_needs'>;
-export type WorldCharacterNeedUpdate = TablesUpdate<'world_character_needs'>;
+type WorldCharacterNeedInsertRow = TablesInsert<'world_character_needs'>;
+export type WorldCharacterNeedInsert = Omit<
+	WorldCharacterNeedInsertRow,
+	'world_id' | 'world_character_id' | 'character_id' | 'need_id' | 'player_id' | 'scenario_id'
+> & {
+	world_id: WorldId;
+	world_character_id: WorldCharacterId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldCharacterNeedUpdateRow = TablesUpdate<'world_character_needs'>;
+export type WorldCharacterNeedUpdate = Omit<
+	WorldCharacterNeedUpdateRow,
+	'id' | 'world_id' | 'world_character_id' | 'character_id' | 'need_id' | 'player_id' | 'scenario_id'
+> & {
+	id?: WorldCharacterNeedId;
+	world_id?: WorldId;
+	world_character_id?: WorldCharacterId;
+	character_id?: CharacterId;
+	need_id?: NeedId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
 
 // NeedBehavior types
 type NeedBehaviorRow = Tables<'need_behaviors'>;
@@ -446,8 +793,21 @@ export type NeedBehavior = Omit<NeedBehaviorRow, 'id' | 'scenario_id' | 'need_id
 	need_id: NeedId;
 	created_by: UserRoleId | null;
 };
-export type NeedBehaviorInsert = TablesInsert<'need_behaviors'>;
-export type NeedBehaviorUpdate = TablesUpdate<'need_behaviors'>;
+type NeedBehaviorInsertRow = TablesInsert<'need_behaviors'>;
+export type NeedBehaviorInsert = Omit<NeedBehaviorInsertRow, 'scenario_id' | 'need_id'> & {
+	scenario_id: ScenarioId;
+	need_id: NeedId;
+};
+type NeedBehaviorUpdateRow = TablesUpdate<'need_behaviors'>;
+export type NeedBehaviorUpdate = Omit<
+	NeedBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'need_id' | 'created_by'
+> & {
+	id?: NeedBehaviorId;
+	scenario_id?: ScenarioId;
+	need_id?: NeedId;
+	created_by?: UserRoleId | null;
+};
 
 // NeedBehaviorAction types
 export type NeedBehaviorActionType = Enums<'need_behavior_action_type'>;
@@ -474,8 +834,50 @@ export type NeedBehaviorAction = Omit<
 	success_need_behavior_action_id: NeedBehaviorActionId | null;
 	failure_need_behavior_action_id: NeedBehaviorActionId | null;
 };
-export type NeedBehaviorActionInsert = TablesInsert<'need_behavior_actions'>;
-export type NeedBehaviorActionUpdate = TablesUpdate<'need_behavior_actions'>;
+type NeedBehaviorActionInsertRow = TablesInsert<'need_behavior_actions'>;
+export type NeedBehaviorActionInsert = Omit<
+	NeedBehaviorActionInsertRow,
+	| 'scenario_id'
+	| 'need_id'
+	| 'behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'success_need_behavior_action_id'
+	| 'failure_need_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	need_id: NeedId;
+	behavior_id: NeedBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	success_need_behavior_action_id?: NeedBehaviorActionId | null;
+	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+};
+type NeedBehaviorActionUpdateRow = TablesUpdate<'need_behavior_actions'>;
+export type NeedBehaviorActionUpdate = Omit<
+	NeedBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_id'
+	| 'behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'success_need_behavior_action_id'
+	| 'failure_need_behavior_action_id'
+> & {
+	id?: NeedBehaviorActionId;
+	scenario_id?: ScenarioId;
+	need_id?: NeedId;
+	behavior_id?: NeedBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	success_need_behavior_action_id?: NeedBehaviorActionId | null;
+	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+};
 
 // BuildingBehavior types
 export type BuildingBehaviorType = Enums<'building_behavior_type'>;
@@ -489,8 +891,24 @@ export type BuildingBehavior = Omit<
 	building_id: BuildingId;
 	created_by: UserRoleId | null;
 };
-export type BuildingBehaviorInsert = TablesInsert<'building_behaviors'>;
-export type BuildingBehaviorUpdate = TablesUpdate<'building_behaviors'>;
+type BuildingBehaviorInsertRow = TablesInsert<'building_behaviors'>;
+export type BuildingBehaviorInsert = Omit<
+	BuildingBehaviorInsertRow,
+	'scenario_id' | 'building_id'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+};
+type BuildingBehaviorUpdateRow = TablesUpdate<'building_behaviors'>;
+export type BuildingBehaviorUpdate = Omit<
+	BuildingBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'building_id' | 'created_by'
+> & {
+	id?: BuildingBehaviorId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	created_by?: UserRoleId | null;
+};
 
 // BuildingBehaviorAction types
 type BuildingBehaviorActionRow = Tables<'building_behavior_actions'>;
@@ -508,8 +926,31 @@ export type BuildingBehaviorAction = Omit<
 	success_building_behavior_action_id: BuildingBehaviorActionId | null;
 	failure_building_behavior_action_id: BuildingBehaviorActionId | null;
 };
-export type BuildingBehaviorActionInsert = TablesInsert<'building_behavior_actions'>;
-export type BuildingBehaviorActionUpdate = TablesUpdate<'building_behavior_actions'>;
+type BuildingBehaviorActionInsertRow = TablesInsert<'building_behavior_actions'>;
+export type BuildingBehaviorActionInsert = Omit<
+	BuildingBehaviorActionInsertRow,
+	'scenario_id' | 'behavior_id' | 'success_building_behavior_action_id' | 'failure_building_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	behavior_id: BuildingBehaviorId;
+	success_building_behavior_action_id?: BuildingBehaviorActionId | null;
+	failure_building_behavior_action_id?: BuildingBehaviorActionId | null;
+};
+type BuildingBehaviorActionUpdateRow = TablesUpdate<'building_behavior_actions'>;
+export type BuildingBehaviorActionUpdate = Omit<
+	BuildingBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_building_behavior_action_id'
+	| 'failure_building_behavior_action_id'
+> & {
+	id?: BuildingBehaviorActionId;
+	scenario_id?: ScenarioId;
+	behavior_id?: BuildingBehaviorId;
+	success_building_behavior_action_id?: BuildingBehaviorActionId | null;
+	failure_building_behavior_action_id?: BuildingBehaviorActionId | null;
+};
 
 // ItemState types
 export type ItemStateType = Enums<'item_state_type'>;
@@ -518,8 +959,15 @@ export type ItemState = Omit<ItemStateRow, 'id' | 'item_id'> & {
 	id: ItemStateId;
 	item_id: ItemId;
 };
-export type ItemStateInsert = TablesInsert<'item_states'>;
-export type ItemStateUpdate = TablesUpdate<'item_states'>;
+type ItemStateInsertRow = TablesInsert<'item_states'>;
+export type ItemStateInsert = Omit<ItemStateInsertRow, 'item_id'> & {
+	item_id: ItemId;
+};
+type ItemStateUpdateRow = TablesUpdate<'item_states'>;
+export type ItemStateUpdate = Omit<ItemStateUpdateRow, 'id' | 'item_id'> & {
+	id?: ItemStateId;
+	item_id?: ItemId;
+};
 
 // Item types
 type ItemRow = Tables<'items'>;
@@ -528,8 +976,16 @@ export type Item = Omit<ItemRow, 'id' | 'scenario_id' | 'created_by'> & {
 	scenario_id: ScenarioId;
 	created_by: UserRoleId | null;
 };
-export type ItemInsert = TablesInsert<'items'>;
-export type ItemUpdate = TablesUpdate<'items'>;
+type ItemInsertRow = TablesInsert<'items'>;
+export type ItemInsert = Omit<ItemInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type ItemUpdateRow = TablesUpdate<'items'>;
+export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: ItemId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
 
 // WorldItem types
 type WorldItemRow = Tables<'world_items'>;
@@ -539,8 +995,22 @@ export type WorldItem = Omit<WorldItemRow, 'id' | 'world_id' | 'item_id' | 'play
 	item_id: ItemId;
 	player_id: PlayerId;
 };
-export type WorldItemInsert = TablesInsert<'world_items'>;
-export type WorldItemUpdate = TablesUpdate<'world_items'>;
+type WorldItemInsertRow = TablesInsert<'world_items'>;
+export type WorldItemInsert = Omit<WorldItemInsertRow, 'world_id' | 'item_id' | 'player_id'> & {
+	world_id: WorldId;
+	item_id: ItemId;
+	player_id: PlayerId;
+};
+type WorldItemUpdateRow = TablesUpdate<'world_items'>;
+export type WorldItemUpdate = Omit<
+	WorldItemUpdateRow,
+	'id' | 'world_id' | 'item_id' | 'player_id'
+> & {
+	id?: WorldItemId;
+	world_id?: WorldId;
+	item_id?: ItemId;
+	player_id?: PlayerId;
+};
 
 // ItemBehavior types
 export type ItemBehaviorType = Enums<'item_behavior_type'>;
@@ -551,8 +1021,21 @@ export type ItemBehavior = Omit<ItemBehaviorRow, 'id' | 'scenario_id' | 'item_id
 	item_id: ItemId;
 	created_by: UserRoleId | null;
 };
-export type ItemBehaviorInsert = TablesInsert<'item_behaviors'>;
-export type ItemBehaviorUpdate = TablesUpdate<'item_behaviors'>;
+type ItemBehaviorInsertRow = TablesInsert<'item_behaviors'>;
+export type ItemBehaviorInsert = Omit<ItemBehaviorInsertRow, 'scenario_id' | 'item_id'> & {
+	scenario_id: ScenarioId;
+	item_id: ItemId;
+};
+type ItemBehaviorUpdateRow = TablesUpdate<'item_behaviors'>;
+export type ItemBehaviorUpdate = Omit<
+	ItemBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'item_id' | 'created_by'
+> & {
+	id?: ItemBehaviorId;
+	scenario_id?: ScenarioId;
+	item_id?: ItemId;
+	created_by?: UserRoleId | null;
+};
 
 // ItemBehaviorAction types
 type ItemBehaviorActionRow = Tables<'item_behavior_actions'>;
@@ -570,5 +1053,28 @@ export type ItemBehaviorAction = Omit<
 	success_item_behavior_action_id: ItemBehaviorActionId | null;
 	failure_item_behavior_action_id: ItemBehaviorActionId | null;
 };
-export type ItemBehaviorActionInsert = TablesInsert<'item_behavior_actions'>;
-export type ItemBehaviorActionUpdate = TablesUpdate<'item_behavior_actions'>;
+type ItemBehaviorActionInsertRow = TablesInsert<'item_behavior_actions'>;
+export type ItemBehaviorActionInsert = Omit<
+	ItemBehaviorActionInsertRow,
+	'scenario_id' | 'behavior_id' | 'success_item_behavior_action_id' | 'failure_item_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	behavior_id: ItemBehaviorId;
+	success_item_behavior_action_id?: ItemBehaviorActionId | null;
+	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+};
+type ItemBehaviorActionUpdateRow = TablesUpdate<'item_behavior_actions'>;
+export type ItemBehaviorActionUpdate = Omit<
+	ItemBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_item_behavior_action_id'
+	| 'failure_item_behavior_action_id'
+> & {
+	id?: ItemBehaviorActionId;
+	scenario_id?: ScenarioId;
+	behavior_id?: ItemBehaviorId;
+	success_item_behavior_action_id?: ItemBehaviorActionId | null;
+	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+};

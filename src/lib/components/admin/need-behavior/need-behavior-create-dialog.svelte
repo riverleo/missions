@@ -28,7 +28,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { ScenarioId } from '$lib/types';
+	import type { NeedId, ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useNeedBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -72,7 +72,7 @@
 		admin
 			.create({
 				name: name.trim(),
-				need_id: needId,
+				need_id: needId as NeedId,
 				need_threshold: needThreshold,
 			})
 			.then((behavior) => {

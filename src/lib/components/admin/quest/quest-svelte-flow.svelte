@@ -72,7 +72,7 @@
 			if (!targetQuestBranch) return;
 
 			await admin.updateQuestBranch(connection.target as QuestBranchId, {
-				parent_quest_branch_id: connection.source,
+				parent_quest_branch_id: connection.source as QuestBranchId,
 			});
 
 			// 로컬 데이터 업데이트
@@ -152,7 +152,7 @@
 			// 새 브랜치 생성 (소스 노드를 부모로 설정)
 			const newQuestBranch = await admin.createQuestBranch({
 				quest_id: questId,
-				parent_quest_branch_id: sourceNode.id,
+				parent_quest_branch_id: sourceNode.id as QuestBranchId,
 			});
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성

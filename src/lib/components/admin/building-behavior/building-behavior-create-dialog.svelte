@@ -21,9 +21,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { BuildingBehaviorType } from '$lib/types';
+	import type { BuildingBehaviorType, BuildingId, ScenarioId } from '$lib/types';
 	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
-	import type { ScenarioId } from '$lib/types';
 
 	const { dialogStore, closeDialog, admin } = useBuildingBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -76,7 +75,7 @@
 		admin
 			.create({
 				description: description.trim(),
-				building_id: buildingId,
+				building_id: buildingId as BuildingId,
 				type: behaviorType,
 			})
 			.then((behavior) => {

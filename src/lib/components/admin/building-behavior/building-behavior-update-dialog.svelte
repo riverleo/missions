@@ -19,7 +19,7 @@
 	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { alphabetical } from 'radash';
-	import type { BuildingBehaviorType } from '$lib/types';
+	import type { BuildingBehaviorType, BuildingId } from '$lib/types';
 	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	const { buildingBehaviorStore, dialogStore, closeDialog, admin } = useBuildingBehavior();
@@ -78,7 +78,7 @@
 		admin
 			.update(behaviorId, {
 				description: description.trim(),
-				building_id: buildingId,
+				building_id: buildingId as BuildingId,
 				type: behaviorType,
 			})
 			.then(() => {

@@ -26,6 +26,7 @@
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { alphabetical } from 'radash';
+	import type { NeedId } from '$lib/types';
 
 	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
 	const { needStore } = useNeed();
@@ -70,7 +71,7 @@
 		admin
 			.update(behaviorId, {
 				name: name.trim(),
-				need_id: needId,
+				need_id: needId as NeedId,
 				need_threshold: needThreshold,
 			})
 			.then(() => {

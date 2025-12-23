@@ -20,7 +20,7 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { alphabetical } from 'radash';
-	import type { ItemBehaviorType } from '$lib/types';
+	import type { ItemBehaviorType, ItemId } from '$lib/types';
 	import { getItemBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	const { itemBehaviorStore, dialogStore, closeDialog, admin } = useItemBehavior();
@@ -79,7 +79,7 @@
 		admin
 			.update(behaviorId, {
 				description: description.trim(),
-				item_id: itemId,
+				item_id: itemId as ItemId,
 				type: behaviorType,
 			})
 			.then(() => {

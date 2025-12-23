@@ -22,7 +22,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { ItemBehaviorType } from '$lib/types';
+	import type { ItemBehaviorType, ItemId } from '$lib/types';
 	import { getItemBehaviorTypeLabel } from '$lib/utils/state-label';
 	import type { ScenarioId } from '$lib/types';
 
@@ -77,7 +77,7 @@
 		admin
 			.create({
 				description: description.trim(),
-				item_id: itemId,
+				item_id: itemId as ItemId,
 				type: behaviorType,
 			})
 			.then((behavior) => {

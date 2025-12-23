@@ -20,7 +20,7 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { ScenarioId } from '$lib/types';
+	import type { CharacterBodyId, ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useCharacter();
 	const { store: bodyStore } = useCharacterBody();
@@ -61,7 +61,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim(), body_id: bodyId })
+			.create({ name: name.trim(), body_id: bodyId as CharacterBodyId })
 			.then((character) => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/characters/${character.id}`);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { QuestType } from '$lib/types';
+	import type { ChapterId, QuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -87,7 +87,7 @@
 			.updateQuest(questId, {
 				title: title.trim(),
 				type,
-				chapter_id: chapterId || null,
+				chapter_id: (chapterId as ChapterId) || null,
 				order_in_chapter: orderInChapter,
 			})
 			.then(() => {

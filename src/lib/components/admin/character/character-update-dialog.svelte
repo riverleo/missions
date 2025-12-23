@@ -18,6 +18,7 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import type { CharacterBodyId } from '$lib/types';
 
 	const { store, admin, dialogStore, closeDialog } = useCharacter();
 	const { store: bodyStore } = useCharacterBody();
@@ -61,7 +62,7 @@
 		isSubmitting = true;
 
 		admin
-			.update(characterId, { name: name.trim(), body_id: bodyId })
+			.update(characterId, { name: name.trim(), body_id: bodyId as CharacterBodyId })
 			.then(() => {
 				closeDialog();
 			})

@@ -162,7 +162,7 @@
 				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
 				if (narrativeNode.type === 'text') {
 					await admin.updateNode(narrativeNodeId as NarrativeNodeId, {
-						narrative_dice_roll_id: narrativeDiceRollId,
+						narrative_dice_roll_id: narrativeDiceRollId as NarrativeDiceRollId,
 					});
 
 					// 엣지 추가
@@ -182,7 +182,7 @@
 					if (!choiceId) return;
 
 					await admin.updateChoice(choiceId as NarrativeNodeChoiceId, {
-						narrative_dice_roll_id: narrativeDiceRollId,
+						narrative_dice_roll_id: narrativeDiceRollId as NarrativeDiceRollId,
 					});
 
 					const choice = $narrativeNodeChoiceStore.data?.[choiceId as NarrativeNodeChoiceId];
@@ -211,7 +211,7 @@
 
 				if (handle === 'success') {
 					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
-						success_narrative_node_id: narrativeNodeId,
+						success_narrative_node_id: narrativeNodeId as NarrativeNodeId,
 					});
 
 					// 엣지 추가
@@ -228,7 +228,7 @@
 					];
 				} else if (handle === 'failure') {
 					await admin.updateNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId, {
-						failure_narrative_node_id: narrativeNodeId,
+						failure_narrative_node_id: narrativeNodeId as NarrativeNodeId,
 					});
 
 					// 엣지 추가

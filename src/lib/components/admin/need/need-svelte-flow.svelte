@@ -33,7 +33,7 @@
 	import NeedCharacterEdgePanel from './need-character-edge-panel.svelte';
 	import NeedFulfillmentNodePanel from './need-fulfillment-node-panel.svelte';
 	import NeedCharacterEdge from './need-character-edge.svelte';
-	import type { NeedId, NeedFulfillmentId } from '$lib/types';
+	import type { CharacterId, NeedId, NeedFulfillmentId } from '$lib/types';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
 	const { store: characterStore } = useCharacter();
@@ -119,8 +119,8 @@
 				const needId = parseNeedNodeId(connection.target);
 
 				const newCharacterNeed = await admin.createCharacterNeed({
-					character_id: characterId,
-					need_id: needId,
+					character_id: characterId as CharacterId,
+					need_id: needId as NeedId,
 				});
 
 				edges = [
@@ -167,7 +167,7 @@
 
 			// 새 fulfillment 생성
 			const newFulfillment = await admin.createNeedFulfillment({
-				need_id: needId,
+				need_id: needId as NeedId,
 				fulfillment_type: 'building',
 				increase_per_tick: 10,
 			});
