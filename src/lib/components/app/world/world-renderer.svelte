@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 	import WorldPlanning from './world-planning.svelte';
+	import { cn } from '$lib/utils';
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width: number;
 		height: number;
 		characters?: WorldCharacter[];
@@ -15,7 +17,7 @@
 		children?: Snippet;
 	}
 
-	let { width, height, characters = [], buildings = [], children }: Props = $props();
+	let { class: className, width, height, characters = [], buildings = [], children, ...restProps }: Props = $props();
 
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
@@ -55,7 +57,8 @@
 <div
 	bind:this={container}
 	data-slot="world-container"
-	class="relative overflow-hidden border border-border"
+	{...restProps}
+	class={cn('relative overflow-hidden border border-border', className)}
 	style="width: {width}px; height: {height}px;"
 	role="application"
 	tabindex="0"

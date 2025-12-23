@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 	import { setWorldContext } from '$lib/hooks/use-world.svelte';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
@@ -7,7 +8,7 @@
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width?: number;
 		height?: number;
 		terrain: Terrain;
@@ -27,6 +28,7 @@
 		debug = false,
 		children,
 		oncamerachange,
+		...restProps
 	}: Props = $props();
 
 	const { supabase } = useServerPayload();
@@ -55,6 +57,6 @@
 	setWorldContext(worldContext);
 </script>
 
-<WorldRenderer {width} {height} {characters} {buildings}>
+<WorldRenderer {...restProps} {width} {height} {characters} {buildings}>
 	{@render children?.()}
 </WorldRenderer>

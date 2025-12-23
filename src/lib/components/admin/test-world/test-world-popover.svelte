@@ -73,7 +73,7 @@
 		<!-- 우측: 월드 -->
 		<div class="relative flex flex-1 items-center justify-center">
 			{#if selectedTerrain}
-				<World terrain={selectedTerrain} {characters} {buildings} debug={$store.debug}>
+				<World class="border-0" terrain={selectedTerrain} {characters} {buildings} debug={$store.debug}>
 					<TestWorldMarker />
 				</World>
 				<TestWorldPanel />
