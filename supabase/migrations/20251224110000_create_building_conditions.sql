@@ -5,6 +5,7 @@ create table building_conditions (
   building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   decrease_multiplier float not null default 1.0,
+  disabled_when_depleted boolean not null default false,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 

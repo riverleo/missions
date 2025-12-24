@@ -226,6 +226,104 @@ export type Database = {
           },
         ]
       }
+      building_condition_effects: {
+        Row: {
+          building_condition_id: string
+          building_id: string
+          change_per_tick: number
+          character_id: string | null
+          condition_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          max_threshold: number
+          min_threshold: number
+          name: string
+          need_id: string
+          scenario_id: string
+        }
+        Insert: {
+          building_condition_id: string
+          building_id: string
+          change_per_tick?: number
+          character_id?: string | null
+          condition_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_threshold?: number
+          min_threshold?: number
+          name: string
+          need_id: string
+          scenario_id: string
+        }
+        Update: {
+          building_condition_id?: string
+          building_id?: string
+          change_per_tick?: number
+          character_id?: string | null
+          condition_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          max_threshold?: number
+          min_threshold?: number
+          name?: string
+          need_id?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_condition_effects_building_condition_id_fkey"
+            columns: ["building_condition_id"]
+            isOneToOne: false
+            referencedRelation: "building_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_condition_effects_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       building_conditions: {
         Row: {
           building_id: string
@@ -233,6 +331,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           decrease_multiplier: number
+          disabled_when_depleted: boolean
           id: string
           scenario_id: string
         }
@@ -242,6 +341,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           decrease_multiplier?: number
+          disabled_when_depleted?: boolean
           id?: string
           scenario_id: string
         }
@@ -251,6 +351,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           decrease_multiplier?: number
+          disabled_when_depleted?: boolean
           id?: string
           scenario_id?: string
         }
