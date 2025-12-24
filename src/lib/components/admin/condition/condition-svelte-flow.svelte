@@ -14,6 +14,7 @@
 	import { page } from '$app/state';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useNeed } from '$lib/hooks/use-need';
 	import {
 		createBuildingNodeId,
 		parseBuildingNodeId,
@@ -23,19 +24,38 @@
 		createBuildingConditionEdgeId,
 		isBuildingConditionEdgeId,
 		createConditionFulfillmentEdgeId,
+		createConditionEffectNodeId,
+		parseConditionEffectNodeId,
+		createConditionEffectEdgeId,
+		isConditionEffectEdgeId,
 	} from '$lib/utils/flow-id';
 	import ConditionNode from './condition-node.svelte';
 	import ConditionBuildingNode from './condition-building-node.svelte';
 	import ConditionFulfillmentNode from './condition-fulfillment-node.svelte';
+	import ConditionEffectNode from './condition-effect-node.svelte';
 	import ConditionActionPanel from './condition-action-panel.svelte';
 	import ConditionNodePanel from './condition-node-panel.svelte';
 	import ConditionBuildingEdgePanel from './condition-building-edge-panel.svelte';
 	import ConditionFulfillmentNodePanel from './condition-fulfillment-node-panel.svelte';
+	import ConditionEffectNodePanel from './condition-effect-node-panel.svelte';
 	import ConditionBuildingEdge from './condition-building-edge.svelte';
-	import type { BuildingId, ConditionId, ConditionFulfillmentId } from '$lib/types';
+	import type {
+		BuildingId,
+		ConditionId,
+		ConditionFulfillmentId,
+		BuildingConditionId,
+		ConditionEffectId,
+	} from '$lib/types';
 
-	const { conditionStore, conditionFulfillmentStore, buildingConditionStore, admin } = useCondition();
+	const {
+		conditionStore,
+		conditionFulfillmentStore,
+		buildingConditionStore,
+		conditionEffectStore,
+		admin,
+	} = useCondition();
 	const { store: buildingStore } = useBuilding();
+	const { needStore } = useNeed();
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
@@ -52,7 +72,11 @@
 	const buildingConditions = $derived(
 		Object.values($buildingConditionStore.data).filter((bc) => bc.condition_id === conditionId)
 	);
+	const conditionEffects = $derived(
+		Object.values($conditionEffectStore.data).filter((ce) => ce.condition_id === conditionId)
+	);
 	const buildings = $derived(Object.values($buildingStore.data));
+	const needs = $derived(Object.values($needStore.data));
 
 	// 선택된 노드/엣지
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
@@ -60,14 +84,24 @@
 
 	// 선택된 항목에 따른 데이터
 	const selectedCondition = $derived(
-		selectedNode?.type === 'condition' && condition && selectedNode.id === createConditionNodeId(condition)
+		selectedNode?.type === 'condition' &&
+			condition &&
+			selectedNode.id === createConditionNodeId(condition)
 			? condition
 			: undefined
 	);
 
 	const selectedFulfillment = $derived(
 		selectedNode?.type === 'fulfillment'
-			? conditionFulfillments.find((cf) => cf.id === selectedNode.id.replace('condition-fulfillment-', ''))
+			? conditionFulfillments.find(
+					(cf) => cf.id === selectedNode.id.replace('condition-fulfillment-', '')
+				)
+			: undefined
+	);
+
+	const selectedEffect = $derived(
+		selectedNode?.type === 'effect'
+			? conditionEffects.find((ce) => ce.id === parseConditionEffectNodeId(selectedNode.id))
 			: undefined
 	);
 
@@ -80,6 +114,7 @@
 		condition: ConditionNode,
 		building: ConditionBuildingNode,
 		fulfillment: ConditionFulfillmentNode,
+		effect: ConditionEffectNode,
 	};
 
 	const edgeTypes = {
@@ -147,7 +182,7 @@
 		const sourceNode = connectionState.fromNode;
 		if (!sourceNode || sourceNode.type !== 'condition') return;
 
-		// source 핸들(오른쪽)에서만 새 노드 생성 가능
+		// source 핸들에서만 새 노드 생성 가능
 		const fromHandleType = connectionState.fromHandle?.type;
 		if (fromHandleType !== 'source') return;
 
@@ -162,29 +197,63 @@
 		skipConvertEffect = true;
 
 		try {
-			const conditionId = parseConditionNodeId(sourceNode.id);
+			const conditionIdStr = parseConditionNodeId(sourceNode.id);
+			const handleId = connectionState.fromHandle?.id;
 
-			// 새 fulfillment 생성
-			const newFulfillment = await admin.createConditionFulfillment({
-				condition_id: conditionId as ConditionId,
-				fulfillment_type: 'character',
-				increase_per_tick: 10,
-			});
+			// bottom handle (id="effect")에서 드래그한 경우 effect 생성
+			if (handleId === 'effect') {
+				// 기본 need 선택
+				const defaultNeed = needs[0];
+				if (!defaultNeed) {
+					skipConvertEffect = false;
+					console.error('No need found for effect creation');
+					alert('욕구가 없습니다. 먼저 욕구를 생성해주세요.');
+					return;
+				}
 
-			// 모든 업데이트 완료 후 노드/엣지 재생성
-			skipConvertEffect = false;
-			convertToNodesAndEdges();
+				const newEffect = await admin.createConditionEffect({
+					condition_id: conditionIdStr as ConditionId,
+					name: '',
+					need_id: defaultNeed.id,
+					min_threshold: 0,
+					max_threshold: 100,
+					change_per_tick: 0,
+				});
 
-			// 새 노드의 위치를 드롭 위치로 설정
-			if (newFulfillment) {
-				nodes = nodes.map((n) =>
-					n.id === createConditionFulfillmentNodeId(newFulfillment) ? { ...n, position } : n
-				);
-				layoutApplied = true;
+				// 모든 업데이트 완료 후 노드/엣지 재생성
+				skipConvertEffect = false;
+				convertToNodesAndEdges();
+
+				// 새 노드의 위치를 드롭 위치로 설정
+				if (newEffect) {
+					nodes = nodes.map((n) =>
+						n.id === createConditionEffectNodeId(newEffect) ? { ...n, position } : n
+					);
+					layoutApplied = true;
+				}
+			} else {
+				// 오른쪽 handle에서 드래그한 경우 fulfillment 생성
+				const newFulfillment = await admin.createConditionFulfillment({
+					condition_id: conditionIdStr as ConditionId,
+					fulfillment_type: 'character',
+					increase_per_tick: 10,
+				});
+
+				// 모든 업데이트 완료 후 노드/엣지 재생성
+				skipConvertEffect = false;
+				convertToNodesAndEdges();
+
+				// 새 노드의 위치를 드롭 위치로 설정
+				if (newFulfillment) {
+					nodes = nodes.map((n) =>
+						n.id === createConditionFulfillmentNodeId(newFulfillment) ? { ...n, position } : n
+					);
+					layoutApplied = true;
+				}
 			}
 		} catch (error) {
 			skipConvertEffect = false;
-			console.error('Failed to create fulfillment on edge drop:', error);
+			console.error('Failed to create on edge drop:', error);
 		}
 	};
 
@@ -214,6 +283,9 @@
 				if (node.type === 'fulfillment') {
 					const fulfillmentId = node.id.replace('condition-fulfillment-', '');
 					await admin.removeConditionFulfillment(fulfillmentId as ConditionFulfillmentId);
+				} else if (node.type === 'effect') {
+					const effectId = parseConditionEffectNodeId(node.id);
+					await admin.removeConditionEffect(effectId as ConditionEffectId);
 				}
 			}
 
@@ -269,7 +341,18 @@
 			});
 		});
 
-		// 4. building_conditions 엣지
+		// 4. Effect 노드 (하단)
+		conditionEffects.forEach((effect, index) => {
+			newNodes.push({
+				id: createConditionEffectNodeId(effect),
+				type: 'effect',
+				data: { effect },
+				position: { x: COLUMN_GAP, y: (index + 1) * ROW_GAP },
+				deletable: true,
+			});
+		});
+
+		// 5. building_conditions 엣지
 		buildingConditions.forEach((bc) => {
 			const building = buildings.find((b) => b.id === bc.building_id);
 			const targetCondition = condition && bc.condition_id === condition.id ? condition : undefined;
@@ -286,7 +369,7 @@
 			});
 		});
 
-		// 5. condition → fulfillment 엣지
+		// 6. condition → fulfillment 엣지
 		conditionFulfillments.forEach((cf) => {
 			if (!condition) return;
 			newEdges.push({
@@ -294,6 +377,19 @@
 				source: createConditionNodeId(condition),
 				target: createConditionFulfillmentNodeId(cf),
 				deletable: false,
+			});
+		});
+
+		// 7. condition → effect 엣지
+		conditionEffects.forEach((effect) => {
+			if (!condition) return;
+			newEdges.push({
+				id: createConditionEffectEdgeId(effect),
+				source: createConditionNodeId(condition),
+				sourceHandle: 'effect',
+				target: createConditionEffectNodeId(effect),
+				deletable: false,
+				style: 'stroke: var(--color-red-500)',
 			});
 		});
 
@@ -310,6 +406,7 @@
 		buildings;
 		buildingConditions;
 		conditionFulfillments;
+		conditionEffects;
 
 		convertToNodesAndEdges();
 	});
@@ -335,6 +432,8 @@
 		<ConditionNodePanel condition={selectedCondition} />
 	{:else if selectedFulfillment}
 		<ConditionFulfillmentNodePanel fulfillment={selectedFulfillment} />
+	{:else if selectedEffect}
+		<ConditionEffectNodePanel effect={selectedEffect} />
 	{:else if selectedBuildingCondition()}
 		<ConditionBuildingEdgePanel buildingCondition={selectedBuildingCondition()!} />
 	{:else}

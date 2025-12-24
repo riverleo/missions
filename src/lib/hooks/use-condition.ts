@@ -11,9 +11,13 @@ import type {
 	BuildingCondition,
 	BuildingConditionInsert,
 	BuildingConditionUpdate,
+	ConditionEffect,
+	ConditionEffectInsert,
+	ConditionEffectUpdate,
 	ConditionId,
 	ConditionFulfillmentId,
 	BuildingConditionId,
+	ConditionEffectId,
 	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
@@ -41,9 +45,14 @@ function createConditionStore() {
 		data: {},
 	});
 
-	const buildingConditionStore = writable<
-		RecordFetchState<BuildingConditionId, BuildingCondition>
-	>({
+	const buildingConditionStore = writable<RecordFetchState<BuildingConditionId, BuildingCondition>>(
+		{
+			status: 'idle',
+			data: {},
+		}
+	);
+
+	const conditionEffectStore = writable<RecordFetchState<ConditionEffectId, ConditionEffect>>({
 		status: 'idle',
 		data: {},
 	});
@@ -58,17 +67,21 @@ function createConditionStore() {
 		conditionStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingConditionStore.update((state) => ({ ...state, status: 'loading' }));
+		conditionEffectStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const [conditionsResult, fulfillmentsResult, buildingConditionsResult] = await Promise.all([
-				supabase.from('conditions').select('*').eq('scenario_id', scenarioId).order('name'),
-				supabase.from('condition_fulfillments').select('*').eq('scenario_id', scenarioId),
-				supabase.from('building_conditions').select('*').eq('scenario_id', scenarioId),
-			]);
+			const [conditionsResult, fulfillmentsResult, buildingConditionsResult, effectsResult] =
+				await Promise.all([
+					supabase.from('conditions').select('*').eq('scenario_id', scenarioId).order('name'),
+					supabase.from('condition_fulfillments').select('*').eq('scenario_id', scenarioId),
+					supabase.from('building_conditions').select('*').eq('scenario_id', scenarioId),
+					supabase.from('condition_effects').select('*').eq('scenario_id', scenarioId),
+				]);
 
 			if (conditionsResult.error) throw conditionsResult.error;
 			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
 			if (buildingConditionsResult.error) throw buildingConditionsResult.error;
+			if (effectsResult.error) throw effectsResult.error;
 
 			const conditionRecord: Record<ConditionId, Condition> = {};
 			for (const item of conditionsResult.data ?? []) {
@@ -85,14 +98,21 @@ function createConditionStore() {
 				buildingConditionRecord[item.id as BuildingConditionId] = item as BuildingCondition;
 			}
 
+			const effectRecord: Record<ConditionEffectId, ConditionEffect> = {};
+			for (const item of effectsResult.data ?? []) {
+				effectRecord[item.id as ConditionEffectId] = item as ConditionEffect;
+			}
+
 			conditionStore.set({ status: 'success', data: conditionRecord });
 			conditionFulfillmentStore.set({ status: 'success', data: fulfillmentRecord });
 			buildingConditionStore.set({ status: 'success', data: buildingConditionRecord });
+			conditionEffectStore.set({ status: 'success', data: effectRecord });
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			conditionStore.set({ status: 'error', data: {}, error: err });
 			conditionFulfillmentStore.set({ status: 'error', data: {}, error: err });
 			buildingConditionStore.set({ status: 'error', data: {}, error: err });
+			conditionEffectStore.set({ status: 'error', data: {}, error: err });
 		}
 	}
 
@@ -155,9 +175,7 @@ function createConditionStore() {
 		},
 
 		// ConditionFulfillment CRUD
-		async createConditionFulfillment(
-			fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>
-		) {
+		async createConditionFulfillment(fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useCondition: currentScenarioId is not set.');
 			}
@@ -234,7 +252,10 @@ function createConditionStore() {
 			return data;
 		},
 
-		async updateBuildingCondition(id: BuildingConditionId, buildingCondition: BuildingConditionUpdate) {
+		async updateBuildingCondition(
+			id: BuildingConditionId,
+			buildingCondition: BuildingConditionUpdate
+		) {
 			const { error } = await supabase
 				.from('building_conditions')
 				.update(buildingCondition)
@@ -262,6 +283,62 @@ function createConditionStore() {
 				})
 			);
 		},
+
+		// ConditionEffect CRUD
+		async createConditionEffect(
+			effect: Omit<ConditionEffectInsert, 'scenario_id' | 'condition_id'> & {
+				condition_id: ConditionId;
+			}
+		) {
+			if (!currentScenarioId) {
+				throw new Error('useCondition: currentScenarioId is not set.');
+			}
+
+			const { data, error } = await supabase
+				.from('condition_effects')
+				.insert({
+					...effect,
+					scenario_id: currentScenarioId,
+				})
+				.select()
+				.single<ConditionEffect>();
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ConditionEffectId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateConditionEffect(id: ConditionEffectId, effect: ConditionEffectUpdate) {
+			const { error } = await supabase.from('condition_effects').update(effect).eq('id', id);
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], effect);
+					}
+				})
+			);
+		},
+
+		async removeConditionEffect(id: ConditionEffectId) {
+			const { error } = await supabase.from('condition_effects').delete().eq('id', id);
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
 	};
 
 	return {
@@ -271,6 +348,9 @@ function createConditionStore() {
 		>,
 		buildingConditionStore: buildingConditionStore as Readable<
 			RecordFetchState<BuildingConditionId, BuildingCondition>
+		>,
+		conditionEffectStore: conditionEffectStore as Readable<
+			RecordFetchState<ConditionEffectId, ConditionEffect>
 		>,
 		dialogStore: dialogStore as Readable<ConditionDialogState>,
 		fetch,

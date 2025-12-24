@@ -28,4 +28,10 @@
 	</div>
 
 	<Handle type="source" position={Position.Right} />
+	<Handle
+		type="source"
+		position={Position.Bottom}
+		id="effect"
+		style="background-color: var(--color-red-500)"
+	/>
 </div>

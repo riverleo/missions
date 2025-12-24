@@ -10,6 +10,7 @@
 		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useBuilding } from '$lib/hooks/use-building';
@@ -54,6 +55,7 @@
 			.updateBuildingCondition(buildingConditionId, {
 				building_id: changes.building_id,
 				decrease_multiplier: changes.decrease_multiplier,
+				disabled_when_depleted: changes.disabled_when_depleted,
 			})
 			.then(() => {
 				// 선택 해제
@@ -97,7 +99,7 @@
 								<TooltipContent>
 									건물별 컨디션 감소 속도 배율입니다.
 									<br />
-									 기본값 1.0이며, 2.0은 두 배 빠르게 감소합니다.
+									기본값 1.0이며, 2.0은 두 배 빠르게 감소합니다.
 								</TooltipContent>
 							</Tooltip>
 						</InputGroupAddon>
@@ -111,6 +113,12 @@
 							<InputGroupText>배</InputGroupText>
 						</InputGroupAddon>
 					</InputGroup>
+					<label class="flex items-center gap-2 cursor-pointer">
+						<Checkbox bind:checked={changes.disabled_when_depleted} />
+						<span class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+							컨디션 고갈 시 건물 사용 불가
+						</span>
+					</label>
 					<div class="flex justify-end gap-2">
 						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
 							취소

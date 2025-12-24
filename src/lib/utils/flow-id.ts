@@ -9,6 +9,7 @@ import type {
 	Character,
 	CharacterNeed,
 	Condition,
+	ConditionEffect,
 	ConditionFulfillment,
 	ItemBehaviorAction,
 	NarrativeDiceRoll,
@@ -402,4 +403,34 @@ export function parseConditionFulfillmentEdgeId(edgeId: string): {
 
 export function isConditionFulfillmentEdgeId(edgeId: string): boolean {
 	return edgeId.startsWith('condition-fulfillment-');
+}
+
+// Condition Effect Node
+export function createConditionEffectNodeId(effect: ConditionEffect): string {
+	return `condition-effect-${effect.id}`;
+}
+
+export function parseConditionEffectNodeId(nodeId: string): string {
+	return nodeId.replace('condition-effect-', '');
+}
+
+export function isConditionEffectNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('condition-effect-');
+}
+
+// Condition-Effect Edge
+export function createConditionEffectEdgeId(effect: ConditionEffect): string {
+	return `condition-effect-${effect.condition_id}-${effect.id}`;
+}
+
+export function parseConditionEffectEdgeId(edgeId: string): {
+	conditionId: string;
+	effectId: string;
+} {
+	const parts = edgeId.replace('condition-effect-', '').split('-');
+	return { conditionId: parts[0] ?? '', effectId: parts[1] ?? '' };
+}
+
+export function isConditionEffectEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('condition-effect-');
 }

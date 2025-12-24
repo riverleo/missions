@@ -59,6 +59,7 @@ export type WorldBuildingId = Brand<string, 'WorldBuildingId'>;
 export type ConditionId = Brand<string, 'ConditionId'>;
 export type ConditionFulfillmentId = Brand<string, 'ConditionFulfillmentId'>;
 export type BuildingConditionId = Brand<string, 'BuildingConditionId'>;
+export type ConditionEffectId = Brand<string, 'ConditionEffectId'>;
 export type WorldBuildingConditionId = Brand<string, 'WorldBuildingConditionId'>;
 export type NeedId = Brand<string, 'NeedId'>;
 export type NeedFulfillmentId = Brand<string, 'NeedFulfillmentId'>;
@@ -571,7 +572,10 @@ export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'terrain_id'
 
 // WorldCharacter types
 type WorldCharacterRow = Tables<'world_characters'>;
-export type WorldCharacter = Omit<WorldCharacterRow, 'id' | 'world_id' | 'character_id' | 'player_id'> & {
+export type WorldCharacter = Omit<
+	WorldCharacterRow,
+	'id' | 'world_id' | 'character_id' | 'player_id'
+> & {
 	id: WorldCharacterId;
 	world_id: WorldId;
 	character_id: CharacterId;
@@ -634,7 +638,10 @@ export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'cre
 
 // WorldBuilding types
 type WorldBuildingRow = Tables<'world_buildings'>;
-export type WorldBuilding = Omit<WorldBuildingRow, 'id' | 'world_id' | 'building_id' | 'player_id'> & {
+export type WorldBuilding = Omit<
+	WorldBuildingRow,
+	'id' | 'world_id' | 'building_id' | 'player_id'
+> & {
 	id: WorldBuildingId;
 	world_id: WorldId;
 	building_id: BuildingId;
@@ -745,6 +752,42 @@ export type BuildingConditionUpdate = Omit<
 	scenario_id?: ScenarioId;
 	building_id?: BuildingId;
 	condition_id?: ConditionId;
+	created_by?: UserRoleId | null;
+};
+
+type ConditionEffectRow = Tables<'condition_effects'>;
+export type ConditionEffect = Omit<
+	ConditionEffectRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id: ConditionEffectId;
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	character_id: CharacterId | null;
+	need_id: NeedId;
+	created_by: UserRoleId | null;
+};
+type ConditionEffectInsertRow = TablesInsert<'condition_effects'>;
+export type ConditionEffectInsert = Omit<
+	ConditionEffectInsertRow,
+	'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	character_id?: CharacterId | null;
+	need_id: NeedId;
+	created_by?: UserRoleId | null;
+};
+type ConditionEffectUpdateRow = TablesUpdate<'condition_effects'>;
+export type ConditionEffectUpdate = Omit<
+	ConditionEffectUpdateRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id?: ConditionEffectId;
+	scenario_id?: ScenarioId;
+	condition_id?: ConditionId;
+	character_id?: CharacterId | null;
+	need_id?: NeedId;
 	created_by?: UserRoleId | null;
 };
 
@@ -904,7 +947,13 @@ export type CharacterNeedUpdate = Omit<
 type WorldCharacterNeedRow = Tables<'world_character_needs'>;
 export type WorldCharacterNeed = Omit<
 	WorldCharacterNeedRow,
-	'id' | 'world_id' | 'world_character_id' | 'character_id' | 'need_id' | 'player_id' | 'scenario_id'
+	| 'id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
 > & {
 	id: WorldCharacterNeedId;
 	world_id: WorldId;
@@ -929,7 +978,13 @@ export type WorldCharacterNeedInsert = Omit<
 type WorldCharacterNeedUpdateRow = TablesUpdate<'world_character_needs'>;
 export type WorldCharacterNeedUpdate = Omit<
 	WorldCharacterNeedUpdateRow,
-	'id' | 'world_id' | 'world_character_id' | 'character_id' | 'need_id' | 'player_id' | 'scenario_id'
+	| 'id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
 > & {
 	id?: WorldCharacterNeedId;
 	world_id?: WorldId;
@@ -942,7 +997,10 @@ export type WorldCharacterNeedUpdate = Omit<
 
 // NeedBehavior types
 type NeedBehaviorRow = Tables<'need_behaviors'>;
-export type NeedBehavior = Omit<NeedBehaviorRow, 'id' | 'scenario_id' | 'need_id' | 'created_by'> & {
+export type NeedBehavior = Omit<
+	NeedBehaviorRow,
+	'id' | 'scenario_id' | 'need_id' | 'created_by'
+> & {
 	id: NeedBehaviorId;
 	scenario_id: ScenarioId;
 	need_id: NeedId;
@@ -1084,7 +1142,10 @@ export type BuildingBehaviorAction = Omit<
 type BuildingBehaviorActionInsertRow = TablesInsert<'building_behavior_actions'>;
 export type BuildingBehaviorActionInsert = Omit<
 	BuildingBehaviorActionInsertRow,
-	'scenario_id' | 'behavior_id' | 'success_building_behavior_action_id' | 'failure_building_behavior_action_id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_building_behavior_action_id'
+	| 'failure_building_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	behavior_id: BuildingBehaviorId;
@@ -1169,7 +1230,10 @@ export type WorldItemUpdate = Omit<
 
 // ItemBehavior types
 type ItemBehaviorRow = Tables<'item_behaviors'>;
-export type ItemBehavior = Omit<ItemBehaviorRow, 'id' | 'scenario_id' | 'item_id' | 'created_by'> & {
+export type ItemBehavior = Omit<
+	ItemBehaviorRow,
+	'id' | 'scenario_id' | 'item_id' | 'created_by'
+> & {
 	id: ItemBehaviorId;
 	scenario_id: ScenarioId;
 	item_id: ItemId;
@@ -1210,7 +1274,10 @@ export type ItemBehaviorAction = Omit<
 type ItemBehaviorActionInsertRow = TablesInsert<'item_behavior_actions'>;
 export type ItemBehaviorActionInsert = Omit<
 	ItemBehaviorActionInsertRow,
-	'scenario_id' | 'behavior_id' | 'success_item_behavior_action_id' | 'failure_item_behavior_action_id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_item_behavior_action_id'
+	| 'failure_item_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	behavior_id: ItemBehaviorId;
