@@ -2,7 +2,6 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		BuildingBehaviorAction,
-		BuildingStateType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 		CharacterId,
@@ -30,7 +29,6 @@
 	import { BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import {
-		getBuildingStateLabel,
 		getCharacterBodyStateLabel,
 		getCharacterFaceStateLabel,
 	} from '$lib/utils/state-label';
@@ -51,7 +49,6 @@
 
 	const characters = $derived(Object.values($characterStore.data));
 
-	const buildingStateTypes: BuildingStateType[] = ['idle', 'damaged', 'planning'];
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
@@ -77,17 +74,12 @@
 			? $buildingStore.data[currentBehavior.building_id as BuildingId]
 			: undefined
 	);
-	// 건물 상태
+	// 건물 상태 (항상 idle 사용)
 	const buildingStates = $derived(
 		currentBuilding ? ($buildingStateStore.data[currentBuilding.id] ?? []) : []
 	);
-	const previewBuildingState = $derived(
-		buildingStates.find((s) => s.type === changes?.building_state_type)
-	);
+	const previewBuildingState = $derived(buildingStates.find((s) => s.type === 'idle'));
 
-	const selectedBuildingStateLabel = $derived(
-		changes?.building_state_type ? getBuildingStateLabel(changes.building_state_type) : '상태 선택'
-	);
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
 			? getCharacterBodyStateLabel(changes.character_body_state_type)
@@ -131,12 +123,6 @@
 		}
 	});
 
-	function onBuildingStateChange(value: string | undefined) {
-		if (changes) {
-			changes.building_state_type = (value as BuildingStateType) || null;
-		}
-	}
-
 	function onBodyStateChange(value: string | undefined) {
 		if (changes) {
 			changes.character_body_state_type = (value as CharacterBodyStateType) || null;
@@ -171,7 +157,6 @@
 
 			await admin.updateBuildingBehaviorAction(actionId, {
 				duration_ticks: changes.duration_ticks,
-				building_state_type: changes.building_state_type,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				offset_x: changes.offset_x,
@@ -231,25 +216,6 @@
 
 						<Separator />
 
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>건물 상태</ButtonGroupText>
-							<Select
-								type="single"
-								value={changes.building_state_type ?? ''}
-								onValueChange={onBuildingStateChange}
-							>
-								<SelectTrigger class="flex-1">
-									{selectedBuildingStateLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each buildingStateTypes as stateType (stateType)}
-										<SelectItem value={stateType}>
-											{getBuildingStateLabel(stateType)}
-										</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>캐릭터 바디</ButtonGroupText>
 							<Select

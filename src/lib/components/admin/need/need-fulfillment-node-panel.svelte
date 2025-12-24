@@ -3,7 +3,10 @@
 	import type {
 		NeedFulfillment,
 		NeedFulfillmentType,
-		NeedFulfillmentTaskCondition, BuildingId, CharacterId, ItemId,
+		NeedFulfillmentTaskCondition,
+		BuildingId,
+		CharacterId,
+		ItemId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -73,17 +76,26 @@
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
 	const selectedTargetLabel = $derived.by(() => {
-		if (changes?.fulfillment_type === 'building' && changes?.building_id) {
-			const building = buildings.find((b) => b.id === changes?.building_id);
-			return building?.name ?? '건물 선택';
+		if (changes?.fulfillment_type === 'building') {
+			if (changes?.building_id) {
+				const building = buildings.find((b) => b.id === changes?.building_id);
+				return building?.name ?? '건물 선택';
+			}
+			return '전체';
 		}
-		if (changes?.fulfillment_type === 'character' && changes?.character_id) {
-			const character = characters.find((c) => c.id === changes?.character_id);
-			return character?.name ?? '캐릭터 선택';
+		if (changes?.fulfillment_type === 'character') {
+			if (changes?.character_id) {
+				const character = characters.find((c) => c.id === changes?.character_id);
+				return character?.name ?? '캐릭터 선택';
+			}
+			return '전체';
 		}
-		if (changes?.fulfillment_type === 'item' && changes?.item_id) {
-			const item = items.find((i) => i.id === changes?.item_id);
-			return item?.name ?? '아이템 선택';
+		if (changes?.fulfillment_type === 'item') {
+			if (changes?.item_id) {
+				const item = items.find((i) => i.id === changes?.item_id);
+				return item?.name ?? '아이템 선택';
+			}
+			return '전체';
 		}
 		return '선택...';
 	});
@@ -110,7 +122,7 @@
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
 				task_condition: changes.fulfillment_type === 'task' ? changes.task_condition : null,
 				task_count: changes.fulfillment_type === 'task' ? changes.task_count : 1,
-				duration_ticks: changes.fulfillment_type === 'task' ? changes.duration_ticks : 0,
+				task_duration_ticks: changes.fulfillment_type === 'task' ? changes.task_duration_ticks : 0,
 				increase_per_tick: changes.increase_per_tick,
 			})
 			.then(() => {
@@ -154,13 +166,13 @@
 
 	function onTargetChange(value: string | undefined) {
 		if (!changes) return;
-		const id = value ?? null;
+		const id = value && value !== '' ? value : null;
 		if (changes.fulfillment_type === 'building') {
-			changes.building_id = id as BuildingId;
+			changes.building_id = id as BuildingId | null;
 		} else if (changes.fulfillment_type === 'character') {
-			changes.character_id = id as CharacterId;
+			changes.character_id = id as CharacterId | null;
 		} else if (changes.fulfillment_type === 'item') {
-			changes.item_id = id as ItemId;
+			changes.item_id = id as ItemId | null;
 		}
 	}
 
@@ -212,15 +224,12 @@
 
 						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
-								<Select
-									type="single"
-									value={selectedTargetId ?? undefined}
-									onValueChange={onTargetChange}
-								>
+								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
 										{selectedTargetLabel}
 									</SelectTrigger>
 									<SelectContent>
+										<SelectItem value="">전체</SelectItem>
 										{#each targetOptions as option (option.id)}
 											<SelectItem value={option.id}>{option.name}</SelectItem>
 										{/each}
@@ -268,7 +277,7 @@
 									type="number"
 									step="0.1"
 									min="0"
-									bind:value={changes.duration_ticks}
+									bind:value={changes.task_duration_ticks}
 								/>
 							</InputGroup>
 						{/if}

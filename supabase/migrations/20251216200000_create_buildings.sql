@@ -5,6 +5,7 @@ create table buildings (
   name text not null default '',
   tile_cols integer not null default 0,
   tile_rows integer not null default 0,
+  item_max_capacity integer not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 

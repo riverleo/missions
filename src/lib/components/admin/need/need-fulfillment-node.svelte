@@ -26,22 +26,22 @@
 				const building = fulfillment.building_id
 					? $buildingStore.data[fulfillment.building_id]
 					: undefined;
-				return building ? `${building.name} 사용` : '건물 미선택';
+				return building ? `${building.name} 사용` : '모든 건물';
 			}
 			case 'character': {
 				const character = fulfillment.character_id
 					? $characterStore.data[fulfillment.character_id]
 					: undefined;
-				return character ? `${character.name}과 상호작용` : '캐릭터 미선택';
+				return character ? `${character.name}과 상호작용` : '모든 캐릭터';
 			}
 			case 'item': {
 				const item = fulfillment.item_id ? $itemStore.data[fulfillment.item_id] : undefined;
-				return item ? `${item.name} 사용` : '아이템 미선택';
+				return item ? `${item.name} 사용` : '모든 아이템';
 			}
 			case 'task': {
 				const count = fulfillment.task_count ?? 1;
 				const condition = fulfillment.task_condition === 'created' ? '생성' : '완료';
-				const duration = fulfillment.duration_ticks ?? 0;
+				const duration = fulfillment.task_duration_ticks ?? 0;
 				return duration > 0
 					? `할 일 ${count}개 ${condition} (${duration}틱)`
 					: `할 일 ${count}개 ${condition}`;

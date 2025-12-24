@@ -53,9 +53,6 @@ create table building_behavior_actions (
   behavior_id uuid not null references building_behaviors(id) on delete cascade,
   root boolean not null default false,
 
-  -- 건물 상태
-  building_state_type building_state_type not null default 'idle',
-
   -- 캐릭터 상태
   character_body_state_type character_body_state_type not null default 'idle',
   character_face_state_type character_face_state_type not null default 'idle',

@@ -61,6 +61,7 @@
    - Matter.js 엔진, DOM 요소 등 외부 라이브러리 객체는 `$state()`가 아닌 `$state.raw()` 사용
    - `$state()`는 값을 Proxy로 감싸서 reactivity를 추적하는데, 외부 라이브러리 객체는 Proxy와 호환되지 않음
    - 예시:
+
      ```typescript
      // ❌ 나쁜 예: Proxy로 감싸져서 Matter.js가 제대로 동작하지 않음
      engine: Matter.Engine | undefined = $state(undefined);
@@ -70,12 +71,14 @@
      engine: Matter.Engine | undefined = $state.raw(undefined);
      container: HTMLDivElement | undefined = $state.raw(undefined);
      ```
+
    - **증상**: `===` 비교 시 같은 객체인데 `false` 반환, `state_proxy_equality_mismatch` 경고
 
 5. **Context는 컴포넌트 초기화 시점에만 접근 가능**
    - `createContext()`로 생성한 훅(예: `useWorld()`)은 컴포넌트 초기화 시점에만 호출 가능
    - 이벤트 핸들러나 클래스 메서드에서 직접 호출하면 context를 찾지 못함
    - 클래스에서 context가 필요하면 생성자로 전달:
+
      ```typescript
      // ❌ 나쁜 예: 메서드에서 context 호출 (이벤트 핸들러에서 실패)
      class Camera {
@@ -269,6 +272,7 @@
 **목적**: 컴파일 타임에 서로 다른 엔티티의 ID가 섞이는 것을 방지
 
 **브랜드 타입 정의**:
+
 ```typescript
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
@@ -279,6 +283,7 @@ export type ScenarioId = Brand<string, 'ScenarioId'>;
 ```
 
 **도메인 타입에 적용**:
+
 ```typescript
 // Row 타입 (Supabase에서 가져온 원본)
 type BuildingRow = Tables<'buildings'>;
@@ -307,6 +312,7 @@ export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'cre
 ```
 
 **Supabase 쿼리에서 제네릭 타입 사용**:
+
 ```typescript
 // ❌ 나쁜 예: 타입 캐스팅
 const { data, error } = await supabase
@@ -336,6 +342,7 @@ store.update((state) =>
 ```
 
 **타입 캐스팅 패턴**:
+
 ```typescript
 // Record 인덱싱 시
 const building = $buildingStore.data[buildingId as BuildingId];
@@ -351,11 +358,13 @@ const newId = crypto.randomUUID() as WorldId;
 ```
 
 **금지 사항**:
+
 - ❌ `as any` 사용 절대 금지 - 타입 안전성을 완전히 무시함
 - ❌ Insert/Update에서 일반 TablesInsert/TablesUpdate 직접 사용 금지
 - ❌ `.single()` 호출 후 `as Type` 캐스팅 금지 - 대신 `.single<Type>()` 사용
 
 **장점**:
+
 - 컴파일 타임에 잘못된 ID 사용 감지
 - IDE 자동완성으로 올바른 타입만 제안
 - 리팩토링 시 타입 에러로 놓친 부분 발견 가능
@@ -435,17 +444,18 @@ const newId = crypto.randomUUID() as WorldId;
   - ButtonGroup이나 InputGroup 안에 Button, Toggle, Select 등을 넣을 때 스타일을 커스텀하지 말 것
   - 이 컴포넌트들은 이미 그룹 내에서 적절한 스타일이 적용되도록 설계됨
   - 예시:
+
     ```svelte
     <!-- ❌ 나쁜 예: 스타일 커스텀 -->
     <ButtonGroup>
-      <Button variant="ghost" size="icon-sm" class="px-2">...</Button>
-      <SelectTrigger class="h-8 w-auto gap-1 border-0 px-2">...</SelectTrigger>
+    	<Button variant="ghost" size="icon-sm" class="px-2">...</Button>
+    	<SelectTrigger class="h-8 w-auto gap-1 border-0 px-2">...</SelectTrigger>
     </ButtonGroup>
 
     <!-- ✅ 좋은 예: 기본 스타일 사용 -->
     <ButtonGroup>
-      <Button>...</Button>
-      <SelectTrigger>...</SelectTrigger>
+    	<Button>...</Button>
+    	<SelectTrigger>...</SelectTrigger>
     </ButtonGroup>
     ```
 
@@ -499,6 +509,7 @@ const newId = crypto.randomUUID() as WorldId;
   - `bindStackEvent({ id, onkeydown, onkeyup })`: 이벤트 바인딩, **cleanup 함수 반환**
 
 - **컴포넌트에서 사용 패턴**:
+
   ```typescript
   // $effect로 cleanup 함수 자동 호출
   $effect(() =>
@@ -531,6 +542,7 @@ const newId = crypto.randomUUID() as WorldId;
   - `create{Type}EdgeId(...)`: 엣지 ID 생성
   - `is{Type}EdgeId(edgeId)`: 엣지 ID 타입 체크
 - **예시**:
+
   ```typescript
   // ❌ 나쁜 예: 컴포넌트에서 직접 ID 생성
   const nodeId = `need-${need.id}`;
@@ -541,6 +553,7 @@ const newId = crypto.randomUUID() as WorldId;
   const nodeId = createNeedNodeId(need);
   const entityId = parseNeedNodeId(nodeId);
   ```
+
 - **이점**:
   - ID 형식 변경 시 한 곳만 수정
   - 타입 안전성 보장
@@ -552,6 +565,7 @@ const newId = crypto.randomUUID() as WorldId;
 - 초기값: `{ status: 'idle', data: {} }`
 - `Object.values($store.data)`로 바로 사용 가능 (`?? {}` 불필요)
 - 예시:
+
   ```typescript
   // ✅ 좋은 예
   const items = $derived(Object.values($store.data));
@@ -603,12 +617,12 @@ const newId = crypto.randomUUID() as WorldId;
 
 캐릭터들은 여러 욕구(Needs)를 가지며, 각 욕구의 충족도에 따라 행동을 결정함
 
-| 욕구 | 설명 | 충족 방법 |
-|------|------|----------|
-| Hunger (배고픔) | 음식이 필요함 | 음식 건물에서 식사 |
-| Fatigue (피로) | 휴식이 필요함 | 집에서 수면 |
-| Faith (신앙) | 플레이어에 대한 믿음 | **할일 완료 시 상승** |
-| Happiness (행복) | 전반적인 만족도 | 다른 욕구 충족 시 상승 |
+| 욕구             | 설명                 | 충족 방법              |
+| ---------------- | -------------------- | ---------------------- |
+| Hunger (배고픔)  | 음식이 필요함        | 음식 건물에서 식사     |
+| Fatigue (피로)   | 휴식이 필요함        | 집에서 수면            |
+| Faith (신앙)     | 플레이어에 대한 믿음 | **할일 완료 시 상승**  |
+| Happiness (행복) | 전반적인 만족도      | 다른 욕구 충족 시 상승 |
 
 - **Faith가 핵심**: 다른 욕구는 게임 내에서 충족 가능하지만, Faith는 플레이어의 할일 완료에만 의존
 - Faith가 낮으면 캐릭터들이 절망하거나 떠날 수 있음
@@ -623,21 +637,25 @@ needs (욕구 정의)
 ```
 
 **needs 테이블**:
+
 - `scenario_id`: not null, 시나리오별 욕구 정의
 - `decay_per_tick`: tick당 감소량 (게임 루프에서 고정 간격으로 처리)
 - `max_value`, `initial_value`: 욕구 값 범위
 
 **need_fulfillments 테이블**:
+
 - 하나의 욕구에 여러 충족 방법 가능
 - `fulfillment_type`: enum (`'building'`, `'task'`, `'item'`, `'idle'`)
 - `building_id`: type이 `'building'`일 때 설정
 - `amount`: 충족 시 증가량
 
 **character_needs 테이블** (어드민 설정):
+
 - 캐릭터 타입이 어떤 욕구를 가지는지 정의
 - `decay_multiplier`: 캐릭터별 감소 속도 배율 (예: 농부는 1.5배 빨리 배고파짐)
 
 **world_character_needs 테이블** (런타임):
+
 - 월드에 배치된 캐릭터의 실제 욕구 값
 - `scenario_id`, `user_id`, `player_id`, `world_id`, `character_id`, `world_character_id`, `need_id`
 - `value`: 현재 충족도 (0 ~ max_value)
@@ -659,10 +677,9 @@ needs (욕구 정의)
 
 ### 기술 스택 (나라 뷰)
 
-| 역할 | 라이브러리 |
-|------|-----------|
-| 물리/위치 | Matter.js |
-| 상태 머신 | XState |
+| 역할       | 라이브러리                                               |
+| ---------- | -------------------------------------------------------- |
+| 물리/위치  | Matter.js                                                |
 | 애니메이션 | sprite-animator (`$lib/components/app/sprite-animator/`) |
 
 ### sprite-animator
@@ -697,7 +714,7 @@ needs (욕구 정의)
 ### Pathfinder (경로 탐색)
 
 - **위치**: `$lib/components/app/world/pathfinder.ts`
-- **라이브러리**: PathFinding.js (A* 알고리즘)
+- **라이브러리**: PathFinding.js (A\* 알고리즘)
 - **설정**:
   - `PATHFINDING_TILE_SIZE = 4` (경로 탐색용 타일 크기)
   - `allowDiagonal: false` (횡스크롤이므로 대각선 이동 없음)
@@ -739,6 +756,7 @@ needs (욕구 정의)
   });
   ```
 - **성능 고려**: 무거운 작업(SVG 파싱 등)과 가벼운 작업(스타일 변경 등)은 별도 $effect로 분리
+
   ```typescript
   // 무거운 작업: terrain 변경 시에만 실행
   $effect(() => { /* SVG 재로딩 */ });
@@ -775,12 +793,12 @@ needs (욕구 정의)
 - **메타데이터 형식**:
   ```json
   {
-    "type": "sprite",
-    "frameWidth": 1080,
-    "frameHeight": 1080,
-    "columns": 3,
-    "rows": 2,
-    "frameCount": 5
+  	"type": "sprite",
+  	"frameWidth": 1080,
+  	"frameHeight": 1080,
+  	"columns": 3,
+  	"rows": 2,
+  	"frameCount": 5
   }
   ```
 - **개발 모드**: 파일 변경 시 자동 재생성 + HMR

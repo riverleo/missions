@@ -106,7 +106,6 @@ export type Database = {
       building_behavior_actions: {
         Row: {
           behavior_id: string
-          building_state_type: Database["public"]["Enums"]["building_state_type"]
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks: number
@@ -120,7 +119,6 @@ export type Database = {
         }
         Insert: {
           behavior_id: string
-          building_state_type?: Database["public"]["Enums"]["building_state_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks?: number
@@ -134,7 +132,6 @@ export type Database = {
         }
         Update: {
           behavior_id?: string
-          building_state_type?: Database["public"]["Enums"]["building_state_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks?: number
@@ -229,6 +226,65 @@ export type Database = {
           },
         ]
       }
+      building_conditions: {
+        Row: {
+          building_id: string
+          condition_id: string
+          created_at: string
+          created_by: string | null
+          decrease_multiplier: number
+          id: string
+          scenario_id: string
+        }
+        Insert: {
+          building_id: string
+          condition_id: string
+          created_at?: string
+          created_by?: string | null
+          decrease_multiplier?: number
+          id?: string
+          scenario_id: string
+        }
+        Update: {
+          building_id?: string
+          condition_id?: string
+          created_at?: string
+          created_by?: string | null
+          decrease_multiplier?: number
+          id?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_conditions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_conditions_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_conditions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_conditions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       building_states: {
         Row: {
           atlas_name: string
@@ -275,6 +331,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          item_max_capacity: number
           name: string
           scenario_id: string
           tile_cols: number
@@ -284,6 +341,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          item_max_capacity?: number
           name?: string
           scenario_id: string
           tile_cols?: number
@@ -293,6 +351,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          item_max_capacity?: number
           name?: string
           scenario_id?: string
           tile_cols?: number
@@ -491,7 +550,7 @@ export type Database = {
           loop?: Database["public"]["Enums"]["loop_mode"]
           offset_x?: number
           offset_y?: number
-          type?: Database["public"]["Enums"]["character_face_state_type"]
+          type: Database["public"]["Enums"]["character_face_state_type"]
         }
         Update: {
           atlas_name?: string
@@ -616,6 +675,126 @@ export type Database = {
           },
           {
             foreignKeyName: "characters_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      condition_fulfillments: {
+        Row: {
+          character_id: string | null
+          condition_id: string
+          created_at: string
+          created_by: string | null
+          fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
+          id: string
+          increase_per_tick: number
+          item_id: string | null
+          scenario_id: string
+        }
+        Insert: {
+          character_id?: string | null
+          condition_id: string
+          created_at?: string
+          created_by?: string | null
+          fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
+          id?: string
+          increase_per_tick?: number
+          item_id?: string | null
+          scenario_id: string
+        }
+        Update: {
+          character_id?: string | null
+          condition_id?: string
+          created_at?: string
+          created_by?: string | null
+          fulfillment_type?: Database["public"]["Enums"]["condition_fulfillment_type"]
+          id?: string
+          increase_per_tick?: number
+          item_id?: string | null
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condition_fulfillments_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_fulfillments_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_fulfillments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_fulfillments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_fulfillments_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conditions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          decrease_per_tick: number
+          id: string
+          initial_value: number
+          max_value: number
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          decrease_per_tick?: number
+          id?: string
+          initial_value?: number
+          max_value?: number
+          name?: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          decrease_per_tick?: number
+          id?: string
+          initial_value?: number
+          max_value?: number
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conditions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conditions_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
@@ -1260,7 +1439,6 @@ export type Database = {
           character_id: string | null
           created_at: string
           created_by: string | null
-          duration_ticks: number
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id: string
           increase_per_tick: number
@@ -1271,13 +1449,13 @@ export type Database = {
             | Database["public"]["Enums"]["need_fulfillment_task_condition"]
             | null
           task_count: number
+          task_duration_ticks: number
         }
         Insert: {
           building_id?: string | null
           character_id?: string | null
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
           increase_per_tick?: number
@@ -1288,13 +1466,13 @@ export type Database = {
             | Database["public"]["Enums"]["need_fulfillment_task_condition"]
             | null
           task_count?: number
+          task_duration_ticks?: number
         }
         Update: {
           building_id?: string | null
           character_id?: string | null
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           fulfillment_type?: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
           increase_per_tick?: number
@@ -1305,6 +1483,7 @@ export type Database = {
             | Database["public"]["Enums"]["need_fulfillment_task_condition"]
             | null
           task_count?: number
+          task_duration_ticks?: number
         }
         Relationships: [
           {
@@ -2053,6 +2232,98 @@ export type Database = {
           },
         ]
       }
+      world_building_conditions: {
+        Row: {
+          building_condition_id: string
+          building_id: string
+          condition_id: string
+          created_at: string
+          id: string
+          player_id: string
+          scenario_id: string
+          user_id: string
+          value: number
+          world_building_id: string
+          world_id: string
+        }
+        Insert: {
+          building_condition_id: string
+          building_id: string
+          condition_id: string
+          created_at?: string
+          id?: string
+          player_id: string
+          scenario_id: string
+          user_id?: string
+          value?: number
+          world_building_id: string
+          world_id: string
+        }
+        Update: {
+          building_condition_id?: string
+          building_id?: string
+          condition_id?: string
+          created_at?: string
+          id?: string
+          player_id?: string
+          scenario_id?: string
+          user_id?: string
+          value?: number
+          world_building_id?: string
+          world_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_building_conditions_building_condition_id_fkey"
+            columns: ["building_condition_id"]
+            isOneToOne: false
+            referencedRelation: "building_conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_world_building_id_fkey"
+            columns: ["world_building_id"]
+            isOneToOne: false
+            referencedRelation: "world_buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_building_conditions_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       world_buildings: {
         Row: {
           building_id: string
@@ -2251,6 +2522,7 @@ export type Database = {
           rotation: number
           state: Database["public"]["Enums"]["item_state_type"]
           user_id: string
+          world_building_id: string | null
           world_id: string
           x: number
           y: number
@@ -2263,6 +2535,7 @@ export type Database = {
           rotation?: number
           state?: Database["public"]["Enums"]["item_state_type"]
           user_id?: string
+          world_building_id?: string | null
           world_id: string
           x?: number
           y?: number
@@ -2275,6 +2548,7 @@ export type Database = {
           rotation?: number
           state?: Database["public"]["Enums"]["item_state_type"]
           user_id?: string
+          world_building_id?: string | null
           world_id?: string
           x?: number
           y?: number
@@ -2292,6 +2566,13 @@ export type Database = {
             columns: ["player_id"]
             isOneToOne: false
             referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_items_world_building_id_fkey"
+            columns: ["world_building_id"]
+            isOneToOne: false
+            referencedRelation: "world_buildings"
             referencedColumns: ["id"]
           },
           {
@@ -2364,13 +2645,14 @@ export type Database = {
       building_state_type: "idle" | "damaged" | "planning"
       character_body_state_type: "idle" | "walk" | "run" | "jump"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
+      condition_fulfillment_type: "character" | "item" | "idle"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       item_state_type: "idle" | "rotten"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_behavior_action_type: "go" | "interact" | "idle"
       need_fulfillment_task_condition: "completed" | "created"
-      need_fulfillment_type: "building" | "task" | "item" | "idle" | "character"
+      need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
       player_scenario_status: "in_progress" | "completed"
@@ -2511,13 +2793,14 @@ export const Constants = {
       building_state_type: ["idle", "damaged", "planning"],
       character_body_state_type: ["idle", "walk", "run", "jump"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
+      condition_fulfillment_type: ["character", "item", "idle"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       item_state_type: ["idle", "rotten"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_behavior_action_type: ["go", "interact", "idle"],
       need_fulfillment_task_condition: ["completed", "created"],
-      need_fulfillment_type: ["building", "task", "item", "idle", "character"],
+      need_fulfillment_type: ["building", "character", "task", "item", "idle"],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],
       player_scenario_status: ["in_progress", "completed"],

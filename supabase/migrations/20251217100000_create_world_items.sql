@@ -5,6 +5,7 @@ create table world_items (
   player_id uuid not null references players(id) on delete cascade,
   world_id uuid not null references worlds(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
+  world_building_id uuid references world_buildings(id) on delete set null,
   state item_state_type not null default 'idle'::item_state_type,
   x float not null default 0,
   y float not null default 0,

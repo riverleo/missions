@@ -56,6 +56,10 @@ export type BuildingStateId = Brand<string, 'BuildingStateId'>;
 export type BuildingBehaviorId = Brand<string, 'BuildingBehaviorId'>;
 export type BuildingBehaviorActionId = Brand<string, 'BuildingBehaviorActionId'>;
 export type WorldBuildingId = Brand<string, 'WorldBuildingId'>;
+export type ConditionId = Brand<string, 'ConditionId'>;
+export type ConditionFulfillmentId = Brand<string, 'ConditionFulfillmentId'>;
+export type BuildingConditionId = Brand<string, 'BuildingConditionId'>;
+export type WorldBuildingConditionId = Brand<string, 'WorldBuildingConditionId'>;
 export type NeedId = Brand<string, 'NeedId'>;
 export type NeedFulfillmentId = Brand<string, 'NeedFulfillmentId'>;
 export type NeedBehaviorId = Brand<string, 'NeedBehaviorId'>;
@@ -654,6 +658,156 @@ export type WorldBuildingUpdate = Omit<
 	world_id?: WorldId;
 	building_id?: BuildingId;
 	player_id?: PlayerId;
+};
+
+// Condition types
+type ConditionRow = Tables<'conditions'>;
+export type Condition = Omit<ConditionRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: ConditionId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type ConditionInsertRow = TablesInsert<'conditions'>;
+export type ConditionInsert = Omit<ConditionInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type ConditionUpdateRow = TablesUpdate<'conditions'>;
+export type ConditionUpdate = Omit<ConditionUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: ConditionId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+export type ConditionFulfillmentType = Enums<'condition_fulfillment_type'>;
+type ConditionFulfillmentRow = Tables<'condition_fulfillments'>;
+export type ConditionFulfillment = Omit<
+	ConditionFulfillmentRow,
+	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+> & {
+	id: ConditionFulfillmentId;
+	condition_id: ConditionId;
+	scenario_id: ScenarioId;
+	character_id: CharacterId | null;
+	item_id: ItemId | null;
+	created_by: UserRoleId | null;
+};
+type ConditionFulfillmentInsertRow = TablesInsert<'condition_fulfillments'>;
+export type ConditionFulfillmentInsert = Omit<
+	ConditionFulfillmentInsertRow,
+	'condition_id' | 'scenario_id' | 'character_id' | 'item_id'
+> & {
+	condition_id: ConditionId;
+	scenario_id: ScenarioId;
+	character_id?: CharacterId | null;
+	item_id?: ItemId | null;
+};
+type ConditionFulfillmentUpdateRow = TablesUpdate<'condition_fulfillments'>;
+export type ConditionFulfillmentUpdate = Omit<
+	ConditionFulfillmentUpdateRow,
+	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+> & {
+	id?: ConditionFulfillmentId;
+	condition_id?: ConditionId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId | null;
+	item_id?: ItemId | null;
+	created_by?: UserRoleId | null;
+};
+
+type BuildingConditionRow = Tables<'building_conditions'>;
+export type BuildingCondition = Omit<
+	BuildingConditionRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	id: BuildingConditionId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	created_by: UserRoleId | null;
+};
+type BuildingConditionInsertRow = TablesInsert<'building_conditions'>;
+export type BuildingConditionInsert = Omit<
+	BuildingConditionInsertRow,
+	'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	created_by?: UserRoleId | null;
+};
+type BuildingConditionUpdateRow = TablesUpdate<'building_conditions'>;
+export type BuildingConditionUpdate = Omit<
+	BuildingConditionUpdateRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	id?: BuildingConditionId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	condition_id?: ConditionId;
+	created_by?: UserRoleId | null;
+};
+
+type WorldBuildingConditionRow = Tables<'world_building_conditions'>;
+export type WorldBuildingCondition = Omit<
+	WorldBuildingConditionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	id: WorldBuildingConditionId;
+	scenario_id: ScenarioId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	world_building_id: WorldBuildingId;
+	building_id: BuildingId;
+	building_condition_id: BuildingConditionId;
+	condition_id: ConditionId;
+};
+type WorldBuildingConditionInsertRow = TablesInsert<'world_building_conditions'>;
+export type WorldBuildingConditionInsert = Omit<
+	WorldBuildingConditionInsertRow,
+	| 'scenario_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	scenario_id: ScenarioId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	world_building_id: WorldBuildingId;
+	building_id: BuildingId;
+	building_condition_id: BuildingConditionId;
+	condition_id: ConditionId;
+};
+type WorldBuildingConditionUpdateRow = TablesUpdate<'world_building_conditions'>;
+export type WorldBuildingConditionUpdate = Omit<
+	WorldBuildingConditionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	id?: WorldBuildingConditionId;
+	scenario_id?: ScenarioId;
+	player_id?: PlayerId;
+	world_id?: WorldId;
+	world_building_id?: WorldBuildingId;
+	building_id?: BuildingId;
+	building_condition_id?: BuildingConditionId;
+	condition_id?: ConditionId;
 };
 
 // Need types
