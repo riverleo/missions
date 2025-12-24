@@ -15,11 +15,7 @@
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
-	import {
-		createActionNodeId,
-		parseActionNodeId,
-		isActionSuccessEdgeId,
-	} from '$lib/utils/flow-id';
+	import { createActionNodeId, parseActionNodeId, isActionSuccessEdgeId } from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
@@ -179,9 +175,7 @@
 
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newAction) {
-				nodes = nodes.map((n) =>
-					n.id === createActionNodeId(newAction) ? { ...n, position } : n
-				);
+				nodes = nodes.map((n) => (n.id === createActionNodeId(newAction) ? { ...n, position } : n));
 			}
 		} catch (error) {
 			skipConvertEffect = false;
@@ -203,8 +197,7 @@
 				const isSuccess = isActionSuccessEdgeId(edge.id);
 
 				await admin.updateNeedBehaviorAction(sourceId as NeedBehaviorActionId, {
-					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
-						null,
+					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']: null,
 				});
 			}
 
@@ -260,9 +253,7 @@
 		// 성공/실패 엣지
 		actions.forEach((action) => {
 			if (action.success_need_behavior_action_id) {
-				const targetAction = actions.find(
-					(a) => a.id === action.success_need_behavior_action_id
-				);
+				const targetAction = actions.find((a) => a.id === action.success_need_behavior_action_id);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createActionNodeId(action)}-success-${createActionNodeId(targetAction)}`,
@@ -277,9 +268,7 @@
 			}
 
 			if (action.failure_need_behavior_action_id) {
-				const targetAction = actions.find(
-					(a) => a.id === action.failure_need_behavior_action_id
-				);
+				const targetAction = actions.find((a) => a.id === action.failure_need_behavior_action_id);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createActionNodeId(action)}-failure-${createActionNodeId(targetAction)}`,

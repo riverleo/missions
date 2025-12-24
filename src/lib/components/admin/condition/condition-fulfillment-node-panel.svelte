@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
-	import type { ConditionFulfillment, ConditionFulfillmentType, CharacterId, ItemId } from '$lib/types';
+	import type {
+		ConditionFulfillment,
+		ConditionFulfillmentType,
+		CharacterId,
+		ItemId,
+	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -87,7 +92,9 @@
 			.then(() => {
 				// 선택 해제
 				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === `condition-fulfillment-${fulfillmentId}` ? { ...n, selected: false } : n))
+					ns.map((n) =>
+						n.id === `condition-fulfillment-${fulfillmentId}` ? { ...n, selected: false } : n
+					)
 				);
 			})
 			.catch((error: Error) => {
@@ -102,7 +109,9 @@
 		if (!fulfillment) return;
 
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === `condition-fulfillment-${fulfillment.id}` ? { ...n, selected: false } : n))
+			ns.map((n) =>
+				n.id === `condition-fulfillment-${fulfillment.id}` ? { ...n, selected: false } : n
+			)
 		);
 	}
 

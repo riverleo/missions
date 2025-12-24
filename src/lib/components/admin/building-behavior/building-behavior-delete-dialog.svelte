@@ -62,8 +62,9 @@
 		<DialogHeader>
 			<DialogTitle>건물 행동 삭제</DialogTitle>
 			<DialogDescription>
-				정말로 "{building?.name}" 건물의 "{behavior ? getBuildingBehaviorTypeLabel(behavior.type) : ''}"
-				행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+				정말로 "{building?.name}" 건물의 "{behavior
+					? getBuildingBehaviorTypeLabel(behavior.type)
+					: ''}" 행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
 			</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>

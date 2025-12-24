@@ -23,9 +23,7 @@
 		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined
 	);
 	const behavior = $derived(behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined);
-	const item = $derived(
-		behavior?.item_id ? $itemStore.data[behavior.item_id] : undefined
-	);
+	const item = $derived(behavior?.item_id ? $itemStore.data[behavior.item_id] : undefined);
 	const open = $derived($dialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);

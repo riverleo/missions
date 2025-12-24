@@ -16,7 +16,9 @@
 	const { conditionStore, dialogStore, closeDialog, admin } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const conditionId = $derived($dialogStore?.type === 'delete' ? $dialogStore.conditionId : undefined);
+	const conditionId = $derived(
+		$dialogStore?.type === 'delete' ? $dialogStore.conditionId : undefined
+	);
 	const condition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
 	const open = $derived($dialogStore?.type === 'delete');
 

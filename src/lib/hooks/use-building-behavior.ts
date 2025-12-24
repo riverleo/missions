@@ -171,7 +171,10 @@ function createBuildingBehaviorStore() {
 			return data;
 		},
 
-		async updateBuildingBehaviorAction(id: BuildingBehaviorActionId, action: BuildingBehaviorActionUpdate) {
+		async updateBuildingBehaviorAction(
+			id: BuildingBehaviorActionId,
+			action: BuildingBehaviorActionUpdate
+		) {
 			const { error } = await supabase
 				.from('building_behavior_actions')
 				.update(action)

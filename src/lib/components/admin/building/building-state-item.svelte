@@ -27,7 +27,10 @@
 		if (buildingState) {
 			await admin.updateBuildingState(buildingState.id, buildingId as BuildingId, change);
 		} else if (change.atlas_name) {
-			await admin.createBuildingState(buildingId as BuildingId, { type, atlas_name: change.atlas_name });
+			await admin.createBuildingState(buildingId as BuildingId, {
+				type,
+				atlas_name: change.atlas_name,
+			});
 		}
 
 		// 타일 값이 0이면 atlas 크기로 자동 계산
@@ -48,7 +51,13 @@
 	}
 </script>
 
-<SpriteStateItem {type} label={getBuildingStateLabel(type)} spriteState={buildingState} {onchange} {ondelete}>
+<SpriteStateItem
+	{type}
+	label={getBuildingStateLabel(type)}
+	spriteState={buildingState}
+	{onchange}
+	{ondelete}
+>
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && building}
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

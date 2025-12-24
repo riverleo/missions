@@ -40,10 +40,7 @@
 						class="group pr-1"
 					>
 						<IconCheck
-							class={cn(
-								'mr-2 size-4',
-								item.id === currentItemId ? 'opacity-100' : 'opacity-0'
-							)}
+							class={cn('mr-2 size-4', item.id === currentItemId ? 'opacity-100' : 'opacity-0')}
 						/>
 						<span class="flex-1 truncate">
 							{item.name || `이름없음 (${item.id.split('-')[0]})`}
@@ -63,14 +60,10 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'update', itemId: item.id })}
-								>
+								<DropdownMenuItem onclick={() => openDialog({ type: 'update', itemId: item.id })}>
 									수정
 								</DropdownMenuItem>
-								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', itemId: item.id })}
-								>
+								<DropdownMenuItem onclick={() => openDialog({ type: 'delete', itemId: item.id })}>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

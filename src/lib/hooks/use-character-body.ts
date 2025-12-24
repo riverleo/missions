@@ -63,7 +63,8 @@ function createCharacterBodyStore() {
 			for (const item of data ?? []) {
 				const { character_body_states, ...body } = item;
 				bodyRecord[item.id as CharacterBodyId] = body as CharacterBody;
-				stateRecord[item.id as CharacterBodyId] = (character_body_states ?? []) as CharacterBodyState[];
+				stateRecord[item.id as CharacterBodyId] = (character_body_states ??
+					[]) as CharacterBodyState[];
 			}
 
 			store.set({
@@ -245,7 +246,9 @@ function createCharacterBodyStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<CharacterBodyId, CharacterBody>>,
-		bodyStateStore: bodyStateStore as Readable<RecordFetchState<CharacterBodyId, CharacterBodyState[]>>,
+		bodyStateStore: bodyStateStore as Readable<
+			RecordFetchState<CharacterBodyId, CharacterBodyState[]>
+		>,
 		dialogStore: dialogStore as Readable<CharacterBodyDialogState>,
 		fetch,
 		openDialog,

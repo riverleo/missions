@@ -4,11 +4,12 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
+	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingCommand from './building-command.svelte';
 	import BuildingCreateDialog from './building-create-dialog.svelte';
+	import BuildingUpdateDialog from './building-update-dialog.svelte';
 	import BuildingDeleteDialog from './building-delete-dialog.svelte';
 
 	const { openDialog } = useBuilding();
@@ -48,6 +49,24 @@
 					</TooltipTrigger>
 					<TooltipContent>새로운 건물</TooltipContent>
 				</Tooltip>
+				<Tooltip>
+					<TooltipTrigger>
+						{#snippet child({ props })}
+							<Button
+								{...props}
+								variant="outline"
+								size="icon"
+								disabled={!currentBuildingId}
+								onclick={() =>
+									currentBuildingId &&
+									openDialog({ type: 'update', buildingId: currentBuildingId as BuildingId })}
+							>
+								<IconEditCircle class="size-4" />
+							</Button>
+						{/snippet}
+					</TooltipTrigger>
+					<TooltipContent>건물 수정</TooltipContent>
+				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
 		<ButtonGroup>
@@ -78,4 +97,5 @@
 </aside>
 
 <BuildingCreateDialog />
+<BuildingUpdateDialog />
 <BuildingDeleteDialog />

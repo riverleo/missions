@@ -34,7 +34,7 @@
 	);
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 
-	const behaviorTypes: BuildingBehaviorType[] = ['demolish', 'use', 'repair', 'refill'];
+	const behaviorTypes: BuildingBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
 
 	let description = $state('');
 	let buildingId = $state<string | undefined>(undefined);

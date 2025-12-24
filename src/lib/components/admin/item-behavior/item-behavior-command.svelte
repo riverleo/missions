@@ -60,7 +60,7 @@
 								{item?.name}
 							</span>
 							{#if behavior.description}
-								<span class="text-muted-foreground text-xs truncate">
+								<span class="truncate text-xs text-muted-foreground">
 									{behavior.description}
 								</span>
 							{/if}

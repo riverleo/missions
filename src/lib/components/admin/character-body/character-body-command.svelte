@@ -40,10 +40,7 @@
 						class="group pr-1"
 					>
 						<IconCheck
-							class={cn(
-								'mr-2 size-4',
-								body.id === currentBodyId ? 'opacity-100' : 'opacity-0'
-							)}
+							class={cn('mr-2 size-4', body.id === currentBodyId ? 'opacity-100' : 'opacity-0')}
 						/>
 						<span class="flex-1 truncate">
 							{body.name || `이름없음 (${body.id.split('-')[0]})`}
@@ -63,9 +60,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', bodyId: body.id })}
-								>
+								<DropdownMenuItem onclick={() => openDialog({ type: 'delete', bodyId: body.id })}>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

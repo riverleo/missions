@@ -53,7 +53,8 @@
 			<DialogTitle>바디 삭제</DialogTitle>
 			<DialogDescription>
 				{#if bodyToDelete}
-					<strong>{bodyToDelete.name || '이름없음'}</strong> 바디를 삭제하시겠습니까?
+					<strong>{bodyToDelete.name || '이름없음'}</strong>
+					바디를 삭제하시겠습니까?
 					<br />
 					이 바디를 사용하는 캐릭터가 있다면 삭제할 수 없습니다.
 				{:else}

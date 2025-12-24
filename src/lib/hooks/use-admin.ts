@@ -1,5 +1,10 @@
 import { get, writable } from 'svelte/store';
-import type { PlayerRolledDice, NarrativeNode, NarrativeDiceRoll, PlayerRolledDiceId } from '$lib/types';
+import type {
+	PlayerRolledDice,
+	NarrativeNode,
+	NarrativeDiceRoll,
+	PlayerRolledDiceId,
+} from '$lib/types';
 import { useCurrentUser } from './use-current-user';
 
 export type AdminMode = 'admin' | 'player';

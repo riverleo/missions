@@ -32,7 +32,9 @@
 	const { needStore } = useNeed();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const behaviorId = $derived($dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined);
+	const behaviorId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined
+	);
 	const currentBehavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
 
@@ -122,9 +124,7 @@
 								<InputGroupButton {...props} variant="ghost">임계값</InputGroupButton>
 							{/snippet}
 						</TooltipTrigger>
-						<TooltipContent>
-							욕구가 이 값 이하로 떨어지면 행동이 발동됩니다
-						</TooltipContent>
+						<TooltipContent>욕구가 이 값 이하로 떨어지면 행동이 발동됩니다</TooltipContent>
 					</Tooltip>
 				</InputGroupAddon>
 				<InputGroupInput

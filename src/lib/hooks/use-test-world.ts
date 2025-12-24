@@ -1,5 +1,15 @@
 import { writable, get } from 'svelte/store';
-import type { Terrain, Character, WorldCharacter, Building, WorldBuilding, WorldCharacterId, WorldBuildingId, WorldId, PlayerId } from '$lib/types';
+import type {
+	Terrain,
+	Character,
+	WorldCharacter,
+	Building,
+	WorldBuilding,
+	WorldCharacterId,
+	WorldBuildingId,
+	WorldId,
+	PlayerId,
+} from '$lib/types';
 import { TILE_SIZE } from '$lib/components/app/world/constants';
 import { browser } from '$app/environment';
 

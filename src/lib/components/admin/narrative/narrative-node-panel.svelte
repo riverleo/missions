@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { Panel, useNodes, useEdges } from '@xyflow/svelte';
-	import type { NarrativeNode, BulkChanges, NarrativeNodeChoice, NarrativeNodeChoiceId } from '$lib/types';
+	import type {
+		NarrativeNode,
+		BulkChanges,
+		NarrativeNodeChoice,
+		NarrativeNodeChoiceId,
+	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		DropdownMenu,
@@ -100,7 +105,9 @@
 					...narrativeNodeChoicesChanges.updated.map((choice) =>
 						admin.updateChoice(choice.id as NarrativeNodeChoiceId, choice)
 					),
-					...narrativeNodeChoicesChanges.deleted.map((id) => admin.removeChoice(id as NarrativeNodeChoiceId)),
+					...narrativeNodeChoicesChanges.deleted.map((id) =>
+						admin.removeChoice(id as NarrativeNodeChoiceId)
+					),
 				]);
 			}
 

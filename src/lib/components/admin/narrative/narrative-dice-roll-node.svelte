@@ -14,7 +14,9 @@
 	const narrativeDiceRoll = $derived(data.narrativeDiceRoll);
 </script>
 
-<div class="h-12 w-12 bg-neutral-300 rounded-sm flex items-center justify-center text-2xl gap-1 text-neutral-900">
+<div
+	class="flex h-12 w-12 items-center justify-center gap-1 rounded-sm bg-neutral-300 text-2xl text-neutral-900"
+>
 	<!-- 입력 핸들 (narrative_node에서 연결) -->
 	<Handle type="target" position={Position.Left} />
 

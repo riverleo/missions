@@ -57,7 +57,8 @@
 								variant="outline"
 								size="icon"
 								disabled={!currentNeedId}
-								onclick={() => currentNeedId && openDialog({ type: 'update', needId: currentNeedId as NeedId })}
+								onclick={() =>
+									currentNeedId && openDialog({ type: 'update', needId: currentNeedId as NeedId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -76,7 +77,8 @@
 							variant="outline"
 							size="icon"
 							disabled={!currentNeedId}
-							onclick={() => currentNeedId && openDialog({ type: 'delete', needId: currentNeedId as NeedId })}
+							onclick={() =>
+								currentNeedId && openDialog({ type: 'delete', needId: currentNeedId as NeedId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

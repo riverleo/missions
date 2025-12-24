@@ -54,6 +54,7 @@ create table condition_fulfillments (
   condition_id uuid not null references conditions(id) on delete cascade,
 
   fulfillment_type condition_fulfillment_type not null,
+  building_behavior_type building_behavior_type not null default 'use',
   character_id uuid references characters(id) on delete set null,
   item_id uuid references items(id) on delete set null,
   increase_per_tick float not null default 0,

@@ -1,8 +1,17 @@
-import type { NarrativeDiceRollInsert, NarrativeDiceRollUpdate, Supabase, NarrativeDiceRollId, NarrativeDiceRoll } from '$lib/types';
+import type {
+	NarrativeDiceRollInsert,
+	NarrativeDiceRollUpdate,
+	Supabase,
+	NarrativeDiceRollId,
+	NarrativeDiceRoll,
+} from '$lib/types';
 import type { NarrativeDiceRollStore } from '.';
 import { produce } from 'immer';
 
-export const fetchNarrativeDiceRolls = async (supabase: Supabase, store: NarrativeDiceRollStore) => {
+export const fetchNarrativeDiceRolls = async (
+	supabase: Supabase,
+	store: NarrativeDiceRollStore
+) => {
 	store.update((state) => ({ ...state, status: 'loading' }));
 
 	try {

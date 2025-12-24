@@ -7,11 +7,7 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import {
-		InputGroup,
-		InputGroupInput,
-		InputGroupAddon,
-	} from '$lib/components/ui/input-group';
+	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { goto } from '$app/navigation';

@@ -14,7 +14,9 @@
 	const { store, admin, dialogStore, closeDialog } = useScenario();
 
 	const open = $derived($dialogStore?.type === 'publish');
-	const scenarioId = $derived($dialogStore?.type === 'publish' ? $dialogStore.scenarioId : undefined);
+	const scenarioId = $derived(
+		$dialogStore?.type === 'publish' ? $dialogStore.scenarioId : undefined
+	);
 	const currentScenario = $derived(scenarioId ? $store.data?.[scenarioId] : undefined);
 	const isPublished = $derived(currentScenario?.status === 'published');
 

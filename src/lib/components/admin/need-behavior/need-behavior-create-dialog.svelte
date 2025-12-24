@@ -124,9 +124,7 @@
 								<InputGroupButton {...props} variant="ghost">임계값</InputGroupButton>
 							{/snippet}
 						</TooltipTrigger>
-						<TooltipContent>
-							욕구가 이 값 이하로 떨어지면 행동이 발동됩니다
-						</TooltipContent>
+						<TooltipContent>욕구가 이 값 이하로 떨어지면 행동이 발동됩니다</TooltipContent>
 					</Tooltip>
 				</InputGroupAddon>
 				<InputGroupInput

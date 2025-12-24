@@ -35,4 +35,10 @@
 	}
 </script>
 
-<SpriteStateItem {type} label={getItemStateLabel(type)} spriteState={itemState} {onchange} {ondelete} />
+<SpriteStateItem
+	{type}
+	label={getItemStateLabel(type)}
+	spriteState={itemState}
+	{onchange}
+	{ondelete}
+/>

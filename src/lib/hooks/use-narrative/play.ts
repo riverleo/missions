@@ -73,7 +73,12 @@ export const roll = (params: Params) => {
 		const { mode } = get(adminStore);
 
 		if (!user?.id || !currentPlayer?.id || !narrativeNode || !narrativeDiceRoll) {
-			console.warn('Missing required data:', { user, currentPlayer, narrativeNode, narrativeDiceRoll });
+			console.warn('Missing required data:', {
+				user,
+				currentPlayer,
+				narrativeNode,
+				narrativeDiceRoll,
+			});
 			return;
 		}
 
@@ -150,7 +155,8 @@ export const next = (params: Params) => (narrativeNodeChoiceId?: string) => {
 	let narrativeDiceRollId: string | null = null;
 
 	if (narrativeNode.type === 'choice' && narrativeNodeChoiceId) {
-		const narrativeNodeChoice = narrativeNodeChoices[narrativeNodeChoiceId as NarrativeNodeChoiceId];
+		const narrativeNodeChoice =
+			narrativeNodeChoices[narrativeNodeChoiceId as NarrativeNodeChoiceId];
 
 		narrativeDiceRollId = narrativeNodeChoice?.narrative_dice_roll_id ?? null;
 	} else if (narrativeNode.type === 'text') {

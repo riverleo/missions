@@ -32,9 +32,7 @@
 	const behavior = $derived(behaviorId ? $buildingBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($buildingBehaviorActionStore.data).filter(
-					(a) => a.behavior_id === behaviorId
-				)
+			? Object.values($buildingBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
 			: []
 	);
 
@@ -108,9 +106,8 @@
 			const isSuccess = connection.sourceHandle === 'success';
 
 			await admin.updateBuildingBehaviorAction(sourceId as BuildingBehaviorActionId, {
-				[isSuccess
-					? 'success_building_behavior_action_id'
-					: 'failure_building_behavior_action_id']: targetId,
+				[isSuccess ? 'success_building_behavior_action_id' : 'failure_building_behavior_action_id']:
+					targetId,
 			});
 
 			edges = [
@@ -170,9 +167,8 @@
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
 			await admin.updateBuildingBehaviorAction(fromActionId as BuildingBehaviorActionId, {
-				[isSuccess
-					? 'success_building_behavior_action_id'
-					: 'failure_building_behavior_action_id']: newAction.id,
+				[isSuccess ? 'success_building_behavior_action_id' : 'failure_building_behavior_action_id']:
+					newAction.id,
 			});
 
 			skipConvertEffect = false;

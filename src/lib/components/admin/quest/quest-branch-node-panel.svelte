@@ -3,11 +3,7 @@
 	import type { QuestBranch } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
-	import {
-		InputGroup,
-		InputGroupInput,
-		InputGroupAddon,
-	} from '$lib/components/ui/input-group';
+	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
@@ -87,7 +83,11 @@
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
 
-							<InputGroupInput bind:ref={titleInputRef} bind:value={changes.title} placeholder="제목을 입력하세요" />
+							<InputGroupInput
+								bind:ref={titleInputRef}
+								bind:value={changes.title}
+								placeholder="제목을 입력하세요"
+							/>
 						</InputGroup>
 						<InputGroup>
 							<InputGroupAddon align="inline-start">

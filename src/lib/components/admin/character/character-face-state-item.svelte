@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { CharacterFaceStateType, CharacterId, CharacterBodyId, CharacterFaceState } from '$lib/types';
+	import type {
+		CharacterFaceStateType,
+		CharacterId,
+		CharacterBodyId,
+		CharacterFaceState,
+	} from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
@@ -33,7 +38,9 @@
 	// 선택된 바디 상태 가져오기
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-	const bodyStates = $derived(character ? ($bodyStateStore.data[character.body_id as CharacterBodyId] ?? []) : []);
+	const bodyStates = $derived(
+		character ? ($bodyStateStore.data[character.body_id as CharacterBodyId] ?? []) : []
+	);
 	const previewBodyState = $derived(bodyStates.find((s) => s.type === previewBodyStateType));
 
 	let offsetX = $state('');
@@ -51,7 +58,10 @@
 		if (faceState) {
 			await admin.updateCharacterFaceState(faceState.id, characterId as CharacterId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterFaceState(characterId as CharacterId, { type, atlas_name: change.atlas_name });
+			await admin.createCharacterFaceState(characterId as CharacterId, {
+				type,
+				atlas_name: change.atlas_name,
+			});
 		}
 	}
 

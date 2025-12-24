@@ -16,6 +16,7 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type BuildingDialogState =
 	| { type: 'create' }
+	| { type: 'update'; buildingId: BuildingId }
 	| { type: 'delete'; buildingId: BuildingId }
 	| undefined;
 
@@ -174,7 +175,10 @@ function createBuildingStore() {
 			);
 		},
 
-		async createBuildingState(buildingId: BuildingId, state: Omit<BuildingStateInsert, 'building_id'>) {
+		async createBuildingState(
+			buildingId: BuildingId,
+			state: Omit<BuildingStateInsert, 'building_id'>
+		) {
 			const { data, error } = await supabase
 				.from('building_states')
 				.insert({
@@ -199,11 +203,12 @@ function createBuildingStore() {
 			return data;
 		},
 
-		async updateBuildingState(stateId: BuildingStateId, buildingId: BuildingId, updates: BuildingStateUpdate) {
-			const { error } = await supabase
-				.from('building_states')
-				.update(updates)
-				.eq('id', stateId);
+		async updateBuildingState(
+			stateId: BuildingStateId,
+			buildingId: BuildingId,
+			updates: BuildingStateUpdate
+		) {
+			const { error } = await supabase.from('building_states').update(updates).eq('id', stateId);
 
 			if (error) throw error;
 

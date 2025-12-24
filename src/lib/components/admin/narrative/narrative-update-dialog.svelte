@@ -18,9 +18,7 @@
 	const narrativeId = $derived(
 		$adminStore.dialog?.type === 'update' ? $adminStore.dialog.narrativeId : undefined
 	);
-	const currentNarrative = $derived(
-		narrativeId ? $narrativeStore.data?.[narrativeId] : undefined
-	);
+	const currentNarrative = $derived(narrativeId ? $narrativeStore.data?.[narrativeId] : undefined);
 
 	let title = $state('');
 	let isSubmitting = $state(false);

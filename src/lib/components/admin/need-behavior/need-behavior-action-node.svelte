@@ -64,7 +64,6 @@
 		}
 		return action.type;
 	});
-
 </script>
 
 <div class="min-w-44 px-3 py-2">

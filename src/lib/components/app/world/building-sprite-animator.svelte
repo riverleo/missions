@@ -15,7 +15,15 @@
 		characterOffset?: { x: number; y: number };
 	}
 
-	let { x, y, angle = 0, buildingState, characterBodyState, characterFaceState, characterOffset = { x: 0, y: 0 } }: Props = $props();
+	let {
+		x,
+		y,
+		angle = 0,
+		buildingState,
+		characterBodyState,
+		characterFaceState,
+		characterOffset = { x: 0, y: 0 },
+	}: Props = $props();
 
 	const world = useWorld();
 
@@ -27,7 +35,7 @@
 	const rotation = $derived(`${angle}rad`);
 
 	// 건물 스프라이트 프레임 크기
-	const buildingSpriteHeight = $derived(animator ? animator.getMetadata()?.frameHeight ?? 0 : 0);
+	const buildingSpriteHeight = $derived(animator ? (animator.getMetadata()?.frameHeight ?? 0) : 0);
 
 	// 건물 중앙 바닥점 기준 캐릭터 위치 (퍼센트)
 	// 건물 position은 중앙이므로, y + height/2가 바닥

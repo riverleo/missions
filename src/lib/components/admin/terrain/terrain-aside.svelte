@@ -60,7 +60,8 @@
 							size="icon"
 							disabled={!currentTerrainId}
 							onclick={() =>
-								currentTerrainId && openDialog({ type: 'delete', terrainId: currentTerrainId as TerrainId })}
+								currentTerrainId &&
+								openDialog({ type: 'delete', terrainId: currentTerrainId as TerrainId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

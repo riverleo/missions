@@ -60,7 +60,8 @@
 							size="icon"
 							disabled={!currentBodyId}
 							onclick={() =>
-								currentBodyId && openDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
+								currentBodyId &&
+								openDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

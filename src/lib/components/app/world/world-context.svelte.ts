@@ -1,12 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type {
-	Supabase,
-	Terrain,
-	WorldCharacter,
-	WorldBuilding,
-	Building,
-} from '$lib/types';
+import type { Supabase, Terrain, WorldCharacter, WorldBuilding, Building } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
 import { WorldEvent } from './world-event.svelte';
@@ -14,7 +8,12 @@ import { TerrainBody } from './terrain-body.svelte';
 import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
 import { Pathfinder } from './pathfinder';
-import { getBuildingOccupiedCells, getOverlappingCells, tileToCenterPixel, type TileCell } from './tiles';
+import {
+	getBuildingOccupiedCells,
+	getOverlappingCells,
+	tileToCenterPixel,
+	type TileCell,
+} from './tiles';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -260,7 +259,11 @@ export class WorldContext {
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
-	private updateRenderBounds(render: Matter.Render | undefined, terrainBody: TerrainBody, camera: Camera) {
+	private updateRenderBounds(
+		render: Matter.Render | undefined,
+		terrainBody: TerrainBody,
+		camera: Camera
+	) {
 		if (!render) return;
 
 		const viewWidth = terrainBody.width / camera.zoom;

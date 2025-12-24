@@ -210,9 +210,7 @@ async function removeMarkerPixels(imagePath: string): Promise<void> {
 
 	if (markersRemoved > 0) {
 		const tempPath = `${imagePath}.tmp`;
-		await sharp(data, { raw: { width, height, channels } })
-			.png()
-			.toFile(tempPath);
+		await sharp(data, { raw: { width, height, channels } }).png().toFile(tempPath);
 		await unlink(imagePath);
 		await rename(tempPath, imagePath);
 	}
@@ -221,7 +219,10 @@ async function removeMarkerPixels(imagePath: string): Promise<void> {
 /**
  * Sprite Sheet 생성 (동일 크기 이미지들)
  */
-async function generateSpriteSheet(groupName: string, files: string[]): Promise<AtlasMetadata | undefined> {
+async function generateSpriteSheet(
+	groupName: string,
+	files: string[]
+): Promise<AtlasMetadata | undefined> {
 	const frameCount = files.length;
 	const columns = Math.ceil(Math.sqrt(frameCount));
 	const rows = Math.ceil(frameCount / columns);

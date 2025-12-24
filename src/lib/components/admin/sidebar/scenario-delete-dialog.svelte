@@ -16,7 +16,9 @@
 	const { store, admin, dialogStore, closeDialog } = useScenario();
 
 	const open = $derived($dialogStore?.type === 'delete');
-	const scenarioId = $derived($dialogStore?.type === 'delete' ? $dialogStore.scenarioId : undefined);
+	const scenarioId = $derived(
+		$dialogStore?.type === 'delete' ? $dialogStore.scenarioId : undefined
+	);
 	const currentScenarioId = $derived(page.params.scenarioId);
 
 	function onOpenChange(value: boolean) {

@@ -98,7 +98,11 @@
 							<InputGroupAddon align="inline-start">
 								<IconHeading class="size-4" />
 							</InputGroupAddon>
-							<InputGroupInput bind:ref={titleInputRef} bind:value={changes.title} placeholder="제목을 입력하세요" />
+							<InputGroupInput
+								bind:ref={titleInputRef}
+								bind:value={changes.title}
+								placeholder="제목을 입력하세요"
+							/>
 						</InputGroup>
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
@@ -108,12 +112,7 @@
 						</InputGroup>
 					</div>
 					<div class="flex justify-between">
-						<Button
-							type="button"
-							variant="ghost"
-							onclick={onclickPublish}
-							disabled={isPublishing}
-						>
+						<Button type="button" variant="ghost" onclick={onclickPublish} disabled={isPublishing}>
 							{isPublished ? '작업중으로 전환' : '공개로 전환'}
 						</Button>
 						<div class="flex gap-2">

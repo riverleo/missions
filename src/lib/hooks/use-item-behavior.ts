@@ -30,7 +30,9 @@ function createItemBehaviorStore() {
 		data: {},
 	});
 
-	const itemBehaviorActionStore = writable<RecordFetchState<ItemBehaviorActionId, ItemBehaviorAction>>({
+	const itemBehaviorActionStore = writable<
+		RecordFetchState<ItemBehaviorActionId, ItemBehaviorAction>
+	>({
 		status: 'idle',
 		data: {},
 	});
@@ -170,10 +172,7 @@ function createItemBehaviorStore() {
 		},
 
 		async updateItemBehaviorAction(id: ItemBehaviorActionId, action: ItemBehaviorActionUpdate) {
-			const { error } = await supabase
-				.from('item_behavior_actions')
-				.update(action)
-				.eq('id', id);
+			const { error } = await supabase.from('item_behavior_actions').update(action).eq('id', id);
 
 			if (error) throw error;
 
@@ -200,7 +199,9 @@ function createItemBehaviorStore() {
 	};
 
 	return {
-		itemBehaviorStore: itemBehaviorStore as Readable<RecordFetchState<ItemBehaviorId, ItemBehavior>>,
+		itemBehaviorStore: itemBehaviorStore as Readable<
+			RecordFetchState<ItemBehaviorId, ItemBehavior>
+		>,
 		itemBehaviorActionStore: itemBehaviorActionStore as Readable<
 			RecordFetchState<ItemBehaviorActionId, ItemBehaviorAction>
 		>,

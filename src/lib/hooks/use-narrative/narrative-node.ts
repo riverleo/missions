@@ -1,4 +1,10 @@
-import type { NarrativeNodeInsert, NarrativeNodeUpdate, Supabase, NarrativeNodeId, NarrativeNode } from '$lib/types';
+import type {
+	NarrativeNodeInsert,
+	NarrativeNodeUpdate,
+	Supabase,
+	NarrativeNodeId,
+	NarrativeNode,
+} from '$lib/types';
 import type { NarrativeNodeStore } from '.';
 import { produce } from 'immer';
 

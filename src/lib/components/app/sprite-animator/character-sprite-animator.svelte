@@ -149,7 +149,10 @@
 	);
 </script>
 
-<div class="relative inline-flex items-center justify-center" style:transform={flip ? 'scaleX(-1)' : undefined}>
+<div
+	class="relative inline-flex items-center justify-center"
+	style:transform={flip ? 'scaleX(-1)' : undefined}
+>
 	{#if isBodyInFront}
 		{#if faceAnimator}
 			<div class="absolute" style:transform={faceTransform}>

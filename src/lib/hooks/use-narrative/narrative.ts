@@ -1,4 +1,10 @@
-import type { NarrativeInsert, NarrativeUpdate, Supabase, NarrativeId, Narrative } from '$lib/types';
+import type {
+	NarrativeInsert,
+	NarrativeUpdate,
+	Supabase,
+	NarrativeId,
+	Narrative,
+} from '$lib/types';
 import type { NarrativeStore } from '.';
 import { produce } from 'immer';
 
@@ -66,7 +72,8 @@ export const createNarrative =
 	};
 
 export const updateNarrative =
-	(supabase: Supabase, store: NarrativeStore) => async (id: NarrativeId, narrative: NarrativeUpdate) => {
+	(supabase: Supabase, store: NarrativeStore) =>
+	async (id: NarrativeId, narrative: NarrativeUpdate) => {
 		try {
 			const { error } = await supabase.from('narratives').update(narrative).eq('id', id);
 

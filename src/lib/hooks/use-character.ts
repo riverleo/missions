@@ -72,7 +72,8 @@ function createCharacterStore() {
 			for (const item of data ?? []) {
 				const { character_face_states, ...character } = item;
 				characterRecord[item.id as CharacterId] = character as Character;
-				faceStateRecord[item.id as CharacterId] = (character_face_states ?? []) as CharacterFaceState[];
+				faceStateRecord[item.id as CharacterId] = (character_face_states ??
+					[]) as CharacterFaceState[];
 			}
 
 			store.set({

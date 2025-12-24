@@ -59,7 +59,10 @@
 								disabled={!currentNarrativeId}
 								onclick={() =>
 									currentNarrativeId &&
-									admin.openDialog({ type: 'update', narrativeId: currentNarrativeId as NarrativeId })}
+									admin.openDialog({
+										type: 'update',
+										narrativeId: currentNarrativeId as NarrativeId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +83,10 @@
 							disabled={!currentNarrativeId}
 							onclick={() =>
 								currentNarrativeId &&
-								admin.openDialog({ type: 'delete', narrativeId: currentNarrativeId as NarrativeId })}
+								admin.openDialog({
+									type: 'delete',
+									narrativeId: currentNarrativeId as NarrativeId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>

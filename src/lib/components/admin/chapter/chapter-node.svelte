@@ -20,10 +20,7 @@
 	const chapter = $derived(data.chapter);
 </script>
 
-<div
-	class="min-w-48 rounded-sm px-3 py-2"
-	class:bg-neutral-300={chapter.status === 'published'}
->
+<div class="min-w-48 rounded-sm px-3 py-2" class:bg-neutral-300={chapter.status === 'published'}>
 	<!-- 좌측 Handle: parent 연결용 (target, 최대 1개 연결) -->
 	<Handle type="target" position={Position.Left} {isConnectable} />
 

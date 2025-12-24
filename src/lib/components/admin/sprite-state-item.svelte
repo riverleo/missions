@@ -51,7 +51,8 @@
 		headerAction?: Snippet;
 	}
 
-	let { type, label, spriteState, onchange, ondelete, preview, overlay, headerAction }: Props = $props();
+	let { type, label, spriteState, onchange, ondelete, preview, overlay, headerAction }: Props =
+		$props();
 
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
@@ -172,7 +173,10 @@
 					{/snippet}
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuRadioGroup value={spriteState?.atlas_name ?? ''} onValueChange={onAtlasChange}>
+					<DropdownMenuRadioGroup
+						value={spriteState?.atlas_name ?? ''}
+						onValueChange={onAtlasChange}
+					>
 						{#each atlasNames as name (name)}
 							<DropdownMenuRadioItem value={name}>{name}</DropdownMenuRadioItem>
 						{/each}
@@ -235,10 +239,14 @@
 					</DropdownMenuSub>
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>
-							동작 흐름 ({loopOptions.find((o) => o.value === (spriteState?.loop ?? 'loop'))?.label})
+							동작 흐름 ({loopOptions.find((o) => o.value === (spriteState?.loop ?? 'loop'))
+								?.label})
 						</DropdownMenuSubTrigger>
 						<DropdownMenuSubContent>
-							<DropdownMenuRadioGroup value={spriteState?.loop ?? 'loop'} onValueChange={onLoopChange}>
+							<DropdownMenuRadioGroup
+								value={spriteState?.loop ?? 'loop'}
+								onValueChange={onLoopChange}
+							>
 								{#each loopOptions as option (option.value)}
 									<DropdownMenuRadioItem value={option.value}>{option.label}</DropdownMenuRadioItem>
 								{/each}

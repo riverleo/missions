@@ -71,13 +71,12 @@
 							class="group pr-1"
 						>
 							<IconCheck
-								class={cn(
-									'mr-2 size-4',
-									quest.id === currentQuestId ? 'opacity-100' : 'opacity-0'
-								)}
+								class={cn('mr-2 size-4', quest.id === currentQuestId ? 'opacity-100' : 'opacity-0')}
 							/>
 							<div class="flex flex-1 flex-col">
-								<span class="truncate">{quest.title || `제목없음 (${quest.id.split('-')[0]})`}</span>
+								<span class="truncate">
+									{quest.title || `제목없음 (${quest.id.split('-')[0]})`}
+								</span>
 								<span class="text-xs text-muted-foreground">
 									{quest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {quest.status ===
 									'published'

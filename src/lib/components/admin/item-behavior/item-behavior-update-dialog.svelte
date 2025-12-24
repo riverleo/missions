@@ -29,9 +29,7 @@
 	const behaviorId = $derived(
 		$dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined
 	);
-	const currentBehavior = $derived(
-		behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined
-	);
+	const currentBehavior = $derived(behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined);
 	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
 
 	let description = $state('');

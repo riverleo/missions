@@ -82,20 +82,20 @@
      ```typescript
      // ❌ 나쁜 예: 메서드에서 context 호출 (이벤트 핸들러에서 실패)
      class Camera {
-       screenToWorld() {
-         const container = useWorld().container; // 에러!
-       }
+     	screenToWorld() {
+     		const container = useWorld().container; // 에러!
+     	}
      }
 
      // ✅ 좋은 예: 생성자로 context 전달
      class Camera {
-       private world: WorldContext;
-       constructor(world: WorldContext) {
-         this.world = world;
-       }
-       screenToWorld() {
-         const container = this.world.container; // OK
-       }
+     	private world: WorldContext;
+     	constructor(world: WorldContext) {
+     		this.world = world;
+     	}
+     	screenToWorld() {
+     		const container = this.world.container; // OK
+     	}
      }
 
      // 컴포넌트에서 초기화 시점에 context 획득 후 전달
@@ -290,24 +290,24 @@ type BuildingRow = Tables<'buildings'>;
 
 // 메인 타입: ID 필드들을 브랜드 타입으로 교체
 export type Building = Omit<BuildingRow, 'id' | 'scenario_id' | 'created_by'> & {
-  id: BuildingId;
-  scenario_id: ScenarioId;
-  created_by: UserRoleId | null;
+	id: BuildingId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
 };
 
 // Insert 타입: 외래 키 ID들을 브랜드 타입으로 교체 (id 제외)
 type BuildingInsertRow = TablesInsert<'buildings'>;
 export type BuildingInsert = Omit<BuildingInsertRow, 'scenario_id' | 'created_by'> & {
-  scenario_id: ScenarioId;
-  created_by?: UserRoleId | null;
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
 };
 
 // Update 타입: 모든 ID 필드를 옵셔널 브랜드 타입으로 교체
 type BuildingUpdateRow = TablesUpdate<'buildings'>;
 export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
-  id?: BuildingId;
-  scenario_id?: ScenarioId;
-  created_by?: UserRoleId | null;
+	id?: BuildingId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
 };
 ```
 
@@ -316,28 +316,28 @@ export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'cre
 ```typescript
 // ❌ 나쁜 예: 타입 캐스팅
 const { data, error } = await supabase
-  .from('buildings')
-  .insert({ ...building, scenario_id: currentScenarioId })
-  .select()
-  .single();
+	.from('buildings')
+	.insert({ ...building, scenario_id: currentScenarioId })
+	.select()
+	.single();
 
 store.update((state) =>
-  produce(state, (draft) => {
-    draft.data[data.id as BuildingId] = data as Building; // 강제 캐스팅
-  })
+	produce(state, (draft) => {
+		draft.data[data.id as BuildingId] = data as Building; // 강제 캐스팅
+	})
 );
 
 // ✅ 좋은 예: 제네릭 타입 명시
 const { data, error } = await supabase
-  .from('buildings')
-  .insert({ ...building, scenario_id: currentScenarioId })
-  .select()
-  .single<Building>(); // 제네릭으로 타입 지정
+	.from('buildings')
+	.insert({ ...building, scenario_id: currentScenarioId })
+	.select()
+	.single<Building>(); // 제네릭으로 타입 지정
 
 store.update((state) =>
-  produce(state, (draft) => {
-    draft.data[data.id as BuildingId] = data; // data는 이미 Building 타입
-  })
+	produce(state, (draft) => {
+		draft.data[data.id as BuildingId] = data; // data는 이미 Building 타입
+	})
 );
 ```
 
@@ -389,7 +389,12 @@ const newId = crypto.randomUUID() as WorldId;
 
     // ✅ 좋은 예
     import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-    import { InputGroup, InputGroupInput, InputGroupText, InputGroupButton } from '$lib/components/ui/input-group';
+    import {
+    	InputGroup,
+    	InputGroupInput,
+    	InputGroupText,
+    	InputGroupButton,
+    } from '$lib/components/ui/input-group';
     import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
     ```
 
@@ -748,25 +753,27 @@ needs (욕구 정의)
   ```typescript
   let prevGameAsset: string | null | undefined = terrain?.game_asset;
   $effect(() => {
-    const currentGameAsset = terrain?.game_asset;
-    if (currentGameAsset !== prevGameAsset && engine) {
-      prevGameAsset = currentGameAsset;
-      // 변경 시 실행할 로직
-    }
+  	const currentGameAsset = terrain?.game_asset;
+  	if (currentGameAsset !== prevGameAsset && engine) {
+  		prevGameAsset = currentGameAsset;
+  		// 변경 시 실행할 로직
+  	}
   });
   ```
 - **성능 고려**: 무거운 작업(SVG 파싱 등)과 가벼운 작업(스타일 변경 등)은 별도 $effect로 분리
 
   ```typescript
   // 무거운 작업: terrain 변경 시에만 실행
-  $effect(() => { /* SVG 재로딩 */ });
+  $effect(() => {
+  	/* SVG 재로딩 */
+  });
 
   // 가벼운 작업: debug 변경 시 기존 바디 스타일만 업데이트
   $effect(() => {
-    const bodies = Composite.allBodies(engine.world);
-    for (const body of bodies) {
-      body.render.visible = debug;
-    }
+  	const bodies = Composite.allBodies(engine.world);
+  	for (const body of bodies) {
+  		body.render.visible = debug;
+  	}
   });
   ```
 

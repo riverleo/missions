@@ -132,7 +132,7 @@ export async function applyElkLayoutWithPorts(
 				height,
 				ports,
 				properties: {
-					'portConstraints': 'FIXED_ORDER',
+					portConstraints: 'FIXED_ORDER',
 				},
 			};
 		}),

@@ -35,7 +35,10 @@
 			<CommandEmpty />
 			<CommandGroup>
 				{#each narratives as narrative (narrative.id)}
-					<CommandLinkItem href={`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`} class="group pr-1">
+					<CommandLinkItem
+						href={`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`}
+						class="group pr-1"
+					>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',

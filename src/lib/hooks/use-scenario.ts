@@ -98,7 +98,11 @@ function createScenarioStore() {
 
 	const admin = {
 		async create(input: Omit<ScenarioInsert, 'display_order'>) {
-			const { data, error } = await supabase.from('scenarios').insert(input).select().single<Scenario>();
+			const { data, error } = await supabase
+				.from('scenarios')
+				.insert(input)
+				.select()
+				.single<Scenario>();
 
 			if (error) throw error;
 

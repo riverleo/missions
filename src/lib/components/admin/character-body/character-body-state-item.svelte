@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { CharacterBodyStateType, CharacterFaceStateType, CharacterBodyId, CharacterBodyState } from '$lib/types';
+	import type {
+		CharacterBodyStateType,
+		CharacterFaceStateType,
+		CharacterBodyId,
+		CharacterBodyState,
+	} from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
@@ -34,7 +39,10 @@
 		if (bodyState) {
 			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterBodyState(bodyId as CharacterBodyId, { type, atlas_name: change.atlas_name });
+			await admin.createCharacterBodyState(bodyId as CharacterBodyId, {
+				type,
+				atlas_name: change.atlas_name,
+			});
 		}
 
 		// body의 width/height가 0이면 atlas frame 크기로 설정
@@ -57,7 +65,9 @@
 
 	async function onInFrontChange(pressed: boolean) {
 		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, { in_front: pressed });
+			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, {
+				in_front: pressed,
+			});
 		}
 	}
 

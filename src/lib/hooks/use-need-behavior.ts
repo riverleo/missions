@@ -30,7 +30,9 @@ function createNeedBehaviorStore() {
 		data: {},
 	});
 
-	const needBehaviorActionStore = writable<RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>>({
+	const needBehaviorActionStore = writable<
+		RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>
+	>({
 		status: 'idle',
 		data: {},
 	});
@@ -47,11 +49,7 @@ function createNeedBehaviorStore() {
 
 		try {
 			const [behaviorsResult, actionsResult] = await Promise.all([
-				supabase
-					.from('need_behaviors')
-					.select('*')
-					.eq('scenario_id', scenarioId)
-					.order('name'),
+				supabase.from('need_behaviors').select('*').eq('scenario_id', scenarioId).order('name'),
 				supabase.from('need_behavior_actions').select('*').eq('scenario_id', scenarioId),
 			]);
 
@@ -201,7 +199,9 @@ function createNeedBehaviorStore() {
 	};
 
 	return {
-		needBehaviorStore: needBehaviorStore as Readable<RecordFetchState<NeedBehaviorId, NeedBehavior>>,
+		needBehaviorStore: needBehaviorStore as Readable<
+			RecordFetchState<NeedBehaviorId, NeedBehavior>
+		>,
 		needBehaviorActionStore: needBehaviorActionStore as Readable<
 			RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>
 		>,

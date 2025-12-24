@@ -30,7 +30,7 @@ const buildingBehaviorTypeLabels: Record<BuildingBehaviorType, string> = {
 	demolish: '철거',
 	use: '사용',
 	repair: '수리',
-	refill: '보충',
+	clean: '청소',
 };
 
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {

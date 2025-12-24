@@ -28,10 +28,7 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
-	import {
-		getCharacterBodyStateLabel,
-		getCharacterFaceStateLabel,
-	} from '$lib/utils/state-label';
+	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {

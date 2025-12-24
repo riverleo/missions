@@ -97,7 +97,7 @@
 								<TooltipContent>
 									캐릭터별 욕구 감소 속도 배율입니다.
 									<br />
-									 기본값 1.0이며, 2.0은 두 배 빠르게 감소합니다.
+									기본값 1.0이며, 2.0은 두 배 빠르게 감소합니다.
 								</TooltipContent>
 							</Tooltip>
 						</InputGroupAddon>

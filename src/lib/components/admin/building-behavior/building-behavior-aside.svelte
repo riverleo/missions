@@ -59,7 +59,10 @@
 								disabled={!currentBehaviorId}
 								onclick={() =>
 									currentBehaviorId &&
-									openDialog({ type: 'update', behaviorId: currentBehaviorId as BuildingBehaviorId })}
+									openDialog({
+										type: 'update',
+										behaviorId: currentBehaviorId as BuildingBehaviorId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>

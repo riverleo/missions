@@ -1,8 +1,17 @@
-import type { NarrativeNodeChoiceInsert, NarrativeNodeChoiceUpdate, Supabase, NarrativeNodeChoiceId, NarrativeNodeChoice } from '$lib/types';
+import type {
+	NarrativeNodeChoiceInsert,
+	NarrativeNodeChoiceUpdate,
+	Supabase,
+	NarrativeNodeChoiceId,
+	NarrativeNodeChoice,
+} from '$lib/types';
 import type { NarrativeNodeChoiceStore } from '.';
 import { produce } from 'immer';
 
-export const fetchNarrativeNodeChoices = async (supabase: Supabase, store: NarrativeNodeChoiceStore) => {
+export const fetchNarrativeNodeChoices = async (
+	supabase: Supabase,
+	store: NarrativeNodeChoiceStore
+) => {
 	store.update((state) => ({ ...state, status: 'loading' }));
 
 	try {

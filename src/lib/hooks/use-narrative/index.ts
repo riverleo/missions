@@ -44,8 +44,12 @@ interface AdminStoreState {
 
 export type NarrativeStore = Writable<RecordFetchState<NarrativeId, Narrative>>;
 export type NarrativeNodeStore = Writable<RecordFetchState<NarrativeNodeId, NarrativeNode>>;
-export type NarrativeDiceRollStore = Writable<RecordFetchState<NarrativeDiceRollId, NarrativeDiceRoll>>;
-export type NarrativeNodeChoiceStore = Writable<RecordFetchState<NarrativeNodeChoiceId, NarrativeNodeChoice>>;
+export type NarrativeDiceRollStore = Writable<
+	RecordFetchState<NarrativeDiceRollId, NarrativeDiceRoll>
+>;
+export type NarrativeNodeChoiceStore = Writable<
+	RecordFetchState<NarrativeNodeChoiceId, NarrativeNodeChoice>
+>;
 export type PlayStore = Writable<PlayStoreState>;
 
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
@@ -61,11 +65,15 @@ function createNarrativeStore() {
 		status: 'idle',
 		data: {},
 	});
-	const narrativeDiceRollStore = writable<RecordFetchState<NarrativeDiceRollId, NarrativeDiceRoll>>({
-		status: 'idle',
-		data: {},
-	});
-	const narrativeNodeChoiceStore = writable<RecordFetchState<NarrativeNodeChoiceId, NarrativeNodeChoice>>({
+	const narrativeDiceRollStore = writable<RecordFetchState<NarrativeDiceRollId, NarrativeDiceRoll>>(
+		{
+			status: 'idle',
+			data: {},
+		}
+	);
+	const narrativeNodeChoiceStore = writable<
+		RecordFetchState<NarrativeNodeChoiceId, NarrativeNodeChoice>
+	>({
 		status: 'idle',
 		data: {},
 	});
@@ -96,7 +104,9 @@ function createNarrativeStore() {
 
 	return {
 		narrativeStore: narrativeStore as Readable<RecordFetchState<NarrativeId, Narrative>>,
-		narrativeNodeStore: narrativeNodeStore as Readable<RecordFetchState<NarrativeNodeId, NarrativeNode>>,
+		narrativeNodeStore: narrativeNodeStore as Readable<
+			RecordFetchState<NarrativeNodeId, NarrativeNode>
+		>,
 		narrativeDiceRollStore: narrativeDiceRollStore as Readable<
 			RecordFetchState<NarrativeDiceRollId, NarrativeDiceRoll>
 		>,

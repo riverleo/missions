@@ -37,7 +37,15 @@
 		isNarrativeDiceRollToSuccessEdge,
 		isNarrativeDiceRollToFailureEdge,
 	} from '$lib/utils/flow-id';
-	import type { NarrativeNode, NarrativeDiceRoll, NarrativeId, NarrativeNodeId, NarrativeDiceRollId, NarrativeNodeChoiceId, ScenarioId } from '$lib/types';
+	import type {
+		NarrativeNode,
+		NarrativeDiceRoll,
+		NarrativeId,
+		NarrativeNodeId,
+		NarrativeDiceRollId,
+		NarrativeNodeChoiceId,
+		ScenarioId,
+	} from '$lib/types';
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const narrativeId = $derived(page.params.narrativeId as NarrativeId);
@@ -270,7 +278,9 @@
 					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
 						edge.id
 					);
-					await admin.updateChoice(narrativeNodeChoiceId as NarrativeNodeChoiceId, { narrative_dice_roll_id: null });
+					await admin.updateChoice(narrativeNodeChoiceId as NarrativeNodeChoiceId, {
+						narrative_dice_roll_id: null,
+					});
 				}
 				// 3. narrative_dice_roll → success 엣지
 				else if (isNarrativeDiceRollToSuccessEdge(edge.id)) {

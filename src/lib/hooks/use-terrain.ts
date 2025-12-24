@@ -10,10 +10,7 @@ import type {
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
 
-type TerrainDialogState =
-	| { type: 'create' }
-	| { type: 'delete'; terrainId: TerrainId }
-	| undefined;
+type TerrainDialogState = { type: 'create' } | { type: 'delete'; terrainId: TerrainId } | undefined;
 
 let instance: ReturnType<typeof createTerrainStore> | null = null;
 

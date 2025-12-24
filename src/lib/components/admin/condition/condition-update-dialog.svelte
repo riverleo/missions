@@ -21,7 +21,9 @@
 	const { conditionStore, dialogStore, closeDialog, admin } = useCondition();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const conditionId = $derived($dialogStore?.type === 'update' ? $dialogStore.conditionId : undefined);
+	const conditionId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.conditionId : undefined
+	);
 	const currentCondition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
 
 	let name = $state('');
@@ -104,9 +106,7 @@
 								<InputGroupButton {...props} variant="ghost">틱당 감소</InputGroupButton>
 							{/snippet}
 						</TooltipTrigger>
-						<TooltipContent>
-							게임 틱(tick)당 감소하는 컨디션 수치입니다
-						</TooltipContent>
+						<TooltipContent>게임 틱(tick)당 감소하는 컨디션 수치입니다</TooltipContent>
 					</Tooltip>
 				</InputGroupAddon>
 				<InputGroupInput type="number" step="0.01" bind:value={decreasePerTick} />

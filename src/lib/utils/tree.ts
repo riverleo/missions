@@ -15,20 +15,12 @@ export class TreeNode {
 }
 
 export class TreeMap extends Map<string, TreeNode> {
-	constructor(
-		items: Record<string, unknown>[],
-		parentIdName: string,
-		orderName: string
-	) {
+	constructor(items: Record<string, unknown>[], parentIdName: string, orderName: string) {
 		super();
 		this.build(items, parentIdName, orderName);
 	}
 
-	private build(
-		items: Record<string, unknown>[],
-		parentIdName: string,
-		orderName: string
-	) {
+	private build(items: Record<string, unknown>[], parentIdName: string, orderName: string) {
 		// 부모별로 자식 그룹화
 		const childrenByParent = new Map<string | null, Record<string, unknown>[]>();
 		for (const item of items) {

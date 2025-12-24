@@ -18,7 +18,7 @@
 .svelte-flow__handle {
 	width: 8px;
 	height: 8px;
-	border: 1px solid rgba(0,0,0,0.3);
+	border: 1px solid rgba(0, 0, 0, 0.3);
 	border-radius: 100%;
 }
 
@@ -28,7 +28,10 @@
 	background-color: var(--xy-node-background-color-default);
 	border: var(--xy-node-border-default);
 	box-shadow: var(--xy-node-boxshadow-hover-default);
-	transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+	transition:
+		border-color 0.15s,
+		background-color 0.15s,
+		box-shadow 0.15s;
 }
 
 .svelte-flow__node.selected {

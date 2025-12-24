@@ -8,7 +8,7 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconGridDots, IconHeading, IconGrid4x4, IconX } from '@tabler/icons-svelte';
+	import { IconGridDots, IconGrid4x4, IconX } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
@@ -20,7 +20,6 @@
 	const { admin } = useBuilding();
 	const { uiStore } = admin;
 
-	let name = $state(building.name ?? '');
 	let tileCols = $state(building.tile_cols === 0 ? '' : building.tile_cols.toString());
 	let tileRows = $state(building.tile_rows === 0 ? '' : building.tile_rows.toString());
 
@@ -32,24 +31,11 @@
 		tileRows = building.tile_rows === 0 ? '' : building.tile_rows.toString();
 	});
 
-	async function updateName() {
-		const trimmed = name.trim();
-		if (trimmed === (building.name ?? '')) return;
-		await admin.update(building.id, { name: trimmed || undefined });
-	}
-
 	async function updateTileSize() {
 		const newCols = parseInt(tileCols) || 1;
 		const newRows = parseInt(tileRows) || 1;
 		if (newCols === building.tile_cols && newRows === building.tile_rows) return;
 		await admin.update(building.id, { tile_cols: newCols, tile_rows: newRows });
-	}
-
-	function onkeydownName(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			(e.target as HTMLInputElement).blur();
-			updateName();
-		}
 	}
 
 	function onkeydownTileSize(e: KeyboardEvent) {
@@ -65,17 +51,6 @@
 </script>
 
 <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
-	<InputGroup>
-		<InputGroupAddon>
-			<InputGroupText>
-				<IconHeading class="size-4" />
-			</InputGroupText>
-		</InputGroupAddon>
-		<InputGroupInput bind:value={name} placeholder="건물 이름" onkeydown={onkeydownName} />
-		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
-		</InputGroupAddon>
-	</InputGroup>
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>

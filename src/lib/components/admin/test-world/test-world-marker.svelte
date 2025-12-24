@@ -207,7 +207,9 @@
 	<button
 		type="button"
 		class="absolute inset-0 bg-transparent"
-		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed ? 'auto' : 'none'};"
+		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed
+			? 'auto'
+			: 'none'};"
 		aria-label="캐릭터 배치"
 		onclick={onclickCharacterOverlay}
 	></button>

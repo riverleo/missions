@@ -20,7 +20,15 @@
 		children?: Snippet;
 	}
 
-	let { class: className, width, height, characters = [], buildings = [], children, ...restProps }: Props = $props();
+	let {
+		class: className,
+		width,
+		height,
+		characters = [],
+		buildings = [],
+		children,
+		...restProps
+	}: Props = $props();
 
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
@@ -87,7 +95,9 @@
 		{#each buildings as building (building.id)}
 			{@const body = world.buildingBodies[building.id]}
 			{@const buildingData = $buildingStore.data[building.building_id]}
-			{@const buildingStates = buildingData ? ($buildingStateStore.data[buildingData.id] ?? []) : []}
+			{@const buildingStates = buildingData
+				? ($buildingStateStore.data[buildingData.id] ?? [])
+				: []}
 			{@const buildingState = buildingStates.find((s) => s.type === 'idle')}
 			{#if body && buildingState}
 				<BuildingSpriteAnimator
@@ -101,7 +111,9 @@
 		{#each characters as character (character.id)}
 			{@const body = world.characterBodies[character.id]}
 			{@const characterData = $characterStore.data[character.character_id]}
-			{@const characterBody = characterData ? $characterBodyStore.data[characterData.body_id] : undefined}
+			{@const characterBody = characterData
+				? $characterBodyStore.data[characterData.body_id]
+				: undefined}
 			{@const bodyStates = characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []}
 			{@const bodyState = bodyStates.find((s) => s.type === 'idle')}
 			{@const faceStates = characterData ? ($faceStateStore.data[characterData.id] ?? []) : []}

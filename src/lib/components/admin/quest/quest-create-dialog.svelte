@@ -25,7 +25,12 @@
 		DropdownMenuRadioItem,
 		DropdownMenuSeparator,
 	} from '$lib/components/ui/dropdown-menu';
-	import { IconHeading, IconChevronDown, IconCategory, IconSortDescending } from '@tabler/icons-svelte';
+	import {
+		IconHeading,
+		IconChevronDown,
+		IconCategory,
+		IconSortDescending,
+	} from '@tabler/icons-svelte';
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { useChapter } from '$lib/hooks/use-chapter';
 	import { goto } from '$app/navigation';

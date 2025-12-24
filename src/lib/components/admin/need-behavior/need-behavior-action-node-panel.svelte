@@ -335,27 +335,27 @@
 
 						<Separator />
 
-					{#if changes.type === 'idle'}
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>바디</ButtonGroupText>
-							<Select
-								type="single"
-								value={changes.character_body_state_type ?? ''}
-								onValueChange={onBodyStateChange}
-							>
-								<SelectTrigger class="flex-1">
-									{selectedBodyStateLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each bodyStateTypes as stateType (stateType)}
-										<SelectItem value={stateType}>
-											{getCharacterBodyStateLabel(stateType)}
-										</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-					{/if}
+						{#if changes.type === 'idle'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>바디</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_body_state_type ?? ''}
+									onValueChange={onBodyStateChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedBodyStateLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each bodyStateTypes as stateType (stateType)}
+											<SelectItem value={stateType}>
+												{getCharacterBodyStateLabel(stateType)}
+											</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>표정</ButtonGroupText>
 							<Select
@@ -376,40 +376,40 @@
 							</Select>
 						</ButtonGroup>
 
-				{#if previewBodyState}
-					<Separator />
+						{#if previewBodyState}
+							<Separator />
 
-					<div class="flex flex-col gap-2">
-						<div
-							class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
-							style:height="120px"
-						>
-							<CharacterSpriteAnimator
-								bodyState={previewBodyState}
-								faceState={previewFaceState}
-								resolution={2}
-							/>
-						</div>
+							<div class="flex flex-col gap-2">
+								<div
+									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
+									style:height="120px"
+								>
+									<CharacterSpriteAnimator
+										bodyState={previewBodyState}
+										faceState={previewFaceState}
+										resolution={2}
+									/>
+								</div>
 
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>캐릭터</ButtonGroupText>
-							<Select
-								type="single"
-								value={previewCharacterId ?? previewCharacter?.id ?? ''}
-								onValueChange={onPreviewCharacterChange}
-							>
-								<SelectTrigger class="flex-1">
-									{selectedPreviewCharacterLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each characters as character (character.id)}
-										<SelectItem value={character.id}>{character.name}</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-					</div>
-				{/if}
+								<ButtonGroup class="w-full">
+									<ButtonGroupText>캐릭터</ButtonGroupText>
+									<Select
+										type="single"
+										value={previewCharacterId ?? previewCharacter?.id ?? ''}
+										onValueChange={onPreviewCharacterChange}
+									>
+										<SelectTrigger class="flex-1">
+											{selectedPreviewCharacterLabel}
+										</SelectTrigger>
+										<SelectContent>
+											{#each characters as character (character.id)}
+												<SelectItem value={character.id}>{character.name}</SelectItem>
+											{/each}
+										</SelectContent>
+									</Select>
+								</ButtonGroup>
+							</div>
+						{/if}
 					</div>
 					<div class="flex justify-between">
 						<Tooltip>

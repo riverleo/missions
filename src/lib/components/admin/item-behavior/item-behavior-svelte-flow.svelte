@@ -32,9 +32,7 @@
 	const behavior = $derived(behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($itemBehaviorActionStore.data).filter(
-					(a) => a.behavior_id === behaviorId
-				)
+			? Object.values($itemBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
 			: []
 	);
 
@@ -108,9 +106,8 @@
 			const isSuccess = connection.sourceHandle === 'success';
 
 			await admin.updateItemBehaviorAction(sourceId as ItemBehaviorActionId, {
-				[isSuccess
-					? 'success_item_behavior_action_id'
-					: 'failure_item_behavior_action_id']: targetId,
+				[isSuccess ? 'success_item_behavior_action_id' : 'failure_item_behavior_action_id']:
+					targetId,
 			});
 
 			edges = [
@@ -170,9 +167,8 @@
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
 			await admin.updateItemBehaviorAction(fromActionId as ItemBehaviorActionId, {
-				[isSuccess
-					? 'success_item_behavior_action_id'
-					: 'failure_item_behavior_action_id']: newAction.id,
+				[isSuccess ? 'success_item_behavior_action_id' : 'failure_item_behavior_action_id']:
+					newAction.id,
 			});
 
 			skipConvertEffect = false;
@@ -205,9 +201,7 @@
 				const isSuccess = isItemBehaviorActionSuccessEdgeId(edge.id);
 
 				await admin.updateItemBehaviorAction(sourceId as ItemBehaviorActionId, {
-					[isSuccess
-						? 'success_item_behavior_action_id'
-						: 'failure_item_behavior_action_id']: null,
+					[isSuccess ? 'success_item_behavior_action_id' : 'failure_item_behavior_action_id']: null,
 				});
 			}
 
@@ -263,9 +257,7 @@
 		// 성공/실패 엣지
 		actions.forEach((action) => {
 			if (action.success_item_behavior_action_id) {
-				const targetAction = actions.find(
-					(a) => a.id === action.success_item_behavior_action_id
-				);
+				const targetAction = actions.find((a) => a.id === action.success_item_behavior_action_id);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createItemBehaviorActionNodeId(action)}-success-${createItemBehaviorActionNodeId(targetAction)}`,
@@ -280,9 +272,7 @@
 			}
 
 			if (action.failure_item_behavior_action_id) {
-				const targetAction = actions.find(
-					(a) => a.id === action.failure_item_behavior_action_id
-				);
+				const targetAction = actions.find((a) => a.id === action.failure_item_behavior_action_id);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createItemBehaviorActionNodeId(action)}-failure-${createItemBehaviorActionNodeId(targetAction)}`,
