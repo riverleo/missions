@@ -82,6 +82,10 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
 						},
 						{
+							title: '컨디션과 충족',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/conditions` : undefined,
+						},
+						{
 							title: '행동',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/building-behaviors` : undefined,
 						},
