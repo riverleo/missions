@@ -53,7 +53,7 @@
 {#if data?.buildingCondition}
 	<EdgeLabel x={labelX} y={labelY}>
 		<div class="rounded-full bg-blue-500 p-1 px-2 text-[10px] text-white">
-			{parseFloat(calculatedDecrease().toFixed(2))} / 시간당 감소
+			{parseFloat(calculatedDecrease().toFixed(2))} / 틱당 감소
 		</div>
 	</EdgeLabel>
 {/if}

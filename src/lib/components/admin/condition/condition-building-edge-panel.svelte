@@ -91,7 +91,7 @@
 							<Tooltip>
 								<TooltipTrigger>
 									{#snippet child({ props })}
-										<InputGroupButton {...props} variant="ghost">시간당 감소</InputGroupButton>
+										<InputGroupButton {...props} variant="ghost">틱당 감소</InputGroupButton>
 									{/snippet}
 								</TooltipTrigger>
 								<TooltipContent>

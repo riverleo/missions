@@ -24,7 +24,7 @@
 		</div>
 		<div class="text-xs text-neutral-600">
 			<strong>{need.decrease_per_tick}</strong>
-			/ 시간당 감소
+			/ 틱당 감소
 		</div>
 	</div>
 

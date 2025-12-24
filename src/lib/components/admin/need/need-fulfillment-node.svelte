@@ -63,7 +63,7 @@
 		</div>
 		<div class="text-xs text-muted-foreground">
 			<strong>{fulfillment.increase_per_tick}</strong>
-			/ 시간당 증가
+			/ 틱당 증가
 		</div>
 	</div>
 </div>
