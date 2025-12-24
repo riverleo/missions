@@ -40,7 +40,7 @@
 			.remove(behaviorId)
 			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/behaviors`);
+				goto(`/admin/scenarios/${scenarioId}/need-behaviors`);
 			})
 			.catch((error) => {
 				console.error('Failed to delete behavior:', error);

@@ -3,6 +3,7 @@
 	import type {
 		ConditionFulfillment,
 		ConditionFulfillmentType,
+		CharacterBehaviorType,
 		CharacterId,
 		ItemId,
 	} from '$lib/types';
@@ -14,12 +15,13 @@
 		InputGroupAddon,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -41,6 +43,8 @@
 		{ value: 'item', label: '아이템' },
 		{ value: 'idle', label: '대기' },
 	];
+
+	const behaviorTypeOptions: CharacterBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
 
 	function getTypeLabel(type: ConditionFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
@@ -85,6 +89,7 @@
 		admin
 			.updateConditionFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
+				character_behavior_type: changes.character_behavior_type,
 				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
 				increase_per_tick: changes.increase_per_tick,
@@ -134,6 +139,12 @@
 		}
 	}
 
+	function onBehaviorTypeChange(value: string | undefined) {
+		if (value && changes) {
+			changes.character_behavior_type = value as CharacterBehaviorType;
+		}
+	}
+
 	const targetOptions = $derived.by(() => {
 		if (changes?.fulfillment_type === 'character') {
 			return characters.map((c) => ({ id: c.id, name: c.name }));
@@ -169,6 +180,26 @@
 								<SelectContent>
 									{#each fulfillmentTypeOptions as option (option.value)}
 										<SelectItem value={option.value}>{option.label}</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
+
+						<ButtonGroup class="w-full">
+							<ButtonGroupText>행동</ButtonGroupText>
+							<Select
+								type="single"
+								value={changes.character_behavior_type}
+								onValueChange={onBehaviorTypeChange}
+							>
+								<SelectTrigger class="flex-1">
+									{getCharacterBehaviorTypeLabel(changes.character_behavior_type)}
+								</SelectTrigger>
+								<SelectContent>
+									{#each behaviorTypeOptions as type (type)}
+										<SelectItem value={type}>
+											{getCharacterBehaviorTypeLabel(type)}
+										</SelectItem>
 									{/each}
 								</SelectContent>
 							</Select>

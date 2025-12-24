@@ -2,7 +2,7 @@ import type {
 	CharacterBodyStateType,
 	CharacterFaceStateType,
 	BuildingStateType,
-	BuildingBehaviorType,
+	CharacterBehaviorType,
 	ItemStateType,
 } from '$lib/types';
 
@@ -26,7 +26,7 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 	planning: '건설 중',
 };
 
-const buildingBehaviorTypeLabels: Record<BuildingBehaviorType, string> = {
+const characterBehaviorTypeLabels: Record<CharacterBehaviorType, string> = {
 	demolish: '철거',
 	use: '사용',
 	repair: '수리',
@@ -45,8 +45,8 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 	return buildingStateLabels[state];
 }
 
-export function getBuildingBehaviorTypeLabel(type: BuildingBehaviorType): string {
-	return buildingBehaviorTypeLabels[type];
+export function getCharacterBehaviorTypeLabel(type: CharacterBehaviorType): string {
+	return characterBehaviorTypeLabels[type];
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {

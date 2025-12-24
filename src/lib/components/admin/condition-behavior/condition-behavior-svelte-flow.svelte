@@ -14,25 +14,25 @@
 	import { mode } from 'mode-watcher';
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import {
-		createBuildingBehaviorActionNodeId,
-		parseBuildingBehaviorActionNodeId,
-		isBuildingBehaviorActionSuccessEdgeId,
+		createConditionBehaviorActionNodeId,
+		parseConditionBehaviorActionNodeId,
+		isConditionBehaviorActionSuccessEdgeId,
 	} from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
-	import BuildingBehaviorActionNode from './building-behavior-action-node.svelte';
-	import BuildingBehaviorActionPanel from './building-behavior-action-panel.svelte';
-	import BuildingBehaviorActionNodePanel from './building-behavior-action-node-panel.svelte';
-	import type { BuildingBehaviorId, BuildingBehaviorActionId } from '$lib/types';
+	import ConditionBehaviorActionNode from './condition-behavior-action-node.svelte';
+	import ConditionBehaviorActionPanel from './condition-behavior-action-panel.svelte';
+	import ConditionBehaviorActionNodePanel from './condition-behavior-action-node-panel.svelte';
+	import type { ConditionBehaviorId, ConditionBehaviorActionId } from '$lib/types';
 
-	const { buildingBehaviorStore, buildingBehaviorActionStore, admin } = useBuildingBehavior();
+	const { conditionBehaviorStore, conditionBehaviorActionStore, admin } = useConditionBehavior();
 
-	const behaviorId = $derived(page.params.behaviorId as BuildingBehaviorId);
-	const behavior = $derived(behaviorId ? $buildingBehaviorStore.data[behaviorId] : undefined);
+	const behaviorId = $derived(page.params.behaviorId as ConditionBehaviorId);
+	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($buildingBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
+			? Object.values($conditionBehaviorActionStore.data).filter((a) => a.condition_behavior_id === behaviorId)
 			: []
 	);
 
@@ -48,21 +48,21 @@
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
 	const selectedAction = $derived(
 		selectedNode?.type === 'action'
-			? actions.find((a) => a.id === parseBuildingBehaviorActionNodeId(selectedNode.id))
+			? actions.find((a) => a.id === parseConditionBehaviorActionNodeId(selectedNode.id))
 			: undefined
 	);
 	const selectedActionHasParent = $derived(
 		selectedAction
 			? actions.some(
 					(a) =>
-						a.success_building_behavior_action_id === selectedAction.id ||
-						a.failure_building_behavior_action_id === selectedAction.id
+						a.success_condition_behavior_action_id === selectedAction.id ||
+						a.failure_condition_behavior_action_id === selectedAction.id
 				)
 			: false
 	);
 
 	const nodeTypes = {
-		action: BuildingBehaviorActionNode,
+		action: ConditionBehaviorActionNode,
 	};
 
 	let nodes = $state<Node[]>([]);
@@ -81,13 +81,13 @@
 			if (connection.source === connection.target) return false;
 
 			// 이미 연결된 핸들에는 새로운 연결 불가
-			const sourceActionId = parseBuildingBehaviorActionNodeId(connection.source);
+			const sourceActionId = parseConditionBehaviorActionNodeId(connection.source);
 			const sourceAction = actions.find((a) => a.id === sourceActionId);
 			if (sourceAction) {
 				const isSuccess = connection.sourceHandle === 'success';
 				const existingConnection = isSuccess
-					? sourceAction.success_building_behavior_action_id
-					: sourceAction.failure_building_behavior_action_id;
+					? sourceAction.success_condition_behavior_action_id
+					: sourceAction.failure_condition_behavior_action_id;
 				if (existingConnection) return false;
 			}
 
@@ -99,14 +99,14 @@
 
 	async function onconnect(connection: Connection) {
 		try {
-			const sourceId = parseBuildingBehaviorActionNodeId(connection.source);
-			const targetId = parseBuildingBehaviorActionNodeId(connection.target);
+			const sourceId = parseConditionBehaviorActionNodeId(connection.source);
+			const targetId = parseConditionBehaviorActionNodeId(connection.target);
 
 			// sourceHandle에 따라 success 또는 failure로 연결
 			const isSuccess = connection.sourceHandle === 'success';
 
-			await admin.updateBuildingBehaviorAction(sourceId as BuildingBehaviorActionId, {
-				[isSuccess ? 'success_building_behavior_action_id' : 'failure_building_behavior_action_id']:
+			await admin.updateConditionBehaviorAction(sourceId as ConditionBehaviorActionId, {
+				[isSuccess ? 'success_condition_behavior_action_id' : 'failure_condition_behavior_action_id']:
 					targetId,
 			});
 
@@ -134,7 +134,7 @@
 		if (!sourceNode || sourceNode.type !== 'action') return;
 		if (!behavior) return;
 
-		const fromActionId = parseBuildingBehaviorActionNodeId(sourceNode.id);
+		const fromActionId = parseConditionBehaviorActionNodeId(sourceNode.id);
 		const fromHandleId = connectionState.fromHandle?.id;
 		const fromAction = actions.find((a) => a.id === fromActionId);
 		if (!fromAction) return;
@@ -144,9 +144,9 @@
 
 		// 이미 연결된 핸들에서는 새 액션 생성 불가
 		if (fromHandleId === 'success') {
-			if (fromAction.success_building_behavior_action_id) return;
+			if (fromAction.success_condition_behavior_action_id) return;
 		} else if (fromHandleId === 'failure') {
-			if (fromAction.failure_building_behavior_action_id) return;
+			if (fromAction.failure_condition_behavior_action_id) return;
 		}
 
 		// 마우스/터치 위치를 플로우 좌표로 변환
@@ -160,14 +160,15 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createBuildingBehaviorAction({
-				behavior_id: behavior.id,
+			const newAction = await admin.createConditionBehaviorAction({
+				condition_id: behavior.condition_id,
+				condition_behavior_id: behavior.id,
 			});
 
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
-			await admin.updateBuildingBehaviorAction(fromActionId as BuildingBehaviorActionId, {
-				[isSuccess ? 'success_building_behavior_action_id' : 'failure_building_behavior_action_id']:
+			await admin.updateConditionBehaviorAction(fromActionId as ConditionBehaviorActionId, {
+				[isSuccess ? 'success_condition_behavior_action_id' : 'failure_condition_behavior_action_id']:
 					newAction.id,
 			});
 
@@ -178,7 +179,7 @@
 			// 새 노드의 위치를 드롭 위치로 설정
 			if (newAction) {
 				nodes = nodes.map((n) =>
-					n.id === createBuildingBehaviorActionNodeId(newAction) ? { ...n, position } : n
+					n.id === createConditionBehaviorActionNodeId(newAction) ? { ...n, position } : n
 				);
 			}
 		} catch (error) {
@@ -197,21 +198,21 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				const sourceId = parseBuildingBehaviorActionNodeId(edge.source);
-				const isSuccess = isBuildingBehaviorActionSuccessEdgeId(edge.id);
+				const sourceId = parseConditionBehaviorActionNodeId(edge.source);
+				const isSuccess = isConditionBehaviorActionSuccessEdgeId(edge.id);
 
-				await admin.updateBuildingBehaviorAction(sourceId as BuildingBehaviorActionId, {
+				await admin.updateConditionBehaviorAction(sourceId as ConditionBehaviorActionId, {
 					[isSuccess
-						? 'success_building_behavior_action_id'
-						: 'failure_building_behavior_action_id']: null,
+						? 'success_condition_behavior_action_id'
+						: 'failure_condition_behavior_action_id']: null,
 				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
-					const actionId = parseBuildingBehaviorActionNodeId(node.id);
-					await admin.removeBuildingBehaviorAction(actionId as BuildingBehaviorActionId);
+					const actionId = parseConditionBehaviorActionNodeId(node.id);
+					await admin.removeConditionBehaviorAction(actionId as ConditionBehaviorActionId);
 				}
 			}
 
@@ -242,13 +243,13 @@
 			// 이 액션을 가리키는 부모 액션 찾기
 			const parentAction = actions.find(
 				(a) =>
-					a.success_building_behavior_action_id === action.id ||
-					a.failure_building_behavior_action_id === action.id
+					a.success_condition_behavior_action_id === action.id ||
+					a.failure_condition_behavior_action_id === action.id
 			);
-			const isSuccessTarget = parentAction?.success_building_behavior_action_id === action.id;
+			const isSuccessTarget = parentAction?.success_condition_behavior_action_id === action.id;
 
 			newNodes.push({
-				id: createBuildingBehaviorActionNodeId(action),
+				id: createConditionBehaviorActionNodeId(action),
 				type: 'action',
 				data: { action, parentAction, isSuccessTarget },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
@@ -258,16 +259,16 @@
 
 		// 성공/실패 엣지
 		actions.forEach((action) => {
-			if (action.success_building_behavior_action_id) {
+			if (action.success_condition_behavior_action_id) {
 				const targetAction = actions.find(
-					(a) => a.id === action.success_building_behavior_action_id
+					(a) => a.id === action.success_condition_behavior_action_id
 				);
 				if (targetAction) {
 					newEdges.push({
-						id: `${createBuildingBehaviorActionNodeId(action)}-success-${createBuildingBehaviorActionNodeId(targetAction)}`,
-						source: createBuildingBehaviorActionNodeId(action),
+						id: `${createConditionBehaviorActionNodeId(action)}-success-${createConditionBehaviorActionNodeId(targetAction)}`,
+						source: createConditionBehaviorActionNodeId(action),
 						sourceHandle: 'success',
-						target: createBuildingBehaviorActionNodeId(targetAction),
+						target: createConditionBehaviorActionNodeId(targetAction),
 						targetHandle: 'target',
 						style: 'stroke: var(--color-green-500)',
 						deletable: true,
@@ -275,16 +276,16 @@
 				}
 			}
 
-			if (action.failure_building_behavior_action_id) {
+			if (action.failure_condition_behavior_action_id) {
 				const targetAction = actions.find(
-					(a) => a.id === action.failure_building_behavior_action_id
+					(a) => a.id === action.failure_condition_behavior_action_id
 				);
 				if (targetAction) {
 					newEdges.push({
-						id: `${createBuildingBehaviorActionNodeId(action)}-failure-${createBuildingBehaviorActionNodeId(targetAction)}`,
-						source: createBuildingBehaviorActionNodeId(action),
+						id: `${createConditionBehaviorActionNodeId(action)}-failure-${createConditionBehaviorActionNodeId(targetAction)}`,
+						source: createConditionBehaviorActionNodeId(action),
 						sourceHandle: 'failure',
-						target: createBuildingBehaviorActionNodeId(targetAction),
+						target: createConditionBehaviorActionNodeId(targetAction),
 						targetHandle: 'target',
 						style: 'stroke: var(--color-red-500)',
 						deletable: true,
@@ -353,8 +354,8 @@
 	<MiniMap />
 
 	{#if selectedAction}
-		<BuildingBehaviorActionNodePanel action={selectedAction} hasParent={selectedActionHasParent} />
+		<ConditionBehaviorActionNodePanel action={selectedAction} hasParent={selectedActionHasParent} />
 	{:else}
-		<BuildingBehaviorActionPanel {behavior} {onlayout} />
+		<ConditionBehaviorActionPanel {behavior} {onlayout} />
 	{/if}
 </SvelteFlow>

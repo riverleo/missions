@@ -1,18 +1,18 @@
 <script lang="ts">
-	import type { BuildingBehaviorId } from '$lib/types';
+	import type { ConditionBehaviorId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
-	import BuildingBehaviorCommand from './building-behavior-command.svelte';
-	import BuildingBehaviorCreateDialog from './building-behavior-create-dialog.svelte';
-	import BuildingBehaviorUpdateDialog from './building-behavior-update-dialog.svelte';
-	import BuildingBehaviorDeleteDialog from './building-behavior-delete-dialog.svelte';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import ConditionBehaviorCommand from './condition-behavior-command.svelte';
+	import ConditionBehaviorCreateDialog from './condition-behavior-create-dialog.svelte';
+	import ConditionBehaviorUpdateDialog from './condition-behavior-update-dialog.svelte';
+	import ConditionBehaviorDeleteDialog from './condition-behavior-delete-dialog.svelte';
 
-	const { openDialog } = useBuildingBehavior();
+	const { openDialog } = useConditionBehavior();
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -61,7 +61,7 @@
 									currentBehaviorId &&
 									openDialog({
 										type: 'update',
-										behaviorId: currentBehaviorId as BuildingBehaviorId,
+										behaviorId: currentBehaviorId as ConditionBehaviorId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
@@ -83,7 +83,7 @@
 							disabled={!currentBehaviorId}
 							onclick={() =>
 								currentBehaviorId &&
-								openDialog({ type: 'delete', behaviorId: currentBehaviorId as BuildingBehaviorId })}
+								openDialog({ type: 'delete', behaviorId: currentBehaviorId as ConditionBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>
@@ -95,10 +95,10 @@
 	</ButtonGroup>
 
 	{#if toggleValue.includes('list')}
-		<BuildingBehaviorCommand />
+		<ConditionBehaviorCommand />
 	{/if}
 </aside>
 
-<BuildingBehaviorCreateDialog />
-<BuildingBehaviorUpdateDialog />
-<BuildingBehaviorDeleteDialog />
+<ConditionBehaviorCreateDialog />
+<ConditionBehaviorUpdateDialog />
+<ConditionBehaviorDeleteDialog />

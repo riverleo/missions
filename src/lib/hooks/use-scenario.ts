@@ -16,7 +16,7 @@ import { useCharacterBody } from './use-character-body';
 import { useBuilding } from './use-building';
 import { useNeed } from './use-need';
 import { useNeedBehavior } from './use-need-behavior';
-import { useBuildingBehavior } from './use-building-behavior';
+import { useConditionBehavior } from './use-condition-behavior';
 import { useCondition } from './use-condition';
 import { useItem } from './use-item';
 import { useItemBehavior } from './use-item-behavior';
@@ -89,7 +89,7 @@ function createScenarioStore() {
 			useBuilding().fetch(scenarioId),
 			useNeed().fetch(scenarioId),
 			useNeedBehavior().fetch(scenarioId),
-			useBuildingBehavior().fetch(scenarioId),
+			useConditionBehavior().fetch(scenarioId),
 			useCondition().fetch(scenarioId),
 			useItem().fetch(scenarioId),
 			useItemBehavior().fetch(scenarioId),

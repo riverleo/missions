@@ -69,8 +69,8 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
 						},
 						{
-							title: '행동',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/behaviors` : undefined,
+							title: '욕구 행동',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/need-behaviors` : undefined,
 						},
 					],
 				},
@@ -86,8 +86,8 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/conditions` : undefined,
 						},
 						{
-							title: '행동',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/building-behaviors` : undefined,
+							title: '컨디션 행동',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/condition-behaviors` : undefined,
 						},
 					],
 				},
@@ -99,7 +99,7 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
 						},
 						{
-							title: '행동',
+							title: '아이템 행동',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/item-behaviors` : undefined,
 						},
 					],

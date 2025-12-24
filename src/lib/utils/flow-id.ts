@@ -4,7 +4,7 @@
 
 import type {
 	Building,
-	BuildingBehaviorAction,
+	ConditionBehaviorAction,
 	BuildingCondition,
 	Character,
 	CharacterNeed,
@@ -261,39 +261,39 @@ export function isActionFailureEdgeId(edgeId: string): boolean {
 // ============================================
 
 // Building Behavior Action Node
-export function createBuildingBehaviorActionNodeId(action: BuildingBehaviorAction): string {
-	return `building-behavior-action-${action.id}`;
+export function createConditionBehaviorActionNodeId(action: ConditionBehaviorAction): string {
+	return `condition-behavior-action-${action.id}`;
 }
 
-export function parseBuildingBehaviorActionNodeId(nodeId: string): string {
-	return nodeId.replace('building-behavior-action-', '');
+export function parseConditionBehaviorActionNodeId(nodeId: string): string {
+	return nodeId.replace('condition-behavior-action-', '');
 }
 
-export function isBuildingBehaviorActionNodeId(nodeId: string): boolean {
-	return nodeId.startsWith('building-behavior-action-');
+export function isConditionBehaviorActionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('condition-behavior-action-');
 }
 
 // Building Behavior Action Success Edge
-export function createBuildingBehaviorActionSuccessEdgeId(
-	sourceAction: BuildingBehaviorAction,
-	targetAction: BuildingBehaviorAction
+export function createConditionBehaviorActionSuccessEdgeId(
+	sourceAction: ConditionBehaviorAction,
+	targetAction: ConditionBehaviorAction
 ): string {
-	return `building-behavior-action-${sourceAction.id}-success-building-behavior-action-${targetAction.id}`;
+	return `condition-behavior-action-${sourceAction.id}-success-condition-behavior-action-${targetAction.id}`;
 }
 
-export function isBuildingBehaviorActionSuccessEdgeId(edgeId: string): boolean {
+export function isConditionBehaviorActionSuccessEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-success-');
 }
 
 // Building Behavior Action Failure Edge
-export function createBuildingBehaviorActionFailureEdgeId(
-	sourceAction: BuildingBehaviorAction,
-	targetAction: BuildingBehaviorAction
+export function createConditionBehaviorActionFailureEdgeId(
+	sourceAction: ConditionBehaviorAction,
+	targetAction: ConditionBehaviorAction
 ): string {
-	return `building-behavior-action-${sourceAction.id}-failure-building-behavior-action-${targetAction.id}`;
+	return `condition-behavior-action-${sourceAction.id}-failure-condition-behavior-action-${targetAction.id}`;
 }
 
-export function isBuildingBehaviorActionFailureEdgeId(edgeId: string): boolean {
+export function isConditionBehaviorActionFailureEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-failure-');
 }
 

@@ -1,20 +1,20 @@
 <script lang="ts">
-	import type { BuildingBehavior } from '$lib/types';
+	import type { ConditionBehavior } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconLayoutDistributeHorizontal, IconPlus } from '@tabler/icons-svelte';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 
 	interface Props {
-		behavior: BuildingBehavior | undefined;
+		behavior: ConditionBehavior | undefined;
 		onlayout?: () => void;
 	}
 
 	let { behavior, onlayout }: Props = $props();
 
-	const { admin } = useBuildingBehavior();
+	const { admin } = useConditionBehavior();
 
 	let isLayouting = $state(false);
 	let isCreating = $state(false);
@@ -37,8 +37,9 @@
 		isCreating = true;
 
 		try {
-			await admin.createBuildingBehaviorAction({
-				behavior_id: behavior.id,
+			await admin.createConditionBehaviorAction({
+				condition_id: behavior.condition_id,
+				condition_behavior_id: behavior.id,
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

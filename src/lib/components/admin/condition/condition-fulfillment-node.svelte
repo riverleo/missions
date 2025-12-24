@@ -3,6 +3,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -19,19 +20,21 @@
 	const { store: itemStore } = useItem();
 
 	const typeLabel = $derived(() => {
+		const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);
+
 		switch (fulfillment.fulfillment_type) {
 			case 'character': {
 				const character = fulfillment.character_id
 					? $characterStore.data[fulfillment.character_id]
 					: undefined;
-				return character ? `${character.name} 행동` : '모든 캐릭터';
+				return character ? `${character.name} ${behaviorLabel}` : `모든 캐릭터 ${behaviorLabel}`;
 			}
 			case 'item': {
 				const item = fulfillment.item_id ? $itemStore.data[fulfillment.item_id] : undefined;
-				return item ? `${item.name} 사용` : '모든 아이템';
+				return item ? `${item.name} ${behaviorLabel}` : `모든 아이템 ${behaviorLabel}`;
 			}
 			case 'idle':
-				return '대기';
+				return `${behaviorLabel} 중 대기`;
 			default:
 				return fulfillment.fulfillment_type;
 		}

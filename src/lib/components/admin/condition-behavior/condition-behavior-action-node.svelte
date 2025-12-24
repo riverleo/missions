@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { BuildingBehaviorAction } from '$lib/types';
+	import type { ConditionBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
-			action: BuildingBehaviorAction;
-			parentAction?: BuildingBehaviorAction;
+			action: ConditionBehaviorAction;
+			parentAction?: ConditionBehaviorAction;
 			isSuccessTarget?: boolean;
 		};
 		id: string;

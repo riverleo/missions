@@ -15,51 +15,51 @@
 	} from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconBuildingCog, IconHeading } from '@tabler/icons-svelte';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
+	import { IconHeading } from '@tabler/icons-svelte';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useCondition } from '$lib/hooks/use-condition';
 	import { alphabetical } from 'radash';
-	import type { BuildingBehaviorType, BuildingId } from '$lib/types';
-	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import type { CharacterBehaviorType, ConditionId } from '$lib/types';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 
-	const { buildingBehaviorStore, dialogStore, closeDialog, admin } = useBuildingBehavior();
-	const { store: buildingStore } = useBuilding();
+	const { conditionBehaviorStore, dialogStore, closeDialog, admin } = useConditionBehavior();
+	const { conditionStore } = useCondition();
 
 	const open = $derived($dialogStore?.type === 'update');
 	const behaviorId = $derived(
 		$dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined
 	);
 	const currentBehavior = $derived(
-		behaviorId ? $buildingBehaviorStore.data[behaviorId] : undefined
+		behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined
 	);
-	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
+	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (b) => b.name));
 
-	const behaviorTypes: BuildingBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
+	const behaviorTypes: CharacterBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
 
-	let description = $state('');
-	let buildingId = $state<string | undefined>(undefined);
-	let behaviorType = $state<BuildingBehaviorType>('use');
+	let name = $state('');
+	let conditionId = $state<string | undefined>(undefined);
+	let behaviorType = $state<CharacterBehaviorType>('use');
 	let isSubmitting = $state(false);
 
-	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
-	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
-	const selectedTypeName = $derived(getBuildingBehaviorTypeLabel(behaviorType));
+	const selectedCondition = $derived(conditions.find((b) => b.id === conditionId));
+	const selectedConditionName = $derived(selectedCondition?.name ?? '컨디션 선택');
+	const selectedTypeName = $derived(getCharacterBehaviorTypeLabel(behaviorType));
 
 	$effect(() => {
 		if (open && currentBehavior) {
-			description = currentBehavior.description;
-			buildingId = currentBehavior.building_id;
-			behaviorType = currentBehavior.type;
+			name = currentBehavior.name;
+			conditionId = currentBehavior.condition_id;
+			behaviorType = currentBehavior.character_behavior_type;
 		}
 	});
 
-	function onBuildingChange(value: string | undefined) {
-		buildingId = value || undefined;
+	function onConditionChange(value: string | undefined) {
+		conditionId = value || undefined;
 	}
 
 	function onTypeChange(value: string | undefined) {
 		if (value) {
-			behaviorType = value as BuildingBehaviorType;
+			behaviorType = value as CharacterBehaviorType;
 		}
 	}
 
@@ -71,21 +71,21 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!behaviorId || !buildingId || isSubmitting) return;
+		if (!behaviorId || !conditionId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
 			.update(behaviorId, {
-				description: description.trim(),
-				building_id: buildingId as BuildingId,
-				type: behaviorType,
+				name: name.trim(),
+				condition_id: conditionId as ConditionId,
+				character_behavior_type: behaviorType,
 			})
 			.then(() => {
 				closeDialog();
 			})
 			.catch((error) => {
-				console.error('Failed to update building behavior:', error);
+				console.error('Failed to update condition behavior:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -96,7 +96,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>건물 행동 수정</DialogTitle>
+			<DialogTitle>컨디션 행동 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
@@ -110,21 +110,21 @@
 							<SelectContent>
 								{#each behaviorTypes as type (type)}
 									<SelectItem value={type}>
-										{getBuildingBehaviorTypeLabel(type)}
+										{getCharacterBehaviorTypeLabel(type)}
 									</SelectItem>
 								{/each}
 							</SelectContent>
 						</Select>
 					</ButtonGroup>
 					<ButtonGroup class="flex-1">
-						<ButtonGroupText>건물</ButtonGroupText>
-						<Select type="single" value={buildingId ?? ''} onValueChange={onBuildingChange}>
+						<ButtonGroupText>컨디션</ButtonGroupText>
+						<Select type="single" value={conditionId ?? ''} onValueChange={onConditionChange}>
 							<SelectTrigger class="flex-1">
-								{selectedBuildingName}
+								{selectedConditionName}
 							</SelectTrigger>
 							<SelectContent>
-								{#each buildings as building (building.id)}
-									<SelectItem value={building.id}>{building.name}</SelectItem>
+								{#each conditions as condition (condition.id)}
+									<SelectItem value={condition.id}>{condition.name}</SelectItem>
 								{/each}
 							</SelectContent>
 						</Select>
@@ -136,11 +136,11 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="설명" bind:value={description} />
+					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
 			</div>
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting || !buildingId}>
+				<Button type="submit" disabled={isSubmitting || !conditionId}>
 					{isSubmitting ? '수정 중...' : '수정하기'}
 				</Button>
 			</DialogFooter>

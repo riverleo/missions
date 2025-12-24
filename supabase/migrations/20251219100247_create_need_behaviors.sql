@@ -11,6 +11,7 @@ create table need_behaviors (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
   need_threshold float not null default 0,
+  character_behavior_type character_behavior_type not null default 'use',
   name text not null,
 
   created_at timestamptz not null default now(),

@@ -51,7 +51,7 @@
 				<CommandGroup heading={need.name}>
 					{#each behaviors as behavior (behavior.id)}
 						<CommandLinkItem
-							href={`/admin/scenarios/${scenarioId}/behaviors/${behavior.id}`}
+							href={`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`}
 							class="group pr-1"
 						>
 							<IconCheck

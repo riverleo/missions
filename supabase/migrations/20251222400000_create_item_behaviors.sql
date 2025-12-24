@@ -3,6 +3,7 @@ create table item_behaviors (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
+  character_behavior_type character_behavior_type not null default 'use',
   description text not null default '',
 
   created_at timestamptz not null default now(),

@@ -22,7 +22,7 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { IconChevronDown } from '@tabler/icons-svelte';
+	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { goto } from '$app/navigation';
@@ -77,7 +77,7 @@
 			})
 			.then((behavior) => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/behaviors/${behavior.id}`);
+				goto(`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`);
 			})
 			.catch((error) => {
 				console.error('Failed to create behavior:', error);
@@ -94,6 +94,12 @@
 			<DialogTitle>새로운 행동 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<IconHeading />
+				</InputGroupAddon>
+				<InputGroupInput placeholder="이름" bind:value={name} />
+			</InputGroup>
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
 					<DropdownMenu>
@@ -114,19 +120,6 @@
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</InputGroupAddon>
-				<InputGroupInput placeholder="이름" bind:value={name} />
-			</InputGroup>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<Tooltip>
-						<TooltipTrigger>
-							{#snippet child({ props })}
-								<InputGroupButton {...props} variant="ghost">임계값</InputGroupButton>
-							{/snippet}
-						</TooltipTrigger>
-						<TooltipContent>욕구가 이 값 이하로 떨어지면 행동이 발동됩니다</TooltipContent>
-					</Tooltip>
-				</InputGroupAddon>
 				<InputGroupInput
 					type="number"
 					placeholder="0"
@@ -136,7 +129,7 @@
 					bind:value={needThreshold}
 				/>
 				<InputGroupAddon align="inline-end">
-					<InputGroupText>/ {selectedNeed?.max_value ?? 100}</InputGroupText>
+					<InputGroupText>/ {selectedNeed?.max_value ?? 100} 이하</InputGroupText>
 				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter>

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
-		BuildingBehaviorAction,
+		ConditionBehaviorAction,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 		CharacterId,
-		BuildingBehaviorId,
-		BuildingId,
+		ConditionBehaviorId,
+		ConditionId,
 		CharacterBodyId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
@@ -22,24 +22,24 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import { BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { createBuildingBehaviorActionNodeId } from '$lib/utils/flow-id';
+	
+	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
-		action: BuildingBehaviorAction | undefined;
+		action: ConditionBehaviorAction | undefined;
 		hasParent?: boolean;
 	}
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { buildingBehaviorStore, buildingBehaviorActionStore, admin } = useBuildingBehavior();
-	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
+	const { conditionBehaviorStore, conditionBehaviorActionStore, admin } = useConditionBehavior();
+	const { conditionStore } = useCondition();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const flowNodes = useNodes();
@@ -50,7 +50,7 @@
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
-	let changes = $state<BuildingBehaviorAction | undefined>(undefined);
+	let changes = $state<ConditionBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
 
 	// 미리보기용 캐릭터 선택
@@ -62,20 +62,20 @@
 
 	// 현재 액션의 행동 -> 건물 가져오기
 	const currentBehavior = $derived(
-		changes?.behavior_id
-			? $buildingBehaviorStore.data[changes.behavior_id as BuildingBehaviorId]
+		changes?.condition_behavior_id
+			? $conditionBehaviorStore.data[changes.condition_behavior_id as ConditionBehaviorId]
 			: undefined
 	);
-	const currentBuilding = $derived(
-		currentBehavior?.building_id
-			? $buildingStore.data[currentBehavior.building_id as BuildingId]
+	const currentCondition = $derived(
+		currentBehavior?.condition_id
+			? $conditionStore.data[currentBehavior.condition_id as ConditionId]
 			: undefined
 	);
 	// 건물 상태 (항상 idle 사용)
-	const buildingStates = $derived(
-		currentBuilding ? ($buildingStateStore.data[currentBuilding.id] ?? []) : []
+	const conditionStates = $derived(
+		currentCondition ? ([]) : []
 	);
-	const previewBuildingState = $derived(buildingStates.find((s) => s.type === 'idle'));
+	const previewConditionState = $derived(conditionStates.find((s: any) => s.type === 'idle'));
 
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -98,14 +98,14 @@
 		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
 	);
 	const previewBodyState = $derived(
-		previewBodyStates.find((s) => s.type === (changes?.character_body_state_type ?? 'idle'))
+		previewBodyStates.find((s: any) => s.type === (changes?.character_body_state_type ?? 'idle'))
 	);
 	const previewFaceStates = $derived(
 		previewCharacter ? ($faceStateStore.data[previewCharacter.id] ?? []) : []
 	);
 	const previewFaceState = $derived(
 		changes?.character_face_state_type
-			? previewFaceStates.find((s) => s.type === changes!.character_face_state_type)
+			? previewFaceStates.find((s: any) => s.type === changes!.character_face_state_type)
 			: undefined
 	);
 
@@ -137,22 +137,22 @@
 		if (!changes || isUpdating) return;
 
 		const actionId = changes.id;
-		const behaviorId = changes.behavior_id;
+		const behaviorId = changes.condition_behavior_id;
 		isUpdating = true;
 
 		try {
 			// root로 설정할 때 다른 root 액션들을 먼저 해제
 			if (changes.root) {
-				const allActions = Object.values($buildingBehaviorActionStore.data);
+				const allActions = Object.values($conditionBehaviorActionStore.data);
 				const otherRootActions = allActions.filter(
-					(a) => a.behavior_id === behaviorId && a.id !== actionId && a.root
+					(a) => a.condition_behavior_id === behaviorId && a.id !== actionId && a.root
 				);
 				await Promise.all(
-					otherRootActions.map((a) => admin.updateBuildingBehaviorAction(a.id, { root: false }))
+					otherRootActions.map((a) => admin.updateConditionBehaviorAction(a.id, { root: false }))
 				);
 			}
 
-			await admin.updateBuildingBehaviorAction(actionId, {
+			await admin.updateConditionBehaviorAction(actionId, {
 				duration_ticks: changes.duration_ticks,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
@@ -162,7 +162,7 @@
 			});
 
 			// 선택 해제
-			const nodeId = `building-behavior-action-${actionId}`;
+			const nodeId = `condition-behavior-action-${actionId}`;
 			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 		} catch (error) {
 			console.error('Failed to update action:', error);
@@ -176,7 +176,7 @@
 
 		flowNodes.update((ns) =>
 			ns.map((n) =>
-				n.id === createBuildingBehaviorActionNodeId(action) ? { ...n, selected: false } : n
+				n.id === createConditionBehaviorActionNodeId(action) ? { ...n, selected: false } : n
 			)
 		);
 	}
@@ -252,7 +252,7 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if previewBuildingState && previewBodyState}
+						{#if previewConditionState && previewBodyState}
 							<Separator />
 
 							<div class="flex flex-col gap-2">
@@ -260,8 +260,7 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									<BuildingSpriteAnimator
-										buildingState={previewBuildingState}
+										conditionState={previewConditionState}
 										characterBodyState={previewBodyState}
 										characterFaceState={previewFaceState}
 										characterOffset={{ x: changes.offset_x, y: changes.offset_y }}

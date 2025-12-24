@@ -120,6 +120,22 @@
 							<InputGroupInput type="text" placeholder="효과 이름" bind:value={changes.name} />
 						</InputGroup>
 
+						<InputGroup>
+							<InputGroupAddon align="inline-start">
+								<Tooltip>
+									<TooltipTrigger>
+										{#snippet child({ props })}
+											<InputGroupButton {...props} variant="ghost">범위</InputGroupButton>
+										{/snippet}
+									</TooltipTrigger>
+									<TooltipContent side="bottom">효과가 발동하는 컨디션 범위</TooltipContent>
+								</Tooltip>
+							</InputGroupAddon>
+							<InputGroupInput type="number" step="0.1" bind:value={changes.min_threshold} />
+							<InputGroupText>~</InputGroupText>
+							<InputGroupInput type="number" step="0.1" bind:value={changes.max_threshold} />
+						</InputGroup>
+
 						<ButtonGroup class="w-full">
 							<Select
 								type="single"
@@ -150,36 +166,6 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
-
-						<div class="grid grid-cols-2 gap-2">
-							<InputGroup>
-								<InputGroupAddon align="inline-start">
-									<Tooltip>
-										<TooltipTrigger>
-											{#snippet child({ props })}
-												<InputGroupButton {...props} variant="ghost">최소</InputGroupButton>
-											{/snippet}
-										</TooltipTrigger>
-										<TooltipContent side="bottom">효과가 발동하는 컨디션 최소값</TooltipContent>
-									</Tooltip>
-								</InputGroupAddon>
-								<InputGroupInput type="number" step="0.1" bind:value={changes.min_threshold} />
-							</InputGroup>
-
-							<InputGroup>
-								<InputGroupAddon align="inline-start">
-									<Tooltip>
-										<TooltipTrigger>
-											{#snippet child({ props })}
-												<InputGroupButton {...props} variant="ghost">최대</InputGroupButton>
-											{/snippet}
-										</TooltipTrigger>
-										<TooltipContent side="bottom">효과가 발동하는 컨디션 최대값</TooltipContent>
-									</Tooltip>
-								</InputGroupAddon>
-								<InputGroupInput type="number" step="0.1" bind:value={changes.max_threshold} />
-							</InputGroup>
-						</div>
 
 						<InputGroup>
 							<InputGroupAddon align="inline-start">

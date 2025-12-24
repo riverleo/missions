@@ -53,8 +53,8 @@ export type WorldCharacterId = Brand<string, 'WorldCharacterId'>;
 export type WorldCharacterNeedId = Brand<string, 'WorldCharacterNeedId'>;
 export type BuildingId = Brand<string, 'BuildingId'>;
 export type BuildingStateId = Brand<string, 'BuildingStateId'>;
-export type BuildingBehaviorId = Brand<string, 'BuildingBehaviorId'>;
-export type BuildingBehaviorActionId = Brand<string, 'BuildingBehaviorActionId'>;
+export type ConditionBehaviorId = Brand<string, 'ConditionBehaviorId'>;
+export type ConditionBehaviorActionId = Brand<string, 'ConditionBehaviorActionId'>;
 export type WorldBuildingId = Brand<string, 'WorldBuildingId'>;
 export type ConditionId = Brand<string, 'ConditionId'>;
 export type ConditionFulfillmentId = Brand<string, 'ConditionFulfillmentId'>;
@@ -1092,80 +1092,91 @@ export type NeedBehaviorActionUpdate = Omit<
 	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
 };
 
-// BuildingBehavior types
-export type BuildingBehaviorType = Enums<'building_behavior_type'>;
-type BuildingBehaviorRow = Tables<'building_behaviors'>;
-export type BuildingBehavior = Omit<
-	BuildingBehaviorRow,
-	'id' | 'scenario_id' | 'building_id' | 'created_by'
+// CharacterBehavior types
+export type CharacterBehaviorType = Enums<'character_behavior_type'>;
+
+// ConditionBehavior types
+type ConditionBehaviorRow = Tables<'condition_behaviors'>;
+export type ConditionBehavior = Omit<
+	ConditionBehaviorRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
-	id: BuildingBehaviorId;
+	id: ConditionBehaviorId;
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
+	condition_id: ConditionId;
+	character_id: CharacterId | null;
 	created_by: UserRoleId | null;
 };
-type BuildingBehaviorInsertRow = TablesInsert<'building_behaviors'>;
-export type BuildingBehaviorInsert = Omit<
-	BuildingBehaviorInsertRow,
-	'scenario_id' | 'building_id'
+type ConditionBehaviorInsertRow = TablesInsert<'condition_behaviors'>;
+export type ConditionBehaviorInsert = Omit<
+	ConditionBehaviorInsertRow,
+	'scenario_id' | 'condition_id' | 'character_id'
 > & {
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
+	condition_id: ConditionId;
+	character_id?: CharacterId | null;
 };
-type BuildingBehaviorUpdateRow = TablesUpdate<'building_behaviors'>;
-export type BuildingBehaviorUpdate = Omit<
-	BuildingBehaviorUpdateRow,
-	'id' | 'scenario_id' | 'building_id' | 'created_by'
+type ConditionBehaviorUpdateRow = TablesUpdate<'condition_behaviors'>;
+export type ConditionBehaviorUpdate = Omit<
+	ConditionBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
-	id?: BuildingBehaviorId;
+	id?: ConditionBehaviorId;
 	scenario_id?: ScenarioId;
-	building_id?: BuildingId;
+	condition_id?: ConditionId;
+	character_id?: CharacterId | null;
 	created_by?: UserRoleId | null;
 };
 
-// BuildingBehaviorAction types
-type BuildingBehaviorActionRow = Tables<'building_behavior_actions'>;
-export type BuildingBehaviorAction = Omit<
-	BuildingBehaviorActionRow,
+// ConditionBehaviorAction types
+type ConditionBehaviorActionRow = Tables<'condition_behavior_actions'>;
+export type ConditionBehaviorAction = Omit<
+	ConditionBehaviorActionRow,
 	| 'id'
 	| 'scenario_id'
-	| 'behavior_id'
-	| 'success_building_behavior_action_id'
-	| 'failure_building_behavior_action_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
 > & {
-	id: BuildingBehaviorActionId;
+	id: ConditionBehaviorActionId;
 	scenario_id: ScenarioId;
-	behavior_id: BuildingBehaviorId;
-	success_building_behavior_action_id: BuildingBehaviorActionId | null;
-	failure_building_behavior_action_id: BuildingBehaviorActionId | null;
+	condition_id: ConditionId;
+	condition_behavior_id: ConditionBehaviorId;
+	success_condition_behavior_action_id: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id: ConditionBehaviorActionId | null;
 };
-type BuildingBehaviorActionInsertRow = TablesInsert<'building_behavior_actions'>;
-export type BuildingBehaviorActionInsert = Omit<
-	BuildingBehaviorActionInsertRow,
+type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
+export type ConditionBehaviorActionInsert = Omit<
+	ConditionBehaviorActionInsertRow,
 	| 'scenario_id'
-	| 'behavior_id'
-	| 'success_building_behavior_action_id'
-	| 'failure_building_behavior_action_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
-	behavior_id: BuildingBehaviorId;
-	success_building_behavior_action_id?: BuildingBehaviorActionId | null;
-	failure_building_behavior_action_id?: BuildingBehaviorActionId | null;
+	condition_id: ConditionId;
+	condition_behavior_id: ConditionBehaviorId;
+	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
-type BuildingBehaviorActionUpdateRow = TablesUpdate<'building_behavior_actions'>;
-export type BuildingBehaviorActionUpdate = Omit<
-	BuildingBehaviorActionUpdateRow,
+type ConditionBehaviorActionUpdateRow = TablesUpdate<'condition_behavior_actions'>;
+export type ConditionBehaviorActionUpdate = Omit<
+	ConditionBehaviorActionUpdateRow,
 	| 'id'
 	| 'scenario_id'
-	| 'behavior_id'
-	| 'success_building_behavior_action_id'
-	| 'failure_building_behavior_action_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
 > & {
-	id?: BuildingBehaviorActionId;
+	id?: ConditionBehaviorActionId;
 	scenario_id?: ScenarioId;
-	behavior_id?: BuildingBehaviorId;
-	success_building_behavior_action_id?: BuildingBehaviorActionId | null;
-	failure_building_behavior_action_id?: BuildingBehaviorActionId | null;
+	condition_id?: ConditionId;
+	condition_behavior_id?: ConditionBehaviorId;
+	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 
 // ItemState types
@@ -1307,25 +1318,25 @@ export type BehaviorPriority = Omit<
 	| 'id'
 	| 'scenario_id'
 	| 'need_behavior_id'
-	| 'building_behavior_id'
+	| 'condition_behavior_id'
 	| 'item_behavior_id'
 	| 'created_by'
 > & {
 	id: BehaviorPriorityId;
 	scenario_id: ScenarioId;
 	need_behavior_id: NeedBehaviorId | null;
-	building_behavior_id: BuildingBehaviorId | null;
+	condition_behavior_id: ConditionBehaviorId | null;
 	item_behavior_id: ItemBehaviorId | null;
 	created_by: UserRoleId | null;
 };
 type BehaviorPriorityInsertRow = TablesInsert<'behavior_priorities'>;
 export type BehaviorPriorityInsert = Omit<
 	BehaviorPriorityInsertRow,
-	'scenario_id' | 'need_behavior_id' | 'building_behavior_id' | 'item_behavior_id' | 'created_by'
+	'scenario_id' | 'need_behavior_id' | 'condition_behavior_id' | 'item_behavior_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
 	need_behavior_id?: NeedBehaviorId | null;
-	building_behavior_id?: BuildingBehaviorId | null;
+	condition_behavior_id?: ConditionBehaviorId | null;
 	item_behavior_id?: ItemBehaviorId | null;
 	created_by?: UserRoleId | null;
 };
@@ -1335,14 +1346,14 @@ export type BehaviorPriorityUpdate = Omit<
 	| 'id'
 	| 'scenario_id'
 	| 'need_behavior_id'
-	| 'building_behavior_id'
+	| 'condition_behavior_id'
 	| 'item_behavior_id'
 	| 'created_by'
 > & {
 	id?: BehaviorPriorityId;
 	scenario_id?: ScenarioId;
 	need_behavior_id?: NeedBehaviorId | null;
-	building_behavior_id?: BuildingBehaviorId | null;
+	condition_behavior_id?: ConditionBehaviorId | null;
 	item_behavior_id?: ItemBehaviorId | null;
 	created_by?: UserRoleId | null;
 };

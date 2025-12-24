@@ -16,28 +16,28 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useCondition } from '$lib/hooks/use-condition';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import type { ScenarioId } from '$lib/types';
 
-	const { buildingBehaviorStore, openDialog } = useBuildingBehavior();
-	const { store: buildingStore } = useBuilding();
+	const { conditionBehaviorStore, openDialog } = useConditionBehavior();
+	const { conditionStore } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
-	const behaviorsGroupedByBuilding = $derived(() => {
-		const behaviors = Object.values($buildingBehaviorStore.data);
-		const grouped = group(behaviors, (b) => b.building_id);
-		const buildings = Object.values($buildingStore.data);
-		const sortedBuildings = alphabetical(buildings, (b) => b.name);
+	const behaviorsGroupedByCondition = $derived(() => {
+		const behaviors = Object.values($conditionBehaviorStore.data);
+		const grouped = group(behaviors, (b) => b.condition_id);
+		const conditions = Object.values($conditionStore.data);
+		const sortedConditions = alphabetical(conditions, (b) => b.name);
 
-		return sortedBuildings
-			.map((building) => ({
-				building,
-				behaviors: alphabetical(grouped[building.id] ?? [], (b) => b.type),
+		return sortedConditions
+			.map((condition) => ({
+				condition,
+				behaviors: alphabetical(grouped[condition.id] ?? [], (b) => b.character_behavior_type),
 			}))
 			.filter((g) => g.behaviors.length > 0);
 	});
@@ -45,14 +45,14 @@
 
 <Command class="w-full rounded-lg border shadow-md">
 	<CommandInput placeholder="건물 행동 검색..." />
-	{#if behaviorsGroupedByBuilding().length > 0}
+	{#if behaviorsGroupedByCondition().length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
-			{#each behaviorsGroupedByBuilding() as { building, behaviors } (building.id)}
-				<CommandGroup heading={building.name}>
+			{#each behaviorsGroupedByCondition() as { condition, behaviors } (condition.id)}
+				<CommandGroup heading={condition.name}>
 					{#each behaviors as behavior (behavior.id)}
 						<CommandLinkItem
-							href={`/admin/scenarios/${scenarioId}/building-behaviors/${behavior.id}`}
+							href={`/admin/scenarios/${scenarioId}/condition-behaviors/${behavior.id}`}
 							class="group pr-1"
 						>
 							<IconCheck
@@ -63,13 +63,11 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									"{building.name}" 건물을 "{getBuildingBehaviorTypeLabel(behavior.type)}"
+									"{condition.name}" 컨디션을 "{getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}"
 								</span>
-								{#if behavior.description}
-									<span class="truncate text-xs text-muted-foreground">
-										{behavior.description}
-									</span>
-								{/if}
+								<span class="truncate text-xs text-muted-foreground">
+									{behavior.name}
+								</span>
 							</div>
 							<DropdownMenu>
 								<DropdownMenuTrigger>

@@ -17,7 +17,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
@@ -31,7 +31,7 @@
 		CharacterId,
 		CharacterBodyId,
 		BuildingId,
-		BuildingBehaviorId,
+		ConditionBehaviorId,
 		ItemId,
 		ItemBehaviorId,
 		NeedId,
@@ -47,7 +47,7 @@
 	const { store: characterStore } = useCharacter();
 	const { store: characterBodyStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
-	const { buildingBehaviorStore } = useBuildingBehavior();
+	const { conditionBehaviorStore } = useConditionBehavior();
 	const { store: itemStore } = useItem();
 	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
@@ -79,8 +79,8 @@
 		if (prevSegment === 'buildings') {
 			return $buildingStore.data?.[id as BuildingId]?.name;
 		}
-		if (prevSegment === 'building-behaviors') {
-			return $buildingBehaviorStore.data?.[id as BuildingBehaviorId]?.type;
+		if (prevSegment === 'condition-behaviors') {
+			return $conditionBehaviorStore.data?.[id as ConditionBehaviorId]?.name;
 		}
 		if (prevSegment === 'items') {
 			return $itemStore.data?.[id as ItemId]?.name;
@@ -95,7 +95,7 @@
 		if (prevSegment === 'needs') {
 			return $needStore.data?.[id as NeedId]?.name;
 		}
-		if (prevSegment === 'behaviors') {
+		if (prevSegment === 'need-behaviors') {
 			return $needBehaviorStore.data?.[id as NeedBehaviorId]?.name;
 		}
 		return undefined;
@@ -138,11 +138,11 @@
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
-			else if (segment === 'building-behaviors') label = '건물 행동';
+			else if (segment === 'condition-behaviors') label = '건물 행동';
 			else if (segment === 'items') label = '아이템';
 			else if (segment === 'item-behaviors') label = '아이템 행동';
 			else if (segment === 'needs') label = '욕구';
-			else if (segment === 'behaviors') label = '욕구 행동';
+			else if (segment === 'need-behaviors') label = '욕구 행동';
 			// UUID 형태의 ID는 title로 표시
 			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
 				const prevSegment = segments[i - 1];

@@ -10,21 +10,21 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useBuildingBehavior } from '$lib/hooks/use-building-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { getBuildingBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useCondition } from '$lib/hooks/use-condition';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import type { ScenarioId } from '$lib/types';
 
-	const { buildingBehaviorStore, dialogStore, closeDialog, admin } = useBuildingBehavior();
-	const { store: buildingStore } = useBuilding();
+	const { conditionBehaviorStore, dialogStore, closeDialog, admin } = useConditionBehavior();
+	const { conditionStore } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
 		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined
 	);
-	const behavior = $derived(behaviorId ? $buildingBehaviorStore.data[behaviorId] : undefined);
-	const building = $derived(
-		behavior?.building_id ? $buildingStore.data[behavior.building_id] : undefined
+	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
+	const condition = $derived(
+		behavior?.condition_id ? $conditionStore.data[behavior.condition_id] : undefined
 	);
 	const open = $derived($dialogStore?.type === 'delete');
 
@@ -46,10 +46,10 @@
 			.remove(behaviorId)
 			.then(() => {
 				closeDialog();
-				goto(`/admin/scenarios/${scenarioId}/building-behaviors`);
+				goto(`/admin/scenarios/${scenarioId}/condition-behaviors`);
 			})
 			.catch((error) => {
-				console.error('Failed to delete building behavior:', error);
+				console.error('Failed to delete condition behavior:', error);
 			})
 			.finally(() => {
 				isSubmitting = false;
@@ -62,8 +62,8 @@
 		<DialogHeader>
 			<DialogTitle>건물 행동 삭제</DialogTitle>
 			<DialogDescription>
-				정말로 "{building?.name}" 건물의 "{behavior
-					? getBuildingBehaviorTypeLabel(behavior.type)
+				정말로 "{condition?.name}" 건물의 "{behavior
+					? getCharacterBehaviorTypeLabel(behavior.character_behavior_type)
 					: ''}" 행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
 			</DialogDescription>
 		</DialogHeader>
