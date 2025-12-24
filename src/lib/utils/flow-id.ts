@@ -3,9 +3,13 @@
  */
 
 import type {
+	Building,
 	BuildingBehaviorAction,
+	BuildingCondition,
 	Character,
 	CharacterNeed,
+	Condition,
+	ConditionFulfillment,
 	ItemBehaviorAction,
 	NarrativeDiceRoll,
 	NarrativeNode,
@@ -331,4 +335,71 @@ export function createItemBehaviorActionFailureEdgeId(
 
 export function isItemBehaviorActionFailureEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-failure-');
+}
+
+// Condition Flow Node/Edge IDs
+
+// Building Node
+export function createBuildingNodeId(building: Building): string {
+	return `building-${building.id}`;
+}
+
+export function parseBuildingNodeId(nodeId: string): string {
+	return nodeId.replace('building-', '');
+}
+
+export function isBuildingNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('building-');
+}
+
+// Condition Node
+export function createConditionNodeId(condition: Condition): string {
+	return `condition-${condition.id}`;
+}
+
+export function parseConditionNodeId(nodeId: string): string {
+	return nodeId.replace('condition-', '');
+}
+
+export function isConditionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('condition-');
+}
+
+// Condition Fulfillment Node
+export function createConditionFulfillmentNodeId(fulfillment: ConditionFulfillment): string {
+	return `condition-fulfillment-${fulfillment.id}`;
+}
+
+// Building-Condition Edge
+export function createBuildingConditionEdgeId(buildingCondition: BuildingCondition): string {
+	return `building-condition-${buildingCondition.building_id}-${buildingCondition.condition_id}`;
+}
+
+export function parseBuildingConditionEdgeId(edgeId: string): {
+	buildingId: string;
+	conditionId: string;
+} {
+	const [, buildingId, conditionId] = edgeId.split('-');
+	return { buildingId: buildingId ?? '', conditionId: conditionId ?? '' };
+}
+
+export function isBuildingConditionEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('building-condition-');
+}
+
+// Condition-Fulfillment Edge
+export function createConditionFulfillmentEdgeId(fulfillment: ConditionFulfillment): string {
+	return `condition-fulfillment-${fulfillment.condition_id}-${fulfillment.id}`;
+}
+
+export function parseConditionFulfillmentEdgeId(edgeId: string): {
+	conditionId: string;
+	fulfillmentId: string;
+} {
+	const [, , conditionId, fulfillmentId] = edgeId.split('-');
+	return { conditionId: conditionId ?? '', fulfillmentId: fulfillmentId ?? '' };
+}
+
+export function isConditionFulfillmentEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('condition-fulfillment-');
 }

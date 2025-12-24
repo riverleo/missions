@@ -28,7 +28,7 @@
 
 <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
 	<ButtonGroup>
-		<ButtonGroupText class="whitespace-nowrap">바디</ButtonGroupText>
+		<ButtonGroupText class="whitespace-nowrap">바디 상태</ButtonGroupText>
 		<Select type="single" value={previewBodyStateType} onValueChange={onBodyStateChange}>
 			<SelectTrigger class="min-w-32">
 				{selectedBodyStateLabel}

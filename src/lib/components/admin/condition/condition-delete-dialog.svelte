@@ -1,0 +1,69 @@
+<script lang="ts">
+	import { Button } from '$lib/components/ui/button';
+	import {
+		Dialog,
+		DialogContent,
+		DialogDescription,
+		DialogFooter,
+		DialogHeader,
+		DialogTitle,
+	} from '$lib/components/ui/dialog';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { useCondition } from '$lib/hooks/use-condition';
+	import type { ScenarioId } from '$lib/types';
+
+	const { conditionStore, dialogStore, closeDialog, admin } = useCondition();
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
+	const conditionId = $derived($dialogStore?.type === 'delete' ? $dialogStore.conditionId : undefined);
+	const condition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
+	const open = $derived($dialogStore?.type === 'delete');
+
+	let isSubmitting = $state(false);
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeDialog();
+		}
+	}
+
+	function onsubmit(e: SubmitEvent) {
+		e.preventDefault();
+		if (!conditionId || !scenarioId || isSubmitting) return;
+
+		isSubmitting = true;
+
+		admin
+			.removeCondition(conditionId)
+			.then(() => {
+				closeDialog();
+				goto(`/admin/scenarios/${scenarioId}/conditions`);
+			})
+			.catch((error) => {
+				console.error('Failed to delete condition:', error);
+			})
+			.finally(() => {
+				isSubmitting = false;
+			});
+	}
+</script>
+
+<Dialog {open} {onOpenChange}>
+	<DialogContent>
+		<DialogHeader>
+			<DialogTitle>컨디션 삭제</DialogTitle>
+			<DialogDescription>
+				정말로 "{condition?.name}" 컨디션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+			</DialogDescription>
+		</DialogHeader>
+		<form {onsubmit}>
+			<DialogFooter>
+				<Button type="button" variant="outline" onclick={() => closeDialog()}>취소</Button>
+				<Button type="submit" variant="destructive" disabled={isSubmitting}>
+					{isSubmitting ? '삭제 중...' : '삭제하기'}
+				</Button>
+			</DialogFooter>
+		</form>
+	</DialogContent>
+</Dialog>
