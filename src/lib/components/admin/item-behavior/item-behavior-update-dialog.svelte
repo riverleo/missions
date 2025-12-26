@@ -24,7 +24,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconHeading, IconChevronDown } from '@tabler/icons-svelte';
+	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -66,6 +66,12 @@
 			durabilityThreshold = currentBehavior.durability_threshold ?? undefined;
 			characterId = currentBehavior.character_id ?? undefined;
 			behaviorType = currentBehavior.character_behavior_type;
+		}
+	});
+
+	$effect(() => {
+		if (behaviorType === 'use') {
+			durabilityThreshold = undefined;
 		}
 	});
 
@@ -124,82 +130,74 @@
 			<div class="flex flex-col gap-2">
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>
-							<IconHeading />
-						</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
-				</InputGroup>
-
-				<ButtonGroup class="w-full">
-					<ButtonGroupText>아이템</ButtonGroupText>
-					<Select type="single" value={itemId ?? ''} onValueChange={onItemChange}>
-						<SelectTrigger class="flex-1">
-							{selectedItemName}
-						</SelectTrigger>
-						<SelectContent>
-							{#each items as item (item.id)}
-								<SelectItem value={item.id}>{item.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<InputGroupText>내구도 임계점</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput
-						type="number"
-						bind:value={durabilityThreshold}
-						placeholder="선택적"
-					/>
-					<InputGroupAddon align="inline-end">
-						<InputGroupText>이하</InputGroupText>
-					</InputGroupAddon>
-				</InputGroup>
-
-				<ButtonGroup class="w-full">
-					<ButtonGroupText>캐릭터</ButtonGroupText>
-					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
-						<SelectTrigger class="flex-1">
-							{selectedCharacterName}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">모두</SelectItem>
-							{#each characters as character (character.id)}
-								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<InputGroupText>행동 타입</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupAddon align="inline-end">
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}
 									<InputGroupButton {...props} variant="ghost">
-										{selectedTypeName}
+										{selectedItemName}
 										<IconChevronDown class="size-4" />
 									</InputGroupButton>
 								{/snippet}
 							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuRadioGroup value={behaviorType} onValueChange={onTypeChange}>
-									{#each behaviorTypes as type (type)}
-										<DropdownMenuRadioItem value={type}>
-											{getCharacterBehaviorTypeLabel(type)}
+							<DropdownMenuContent align="start">
+								<DropdownMenuRadioGroup value={itemId ?? ''} onValueChange={onItemChange}>
+									{#each items as item (item.id)}
+										<DropdownMenuRadioItem value={item.id}>
+											{item.name}
 										</DropdownMenuRadioItem>
 									{/each}
 								</DropdownMenuRadioGroup>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</InputGroupAddon>
+					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
+				<ButtonGroup class="w-full gap-2">
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>행동</ButtonGroupText>
+						<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
+							<SelectTrigger class="flex-1">
+								{selectedTypeName}
+							</SelectTrigger>
+							<SelectContent>
+								{#each behaviorTypes as type (type)}
+									<SelectItem value={type}>
+										{getCharacterBehaviorTypeLabel(type)}
+									</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>캐릭터</ButtonGroupText>
+						<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+							<SelectTrigger class="flex-1">
+								{selectedCharacterName}
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="">모두</SelectItem>
+								{#each characters as character (character.id)}
+									<SelectItem value={character.id}>{character.name}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+				</ButtonGroup>
+				{#if behaviorType === 'clean'}
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>내구도</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput
+							type="number"
+							bind:value={durabilityThreshold}
+							placeholder="0"
+						/>
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>/ 이하</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
+				{/if}
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !itemId || !name.trim()}>

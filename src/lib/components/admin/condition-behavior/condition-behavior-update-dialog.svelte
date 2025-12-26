@@ -122,75 +122,79 @@
 			<DialogTitle>컨디션 행동 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<IconHeading />
-				</InputGroupAddon>
-				<InputGroupInput placeholder="이름" bind:value={name} />
-			</InputGroup>
-			<ButtonGroup class="w-full gap-2">
-				<ButtonGroup class="flex-1">
-					<ButtonGroupText>행동</ButtonGroupText>
-					<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
-						<SelectTrigger class="flex-1">
-							{selectedTypeName}
-						</SelectTrigger>
-						<SelectContent>
-							{#each behaviorTypes as type (type)}
-								<SelectItem value={type}>
-									{getCharacterBehaviorTypeLabel(type)}
-								</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-				<ButtonGroup class="flex-1">
-					<ButtonGroupText>캐릭터</ButtonGroupText>
-					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
-						<SelectTrigger class="flex-1">
-							{selectedCharacterName}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">모두</SelectItem>
-							{#each characters as character (character.id)}
-								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-			</ButtonGroup>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<DropdownMenu>
-						<DropdownMenuTrigger>
-							{#snippet child({ props })}
-								<InputGroupButton {...props} variant="ghost">
-									{selectedConditionName}
-									<IconChevronDown class="ml-1 size-4" />
-								</InputGroupButton>
-							{/snippet}
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="start">
-							<DropdownMenuRadioGroup value={conditionId ?? ''} onValueChange={onConditionChange}>
-								{#each conditions as condition (condition.id)}
-									<DropdownMenuRadioItem value={condition.id}>{condition.name}</DropdownMenuRadioItem>
+			<div class="grid-2 flex flex-col">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<IconHeading />
+					</InputGroupAddon>
+					<InputGroupInput placeholder="이름" bind:value={name} />
+				</InputGroup>
+				<ButtonGroup class="w-full gap-2">
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>행동</ButtonGroupText>
+						<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
+							<SelectTrigger class="flex-1">
+								{selectedTypeName}
+							</SelectTrigger>
+							<SelectContent>
+								{#each behaviorTypes as type (type)}
+									<SelectItem value={type}>
+										{getCharacterBehaviorTypeLabel(type)}
+									</SelectItem>
 								{/each}
-							</DropdownMenuRadioGroup>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</InputGroupAddon>
-				<InputGroupInput
-					type="number"
-					placeholder="0"
-					step="1"
-					min="0"
-					max={selectedCondition?.max_value ?? 100}
-					bind:value={conditionThreshold}
-				/>
-				<InputGroupAddon align="inline-end">
-					<InputGroupText>/ {selectedCondition?.max_value ?? 100} 이하</InputGroupText>
-				</InputGroupAddon>
-			</InputGroup>
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>캐릭터</ButtonGroupText>
+						<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+							<SelectTrigger class="flex-1">
+								{selectedCharacterName}
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="">모두</SelectItem>
+								{#each characters as character (character.id)}
+									<SelectItem value={character.id}>{character.name}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+				</ButtonGroup>
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<DropdownMenu>
+							<DropdownMenuTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props} variant="ghost">
+										{selectedConditionName}
+										<IconChevronDown class="ml-1 size-4" />
+									</InputGroupButton>
+								{/snippet}
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="start">
+								<DropdownMenuRadioGroup value={conditionId ?? ''} onValueChange={onConditionChange}>
+									{#each conditions as condition (condition.id)}
+										<DropdownMenuRadioItem value={condition.id}>
+											{condition.name}
+										</DropdownMenuRadioItem>
+									{/each}
+								</DropdownMenuRadioGroup>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</InputGroupAddon>
+					<InputGroupInput
+						type="number"
+						placeholder="0"
+						step="1"
+						min="0"
+						max={selectedCondition?.max_value ?? 100}
+						bind:value={conditionThreshold}
+					/>
+					<InputGroupAddon align="inline-end">
+						<InputGroupText>/ {selectedCondition?.max_value ?? 100} 이하</InputGroupText>
+					</InputGroupAddon>
+				</InputGroup>
+			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !conditionId}>
 					{isSubmitting ? '수정 중...' : '수정하기'}

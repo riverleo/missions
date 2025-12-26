@@ -19,6 +19,7 @@
 	import { cn } from '$lib/utils';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
@@ -26,6 +27,7 @@
 
 	const { itemBehaviorStore, openDialog } = useItemBehavior();
 	const { store: itemStore } = useItem();
+	const { store: characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -43,6 +45,7 @@
 			<CommandGroup>
 				{#each behaviors() as behavior (behavior.id)}
 					{@const item = $itemStore.data[behavior.item_id]}
+					{@const character = behavior.character_id ? $characterStore.data[behavior.character_id as import('$lib/types').CharacterId] : undefined}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/item-behaviors/${behavior.id}`}
 						class="group pr-1"
@@ -55,16 +58,13 @@
 						/>
 						<div class="flex flex-1 flex-col truncate">
 							<span class="truncate">
-								{behavior.name}
+								"{item?.name}" {behavior.name}
 							</span>
 							<span class="truncate text-xs text-muted-foreground">
-								{item?.name}
+								{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}할 때
 								{#if behavior.durability_threshold !== null}
-									내구도 {behavior.durability_threshold} 이하인 경우
-								{:else}
-									사용 시
+									(내구도 {behavior.durability_threshold} 이하)
 								{/if}
-								{getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
 							</span>
 						</div>
 						<DropdownMenu>
