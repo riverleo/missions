@@ -17,7 +17,11 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import type { BehaviorPriority, CharacterId, BuildingId } from '$lib/types';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import {
+		getNeedBehaviorLabel,
+		getConditionBehaviorLabel,
+		getItemBehaviorLabel,
+	} from '$lib/utils/state-label';
 
 	interface Props {
 		priority: BehaviorPriority;
@@ -66,10 +70,11 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return {
-				title: behavior.name || `이름없음 (${behavior.id.split('-')[0]})`,
-				description: `${character?.name ?? '모든 캐릭터'} (${need?.name ?? '욕구'} ${behavior.need_threshold} 이하)`,
-			};
+			return getNeedBehaviorLabel({
+				behavior,
+				needName: need?.name,
+				characterName: character?.name,
+			});
 		} else if (priority.condition_behavior_id) {
 			const behavior = $conditionBehaviorStore.data[priority.condition_behavior_id];
 			if (!behavior) return null;
@@ -82,10 +87,12 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return {
-				title: `${building?.name ?? '건물'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
-				description: `${character?.name ?? '모든 캐릭터'} (${condition?.name ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
-			};
+			return getConditionBehaviorLabel({
+				behavior,
+				buildingName: building?.name,
+				conditionName: condition?.name,
+				characterName: character?.name,
+			});
 		} else if (priority.item_behavior_id) {
 			const behavior = $itemBehaviorStore.data[priority.item_behavior_id];
 			if (!behavior) return null;
@@ -95,10 +102,11 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return {
-				title: `${item?.name ?? '아이템'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
-				description: `${character?.name ?? '모든 캐릭터'}${behavior.durability_threshold !== null ? ` (내구도 ${behavior.durability_threshold} 이하)` : ''}`,
-			};
+			return getItemBehaviorLabel({
+				behavior,
+				itemName: item?.name,
+				characterName: character?.name,
+			});
 		}
 
 		return null;

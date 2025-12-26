@@ -12,7 +12,7 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getItemBehaviorLabel } from '$lib/utils/state-label';
 	import type { ItemBehavior, CharacterId } from '$lib/types';
 
 	interface Props {
@@ -28,10 +28,18 @@
 	const { store: itemStore } = useItem();
 	const { store: characterStore } = useCharacter();
 
-	const item = $derived($itemStore.data[behavior.item_id]);
-	const character = $derived(
-		behavior.character_id ? $characterStore.data[behavior.character_id as CharacterId] : undefined
-	);
+	const label = $derived(() => {
+		const item = $itemStore.data[behavior.item_id];
+		const character = behavior.character_id
+			? $characterStore.data[behavior.character_id as CharacterId]
+			: undefined;
+
+		return getItemBehaviorLabel({
+			behavior,
+			itemName: item?.name,
+			characterName: character?.name,
+		});
+	});
 
 	const itemClass = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 group pr-1";
 </script>
@@ -40,15 +48,8 @@
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{item?.name ?? '아이템'} - {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'}
-				{#if behavior.durability_threshold !== null}
-					(내구도 {behavior.durability_threshold} 이하)
-				{/if}
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
@@ -84,15 +85,8 @@
 	<div class={itemClass}>
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{item?.name ?? '아이템'} - {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'}
-				{#if behavior.durability_threshold !== null}
-					(내구도 {behavior.durability_threshold} 이하)
-				{/if}
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>

@@ -22,7 +22,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 
 	const { needBehaviorStore, openDialog } = useNeedBehavior();
 	const { needStore } = useNeed();
@@ -56,6 +56,11 @@
 						{@const character = behavior.character_id
 							? $characterStore.data[behavior.character_id as CharacterId]
 							: undefined}
+						{@const label = getNeedBehaviorLabel({
+							behavior,
+							needName: need.name,
+							characterName: character?.name,
+						})}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`}
 							class="group pr-1"
@@ -67,13 +72,8 @@
 								)}
 							/>
 							<div class="flex flex-1 flex-col truncate">
-								<span class="truncate">
-									{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
-								</span>
-								<span class="truncate text-xs text-muted-foreground">
-									{character?.name ?? '모든 캐릭터'} ({need.name}
-									{behavior.need_threshold} 이하)
-								</span>
+								<span class="truncate">{label.title}</span>
+								<span class="truncate text-xs text-muted-foreground">{label.description}</span>
 							</div>
 							<DropdownMenu>
 								<DropdownMenuTrigger>

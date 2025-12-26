@@ -4,6 +4,9 @@ import type {
 	BuildingStateType,
 	CharacterBehaviorType,
 	ItemStateType,
+	NeedBehavior,
+	ConditionBehavior,
+	ItemBehavior,
 } from '$lib/types';
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
@@ -56,4 +59,42 @@ const itemStateLabels: Record<ItemStateType, string> = {
 
 export function getItemStateLabel(state: ItemStateType): string {
 	return itemStateLabels[state];
+}
+
+// Behavior 라벨 생성 함수들
+export function getNeedBehaviorLabel(params: {
+	behavior: NeedBehavior;
+	needName?: string;
+	characterName?: string;
+}): { title: string; description: string } {
+	const { behavior, needName, characterName } = params;
+	return {
+		title: behavior.name || `이름없음 (${behavior.id.split('-')[0]})`,
+		description: `${characterName ?? '모든 캐릭터'} (${needName ?? '욕구'} ${behavior.need_threshold} 이하)`,
+	};
+}
+
+export function getConditionBehaviorLabel(params: {
+	behavior: ConditionBehavior;
+	buildingName?: string;
+	conditionName?: string;
+	characterName?: string;
+}): { title: string; description: string } {
+	const { behavior, buildingName, conditionName, characterName } = params;
+	return {
+		title: `${buildingName ?? '건물'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
+		description: `${characterName ?? '모든 캐릭터'} (${conditionName ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
+	};
+}
+
+export function getItemBehaviorLabel(params: {
+	behavior: ItemBehavior;
+	itemName?: string;
+	characterName?: string;
+}): { title: string; description: string } {
+	const { behavior, itemName, characterName } = params;
+	return {
+		title: `${itemName ?? '아이템'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
+		description: `${characterName ?? '모든 캐릭터'}${behavior.durability_threshold !== null ? ` (내구도 ${behavior.durability_threshold} 이하)` : ''}`,
+	};
 }

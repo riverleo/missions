@@ -13,7 +13,7 @@
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getConditionBehaviorLabel } from '$lib/utils/state-label';
 	import type { ConditionBehavior, BuildingId, CharacterId } from '$lib/types';
 
 	interface Props {
@@ -30,13 +30,20 @@
 	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
 
-	const building = $derived($buildingStore.data[behavior.building_id as BuildingId]);
-	const condition = $derived(
-		behavior.condition_id ? $conditionStore.data[behavior.condition_id] : undefined
-	);
-	const character = $derived(
-		behavior.character_id ? $characterStore.data[behavior.character_id as CharacterId] : undefined
-	);
+	const label = $derived(() => {
+		const building = $buildingStore.data[behavior.building_id as BuildingId];
+		const condition = behavior.condition_id ? $conditionStore.data[behavior.condition_id] : undefined;
+		const character = behavior.character_id
+			? $characterStore.data[behavior.character_id as CharacterId]
+			: undefined;
+
+		return getConditionBehaviorLabel({
+			behavior,
+			buildingName: building?.name,
+			conditionName: condition?.name,
+			characterName: character?.name,
+		});
+	});
 
 	const itemClass = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 group pr-1";
 </script>
@@ -45,13 +52,8 @@
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{building?.name ?? '건물'} - {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'} ({condition?.name ?? '컨디션'}
-				{behavior.condition_threshold} 이하)
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
@@ -87,13 +89,8 @@
 	<div class={itemClass}>
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{building?.name ?? '건물'} - {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'} ({condition?.name ?? '컨디션'}
-				{behavior.condition_threshold} 이하)
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>

@@ -13,7 +13,7 @@
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		behavior: NeedBehavior;
@@ -28,10 +28,18 @@
 	const { needStore } = useNeed();
 	const { store: characterStore } = useCharacter();
 
-	const need = $derived(behavior.need_id ? $needStore.data[behavior.need_id] : undefined);
-	const character = $derived(
-		behavior.character_id ? $characterStore.data[behavior.character_id as CharacterId] : undefined
-	);
+	const label = $derived(() => {
+		const need = behavior.need_id ? $needStore.data[behavior.need_id] : undefined;
+		const character = behavior.character_id
+			? $characterStore.data[behavior.character_id as CharacterId]
+			: undefined;
+
+		return getNeedBehaviorLabel({
+			behavior,
+			needName: need?.name,
+			characterName: character?.name,
+		});
+	});
 
 	const itemClass = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 group pr-1";
 </script>
@@ -40,13 +48,8 @@
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'} ({need?.name ?? '욕구'}
-				{behavior.need_threshold} 이하)
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
@@ -82,13 +85,8 @@
 	<div class={itemClass}>
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">
-				{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
-			</span>
-			<span class="truncate text-xs text-muted-foreground">
-				{character?.name ?? '모든 캐릭터'} ({need?.name ?? '욕구'}
-				{behavior.need_threshold} 이하)
-			</span>
+			<span class="truncate">{label().title}</span>
+			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
