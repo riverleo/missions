@@ -39,7 +39,7 @@
 
 	const open = $derived($dialogStore?.type === 'update');
 	const behaviorId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined
+		$dialogStore?.type === 'update' ? $dialogStore.conditionBehaviorId : undefined
 	);
 	const currentBehavior = $derived(
 		behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined

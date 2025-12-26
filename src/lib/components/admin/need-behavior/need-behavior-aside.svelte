@@ -59,7 +59,10 @@
 								disabled={!currentBehaviorId}
 								onclick={() =>
 									currentBehaviorId &&
-									openDialog({ type: 'update', behaviorId: currentBehaviorId as NeedBehaviorId })}
+									openDialog({
+										type: 'update',
+										needBehaviorId: currentBehaviorId as NeedBehaviorId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +83,7 @@
 							disabled={!currentBehaviorId}
 							onclick={() =>
 								currentBehaviorId &&
-								openDialog({ type: 'delete', behaviorId: currentBehaviorId as NeedBehaviorId })}
+								openDialog({ type: 'delete', needBehaviorId: currentBehaviorId as NeedBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

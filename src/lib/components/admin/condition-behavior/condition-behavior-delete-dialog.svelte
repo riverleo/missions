@@ -20,7 +20,7 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined
+		$dialogStore?.type === 'delete' ? $dialogStore.conditionBehaviorId : undefined
 	);
 	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
 	const condition = $derived(

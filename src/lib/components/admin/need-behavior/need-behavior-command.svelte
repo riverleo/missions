@@ -93,12 +93,12 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'update', behaviorId: behavior.id })}
+										onclick={() => openDialog({ type: 'update', needBehaviorId: behavior.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'delete', behaviorId: behavior.id })}
+										onclick={() => openDialog({ type: 'delete', needBehaviorId: behavior.id })}
 									>
 										삭제
 									</DropdownMenuItem>

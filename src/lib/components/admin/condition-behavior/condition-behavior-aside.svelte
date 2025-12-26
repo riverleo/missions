@@ -61,7 +61,7 @@
 									currentBehaviorId &&
 									openDialog({
 										type: 'update',
-										behaviorId: currentBehaviorId as ConditionBehaviorId,
+										conditionBehaviorId: currentBehaviorId as ConditionBehaviorId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
@@ -85,7 +85,7 @@
 								currentBehaviorId &&
 								openDialog({
 									type: 'delete',
-									behaviorId: currentBehaviorId as ConditionBehaviorId,
+									conditionBehaviorId: currentBehaviorId as ConditionBehaviorId,
 								})}
 						>
 							<IconTrash class="size-4" />

@@ -33,10 +33,12 @@
 	const { store: characterStore } = useCharacter();
 
 	const open = $derived($dialogStore?.type === 'update');
-	const behaviorId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.behaviorId : undefined
+	const needBehaviorId = $derived(
+		$dialogStore?.type === 'update' ? $dialogStore.needBehaviorId : undefined
 	);
-	const currentBehavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
+	const currentBehavior = $derived(
+		needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined
+	);
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
@@ -76,12 +78,12 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!behaviorId || !name.trim() || !needId || isSubmitting) return;
+		if (!needBehaviorId || !name.trim() || !needId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.update(behaviorId, {
+			.update(needBehaviorId, {
 				name: name.trim(),
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,

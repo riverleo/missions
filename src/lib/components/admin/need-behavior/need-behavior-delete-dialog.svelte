@@ -16,10 +16,10 @@
 	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const behaviorId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined
+	const needBehaviorId = $derived(
+		$dialogStore?.type === 'delete' ? $dialogStore.needBehaviorId : undefined
 	);
-	const behavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
+	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
 	const open = $derived($dialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);
@@ -32,12 +32,12 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!behaviorId || !scenarioId || isSubmitting) return;
+		if (!needBehaviorId || !scenarioId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.remove(behaviorId)
+			.remove(needBehaviorId)
 			.then(() => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/need-behaviors`);

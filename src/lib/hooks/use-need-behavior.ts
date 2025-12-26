@@ -16,8 +16,8 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type NeedBehaviorDialogState =
 	| { type: 'create' }
-	| { type: 'update'; behaviorId: NeedBehaviorId }
-	| { type: 'delete'; behaviorId: NeedBehaviorId }
+	| { type: 'update'; needBehaviorId: NeedBehaviorId }
+	| { type: 'delete'; needBehaviorId: NeedBehaviorId }
 	| undefined;
 
 let instance: ReturnType<typeof createNeedBehaviorStore> | null = null;

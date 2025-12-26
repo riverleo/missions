@@ -16,8 +16,8 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type ConditionBehaviorDialogState =
 	| { type: 'create' }
-	| { type: 'update'; behaviorId: ConditionBehaviorId }
-	| { type: 'delete'; behaviorId: ConditionBehaviorId }
+	| { type: 'update'; conditionBehaviorId: ConditionBehaviorId }
+	| { type: 'delete'; conditionBehaviorId: ConditionBehaviorId }
 	| undefined;
 
 let instance: ReturnType<typeof createConditionBehaviorStore> | null = null;

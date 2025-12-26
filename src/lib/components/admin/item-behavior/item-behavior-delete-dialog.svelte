@@ -20,7 +20,7 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.behaviorId : undefined
+		$dialogStore?.type === 'delete' ? $dialogStore.itemBehaviorId : undefined
 	);
 	const behavior = $derived(behaviorId ? $itemBehaviorStore.data[behaviorId] : undefined);
 	const item = $derived(behavior?.item_id ? $itemStore.data[behavior.item_id] : undefined);

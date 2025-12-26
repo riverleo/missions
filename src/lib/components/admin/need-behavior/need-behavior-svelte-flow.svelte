@@ -24,11 +24,11 @@
 
 	const { needBehaviorStore, needBehaviorActionStore, admin } = useNeedBehavior();
 
-	const behaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
-	const behavior = $derived(behaviorId ? $needBehaviorStore.data[behaviorId] : undefined);
+	const needBehaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
+	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
 	const actions = $derived(
-		behaviorId
-			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === behaviorId)
+		needBehaviorId
+			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === needBehaviorId)
 			: []
 	);
 

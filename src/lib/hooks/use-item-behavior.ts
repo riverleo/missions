@@ -16,8 +16,8 @@ import { useServerPayload } from './use-server-payload.svelte';
 
 type ItemBehaviorDialogState =
 	| { type: 'create' }
-	| { type: 'update'; behaviorId: ItemBehaviorId }
-	| { type: 'delete'; behaviorId: ItemBehaviorId }
+	| { type: 'update'; itemBehaviorId: ItemBehaviorId }
+	| { type: 'delete'; itemBehaviorId: ItemBehaviorId }
 	| undefined;
 
 let instance: ReturnType<typeof createItemBehaviorStore> | null = null;
