@@ -23,13 +23,13 @@
 	const item = $derived(itemId ? $store.data[itemId] : undefined);
 
 	let name = $state('');
-	let decayTicks = $state<number | undefined>(undefined);
+	let maxDurabilityTicks = $state<number | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open && item) {
 			name = item.name ?? '';
-			decayTicks = item.decay_ticks ?? undefined;
+			maxDurabilityTicks = item.max_durability_ticks ?? undefined;
 		}
 	});
 
@@ -48,7 +48,7 @@
 		admin
 			.update(itemId, {
 				name: name.trim(),
-				decay_ticks: decayTicks ?? null,
+				max_durability_ticks: maxDurabilityTicks ?? null,
 			})
 			.then(() => {
 				closeDialog();
@@ -82,12 +82,10 @@
 						<IconClock />
 					</InputGroupText>
 				</InputGroupAddon>
-				<InputGroupInput
-					type="number"
-					placeholder="썩는 시간(틱)"
-					bind:value={decayTicks}
-					min="0"
-				/>
+				<InputGroupInput type="number" placeholder="최대 내구도" bind:value={maxDurabilityTicks} min="0" />
+				<InputGroupAddon align="inline-end">
+					<InputGroupText>틱</InputGroupText>
+				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !name.trim()}>

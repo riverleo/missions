@@ -7,6 +7,7 @@ create table world_buildings (
   building_id uuid not null references buildings(id) on delete cascade,
   tile_x integer not null default 0,
   tile_y integer not null default 0,
+  created_at_tick bigint not null default 0,
   created_at timestamptz not null default now()
 );
 

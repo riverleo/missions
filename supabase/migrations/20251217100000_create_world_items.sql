@@ -7,9 +7,11 @@ create table world_items (
   item_id uuid not null references items(id) on delete cascade,
   world_building_id uuid references world_buildings(id) on delete set null,
   state item_state_type not null default 'idle'::item_state_type,
+  durability_ticks bigint, -- nullable: max_durability_ticks가 null인 아이템은 이것도 null
   x float not null default 0,
   y float not null default 0,
   rotation float not null default 0,
+  created_at_tick bigint not null default 0,
   created_at timestamptz not null default now()
 );
 

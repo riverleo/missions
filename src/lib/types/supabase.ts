@@ -1127,24 +1127,24 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
-          decay_ticks: number | null
           id: string
+          max_durability_ticks: number | null
           name: string
           scenario_id: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
-          decay_ticks?: number | null
           id?: string
+          max_durability_ticks?: number | null
           name?: string
           scenario_id: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
-          decay_ticks?: number | null
           id?: string
+          max_durability_ticks?: number | null
           name?: string
           scenario_id?: string
         }
@@ -2014,6 +2014,7 @@ export type Database = {
       player_scenarios: {
         Row: {
           created_at: string
+          current_tick: number
           id: string
           player_id: string
           scenario_id: string
@@ -2022,6 +2023,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          current_tick?: number
           id?: string
           player_id: string
           scenario_id: string
@@ -2030,6 +2032,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          current_tick?: number
           id?: string
           player_id?: string
           scenario_id?: string
@@ -2456,6 +2459,7 @@ export type Database = {
         Row: {
           building_id: string
           created_at: string
+          created_at_tick: number
           id: string
           player_id: string
           tile_x: number
@@ -2466,6 +2470,7 @@ export type Database = {
         Insert: {
           building_id: string
           created_at?: string
+          created_at_tick?: number
           id?: string
           player_id: string
           tile_x?: number
@@ -2476,6 +2481,7 @@ export type Database = {
         Update: {
           building_id?: string
           created_at?: string
+          created_at_tick?: number
           id?: string
           player_id?: string
           tile_x?: number
@@ -2590,6 +2596,7 @@ export type Database = {
         Row: {
           character_id: string
           created_at: string
+          created_at_tick: number
           id: string
           player_id: string
           user_id: string
@@ -2600,6 +2607,7 @@ export type Database = {
         Insert: {
           character_id: string
           created_at?: string
+          created_at_tick?: number
           id?: string
           player_id: string
           user_id?: string
@@ -2610,6 +2618,7 @@ export type Database = {
         Update: {
           character_id?: string
           created_at?: string
+          created_at_tick?: number
           id?: string
           player_id?: string
           user_id?: string
@@ -2644,6 +2653,8 @@ export type Database = {
       world_items: {
         Row: {
           created_at: string
+          created_at_tick: number
+          durability_ticks: number | null
           id: string
           item_id: string
           player_id: string
@@ -2657,6 +2668,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_at_tick?: number
+          durability_ticks?: number | null
           id?: string
           item_id: string
           player_id: string
@@ -2670,6 +2683,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_at_tick?: number
+          durability_ticks?: number | null
           id?: string
           item_id?: string
           player_id?: string
@@ -2775,7 +2790,7 @@ export type Database = {
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
       condition_fulfillment_type: "character" | "item" | "idle"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
-      item_state_type: "idle" | "rotten"
+      item_state_type: "idle" | "broken"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_behavior_action_type: "go" | "interact" | "idle"
@@ -2923,7 +2938,7 @@ export const Constants = {
       character_face_state_type: ["idle", "happy", "sad", "angry"],
       condition_fulfillment_type: ["character", "item", "idle"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
-      item_state_type: ["idle", "rotten"],
+      item_state_type: ["idle", "broken"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_behavior_action_type: ["go", "interact", "idle"],

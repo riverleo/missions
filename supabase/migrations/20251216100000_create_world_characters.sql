@@ -7,6 +7,7 @@ create table world_characters (
   character_id uuid not null references characters(id) on delete cascade,
   x real not null default 0,
   y real not null default 0,
+  created_at_tick bigint not null default 0,
   created_at timestamptz not null default now()
 );
 

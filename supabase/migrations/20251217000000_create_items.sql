@@ -3,7 +3,7 @@ create table items (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   name text not null default '',
-  decay_ticks integer, -- nullable: 썩지 않는 아이템도 있음
+  max_durability_ticks bigint, -- nullable: 내구도가 없는 아이템도 있음
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
@@ -37,7 +37,7 @@ create policy "admins can delete items"
   using (is_admin());
 
 -- item_state_type enum
-create type item_state_type as enum ('idle', 'rotten');
+create type item_state_type as enum ('idle', 'broken');
 
 -- item_states 테이블
 create table item_states (

@@ -665,6 +665,55 @@ needs (욕구 정의)
 - `scenario_id`, `user_id`, `player_id`, `world_id`, `character_id`, `world_character_id`, `need_id`
 - `value`: 현재 충족도 (0 ~ max_value)
 
+### 행동 시스템 (Behavior Systems)
+
+게임에는 세 가지 행동 시스템이 있으며, 각각 다른 트리거와 목적을 가짐:
+
+#### 1. 욕구 행동 (Need Behaviors)
+
+- **트리거**: 캐릭터의 특정 욕구 < 임계점
+- **액션**: 건물/아이템/캐릭터 사용하여 욕구 충족
+- **예시**: "배고픔 50 이하인 경우 식당에서 식사"
+- **DB 구조**:
+  - `need_behaviors`: 행동 정의 (need_id, need_threshold)
+  - `need_behavior_actions`: 행동 액션 체인 (캐릭터 애니메이션, 지속 시간 등)
+
+#### 2. 컨디션 행동 (Condition Behaviors)
+
+- **트리거**: 건물의 특정 컨디션 < 임계점
+- **대상**: 특정 캐릭터 또는 모든 캐릭터 (character_id null이면 모두)
+- **액션**: 건물에 대한 행동 (철거, 수리, 사용 등)
+- **예시**: "청결도 50 이하인 경우 건물 철거"
+- **DB 구조**:
+  - `condition_behaviors`: 행동 정의 (condition_id, condition_threshold, character_id, character_behavior_type)
+  - `condition_behavior_actions`: 행동 액션 체인 (캐릭터 애니메이션, offset, scale, rotation 등)
+
+#### 3. 아이템 행동 (Item Behaviors)
+
+- **트리거**: 아이템 사용
+- **액션**: 아이템 사용 효과 (애니메이션, 상태 변화 등)
+- **예시**: "도끼 사용 시 휘두르기 애니메이션"
+- **DB 구조**:
+  - `item_behaviors`: 행동 정의 (item_id, character_behavior_type)
+  - `item_behavior_actions`: 행동 액션 체인 (캐릭터 + 아이템 애니메이션, offset, scale, rotation 등)
+
+#### Behavior Actions 공통 필드
+
+모든 behavior_actions 테이블은 다음 공통 패턴을 따름:
+
+- `duration_ticks`: 액션 지속 시간 (틱 단위)
+- `character_body_state_type`: 캐릭터 바디 상태 (idle, walk, run, jump)
+- `character_face_state_type`: 캐릭터 표정 상태 (idle, happy, sad, angry)
+- `root`: 시작 액션 여부 (각 behavior당 하나만 root=true)
+- `success_*_action_id`: 성공 시 다음 액션
+- `failure_*_action_id`: 실패 시 다음 액션
+
+**행동별 차이점**:
+
+- `need_behavior_actions`: 캐릭터만 제어 (건물/아이템 없음)
+- `condition_behavior_actions`: 캐릭터를 건물 위에 배치 (character_offset_x/y, character_scale, character_rotation)
+- `item_behavior_actions`: 캐릭터가 아이템을 손에 들고 사용 (item_offset_x/y, item_scale, item_rotation)
+
 ### 시나리오 시스템
 
 - **시나리오** = 게임 월드의 위기 상황
@@ -693,8 +742,21 @@ needs (욕구 정의)
 - **구성**:
   - `sprite-animator.svelte.ts`: SpriteAnimator 클래스 (init, play, stop)
   - `sprite-animator-renderer.svelte`: CSS background-position으로 렌더링
+  - `character-sprite-animator.svelte`: 캐릭터 + 얼굴 + 손에 든 아이템 렌더링
+  - `building-sprite-animator.svelte`: 건물 + 건물 위 캐릭터 렌더링
 - **루프 모드**: `loop`, `once`, `ping-pong`, `ping-pong-once`
 - **스프라이트 시트**: `$lib/assets/atlas/generated/`에서 로드
+- **Transform 적용 순서**:
+  - CharacterSpriteAnimator (손에 든 아이템): `translate → scale → rotate`
+  - BuildingSpriteAnimator (건물 위 캐릭터): `translate → scale → rotate`
+  - 예시:
+    ```typescript
+    // CharacterSpriteAnimator의 handTransform
+    `translate(${x}px, ${y}px) scale(${heldItemScale}) rotate(${heldItemRotation}deg)`
+
+    // BuildingSpriteAnimator의 characterTransform
+    `translate(${x}px, ${y}px) scale(${characterScale}) rotate(${characterRotation}deg)`
+    ```
 
 ### World 컴포넌트 (Matter.js 물리 월드)
 

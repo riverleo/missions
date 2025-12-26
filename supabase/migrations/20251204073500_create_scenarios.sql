@@ -17,6 +17,7 @@ create table player_scenarios (
   player_id uuid not null references players(id) on delete cascade,
   scenario_id uuid not null references scenarios(id) on delete cascade,
   status player_scenario_status not null default 'in_progress',
+  current_tick bigint not null default 0,
   created_at timestamptz not null default now(),
 
   constraint uq_player_scenarios_player_id_scenario_id_status unique (player_id, scenario_id, status)

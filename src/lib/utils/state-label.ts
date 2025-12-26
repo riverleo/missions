@@ -51,7 +51,7 @@ export function getCharacterBehaviorTypeLabel(type: CharacterBehaviorType): stri
 
 const itemStateLabels: Record<ItemStateType, string> = {
 	idle: '정상',
-	rotten: '썩음',
+	broken: '파손',
 };
 
 export function getItemStateLabel(state: ItemStateType): string {
