@@ -25,10 +25,12 @@ let instance: ReturnType<typeof createConditionBehaviorStore> | null = null;
 function createConditionBehaviorStore() {
 	const { supabase } = useServerPayload();
 
-	const conditionBehaviorStore = writable<RecordFetchState<ConditionBehaviorId, ConditionBehavior>>({
-		status: 'idle',
-		data: {},
-	});
+	const conditionBehaviorStore = writable<RecordFetchState<ConditionBehaviorId, ConditionBehavior>>(
+		{
+			status: 'idle',
+			data: {},
+		}
+	);
 
 	const conditionBehaviorActionStore = writable<
 		RecordFetchState<ConditionBehaviorActionId, ConditionBehaviorAction>
@@ -145,14 +147,18 @@ function createConditionBehaviorStore() {
 		},
 
 		// ConditionBehaviorAction CRUD
-		async createConditionBehaviorAction(action: Omit<ConditionBehaviorActionInsert, 'scenario_id'>) {
+		async createConditionBehaviorAction(
+			action: Omit<ConditionBehaviorActionInsert, 'scenario_id'>
+		) {
 			if (!currentScenarioId) {
 				throw new Error('useConditionBehavior: currentScenarioId is not set.');
 			}
 
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
 			const existingActions = Object.values(get(conditionBehaviorActionStore).data);
-			const isFirstAction = !existingActions.some((a) => a.condition_behavior_id === action.condition_behavior_id);
+			const isFirstAction = !existingActions.some(
+				(a) => a.condition_behavior_id === action.condition_behavior_id
+			);
 
 			const { data, error } = await supabase
 				.from('condition_behavior_actions')
@@ -192,7 +198,7 @@ function createConditionBehaviorStore() {
 		},
 
 		async removeConditionBehaviorAction(id: ConditionBehaviorActionId) {
-			const { error} = await supabase.from('condition_behavior_actions').delete().eq('id', id);
+			const { error } = await supabase.from('condition_behavior_actions').delete().eq('id', id);
 
 			if (error) throw error;
 

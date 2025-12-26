@@ -18,12 +18,15 @@
 	import { cn } from '$lib/utils';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId } from '$lib/types';
+	import type { ScenarioId, CharacterId } from '$lib/types';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	const { needBehaviorStore, openDialog } = useNeedBehavior();
 	const { needStore } = useNeed();
+	const { store: characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -50,6 +53,9 @@
 			{#each behaviorsGroupedByNeed() as { need, behaviors } (need.id)}
 				<CommandGroup heading={need.name}>
 					{#each behaviors as behavior (behavior.id)}
+						{@const character = behavior.character_id
+							? $characterStore.data[behavior.character_id as CharacterId]
+							: undefined}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`}
 							class="group pr-1"
@@ -65,7 +71,10 @@
 									{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{need.name} {behavior.need_threshold} 이하인 경우 행동
+									{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
+										behavior.character_behavior_type
+									)}할 때 ({need.name}
+									{behavior.need_threshold} 이하)
 								</span>
 							</div>
 							<DropdownMenu>

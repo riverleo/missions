@@ -45,7 +45,9 @@
 			<CommandGroup>
 				{#each behaviors() as behavior (behavior.id)}
 					{@const item = $itemStore.data[behavior.item_id]}
-					{@const character = behavior.character_id ? $characterStore.data[behavior.character_id as import('$lib/types').CharacterId] : undefined}
+					{@const character = behavior.character_id
+						? $characterStore.data[behavior.character_id as import('$lib/types').CharacterId]
+						: undefined}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/item-behaviors/${behavior.id}`}
 						class="group pr-1"
@@ -61,7 +63,9 @@
 								"{item?.name}" {behavior.name}
 							</span>
 							<span class="truncate text-xs text-muted-foreground">
-								{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}할 때
+								{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
+									behavior.character_behavior_type
+								)}할 때
 								{#if behavior.durability_threshold !== null}
 									(내구도 {behavior.durability_threshold} 이하)
 								{/if}

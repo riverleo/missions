@@ -48,7 +48,7 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorActionStore, admin } = useNeedBehavior();
+	const { needBehaviorStore, needBehaviorActionStore, admin } = useNeedBehavior();
 	const { store: buildingStore } = useBuilding();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
@@ -60,9 +60,16 @@
 	const items = $derived(Object.values($itemStore.data));
 
 	// 미리보기용 캐릭터 선택
+	const parentBehavior = $derived(action ? $needBehaviorStore.data[action.behavior_id] : undefined);
+	const behaviorHasSpecificCharacter = $derived(parentBehavior?.character_id != null);
+
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
+		behaviorHasSpecificCharacter && parentBehavior?.character_id
+			? $characterStore.data[parentBehavior.character_id as CharacterId]
+			: previewCharacterId
+				? $characterStore.data[previewCharacterId as CharacterId]
+				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
@@ -313,8 +320,8 @@
 											{/snippet}
 										</TooltipTrigger>
 										<TooltipContent>
-											자동 선택 시 욕구를 가장 많이 채워주는 <br />
-											건물, 캐릭터, 아이템을 찾아 자동으로 선택합니다.
+											자동 선택 시 대상을 기준으로 욕구를 채워줄 수 있는 <br />
+											가까운 건물 또는 캐릭터, 아이템을 선택합니다.
 										</TooltipContent>
 									</Tooltip>
 								</ButtonGroup>
@@ -391,23 +398,25 @@
 									/>
 								</div>
 
-								<ButtonGroup class="w-full">
-									<ButtonGroupText>캐릭터</ButtonGroupText>
-									<Select
-										type="single"
-										value={previewCharacterId ?? previewCharacter?.id ?? ''}
-										onValueChange={onPreviewCharacterChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedPreviewCharacterLabel}
-										</SelectTrigger>
-										<SelectContent>
-											{#each characters as character (character.id)}
-												<SelectItem value={character.id}>{character.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
+								{#if !behaviorHasSpecificCharacter}
+									<ButtonGroup class="w-full">
+										<ButtonGroupText>캐릭터</ButtonGroupText>
+										<Select
+											type="single"
+											value={previewCharacterId ?? previewCharacter?.id ?? ''}
+											onValueChange={onPreviewCharacterChange}
+										>
+											<SelectTrigger class="flex-1">
+												{selectedPreviewCharacterLabel}
+											</SelectTrigger>
+											<SelectContent>
+												{#each characters as character (character.id)}
+													<SelectItem value={character.id}>{character.name}</SelectItem>
+												{/each}
+											</SelectContent>
+										</Select>
+									</ButtonGroup>
+								{/if}
 							</div>
 						{/if}
 					</div>

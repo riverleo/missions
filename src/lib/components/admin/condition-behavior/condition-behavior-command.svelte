@@ -18,13 +18,17 @@
 	import { cn } from '$lib/utils';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
-	import type { ScenarioId } from '$lib/types';
+	import type { ScenarioId, BuildingId, CharacterId } from '$lib/types';
 
 	const { conditionBehaviorStore, openDialog } = useConditionBehavior();
 	const { conditionStore } = useCondition();
+	const { store: buildingStore } = useBuilding();
+	const { store: characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -51,6 +55,10 @@
 			{#each behaviorsGroupedByCondition() as { condition, behaviors } (condition.id)}
 				<CommandGroup heading={condition.name}>
 					{#each behaviors as behavior (behavior.id)}
+						{@const building = $buildingStore.data[behavior.building_id as BuildingId]}
+						{@const character = behavior.character_id
+							? $characterStore.data[behavior.character_id as CharacterId]
+							: undefined}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/condition-behaviors/${behavior.id}`}
 							class="group pr-1"
@@ -63,10 +71,13 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									{behavior.name}
+									"{building?.name}" {behavior.name}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{condition.name} {behavior.condition_threshold} 이하인 경우 건물 {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
+									{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
+										behavior.character_behavior_type
+									)}할 때 ({condition.name}
+									{behavior.condition_threshold} 이하)
 								</span>
 							</div>
 							<DropdownMenu>

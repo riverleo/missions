@@ -83,7 +83,10 @@
 							disabled={!currentBehaviorId}
 							onclick={() =>
 								currentBehaviorId &&
-								openDialog({ type: 'delete', behaviorId: currentBehaviorId as ConditionBehaviorId })}
+								openDialog({
+									type: 'delete',
+									behaviorId: currentBehaviorId as ConditionBehaviorId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>

@@ -750,12 +750,12 @@ needs (욕구 정의)
   - CharacterSpriteAnimator (손에 든 아이템): `translate → scale → rotate`
   - BuildingSpriteAnimator (건물 위 캐릭터): `translate → scale → rotate`
   - 예시:
+
     ```typescript
     // CharacterSpriteAnimator의 handTransform
     `translate(${x}px, ${y}px) scale(${heldItemScale}) rotate(${heldItemRotation}deg)`
-
     // BuildingSpriteAnimator의 characterTransform
-    `translate(${x}px, ${y}px) scale(${characterScale}) rotate(${characterRotation}deg)`
+    `translate(${x}px, ${y}px) scale(${characterScale}) rotate(${characterRotation}deg)`;
     ```
 
 ### World 컴포넌트 (Matter.js 물리 월드)

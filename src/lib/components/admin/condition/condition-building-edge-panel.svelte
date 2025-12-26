@@ -113,9 +113,11 @@
 							<InputGroupText>배</InputGroupText>
 						</InputGroupAddon>
 					</InputGroup>
-					<label class="flex items-center gap-2 cursor-pointer">
+					<label class="flex cursor-pointer items-center gap-2">
 						<Checkbox bind:checked={changes.disabled_when_depleted} />
-						<span class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+						<span
+							class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+						>
 							컨디션 고갈 시 건물 사용 불가
 						</span>
 					</label>

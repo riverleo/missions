@@ -82,7 +82,12 @@
 						<IconClock />
 					</InputGroupText>
 				</InputGroupAddon>
-				<InputGroupInput type="number" placeholder="최대 내구도" bind:value={maxDurabilityTicks} min="0" />
+				<InputGroupInput
+					type="number"
+					placeholder="최대 내구도"
+					bind:value={maxDurabilityTicks}
+					min="0"
+				/>
 				<InputGroupAddon align="inline-end">
 					<InputGroupText>틱</InputGroupText>
 				</InputGroupAddon>

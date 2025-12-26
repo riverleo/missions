@@ -43,13 +43,13 @@
 	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	const behaviorTypes: CharacterBehaviorType[] = ['use', 'clean'];
+	const behaviorTypes: CharacterBehaviorType[] = ['clean'];
 
 	let name = $state('');
 	let itemId = $state<string | undefined>(undefined);
 	let durabilityThreshold = $state<number | undefined>(undefined);
 	let characterId = $state<string | undefined>(undefined);
-	let behaviorType = $state<CharacterBehaviorType>('use');
+	let behaviorType = $state<CharacterBehaviorType>('clean');
 	let isSubmitting = $state(false);
 
 	const selectedItem = $derived(items.find((i) => i.id === itemId));
@@ -65,12 +65,6 @@
 			durabilityThreshold = currentBehavior.durability_threshold ?? undefined;
 			characterId = currentBehavior.character_id ?? undefined;
 			behaviorType = currentBehavior.character_behavior_type;
-		}
-	});
-
-	$effect(() => {
-		if (behaviorType === 'use') {
-			durabilityThreshold = undefined;
 		}
 	});
 

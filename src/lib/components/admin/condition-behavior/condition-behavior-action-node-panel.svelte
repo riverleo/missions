@@ -28,7 +28,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { CharacterSpriteAnimator, BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
+	import {
+		CharacterSpriteAnimator,
+		BuildingSpriteAnimator,
+	} from '$lib/components/app/sprite-animator';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
@@ -57,19 +60,29 @@
 	let changes = $state<ConditionBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
 
+	// 부모 behavior 조회
+	const parentBehavior = $derived(
+		action ? $conditionBehaviorStore.data[action.condition_behavior_id] : undefined
+	);
+	const behaviorHasSpecificCharacter = $derived(parentBehavior?.character_id != null);
+
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
+		behaviorHasSpecificCharacter && parentBehavior?.character_id
+			? $characterStore.data[parentBehavior.character_id as CharacterId]
+			: previewCharacterId
+				? $characterStore.data[previewCharacterId as CharacterId]
+				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
-	// 미리보기용 건물 선택
-	let previewBuildingId = $state<string | undefined>(undefined);
+	// 미리보기용 건물 (부모 behavior의 building_id 사용)
 	const previewBuilding = $derived(
-		previewBuildingId ? $buildingStore.data[previewBuildingId as BuildingId] : buildings[0]
+		parentBehavior?.building_id
+			? $buildingStore.data[parentBehavior.building_id as BuildingId]
+			: buildings[0]
 	);
-	const selectedPreviewBuildingLabel = $derived(previewBuilding?.name ?? '건물 선택');
 
 	// 미리보기용 건물 상태
 	const previewBuildingStates = $derived(
@@ -111,10 +124,6 @@
 
 	function onPreviewCharacterChange(value: string | undefined) {
 		previewCharacterId = value || undefined;
-	}
-
-	function onPreviewBuildingChange(value: string | undefined) {
-		previewBuildingId = value || undefined;
 	}
 
 	$effect(() => {
@@ -210,11 +219,19 @@
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>캐릭터 오프셋</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" bind:value={changes.character_offset_x} placeholder="x" />
+							<InputGroupInput
+								type="number"
+								bind:value={changes.character_offset_x}
+								placeholder="x"
+							/>
 							<InputGroupText>
 								<IconX />
 							</InputGroupText>
-							<InputGroupInput type="number" bind:value={changes.character_offset_y} placeholder="y" />
+							<InputGroupInput
+								type="number"
+								bind:value={changes.character_offset_y}
+								placeholder="y"
+							/>
 						</InputGroup>
 
 						<div class="flex gap-2">
@@ -222,7 +239,12 @@
 								<InputGroupAddon align="inline-start">
 									<InputGroupText>스케일</InputGroupText>
 								</InputGroupAddon>
-								<InputGroupInput type="number" step="0.01" min="0" bind:value={changes.character_scale} />
+								<InputGroupInput
+									type="number"
+									step="0.01"
+									min="0"
+									bind:value={changes.character_scale}
+								/>
 								<InputGroupAddon align="inline-end">
 									<InputGroupText>배</InputGroupText>
 								</InputGroupAddon>
@@ -292,48 +314,35 @@
 										buildingState={previewBuildingState}
 										characterBodyState={previewBodyState}
 										characterFaceState={previewFaceState}
-										characterOffset={{ x: changes.character_offset_x, y: changes.character_offset_y }}
+										characterOffset={{
+											x: changes.character_offset_x,
+											y: changes.character_offset_y,
+										}}
 										characterScale={changes.character_scale}
 										characterRotation={changes.character_rotation}
 										resolution={2}
 									/>
 								</div>
 
-								<ButtonGroup class="w-full">
-									<ButtonGroupText>건물</ButtonGroupText>
-									<Select
-										type="single"
-										value={previewBuildingId ?? previewBuilding?.id ?? ''}
-										onValueChange={onPreviewBuildingChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedPreviewBuildingLabel}
-										</SelectTrigger>
-										<SelectContent>
-											{#each buildings as building (building.id)}
-												<SelectItem value={building.id}>{building.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
-
-								<ButtonGroup class="w-full">
-									<ButtonGroupText>캐릭터</ButtonGroupText>
-									<Select
-										type="single"
-										value={previewCharacterId ?? previewCharacter?.id ?? ''}
-										onValueChange={onPreviewCharacterChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedPreviewCharacterLabel}
-										</SelectTrigger>
-										<SelectContent>
-											{#each characters as character (character.id)}
-												<SelectItem value={character.id}>{character.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
+								{#if !behaviorHasSpecificCharacter}
+									<ButtonGroup class="w-full">
+										<ButtonGroupText>캐릭터</ButtonGroupText>
+										<Select
+											type="single"
+											value={previewCharacterId ?? previewCharacter?.id ?? ''}
+											onValueChange={onPreviewCharacterChange}
+										>
+											<SelectTrigger class="flex-1">
+												{selectedPreviewCharacterLabel}
+											</SelectTrigger>
+											<SelectContent>
+												{#each characters as character (character.id)}
+													<SelectItem value={character.id}>{character.name}</SelectItem>
+												{/each}
+											</SelectContent>
+										</Select>
+									</ButtonGroup>
+								{/if}
 							</div>
 						{/if}
 					</div>

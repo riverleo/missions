@@ -50,10 +50,18 @@
 	let changes = $state<ItemBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
 
+	// 부모 behavior 조회
+	const parentBehavior = $derived(action ? $itemBehaviorStore.data[action.behavior_id] : undefined);
+	const behaviorHasSpecificCharacter = $derived(parentBehavior?.character_id != null);
+
 	// 미리보기용 캐릭터 선택
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
-		previewCharacterId ? $characterStore.data[previewCharacterId as CharacterId] : characters[0]
+		behaviorHasSpecificCharacter && parentBehavior?.character_id
+			? $characterStore.data[parentBehavior.character_id as CharacterId]
+			: previewCharacterId
+				? $characterStore.data[previewCharacterId as CharacterId]
+				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
@@ -288,23 +296,25 @@
 									/>
 								</div>
 
-								<ButtonGroup class="w-full">
-									<ButtonGroupText>캐릭터</ButtonGroupText>
-									<Select
-										type="single"
-										value={previewCharacterId ?? previewCharacter?.id ?? ''}
-										onValueChange={onPreviewCharacterChange}
-									>
-										<SelectTrigger class="flex-1">
-											{selectedPreviewCharacterLabel}
-										</SelectTrigger>
-										<SelectContent>
-											{#each characters as character (character.id)}
-												<SelectItem value={character.id}>{character.name}</SelectItem>
-											{/each}
-										</SelectContent>
-									</Select>
-								</ButtonGroup>
+								{#if !behaviorHasSpecificCharacter}
+									<ButtonGroup class="w-full">
+										<ButtonGroupText>캐릭터</ButtonGroupText>
+										<Select
+											type="single"
+											value={previewCharacterId ?? previewCharacter?.id ?? ''}
+											onValueChange={onPreviewCharacterChange}
+										>
+											<SelectTrigger class="flex-1">
+												{selectedPreviewCharacterLabel}
+											</SelectTrigger>
+											<SelectContent>
+												{#each characters as character (character.id)}
+													<SelectItem value={character.id}>{character.name}</SelectItem>
+												{/each}
+											</SelectContent>
+										</Select>
+									</ButtonGroup>
+								{/if}
 							</div>
 						{/if}
 					</div>

@@ -32,7 +32,9 @@
 	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
 	const actions = $derived(
 		behaviorId
-			? Object.values($conditionBehaviorActionStore.data).filter((a) => a.condition_behavior_id === behaviorId)
+			? Object.values($conditionBehaviorActionStore.data).filter(
+					(a) => a.condition_behavior_id === behaviorId
+				)
 			: []
 	);
 
@@ -106,8 +108,9 @@
 			const isSuccess = connection.sourceHandle === 'success';
 
 			await admin.updateConditionBehaviorAction(sourceId as ConditionBehaviorActionId, {
-				[isSuccess ? 'success_condition_behavior_action_id' : 'failure_condition_behavior_action_id']:
-					targetId,
+				[isSuccess
+					? 'success_condition_behavior_action_id'
+					: 'failure_condition_behavior_action_id']: targetId,
 			});
 
 			edges = [
@@ -168,8 +171,9 @@
 			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
 			const isSuccess = fromHandleId === 'success';
 			await admin.updateConditionBehaviorAction(fromActionId as ConditionBehaviorActionId, {
-				[isSuccess ? 'success_condition_behavior_action_id' : 'failure_condition_behavior_action_id']:
-					newAction.id,
+				[isSuccess
+					? 'success_condition_behavior_action_id'
+					: 'failure_condition_behavior_action_id']: newAction.id,
 			});
 
 			skipConvertEffect = false;
