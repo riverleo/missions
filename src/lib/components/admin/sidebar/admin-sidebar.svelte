@@ -104,6 +104,10 @@
 						},
 					],
 				},
+				{
+					title: '행동 우선도',
+					href: scenarioId ? `/admin/scenarios/${scenarioId}/behavior-priorities` : undefined,
+				},
 			],
 		},
 	]);
