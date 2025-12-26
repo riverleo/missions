@@ -1033,32 +1033,45 @@ export type Database = {
       item_behaviors: {
         Row: {
           character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_id: string | null
           created_at: string
           created_by: string | null
-          description: string
+          durability_threshold: number | null
           id: string
           item_id: string
+          name: string
           scenario_id: string
         }
         Insert: {
           character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
           created_at?: string
           created_by?: string | null
-          description?: string
+          durability_threshold?: number | null
           id?: string
           item_id: string
+          name: string
           scenario_id: string
         }
         Update: {
           character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
           created_at?: string
           created_by?: string | null
-          description?: string
+          durability_threshold?: number | null
           id?: string
           item_id?: string
+          name?: string
           scenario_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "item_behaviors_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "item_behaviors_created_by_fkey"
             columns: ["created_by"]
@@ -1069,7 +1082,7 @@ export type Database = {
           {
             foreignKeyName: "item_behaviors_item_id_fkey"
             columns: ["item_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "items"
             referencedColumns: ["id"]
           },

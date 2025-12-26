@@ -22,6 +22,7 @@
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	const { itemBehaviorStore, openDialog } = useItemBehavior();
 	const { store: itemStore } = useItem();
@@ -30,10 +31,7 @@
 
 	const behaviors = $derived(() => {
 		const behaviorList = Object.values($itemBehaviorStore.data);
-		return alphabetical(behaviorList, (b) => {
-			const item = $itemStore.data[b.item_id];
-			return item?.name ?? '';
-		});
+		return alphabetical(behaviorList, (b) => b.name);
 	});
 </script>
 
@@ -57,13 +55,17 @@
 						/>
 						<div class="flex flex-1 flex-col truncate">
 							<span class="truncate">
-								{item?.name}
+								{behavior.name}
 							</span>
-							{#if behavior.description}
-								<span class="truncate text-xs text-muted-foreground">
-									{behavior.description}
-								</span>
-							{/if}
+							<span class="truncate text-xs text-muted-foreground">
+								{item?.name}
+								{#if behavior.durability_threshold !== null}
+									내구도 {behavior.durability_threshold} 이하인 경우
+								{:else}
+									사용 시
+								{/if}
+								{getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
+							</span>
 						</div>
 						<DropdownMenu>
 							<DropdownMenuTrigger>

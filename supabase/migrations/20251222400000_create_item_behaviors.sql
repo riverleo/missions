@@ -1,15 +1,17 @@
--- item_behaviors 테이블 (아이템 사용 행동)
+-- item_behaviors 테이블 (아이템 행동: 사용, 청소 등)
 create table item_behaviors (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
+  durability_threshold bigint, -- nullable: null이면 임계점 무관 (use), 값 있으면 임계점 적용 (clean)
+  character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   character_behavior_type character_behavior_type not null default 'use',
-  description text not null default '',
+  name text not null,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_item_behaviors_item_id unique (item_id)
+  constraint uq_item_behaviors_scenario_id_name unique (scenario_id, name)
 );
 
 alter table item_behaviors enable row level security;
