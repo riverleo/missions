@@ -23,34 +23,66 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
+	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { CharacterBehaviorType, ConditionId, CharacterId, ScenarioId } from '$lib/types';
+	import type {
+		CharacterBehaviorType,
+		ConditionId,
+		CharacterId,
+		BuildingId,
+		ScenarioId,
+	} from '$lib/types';
 	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 
 	const { dialogStore, closeDialog, admin } = useConditionBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const { conditionStore } = useCondition();
+	const { conditionStore, buildingConditionStore } = useCondition();
 	const { store: characterStore } = useCharacter();
+	const { store: buildingStore } = useBuilding();
 
 	const open = $derived($dialogStore?.type === 'create');
-	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (c) => c.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
+	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 
-	const behaviorTypes: CharacterBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
+	const behaviorTypes: CharacterBehaviorType[] = ['demolish', 'repair', 'clean'];
 
 	let name = $state('');
+	let buildingId = $state<string | undefined>(undefined);
 	let conditionId = $state<string | undefined>(undefined);
 	let conditionThreshold = $state(0);
 	let characterId = $state<string | undefined>(undefined);
-	let behaviorType = $state<CharacterBehaviorType>('use');
+	let behaviorType = $state<CharacterBehaviorType>('repair');
 	let isSubmitting = $state(false);
 
+	// 선택된 건물에 연결된 컨디션 ID 목록
+	const availableConditionIds = $derived(
+		buildingId
+			? new Set(
+					Object.values($buildingConditionStore.data)
+						.filter((bc) => bc.building_id === buildingId)
+						.map((bc) => bc.condition_id)
+				)
+			: new Set<string>()
+	);
+
+	// 필터링된 컨디션 목록 (건물 선택 시에만 표시)
+	const conditions = $derived(
+		buildingId
+			? alphabetical(
+					Object.values($conditionStore.data).filter((c) => availableConditionIds.has(c.id)),
+					(c) => c.name
+				)
+			: []
+	);
+
+	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
+	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCondition = $derived(conditions.find((c) => c.id === conditionId));
 	const selectedConditionName = $derived(selectedCondition?.name ?? '컨디션 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
@@ -60,12 +92,24 @@
 	$effect(() => {
 		if (open) {
 			name = '';
+			buildingId = undefined;
 			conditionId = undefined;
 			conditionThreshold = 0;
 			characterId = undefined;
-			behaviorType = 'use';
+			behaviorType = 'repair';
 		}
 	});
+
+	// buildingId 변경 시 conditionId 검증
+	$effect(() => {
+		if (buildingId && conditionId && !availableConditionIds.has(conditionId)) {
+			conditionId = undefined;
+		}
+	});
+
+	function onBuildingChange(value: string | undefined) {
+		buildingId = value || undefined;
+	}
 
 	function onConditionChange(value: string) {
 		conditionId = value || undefined;
@@ -89,13 +133,14 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!conditionId || isSubmitting) return;
+		if (!buildingId || !conditionId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
 			.create({
 				name: name.trim(),
+				building_id: buildingId as BuildingId,
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,
 				character_id: characterId as CharacterId | undefined,
@@ -123,7 +168,25 @@
 			<div class="flex flex-col gap-2">
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<IconHeading />
+						<DropdownMenu>
+							<DropdownMenuTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props} variant="ghost">
+										{selectedBuildingName}
+										<IconChevronDown class="size-4" />
+									</InputGroupButton>
+								{/snippet}
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="start">
+								<DropdownMenuRadioGroup value={buildingId ?? ''} onValueChange={onBuildingChange}>
+									{#each buildings as building (building.id)}
+										<DropdownMenuRadioItem value={building.id}>
+											{building.name}
+										</DropdownMenuRadioItem>
+									{/each}
+								</DropdownMenuRadioGroup>
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</InputGroupAddon>
 					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
@@ -170,13 +233,22 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="start">
-								<DropdownMenuRadioGroup value={conditionId ?? ''} onValueChange={onConditionChange}>
-									{#each conditions as condition (condition.id)}
-										<DropdownMenuRadioItem value={condition.id}>
-											{condition.name}
-										</DropdownMenuRadioItem>
-									{/each}
-								</DropdownMenuRadioGroup>
+								{#if conditions.length === 0}
+									<div class="p-2 text-center text-sm text-muted-foreground">
+										선택 가능한 항목 없음
+									</div>
+								{:else}
+									<DropdownMenuRadioGroup
+										value={conditionId ?? ''}
+										onValueChange={onConditionChange}
+									>
+										{#each conditions as condition (condition.id)}
+											<DropdownMenuRadioItem value={condition.id}>
+												{condition.name}
+											</DropdownMenuRadioItem>
+										{/each}
+									</DropdownMenuRadioGroup>
+								{/if}
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</InputGroupAddon>
@@ -194,7 +266,10 @@
 				</InputGroup>
 			</div>
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting || !conditionId}>
+				<Button
+					type="submit"
+					disabled={isSubmitting || !buildingId || !conditionId || !name.trim()}
+				>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>
 			</DialogFooter>

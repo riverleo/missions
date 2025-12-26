@@ -1,9 +1,8 @@
 <script lang="ts">
-	import type { ItemBehaviorId, ItemBehaviorActionId, CharacterId } from '$lib/types';
+	import type { CharacterId } from '$lib/types';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		ItemBehaviorAction,
-		ItemStateType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -26,11 +25,7 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createItemBehaviorActionNodeId } from '$lib/utils/flow-id';
-	import {
-		getItemStateLabel,
-		getCharacterBodyStateLabel,
-		getCharacterFaceStateLabel,
-	} from '$lib/utils/state-label';
+	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -211,7 +206,12 @@
 								<InputGroupAddon align="inline-start">
 									<InputGroupText>스케일</InputGroupText>
 								</InputGroupAddon>
-								<InputGroupInput type="number" step="0.01" min="0" bind:value={changes.item_scale} />
+								<InputGroupInput
+									type="number"
+									step="0.01"
+									min="0"
+									bind:value={changes.item_scale}
+								/>
 								<InputGroupAddon align="inline-end">
 									<InputGroupText>배</InputGroupText>
 								</InputGroupAddon>

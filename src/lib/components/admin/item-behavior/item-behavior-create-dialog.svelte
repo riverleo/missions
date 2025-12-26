@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { ItemBehaviorId, ItemBehaviorActionId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -188,11 +187,7 @@
 						<InputGroupAddon align="inline-start">
 							<InputGroupText>내구도</InputGroupText>
 						</InputGroupAddon>
-						<InputGroupInput
-							type="number"
-							bind:value={durabilityThreshold}
-							placeholder="0"
-						/>
+						<InputGroupInput type="number" bind:value={durabilityThreshold} placeholder="0" />
 						<InputGroupAddon align="inline-end">
 							<InputGroupText>/ 이하</InputGroupText>
 						</InputGroupAddon>

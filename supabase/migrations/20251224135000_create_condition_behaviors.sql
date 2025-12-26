@@ -2,6 +2,7 @@
 create table condition_behaviors (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
+  building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_threshold float not null default 0,
   character_id uuid references characters(id) on delete set null,
@@ -44,6 +45,7 @@ create policy "admins can delete condition_behaviors"
 create table condition_behavior_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
+  building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_behavior_id uuid not null references condition_behaviors(id) on delete cascade,
   root boolean not null default false,
