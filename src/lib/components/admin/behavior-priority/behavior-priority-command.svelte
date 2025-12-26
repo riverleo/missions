@@ -119,13 +119,11 @@
 			{#if behaviorsWithoutPriority().need.length > 0}
 				<CommandGroup heading="욕구 행동">
 					{#each behaviorsWithoutPriority().need as behavior (behavior.id)}
-						<button
-							type="button"
+						<NeedBehaviorCommandItem
+							{behavior}
+							showActions={false}
 							onclick={() => addNeedBehaviorToPriority(behavior)}
-							class="w-full text-left"
-						>
-							<NeedBehaviorCommandItem {behavior} showActions={false} />
-						</button>
+						/>
 					{/each}
 				</CommandGroup>
 			{/if}
@@ -134,13 +132,11 @@
 			{#if behaviorsWithoutPriority().condition.length > 0}
 				<CommandGroup heading="컨디션 행동">
 					{#each behaviorsWithoutPriority().condition as behavior (behavior.id)}
-						<button
-							type="button"
+						<ConditionBehaviorCommandItem
+							{behavior}
+							showActions={false}
 							onclick={() => addConditionBehaviorToPriority(behavior)}
-							class="w-full text-left"
-						>
-							<ConditionBehaviorCommandItem {behavior} showActions={false} />
-						</button>
+						/>
 					{/each}
 				</CommandGroup>
 			{/if}
@@ -149,13 +145,11 @@
 			{#if behaviorsWithoutPriority().item.length > 0}
 				<CommandGroup heading="아이템 행동">
 					{#each behaviorsWithoutPriority().item as behavior (behavior.id)}
-						<button
-							type="button"
+						<ItemBehaviorCommandItem
+							{behavior}
+							showActions={false}
 							onclick={() => addItemBehaviorToPriority(behavior)}
-							class="w-full text-left"
-						>
-							<ItemBehaviorCommandItem {behavior} showActions={false} />
-						</button>
+						/>
 					{/each}
 				</CommandGroup>
 			{/if}

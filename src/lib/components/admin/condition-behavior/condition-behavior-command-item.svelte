@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { CommandLinkItem } from '$lib/components/ui/command';
+	import { CommandLinkItem, CommandItem } from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
@@ -21,9 +21,10 @@
 		href?: string;
 		isSelected?: boolean;
 		showActions?: boolean;
+		onclick?: () => void;
 	}
 
-	let { behavior, href, isSelected = false, showActions = true }: Props = $props();
+	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
 	const { openDialog } = useConditionBehavior();
 	const { conditionStore } = useCondition();
@@ -45,7 +46,7 @@
 		});
 	});
 
-	const itemClass = "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 group pr-1";
+	const searchValue = $derived(`${label().title} ${label().description}`);
 </script>
 
 {#if href}
@@ -86,7 +87,7 @@
 		{/if}
 	</CommandLinkItem>
 {:else}
-	<div class={itemClass}>
+	<CommandItem value={searchValue} {onclick} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
 			<span class="truncate">{label().title}</span>
@@ -121,5 +122,5 @@
 				</DropdownMenuContent>
 			</DropdownMenu>
 		{/if}
-	</div>
+	</CommandItem>
 {/if}
