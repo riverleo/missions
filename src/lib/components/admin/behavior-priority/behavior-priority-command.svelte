@@ -103,13 +103,17 @@
 			behaviorsWithoutPriority().condition.length > 0 ||
 			behaviorsWithoutPriority().item.length > 0
 	);
+
+	let searchValue = $state('');
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
-	<CommandInput placeholder="행동 검색..." />
+	<CommandInput placeholder="행동 검색..." bind:value={searchValue} />
 	{#if hasAnyBehaviors}
 		<CommandList class="max-h-80">
-			<CommandEmpty>검색 결과가 없습니다</CommandEmpty>
+			{#if searchValue.trim() !== ''}
+				<CommandEmpty>검색 결과가 없습니다</CommandEmpty>
+			{/if}
 
 			<!-- 욕구 행동 그룹 -->
 			{#if behaviorsWithoutPriority().need.length > 0}
