@@ -69,8 +69,8 @@ export type ItemId = Brand<string, 'ItemId'>;
 export type ItemStateId = Brand<string, 'ItemStateId'>;
 export type ItemBehaviorId = Brand<string, 'ItemBehaviorId'>;
 export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
-export type WorldItemId = Brand<string, 'WorldItemId'>;
 export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
+export type WorldItemId = Brand<string, 'WorldItemId'>;
 
 // Bulk update types
 export interface BulkChanges<T> {
@@ -1099,10 +1099,11 @@ export type CharacterBehaviorType = Enums<'character_behavior_type'>;
 type ConditionBehaviorRow = Tables<'condition_behaviors'>;
 export type ConditionBehavior = Omit<
 	ConditionBehaviorRow,
-	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
 	id: ConditionBehaviorId;
 	scenario_id: ScenarioId;
+	building_id: BuildingId;
 	condition_id: ConditionId;
 	character_id: CharacterId | null;
 	created_by: UserRoleId | null;
@@ -1110,18 +1111,20 @@ export type ConditionBehavior = Omit<
 type ConditionBehaviorInsertRow = TablesInsert<'condition_behaviors'>;
 export type ConditionBehaviorInsert = Omit<
 	ConditionBehaviorInsertRow,
-	'scenario_id' | 'condition_id' | 'character_id'
+	'scenario_id' | 'building_id' | 'condition_id' | 'character_id'
 > & {
 	scenario_id: ScenarioId;
+	building_id: BuildingId;
 	condition_id: ConditionId;
 	character_id?: CharacterId | null;
 };
 type ConditionBehaviorUpdateRow = TablesUpdate<'condition_behaviors'>;
 export type ConditionBehaviorUpdate = Omit<
 	ConditionBehaviorUpdateRow,
-	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
 	id?: ConditionBehaviorId;
+	building_id?: BuildingId;
 	scenario_id?: ScenarioId;
 	condition_id?: ConditionId;
 	character_id?: CharacterId | null;
