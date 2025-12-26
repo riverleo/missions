@@ -7,9 +7,23 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from '$lib/components/ui/input-group';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+		InputGroupButton,
+		InputGroupText,
+	} from '$lib/components/ui/input-group';
+	import {
+		DropdownMenu,
+		DropdownMenuTrigger,
+		DropdownMenuContent,
+		DropdownMenuRadioGroup,
+		DropdownMenuRadioItem,
+	} from '$lib/components/ui/dropdown-menu';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -160,26 +174,6 @@
 						</Select>
 					</ButtonGroup>
 					<ButtonGroup class="flex-1">
-						<ButtonGroupText>컨디션</ButtonGroupText>
-						<Select
-							type="single"
-							value={conditionId ?? ''}
-							onValueChange={onConditionChange}
-							disabled={!buildingId || conditions.length === 0}
-						>
-							<SelectTrigger class="flex-1">
-								{selectedConditionName}
-							</SelectTrigger>
-							<SelectContent>
-								{#each conditions as condition (condition.id)}
-									<SelectItem value={condition.id}>{condition.name}</SelectItem>
-								{/each}
-							</SelectContent>
-						</Select>
-					</ButtonGroup>
-				</ButtonGroup>
-				<ButtonGroup class="w-full gap-2">
-					<ButtonGroup class="flex-1">
 						<ButtonGroupText>행동</ButtonGroupText>
 						<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
 							<SelectTrigger class="flex-1">
@@ -194,24 +188,51 @@
 							</SelectContent>
 						</Select>
 					</ButtonGroup>
-					<ButtonGroup class="flex-1">
-						<ButtonGroupText>캐릭터</ButtonGroupText>
-						<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
-							<SelectTrigger class="flex-1">
-								{selectedCharacterName}
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="">모두</SelectItem>
-								{#each characters as character (character.id)}
-									<SelectItem value={character.id}>{character.name}</SelectItem>
-								{/each}
-							</SelectContent>
-						</Select>
-					</ButtonGroup>
+				</ButtonGroup>
+				<ButtonGroup class="w-full">
+					<ButtonGroupText>캐릭터</ButtonGroupText>
+					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+						<SelectTrigger class="flex-1">
+							{selectedCharacterName}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="">모두</SelectItem>
+							{#each characters as character (character.id)}
+								<SelectItem value={character.id}>{character.name}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
 				</ButtonGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>임계점</InputGroupText>
+						<DropdownMenu>
+							<DropdownMenuTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props} variant="ghost" disabled={!buildingId || conditions.length === 0}>
+										{selectedConditionName}
+										<IconChevronDown class="ml-1 size-4" />
+									</InputGroupButton>
+								{/snippet}
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="start">
+								{#if conditions.length === 0}
+									<div class="p-2 text-center text-sm text-muted-foreground">
+										선택 가능한 항목 없음
+									</div>
+								{:else}
+									<DropdownMenuRadioGroup
+										value={conditionId ?? ''}
+										onValueChange={onConditionChange}
+									>
+										{#each conditions as condition (condition.id)}
+											<DropdownMenuRadioItem value={condition.id}>
+												{condition.name}
+											</DropdownMenuRadioItem>
+										{/each}
+									</DropdownMenuRadioGroup>
+								{/if}
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</InputGroupAddon>
 					<InputGroupInput
 						type="number"
