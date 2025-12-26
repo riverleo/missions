@@ -33,7 +33,10 @@
 
 	const behaviors = $derived(() => {
 		const behaviorList = Object.values($itemBehaviorStore.data);
-		return alphabetical(behaviorList, (b) => b.name);
+		return alphabetical(behaviorList, (b) => {
+			const item = $itemStore.data[b.item_id];
+			return item?.name ?? '';
+		});
 	});
 </script>
 
@@ -60,12 +63,12 @@
 						/>
 						<div class="flex flex-1 flex-col truncate">
 							<span class="truncate">
-								"{item?.name}" {behavior.name}
+								{item?.name ?? '아이템'} - {getCharacterBehaviorTypeLabel(
+									behavior.character_behavior_type
+								)}
 							</span>
 							<span class="truncate text-xs text-muted-foreground">
-								{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
-									behavior.character_behavior_type
-								)}할 때
+								{character?.name ?? '모든 캐릭터'}
 								{#if behavior.durability_threshold !== null}
 									(내구도 {behavior.durability_threshold} 이하)
 								{/if}

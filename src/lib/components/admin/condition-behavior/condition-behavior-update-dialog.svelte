@@ -7,23 +7,9 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import {
-		InputGroup,
-		InputGroupInput,
-		InputGroupAddon,
-		InputGroupButton,
-		InputGroupText,
-	} from '$lib/components/ui/input-group';
-	import {
-		DropdownMenu,
-		DropdownMenuTrigger,
-		DropdownMenuContent,
-		DropdownMenuRadioGroup,
-		DropdownMenuRadioItem,
-	} from '$lib/components/ui/dropdown-menu';
+	import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -49,7 +35,6 @@
 
 	const behaviorTypes: CharacterBehaviorType[] = ['demolish', 'repair', 'clean'];
 
-	let name = $state('');
 	let buildingId = $state<string | undefined>(undefined);
 	let conditionId = $state<string | undefined>(undefined);
 	let conditionThreshold = $state(0);
@@ -88,7 +73,6 @@
 
 	$effect(() => {
 		if (open && currentBehavior) {
-			name = currentBehavior.name;
 			buildingId = currentBehavior.building_id ?? undefined;
 			conditionId = currentBehavior.condition_id;
 			conditionThreshold = currentBehavior.condition_threshold;
@@ -136,7 +120,6 @@
 
 		admin
 			.update(behaviorId, {
-				name: name.trim(),
 				building_id: buildingId as BuildingId,
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,
@@ -162,30 +145,39 @@
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost">
-										{selectedBuildingName}
-										<IconChevronDown class="size-4" />
-									</InputGroupButton>
-								{/snippet}
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="start">
-								<DropdownMenuRadioGroup value={buildingId ?? ''} onValueChange={onBuildingChange}>
-									{#each buildings as building (building.id)}
-										<DropdownMenuRadioItem value={building.id}>
-											{building.name}
-										</DropdownMenuRadioItem>
-									{/each}
-								</DropdownMenuRadioGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
-				</InputGroup>
+				<ButtonGroup class="w-full gap-2">
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>건물</ButtonGroupText>
+						<Select type="single" value={buildingId ?? ''} onValueChange={onBuildingChange}>
+							<SelectTrigger class="flex-1">
+								{selectedBuildingName}
+							</SelectTrigger>
+							<SelectContent>
+								{#each buildings as building (building.id)}
+									<SelectItem value={building.id}>{building.name}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>컨디션</ButtonGroupText>
+						<Select
+							type="single"
+							value={conditionId ?? ''}
+							onValueChange={onConditionChange}
+							disabled={!buildingId || conditions.length === 0}
+						>
+							<SelectTrigger class="flex-1">
+								{selectedConditionName}
+							</SelectTrigger>
+							<SelectContent>
+								{#each conditions as condition (condition.id)}
+									<SelectItem value={condition.id}>{condition.name}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
+				</ButtonGroup>
 				<ButtonGroup class="w-full gap-2">
 					<ButtonGroup class="flex-1">
 						<ButtonGroupText>행동</ButtonGroupText>
@@ -219,34 +211,7 @@
 				</ButtonGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost">
-										{selectedConditionName}
-										<IconChevronDown class="ml-1 size-4" />
-									</InputGroupButton>
-								{/snippet}
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="start">
-								{#if conditions.length === 0}
-									<div class="p-2 text-center text-sm text-muted-foreground">
-										선택 가능한 항목 없음
-									</div>
-								{:else}
-									<DropdownMenuRadioGroup
-										value={conditionId ?? ''}
-										onValueChange={onConditionChange}
-									>
-										{#each conditions as condition (condition.id)}
-											<DropdownMenuRadioItem value={condition.id}>
-												{condition.name}
-											</DropdownMenuRadioItem>
-										{/each}
-									</DropdownMenuRadioGroup>
-								{/if}
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<InputGroupText>임계점</InputGroupText>
 					</InputGroupAddon>
 					<InputGroupInput
 						type="number"

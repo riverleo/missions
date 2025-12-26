@@ -7,23 +7,9 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import {
-		InputGroup,
-		InputGroupInput,
-		InputGroupAddon,
-		InputGroupButton,
-		InputGroupText,
-	} from '$lib/components/ui/input-group';
-	import {
-		DropdownMenu,
-		DropdownMenuTrigger,
-		DropdownMenuContent,
-		DropdownMenuRadioGroup,
-		DropdownMenuRadioItem,
-	} from '$lib/components/ui/dropdown-menu';
+	import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
-	import { IconChevronDown } from '@tabler/icons-svelte';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -42,13 +28,12 @@
 	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	const behaviorTypes: CharacterBehaviorType[] = ['clean'];
+	const behaviorTypes: CharacterBehaviorType[] = ['use', 'clean'];
 
-	let name = $state('');
 	let itemId = $state<string | undefined>(undefined);
 	let durabilityThreshold = $state<number | undefined>(undefined);
 	let characterId = $state<string | undefined>(undefined);
-	let behaviorType = $state<CharacterBehaviorType>('clean');
+	let behaviorType = $state<CharacterBehaviorType>('use');
 	let isSubmitting = $state(false);
 
 	const selectedItem = $derived(items.find((i) => i.id === itemId));
@@ -59,11 +44,10 @@
 
 	$effect(() => {
 		if (open) {
-			name = '';
 			itemId = undefined;
 			durabilityThreshold = undefined;
 			characterId = undefined;
-			behaviorType = 'clean';
+			behaviorType = 'use';
 		}
 	});
 
@@ -95,7 +79,6 @@
 
 		admin
 			.create({
-				name: name.trim(),
 				item_id: itemId as ItemId,
 				durability_threshold: durabilityThreshold ?? null,
 				character_id: characterId as CharacterId | undefined,
@@ -121,31 +104,20 @@
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost">
-										{selectedItemName}
-										<IconChevronDown class="size-4" />
-									</InputGroupButton>
-								{/snippet}
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="start">
-								<DropdownMenuRadioGroup value={itemId ?? ''} onValueChange={onItemChange}>
-									{#each items as item (item.id)}
-										<DropdownMenuRadioItem value={item.id}>
-											{item.name}
-										</DropdownMenuRadioItem>
-									{/each}
-								</DropdownMenuRadioGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
-				</InputGroup>
 				<ButtonGroup class="w-full gap-2">
+					<ButtonGroup class="flex-1">
+						<ButtonGroupText>아이템</ButtonGroupText>
+						<Select type="single" value={itemId ?? ''} onValueChange={onItemChange}>
+							<SelectTrigger class="flex-1">
+								{selectedItemName}
+							</SelectTrigger>
+							<SelectContent>
+								{#each items as item (item.id)}
+									<SelectItem value={item.id}>{item.name}</SelectItem>
+								{/each}
+							</SelectContent>
+						</Select>
+					</ButtonGroup>
 					<ButtonGroup class="flex-1">
 						<ButtonGroupText>행동</ButtonGroupText>
 						<Select type="single" value={behaviorType} onValueChange={onTypeChange}>
@@ -161,20 +133,20 @@
 							</SelectContent>
 						</Select>
 					</ButtonGroup>
-					<ButtonGroup class="flex-1">
-						<ButtonGroupText>캐릭터</ButtonGroupText>
-						<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
-							<SelectTrigger class="flex-1">
-								{selectedCharacterName}
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="">모두</SelectItem>
-								{#each characters as character (character.id)}
-									<SelectItem value={character.id}>{character.name}</SelectItem>
-								{/each}
-							</SelectContent>
-						</Select>
-					</ButtonGroup>
+				</ButtonGroup>
+				<ButtonGroup class="w-full">
+					<ButtonGroupText>캐릭터</ButtonGroupText>
+					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+						<SelectTrigger class="flex-1">
+							{selectedCharacterName}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="">모두</SelectItem>
+							{#each characters as character (character.id)}
+								<SelectItem value={character.id}>{character.name}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
 				</ButtonGroup>
 				{#if behaviorType === 'clean'}
 					<InputGroup>
@@ -189,7 +161,7 @@
 				{/if}
 			</div>
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting || !itemId || !name.trim()}>
+				<Button type="submit" disabled={isSubmitting || !itemId}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>
 			</DialogFooter>

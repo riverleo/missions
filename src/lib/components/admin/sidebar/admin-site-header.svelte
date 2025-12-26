@@ -80,7 +80,11 @@
 			return $buildingStore.data?.[id as BuildingId]?.name;
 		}
 		if (prevSegment === 'condition-behaviors') {
-			return $conditionBehaviorStore.data?.[id as ConditionBehaviorId]?.name;
+			const behavior = $conditionBehaviorStore.data?.[id as ConditionBehaviorId];
+			if (behavior && behavior.building_id) {
+				return $buildingStore.data?.[behavior.building_id as BuildingId]?.name;
+			}
+			return undefined;
 		}
 		if (prevSegment === 'items') {
 			return $itemStore.data?.[id as ItemId]?.name;

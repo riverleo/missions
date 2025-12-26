@@ -71,12 +71,12 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									"{building?.name}" {behavior.name}
+									{building?.name ?? '건물'} - {getCharacterBehaviorTypeLabel(
+										behavior.character_behavior_type
+									)}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
-										behavior.character_behavior_type
-									)}할 때 ({condition.name}
+									{character?.name ?? '모든 캐릭터'} ({condition.name}
 									{behavior.condition_threshold} 이하)
 								</span>
 							</div>

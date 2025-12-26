@@ -7,12 +7,11 @@ create table condition_behaviors (
   condition_threshold float not null default 0,
   character_id uuid references characters(id) on delete set null,
   character_behavior_type character_behavior_type not null default 'use',
-  name text not null,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_condition_behaviors_scenario_id_name unique (scenario_id, name)
+  constraint uq_condition_behaviors_building_condition_behavior_character unique nulls not distinct (building_id, condition_id, character_behavior_type, character_id)
 );
 
 alter table condition_behaviors enable row level security;

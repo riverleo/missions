@@ -6,12 +6,11 @@ create table item_behaviors (
   durability_threshold bigint, -- nullable: null이면 임계점 무관 (use), 값 있으면 임계점 적용 (clean)
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   character_behavior_type character_behavior_type not null default 'use',
-  name text not null,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_item_behaviors_scenario_id_name unique (scenario_id, name)
+  constraint uq_item_behaviors_item_behavior_character unique nulls not distinct (item_id, character_behavior_type, character_id)
 );
 
 alter table item_behaviors enable row level security;
