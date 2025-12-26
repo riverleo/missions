@@ -8,6 +8,8 @@
 		faceState?: CharacterFaceState;
 		heldItemState?: ItemState;
 		heldItemOffset?: { x: number; y: number };
+		heldItemScale?: number;
+		heldItemRotation?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 	}
@@ -17,6 +19,8 @@
 		faceState,
 		heldItemState,
 		heldItemOffset,
+		heldItemScale = 1,
+		heldItemRotation = 0,
 		resolution = 2,
 		flip = false,
 	}: Props = $props();
@@ -143,9 +147,9 @@
 		return { x, y };
 	});
 
-	// Transform 스타일 계산
+	// Transform 스타일 계산 (translate, scale, rotate 순서)
 	const handTransform = $derived(
-		`translate(${handOffset.x / resolution}px, ${handOffset.y / resolution}px)`
+		`translate(${handOffset.x / resolution}px, ${handOffset.y / resolution}px) scale(${heldItemScale}) rotate(${heldItemRotation}deg)`
 	);
 </script>
 

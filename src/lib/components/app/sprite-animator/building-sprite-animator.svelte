@@ -9,6 +9,8 @@
 		characterBodyState?: CharacterBodyState;
 		characterFaceState?: CharacterFaceState;
 		characterOffset?: { x: number; y: number };
+		characterScale?: number;
+		characterRotation?: number;
 		resolution?: 1 | 2 | 3;
 	}
 
@@ -17,6 +19,8 @@
 		characterBodyState,
 		characterFaceState,
 		characterOffset = { x: 0, y: 0 },
+		characterScale = 1,
+		characterRotation = 0,
 		resolution = 2,
 	}: Props = $props();
 
@@ -54,7 +58,7 @@
 		<div
 			class="absolute bottom-0 left-1/2"
 			style:transform="translate(calc(-50% + {characterOffset.x / resolution}px), {-characterOffset.y /
-				resolution}px)"
+				resolution}px) scale({characterScale}) rotate({characterRotation}deg)"
 		>
 			<CharacterSpriteAnimator
 				bodyState={characterBodyState}

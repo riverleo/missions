@@ -566,13 +566,15 @@ export type Database = {
         Row: {
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
+          character_offset_x: number
+          character_offset_y: number
+          character_rotation: number
+          character_scale: number
           condition_behavior_id: string
           condition_id: string
           duration_ticks: number
           failure_condition_behavior_action_id: string | null
           id: string
-          offset_x: number
-          offset_y: number
           root: boolean
           scenario_id: string
           success_condition_behavior_action_id: string | null
@@ -580,13 +582,15 @@ export type Database = {
         Insert: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
           condition_behavior_id: string
           condition_id: string
           duration_ticks?: number
           failure_condition_behavior_action_id?: string | null
           id?: string
-          offset_x?: number
-          offset_y?: number
           root?: boolean
           scenario_id: string
           success_condition_behavior_action_id?: string | null
@@ -594,13 +598,15 @@ export type Database = {
         Update: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
           condition_behavior_id?: string
           condition_id?: string
           duration_ticks?: number
           failure_condition_behavior_action_id?: string | null
           id?: string
-          offset_x?: number
-          offset_y?: number
           root?: boolean
           scenario_id?: string
           success_condition_behavior_action_id?: string | null
@@ -955,8 +961,10 @@ export type Database = {
           duration_ticks: number
           failure_item_behavior_action_id: string | null
           id: string
-          offset_x: number
-          offset_y: number
+          item_offset_x: number
+          item_offset_y: number
+          item_rotation: number
+          item_scale: number
           root: boolean
           scenario_id: string
           success_item_behavior_action_id: string | null
@@ -968,8 +976,10 @@ export type Database = {
           duration_ticks?: number
           failure_item_behavior_action_id?: string | null
           id?: string
-          offset_x?: number
-          offset_y?: number
+          item_offset_x?: number
+          item_offset_y?: number
+          item_rotation?: number
+          item_scale?: number
           root?: boolean
           scenario_id: string
           success_item_behavior_action_id?: string | null
@@ -981,8 +991,10 @@ export type Database = {
           duration_ticks?: number
           failure_item_behavior_action_id?: string | null
           id?: string
-          offset_x?: number
-          offset_y?: number
+          item_offset_x?: number
+          item_offset_y?: number
+          item_rotation?: number
+          item_scale?: number
           root?: boolean
           scenario_id?: string
           success_item_behavior_action_id?: string | null

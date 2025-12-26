@@ -149,8 +149,10 @@
 				duration_ticks: changes.duration_ticks,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
-				offset_x: changes.offset_x,
-				offset_y: changes.offset_y,
+				item_offset_x: changes.item_offset_x,
+				item_offset_y: changes.item_offset_y,
+				item_scale: changes.item_scale,
+				item_rotation: changes.item_rotation,
 				root: changes.root,
 			});
 
@@ -197,12 +199,34 @@
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>오프셋</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" bind:value={changes.offset_x} placeholder="x" />
+							<InputGroupInput type="number" bind:value={changes.item_offset_x} placeholder="x" />
 							<InputGroupText>
 								<IconX />
 							</InputGroupText>
-							<InputGroupInput type="number" bind:value={changes.offset_y} placeholder="y" />
+							<InputGroupInput type="number" bind:value={changes.item_offset_y} placeholder="y" />
 						</InputGroup>
+
+						<div class="flex gap-2">
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>스케일</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput type="number" step="0.01" min="0" bind:value={changes.item_scale} />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>배</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>회전</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput type="number" bind:value={changes.item_rotation} />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>도</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
 
 						<Separator />
 
@@ -257,7 +281,10 @@
 										bodyState={previewBodyState}
 										faceState={previewFaceState}
 										heldItemState={previewItemState}
-										heldItemOffset={{ x: changes.offset_x, y: changes.offset_y }}
+										heldItemOffset={{ x: changes.item_offset_x, y: changes.item_offset_y }}
+										heldItemScale={changes.item_scale}
+										heldItemRotation={changes.item_rotation}
+										resolution={2}
 									/>
 								</div>
 

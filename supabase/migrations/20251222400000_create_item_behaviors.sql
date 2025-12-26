@@ -49,9 +49,15 @@ create table item_behavior_actions (
   character_body_state_type character_body_state_type not null default 'idle',
   character_face_state_type character_face_state_type not null default 'idle',
 
-  -- 캐릭터 중심 기준 아이템 위치 오프셋
-  offset_x integer not null default 0,
-  offset_y integer not null default 0,
+  -- 아이템 오프셋 (캐릭터 중심 기준)
+  item_offset_x integer not null default 0,
+  item_offset_y integer not null default 0,
+
+  -- 아이템 스케일
+  item_scale float not null default 1.0,
+
+  -- 아이템 회전 (도)
+  item_rotation float not null default 0,
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 0,

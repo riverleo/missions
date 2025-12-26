@@ -63,10 +63,10 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									"{condition.name}" 컨디션을 "{getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}"
+									{behavior.name}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{behavior.name}
+									{condition.name} {behavior.condition_threshold} 이하인 경우 건물 {getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}
 								</span>
 							</div>
 							<DropdownMenu>

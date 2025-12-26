@@ -65,8 +65,7 @@
 									{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{need.name}
-									{behavior.need_threshold} 이하
+									{need.name} {behavior.need_threshold} 이하인 경우 행동
 								</span>
 							</div>
 							<DropdownMenu>

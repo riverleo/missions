@@ -52,9 +52,15 @@ create table condition_behavior_actions (
   character_body_state_type character_body_state_type not null default 'idle',
   character_face_state_type character_face_state_type not null default 'idle',
 
-  -- 건물 바닥 중앙 기준 캐릭터 위치 오프셋
-  offset_x integer not null default 0,
-  offset_y integer not null default 0,
+  -- 캐릭터 오프셋 (건물 바닥 중앙 기준)
+  character_offset_x integer not null default 0,
+  character_offset_y integer not null default 0,
+
+  -- 캐릭터 스케일
+  character_scale float not null default 1.0,
+
+  -- 캐릭터 회전 (도)
+  character_rotation float not null default 0,
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 0,

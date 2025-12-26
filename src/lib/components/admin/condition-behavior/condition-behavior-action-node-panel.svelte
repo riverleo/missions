@@ -8,6 +8,7 @@
 		ConditionBehaviorId,
 		ConditionId,
 		CharacterBodyId,
+		BuildingId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -26,7 +27,8 @@
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	
+	import { useBuilding } from '$lib/hooks/use-building';
+	import { CharacterSpriteAnimator, BuildingSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
@@ -42,9 +44,11 @@
 	const { conditionStore } = useCondition();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));
+	const buildings = $derived(Object.values($buildingStore.data));
 
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
@@ -60,22 +64,18 @@
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
-	// 현재 액션의 행동 -> 건물 가져오기
-	const currentBehavior = $derived(
-		changes?.condition_behavior_id
-			? $conditionBehaviorStore.data[changes.condition_behavior_id as ConditionBehaviorId]
-			: undefined
+	// 미리보기용 건물 선택
+	let previewBuildingId = $state<string | undefined>(undefined);
+	const previewBuilding = $derived(
+		previewBuildingId ? $buildingStore.data[previewBuildingId as BuildingId] : buildings[0]
 	);
-	const currentCondition = $derived(
-		currentBehavior?.condition_id
-			? $conditionStore.data[currentBehavior.condition_id as ConditionId]
-			: undefined
+	const selectedPreviewBuildingLabel = $derived(previewBuilding?.name ?? '건물 선택');
+
+	// 미리보기용 건물 상태
+	const previewBuildingStates = $derived(
+		previewBuilding ? ($buildingStateStore.data[previewBuilding.id] ?? []) : []
 	);
-	// 건물 상태 (항상 idle 사용)
-	const conditionStates = $derived(
-		currentCondition ? ([]) : []
-	);
-	const previewConditionState = $derived(conditionStates.find((s: any) => s.type === 'idle'));
+	const previewBuildingState = $derived(previewBuildingStates.find((s) => s.type === 'idle'));
 
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -111,6 +111,10 @@
 
 	function onPreviewCharacterChange(value: string | undefined) {
 		previewCharacterId = value || undefined;
+	}
+
+	function onPreviewBuildingChange(value: string | undefined) {
+		previewBuildingId = value || undefined;
 	}
 
 	$effect(() => {
@@ -156,8 +160,10 @@
 				duration_ticks: changes.duration_ticks,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
-				offset_x: changes.offset_x,
-				offset_y: changes.offset_y,
+				character_offset_x: changes.character_offset_x,
+				character_offset_y: changes.character_offset_y,
+				character_scale: changes.character_scale,
+				character_rotation: changes.character_rotation,
 				root: changes.root,
 			});
 
@@ -202,14 +208,36 @@
 
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>오프셋</InputGroupText>
+								<InputGroupText>캐릭터 오프셋</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput type="number" bind:value={changes.offset_x} placeholder="x" />
+							<InputGroupInput type="number" bind:value={changes.character_offset_x} placeholder="x" />
 							<InputGroupText>
 								<IconX />
 							</InputGroupText>
-							<InputGroupInput type="number" bind:value={changes.offset_y} placeholder="y" />
+							<InputGroupInput type="number" bind:value={changes.character_offset_y} placeholder="y" />
 						</InputGroup>
+
+						<div class="flex gap-2">
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>스케일</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput type="number" step="0.01" min="0" bind:value={changes.character_scale} />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>배</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupText>회전</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput type="number" bind:value={changes.character_rotation} />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>도</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
 
 						<Separator />
 
@@ -252,7 +280,7 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if previewConditionState && previewBodyState}
+						{#if previewBuildingState && previewBodyState}
 							<Separator />
 
 							<div class="flex flex-col gap-2">
@@ -260,12 +288,34 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-										conditionState={previewConditionState}
+									<BuildingSpriteAnimator
+										buildingState={previewBuildingState}
 										characterBodyState={previewBodyState}
 										characterFaceState={previewFaceState}
-										characterOffset={{ x: changes.offset_x, y: changes.offset_y }}
+										characterOffset={{ x: changes.character_offset_x, y: changes.character_offset_y }}
+										characterScale={changes.character_scale}
+										characterRotation={changes.character_rotation}
+										resolution={2}
 									/>
 								</div>
+
+								<ButtonGroup class="w-full">
+									<ButtonGroupText>건물</ButtonGroupText>
+									<Select
+										type="single"
+										value={previewBuildingId ?? previewBuilding?.id ?? ''}
+										onValueChange={onPreviewBuildingChange}
+									>
+										<SelectTrigger class="flex-1">
+											{selectedPreviewBuildingLabel}
+										</SelectTrigger>
+										<SelectContent>
+											{#each buildings as building (building.id)}
+												<SelectItem value={building.id}>{building.name}</SelectItem>
+											{/each}
+										</SelectContent>
+									</Select>
+								</ButtonGroup>
 
 								<ButtonGroup class="w-full">
 									<ButtonGroupText>캐릭터</ButtonGroupText>
