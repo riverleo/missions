@@ -68,9 +68,7 @@
 
 			return {
 				title: behavior.name || `이름없음 (${behavior.id.split('-')[0]})`,
-				description: `${character?.name ?? '모든 캐릭터'}가 ${getCharacterBehaviorTypeLabel(
-					behavior.character_behavior_type
-				)}할 때 (${need?.name ?? '욕구'} ${behavior.need_threshold} 이하)`,
+				description: `${character?.name ?? '모든 캐릭터'} (${need?.name ?? '욕구'} ${behavior.need_threshold} 이하)`,
 			};
 		} else if (priority.condition_behavior_id) {
 			const behavior = $conditionBehaviorStore.data[priority.condition_behavior_id];

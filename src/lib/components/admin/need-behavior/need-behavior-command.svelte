@@ -71,9 +71,7 @@
 									{behavior.name || `이름없음 (${behavior.id.split('-')[0]})`}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{character?.name ?? '모든 캐릭터'}가 {getCharacterBehaviorTypeLabel(
-										behavior.character_behavior_type
-									)}할 때 ({need.name}
+									{character?.name ?? '모든 캐릭터'} ({need.name}
 									{behavior.need_threshold} 이하)
 								</span>
 							</div>
