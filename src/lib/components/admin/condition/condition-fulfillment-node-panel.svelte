@@ -173,6 +173,7 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
+							<ButtonGroupText>타입</ButtonGroupText>
 							<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
 								<SelectTrigger class="flex-1">
 									{getTypeLabel(changes.fulfillment_type)}
@@ -207,6 +208,7 @@
 
 						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
+								<ButtonGroupText>캐릭터</ButtonGroupText>
 								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
 										{selectedTargetLabel}

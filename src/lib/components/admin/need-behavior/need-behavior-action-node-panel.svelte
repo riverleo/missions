@@ -344,7 +344,7 @@
 
 						{#if changes.type === 'idle'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>바디</ButtonGroupText>
+								<ButtonGroupText>캐릭터 바디</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.character_body_state_type ?? ''}
@@ -364,7 +364,7 @@
 							</ButtonGroup>
 						{/if}
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>표정</ButtonGroupText>
+							<ButtonGroupText>캐릭터 표정</ButtonGroupText>
 							<Select
 								type="single"
 								value={changes.character_face_state_type ?? ''}
