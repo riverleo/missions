@@ -81,7 +81,7 @@
 			<DialogTitle>새로운 캐릭터 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
-			<ButtonGroup class="w-full">
+			<ButtonGroup class="flex w-full gap-2">
 				<ButtonGroup>
 					<Select type="single" value={bodyId} onValueChange={onBodyChange}>
 						<SelectTrigger>

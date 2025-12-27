@@ -94,7 +94,8 @@ export class WorldContext {
 	characterBodies = $state<Record<string, CharacterBody>>({});
 
 	private get allBodies() {
-		return [...Object.values(this.characterBodies), ...Object.values(this.buildingBodies)];
+		// 건물(static)을 먼저, 캐릭터(dynamic)를 나중에 추가하여 캐릭터가 렌더링 순서에서 위에 오도록 함
+		return [...Object.values(this.buildingBodies), ...Object.values(this.characterBodies)];
 	}
 
 	readonly planning = new WorldPlanning();
@@ -133,14 +134,14 @@ export class WorldContext {
 			}
 		});
 
-		// characters 변경 시 바디 동기화
-		$effect(() => {
-			this.syncCharacterBodies(this.characters, this.initialized);
-		});
-
-		// buildings 변경 시 바디 동기화
+		// buildings 변경 시 바디 동기화 (건물을 먼저 처리)
 		$effect(() => {
 			this.syncBuildingBodies(this.buildings, this.initialized);
+		});
+
+		// characters 변경 시 바디 동기화 (캐릭터를 나중에 처리)
+		$effect(() => {
+			this.syncCharacterBodies(this.characters, this.initialized);
 		});
 
 		// 카메라 변경 시 렌더 바운드 업데이트
@@ -169,6 +170,10 @@ export class WorldContext {
 		this.mouseConstraint = MouseConstraint.create(this.engine, {
 			mouse,
 			constraint: { stiffness: 0.2, render: { visible: false } },
+			collisionFilter: {
+				// static 바디(건물)는 선택 안 되도록 CATEGORY_BUILDING 제외
+				mask: 0xffffffff & ~0x0008,
+			},
 		});
 		Composite.add(this.engine.world, this.mouseConstraint);
 		this.render.mouse = mouse;
@@ -203,9 +208,9 @@ export class WorldContext {
 			});
 		}
 
-		// 초기 캐릭터/건물 바디 생성
-		this.syncCharacterBodies(this.characters);
+		// 초기 건물/캐릭터 바디 생성 (건물을 먼저 추가하여 캐릭터가 나중에 추가되도록)
 		this.syncBuildingBodies(this.buildings);
+		this.syncCharacterBodies(this.characters);
 
 		Render.run(this.render);
 		this.updateRenderBounds(this.render, this.terrainBody, this.camera);

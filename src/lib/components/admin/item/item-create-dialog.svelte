@@ -70,31 +70,33 @@
 		<DialogHeader>
 			<DialogTitle>새로운 아이템 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit} class="space-y-4">
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<InputGroupText>
-						<IconHeading />
-					</InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput placeholder="이름" bind:value={name} />
-			</InputGroup>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<InputGroupText>
-						<IconClock />
-					</InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput
-					type="number"
-					placeholder="최대 내구도"
-					bind:value={maxDurabilityTicks}
-					min="0"
-				/>
-				<InputGroupAddon align="inline-end">
-					<InputGroupText>틱</InputGroupText>
-				</InputGroupAddon>
-			</InputGroup>
+		<form {onsubmit} class="flex flex-col gap-4">
+			<div class="flex flex-col gap-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput placeholder="이름" bind:value={name} />
+				</InputGroup>
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconClock />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput
+						type="number"
+						placeholder="최대 내구도"
+						bind:value={maxDurabilityTicks}
+						min="0"
+					/>
+					<InputGroupAddon align="inline-end">
+						<InputGroupText>틱</InputGroupText>
+					</InputGroupAddon>
+				</InputGroup>
+			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
