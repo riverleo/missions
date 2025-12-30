@@ -16,6 +16,7 @@ import { browser } from '$app/environment';
 const STORAGE_KEY = 'test-world-state';
 
 interface TestWorldState {
+	open: boolean;
 	selectedTerrain?: Terrain;
 	selectedCharacter?: Character;
 	selectedBuilding?: Building;
@@ -25,11 +26,15 @@ interface TestWorldState {
 	cameraX: number;
 	cameraY: number;
 	cameraZoom: number;
+	// 모달 위치 (픽셀 단위)
+	modalX: number;
+	modalY: number;
 	debug: boolean;
 	eraser: boolean;
 }
 
 const defaultState: TestWorldState = {
+	open: false,
 	selectedTerrain: undefined,
 	selectedCharacter: undefined,
 	selectedBuilding: undefined,
@@ -38,6 +43,8 @@ const defaultState: TestWorldState = {
 	cameraX: 0,
 	cameraY: 0,
 	cameraZoom: 1,
+	modalX: 0,
+	modalY: 0,
 	debug: false,
 	eraser: false,
 };
@@ -47,6 +54,8 @@ interface PersistedState {
 	terrainId?: string;
 	characters: WorldCharacter[];
 	buildings: WorldBuilding[];
+	modalX: number;
+	modalY: number;
 	debug: boolean;
 }
 
@@ -61,6 +70,8 @@ function loadFromStorage(): { state: TestWorldState; terrainId?: string } {
 					...defaultState,
 					characters: persisted.characters ?? [],
 					buildings: persisted.buildings ?? [],
+					modalX: persisted.modalX ?? 0,
+					modalY: persisted.modalY ?? 0,
 					debug: persisted.debug ?? false,
 				},
 				terrainId: persisted.terrainId,
@@ -79,6 +90,8 @@ function saveToStorage(state: TestWorldState) {
 			terrainId: state.selectedTerrain?.id,
 			characters: state.characters,
 			buildings: state.buildings,
+			modalX: state.modalX,
+			modalY: state.modalY,
 			debug: state.debug,
 		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
@@ -147,8 +160,20 @@ function createTestWorldStore() {
 		}));
 	}
 
+	function setOpen(open: boolean) {
+		store.update((state) => ({ ...state, open }));
+	}
+
+	function toggleOpen() {
+		store.update((state) => ({ ...state, open: !state.open }));
+	}
+
 	function setCamera(x: number, y: number, zoom: number) {
 		store.update((state) => ({ ...state, cameraX: x, cameraY: y, cameraZoom: zoom }));
+	}
+
+	function setModalPosition(x: number, y: number) {
+		store.update((state) => ({ ...state, modalX: x, modalY: y }));
 	}
 
 	function placeCharacter(character: Character, x: number, y: number) {
@@ -249,7 +274,10 @@ function createTestWorldStore() {
 		selectBuilding,
 		setDebug,
 		setEraser,
+		setOpen,
+		toggleOpen,
 		setCamera,
+		setModalPosition,
 		placeCharacter,
 		placeBuilding,
 		removeCharacter,
