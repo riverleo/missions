@@ -18,8 +18,6 @@ export class WorldCharacterEntity {
 	readonly id: WorldCharacterId;
 	readonly body: Matter.Body;
 
-	angle = $state(0);
-
 	private world = useWorld();
 
 	constructor(id: WorldCharacterId) {
@@ -77,7 +75,6 @@ export class WorldCharacterEntity {
 			worldCharacter.x = this.body.position.x;
 			worldCharacter.y = this.body.position.y;
 		}
-		this.angle = this.body.angle;
 	}
 
 	setDebug(debug: boolean): void {

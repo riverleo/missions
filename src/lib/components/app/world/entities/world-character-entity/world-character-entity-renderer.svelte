@@ -31,13 +31,12 @@
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
 	const left = $derived(worldCharacter ? `${(worldCharacter.x / terrainBody.width) * 100}%` : '0%');
 	const top = $derived(worldCharacter ? `${(worldCharacter.y / terrainBody.height) * 100}%` : '0%');
-	const rotation = $derived(`${entity.angle}rad`);
 </script>
 
 {#if bodyState}
 	<div
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {left}; top: {top}; rotate: {rotation};"
+		style="left: {left}; top: {top};"
 	>
 		<CharacterSpriteAnimator {bodyState} {faceState} />
 	</div>
