@@ -33,7 +33,9 @@
 
 	const label = $derived(() => {
 		const building = $buildingStore.data[behavior.building_id as BuildingId];
-		const condition = behavior.condition_id ? $conditionStore.data[behavior.condition_id] : undefined;
+		const condition = behavior.condition_id
+			? $conditionStore.data[behavior.condition_id]
+			: undefined;
 		const character = behavior.character_id
 			? $characterStore.data[behavior.character_id as CharacterId]
 			: undefined;

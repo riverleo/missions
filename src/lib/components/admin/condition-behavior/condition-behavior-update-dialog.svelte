@@ -208,7 +208,11 @@
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost" disabled={!buildingId || conditions.length === 0}>
+									<InputGroupButton
+										{...props}
+										variant="ghost"
+										disabled={!buildingId || conditions.length === 0}
+									>
 										{selectedConditionName}
 										<IconChevronDown class="ml-1 size-4" />
 									</InputGroupButton>

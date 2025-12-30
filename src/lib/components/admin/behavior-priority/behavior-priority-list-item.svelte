@@ -82,7 +82,9 @@
 			const building = behavior.building_id
 				? $buildingStore.data[behavior.building_id as BuildingId]
 				: undefined;
-			const condition = behavior.condition_id ? $conditionStore.data[behavior.condition_id] : undefined;
+			const condition = behavior.condition_id
+				? $conditionStore.data[behavior.condition_id]
+				: undefined;
 			const character = behavior.character_id
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
@@ -114,7 +116,9 @@
 </script>
 
 {#if behaviorInfo()}
-	<div class="group relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none">
+	<div
+		class="group relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none"
+	>
 		<Badge variant="secondary" class="shrink-0 font-mono">
 			{priority.priority}
 		</Badge>
@@ -130,33 +134,16 @@
 			{behaviorInfo()?.description}
 		</span>
 		<div class="ml-auto flex items-center gap-1">
-			<Button
-				variant="ghost"
-				size="icon"
-				class="size-6"
-				onclick={onmoveup}
-				disabled={isFirst}
-			>
+			<Button variant="ghost" size="icon" class="size-6" onclick={onmoveup} disabled={isFirst}>
 				<IconArrowUp class="size-4" />
 			</Button>
-			<Button
-				variant="ghost"
-				size="icon"
-				class="size-6"
-				onclick={onmovedown}
-				disabled={isLast}
-			>
+			<Button variant="ghost" size="icon" class="size-6" onclick={onmovedown} disabled={isLast}>
 				<IconArrowDown class="size-4" />
 			</Button>
 			<DropdownMenu>
 				<DropdownMenuTrigger>
 					{#snippet child({ props })}
-						<Button
-							{...props}
-							variant="ghost"
-							size="icon"
-							class="size-6"
-						>
+						<Button {...props} variant="ghost" size="icon" class="size-6">
 							<IconDotsVertical class="size-4" />
 						</Button>
 					{/snippet}

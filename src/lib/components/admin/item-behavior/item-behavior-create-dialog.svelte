@@ -7,7 +7,12 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText } from '$lib/components/ui/input-group';
+	import {
+		InputGroup,
+		InputGroupInput,
+		InputGroupAddon,
+		InputGroupText,
+	} from '$lib/components/ui/input-group';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';

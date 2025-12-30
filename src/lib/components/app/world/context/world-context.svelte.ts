@@ -1,13 +1,18 @@
 import Matter from 'matter-js';
-import { get } from 'svelte/store';
-import type { Supabase, Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
+import type {
+	Supabase,
+	Terrain,
+	WorldCharacter,
+	WorldCharacterId,
+	WorldBuilding,
+	WorldBuildingId,
+} from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
-import { BuildingBody } from '../building-body.svelte';
+import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { Pathfinder } from '../pathfinder';
-import { useBuilding } from '$lib/hooks/use-building';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldPlanning } from './world-planning.svelte';
 
@@ -22,14 +27,14 @@ export class WorldContext {
 	readonly terrainBody = new TerrainBody();
 
 	terrain = $state<Terrain | undefined>();
-	buildings = $state<Record<string, WorldBuilding>>({});
-	worldCharacters = $state<Record<string, WorldCharacter>>({});
+	buildings = $state<Record<WorldBuildingId, WorldBuilding>>({});
+	worldCharacters = $state<Record<WorldCharacterId, WorldCharacter>>({});
 
 	get terrainAssetUrl() {
 		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
-	buildingBodies = $state<Record<string, BuildingBody>>({});
-	worldCharacterEntities = $state<Record<string, WorldCharacterEntity>>({});
+	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
+	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
 
 	readonly planning = new WorldPlanning();
 	pathfinder = $state<Pathfinder | undefined>(undefined);
@@ -62,17 +67,17 @@ export class WorldContext {
 		// debug 변경 시 바디들의 렌더 스타일 업데이트
 		$effect(() => {
 			this.terrainBody.setDebug(this.debug);
-			for (const body of Object.values(this.buildingBodies)) {
-				body.setDebug(this.debug);
+			for (const entity of Object.values(this.worldBuildingEntities)) {
+				entity.setDebug(this.debug);
 			}
 			for (const entity of Object.values(this.worldCharacterEntities)) {
 				entity.setDebug(this.debug);
 			}
 		});
 
-		// buildings 변경 시 바디 동기화 (건물을 먼저 처리)
+		// buildings 변경 시 엔티티 동기화 (건물을 먼저 처리)
 		$effect(() => {
-			this.syncBuildingBodies(this.buildings);
+			this.syncWorldBuildingEntities(this.buildings);
 		});
 
 		// characters 변경 시 바디 동기화 (캐릭터를 나중에 처리)
@@ -145,7 +150,7 @@ export class WorldContext {
 		}
 
 		// 초기 건물/캐릭터 바디 생성 (건물을 먼저 추가하여 캐릭터가 나중에 추가되도록)
-		this.syncBuildingBodies(this.buildings);
+		this.syncWorldBuildingEntities(this.buildings);
 		this.syncWorldCharacterEntities(this.worldCharacters);
 
 		Render.run(this.render);
@@ -187,8 +192,8 @@ export class WorldContext {
 		this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
 
 		// 건물 바디 재추가
-		for (const body of Object.values(this.buildingBodies)) {
-			body.addToWorld(this.engine.world);
+		for (const entity of Object.values(this.worldBuildingEntities)) {
+			entity.addToWorld();
 		}
 
 		// 캐릭터 바디 재추가
@@ -224,19 +229,27 @@ export class WorldContext {
 	}
 
 	// 캐릭터 바디 동기화
-	private syncWorldCharacterEntities(characters: Record<string, WorldCharacter>) {
+	private syncWorldCharacterEntities(characters: Record<WorldCharacterId, WorldCharacter>) {
 		if (!this.initialized) return;
 
-		const currentIds = new Set(Object.keys(characters));
 		let changed = false;
 
-		// 새로 추가된 캐릭터
-		for (const worldCharacter of Object.values(characters)) {
-			if (!this.worldCharacterEntities[worldCharacter.id]) {
+		// 제거될 엔티티들 cleanup
+		for (const entity of Object.values(this.worldCharacterEntities)) {
+			if (!characters[entity.id]) {
+				entity.removeFromWorld();
+				delete this.worldCharacterEntities[entity.id];
+				changed = true;
+			}
+		}
+
+		// 새 엔티티 추가
+		for (const character of Object.values(characters)) {
+			if (!this.worldCharacterEntities[character.id]) {
 				try {
-					const entity = new WorldCharacterEntity(worldCharacter.id);
+					const entity = new WorldCharacterEntity(character.id);
 					entity.addToWorld();
-					this.worldCharacterEntities[worldCharacter.id] = entity;
+					this.worldCharacterEntities[character.id] = entity;
 					changed = true;
 				} catch (error) {
 					// 스토어에 없는 삭제된 캐릭터는 건너뜀 (localStorage 정리 필요)
@@ -245,57 +258,45 @@ export class WorldContext {
 			}
 		}
 
-		// 제거된 캐릭터
-		for (const id of Object.keys(this.worldCharacterEntities)) {
-			if (!currentIds.has(id)) {
-				const entity = this.worldCharacterEntities[id];
-				if (entity) {
-					entity.removeFromWorld();
-					delete this.worldCharacterEntities[id];
-					changed = true;
-				}
-			}
-		}
-
-		// 변경 감지를 위해 재할당
+		// 변경이 있을 때만 재할당 (reactivity 트리거)
 		if (changed) {
 			this.worldCharacterEntities = { ...this.worldCharacterEntities };
 		}
 	}
 
-	// 건물 바디 동기화
-	private syncBuildingBodies(buildings: Record<string, WorldBuilding>) {
+	// 건물 엔티티 동기화
+	private syncWorldBuildingEntities(buildings: Record<WorldBuildingId, WorldBuilding>) {
 		if (!this.initialized) return;
 
-		const currentIds = new Set(Object.keys(buildings));
 		let changed = false;
 
-		// 새로 추가된 건물
-		const buildingStore = get(useBuilding().store).data;
-		for (const worldBuilding of Object.values(buildings)) {
-			if (!this.buildingBodies[worldBuilding.id]) {
-				const buildingData = buildingStore[worldBuilding.building_id];
-				if (buildingData) {
-					const buildingBody = new BuildingBody(worldBuilding, buildingData, this.debug);
-					buildingBody.addToWorld(this.engine.world);
-					this.buildingBodies[worldBuilding.id] = buildingBody;
-					changed = true;
-				}
-			}
-		}
-
-		// 제거된 건물
-		for (const id of Object.keys(this.buildingBodies)) {
-			if (!currentIds.has(id)) {
-				this.buildingBodies[id]?.removeFromWorld(this.engine.world);
-				delete this.buildingBodies[id];
+		// 제거될 엔티티들 cleanup
+		for (const entity of Object.values(this.worldBuildingEntities)) {
+			if (!buildings[entity.id]) {
+				entity.removeFromWorld();
+				delete this.worldBuildingEntities[entity.id];
 				changed = true;
 			}
 		}
 
-		// 변경 감지를 위해 재할당
+		// 새 엔티티 추가
+		for (const worldBuilding of Object.values(buildings)) {
+			if (!this.worldBuildingEntities[worldBuilding.id]) {
+				try {
+					const entity = new WorldBuildingEntity(worldBuilding.id);
+					entity.addToWorld();
+					this.worldBuildingEntities[worldBuilding.id] = entity;
+					changed = true;
+				} catch (error) {
+					// 스토어에 없는 삭제된 건물은 건너뜀
+					console.warn('Skipping building creation:', error);
+				}
+			}
+		}
+
+		// 변경이 있을 때만 재할당 (reactivity 트리거)
 		if (changed) {
-			this.buildingBodies = { ...this.buildingBodies };
+			this.worldBuildingEntities = { ...this.worldBuildingEntities };
 		}
 	}
 

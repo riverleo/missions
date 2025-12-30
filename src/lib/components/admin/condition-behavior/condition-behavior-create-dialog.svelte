@@ -212,7 +212,11 @@
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost" disabled={!buildingId || conditions.length === 0}>
+									<InputGroupButton
+										{...props}
+										variant="ghost"
+										disabled={!buildingId || conditions.length === 0}
+									>
 										{selectedConditionName}
 										<IconChevronDown class="ml-1 size-4" />
 									</InputGroupButton>
@@ -252,10 +256,7 @@
 				</InputGroup>
 			</div>
 			<DialogFooter>
-				<Button
-					type="submit"
-					disabled={isSubmitting || !buildingId || !conditionId}
-				>
+				<Button type="submit" disabled={isSubmitting || !buildingId || !conditionId}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>
 			</DialogFooter>

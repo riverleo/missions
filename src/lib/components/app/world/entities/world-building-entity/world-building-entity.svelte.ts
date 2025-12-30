@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
-import type { WorldBuilding, Building } from '$lib/types';
+import { get } from 'svelte/store';
+import type { WorldBuildingId, Building } from '$lib/types';
 import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
@@ -7,7 +8,9 @@ import {
 	CATEGORY_CHARACTER,
 	DEBUG_BUILDING_FILL_STYLE,
 	TILE_SIZE,
-} from './constants';
+} from '../../constants';
+import { useWorld } from '$lib/hooks/use-world.svelte';
+import { useBuilding } from '$lib/hooks/use-building';
 
 const { Bodies, Composite } = Matter;
 
@@ -17,15 +20,25 @@ export interface BodyPosition {
 	angle: number;
 }
 
-export class BuildingBody {
-	readonly id: string;
+export class WorldBuildingEntity {
+	readonly id: WorldBuildingId;
 	readonly body: Matter.Body;
 	readonly size: { width: number; height: number };
 
 	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
 
-	constructor(worldBuilding: WorldBuilding, building: Building, debug: boolean) {
-		this.id = worldBuilding.id;
+	private world = useWorld();
+
+	constructor(id: WorldBuildingId) {
+		this.id = id;
+
+		// 스토어에서 데이터 조회
+		const worldBuilding = this.world.buildings[id];
+		const building = this.building;
+
+		if (!worldBuilding || !building) {
+			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${id}`);
+		}
 
 		// 타일 기반 크기 계산
 		const width = building.tile_cols * TILE_SIZE;
@@ -44,11 +57,21 @@ export class BuildingBody {
 				category: CATEGORY_BUILDING,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
-			render: debug ? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE } : { visible: false },
+			render: this.world.debug
+				? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE }
+				: { visible: false },
 		});
 
 		// 초기 위치 설정
 		this.position = { x, y, angle: 0 };
+	}
+
+	get building(): Building | undefined {
+		const worldBuilding = this.world.buildings[this.id];
+		if (!worldBuilding) return undefined;
+
+		const buildingStore = get(useBuilding().store).data;
+		return buildingStore[worldBuilding.building_id];
 	}
 
 	updatePosition(): void {
@@ -68,11 +91,11 @@ export class BuildingBody {
 		}
 	}
 
-	addToWorld(matterWorld: Matter.World): void {
-		Composite.add(matterWorld, this.body);
+	addToWorld(): void {
+		Composite.add(this.world.engine.world, this.body);
 	}
 
-	removeFromWorld(matterWorld: Matter.World): void {
-		Composite.remove(matterWorld, this.body);
+	removeFromWorld(): void {
+		Composite.remove(this.world.engine.world, this.body);
 	}
 }

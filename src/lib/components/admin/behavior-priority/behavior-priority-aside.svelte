@@ -7,7 +7,7 @@
 	let toggleValue = $state<string[]>(['list']);
 </script>
 
-<aside class="absolute left-4 top-4 z-10 flex w-80 flex-col gap-2">
+<aside class="absolute top-4 left-4 z-10 flex w-80 flex-col gap-2">
 	<ToggleGroup type="multiple" variant="outline" bind:value={toggleValue}>
 		<Tooltip>
 			<TooltipTrigger>

@@ -131,7 +131,10 @@
 			class="flex flex-col gap-1"
 		>
 			{#each current as item, index (item.id)}
-				<div animate:flip={{ duration: flipDurationMs }} class="cursor-grab active:cursor-grabbing rounded-lg border bg-background">
+				<div
+					animate:flip={{ duration: flipDurationMs }}
+					class="cursor-grab rounded-lg border bg-background active:cursor-grabbing"
+				>
 					<BehaviorPriorityListItem
 						priority={item}
 						isFirst={index === 0}

@@ -17,7 +17,7 @@
 	// 1초마다 body 위치를 testWorld 스토어에 동기화
 	$effect(() => {
 		const interval = setInterval(() => {
-			syncPositions(world.worldCharacterEntities, world.buildingBodies);
+			syncPositions(world.worldCharacterEntities, world.worldBuildingEntities);
 		}, 1000);
 		return () => clearInterval(interval);
 	});
@@ -144,11 +144,11 @@
 		}
 
 		// 클릭 위치에 있는 건물 찾기
-		for (const [id, body] of Object.entries(world.buildingBodies)) {
-			const dx = pos.x - body.body.position.x;
-			const dy = pos.y - body.body.position.y;
-			const halfWidth = body.size.width / 2;
-			const halfHeight = body.size.height / 2;
+		for (const [id, entity] of Object.entries(world.worldBuildingEntities)) {
+			const dx = pos.x - entity.body.position.x;
+			const dy = pos.y - entity.body.position.y;
+			const halfWidth = entity.size.width / 2;
+			const halfHeight = entity.size.height / 2;
 			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 				removeBuilding(id);
 				return;

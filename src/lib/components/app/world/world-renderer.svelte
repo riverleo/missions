@@ -89,17 +89,17 @@
 			<WorldPlanning width={terrainBody.width} height={terrainBody.height} />
 		{/if}
 		{#each buildings as building (building.id)}
-			{@const body = world.buildingBodies[building.id]}
+			{@const entity = world.worldBuildingEntities[building.id]}
 			{@const buildingData = $buildingStore.data[building.building_id]}
 			{@const buildingStates = buildingData
 				? ($buildingStateStore.data[buildingData.id] ?? [])
 				: []}
 			{@const buildingState = buildingStates.find((s) => s.type === 'idle')}
-			{#if body && buildingState}
+			{#if entity && buildingState}
 				<BuildingSpriteAnimator
-					x={body.body.position.x}
-					y={body.body.position.y}
-					angle={body.body.angle}
+					x={entity.body.position.x}
+					y={entity.body.position.y}
+					angle={entity.body.angle}
 					{buildingState}
 				/>
 			{/if}
