@@ -111,5 +111,7 @@
 			{/if}
 		{/each}
 	</div>
+
+	<!-- 오버레이 레이어: pointer-events를 받을 수 있는 별도 레이어 -->
 	{@render children?.()}
 </div>
