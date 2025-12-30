@@ -18,8 +18,6 @@ export class WorldCharacterEntity {
 	readonly id: WorldCharacterId;
 	readonly body: Matter.Body;
 
-	x = $state(0);
-	y = $state(0);
 	angle = $state(0);
 
 	private world = useWorld();
@@ -77,8 +75,11 @@ export class WorldCharacterEntity {
 	}
 
 	updatePosition(): void {
-		this.x = this.body.position.x;
-		this.y = this.body.position.y;
+		const worldCharacter = this.world.characters[this.id];
+		if (worldCharacter) {
+			worldCharacter.x = this.body.position.x;
+			worldCharacter.y = this.body.position.y;
+		}
 		this.angle = this.body.angle;
 	}
 
