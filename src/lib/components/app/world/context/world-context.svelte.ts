@@ -72,14 +72,12 @@ export class WorldContext {
 
 		// buildings 변경 시 바디 동기화 (건물을 먼저 처리)
 		$effect(() => {
-			if (!this.initialized) return;
 			this.syncBuildingBodies(this.buildings);
 		});
 
 		// characters 변경 시 바디 동기화 (캐릭터를 나중에 처리)
 		$effect(() => {
-			if (!this.initialized) return;
-			this.syncCharacterBodies(this.worldCharacters);
+			this.syncWorldCharacterEntities(this.worldCharacters);
 		});
 
 		// 카메라 변경 시 렌더 바운드 업데이트
@@ -148,7 +146,7 @@ export class WorldContext {
 
 		// 초기 건물/캐릭터 바디 생성 (건물을 먼저 추가하여 캐릭터가 나중에 추가되도록)
 		this.syncBuildingBodies(this.buildings);
-		this.syncCharacterBodies(this.worldCharacters);
+		this.syncWorldCharacterEntities(this.worldCharacters);
 
 		Render.run(this.render);
 		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
@@ -226,7 +224,9 @@ export class WorldContext {
 	}
 
 	// 캐릭터 바디 동기화
-	private syncCharacterBodies(characters: Record<string, WorldCharacter>) {
+	private syncWorldCharacterEntities(characters: Record<string, WorldCharacter>) {
+		if (!this.initialized) return;
+
 		const currentIds = new Set(Object.keys(characters));
 		let changed = false;
 
@@ -265,6 +265,8 @@ export class WorldContext {
 
 	// 건물 바디 동기화
 	private syncBuildingBodies(buildings: Record<string, WorldBuilding>) {
+		if (!this.initialized) return;
+
 		const currentIds = new Set(Object.keys(buildings));
 		let changed = false;
 
