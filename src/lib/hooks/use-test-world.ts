@@ -219,13 +219,13 @@ function createTestWorldStore() {
 
 	// World의 body 위치를 스토어에 동기화
 	function syncPositions(
-		characterBodies: Record<string, { body: { position: { x: number; y: number } } }>,
+		worldCharacterEntities: Record<string, { body: { position: { x: number; y: number } } }>,
 		buildingBodies: Record<string, { body: { position: { x: number; y: number } } }>
 	) {
 		store.update((state) => ({
 			...state,
 			characters: state.characters.map((c) => {
-				const body = characterBodies[c.id];
+				const body = worldCharacterEntities[c.id];
 				return body ? { ...c, x: body.body.position.x, y: body.body.position.y } : c;
 			}),
 			buildings: state.buildings.map((b) => {

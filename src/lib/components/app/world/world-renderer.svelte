@@ -5,7 +5,7 @@
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { WorldCharacterEntityRenderer } from './entities/character-entity';
+	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
 	import WorldPlanning from './world-planning.svelte';
 	import { cn } from '$lib/utils';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
@@ -105,7 +105,7 @@
 			{/if}
 		{/each}
 		{#each characters as character (character.id)}
-			{@const entity = world.characterBodies[character.id]}
+			{@const entity = world.worldCharacterEntities[character.id]}
 			{#if entity}
 				<WorldCharacterEntityRenderer {entity} />
 			{/if}

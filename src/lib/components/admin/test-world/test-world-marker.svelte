@@ -17,7 +17,7 @@
 	// 1초마다 body 위치를 testWorld 스토어에 동기화
 	$effect(() => {
 		const interval = setInterval(() => {
-			syncPositions(world.characterBodies, world.buildingBodies);
+			syncPositions(world.worldCharacterEntities, world.buildingBodies);
 		}, 1000);
 		return () => clearInterval(interval);
 	});
@@ -129,7 +129,7 @@
 		const pos = mouseWorldPos();
 
 		// 클릭 위치에 있는 캐릭터 찾기
-		for (const [id, entity] of Object.entries(world.characterBodies)) {
+		for (const [id, entity] of Object.entries(world.worldCharacterEntities)) {
 			const characterBody = entity.characterBody;
 			if (!characterBody) continue;
 
