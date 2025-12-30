@@ -4,11 +4,10 @@
 	import 'pathseg';
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
+	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
 	import WorldPlanning from './world-planning.svelte';
 	import { cn } from '$lib/utils';
-	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width: number;
@@ -30,7 +29,6 @@
 
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
-	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
 
 	let container: HTMLDivElement;
 
@@ -90,18 +88,8 @@
 		{/if}
 		{#each buildings as building (building.id)}
 			{@const entity = world.worldBuildingEntities[building.id]}
-			{@const buildingData = $buildingStore.data[building.building_id]}
-			{@const buildingStates = buildingData
-				? ($buildingStateStore.data[buildingData.id] ?? [])
-				: []}
-			{@const buildingState = buildingStates.find((s) => s.type === 'idle')}
-			{#if entity && buildingState}
-				<BuildingSpriteAnimator
-					x={entity.body.position.x}
-					y={entity.body.position.y}
-					angle={entity.body.angle}
-					{buildingState}
-				/>
+			{#if entity}
+				<WorldBuildingEntityRenderer {entity} />
 			{/if}
 		{/each}
 		{#each characters as character (character.id)}
