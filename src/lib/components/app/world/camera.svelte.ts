@@ -1,4 +1,4 @@
-import type { WorldContext } from './world-context.svelte';
+import type { WorldContext } from './context';
 
 export class Camera {
 	static readonly MIN_ZOOM = 0.25;

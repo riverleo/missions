@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldContext } from './world-context.svelte';
+import type { WorldContext } from './context';
 import type { Camera } from './camera.svelte';
 
 const { Query, Composite } = Matter;

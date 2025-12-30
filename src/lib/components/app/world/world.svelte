@@ -4,7 +4,7 @@
 	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
 	import { setWorldContext } from '$lib/hooks/use-world.svelte';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-	import { WorldContext } from './world-context.svelte';
+	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
 
