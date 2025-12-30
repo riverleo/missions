@@ -5,7 +5,6 @@ import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from './camera.svelte';
 import { WorldEvent } from './world-event.svelte';
 import { TerrainBody } from './terrain-body.svelte';
-import { CharacterBody } from './character-body.svelte';
 import { BuildingBody } from './building-body.svelte';
 import { Pathfinder } from './pathfinder';
 import {
@@ -15,8 +14,7 @@ import {
 	type TileCell,
 } from './tiles';
 import { useBuilding } from '$lib/hooks/use-building';
-import { useCharacter } from '$lib/hooks/use-character';
-import { useCharacterBody } from '$lib/hooks/use-character-body';
+import { WorldCharacterEntity } from './entities/character-entity';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
 
@@ -91,12 +89,7 @@ export class WorldContext {
 		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
 	buildingBodies = $state<Record<string, BuildingBody>>({});
-	characterBodies = $state<Record<string, CharacterBody>>({});
-
-	private get allBodies() {
-		// 건물(static)을 먼저, 캐릭터(dynamic)를 나중에 추가하여 캐릭터가 렌더링 순서에서 위에 오도록 함
-		return [...Object.values(this.buildingBodies), ...Object.values(this.characterBodies)];
-	}
+	characterBodies = $state<Record<string, WorldCharacterEntity>>({});
 
 	readonly planning = new WorldPlanning();
 	pathfinder = $state<Pathfinder | undefined>(undefined);
@@ -129,8 +122,11 @@ export class WorldContext {
 		// debug 변경 시 바디들의 렌더 스타일 업데이트
 		$effect(() => {
 			this.terrainBody.setDebug(this.debug);
-			for (const body of this.allBodies) {
+			for (const body of Object.values(this.buildingBodies)) {
 				body.setDebug(this.debug);
+			}
+			for (const entity of Object.values(this.characterBodies)) {
+				entity.setDebug(this.debug);
 			}
 		});
 
@@ -218,7 +214,7 @@ export class WorldContext {
 
 		// 물리 시뮬레이션 시작
 		Matter.Events.on(this.engine, 'beforeUpdate', () => this.checkBounds());
-		Matter.Events.on(this.engine, 'afterUpdate', () => this.updatePositions());
+		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateCharacterPositions());
 		Runner.run(this.runner, this.engine);
 
 		return () => {
@@ -250,9 +246,14 @@ export class WorldContext {
 		// pathfinder 재생성
 		this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
 
-		// 캐릭터/건물 바디 재추가
-		for (const body of this.allBodies) {
+		// 건물 바디 재추가
+		for (const body of Object.values(this.buildingBodies)) {
 			body.addToWorld(this.engine.world);
+		}
+
+		// 캐릭터 바디 재추가
+		for (const entity of Object.values(this.characterBodies)) {
+			Composite.add(this.engine.world, entity.body);
 		}
 
 		// mouseConstraint 재추가
@@ -290,19 +291,15 @@ export class WorldContext {
 		let changed = false;
 
 		// 새로 추가된 캐릭터
-		const characterStore = get(useCharacter().store).data;
-		const characterBodyStore = get(useCharacterBody().store).data;
 		for (const worldCharacter of Object.values(characters)) {
 			if (!this.characterBodies[worldCharacter.id]) {
-				// worldCharacter.character_id -> character.body_id -> characterBody
-				const character = characterStore[worldCharacter.character_id];
-				const bodyData = character ? characterBodyStore[character.body_id] : undefined;
-
-				if (bodyData) {
-					const body = new CharacterBody(worldCharacter, bodyData, this.debug);
-					body.addToWorld(this.engine.world);
-					this.characterBodies[worldCharacter.id] = body;
+				try {
+					const entity = new WorldCharacterEntity(worldCharacter.id);
+					this.characterBodies[worldCharacter.id] = entity;
 					changed = true;
+				} catch (error) {
+					// 스토어에 없는 삭제된 캐릭터는 건너뜀 (localStorage 정리 필요)
+					console.warn('Skipping character creation:', error);
 				}
 			}
 		}
@@ -310,9 +307,12 @@ export class WorldContext {
 		// 제거된 캐릭터
 		for (const id of Object.keys(this.characterBodies)) {
 			if (!currentIds.has(id)) {
-				this.characterBodies[id]?.removeFromWorld(this.engine.world);
-				delete this.characterBodies[id];
-				changed = true;
+				const entity = this.characterBodies[id];
+				if (entity) {
+					entity.removeFromWorld();
+					delete this.characterBodies[id];
+					changed = true;
+				}
 			}
 		}
 
@@ -358,6 +358,13 @@ export class WorldContext {
 		}
 	}
 
+	// Matter.js body 위치를 CharacterEntity의 $state로 동기화
+	private updateCharacterPositions() {
+		for (const entity of Object.values(this.characterBodies)) {
+			entity.updatePosition();
+		}
+	}
+
 	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 시작 위치에 다시 추가
 	private checkBounds() {
 		const { width, height } = this.terrainBody;
@@ -365,27 +372,25 @@ export class WorldContext {
 
 		for (const character of Object.values(this.characters)) {
 			const body = this.characterBodies[character.id];
-			if (body && this.isOutOfBounds(body.body, body.size, width, height)) {
+			if (body && this.isOutOfBounds(body)) {
 				this.respawnCharacter(character);
 			}
 		}
 	}
 
-	private isOutOfBounds(
-		body: Matter.Body,
-		size: { width: number; height: number },
-		worldWidth: number,
-		worldHeight: number
-	) {
-		const halfWidth = size.width / 2;
-		const halfHeight = size.height / 2;
-		const { x, y } = body.position;
+	private isOutOfBounds(entity: WorldCharacterEntity) {
+		const characterBody = entity.characterBody;
+		if (!characterBody) return false;
+
+		const halfWidth = characterBody.width / 2;
+		const halfHeight = characterBody.height / 2;
+		const { x, y } = entity.body.position;
 
 		return (
 			x - halfWidth < 0 ||
-			x + halfWidth > worldWidth ||
+			x + halfWidth > this.terrainBody.width ||
 			y - halfHeight < 0 ||
-			y + halfHeight > worldHeight
+			y + halfHeight > this.terrainBody.height
 		);
 	}
 
@@ -405,12 +410,5 @@ export class WorldContext {
 			this.characters = { ...this.characters, [id]: { ...character, x, y } };
 			this.respawningIds.delete(id);
 		}, 1000);
-	}
-
-	// 물리 업데이트 후 위치 동기화
-	private updatePositions() {
-		for (const body of this.allBodies) {
-			body.updatePosition();
-		}
 	}
 }

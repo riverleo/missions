@@ -5,12 +5,10 @@
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
-	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
+	import { WorldCharacterEntityRenderer } from './entities/character-entity';
 	import WorldPlanning from './world-planning.svelte';
 	import { cn } from '$lib/utils';
+	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width: number;
@@ -33,8 +31,6 @@
 	const world = useWorld();
 	const { terrainBody, camera, event } = world;
 	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
-	const { store: characterStore, faceStateStore } = useCharacter();
-	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 
 	let container: HTMLDivElement;
 
@@ -84,9 +80,9 @@
 		{#if world.terrainAssetUrl}
 			<img
 				src={world.terrainAssetUrl}
-				alt="terrain"
 				class="absolute inset-0 h-full w-full"
 				style="opacity: {world.debug ? 0 : 1};"
+				alt={world.terrain?.title}
 			/>
 		{/if}
 		{#if world.planning.showGrid}
@@ -101,31 +97,17 @@
 			{@const buildingState = buildingStates.find((s) => s.type === 'idle')}
 			{#if body && buildingState}
 				<BuildingSpriteAnimator
-					x={body.position.x}
-					y={body.position.y}
-					angle={body.position.angle}
+					x={body.body.position.x}
+					y={body.body.position.y}
+					angle={body.body.angle}
 					{buildingState}
 				/>
 			{/if}
 		{/each}
 		{#each characters as character (character.id)}
-			{@const body = world.characterBodies[character.id]}
-			{@const characterData = $characterStore.data[character.character_id]}
-			{@const characterBody = characterData
-				? $characterBodyStore.data[characterData.body_id]
-				: undefined}
-			{@const bodyStates = characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []}
-			{@const bodyState = bodyStates.find((s) => s.type === 'idle')}
-			{@const faceStates = characterData ? ($faceStateStore.data[characterData.id] ?? []) : []}
-			{@const faceState = faceStates.find((s) => s.type === 'idle')}
-			{#if body && bodyState}
-				<CharacterSpriteAnimator
-					x={body.position.x}
-					y={body.position.y}
-					angle={body.position.angle}
-					characterBodyState={bodyState}
-					characterFaceState={faceState}
-				/>
+			{@const entity = world.characterBodies[character.id]}
+			{#if entity}
+				<WorldCharacterEntityRenderer {entity} />
 			{/if}
 		{/each}
 	</div>

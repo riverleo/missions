@@ -129,11 +129,14 @@
 		const pos = mouseWorldPos();
 
 		// 클릭 위치에 있는 캐릭터 찾기
-		for (const [id, body] of Object.entries(world.characterBodies)) {
-			const dx = pos.x - body.position.x;
-			const dy = pos.y - body.position.y;
-			const halfWidth = body.size.width / 2;
-			const halfHeight = body.size.height / 2;
+		for (const [id, entity] of Object.entries(world.characterBodies)) {
+			const characterBody = entity.characterBody;
+			if (!characterBody) continue;
+
+			const dx = pos.x - entity.body.position.x;
+			const dy = pos.y - entity.body.position.y;
+			const halfWidth = characterBody.width / 2;
+			const halfHeight = characterBody.height / 2;
 			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 				removeCharacter(id);
 				return;
@@ -142,8 +145,8 @@
 
 		// 클릭 위치에 있는 건물 찾기
 		for (const [id, body] of Object.entries(world.buildingBodies)) {
-			const dx = pos.x - body.position.x;
-			const dy = pos.y - body.position.y;
+			const dx = pos.x - body.body.position.x;
+			const dy = pos.y - body.body.position.y;
 			const halfWidth = body.size.width / 2;
 			const halfHeight = body.size.height / 2;
 			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {

@@ -219,21 +219,21 @@ function createTestWorldStore() {
 
 	// World의 body 위치를 스토어에 동기화
 	function syncPositions(
-		characterBodies: Record<string, { position: { x: number; y: number } }>,
-		buildingBodies: Record<string, { position: { x: number; y: number } }>
+		characterBodies: Record<string, { body: { position: { x: number; y: number } } }>,
+		buildingBodies: Record<string, { body: { position: { x: number; y: number } } }>
 	) {
 		store.update((state) => ({
 			...state,
 			characters: state.characters.map((c) => {
 				const body = characterBodies[c.id];
-				return body ? { ...c, x: body.position.x, y: body.position.y } : c;
+				return body ? { ...c, x: body.body.position.x, y: body.body.position.y } : c;
 			}),
 			buildings: state.buildings.map((b) => {
 				const body = buildingBodies[b.id];
 				// 건물은 tile_x, tile_y로 저장 (픽셀 좌표를 타일 좌표로 변환)
 				if (body) {
-					const tile_x = Math.floor(body.position.x / TILE_SIZE);
-					const tile_y = Math.floor(body.position.y / TILE_SIZE);
+					const tile_x = Math.floor(body.body.position.x / TILE_SIZE);
+					const tile_y = Math.floor(body.body.position.y / TILE_SIZE);
 					return { ...b, tile_x, tile_y };
 				}
 				return b;
