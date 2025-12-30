@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldCharacter, WorldCharacterId, CharacterBody } from '$lib/types';
+import type { WorldCharacterId, CharacterBody } from '$lib/types';
 import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
@@ -58,9 +58,6 @@ export class WorldCharacterEntity {
 
 		// 초기 위치 동기화
 		this.updatePosition();
-
-		// 월드에 추가
-		Composite.add(this.world.engine.world, this.body);
 	}
 
 	get characterBody(): CharacterBody | undefined {
@@ -85,9 +82,14 @@ export class WorldCharacterEntity {
 
 	setDebug(debug: boolean): void {
 		this.body.render.visible = debug;
+
 		if (debug) {
 			this.body.render.fillStyle = DEBUG_CHARACTER_FILL_STYLE;
 		}
+	}
+
+	addToWorld(): void {
+		Composite.add(this.world.engine.world, this.body);
 	}
 
 	removeFromWorld(): void {

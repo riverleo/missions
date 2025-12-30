@@ -255,7 +255,7 @@ export class WorldContext {
 
 		// 캐릭터 바디 재추가
 		for (const entity of Object.values(this.worldCharacterEntities)) {
-			Composite.add(this.engine.world, entity.body);
+			entity.addToWorld();
 		}
 
 		// mouseConstraint 재추가
@@ -295,6 +295,7 @@ export class WorldContext {
 			if (!this.worldCharacterEntities[worldCharacter.id]) {
 				try {
 					const entity = new WorldCharacterEntity(worldCharacter.id);
+					entity.addToWorld();
 					this.worldCharacterEntities[worldCharacter.id] = entity;
 					changed = true;
 				} catch (error) {
