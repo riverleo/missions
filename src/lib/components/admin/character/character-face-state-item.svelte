@@ -39,7 +39,7 @@
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
 	const bodyStates = $derived(
-		character ? ($bodyStateStore.data[character.body_id as CharacterBodyId] ?? []) : []
+		character ? ($bodyStateStore.data[character.character_body_id] ?? []) : []
 	);
 	const previewBodyState = $derived(bodyStates.find((s) => s.type === previewBodyStateType));
 

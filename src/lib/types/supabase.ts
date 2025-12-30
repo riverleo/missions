@@ -515,7 +515,7 @@ export type Database = {
       }
       characters: {
         Row: {
-          body_id: string
+          character_body_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -523,7 +523,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          body_id: string
+          character_body_id: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -531,7 +531,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          body_id?: string
+          character_body_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -539,13 +539,6 @@ export type Database = {
           scenario_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "characters_body_id_fkey"
-            columns: ["body_id"]
-            isOneToOne: false
-            referencedRelation: "character_bodies"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "characters_created_by_fkey"
             columns: ["created_by"]
@@ -558,6 +551,13 @@ export type Database = {
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_characters_character_body_id"
+            columns: ["character_body_id"]
+            isOneToOne: false
+            referencedRelation: "character_bodies"
             referencedColumns: ["id"]
           },
         ]

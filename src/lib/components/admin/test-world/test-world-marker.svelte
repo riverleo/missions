@@ -90,7 +90,7 @@
 		$store.selectedCharacter ? $characterStore.data[$store.selectedCharacter.id] : undefined
 	);
 	const selectedCharacterBody = $derived(
-		selectedCharacter ? $characterBodyStore.data[selectedCharacter.body_id] : undefined
+		selectedCharacter ? $characterBodyStore.data[selectedCharacter.character_body_id] : undefined
 	);
 	const selectedBodyStates = $derived(
 		selectedCharacterBody ? ($bodyStateStore.data[selectedCharacterBody.id] ?? []) : []

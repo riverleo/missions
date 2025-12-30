@@ -31,17 +31,19 @@
 	const bodies = $derived(Object.values($bodyStore.data));
 
 	let name = $state('');
-	let bodyId = $state<string | undefined>(undefined);
+	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const selectedBodyLabel = $derived(
-		bodyId ? (bodies.find((b) => b.id === bodyId)?.name ?? '바디 선택') : '바디 선택'
+		characterBodyId
+			? (bodies.find((b) => b.id === characterBodyId)?.name ?? '바디 선택')
+			: '바디 선택'
 	);
 
 	$effect(() => {
 		if (open && character) {
 			name = character.name ?? '';
-			bodyId = character.body_id ?? undefined;
+			characterBodyId = character.character_body_id ?? undefined;
 		}
 	});
 
@@ -52,17 +54,17 @@
 	}
 
 	function onBodyChange(value: string | undefined) {
-		bodyId = value;
+		characterBodyId = value as CharacterBodyId | undefined;
 	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!characterId || !name.trim() || !bodyId || isSubmitting) return;
+		if (!characterId || !name.trim() || !characterBodyId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.update(characterId, { name: name.trim(), body_id: bodyId as CharacterBodyId })
+			.update(characterId, { name: name.trim(), character_body_id: characterBodyId })
 			.then(() => {
 				closeDialog();
 			})
@@ -84,7 +86,7 @@
 			<ButtonGroup class="w-full">
 				<ButtonGroup>
 					<ButtonGroupText>바디</ButtonGroupText>
-					<Select type="single" value={bodyId} onValueChange={onBodyChange}>
+					<Select type="single" value={characterBodyId} onValueChange={onBodyChange}>
 						<SelectTrigger>
 							{selectedBodyLabel}
 						</SelectTrigger>
@@ -107,7 +109,7 @@
 				</ButtonGroup>
 			</ButtonGroup>
 			<DialogFooter class="mt-4">
-				<Button type="submit" disabled={isSubmitting || !bodyId || !name.trim()}>
+				<Button type="submit" disabled={isSubmitting || !characterBodyId || !name.trim()}>
 					{isSubmitting ? '저장 중...' : '저장'}
 				</Button>
 			</DialogFooter>

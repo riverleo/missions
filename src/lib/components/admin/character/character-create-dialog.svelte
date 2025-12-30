@@ -30,17 +30,19 @@
 	const bodies = $derived(Object.values($bodyStore.data));
 
 	let name = $state('');
-	let bodyId = $state<string | undefined>(undefined);
+	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const selectedBodyLabel = $derived(
-		bodyId ? (bodies.find((b) => b.id === bodyId)?.name ?? '바디 선택') : '바디 선택'
+		characterBodyId
+			? (bodies.find((b) => b.id === characterBodyId)?.name ?? '바디 선택')
+			: '바디 선택'
 	);
 
 	$effect(() => {
 		if (open) {
 			name = '';
-			bodyId = undefined;
+			characterBodyId = undefined;
 		}
 	});
 
@@ -51,17 +53,17 @@
 	}
 
 	function onBodyChange(value: string | undefined) {
-		bodyId = value;
+		characterBodyId = value as CharacterBodyId | undefined;
 	}
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!name.trim() || !bodyId || isSubmitting) return;
+		if (!name.trim() || !characterBodyId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim(), body_id: bodyId as CharacterBodyId })
+			.create({ name: name.trim(), character_body_id: characterBodyId })
 			.then((character) => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/characters/${character.id}`);
@@ -83,7 +85,7 @@
 		<form {onsubmit}>
 			<ButtonGroup class="flex w-full gap-2">
 				<ButtonGroup>
-					<Select type="single" value={bodyId} onValueChange={onBodyChange}>
+					<Select type="single" value={characterBodyId} onValueChange={onBodyChange}>
 						<SelectTrigger>
 							{selectedBodyLabel}
 						</SelectTrigger>
@@ -109,7 +111,7 @@
 				<p class="mt-4 text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
 			{/if}
 			<DialogFooter class="mt-4">
-				<Button type="submit" disabled={isSubmitting || !bodyId || !name.trim()}>
+				<Button type="submit" disabled={isSubmitting || !characterBodyId || !name.trim()}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>
 			</DialogFooter>

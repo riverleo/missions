@@ -8,13 +8,9 @@
 	import TestWorldPanel from './test-world-panel.svelte';
 	import { useTestWorld } from '$lib/hooks/use-test-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useBuilding } from '$lib/hooks/use-building';
 
 	const { store, restoreTerrain } = useTestWorld();
 	const { store: terrainStore } = useTerrain();
-	const { store: characterStore } = useCharacter();
-	const { store: buildingStore } = useBuilding();
 
 	let open = $state(false);
 

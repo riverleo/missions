@@ -66,7 +66,7 @@ export class WorldCharacterEntity {
 		const characterBodyStore = get(useCharacterBody().store).data;
 		const character = characterStore[worldCharacter.character_id];
 
-		return character ? characterBodyStore[character.body_id] : undefined;
+		return character ? characterBodyStore[character.character_body_id] : undefined;
 	}
 
 	updatePosition(): void {

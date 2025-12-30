@@ -529,25 +529,28 @@ export type CharacterFaceStateUpdate = Omit<CharacterFaceStateUpdateRow, 'id' | 
 
 // Character types
 type CharacterRow = Tables<'characters'>;
-export type Character = Omit<CharacterRow, 'id' | 'scenario_id' | 'body_id' | 'created_by'> & {
+export type Character = Omit<
+	CharacterRow,
+	'id' | 'scenario_id' | 'character_body_id' | 'created_by'
+> & {
 	id: CharacterId;
 	scenario_id: ScenarioId;
-	body_id: CharacterBodyId;
+	character_body_id: CharacterBodyId;
 	created_by: UserRoleId | null;
 };
 type CharacterInsertRow = TablesInsert<'characters'>;
-export type CharacterInsert = Omit<CharacterInsertRow, 'scenario_id' | 'body_id'> & {
+export type CharacterInsert = Omit<CharacterInsertRow, 'scenario_id' | 'character_body_id'> & {
 	scenario_id: ScenarioId;
-	body_id: CharacterBodyId;
+	character_body_id: CharacterBodyId;
 };
 type CharacterUpdateRow = TablesUpdate<'characters'>;
 export type CharacterUpdate = Omit<
 	CharacterUpdateRow,
-	'id' | 'scenario_id' | 'body_id' | 'created_by'
+	'id' | 'scenario_id' | 'character_body_id' | 'created_by'
 > & {
 	id?: CharacterId;
 	scenario_id?: ScenarioId;
-	body_id?: CharacterBodyId;
+	character_body_id?: CharacterBodyId;
 	created_by?: UserRoleId | null;
 };
 

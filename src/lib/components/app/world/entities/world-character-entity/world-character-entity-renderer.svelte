@@ -21,7 +21,7 @@
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
 	const characterBody = $derived(
-		character ? $characterBodyStore.data[character.body_id] : undefined
+		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
 	const bodyStates = $derived(characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []);
 	const bodyState = $derived(bodyStates.find((s) => s.type === 'idle'));

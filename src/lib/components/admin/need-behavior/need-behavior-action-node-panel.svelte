@@ -117,7 +117,7 @@
 
 	// 선택된 바디/얼굴 상태로 미리보기
 	const previewCharacterBody = $derived(
-		previewCharacter ? $characterBodyStore.data[previewCharacter.body_id] : undefined
+		previewCharacter ? $characterBodyStore.data[previewCharacter.character_body_id] : undefined
 	);
 	const previewBodyStates = $derived(
 		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
