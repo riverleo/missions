@@ -26,7 +26,7 @@ export class WorldCharacterEntity {
 		this.id = id;
 
 		// 스토어에서 데이터 조회
-		const worldCharacter = this.world.characters[id];
+		const worldCharacter = this.world.worldCharacters[id];
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter || !characterBody) {
@@ -64,7 +64,7 @@ export class WorldCharacterEntity {
 	}
 
 	get characterBody(): CharacterBody | undefined {
-		const worldCharacter = this.world.characters[this.id];
+		const worldCharacter = this.world.worldCharacters[this.id];
 		if (!worldCharacter) return undefined;
 
 		const characterStore = get(useCharacter().store).data;
@@ -75,7 +75,7 @@ export class WorldCharacterEntity {
 	}
 
 	updatePosition(): void {
-		const worldCharacter = this.world.characters[this.id];
+		const worldCharacter = this.world.worldCharacters[this.id];
 		if (worldCharacter) {
 			worldCharacter.x = this.body.position.x;
 			worldCharacter.y = this.body.position.y;

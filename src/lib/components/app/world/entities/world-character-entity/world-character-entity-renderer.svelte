@@ -16,7 +16,7 @@
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 
-	const worldCharacter = $derived(world.characters[entity.id]);
+	const worldCharacter = $derived(world.worldCharacters[entity.id]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);

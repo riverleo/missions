@@ -42,7 +42,7 @@
 
 	// characters/buildings prop을 world에 동기화
 	$effect(() => {
-		world.characters = Object.fromEntries(characters.map((c) => [c.id, c]));
+		world.worldCharacters = Object.fromEntries(characters.map((c) => [c.id, c]));
 	});
 
 	$effect(() => {

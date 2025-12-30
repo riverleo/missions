@@ -83,7 +83,7 @@ export class WorldContext {
 
 	terrain = $state<Terrain | undefined>();
 	buildings = $state<Record<string, WorldBuilding>>({});
-	characters = $state<Record<string, WorldCharacter>>({});
+	worldCharacters = $state<Record<string, WorldCharacter>>({});
 
 	get terrainAssetUrl() {
 		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
@@ -132,12 +132,14 @@ export class WorldContext {
 
 		// buildings 변경 시 바디 동기화 (건물을 먼저 처리)
 		$effect(() => {
-			this.syncBuildingBodies(this.buildings, this.initialized);
+			if (!this.initialized) return;
+			this.syncBuildingBodies(this.buildings);
 		});
 
 		// characters 변경 시 바디 동기화 (캐릭터를 나중에 처리)
 		$effect(() => {
-			this.syncCharacterBodies(this.characters, this.initialized);
+			if (!this.initialized) return;
+			this.syncCharacterBodies(this.worldCharacters);
 		});
 
 		// 카메라 변경 시 렌더 바운드 업데이트
@@ -206,7 +208,7 @@ export class WorldContext {
 
 		// 초기 건물/캐릭터 바디 생성 (건물을 먼저 추가하여 캐릭터가 나중에 추가되도록)
 		this.syncBuildingBodies(this.buildings);
-		this.syncCharacterBodies(this.characters);
+		this.syncCharacterBodies(this.worldCharacters);
 
 		Render.run(this.render);
 		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
@@ -284,9 +286,7 @@ export class WorldContext {
 	}
 
 	// 캐릭터 바디 동기화
-	private syncCharacterBodies(characters: Record<string, WorldCharacter>, initialized = true) {
-		if (!initialized) return;
-
+	private syncCharacterBodies(characters: Record<string, WorldCharacter>) {
 		const currentIds = new Set(Object.keys(characters));
 		let changed = false;
 
@@ -323,9 +323,7 @@ export class WorldContext {
 	}
 
 	// 건물 바디 동기화
-	private syncBuildingBodies(buildings: Record<string, WorldBuilding>, initialized = true) {
-		if (!initialized) return;
-
+	private syncBuildingBodies(buildings: Record<string, WorldBuilding>) {
 		const currentIds = new Set(Object.keys(buildings));
 		let changed = false;
 
@@ -370,7 +368,7 @@ export class WorldContext {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
 
-		for (const character of Object.values(this.characters)) {
+		for (const character of Object.values(this.worldCharacters)) {
 			const body = this.worldCharacterEntities[character.id];
 			if (body && this.isOutOfBounds(body)) {
 				this.respawnCharacter(character);
@@ -400,14 +398,14 @@ export class WorldContext {
 		this.respawningIds.add(id);
 
 		// characters에서 제거 (바디도 자동 제거됨)
-		const { [id]: _, ...rest } = this.characters;
-		this.characters = rest;
+		const { [id]: _, ...rest } = this.worldCharacters;
+		this.worldCharacters = rest;
 
 		// 1초 후 시작 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.start_x ?? 0;
 			const y = this.terrain?.start_y ?? 0;
-			this.characters = { ...this.characters, [id]: { ...character, x, y } };
+			this.worldCharacters = { ...this.worldCharacters, [id]: { ...character, x, y } };
 			this.respawningIds.delete(id);
 		}, 1000);
 	}
