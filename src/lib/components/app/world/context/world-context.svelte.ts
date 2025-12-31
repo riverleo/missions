@@ -87,6 +87,31 @@ export class WorldContext {
 			},
 		});
 
+		const mouse = Mouse.create(this.render.canvas);
+		this.mouseConstraint = MouseConstraint.create(this.engine, {
+			mouse,
+			constraint: {
+				stiffness: 0.8,
+				damping: 0.2,
+				render: { visible: false },
+			},
+			collisionFilter: {
+				// static 바디(건물)는 선택 안 되도록 CATEGORY_BUILDING 제외
+				mask: 0xffffffff & ~0x0008,
+			},
+		});
+
+		// 드래그 종료 시 velocity 완전히 제거
+		Matter.Events.on(this.mouseConstraint, 'enddrag', (event: any) => {
+			if (event.body) {
+				Body.setVelocity(event.body, { x: 0, y: 0 });
+				Body.setAngularVelocity(event.body, 0);
+			}
+		});
+
+		Composite.add(this.engine.world, this.mouseConstraint);
+		this.render.mouse = mouse;
+
 		// ResizeObserver 설정
 		this.resizeObserver = new ResizeObserver((entries) => {
 			const entry = entries[0];
@@ -188,6 +213,12 @@ export class WorldContext {
 		render.bounds.min.y = camera.y;
 		render.bounds.max.x = camera.x + viewWidth;
 		render.bounds.max.y = camera.y + viewHeight;
+
+		// Mouse 좌표 변환 업데이트
+		if (this.mouseConstraint?.mouse) {
+			Mouse.setOffset(this.mouseConstraint.mouse, { x: camera.x, y: camera.y });
+			Mouse.setScale(this.mouseConstraint.mouse, { x: 1 / camera.zoom, y: 1 / camera.zoom });
+		}
 
 		this.oncamerachange?.(camera);
 	}

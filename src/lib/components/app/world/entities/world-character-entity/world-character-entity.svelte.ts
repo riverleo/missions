@@ -44,7 +44,7 @@ export class WorldCharacterEntity extends Entity {
 		this.body = Bodies.fromVertices(0, 0, [vertices], {
 			restitution: 0.1,
 			friction: 0.8,
-			frictionAir: 0.05,
+			frictionAir: 0.1,
 			inertia: Infinity,
 			collisionFilter: {
 				category: CATEGORY_CHARACTER,

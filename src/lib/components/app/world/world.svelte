@@ -49,7 +49,7 @@
 		worldContext.oncamerachange = oncamerachange;
 	});
 
-	// terrain 변경 시 worldContext 업데이트 (id 또는 game_asset이 변경되었을 때만)
+	// terrain 변경 시 worldContext 업데이트 및 reload
 	let prevTerrainKey = '';
 	$effect(() => {
 		const currentTerrain = terrain();
@@ -58,6 +58,11 @@
 		if (key !== prevTerrainKey) {
 			prevTerrainKey = key;
 			worldContext.terrain = currentTerrain;
+
+			// initialized 상태에서만 reload
+			if (worldContext.initialized) {
+				worldContext.reload();
+			}
 		}
 	});
 
@@ -65,13 +70,6 @@
 	$effect(() => {
 		worldContext.debug = debug;
 		worldContext.setDebugEntities(debug);
-	});
-
-	// terrain 변경 시 reload
-	$effect(() => {
-		if (worldContext.initialized && worldContext.terrain) {
-			worldContext.reload();
-		}
 	});
 
 	// 카메라 변경 시 렌더 바운드 업데이트
@@ -102,7 +100,7 @@
 	setWorldContext(worldContext);
 </script>
 
-{#if terrain() && $fetchAllStatus === 'success'}
+{#if terrain()}
 	<WorldRenderer {...restProps} {width} {height}>
 		{@render children?.()}
 	</WorldRenderer>

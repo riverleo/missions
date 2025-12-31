@@ -149,6 +149,15 @@ function createTestWorldStore() {
 			if (isSameTerrain) {
 				const newWorlds = { ...state.worlds };
 				delete newWorlds[TEST_WORLD_ID];
+
+				// use-world 스토어도 업데이트
+				const world = useWorld();
+				world.worldStore.update((state) =>
+					produce(state, (draft) => {
+						delete draft.data[TEST_WORLD_ID];
+					})
+				);
+
 				return {
 					...state,
 					selectedTerrainId: undefined,
@@ -160,7 +169,7 @@ function createTestWorldStore() {
 			const terrain = get(useTerrain().store).data[terrainId];
 			if (!terrain) return state;
 
-			const world: World = {
+			const newWorld: World = {
 				id: TEST_WORLD_ID,
 				user_id: crypto.randomUUID(),
 				player_id: TEST_PLAYER_ID,
@@ -170,12 +179,20 @@ function createTestWorldStore() {
 				created_at: new Date().toISOString(),
 			} as World;
 
+			// use-world 스토어도 업데이트
+			const world = useWorld();
+			world.worldStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[TEST_WORLD_ID] = newWorld;
+				})
+			);
+
 			return {
 				...state,
 				selectedTerrainId: terrainId,
 				worlds: {
 					...state.worlds,
-					[TEST_WORLD_ID]: world,
+					[TEST_WORLD_ID]: newWorld,
 				},
 			};
 		});
