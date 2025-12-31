@@ -36,34 +36,40 @@ function createWorldStore() {
 		data: {},
 	});
 
-	let currentWorldId: WorldId | undefined;
-
-	async function fetch(worldId: WorldId) {
-		currentWorldId = worldId;
-
+	async function fetch() {
 		worldStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			// World 조회
+			// 현재 사용자 조회
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+			if (!user) throw new Error('User not authenticated');
+
+			// World 조회 (user_id로 필터링)
 			const { data: worldData, error: worldError } = await supabase
 				.from('worlds')
 				.select('*')
-				.eq('id', worldId)
-				.single<World>();
+				.eq('user_id', user.id);
 
 			if (worldError) throw worldError;
 
+			const worldRecord: Record<WorldId, World> = {};
+			for (const world of worldData ?? []) {
+				worldRecord[world.id as WorldId] = world as World;
+			}
+
 			worldStore.set({
 				status: 'success',
-				data: { [worldId]: worldData },
+				data: worldRecord,
 				error: undefined,
 			});
 
-			// WorldCharacter 조회
+			// WorldCharacter 조회 (user_id로 필터링)
 			const { data: characterData, error: characterError } = await supabase
 				.from('world_characters')
 				.select('*')
-				.eq('world_id', worldId);
+				.eq('user_id', user.id);
 
 			if (characterError) throw characterError;
 
@@ -78,11 +84,11 @@ function createWorldStore() {
 				error: undefined,
 			});
 
-			// WorldBuilding 조회
+			// WorldBuilding 조회 (user_id로 필터링)
 			const { data: buildingData, error: buildingError } = await supabase
 				.from('world_buildings')
 				.select('*')
-				.eq('world_id', worldId);
+				.eq('user_id', user.id);
 
 			if (buildingError) throw buildingError;
 

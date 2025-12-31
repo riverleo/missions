@@ -21,6 +21,7 @@ import { useCondition } from './use-condition';
 import { useItem } from './use-item';
 import { useItemBehavior } from './use-item-behavior';
 import { useBehaviorPriority } from './use-behavior-priority';
+import { useWorld } from './use-world';
 
 type ScenarioStoreState = RecordFetchState<ScenarioId, Scenario>;
 
@@ -95,6 +96,7 @@ function createScenarioStore() {
 			useItem().fetch(scenarioId),
 			useItemBehavior().fetch(scenarioId),
 			useBehaviorPriority().fetch(scenarioId),
+			useWorld().fetch(),
 		]);
 	}
 
