@@ -30,8 +30,8 @@
 	const faceState = $derived(faceStates.find((s) => s.type === 'idle'));
 
 	// 엔티티 로컬 position 사용 (스토어가 아닌)
-	const left = $derived(`${(entity.position.x / terrainBody.width) * 100}%`);
-	const top = $derived(`${(entity.position.y / terrainBody.height) * 100}%`);
+	const left = $derived(`${(entity.x / terrainBody.width) * 100}%`);
+	const top = $derived(`${(entity.y / terrainBody.height) * 100}%`);
 </script>
 
 {#if bodyState}

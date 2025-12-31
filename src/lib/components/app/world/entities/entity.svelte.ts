@@ -16,14 +16,19 @@ export abstract class Entity {
 	protected abstract readonly world: WorldContext;
 	protected abstract get debugFillStyle(): string;
 
-	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
+	x = $state(0);
+	y = $state(0);
+	angle = $state(0);
 
 	updatePosition(): void {
-		this.position = {
-			x: this.body.position.x,
-			y: this.body.position.y,
-			angle: this.body.angle,
-		};
+		const newX = this.body.position.x;
+		const newY = this.body.position.y;
+		const newAngle = this.body.angle;
+
+		// 개별 값 업데이트
+		this.x = newX;
+		this.y = newY;
+		this.angle = newAngle;
 	}
 
 	abstract saveToStore(): void;

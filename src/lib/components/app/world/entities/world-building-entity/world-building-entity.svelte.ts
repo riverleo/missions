@@ -60,7 +60,9 @@ export class WorldBuildingEntity extends Entity {
 		});
 
 		// 초기 위치 설정
-		this.position = { x, y, angle: 0 };
+		this.x = x;
+		this.y = y;
+		this.angle = 0;
 	}
 
 	get building(): Building | undefined {

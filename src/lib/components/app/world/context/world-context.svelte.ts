@@ -87,18 +87,6 @@ export class WorldContext {
 			},
 		});
 
-		const mouse = Mouse.create(this.render.canvas);
-		this.mouseConstraint = MouseConstraint.create(this.engine, {
-			mouse,
-			constraint: { stiffness: 0.2, render: { visible: false } },
-			collisionFilter: {
-				// static 바디(건물)는 선택 안 되도록 CATEGORY_BUILDING 제외
-				mask: 0xffffffff & ~0x0008,
-			},
-		});
-		Composite.add(this.engine.world, this.mouseConstraint);
-		this.render.mouse = mouse;
-
 		// ResizeObserver 설정
 		this.resizeObserver = new ResizeObserver((entries) => {
 			const entry = entries[0];
@@ -330,7 +318,9 @@ export class WorldContext {
 			Body.setPosition(characterEntity.body, { x, y });
 
 			// position state 업데이트
-			characterEntity.position = { x, y, angle: 0 };
+			characterEntity.x = x;
+			characterEntity.y = y;
+			characterEntity.angle = 0;
 
 			// 다시 world에 추가
 			characterEntity.addToWorld();

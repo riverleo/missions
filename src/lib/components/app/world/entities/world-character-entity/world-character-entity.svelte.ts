@@ -13,7 +13,7 @@ import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
 
-const { Bodies, Body, Composite } = Matter;
+const { Bodies, Body } = Matter;
 
 export class WorldCharacterEntity extends Entity {
 	readonly id: WorldCharacterId;
@@ -44,6 +44,7 @@ export class WorldCharacterEntity extends Entity {
 		this.body = Bodies.fromVertices(0, 0, [vertices], {
 			restitution: 0.1,
 			friction: 0.8,
+			frictionAir: 0.05,
 			inertia: Infinity,
 			collisionFilter: {
 				category: CATEGORY_CHARACTER,
@@ -60,7 +61,9 @@ export class WorldCharacterEntity extends Entity {
 		Body.setPosition(this.body, { x: worldCharacter.x, y: worldCharacter.y });
 
 		// 초기 위치 설정
-		this.position = { x: worldCharacter.x, y: worldCharacter.y, angle: 0 };
+		this.x = worldCharacter.x;
+		this.y = worldCharacter.y;
+		this.angle = 0;
 	}
 
 	get characterBody(): CharacterBody | undefined {

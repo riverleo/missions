@@ -24,9 +24,9 @@
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
 	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
-	const left = $derived(`${(entity.position.x / terrainBody.width) * 100}%`);
-	const top = $derived(`${(entity.position.y / terrainBody.height) * 100}%`);
-	const rotation = $derived(`${entity.position.angle}rad`);
+	const left = $derived(`${(entity.x / terrainBody.width) * 100}%`);
+	const top = $derived(`${(entity.y / terrainBody.height) * 100}%`);
+	const rotation = $derived(`${entity.angle}rad`);
 
 	// buildingState가 변경되면 animator 생성
 	$effect(() => {
