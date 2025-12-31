@@ -3,7 +3,7 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 
 	interface Props {
 		entity: WorldCharacterEntity;
@@ -11,7 +11,7 @@
 
 	let { entity }: Props = $props();
 
-	const world = useWorld();
+	const world = useWorldContext();
 	const { terrainBody } = world;
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();

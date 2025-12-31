@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { Terrain, WorldCharacter, WorldBuilding } from '$lib/types';
-	import { setWorldContext } from '$lib/hooks/use-world.svelte';
+	import { setWorldContext } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';

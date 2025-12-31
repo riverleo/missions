@@ -3,7 +3,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 
 	interface Props {
 		entity: WorldBuildingEntity;
@@ -11,7 +11,7 @@
 
 	let { entity }: Props = $props();
 
-	const world = useWorld();
+	const world = useWorldContext();
 	const { terrainBody } = world;
 	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
 

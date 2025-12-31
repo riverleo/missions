@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import { pixelToTile } from './tiles';
 
 	interface Props {
@@ -10,7 +10,7 @@
 
 	let { cols, rows }: Props = $props();
 
-	const world = useWorld();
+	const world = useWorldContext();
 
 	const width = $derived(cols * TILE_SIZE);
 	const height = $derived(rows * TILE_SIZE);

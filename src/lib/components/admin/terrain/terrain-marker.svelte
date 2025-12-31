@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Terrain } from '$lib/types';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { useTerrain } from '$lib/hooks/use-terrain';
@@ -13,7 +13,7 @@
 
 	const { admin } = useTerrain();
 	const uiStore = admin.uiStore;
-	const world = useWorld();
+	const world = useWorldContext();
 
 	let isDragging = $state(false);
 	let dragX = $state<number | undefined>(undefined);

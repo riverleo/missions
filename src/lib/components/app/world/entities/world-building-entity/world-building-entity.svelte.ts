@@ -9,7 +9,7 @@ import {
 	DEBUG_BUILDING_FILL_STYLE,
 	TILE_SIZE,
 } from '../../constants';
-import { useWorld } from '$lib/hooks/use-world.svelte';
+import { useWorldContext } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 
 const { Bodies, Composite } = Matter;
@@ -27,7 +27,7 @@ export class WorldBuildingEntity {
 
 	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
 
-	private world = useWorld();
+	private world = useWorldContext();
 
 	constructor(id: WorldBuildingId) {
 		this.id = id;

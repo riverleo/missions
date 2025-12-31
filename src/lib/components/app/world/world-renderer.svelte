@@ -3,7 +3,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
 	import type { WorldCharacter, WorldBuilding } from '$lib/types';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
 	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
 	import WorldPlanning from './world-planning.svelte';
@@ -27,7 +27,7 @@
 		...restProps
 	}: Props = $props();
 
-	const world = useWorld();
+	const world = useWorldContext();
 	const { terrainBody, camera, event } = world;
 
 	let container: HTMLDivElement;

@@ -8,7 +8,7 @@ import {
 	DEBUG_CHARACTER_FILL_STYLE,
 } from '../../constants';
 import { createEllipseVertices } from '../../vertices';
-import { useWorld } from '$lib/hooks/use-world.svelte';
+import { useWorldContext } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 
@@ -18,7 +18,7 @@ export class WorldCharacterEntity {
 	readonly id: WorldCharacterId;
 	readonly body: Matter.Body;
 
-	private world = useWorld();
+	private world = useWorldContext();
 
 	constructor(id: WorldCharacterId) {
 		this.id = id;

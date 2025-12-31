@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useTestWorld } from '$lib/hooks/use-test-world';
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
@@ -10,7 +10,7 @@
 
 	const { store, placeCharacter, placeBuilding, removeCharacter, removeBuilding, syncPositions } =
 		useTestWorld();
-	const world = useWorld();
+	const world = useWorldContext();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 

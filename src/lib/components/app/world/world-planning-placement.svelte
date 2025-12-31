@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { useWorld } from '$lib/hooks/use-world.svelte';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import WorldPlanningPlacementRect from './world-planning-placement-rect.svelte';
 
-	const world = useWorld();
+	const world = useWorldContext();
 	const { stateStore: buildingStateStore } = useBuilding();
 
 	// 배치 미리보기용 animator

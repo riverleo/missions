@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { createContext } from 'svelte';
 import type {
 	RecordFetchState,
 	World,
@@ -8,8 +9,13 @@ import type {
 	WorldCharacterId,
 	WorldBuildingId,
 } from '$lib/types';
+import type { WorldContext } from '$lib/components/app/world/context';
 import { useServerPayload } from './use-server-payload.svelte';
 
+// WorldContext (Svelte context)
+export const [useWorldContext, setWorldContext] = createContext<WorldContext>();
+
+// World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;
 
 function createWorldStore() {
