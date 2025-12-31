@@ -1,7 +1,9 @@
 import { writable, get } from 'svelte/store';
 import type {
+	RecordFetchState,
 	Terrain,
 	Character,
+	World,
 	WorldCharacter,
 	Building,
 	WorldBuilding,
@@ -12,16 +14,19 @@ import type {
 } from '$lib/types';
 import { TILE_SIZE } from '$lib/components/app/world/constants';
 import { browser } from '$app/environment';
+import { useWorld } from './use-world';
 
 const STORAGE_KEY = 'test-world-state';
+const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 
-interface TestWorldState {
+interface WorldTestStoreState {
 	open: boolean;
 	selectedTerrain?: Terrain;
 	selectedCharacter?: Character;
 	selectedBuilding?: Building;
-	characters: WorldCharacter[];
-	buildings: WorldBuilding[];
+	worlds: Record<WorldId, World>;
+	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
+	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
 	// 카메라 상태: test-world-marker에서 클릭 좌표를 월드 좌표로 변환할 때 사용
 	cameraX: number;
 	cameraY: number;
@@ -33,13 +38,14 @@ interface TestWorldState {
 	eraser: boolean;
 }
 
-const defaultState: TestWorldState = {
+const defaultState: WorldTestStoreState = {
 	open: false,
 	selectedTerrain: undefined,
 	selectedCharacter: undefined,
 	selectedBuilding: undefined,
-	characters: [],
-	buildings: [],
+	worlds: {},
+	worldCharacters: {},
+	worldBuildings: {},
 	cameraX: 0,
 	cameraY: 0,
 	cameraZoom: 1,
@@ -52,14 +58,14 @@ const defaultState: TestWorldState = {
 // localStorage에 저장할 필드만 정의
 interface PersistedState {
 	terrainId?: string;
-	characters: WorldCharacter[];
-	buildings: WorldBuilding[];
+	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
+	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
 	modalX: number;
 	modalY: number;
 	debug: boolean;
 }
 
-function loadFromStorage(): { state: TestWorldState; terrainId?: string } {
+function loadFromStorage(): { state: WorldTestStoreState; terrainId?: string } {
 	if (!browser) return { state: defaultState };
 	try {
 		const saved = localStorage.getItem(STORAGE_KEY);
@@ -68,8 +74,8 @@ function loadFromStorage(): { state: TestWorldState; terrainId?: string } {
 			return {
 				state: {
 					...defaultState,
-					characters: persisted.characters ?? [],
-					buildings: persisted.buildings ?? [],
+					worldCharacters: persisted.worldCharacters ?? {},
+					worldBuildings: persisted.worldBuildings ?? {},
 					modalX: persisted.modalX ?? 0,
 					modalY: persisted.modalY ?? 0,
 					debug: persisted.debug ?? false,
@@ -83,13 +89,13 @@ function loadFromStorage(): { state: TestWorldState; terrainId?: string } {
 	return { state: defaultState };
 }
 
-function saveToStorage(state: TestWorldState) {
+function saveToStorage(state: WorldTestStoreState) {
 	if (!browser) return;
 	try {
 		const persisted: PersistedState = {
 			terrainId: state.selectedTerrain?.id,
-			characters: state.characters,
-			buildings: state.buildings,
+			worldCharacters: state.worldCharacters,
+			worldBuildings: state.worldBuildings,
 			modalX: state.modalX,
 			modalY: state.modalY,
 			debug: state.debug,
@@ -107,7 +113,7 @@ function createTestWorldStore() {
 	const { state, terrainId } = loadFromStorage();
 	pendingTerrainId = terrainId;
 
-	const store = writable<TestWorldState>(state);
+	const store = writable<WorldTestStoreState>(state);
 
 	// 1초마다 localStorage에 저장
 	if (browser) {
@@ -180,7 +186,7 @@ function createTestWorldStore() {
 		const worldCharacter: WorldCharacter = {
 			id: crypto.randomUUID() as WorldCharacterId,
 			user_id: crypto.randomUUID(),
-			player_id: crypto.randomUUID() as PlayerId,
+			player_id: TEST_PLAYER_ID,
 			world_id: crypto.randomUUID() as WorldId,
 			character_id: character.id,
 			x,
@@ -189,7 +195,10 @@ function createTestWorldStore() {
 		} as WorldCharacter;
 		store.update((state) => ({
 			...state,
-			characters: [...state.characters, worldCharacter],
+			worldCharacters: {
+				...state.worldCharacters,
+				[worldCharacter.id]: worldCharacter,
+			},
 		}));
 	}
 
@@ -201,7 +210,7 @@ function createTestWorldStore() {
 		const worldBuilding: WorldBuilding = {
 			id: crypto.randomUUID() as WorldBuildingId,
 			user_id: crypto.randomUUID(),
-			player_id: crypto.randomUUID() as PlayerId,
+			player_id: TEST_PLAYER_ID,
 			world_id: crypto.randomUUID() as WorldId,
 			building_id: building.id,
 			tile_x,
@@ -210,35 +219,46 @@ function createTestWorldStore() {
 		} as WorldBuilding;
 		store.update((state) => ({
 			...state,
-			buildings: [...state.buildings, worldBuilding],
+			worldBuildings: {
+				...state.worldBuildings,
+				[worldBuilding.id]: worldBuilding,
+			},
 		}));
 	}
 
 	function removeCharacter(id: string) {
-		store.update((state) => ({
-			...state,
-			characters: state.characters.filter((c) => c.id !== id),
-		}));
+		store.update((state) => {
+			const newData = { ...state.worldCharacters };
+			delete newData[id as WorldCharacterId];
+			return {
+				...state,
+				worldCharacters: newData,
+			};
+		});
 	}
 
 	function removeBuilding(id: string) {
-		store.update((state) => ({
-			...state,
-			buildings: state.buildings.filter((b) => b.id !== id),
-		}));
+		store.update((state) => {
+			const newData = { ...state.worldBuildings };
+			delete newData[id as WorldBuildingId];
+			return {
+				...state,
+				worldBuildings: newData,
+			};
+		});
 	}
 
 	function clearCharacters() {
 		store.update((state) => ({
 			...state,
-			characters: [],
+			worldCharacters: {},
 		}));
 	}
 
 	function clearBuildings() {
 		store.update((state) => ({
 			...state,
-			buildings: [],
+			worldBuildings: {},
 		}));
 	}
 
@@ -247,23 +267,68 @@ function createTestWorldStore() {
 		worldCharacterEntities: Record<string, { body: { position: { x: number; y: number } } }>,
 		buildingBodies: Record<string, { body: { position: { x: number; y: number } } }>
 	) {
-		store.update((state) => ({
-			...state,
-			characters: state.characters.map((c) => {
-				const body = worldCharacterEntities[c.id];
-				return body ? { ...c, x: body.body.position.x, y: body.body.position.y } : c;
-			}),
-			buildings: state.buildings.map((b) => {
-				const body = buildingBodies[b.id];
-				// 건물은 tile_x, tile_y로 저장 (픽셀 좌표를 타일 좌표로 변환)
+		store.update((state) => {
+			const updatedCharacters: Record<WorldCharacterId, WorldCharacter> = {};
+			for (const id in state.worldCharacters) {
+				const char = state.worldCharacters[id as WorldCharacterId];
+				if (!char) continue;
+
+				const body = worldCharacterEntities[id];
+				if (body) {
+					updatedCharacters[id as WorldCharacterId] = {
+						...char,
+						x: body.body.position.x,
+						y: body.body.position.y,
+					};
+				} else {
+					updatedCharacters[id as WorldCharacterId] = char;
+				}
+			}
+
+			const updatedBuildings: Record<WorldBuildingId, WorldBuilding> = {};
+			for (const id in state.worldBuildings) {
+				const building = state.worldBuildings[id as WorldBuildingId];
+				if (!building) continue;
+
+				const body = buildingBodies[id];
 				if (body) {
 					const tile_x = Math.floor(body.body.position.x / TILE_SIZE);
 					const tile_y = Math.floor(body.body.position.y / TILE_SIZE);
-					return { ...b, tile_x, tile_y };
+					updatedBuildings[id as WorldBuildingId] = {
+						...building,
+						tile_x,
+						tile_y,
+					};
+				} else {
+					updatedBuildings[id as WorldBuildingId] = building;
 				}
-				return b;
-			}),
-		}));
+			}
+
+			return {
+				...state,
+				worldCharacters: updatedCharacters,
+				worldBuildings: updatedBuildings,
+			};
+		});
+	}
+
+	function init() {
+		const world = useWorld();
+		const testState = get(store);
+
+		// use-world 스토어에 테스트 데이터 주입
+		world.worldStore.set({
+			status: 'success',
+			data: testState.worlds,
+		});
+		world.worldCharacterStore.set({
+			status: 'success',
+			data: testState.worldCharacters,
+		});
+		world.worldBuildingStore.set({
+			status: 'success',
+			data: testState.worldBuildings,
+		});
 	}
 
 	return {
@@ -285,6 +350,8 @@ function createTestWorldStore() {
 		clearCharacters,
 		clearBuildings,
 		syncPositions,
+		init,
+		TEST_PLAYER_ID,
 	};
 }
 

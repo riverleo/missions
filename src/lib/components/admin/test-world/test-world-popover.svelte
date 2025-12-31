@@ -46,8 +46,8 @@
 	);
 
 	// 배치된 캐릭터/건물 (WorldContext가 스토어에서 원본 데이터를 조회함)
-	const characters = $derived($store.characters);
-	const buildings = $derived($store.buildings);
+	const characters = $derived(Object.values($store.worldCharacters));
+	const buildings = $derived(Object.values($store.worldBuildings));
 
 	function onclick() {
 		setOpen(true);
@@ -133,7 +133,7 @@
 			variant="ghost"
 			size="icon-sm"
 			onclick={onclickClose}
-			class="absolute top-1/2 right-1 -translate-y-1/2"
+			class="absolute top-1/2 right-2 -translate-y-1/2"
 		>
 			<IconX class="size-4" />
 		</Button>
