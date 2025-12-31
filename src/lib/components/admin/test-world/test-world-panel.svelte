@@ -3,9 +3,9 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconBug, IconBugOff, IconEraser } from '@tabler/icons-svelte';
-	import { useTestWorld } from '$lib/hooks/use-world';
+	import { useWorldTest } from '$lib/hooks/use-world';
 
-	const { store, setDebug, setEraser } = useTestWorld();
+	const { store, setDebug, setEraser } = useWorldTest();
 </script>
 
 <div class="absolute top-2 right-2 flex items-center gap-2">

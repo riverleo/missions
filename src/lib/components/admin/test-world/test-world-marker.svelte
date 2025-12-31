@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { useTestWorld } from '$lib/hooks/use-world';
+	import { useWorldTest } from '$lib/hooks/use-world';
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
+	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
 
-	const { store, placeCharacter, placeBuilding, removeCharacter, removeBuilding, syncPositions } =
-		useTestWorld();
+	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding, syncPositions } =
+		useWorldTest();
 	const world = useWorldContext();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+	const { store: buildingStore } = useBuilding();
 
 	// 1초마다 body 위치를 testWorld 스토어에 동기화
 	$effect(() => {
@@ -24,7 +27,7 @@
 
 	// 건물 선택 시 planning 그리드 표시
 	$effect(() => {
-		world.planning.showGrid = !!$store.selectedBuilding;
+		world.planning.showGrid = !!$store.selectedBuildingId;
 	});
 
 	// 시작지점 좌표 (카메라 변환 적용)
@@ -63,20 +66,24 @@
 		};
 	});
 
+	// 선택된 건물 (from useBuilding)
+	const selectedBuilding = $derived(
+		$store.selectedBuildingId ? $buildingStore.data[$store.selectedBuildingId] : undefined
+	);
+
 	// 스냅된 건물 배치 좌표 (월드 좌표)
 	const snappedWorldPos = $derived(() => {
 		const pos = mouseWorldPos();
-		const building = $store.selectedBuilding;
-		if (!building) return { x: pos.x, y: pos.y };
-		return snapPointToBuildingCenter(pos.x, pos.y, building.tile_cols, building.tile_rows);
+		if (!selectedBuilding) return { x: pos.x, y: pos.y };
+		return snapPointToBuildingCenter(pos.x, pos.y, selectedBuilding.tile_cols, selectedBuilding.tile_rows);
 	});
 
 	// 건물 선택 시 world.planning.placement 업데이트
 	$effect(() => {
-		if ($store.selectedBuilding) {
+		if (selectedBuilding) {
 			const pos = snappedWorldPos();
 			world.planning.placement = {
-				building: $store.selectedBuilding,
+				building: selectedBuilding,
 				x: pos.x,
 				y: pos.y,
 			};
@@ -87,7 +94,7 @@
 
 	// 선택된 캐릭터 -> 바디 -> 바디 상태 조회
 	const selectedCharacter = $derived(
-		$store.selectedCharacter ? $characterStore.data[$store.selectedCharacter.id] : undefined
+		$store.selectedCharacterId ? $characterStore.data[$store.selectedCharacterId] : undefined
 	);
 	const selectedCharacterBody = $derived(
 		selectedCharacter ? $characterBodyStore.data[selectedCharacter.character_body_id] : undefined
@@ -113,15 +120,15 @@
 		if (!world.planning.canPlace) return;
 
 		const pos = snappedWorldPos();
-		if ($store.selectedBuilding) {
-			placeBuilding($store.selectedBuilding, pos.x, pos.y);
+		if (selectedBuilding) {
+			addWorldBuilding(selectedBuilding.id, pos.x, pos.y);
 		}
 	}
 
 	function onclickCharacterOverlay(e: MouseEvent) {
 		const pos = mouseWorldPos();
-		if ($store.selectedCharacter) {
-			placeCharacter($store.selectedCharacter, pos.x, pos.y);
+		if (selectedCharacter) {
+			addWorldCharacter(selectedCharacter.id, pos.x, pos.y);
 		}
 	}
 
@@ -138,7 +145,7 @@
 			const halfWidth = characterBody.width / 2;
 			const halfHeight = characterBody.height / 2;
 			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-				removeCharacter(id);
+				removeWorldCharacter(id as WorldCharacterId);
 				return;
 			}
 		}
@@ -150,7 +157,7 @@
 			const halfWidth = entity.size.width / 2;
 			const halfHeight = entity.size.height / 2;
 			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-				removeBuilding(id);
+				removeWorldBuilding(id as WorldBuildingId);
 				return;
 			}
 		}
@@ -196,7 +203,7 @@
 {/if}
 
 <!-- 건물 선택 시 클릭 오버레이 -->
-{#if $store.selectedBuilding}
+{#if selectedBuilding}
 	<button
 		type="button"
 		class="absolute inset-0 cursor-pointer bg-transparent"
@@ -206,7 +213,7 @@
 {/if}
 
 <!-- 캐릭터 선택 시 클릭 오버레이 -->
-{#if $store.selectedCharacter}
+{#if selectedCharacter}
 	<button
 		type="button"
 		class="absolute inset-0 bg-transparent"

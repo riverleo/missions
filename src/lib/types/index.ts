@@ -560,7 +560,7 @@ export type World = Omit<WorldRow, 'id' | 'player_id' | 'scenario_id' | 'terrain
 	id: WorldId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
-	terrain_id: TerrainId | null;
+	terrain: Terrain | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
 export type WorldInsert = Omit<WorldInsertRow, 'player_id' | 'scenario_id' | 'terrain_id'> & {

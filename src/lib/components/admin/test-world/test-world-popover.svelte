@@ -6,10 +6,10 @@
 	import TestWorldCommand from './test-world-command.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPanel from './test-world-panel.svelte';
-	import { useTestWorld } from '$lib/hooks/use-world';
+	import { useWorldTest } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 
-	const { store, restoreTerrain, toggleOpen, setOpen, setModalPosition } = useTestWorld();
+	const { store, toggleOpen, setOpen, setModalPosition } = useWorldTest();
 	const { store: terrainStore } = useTerrain();
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
@@ -18,11 +18,6 @@
 	let dragStartY = $state(0);
 	let modalStartX = $state(0);
 	let modalStartY = $state(0);
-
-	// localStorage에서 저장된 terrain ID로 terrain 복원
-	$effect(() => {
-		restoreTerrain($terrainStore.data);
-	});
 
 	// 단축키: Ctrl/Cmd + Shift + P (열기/닫기), ESC (닫기)
 	function onkeydown(e: KeyboardEvent) {
@@ -42,7 +37,7 @@
 
 	// 선택된 지형의 최신 데이터 가져오기
 	const selectedTerrain = $derived(
-		$store.selectedTerrain ? $terrainStore.data[$store.selectedTerrain.id] : undefined
+		$store.selectedTerrainId ? $terrainStore.data[$store.selectedTerrainId] : undefined
 	);
 
 	// 배치된 캐릭터/건물 (WorldContext가 스토어에서 원본 데이터를 조회함)

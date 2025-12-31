@@ -12,7 +12,7 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useTestWorld } from '$lib/hooks/use-world';
+	import { useWorldTest } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
@@ -21,7 +21,7 @@
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
-	const { store: testWorldStore, selectTerrain, selectCharacter, selectBuilding } = useTestWorld();
+	const { store: testWorldStore, selectTerrain, selectCharacter, selectBuilding } = useWorldTest();
 
 	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
@@ -36,11 +36,11 @@
 			<CommandGroup heading="지형">
 				{#each terrains as terrain (terrain.id)}
 					{@const assetUrl = getGameAssetUrl(supabase, 'terrain', terrain)}
-					<CommandItem onSelect={() => selectTerrain(terrain)}>
+					<CommandItem onSelect={() => selectTerrain(terrain.id)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								terrain.id === $testWorldStore.selectedTerrain?.id ? 'opacity-100' : 'opacity-0'
+								terrain.id === $testWorldStore.selectedTerrainId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						{#if assetUrl}
@@ -58,11 +58,11 @@
 		{#if characters.length > 0}
 			<CommandGroup heading="캐릭터">
 				{#each characters as character (character.id)}
-					<CommandItem onSelect={() => selectCharacter(character)}>
+					<CommandItem onSelect={() => selectCharacter(character.id)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								character.id === $testWorldStore.selectedCharacter?.id ? 'opacity-100' : 'opacity-0'
+								character.id === $testWorldStore.selectedCharacterId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -75,11 +75,11 @@
 		{#if buildings.length > 0}
 			<CommandGroup heading="건물">
 				{#each buildings as building (building.id)}
-					<CommandItem onSelect={() => selectBuilding(building)}>
+					<CommandItem onSelect={() => selectBuilding(building.id)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								building.id === $testWorldStore.selectedBuilding?.id ? 'opacity-100' : 'opacity-0'
+								building.id === $testWorldStore.selectedBuildingId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">

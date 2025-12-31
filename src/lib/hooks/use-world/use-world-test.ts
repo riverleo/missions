@@ -1,29 +1,33 @@
 import { writable, get } from 'svelte/store';
 import type {
-	RecordFetchState,
-	Terrain,
-	Character,
 	World,
 	WorldCharacter,
-	Building,
 	WorldBuilding,
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldId,
 	PlayerId,
+	ScenarioId,
+	TerrainId,
+	CharacterId,
+	BuildingId,
 } from '$lib/types';
 import { TILE_SIZE } from '$lib/components/app/world/constants';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
+import { useTerrain } from '../use-terrain';
 
 const STORAGE_KEY = 'test-world-state';
-const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
+
+export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
+export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
+export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 
 interface WorldTestStoreState {
 	open: boolean;
-	selectedTerrain?: Terrain;
-	selectedCharacter?: Character;
-	selectedBuilding?: Building;
+	selectedTerrainId?: TerrainId;
+	selectedCharacterId?: CharacterId;
+	selectedBuildingId?: BuildingId;
 	worlds: Record<WorldId, World>;
 	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
@@ -40,9 +44,9 @@ interface WorldTestStoreState {
 
 const defaultState: WorldTestStoreState = {
 	open: false,
-	selectedTerrain: undefined,
-	selectedCharacter: undefined,
-	selectedBuilding: undefined,
+	selectedTerrainId: undefined,
+	selectedCharacterId: undefined,
+	selectedBuildingId: undefined,
 	worlds: {},
 	worldCharacters: {},
 	worldBuildings: {},
@@ -57,7 +61,7 @@ const defaultState: WorldTestStoreState = {
 
 // localStorage에 저장할 필드만 정의
 interface PersistedState {
-	terrainId?: string;
+	worlds: Record<WorldId, World>;
 	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
 	modalX: number;
@@ -65,37 +69,55 @@ interface PersistedState {
 	debug: boolean;
 }
 
-function loadFromStorage(): { state: WorldTestStoreState; terrainId?: string } {
-	if (!browser) return { state: defaultState };
+function loadFromStorage(): WorldTestStoreState {
+	if (!browser) return defaultState;
 	try {
 		const saved = localStorage.getItem(STORAGE_KEY);
 		if (saved) {
 			const persisted: PersistedState = JSON.parse(saved);
+			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
+			const world = persisted.worlds?.[TEST_WORLD_ID];
 			return {
-				state: {
-					...defaultState,
-					worldCharacters: persisted.worldCharacters ?? {},
-					worldBuildings: persisted.worldBuildings ?? {},
-					modalX: persisted.modalX ?? 0,
-					modalY: persisted.modalY ?? 0,
-					debug: persisted.debug ?? false,
-				},
-				terrainId: persisted.terrainId,
+				...defaultState,
+				selectedTerrainId: world?.terrain?.id,
+				worlds: persisted.worlds ?? {},
+				worldCharacters: persisted.worldCharacters ?? {},
+				worldBuildings: persisted.worldBuildings ?? {},
+				modalX: persisted.modalX ?? 0,
+				modalY: persisted.modalY ?? 0,
+				debug: persisted.debug ?? false,
 			};
 		}
 	} catch {
 		// ignore parse errors
 	}
-	return { state: defaultState };
+	return defaultState;
 }
 
 function saveToStorage(state: WorldTestStoreState) {
 	if (!browser) return;
 	try {
+		// TEST_WORLD_ID와 관련된 데이터만 필터링
+		const testWorld = state.worlds[TEST_WORLD_ID];
+		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
+		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
+
+		for (const [id, character] of Object.entries(state.worldCharacters)) {
+			if (character.world_id === TEST_WORLD_ID) {
+				testWorldCharacters[id as WorldCharacterId] = character;
+			}
+		}
+
+		for (const [id, building] of Object.entries(state.worldBuildings)) {
+			if (building.world_id === TEST_WORLD_ID) {
+				testWorldBuildings[id as WorldBuildingId] = building;
+			}
+		}
+
 		const persisted: PersistedState = {
-			terrainId: state.selectedTerrain?.id,
-			worldCharacters: state.worldCharacters,
-			worldBuildings: state.worldBuildings,
+			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
+			worldCharacters: testWorldCharacters,
+			worldBuildings: testWorldBuildings,
 			modalX: state.modalX,
 			modalY: state.modalY,
 			debug: state.debug,
@@ -107,11 +129,9 @@ function saveToStorage(state: WorldTestStoreState) {
 }
 
 let instance: ReturnType<typeof createTestWorldStore> | null = null;
-let pendingTerrainId: string | undefined;
 
 function createTestWorldStore() {
-	const { state, terrainId } = loadFromStorage();
-	pendingTerrainId = terrainId;
+	const state = loadFromStorage();
 
 	const store = writable<WorldTestStoreState>(state);
 
@@ -120,35 +140,60 @@ function createTestWorldStore() {
 		setInterval(() => saveToStorage(get(store)), 1000);
 	}
 
-	// 저장된 terrain ID로 terrain 복원 (terrain store에서 찾아서 설정)
-	function restoreTerrain(terrainStore: Record<string, Terrain>) {
-		if (pendingTerrainId && terrainStore[pendingTerrainId]) {
-			store.update((s) => ({ ...s, selectedTerrain: terrainStore[pendingTerrainId!] }));
-			pendingTerrainId = undefined;
-		}
+	function selectTerrain(terrainId: TerrainId) {
+		store.update((state) => {
+			const isSameTerrain = state.selectedTerrainId === terrainId;
+
+			// 같은 terrain 선택 시 선택 해제 및 world 제거
+			if (isSameTerrain) {
+				const newWorlds = { ...state.worlds };
+				delete newWorlds[TEST_WORLD_ID];
+				return {
+					...state,
+					selectedTerrainId: undefined,
+					worlds: newWorlds,
+				};
+			}
+
+			// 새 terrain 선택 시 world 생성 또는 업데이트
+			const terrain = get(useTerrain().store).data[terrainId];
+			if (!terrain) return state;
+
+			const world: World = {
+				id: TEST_WORLD_ID,
+				user_id: crypto.randomUUID(),
+				player_id: TEST_PLAYER_ID,
+				scenario_id: TEST_SCENARIO_ID,
+				terrain: terrain,
+				name: 'Test World',
+				created_at: new Date().toISOString(),
+			} as World;
+
+			return {
+				...state,
+				selectedTerrainId: terrainId,
+				worlds: {
+					...state.worlds,
+					[TEST_WORLD_ID]: world,
+				},
+			};
+		});
 	}
 
-	function selectTerrain(terrain: Terrain) {
+	function selectCharacter(characterId: CharacterId) {
 		store.update((state) => ({
 			...state,
-			selectedTerrain: state.selectedTerrain?.id === terrain.id ? undefined : terrain,
-		}));
-	}
-
-	function selectCharacter(character: Character) {
-		store.update((state) => ({
-			...state,
-			selectedCharacter: state.selectedCharacter?.id === character.id ? undefined : character,
-			selectedBuilding: undefined,
+			selectedCharacterId: state.selectedCharacterId === characterId ? undefined : characterId,
+			selectedBuildingId: undefined,
 			eraser: false,
 		}));
 	}
 
-	function selectBuilding(building: Building) {
+	function selectBuilding(buildingId: BuildingId) {
 		store.update((state) => ({
 			...state,
-			selectedBuilding: state.selectedBuilding?.id === building.id ? undefined : building,
-			selectedCharacter: undefined,
+			selectedBuildingId: state.selectedBuildingId === buildingId ? undefined : buildingId,
+			selectedCharacterId: undefined,
 			eraser: false,
 		}));
 	}
@@ -161,8 +206,8 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			eraser,
-			selectedCharacter: undefined,
-			selectedBuilding: undefined,
+			selectedCharacterId: undefined,
+			selectedBuildingId: undefined,
 		}));
 	}
 
@@ -182,13 +227,14 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, modalX: x, modalY: y }));
 	}
 
-	function placeCharacter(character: Character, x: number, y: number) {
+	function addWorldCharacter(characterId: CharacterId, x: number, y: number) {
 		const worldCharacter: WorldCharacter = {
 			id: crypto.randomUUID() as WorldCharacterId,
 			user_id: crypto.randomUUID(),
 			player_id: TEST_PLAYER_ID,
-			world_id: crypto.randomUUID() as WorldId,
-			character_id: character.id,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: TEST_WORLD_ID,
+			character_id: characterId,
 			x,
 			y,
 			created_at: new Date().toISOString(),
@@ -202,7 +248,7 @@ function createTestWorldStore() {
 		}));
 	}
 
-	function placeBuilding(building: Building, x: number, y: number) {
+	function addWorldBuilding(buildingId: BuildingId, x: number, y: number) {
 		// 픽셀 좌표를 타일 좌표로 변환
 		const tile_x = Math.floor(x / TILE_SIZE);
 		const tile_y = Math.floor(y / TILE_SIZE);
@@ -211,8 +257,9 @@ function createTestWorldStore() {
 			id: crypto.randomUUID() as WorldBuildingId,
 			user_id: crypto.randomUUID(),
 			player_id: TEST_PLAYER_ID,
-			world_id: crypto.randomUUID() as WorldId,
-			building_id: building.id,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: TEST_WORLD_ID,
+			building_id: buildingId,
 			tile_x,
 			tile_y,
 			created_at: new Date().toISOString(),
@@ -226,10 +273,10 @@ function createTestWorldStore() {
 		}));
 	}
 
-	function removeCharacter(id: string) {
+	function removeWorldCharacter(worldCharacterId: WorldCharacterId) {
 		store.update((state) => {
 			const newData = { ...state.worldCharacters };
-			delete newData[id as WorldCharacterId];
+			delete newData[worldCharacterId];
 			return {
 				...state,
 				worldCharacters: newData,
@@ -237,29 +284,15 @@ function createTestWorldStore() {
 		});
 	}
 
-	function removeBuilding(id: string) {
+	function removeWorldBuilding(worldBuildingId: WorldBuildingId) {
 		store.update((state) => {
 			const newData = { ...state.worldBuildings };
-			delete newData[id as WorldBuildingId];
+			delete newData[worldBuildingId];
 			return {
 				...state,
 				worldBuildings: newData,
 			};
 		});
-	}
-
-	function clearCharacters() {
-		store.update((state) => ({
-			...state,
-			worldCharacters: {},
-		}));
-	}
-
-	function clearBuildings() {
-		store.update((state) => ({
-			...state,
-			worldBuildings: {},
-		}));
 	}
 
 	// World의 body 위치를 스토어에 동기화
@@ -333,7 +366,6 @@ function createTestWorldStore() {
 
 	return {
 		store,
-		restoreTerrain,
 		selectTerrain,
 		selectCharacter,
 		selectBuilding,
@@ -343,19 +375,16 @@ function createTestWorldStore() {
 		toggleOpen,
 		setCamera,
 		setModalPosition,
-		placeCharacter,
-		placeBuilding,
-		removeCharacter,
-		removeBuilding,
-		clearCharacters,
-		clearBuildings,
+		addWorldCharacter,
+		addWorldBuilding,
+		removeWorldCharacter,
+		removeWorldBuilding,
 		syncPositions,
 		init,
-		TEST_PLAYER_ID,
 	};
 }
 
-export function useTestWorld() {
+export function useWorldTest() {
 	if (!instance) {
 		instance = createTestWorldStore();
 	}
