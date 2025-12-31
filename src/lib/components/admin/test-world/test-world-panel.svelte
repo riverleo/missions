@@ -3,7 +3,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconBug, IconBugOff, IconEraser } from '@tabler/icons-svelte';
-	import { useTestWorld } from '$lib/hooks/use-test-world';
+	import { useTestWorld } from '$lib/hooks/use-world';
 
 	const { store, setDebug, setEraser } = useTestWorld();
 </script>

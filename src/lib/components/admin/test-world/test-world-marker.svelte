@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useTestWorld } from '$lib/hooks/use-test-world';
+	import { useTestWorld } from '$lib/hooks/use-world';
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';

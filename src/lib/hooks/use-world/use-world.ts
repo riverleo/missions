@@ -10,7 +10,7 @@ import type {
 	WorldBuildingId,
 } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 // WorldContext (Svelte context)
 export const [useWorldContext, setWorldContext] = createContext<WorldContext>();

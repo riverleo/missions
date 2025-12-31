@@ -6,7 +6,7 @@
 	import TestWorldCommand from './test-world-command.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPanel from './test-world-panel.svelte';
-	import { useTestWorld } from '$lib/hooks/use-test-world';
+	import { useTestWorld } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 
 	const { store, restoreTerrain, toggleOpen, setOpen, setModalPosition } = useTestWorld();

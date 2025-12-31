@@ -12,7 +12,7 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useTestWorld } from '$lib/hooks/use-test-world';
+	import { useTestWorld } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
