@@ -40,7 +40,7 @@ function createScenarioStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<ScenarioStoreState>({ status: 'idle', data: {} });
-	const initStatusStore = writable<FetchStatus>('idle');
+	const fetchAllStatus = writable<FetchStatus>('idle');
 
 	const dialogStore = writable<ScenarioDialogState>(undefined);
 
@@ -104,7 +104,7 @@ function createScenarioStore() {
 	}
 
 	async function fetchAll(scenarioId: ScenarioId) {
-		initStatusStore.set('loading');
+		fetchAllStatus.set('loading');
 
 		try {
 			// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
@@ -127,9 +127,9 @@ function createScenarioStore() {
 				useWorld().fetch(),
 			]);
 
-			initStatusStore.set('success');
+			fetchAllStatus.set('success');
 		} catch (error) {
-			initStatusStore.set('error');
+			fetchAllStatus.set('error');
 			throw error;
 		}
 	}
@@ -219,7 +219,7 @@ function createScenarioStore() {
 	return {
 		store: store as Readable<ScenarioStoreState>,
 		dialogStore: dialogStore as Readable<ScenarioDialogState>,
-		initStatusStore: initStatusStore as Readable<FetchStatus>,
+		fetchAllStatus: fetchAllStatus as Readable<FetchStatus>,
 		fetch,
 		init,
 		fetchAll,

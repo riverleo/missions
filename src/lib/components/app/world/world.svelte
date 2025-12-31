@@ -33,7 +33,7 @@
 	const { supabase } = useServerPayload();
 	const worldContext = new WorldContext(supabase, debug, worldId);
 	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
-	const { initStatusStore } = useScenario();
+	const { fetchAllStatus } = useScenario();
 
 	// worldId가 있으면 useWorld에서 데이터 조회, 없으면 props 사용
 	const terrain = $derived(() => {
@@ -102,8 +102,7 @@
 	setWorldContext(worldContext);
 </script>
 
-{terrain()}
-{#if terrain() && $initStatusStore === 'success'}
+{#if terrain() && $fetchAllStatus === 'success'}
 	<WorldRenderer {...restProps} {width} {height}>
 		{@render children?.()}
 	</WorldRenderer>

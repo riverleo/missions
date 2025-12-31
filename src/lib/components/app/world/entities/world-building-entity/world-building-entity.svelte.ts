@@ -37,7 +37,6 @@ export class WorldBuildingEntity {
 		const building = this.building;
 
 		if (!worldBuilding || !building) {
-			console.log({ worldBuilding, building });
 			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${id}`);
 		}
 
@@ -71,9 +70,7 @@ export class WorldBuildingEntity {
 		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
 		if (!worldBuilding) return undefined;
 
-		const buildingStore = get(useBuilding().store).data;
-		console.log({ worldBuilding, buildingStore });
-		return buildingStore[worldBuilding.building_id];
+		return get(useBuilding().store).data[worldBuilding.building_id];
 	}
 
 	updatePosition(): void {

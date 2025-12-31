@@ -257,8 +257,6 @@ function createTestWorldStore() {
 				draft.data[worldCharacter.id] = worldCharacter;
 			})
 		);
-
-		console.log(get(world.worldCharacterStore));
 	}
 
 	function addWorldBuilding(buildingId: BuildingId, x: number, y: number) {
@@ -340,6 +338,7 @@ function createTestWorldStore() {
 		// use-world 스토어에 테스트 데이터 주입
 		const testState = get(store);
 		const world = useWorld();
+
 		world.worldStore.set({
 			status: 'success',
 			data: testState.worlds,

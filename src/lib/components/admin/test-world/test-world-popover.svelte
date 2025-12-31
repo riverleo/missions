@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
 	import { IconX } from '@tabler/icons-svelte';
@@ -8,12 +7,16 @@
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPanel from './test-world-panel.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
+	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { store, toggleOpen, setOpen, setModalPosition, init } = useWorldTest();
+	const { fetchAllStatus } = useScenario();
 
-	// 초기화 (컴포넌트 마운트 시 한 번만 실행)
-	onMount(() => {
-		init();
+	// fetchAll 완료 후 테스트 데이터 초기화
+	$effect(() => {
+		if ($fetchAllStatus === 'success') {
+			init();
+		}
 	});
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
