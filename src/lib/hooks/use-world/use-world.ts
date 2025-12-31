@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { createContext } from 'svelte';
 import type {
 	RecordFetchState,
@@ -11,6 +11,7 @@ import type {
 } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+import { usePlayer } from '../use-player';
 
 // WorldContext (Svelte context)
 export const [useWorldContext, setWorldContext] = createContext<WorldContext>();
@@ -40,17 +41,15 @@ function createWorldStore() {
 		worldStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			// 현재 사용자 조회
-			const {
-				data: { user },
-			} = await supabase.auth.getUser();
-			if (!user) throw new Error('User not authenticated');
+			// Player 조회
+			const player = get(usePlayer().current);
+			if (!player) return;
 
-			// World 조회 (user_id로 필터링)
+			// World 조회 (player_id로 필터링)
 			const { data: worldData, error: worldError } = await supabase
 				.from('worlds')
 				.select('*')
-				.eq('user_id', user.id);
+				.eq('player_id', player.id);
 
 			if (worldError) throw worldError;
 
@@ -65,11 +64,11 @@ function createWorldStore() {
 				error: undefined,
 			});
 
-			// WorldCharacter 조회 (user_id로 필터링)
+			// WorldCharacter 조회 (player_id로 필터링)
 			const { data: characterData, error: characterError } = await supabase
 				.from('world_characters')
 				.select('*')
-				.eq('user_id', user.id);
+				.eq('player_id', player.id);
 
 			if (characterError) throw characterError;
 
@@ -84,11 +83,11 @@ function createWorldStore() {
 				error: undefined,
 			});
 
-			// WorldBuilding 조회 (user_id로 필터링)
+			// WorldBuilding 조회 (player_id로 필터링)
 			const { data: buildingData, error: buildingError } = await supabase
 				.from('world_buildings')
 				.select('*')
-				.eq('user_id', user.id);
+				.eq('player_id', player.id);
 
 			if (buildingError) throw buildingError;
 

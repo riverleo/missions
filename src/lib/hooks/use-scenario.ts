@@ -8,6 +8,7 @@ import type {
 	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
+import { usePlayer } from './use-player';
 import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
@@ -82,6 +83,9 @@ function createScenarioStore() {
 	}
 
 	async function init(scenarioId: ScenarioId) {
+		// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
+		await usePlayer().fetch();
+
 		await Promise.all([
 			useQuest().fetch(scenarioId),
 			useChapter().fetch(scenarioId),
