@@ -3,6 +3,7 @@ create table world_characters (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
   player_id uuid not null references players(id) on delete cascade,
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   world_id uuid not null references worlds(id) on delete cascade,
   character_id uuid not null references characters(id) on delete cascade,
   x real not null default 0,

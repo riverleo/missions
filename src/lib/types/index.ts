@@ -556,20 +556,23 @@ export type CharacterUpdate = Omit<
 
 // World types
 type WorldRow = Tables<'worlds'>;
-export type World = Omit<WorldRow, 'id' | 'player_id' | 'terrain_id'> & {
+export type World = Omit<WorldRow, 'id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
 	id: WorldId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 	terrain_id: TerrainId | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
-export type WorldInsert = Omit<WorldInsertRow, 'player_id' | 'terrain_id'> & {
+export type WorldInsert = Omit<WorldInsertRow, 'player_id' | 'scenario_id' | 'terrain_id'> & {
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 	terrain_id?: TerrainId | null;
 };
 type WorldUpdateRow = TablesUpdate<'worlds'>;
-export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'terrain_id'> & {
+export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
 	id?: WorldId;
 	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
 	terrain_id?: TerrainId | null;
 };
 
@@ -577,31 +580,34 @@ export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'terrain_id'
 type WorldCharacterRow = Tables<'world_characters'>;
 export type WorldCharacter = Omit<
 	WorldCharacterRow,
-	'id' | 'world_id' | 'character_id' | 'player_id'
+	'id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
 > & {
 	id: WorldCharacterId;
 	world_id: WorldId;
 	character_id: CharacterId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldCharacterInsertRow = TablesInsert<'world_characters'>;
 export type WorldCharacterInsert = Omit<
 	WorldCharacterInsertRow,
-	'world_id' | 'character_id' | 'player_id'
+	'world_id' | 'character_id' | 'player_id' | 'scenario_id'
 > & {
 	world_id: WorldId;
 	character_id: CharacterId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldCharacterUpdateRow = TablesUpdate<'world_characters'>;
 export type WorldCharacterUpdate = Omit<
 	WorldCharacterUpdateRow,
-	'id' | 'world_id' | 'character_id' | 'player_id'
+	'id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
 > & {
 	id?: WorldCharacterId;
 	world_id?: WorldId;
 	character_id?: CharacterId;
 	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
 };
 
 // BuildingState types
@@ -643,31 +649,34 @@ export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'cre
 type WorldBuildingRow = Tables<'world_buildings'>;
 export type WorldBuilding = Omit<
 	WorldBuildingRow,
-	'id' | 'world_id' | 'building_id' | 'player_id'
+	'id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
 > & {
 	id: WorldBuildingId;
 	world_id: WorldId;
 	building_id: BuildingId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldBuildingInsertRow = TablesInsert<'world_buildings'>;
 export type WorldBuildingInsert = Omit<
 	WorldBuildingInsertRow,
-	'world_id' | 'building_id' | 'player_id'
+	'world_id' | 'building_id' | 'player_id' | 'scenario_id'
 > & {
 	world_id: WorldId;
 	building_id: BuildingId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldBuildingUpdateRow = TablesUpdate<'world_buildings'>;
 export type WorldBuildingUpdate = Omit<
 	WorldBuildingUpdateRow,
-	'id' | 'world_id' | 'building_id' | 'player_id'
+	'id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
 > & {
 	id?: WorldBuildingId;
 	world_id?: WorldId;
 	building_id?: BuildingId;
 	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
 };
 
 // Condition types
@@ -1222,26 +1231,29 @@ export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'
 
 // WorldItem types
 type WorldItemRow = Tables<'world_items'>;
-export type WorldItem = Omit<WorldItemRow, 'id' | 'world_id' | 'item_id' | 'player_id'> & {
+export type WorldItem = Omit<WorldItemRow, 'id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'> & {
 	id: WorldItemId;
 	world_id: WorldId;
 	item_id: ItemId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldItemInsertRow = TablesInsert<'world_items'>;
-export type WorldItemInsert = Omit<WorldItemInsertRow, 'world_id' | 'item_id' | 'player_id'> & {
+export type WorldItemInsert = Omit<WorldItemInsertRow, 'world_id' | 'item_id' | 'player_id' | 'scenario_id'> & {
 	world_id: WorldId;
 	item_id: ItemId;
 	player_id: PlayerId;
+	scenario_id: ScenarioId;
 };
 type WorldItemUpdateRow = TablesUpdate<'world_items'>;
 export type WorldItemUpdate = Omit<
 	WorldItemUpdateRow,
-	'id' | 'world_id' | 'item_id' | 'player_id'
+	'id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
 > & {
 	id?: WorldItemId;
 	world_id?: WorldId;
 	item_id?: ItemId;
+	scenario_id?: ScenarioId;
 	player_id?: PlayerId;
 };
 
