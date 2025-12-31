@@ -11,25 +11,22 @@ import {
 } from '../../constants';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
+import { Entity } from '../entity.svelte';
 
 const { Bodies, Composite } = Matter;
 
-export interface BodyPosition {
-	x: number;
-	y: number;
-	angle: number;
-}
-
-export class WorldBuildingEntity {
+export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
 	readonly body: Matter.Body;
 	readonly size: { width: number; height: number };
 
-	position = $state<BodyPosition>({ x: 0, y: 0, angle: 0 });
-
-	private world = useWorldContext();
+	protected readonly world = useWorldContext();
+	protected get debugFillStyle(): string {
+		return DEBUG_BUILDING_FILL_STYLE;
+	}
 
 	constructor(id: WorldBuildingId) {
+		super();
 		this.id = id;
 
 		// 스토어에서 데이터 조회
@@ -73,28 +70,8 @@ export class WorldBuildingEntity {
 		return get(useBuilding().store).data[worldBuilding.building_id];
 	}
 
-	updatePosition(): void {
-		// static body이므로 위치 업데이트 불필요
-		// 하지만 인터페이스 일관성을 위해 유지
-		this.position = {
-			x: this.body.position.x,
-			y: this.body.position.y,
-			angle: this.body.angle,
-		};
-	}
-
-	setDebug(debug: boolean): void {
-		this.body.render.visible = debug;
-		if (debug) {
-			this.body.render.fillStyle = DEBUG_BUILDING_FILL_STYLE;
-		}
-	}
-
-	addToWorld(): void {
-		Composite.add(this.world.engine.world, this.body);
-	}
-
-	removeFromWorld(): void {
-		Composite.remove(this.world.engine.world, this.body);
+	saveToStore(): void {
+		// 건물은 static이므로 실제로 위치 변경 없음
+		// 하지만 일관성을 위해 인터페이스 제공
 	}
 }

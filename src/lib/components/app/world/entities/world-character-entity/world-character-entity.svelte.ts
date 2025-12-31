@@ -11,19 +11,24 @@ import { createEllipseVertices } from '../../vertices';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
+import { Entity } from '../entity.svelte';
 
 const { Bodies, Body, Composite } = Matter;
 
-export class WorldCharacterEntity {
+export class WorldCharacterEntity extends Entity {
 	readonly id: WorldCharacterId;
 	readonly body: Matter.Body;
 
-	private world = useWorldContext();
+	protected readonly world = useWorldContext();
+	protected get debugFillStyle(): string {
+		return DEBUG_CHARACTER_FILL_STYLE;
+	}
 
 	constructor(id: WorldCharacterId) {
+		super();
 		this.id = id;
 
-		// 스토어에서 데이터 조회
+		// 스토어에서 데이터 조회 (초기값만)
 		const worldCharacter = get(useWorld().worldCharacterStore).data[id];
 		const characterBody = this.characterBody;
 
@@ -54,8 +59,8 @@ export class WorldCharacterEntity {
 		// 바디 위치 설정
 		Body.setPosition(this.body, { x: worldCharacter.x, y: worldCharacter.y });
 
-		// 초기 위치 동기화
-		this.updatePosition();
+		// 초기 위치 설정
+		this.position = { x: worldCharacter.x, y: worldCharacter.y, angle: 0 };
 	}
 
 	get characterBody(): CharacterBody | undefined {
@@ -69,23 +74,7 @@ export class WorldCharacterEntity {
 		return character ? characterBodyStore[character.character_body_id] : undefined;
 	}
 
-	updatePosition(): void {
-		this.world.updateWorldCharacterPosition(this.id, this.body.position.x, this.body.position.y);
-	}
-
-	setDebug(debug: boolean): void {
-		this.body.render.visible = debug;
-
-		if (debug) {
-			this.body.render.fillStyle = DEBUG_CHARACTER_FILL_STYLE;
-		}
-	}
-
-	addToWorld(): void {
-		Composite.add(this.world.engine.world, this.body);
-	}
-
-	removeFromWorld(): void {
-		Composite.remove(this.world.engine.world, this.body);
+	saveToStore(): void {
+		// 스토어에 현재 위치 저장 (수동 호출)
 	}
 }

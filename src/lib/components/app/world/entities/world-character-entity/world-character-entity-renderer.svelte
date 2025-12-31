@@ -29,9 +29,9 @@
 	const faceStates = $derived(character ? ($faceStateStore.data[character.id] ?? []) : []);
 	const faceState = $derived(faceStates.find((s) => s.type === 'idle'));
 
-	// 월드 좌표를 퍼센트로 변환 (부모 월드 레이어 기준)
-	const left = $derived(worldCharacter ? `${(worldCharacter.x / terrainBody.width) * 100}%` : '0%');
-	const top = $derived(worldCharacter ? `${(worldCharacter.y / terrainBody.height) * 100}%` : '0%');
+	// 엔티티 로컬 position 사용 (스토어가 아닌)
+	const left = $derived(`${(entity.position.x / terrainBody.width) * 100}%`);
+	const top = $derived(`${(entity.position.y / terrainBody.height) * 100}%`);
 </script>
 
 {#if bodyState}
