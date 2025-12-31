@@ -5,6 +5,7 @@ import { useServerPayload } from './use-server-payload.svelte';
 type PlayerStoreState = RecordFetchState<PlayerId, Player>;
 
 let instance: ReturnType<typeof createPlayerStore> | null = null;
+let initialized = false;
 
 function createPlayerStore() {
 	const { supabase, user } = useServerPayload();
@@ -16,7 +17,15 @@ function createPlayerStore() {
 		return players[0];
 	});
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch() {
+		if (!initialized) {
+			throw new Error('usePlayer not initialized. Call init() first.');
+		}
+
 		store.update((state) => ({ ...state, status: 'loading' }));
 
 		if (!user) return;
@@ -56,6 +65,7 @@ function createPlayerStore() {
 	return {
 		store: store as Readable<PlayerStoreState>,
 		current: current as Readable<Player | undefined>,
+		init,
 		fetch,
 	};
 }

@@ -1,4 +1,5 @@
 import Matter from 'matter-js';
+import { get } from 'svelte/store';
 import type {
 	Supabase,
 	Terrain,
@@ -6,6 +7,7 @@ import type {
 	WorldCharacterId,
 	WorldBuilding,
 	WorldBuildingId,
+	WorldId,
 } from '$lib/types';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from '../camera.svelte';
@@ -15,6 +17,7 @@ import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { Pathfinder } from '../pathfinder';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldPlanning } from './world-planning.svelte';
+import { useWorld } from '$lib/hooks/use-world';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite } = Matter;
 
@@ -25,14 +28,18 @@ export class WorldContext {
 	readonly camera: Camera;
 	readonly event: WorldEvent;
 	readonly terrainBody = new TerrainBody();
+	readonly worldId?: WorldId;
+
+	private worldStore;
+	private worldCharacterStore;
+	private worldBuildingStore;
 
 	terrain = $state<Terrain | undefined>();
-	buildings = $state<Record<WorldBuildingId, WorldBuilding>>({});
-	worldCharacters = $state<Record<WorldCharacterId, WorldCharacter>>({});
 
 	get terrainAssetUrl() {
 		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
+
 	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
 	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
 
@@ -48,47 +55,32 @@ export class WorldContext {
 	private resizeObserver: ResizeObserver | undefined;
 	private respawningIds = new Set<string>();
 
-	constructor(supabase: Supabase, debug: boolean) {
+	constructor(supabase: Supabase, debug: boolean, worldId?: WorldId) {
 		this.supabase = supabase;
 		this.debug = debug;
+		this.worldId = worldId;
 		this.engine = Engine.create();
 		this.runner = Runner.create();
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
 		this.planning.setWorldContext(this);
 
-		// terrain 변경 감지하여 재로드
-		$effect(() => {
-			if (this.initialized && this.terrain) {
-				this.reload();
-			}
-		});
+		// useWorld stores 가져오기
+		const world = useWorld();
+		this.worldStore = world.worldStore;
+		this.worldCharacterStore = world.worldCharacterStore;
+		this.worldBuildingStore = world.worldBuildingStore;
+	}
 
-		// debug 변경 시 바디들의 렌더 스타일 업데이트
-		$effect(() => {
-			this.terrainBody.setDebug(this.debug);
-			for (const entity of Object.values(this.worldBuildingEntities)) {
-				entity.setDebug(this.debug);
-			}
-			for (const entity of Object.values(this.worldCharacterEntities)) {
-				entity.setDebug(this.debug);
-			}
-		});
-
-		// buildings 변경 시 엔티티 동기화 (건물을 먼저 처리)
-		$effect(() => {
-			this.syncWorldBuildingEntities(this.buildings);
-		});
-
-		// characters 변경 시 바디 동기화 (캐릭터를 나중에 처리)
-		$effect(() => {
-			this.syncWorldCharacterEntities(this.worldCharacters);
-		});
-
-		// 카메라 변경 시 렌더 바운드 업데이트
-		$effect(() => {
-			this.updateRenderBounds(this.render, this.terrainBody, this.camera);
-		});
+	// debug 변경 시 모든 엔티티 업데이트
+	setDebugEntities(debug: boolean) {
+		this.terrainBody.setDebug(debug);
+		for (const entity of Object.values(this.worldBuildingEntities)) {
+			entity.setDebug(debug);
+		}
+		for (const entity of Object.values(this.worldCharacterEntities)) {
+			entity.setDebug(debug);
+		}
 	}
 
 	// 월드 마운트, cleanup 함수 반환
@@ -132,7 +124,7 @@ export class WorldContext {
 				this.render.canvas.height = height;
 				this.render.options.width = width;
 				this.render.options.height = height;
-				this.updateRenderBounds(this.render, this.terrainBody, this.camera);
+				this.updateRenderBounds();
 			}
 		});
 		this.resizeObserver.observe(container);
@@ -145,16 +137,14 @@ export class WorldContext {
 					this.terrainBody.setDebug(this.debug);
 				}
 				this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
-				this.updateRenderBounds(this.render, this.terrainBody, this.camera);
+				this.updateRenderBounds();
 			});
 		}
 
-		// 초기 건물/캐릭터 바디 생성 (건물을 먼저 추가하여 캐릭터가 나중에 추가되도록)
-		this.syncWorldBuildingEntities(this.buildings);
-		this.syncWorldCharacterEntities(this.worldCharacters);
+		// 초기 건물/캐릭터 바디 생성은 world.svelte에서 $effect로 처리됨
 
 		Render.run(this.render);
-		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
+		this.updateRenderBounds();
 		this.initialized = true;
 
 		// 물리 시뮬레이션 시작
@@ -206,15 +196,12 @@ export class WorldContext {
 			Composite.add(this.engine.world, this.mouseConstraint);
 		}
 
-		this.updateRenderBounds(this.render, this.terrainBody, this.camera);
+		this.updateRenderBounds();
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
-	private updateRenderBounds(
-		render: Matter.Render | undefined,
-		terrainBody: TerrainBody,
-		camera: Camera
-	) {
+	updateRenderBounds() {
+		const { render, terrainBody, camera } = this;
 		if (!render) return;
 
 		const viewWidth = terrainBody.width / camera.zoom;
@@ -229,7 +216,7 @@ export class WorldContext {
 	}
 
 	// 캐릭터 바디 동기화
-	private syncWorldCharacterEntities(characters: Record<WorldCharacterId, WorldCharacter>) {
+	syncWorldCharacterEntities(characters: Record<WorldCharacterId, WorldCharacter>) {
 		if (!this.initialized) return;
 
 		let changed = false;
@@ -265,7 +252,7 @@ export class WorldContext {
 	}
 
 	// 건물 엔티티 동기화
-	private syncWorldBuildingEntities(buildings: Record<WorldBuildingId, WorldBuilding>) {
+	syncWorldBuildingEntities(buildings: Record<WorldBuildingId, WorldBuilding>) {
 		if (!this.initialized) return;
 
 		let changed = false;
@@ -300,11 +287,26 @@ export class WorldContext {
 		}
 	}
 
-	// Matter.js body 위치를 CharacterEntity의 $state로 동기화
+	// Matter.js body 위치를 스토어에 동기화
 	private updateCharacterPositions() {
 		for (const entity of Object.values(this.worldCharacterEntities)) {
 			entity.updatePosition();
 		}
+	}
+
+	// WorldCharacterEntity에서 호출: 바디 위치를 스토어에 업데이트
+	updateWorldCharacterPosition(id: WorldCharacterId, x: number, y: number) {
+		this.worldCharacterStore.update((state) => {
+			const character = state.data[id];
+			if (!character) return state;
+			return {
+				...state,
+				data: {
+					...state.data,
+					[id]: { ...character, x, y },
+				},
+			};
+		});
 	}
 
 	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 시작 위치에 다시 추가
@@ -312,10 +314,14 @@ export class WorldContext {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
 
-		for (const character of Object.values(this.worldCharacters)) {
+		const worldCharacters = Object.values(get(this.worldCharacterStore).data).filter(
+			(c) => !this.worldId || c.world_id === this.worldId
+		);
+
+		for (const character of worldCharacters) {
 			const body = this.worldCharacterEntities[character.id];
 			if (body && this.isOutOfBounds(body)) {
-				this.respawnCharacter(character);
+				this.respawnCharacter(character.id);
 			}
 		}
 	}
@@ -336,20 +342,27 @@ export class WorldContext {
 		);
 	}
 
-	private respawnCharacter(character: WorldCharacter) {
-		const { id } = character;
+	private respawnCharacter(id: WorldCharacterId) {
 		if (this.respawningIds.has(id)) return;
 		this.respawningIds.add(id);
 
-		// characters에서 제거 (바디도 자동 제거됨)
-		const { [id]: _, ...rest } = this.worldCharacters;
-		this.worldCharacters = rest;
+		const character = get(this.worldCharacterStore).data[id];
+		if (!character) return;
+
+		// 스토어에서 제거 (바디도 자동 제거됨)
+		this.worldCharacterStore.update((state) => {
+			const { [id]: _, ...rest } = state.data;
+			return { ...state, data: rest };
+		});
 
 		// 1초 후 시작 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.start_x ?? 0;
 			const y = this.terrain?.start_y ?? 0;
-			this.worldCharacters = { ...this.worldCharacters, [id]: { ...character, x, y } };
+			this.worldCharacterStore.update((state) => ({
+				...state,
+				data: { ...state.data, [id]: { ...character, x, y } },
+			}));
 			this.respawningIds.delete(id);
 		}, 1000);
 	}

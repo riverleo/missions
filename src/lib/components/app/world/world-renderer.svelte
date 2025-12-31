@@ -2,8 +2,7 @@
 	import { onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
-	import type { WorldCharacter, WorldBuilding } from '$lib/types';
-	import { useWorldContext } from '$lib/hooks/use-world';
+	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
 	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
 	import WorldPlanning from './world-planning.svelte';
@@ -12,8 +11,6 @@
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width: number;
 		height: number;
-		characters?: WorldCharacter[];
-		buildings?: WorldBuilding[];
 		children?: Snippet;
 	}
 
@@ -21,31 +18,34 @@
 		class: className,
 		width,
 		height,
-		characters = [],
-		buildings = [],
 		children,
 		...restProps
 	}: Props = $props();
 
 	const world = useWorldContext();
 	const { terrainBody, camera, event } = world;
+	const { worldBuildingStore, worldCharacterStore } = useWorld();
 
 	let container: HTMLDivElement;
+
+	// worldId 필터링된 buildings와 characters
+	const buildings = $derived(
+		Object.values($worldBuildingStore.data).filter(
+			(b) => !world.worldId || b.world_id === world.worldId
+		)
+	);
+
+	const characters = $derived(
+		Object.values($worldCharacterStore.data).filter(
+			(c) => !world.worldId || c.world_id === world.worldId
+		)
+	);
 
 	// 카메라 줌 핸들러
 	function onwheel(e: WheelEvent) {
 		e.preventDefault();
 		camera.applyZoom(e.deltaY, e.clientX, e.clientY);
 	}
-
-	// characters/buildings prop을 world에 동기화
-	$effect(() => {
-		world.worldCharacters = Object.fromEntries(characters.map((c) => [c.id, c]));
-	});
-
-	$effect(() => {
-		world.buildings = Object.fromEntries(buildings.map((b) => [b.id, b]));
-	});
 
 	onMount(() => world.mount(container));
 </script>

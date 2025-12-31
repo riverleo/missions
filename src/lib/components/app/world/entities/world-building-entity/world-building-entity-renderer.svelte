@@ -3,7 +3,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useWorldContext } from '$lib/hooks/use-world';
+	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 
 	interface Props {
 		entity: WorldBuildingEntity;
@@ -14,8 +14,9 @@
 	const world = useWorldContext();
 	const { terrainBody } = world;
 	const { store: buildingStore, stateStore: buildingStateStore } = useBuilding();
+	const { worldBuildingStore } = useWorld();
 
-	const worldBuilding = $derived(world.buildings[entity.id]);
+	const worldBuilding = $derived($worldBuildingStore.data[entity.id]);
 	const building = $derived(worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined);
 	const buildingStates = $derived(building ? ($buildingStateStore.data[building.id] ?? []) : []);
 	const buildingState = $derived(buildingStates.find((s) => s.type === 'idle'));

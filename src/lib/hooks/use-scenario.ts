@@ -2,6 +2,7 @@ import { writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
+	FetchStatus,
 	Scenario,
 	ScenarioInsert,
 	ScenarioUpdate,
@@ -39,6 +40,7 @@ function createScenarioStore() {
 	const { supabase } = useServerPayload();
 
 	const store = writable<ScenarioStoreState>({ status: 'idle', data: {} });
+	const initStatusStore = writable<FetchStatus>('idle');
 
 	const dialogStore = writable<ScenarioDialogState>(undefined);
 
@@ -82,26 +84,54 @@ function createScenarioStore() {
 		}
 	}
 
-	async function init(scenarioId: ScenarioId) {
-		// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
-		await usePlayer().fetch();
+	function init() {
+		// 모든 훅의 싱글톤 생성 및 초기화
+		usePlayer().init();
+		useQuest().init();
+		useChapter().init();
+		useTerrain().init();
+		useCharacter().init();
+		useCharacterBody().init();
+		useBuilding().init();
+		useNeed().init();
+		useNeedBehavior().init();
+		useConditionBehavior().init();
+		useCondition().init();
+		useItem().init();
+		useItemBehavior().init();
+		useBehaviorPriority().init();
+		useWorld().init();
+	}
 
-		await Promise.all([
-			useQuest().fetch(scenarioId),
-			useChapter().fetch(scenarioId),
-			useTerrain().fetch(scenarioId),
-			useCharacter().fetch(scenarioId),
-			useCharacterBody().fetch(scenarioId),
-			useBuilding().fetch(scenarioId),
-			useNeed().fetch(scenarioId),
-			useNeedBehavior().fetch(scenarioId),
-			useConditionBehavior().fetch(scenarioId),
-			useCondition().fetch(scenarioId),
-			useItem().fetch(scenarioId),
-			useItemBehavior().fetch(scenarioId),
-			useBehaviorPriority().fetch(scenarioId),
-			useWorld().fetch(),
-		]);
+	async function fetchAll(scenarioId: ScenarioId) {
+		initStatusStore.set('loading');
+
+		try {
+			// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
+			await usePlayer().fetch();
+
+			await Promise.all([
+				useQuest().fetch(scenarioId),
+				useChapter().fetch(scenarioId),
+				useTerrain().fetch(scenarioId),
+				useCharacter().fetch(scenarioId),
+				useCharacterBody().fetch(scenarioId),
+				useBuilding().fetch(scenarioId),
+				useNeed().fetch(scenarioId),
+				useNeedBehavior().fetch(scenarioId),
+				useConditionBehavior().fetch(scenarioId),
+				useCondition().fetch(scenarioId),
+				useItem().fetch(scenarioId),
+				useItemBehavior().fetch(scenarioId),
+				useBehaviorPriority().fetch(scenarioId),
+				useWorld().fetch(),
+			]);
+
+			initStatusStore.set('success');
+		} catch (error) {
+			initStatusStore.set('error');
+			throw error;
+		}
 	}
 
 	const admin = {
@@ -189,8 +219,10 @@ function createScenarioStore() {
 	return {
 		store: store as Readable<ScenarioStoreState>,
 		dialogStore: dialogStore as Readable<ScenarioDialogState>,
+		initStatusStore: initStatusStore as Readable<FetchStatus>,
 		fetch,
 		init,
+		fetchAll,
 		openDialog,
 		closeDialog,
 		admin,

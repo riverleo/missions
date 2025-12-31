@@ -3,7 +3,7 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import { useWorldContext } from '$lib/hooks/use-world';
+	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 
 	interface Props {
 		entity: WorldCharacterEntity;
@@ -15,8 +15,9 @@
 	const { terrainBody } = world;
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+	const { worldCharacterStore } = useWorld();
 
-	const worldCharacter = $derived(world.worldCharacters[entity.id]);
+	const worldCharacter = $derived($worldCharacterStore.data[entity.id]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);

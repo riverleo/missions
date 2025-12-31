@@ -20,6 +20,7 @@ type QuestDialogState =
 	| undefined;
 
 let instance: ReturnType<typeof createQuestStore> | null = null;
+let initialized = false;
 
 function createQuestStore() {
 	const { supabase } = useServerPayload();
@@ -38,7 +39,15 @@ function createQuestStore() {
 
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useQuest not initialized. Call init() first.');
+		}
+
 		currentScenarioId = scenarioId;
 
 		questStore.update((state) => ({ ...state, status: 'loading' }));
@@ -251,6 +260,7 @@ function createQuestStore() {
 		questStore: questStore as Readable<RecordFetchState<QuestId, Quest>>,
 		questBranchStore: questBranchStore as Readable<RecordFetchState<QuestBranchId, QuestBranch>>,
 		dialogStore: dialogStore as Readable<QuestDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

@@ -39,9 +39,17 @@ function createNeedBehaviorStore() {
 
 	const dialogStore = writable<NeedBehaviorDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useNeedBehavior not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		needBehaviorStore.update((state) => ({ ...state, status: 'loading' }));
@@ -206,6 +214,7 @@ function createNeedBehaviorStore() {
 			RecordFetchState<NeedBehaviorActionId, NeedBehaviorAction>
 		>,
 		dialogStore: dialogStore as Readable<NeedBehaviorDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

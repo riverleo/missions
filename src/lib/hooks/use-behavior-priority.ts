@@ -28,9 +28,17 @@ function createBehaviorPriorityStore() {
 
 	const dialogStore = writable<BehaviorPriorityDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useBehaviorPriority not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -124,6 +132,7 @@ function createBehaviorPriorityStore() {
 	return {
 		store,
 		dialogStore,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

@@ -18,6 +18,7 @@ export const [useWorldContext, setWorldContext] = createContext<WorldContext>();
 
 // World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;
+let initialized = false;
 
 function createWorldStore() {
 	const { supabase } = useServerPayload();
@@ -37,7 +38,15 @@ function createWorldStore() {
 		data: {},
 	});
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch() {
+		if (!initialized) {
+			throw new Error('useWorld not initialized. Call init() first.');
+		}
+
 		worldStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
@@ -116,6 +125,7 @@ function createWorldStore() {
 		worldStore,
 		worldCharacterStore,
 		worldBuildingStore,
+		init,
 		fetch,
 	};
 }

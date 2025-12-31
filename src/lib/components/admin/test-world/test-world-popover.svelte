@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
 	import { IconX } from '@tabler/icons-svelte';
@@ -6,11 +7,14 @@
 	import TestWorldCommand from './test-world-command.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPanel from './test-world-panel.svelte';
-	import { useWorldTest } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
+	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 
-	const { store, toggleOpen, setOpen, setModalPosition } = useWorldTest();
-	const { store: terrainStore } = useTerrain();
+	const { store, toggleOpen, setOpen, setModalPosition, init } = useWorldTest();
+
+	// 초기화 (컴포넌트 마운트 시 한 번만 실행)
+	onMount(() => {
+		init();
+	});
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
 	let isDragging = $state(false);
@@ -35,14 +39,8 @@
 		return () => window.removeEventListener('keydown', onkeydown);
 	});
 
-	// 선택된 지형의 최신 데이터 가져오기
-	const selectedTerrain = $derived(
-		$store.selectedTerrainId ? $terrainStore.data[$store.selectedTerrainId] : undefined
-	);
-
-	// 배치된 캐릭터/건물 (WorldContext가 스토어에서 원본 데이터를 조회함)
-	const characters = $derived(Object.values($store.worldCharacters));
-	const buildings = $derived(Object.values($store.worldBuildings));
+	// 지형이 선택되었는지 확인
+	const hasSelectedTerrain = $derived($store.selectedTerrainId !== undefined);
 
 	function onclick() {
 		setOpen(true);
@@ -142,15 +140,9 @@
 		</div>
 
 		<!-- 우측: 월드 -->
-		<div class="relative flex h-[420px] w-[820px] flex-1 items-center justify-center">
-			{#if selectedTerrain}
-				<World
-					class="border-0"
-					terrain={selectedTerrain}
-					{characters}
-					{buildings}
-					debug={$store.debug}
-				>
+		<div class="relative flex flex-1 items-center justify-center p-4">
+			{#if hasSelectedTerrain}
+				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug}>
 					<TestWorldMarker />
 				</World>
 				<TestWorldPanel />

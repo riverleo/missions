@@ -7,6 +7,7 @@ import {
 	type TileCell,
 } from '../tiles';
 import { useBuilding } from '$lib/hooks/use-building';
+import { useWorld } from '$lib/hooks/use-world';
 import type { WorldContext } from './world-context.svelte';
 
 export interface WorldPlanningPlacement {
@@ -36,8 +37,15 @@ export class WorldPlanning {
 
 		// 기존 건물들이 차지하는 모든 셀 수집
 		const buildingStore = get(useBuilding().store).data;
+		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
 		const existingCells: TileCell[] = [];
-		for (const worldBuilding of Object.values(this.worldContext.buildings)) {
+
+		// worldId 필터링
+		const worldBuildings = Object.values(worldBuildingStore).filter(
+			(b) => !this.worldContext?.worldId || b.world_id === this.worldContext.worldId
+		);
+
+		for (const worldBuilding of worldBuildings) {
 			const buildingData = buildingStore[worldBuilding.building_id];
 			if (!buildingData) continue;
 

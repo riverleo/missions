@@ -59,9 +59,17 @@ function createConditionStore() {
 
 	const dialogStore = writable<ConditionDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useCondition not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		conditionStore.update((state) => ({ ...state, status: 'loading' }));
@@ -353,6 +361,7 @@ function createConditionStore() {
 			RecordFetchState<ConditionEffectId, ConditionEffect>
 		>,
 		dialogStore: dialogStore as Readable<ConditionDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

@@ -10,20 +10,12 @@
 	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
 	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
 
-	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding, syncPositions } =
+	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
 		useWorldTest();
 	const world = useWorldContext();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
-
-	// 1초마다 body 위치를 testWorld 스토어에 동기화
-	$effect(() => {
-		const interval = setInterval(() => {
-			syncPositions(world.worldCharacterEntities, world.worldBuildingEntities);
-		}, 1000);
-		return () => clearInterval(interval);
-	});
 
 	// 건물 선택 시 planning 그리드 표시
 	$effect(() => {

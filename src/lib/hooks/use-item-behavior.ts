@@ -39,9 +39,17 @@ function createItemBehaviorStore() {
 
 	const dialogStore = writable<ItemBehaviorDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useItemBehavior not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		itemBehaviorStore.update((state) => ({ ...state, status: 'loading' }));
@@ -206,6 +214,7 @@ function createItemBehaviorStore() {
 			RecordFetchState<ItemBehaviorActionId, ItemBehaviorAction>
 		>,
 		dialogStore: dialogStore as Readable<ItemBehaviorDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

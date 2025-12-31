@@ -42,9 +42,17 @@ function createBuildingStore() {
 		showBodyPreview: false,
 	});
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useBuilding not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -245,6 +253,7 @@ function createBuildingStore() {
 		store: store as Readable<RecordFetchState<BuildingId, Building>>,
 		stateStore: stateStore as Readable<RecordFetchState<BuildingId, BuildingState[]>>,
 		dialogStore: dialogStore as Readable<BuildingDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

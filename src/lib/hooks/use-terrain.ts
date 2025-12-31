@@ -30,9 +30,17 @@ function createTerrainStore() {
 		isSettingStartMarker: false,
 	});
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useTerrain not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -142,6 +150,7 @@ function createTerrainStore() {
 	return {
 		store: store as Readable<RecordFetchState<TerrainId, Terrain>>,
 		dialogStore: dialogStore as Readable<TerrainDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

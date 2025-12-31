@@ -45,9 +45,17 @@ function createCharacterStore() {
 		previewBodyStateType: 'idle',
 	});
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useCharacter not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -259,6 +267,7 @@ function createCharacterStore() {
 		store: store as Readable<RecordFetchState<CharacterId, Character>>,
 		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterId, CharacterFaceState[]>>,
 		dialogStore: dialogStore as Readable<CharacterDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

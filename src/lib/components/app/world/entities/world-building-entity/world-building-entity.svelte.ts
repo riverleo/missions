@@ -9,7 +9,7 @@ import {
 	DEBUG_BUILDING_FILL_STYLE,
 	TILE_SIZE,
 } from '../../constants';
-import { useWorldContext } from '$lib/hooks/use-world';
+import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 
 const { Bodies, Composite } = Matter;
@@ -33,10 +33,11 @@ export class WorldBuildingEntity {
 		this.id = id;
 
 		// 스토어에서 데이터 조회
-		const worldBuilding = this.world.buildings[id];
+		const worldBuilding = get(useWorld().worldBuildingStore).data[id];
 		const building = this.building;
 
 		if (!worldBuilding || !building) {
+			console.log({ worldBuilding, building });
 			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${id}`);
 		}
 
@@ -67,10 +68,11 @@ export class WorldBuildingEntity {
 	}
 
 	get building(): Building | undefined {
-		const worldBuilding = this.world.buildings[this.id];
+		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
 		if (!worldBuilding) return undefined;
 
 		const buildingStore = get(useBuilding().store).data;
+		console.log({ worldBuilding, buildingStore });
 		return buildingStore[worldBuilding.building_id];
 	}
 

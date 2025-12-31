@@ -6,21 +6,24 @@
 
 	let { children } = $props();
 
-	const { store, init } = useScenario();
+	const { store, init, fetchAll } = useScenario();
+
+	// 모든 훅의 싱글톤을 동기적으로 생성
+	init();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const isValidScenario = $derived(scenarioId ? !!$store.data?.[scenarioId] : false);
 
-	// scenarioId 변경 시 init 호출 추적
-	let lastInitedScenarioId: string | undefined;
+	// scenarioId 변경 시 fetchAll 호출 추적
+	let lastFetchedScenarioId: string | undefined;
 
 	$effect(() => {
 		if ($store.status === 'success' && scenarioId) {
 			if (isValidScenario) {
-				// URL의 scenarioId가 유효하고 아직 init 호출 안했으면 init 호출
-				if (lastInitedScenarioId !== scenarioId) {
-					lastInitedScenarioId = scenarioId;
-					init(scenarioId);
+				// URL의 scenarioId가 유효하고 아직 fetch 안했으면 fetchAll 호출
+				if (lastFetchedScenarioId !== scenarioId) {
+					lastFetchedScenarioId = scenarioId;
+					fetchAll(scenarioId);
 				}
 			} else {
 				// 유효하지 않은 scenarioId면 /admin으로 리다이렉트

@@ -38,9 +38,17 @@ function createItemStore() {
 
 	const dialogStore = writable<ItemDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useItem not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
@@ -228,6 +236,7 @@ function createItemStore() {
 		store: store as Readable<RecordFetchState<ItemId, Item>>,
 		stateStore: stateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
 		dialogStore: dialogStore as Readable<ItemDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

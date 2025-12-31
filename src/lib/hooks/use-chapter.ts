@@ -16,9 +16,17 @@ function createChapterStore() {
 	const { supabase } = useServerPayload();
 	const store = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useChapter not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 		store.update((state) => ({ ...state, status: 'loading' }));
 
@@ -133,6 +141,7 @@ function createChapterStore() {
 
 	return {
 		store: store as Readable<RecordFetchState<ChapterId, Chapter>>,
+		init,
 		fetch,
 		admin: {
 			create,

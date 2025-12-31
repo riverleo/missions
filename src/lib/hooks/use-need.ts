@@ -46,9 +46,17 @@ function createNeedStore() {
 
 	const dialogStore = writable<NeedDialogState>(undefined);
 
+	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useNeed not initialized. Call init() first.');
+		}
 		currentScenarioId = scenarioId;
 
 		needStore.update((state) => ({ ...state, status: 'loading' }));
@@ -258,6 +266,7 @@ function createNeedStore() {
 			RecordFetchState<CharacterNeedId, CharacterNeed>
 		>,
 		dialogStore: dialogStore as Readable<NeedDialogState>,
+		init,
 		fetch,
 		openDialog,
 		closeDialog,

@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import { produce } from 'immer';
 import type {
 	World,
 	WorldCharacter,
@@ -239,6 +240,8 @@ function createTestWorldStore() {
 			y,
 			created_at: new Date().toISOString(),
 		} as WorldCharacter;
+
+		// 로컬 스토어 업데이트
 		store.update((state) => ({
 			...state,
 			worldCharacters: {
@@ -246,6 +249,16 @@ function createTestWorldStore() {
 				[worldCharacter.id]: worldCharacter,
 			},
 		}));
+
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[worldCharacter.id] = worldCharacter;
+			})
+		);
+
+		console.log(get(world.worldCharacterStore));
 	}
 
 	function addWorldBuilding(buildingId: BuildingId, x: number, y: number) {
@@ -264,6 +277,8 @@ function createTestWorldStore() {
 			tile_y,
 			created_at: new Date().toISOString(),
 		} as WorldBuilding;
+
+		// 로컬 스토어 업데이트
 		store.update((state) => ({
 			...state,
 			worldBuildings: {
@@ -271,9 +286,18 @@ function createTestWorldStore() {
 				[worldBuilding.id]: worldBuilding,
 			},
 		}));
+
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldBuildingStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[worldBuilding.id] = worldBuilding;
+			})
+		);
 	}
 
 	function removeWorldCharacter(worldCharacterId: WorldCharacterId) {
+		// 로컬 스토어 업데이트
 		store.update((state) => {
 			const newData = { ...state.worldCharacters };
 			delete newData[worldCharacterId];
@@ -282,9 +306,18 @@ function createTestWorldStore() {
 				worldCharacters: newData,
 			};
 		});
+
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				delete draft.data[worldCharacterId];
+			})
+		);
 	}
 
 	function removeWorldBuilding(worldBuildingId: WorldBuildingId) {
+		// 로컬 스토어 업데이트
 		store.update((state) => {
 			const newData = { ...state.worldBuildings };
 			delete newData[worldBuildingId];
@@ -293,63 +326,20 @@ function createTestWorldStore() {
 				worldBuildings: newData,
 			};
 		});
-	}
 
-	// World의 body 위치를 스토어에 동기화
-	function syncPositions(
-		worldCharacterEntities: Record<string, { body: { position: { x: number; y: number } } }>,
-		buildingBodies: Record<string, { body: { position: { x: number; y: number } } }>
-	) {
-		store.update((state) => {
-			const updatedCharacters: Record<WorldCharacterId, WorldCharacter> = {};
-			for (const id in state.worldCharacters) {
-				const char = state.worldCharacters[id as WorldCharacterId];
-				if (!char) continue;
-
-				const body = worldCharacterEntities[id];
-				if (body) {
-					updatedCharacters[id as WorldCharacterId] = {
-						...char,
-						x: body.body.position.x,
-						y: body.body.position.y,
-					};
-				} else {
-					updatedCharacters[id as WorldCharacterId] = char;
-				}
-			}
-
-			const updatedBuildings: Record<WorldBuildingId, WorldBuilding> = {};
-			for (const id in state.worldBuildings) {
-				const building = state.worldBuildings[id as WorldBuildingId];
-				if (!building) continue;
-
-				const body = buildingBodies[id];
-				if (body) {
-					const tile_x = Math.floor(body.body.position.x / TILE_SIZE);
-					const tile_y = Math.floor(body.body.position.y / TILE_SIZE);
-					updatedBuildings[id as WorldBuildingId] = {
-						...building,
-						tile_x,
-						tile_y,
-					};
-				} else {
-					updatedBuildings[id as WorldBuildingId] = building;
-				}
-			}
-
-			return {
-				...state,
-				worldCharacters: updatedCharacters,
-				worldBuildings: updatedBuildings,
-			};
-		});
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldBuildingStore.update((state) =>
+			produce(state, (draft) => {
+				delete draft.data[worldBuildingId];
+			})
+		);
 	}
 
 	function init() {
-		const world = useWorld();
-		const testState = get(store);
-
 		// use-world 스토어에 테스트 데이터 주입
+		const testState = get(store);
+		const world = useWorld();
 		world.worldStore.set({
 			status: 'success',
 			data: testState.worlds,
@@ -379,7 +369,6 @@ function createTestWorldStore() {
 		addWorldBuilding,
 		removeWorldCharacter,
 		removeWorldBuilding,
-		syncPositions,
 		init,
 	};
 }

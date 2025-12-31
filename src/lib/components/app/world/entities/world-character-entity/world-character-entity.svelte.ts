@@ -8,7 +8,7 @@ import {
 	DEBUG_CHARACTER_FILL_STYLE,
 } from '../../constants';
 import { createEllipseVertices } from '../../vertices';
-import { useWorldContext } from '$lib/hooks/use-world';
+import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 
@@ -24,7 +24,7 @@ export class WorldCharacterEntity {
 		this.id = id;
 
 		// 스토어에서 데이터 조회
-		const worldCharacter = this.world.worldCharacters[id];
+		const worldCharacter = get(useWorld().worldCharacterStore).data[id];
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter || !characterBody) {
@@ -59,7 +59,7 @@ export class WorldCharacterEntity {
 	}
 
 	get characterBody(): CharacterBody | undefined {
-		const worldCharacter = this.world.worldCharacters[this.id];
+		const worldCharacter = get(useWorld().worldCharacterStore).data[this.id];
 		if (!worldCharacter) return undefined;
 
 		const characterStore = get(useCharacter().store).data;
@@ -70,11 +70,7 @@ export class WorldCharacterEntity {
 	}
 
 	updatePosition(): void {
-		const worldCharacter = this.world.worldCharacters[this.id];
-		if (worldCharacter) {
-			worldCharacter.x = this.body.position.x;
-			worldCharacter.y = this.body.position.y;
-		}
+		this.world.updateWorldCharacterPosition(this.id, this.body.position.x, this.body.position.y);
 	}
 
 	setDebug(debug: boolean): void {
