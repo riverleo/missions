@@ -17,13 +17,7 @@
 		children?: Snippet;
 	}
 
-	let {
-		class: className,
-		width,
-		height,
-		children,
-		...restProps
-	}: Props = $props();
+	let { class: className, width, height, children, ...restProps }: Props = $props();
 
 	const world = useWorldContext();
 	const { terrainBody, camera, event } = world;
@@ -40,7 +34,7 @@
 		terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined
 	);
 
-	let container: HTMLDivElement;
+	let element: HTMLDivElement;
 
 	// worldId 필터링된 buildings와 characters
 	const buildings = $derived(
@@ -61,13 +55,13 @@
 		camera.applyZoom(e.deltaY, e.clientX, e.clientY);
 	}
 
-	onMount(() => world.load(container));
+	onMount(() => world.load({ element, width, height }));
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
-	bind:this={container}
+	bind:this={element}
 	data-slot="world-container"
 	{...restProps}
 	class={cn('relative overflow-hidden border border-border', className)}

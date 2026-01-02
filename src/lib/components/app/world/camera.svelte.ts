@@ -24,10 +24,10 @@ export class Camera {
 
 	// 화면 좌표를 월드 좌표로 변환
 	screenToWorld(screenX: number, screenY: number): { x: number; y: number } | undefined {
-		const container = this.world.container;
-		if (!container) return undefined;
+		const canvas = this.world.render?.canvas;
+		if (!canvas) return undefined;
 
-		const rect = container.getBoundingClientRect();
+		const rect = canvas.getBoundingClientRect();
 		const containerX = screenX - rect.left;
 		const containerY = screenY - rect.top;
 		return {

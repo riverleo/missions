@@ -36,7 +36,6 @@ export class WorldContext {
 
 	debug = $state(false);
 	initialized = $state(false);
-	container: HTMLDivElement | undefined = $state.raw(undefined);
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
@@ -72,15 +71,13 @@ export class WorldContext {
 	}
 
 	// 월드 로드, cleanup 함수 반환
-	load(container: HTMLDivElement) {
-		this.container = container;
-
+	load({ element, width = 800, height = 400 }: { element: HTMLDivElement; width?: number; height?: number }) {
 		this.render = Render.create({
-			element: container,
+			element,
 			engine: this.engine,
 			options: {
-				width: 800,
-				height: 400,
+				width,
+				height,
 				wireframes: false,
 				background: 'transparent',
 				hasBounds: true,
