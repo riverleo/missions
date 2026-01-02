@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { TILE_SIZE } from './constants';
-	import WorldBlueprintPlacement from './world-blueprint-placement.svelte';
+	import WorldBlueprintCursor from './world-blueprint-cursor.svelte';
 
 	interface Props {
 		width: number;
@@ -39,4 +39,4 @@
 	{/each}
 </svg>
 
-<WorldBlueprintPlacement />
+<WorldBlueprintCursor />

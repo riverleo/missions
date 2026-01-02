@@ -5,7 +5,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 
-export class WorldBlueprint {
+export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
 
 	private context: WorldContext;

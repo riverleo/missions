@@ -7,4 +7,4 @@ export interface WorldBlueprintCursor {
 }
 
 export { WorldContext } from './world-context.svelte';
-export { WorldBlueprint } from './world-blueprint.svelte';
+export { WorldContextBlueprint } from './world-context-blueprint.svelte';

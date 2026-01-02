@@ -17,7 +17,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
-import { WorldBlueprint } from './world-blueprint.svelte';
+import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
@@ -29,7 +29,7 @@ export class WorldContext {
 	readonly event: WorldEvent;
 	readonly terrainBody = new TerrainBody();
 	readonly worldId: WorldId;
-	readonly blueprint: WorldBlueprint;
+	readonly blueprint: WorldContextBlueprint;
 
 	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
 	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
@@ -50,7 +50,7 @@ export class WorldContext {
 		this.runner = Runner.create();
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
-		this.blueprint = new WorldBlueprint(this);
+		this.blueprint = new WorldContextBlueprint(this);
 	}
 
 	private get terrain(): Terrain | null | undefined {
@@ -71,7 +71,15 @@ export class WorldContext {
 	}
 
 	// 월드 로드, cleanup 함수 반환
-	load({ element, width = 800, height = 400 }: { element: HTMLDivElement; width?: number; height?: number }) {
+	load({
+		element,
+		width = 800,
+		height = 400,
+	}: {
+		element: HTMLDivElement;
+		width?: number;
+		height?: number;
+	}) {
 		this.render = Render.create({
 			element,
 			engine: this.engine,
