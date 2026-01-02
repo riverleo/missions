@@ -41,6 +41,7 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
+	private resizeObserver: ResizeObserver | undefined;
 	private respawningWorldCharacterIds = new Set<string>();
 
 	constructor(worldId: WorldId, debug: boolean = false) {
@@ -101,27 +102,33 @@ export class WorldContext {
 			},
 		});
 
-		Composite.add(this.engine.world, this.mouseConstraint);
 		this.render.mouse = mouse;
 
-		// 지형 로드 (비동기)
-		if (this.terrain) {
-			this.terrainBody.load(this.supabase, this.terrain).then(() => {
-				if (this.terrainBody.bodies.length > 0) {
-					Composite.add(this.engine.world, this.terrainBody.bodies);
-					this.terrainBody.setDebug(this.debug);
-				}
+		// ResizeObserver 설정
+		this.resizeObserver = new ResizeObserver((entries) => {
+			const entry = entries[0];
+			if (!entry) return;
 
+			const { width, height } = entry.contentRect;
+			if (width === 0 || height === 0) return;
+
+			if (this.render) {
+				this.render.canvas.width = width;
+				this.render.canvas.height = height;
+				this.render.options.width = width;
+				this.render.options.height = height;
 				this.updateRenderBounds();
-			});
-		}
-
-		// 초기 건물/캐릭터 바디 생성은 world.svelte에서 $effect로 처리됨
-
-		Render.run(this.render);
-		this.updateRenderBounds();
+			}
+		});
+		this.resizeObserver.observe(container);
 
 		this.initialized = true;
+
+		// 지형 및 엔티티 로드
+		this.reload();
+
+		// 렌더링 시작
+		Render.run(this.render);
 
 		// 물리 시뮬레이션 시작
 		Matter.Events.on(this.engine, 'beforeUpdate', () => this.checkWorldCharacterBounds());
@@ -130,6 +137,7 @@ export class WorldContext {
 
 		return () => {
 			this.initialized = false;
+			this.resizeObserver?.disconnect();
 			Runner.stop(this.runner);
 			Engine.clear(this.engine);
 
@@ -140,7 +148,7 @@ export class WorldContext {
 		};
 	}
 
-	async reload() {
+	reload() {
 		if (!this.initialized) {
 			console.warn('Cannot reload terrain: WorldContext not initialized');
 			return;
@@ -155,28 +163,29 @@ export class WorldContext {
 		Composite.clear(this.engine.world, false);
 
 		// 지형 로드
-		await this.terrainBody.load(this.supabase, this.terrain);
-		if (this.terrainBody.bodies.length > 0) {
-			Composite.add(this.engine.world, this.terrainBody.bodies);
-			this.terrainBody.setDebug(this.debug);
-		}
+		this.terrainBody.load(this.supabase, this.terrain).then(() => {
+			if (this.terrainBody.bodies.length > 0) {
+				Composite.add(this.engine.world, this.terrainBody.bodies);
+				this.terrainBody.setDebug(this.debug);
+			}
 
-		// 건물 바디 재추가
-		for (const entity of Object.values(this.worldBuildingEntities)) {
-			entity.addToWorld();
-		}
+			// 건물 바디 재추가
+			for (const entity of Object.values(this.worldBuildingEntities)) {
+				entity.addToWorld();
+			}
 
-		// 캐릭터 바디 재추가
-		for (const entity of Object.values(this.worldCharacterEntities)) {
-			entity.addToWorld();
-		}
+			// 캐릭터 바디 재추가
+			for (const entity of Object.values(this.worldCharacterEntities)) {
+				entity.addToWorld();
+			}
 
-		// mouseConstraint 재추가
-		if (this.mouseConstraint) {
-			Composite.add(this.engine.world, this.mouseConstraint);
-		}
+			// mouseConstraint 재추가
+			if (this.mouseConstraint) {
+				Composite.add(this.engine.world, this.mouseConstraint);
+			}
 
-		this.updateRenderBounds();
+			this.updateRenderBounds();
+		});
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
@@ -203,11 +212,6 @@ export class WorldContext {
 
 	// 캐릭터 바디 동기화
 	syncWorldCharacterEntities(worldCharacters: Record<WorldCharacterId, WorldCharacter>) {
-		if (!this.initialized) {
-			console.warn('Cannot load terrain: WorldContext not initialized');
-			return;
-		}
-
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.worldCharacterEntities)) {
 			if (!worldCharacters[entity.id]) {
@@ -233,11 +237,6 @@ export class WorldContext {
 
 	// 건물 엔티티 동기화
 	syncWorldBuildingEntities(worldBuildings: Record<WorldBuildingId, WorldBuilding>) {
-		if (!this.initialized) {
-			console.warn('Cannot load terrain: WorldContext not initialized');
-			return;
-		}
-
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.worldBuildingEntities)) {
 			if (!worldBuildings[entity.id]) {

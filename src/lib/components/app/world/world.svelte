@@ -66,10 +66,13 @@
 	$effect(() => {
 		const buildings = Object.values($worldBuildingStore.data)
 			.filter((b) => b.world_id === worldId)
-			.reduce((acc, b) => {
-				acc[b.id] = b;
-				return acc;
-			}, {} as Record<WorldBuildingId, WorldBuilding>);
+			.reduce(
+				(acc, b) => {
+					acc[b.id] = b;
+					return acc;
+				},
+				{} as Record<WorldBuildingId, WorldBuilding>
+			);
 		worldContext.syncWorldBuildingEntities(buildings);
 	});
 
@@ -77,10 +80,13 @@
 	$effect(() => {
 		const characters = Object.values($worldCharacterStore.data)
 			.filter((c) => c.world_id === worldId)
-			.reduce((acc, c) => {
-				acc[c.id] = c;
-				return acc;
-			}, {} as Record<WorldCharacterId, WorldCharacter>);
+			.reduce(
+				(acc, c) => {
+					acc[c.id] = c;
+					return acc;
+				},
+				{} as Record<WorldCharacterId, WorldCharacter>
+			);
 		worldContext.syncWorldCharacterEntities(characters);
 	});
 
