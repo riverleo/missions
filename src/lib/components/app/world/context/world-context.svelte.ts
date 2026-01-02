@@ -17,7 +17,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
-import { WorldPlanning } from './world-planning.svelte';
+import { WorldBlueprint } from './world-blueprint.svelte';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
@@ -29,7 +29,7 @@ export class WorldContext {
 	readonly event: WorldEvent;
 	readonly terrainBody = new TerrainBody();
 	readonly worldId: WorldId;
-	readonly planning = new WorldPlanning();
+	readonly blueprint: WorldBlueprint;
 
 	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
 	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
@@ -50,7 +50,7 @@ export class WorldContext {
 		this.runner = Runner.create();
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
-		this.planning.setWorldContext(this);
+		this.blueprint = new WorldBlueprint(this);
 	}
 
 	private get terrain(): Terrain | null | undefined {

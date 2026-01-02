@@ -1,33 +1,26 @@
 import { get } from 'svelte/store';
-import type { Building } from '$lib/types';
 import { getBuildingOccupiedCells, getOverlappingCells, type TileCell } from '../tiles';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import type { WorldContext } from './world-context.svelte';
+import type { WorldBlueprintCursor } from './index';
 
-export interface WorldPlanningPlacement {
-	building: Building;
-	tileX: number;
-	tileY: number;
-}
+export class WorldBlueprint {
+	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
 
-export class WorldPlanning {
-	showGrid = $state(false);
-	placement = $state<WorldPlanningPlacement | undefined>(undefined);
+	private context: WorldContext;
 
-	private worldContext: WorldContext | undefined;
-
-	setWorldContext(context: WorldContext) {
-		this.worldContext = context;
+	constructor(context: WorldContext) {
+		this.context = context;
 	}
 
 	/**
 	 * 현재 배치하려는 건물과 기존 건물들의 겹치는 셀들 계산
 	 */
 	getOverlappingCells(): TileCell[] {
-		if (!this.placement || !this.worldContext) return [];
+		if (!this.cursor || !this.context) return [];
 
-		const { building, tileX, tileY } = this.placement;
+		const { building, tileX, tileY } = this.cursor;
 		const placementCells = getBuildingOccupiedCells(
 			tileX,
 			tileY,
@@ -42,7 +35,7 @@ export class WorldPlanning {
 
 		// worldId 필터링
 		const worldBuildings = Object.values(worldBuildingStore).filter(
-			(b) => !this.worldContext?.worldId || b.world_id === this.worldContext.worldId
+			(b) => !this.context?.worldId || b.world_id === this.context.worldId
 		);
 
 		for (const worldBuilding of worldBuildings) {

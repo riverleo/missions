@@ -23,11 +23,6 @@
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
 	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
-	// 건물 선택 시 planning 그리드 표시
-	$effect(() => {
-		world.planning.showGrid = !!$store.selectedBuildingId;
-	});
-
 	// 시작지점 좌표 (카메라 변환 적용)
 	const startLeft = $derived(
 		terrain?.start_x != null
@@ -69,7 +64,7 @@
 		$store.selectedBuildingId ? $buildingStore.data[$store.selectedBuildingId] : undefined
 	);
 
-	// 건물 선택 시 world.planning.placement 업데이트
+	// 건물 선택 시 world.blueprint.cursor 업데이트
 	$effect(() => {
 		if (selectedBuilding) {
 			const pos = mouseWorldPos();
@@ -79,13 +74,13 @@
 				selectedBuilding.tile_cols,
 				selectedBuilding.tile_rows
 			);
-			world.planning.placement = {
+			world.blueprint.cursor = {
 				building: selectedBuilding,
 				tileX,
 				tileY,
 			};
 		} else {
-			world.planning.placement = undefined;
+			world.blueprint.cursor = undefined;
 		}
 	});
 
@@ -114,7 +109,7 @@
 
 	function onclickBuildingOverlay() {
 		// 겹치는 셀이 있으면 배치하지 않음
-		if (!world.planning.canPlace) return;
+		if (!world.blueprint.canPlace) return;
 
 		const pos = mouseWorldPos();
 		if (selectedBuilding) {

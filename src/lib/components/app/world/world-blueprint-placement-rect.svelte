@@ -16,15 +16,15 @@
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
 	const overlappingCellSet = $derived(() => {
-		const cells = world.planning.getOverlappingCells();
+		const cells = world.blueprint.getOverlappingCells();
 		return new Set(cells.map((c) => `${c.col},${c.row}`));
 	});
 
 	// 셀이 겹치는지 확인 (절대 좌표 기준)
 	function isCellOverlapping(localCol: number, localRow: number): boolean {
-		if (!world.planning.placement) return false;
+		if (!world.blueprint.cursor) return false;
 
-		const { tileX, tileY } = world.planning.placement;
+		const { tileX, tileY } = world.blueprint.cursor;
 		const absoluteCol = tileX + localCol;
 		const absoluteRow = tileY + localRow;
 

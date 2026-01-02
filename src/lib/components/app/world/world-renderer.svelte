@@ -8,7 +8,7 @@
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
 	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
-	import WorldPlanning from './world-planning.svelte';
+	import WorldBlueprint from './world-blueprint.svelte';
 	import { cn } from '$lib/utils';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -91,8 +91,8 @@
 				alt={terrain?.title}
 			/>
 		{/if}
-		{#if world.planning.showGrid}
-			<WorldPlanning width={terrainBody.width} height={terrainBody.height} />
+		{#if world.blueprint.cursor}
+			<WorldBlueprint width={terrainBody.width} height={terrainBody.height} />
 		{/if}
 		{#each buildings as building (building.id)}
 			{@const entity = world.worldBuildingEntities[building.id]}
