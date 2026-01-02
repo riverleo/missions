@@ -237,14 +237,11 @@ export class WorldContext {
 			return;
 		}
 
-		let changed = false;
-
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.worldCharacterEntities)) {
 			if (!worldCharacters[entity.id]) {
 				entity.removeFromWorld();
 				delete this.worldCharacterEntities[entity.id];
-				changed = true;
 			}
 		}
 
@@ -255,17 +252,11 @@ export class WorldContext {
 					const entity = new WorldCharacterEntity(character.id);
 					entity.addToWorld();
 					this.worldCharacterEntities[character.id] = entity;
-					changed = true;
 				} catch (error) {
 					// 스토어에 없는 삭제된 캐릭터는 건너뜀 (localStorage 정리 필요)
 					console.warn('Skipping character creation:', error);
 				}
 			}
-		}
-
-		// 변경이 있을 때만 재할당 (reactivity 트리거)
-		if (changed) {
-			this.worldCharacterEntities = { ...this.worldCharacterEntities };
 		}
 	}
 
@@ -276,14 +267,11 @@ export class WorldContext {
 			return;
 		}
 
-		let changed = false;
-
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.worldBuildingEntities)) {
 			if (!worldBuildings[entity.id]) {
 				entity.removeFromWorld();
 				delete this.worldBuildingEntities[entity.id];
-				changed = true;
 			}
 		}
 
@@ -294,17 +282,11 @@ export class WorldContext {
 					const entity = new WorldBuildingEntity(worldBuilding.id);
 					entity.addToWorld();
 					this.worldBuildingEntities[worldBuilding.id] = entity;
-					changed = true;
 				} catch (error) {
 					// 스토어에 없는 삭제된 건물은 건너뜀
 					console.warn('Skipping building creation:', error);
 				}
 			}
-		}
-
-		// 변경이 있을 때만 재할당 (reactivity 트리거)
-		if (changed) {
-			this.worldBuildingEntities = { ...this.worldBuildingEntities };
 		}
 	}
 
