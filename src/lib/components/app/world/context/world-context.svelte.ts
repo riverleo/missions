@@ -16,7 +16,6 @@ import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
-import { Pathfinder } from '../pathfinder';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldPlanning } from './world-planning.svelte';
 
@@ -42,8 +41,7 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
-	private resizeObserver: ResizeObserver | undefined;
-	private respawningIds = new Set<string>();
+	private respawningWorldCharacterIds = new Set<string>();
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.supabase = useServerPayload().supabase;
@@ -114,24 +112,6 @@ export class WorldContext {
 		Composite.add(this.engine.world, this.mouseConstraint);
 		this.render.mouse = mouse;
 
-		// ResizeObserver 설정
-		this.resizeObserver = new ResizeObserver((entries) => {
-			const entry = entries[0];
-			if (!entry) return;
-
-			const { width, height } = entry.contentRect;
-			if (width === 0 || height === 0) return;
-
-			if (this.render) {
-				this.render.canvas.width = width;
-				this.render.canvas.height = height;
-				this.render.options.width = width;
-				this.render.options.height = height;
-				this.updateRenderBounds();
-			}
-		});
-		this.resizeObserver.observe(container);
-
 		// 지형 로드 (비동기)
 		if (this.terrain) {
 			this.terrainBody.load(this.supabase, this.terrain).then(() => {
@@ -158,7 +138,6 @@ export class WorldContext {
 
 		return () => {
 			this.initialized = false;
-			this.resizeObserver?.disconnect();
 			Runner.stop(this.runner);
 			Engine.clear(this.engine);
 
@@ -326,8 +305,8 @@ export class WorldContext {
 	}
 
 	private respawnWorldCharacterEntity(worldCharacterId: WorldCharacterId) {
-		if (this.respawningIds.has(worldCharacterId)) return;
-		this.respawningIds.add(worldCharacterId);
+		if (this.respawningWorldCharacterIds.has(worldCharacterId)) return;
+		this.respawningWorldCharacterIds.add(worldCharacterId);
 
 		const worldCharacterEntity = this.worldCharacterEntities[worldCharacterId];
 		if (!worldCharacterEntity) return;
@@ -351,7 +330,7 @@ export class WorldContext {
 			// 다시 world에 추가
 			worldCharacterEntity.addToWorld();
 
-			this.respawningIds.delete(worldCharacterId);
+			this.respawningWorldCharacterIds.delete(worldCharacterId);
 		}, 1000);
 	}
 }
