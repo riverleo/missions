@@ -44,13 +44,13 @@
 		worldContext.oncamerachange = oncamerachange;
 	});
 
-	// terrainId 변경 시 load 호출 (초기 마운트 제외)
+	// terrainId 변경 시 reload 호출 (초기 마운트 제외)
 	let prevTerrainId: typeof terrainId | undefined = undefined;
 	$effect(() => {
 		if (terrainId !== prevTerrainId) {
 			// 초기 마운트가 아닐 때만 reload
 			if (prevTerrainId !== undefined && terrainId) {
-				worldContext.load();
+				worldContext.reload();
 			}
 			prevTerrainId = terrainId;
 		}

@@ -71,8 +71,8 @@ export class WorldContext {
 		}
 	}
 
-	// 월드 마운트, cleanup 함수 반환
-	mount(container: HTMLDivElement) {
+	// 월드 로드, cleanup 함수 반환
+	load(container: HTMLDivElement) {
 		this.container = container;
 
 		this.render = Render.create({
@@ -148,14 +148,14 @@ export class WorldContext {
 		};
 	}
 
-	async load() {
+	async reload() {
 		if (!this.initialized) {
-			console.warn('Cannot load terrain: WorldContext not initialized');
+			console.warn('Cannot reload terrain: WorldContext not initialized');
 			return;
 		}
 
 		if (!this.terrain) {
-			console.warn('Cannot load terrain: No terrain found');
+			console.warn('Cannot reload terrain: No terrain found');
 			return;
 		}
 
