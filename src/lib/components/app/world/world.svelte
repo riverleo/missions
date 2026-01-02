@@ -1,10 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import type { WorldId, Terrain } from '$lib/types';
+	import type { WorldId } from '$lib/types';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
@@ -12,8 +11,7 @@
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width?: number;
 		height?: number;
-		worldId?: WorldId;
-		terrain?: Terrain;
+		worldId: WorldId;
 		debug?: boolean;
 		children?: Snippet;
 		oncamerachange?: (camera: Camera) => void;
@@ -23,7 +21,6 @@
 		width = 800,
 		height = 400,
 		worldId,
-		terrain: terrainProp,
 		debug = false,
 		children,
 		oncamerachange,
@@ -33,15 +30,11 @@
 	const { supabase } = useServerPayload();
 	const worldContext = new WorldContext(supabase, debug, worldId);
 	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
-	const { fetchAllStatus } = useScenario();
 
-	// worldId가 있으면 useWorld에서 데이터 조회, 없으면 props 사용
+	// worldId로 useWorld에서 terrain 조회
 	const terrain = $derived(() => {
-		if (worldId) {
-			const world = $worldStore.data[worldId];
-			return world?.terrain ?? null;
-		}
-		return terrainProp ?? null;
+		const world = $worldStore.data[worldId];
+		return world?.terrain ?? null;
 	});
 
 	// oncamerachange prop 변경 시 worldContext 업데이트

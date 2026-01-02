@@ -48,7 +48,7 @@ export class WorldBuildingEntity extends Entity {
 
 		// 사각형 static 바디 생성
 		this.body = Bodies.rectangle(x, y, width, height, {
-			label: `building-${worldBuilding.id}`,
+			label: id,
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,

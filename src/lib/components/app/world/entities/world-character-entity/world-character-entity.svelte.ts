@@ -42,6 +42,7 @@ export class WorldCharacterEntity extends Entity {
 		const vertices = createEllipseVertices(0, 0, rx, ry);
 
 		this.body = Bodies.fromVertices(0, 0, [vertices], {
+			label: id,
 			restitution: 0.1,
 			friction: 0.8,
 			frictionAir: 0.1,

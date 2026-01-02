@@ -41,7 +41,6 @@ export class WorldContext {
 	pathfinder = $state<Pathfinder | undefined>(undefined);
 	debug = $state(false);
 	initialized = $state(false);
-	reloading = $state(false);
 	container: HTMLDivElement | undefined = $state.raw(undefined);
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
@@ -111,9 +110,6 @@ export class WorldContext {
 		});
 
 		Composite.add(this.engine.world, this.mouseConstraint);
-		console.log(
-			`[mount] mouseConstraint added, total bodies: ${Composite.allBodies(this.engine.world).length}`
-		);
 		this.render.mouse = mouse;
 
 		// ResizeObserver 설정
@@ -139,16 +135,9 @@ export class WorldContext {
 			this.terrainBody.load(this.supabase, this.terrain).then(() => {
 				if (this.terrainBody.bodies.length > 0) {
 					Composite.add(this.engine.world, this.terrainBody.bodies);
-					console.log(
-						`[mount] terrain bodies added: ${this.terrainBody.bodies.length}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-					);
 					this.terrainBody.setDebug(this.debug);
 				}
 				this.pathfinder = new Pathfinder(this.terrainBody.width, this.terrainBody.height);
-
-				// 중복 바디 체크
-				const duplicateCount = this.checkDuplicateBodies();
-				console.log(`[mount] duplicate check complete, duplicates found: ${duplicateCount}`);
 
 				this.updateRenderBounds();
 			});
@@ -182,8 +171,6 @@ export class WorldContext {
 	async reload() {
 		if (!this.terrain) return;
 
-		this.reloading = true;
-
 		// 기존 bodies 제거
 		Composite.clear(this.engine.world, false);
 
@@ -191,9 +178,6 @@ export class WorldContext {
 		await this.terrainBody.load(this.supabase, this.terrain);
 		if (this.terrainBody.bodies.length > 0) {
 			Composite.add(this.engine.world, this.terrainBody.bodies);
-			console.log(
-				`[reload] terrain bodies added: ${this.terrainBody.bodies.length}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-			);
 			this.terrainBody.setDebug(this.debug);
 		}
 
@@ -204,51 +188,18 @@ export class WorldContext {
 		for (const entity of Object.values(this.worldBuildingEntities)) {
 			entity.addToWorld();
 		}
-		console.log(
-			`[reload] buildings re-added: ${Object.keys(this.worldBuildingEntities).length}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-		);
 
 		// 캐릭터 바디 재추가
 		for (const entity of Object.values(this.worldCharacterEntities)) {
 			entity.addToWorld();
 		}
-		console.log(
-			`[reload] characters re-added: ${Object.keys(this.worldCharacterEntities).length}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-		);
-
 
 		// mouseConstraint 재추가
 		if (this.mouseConstraint) {
 			Composite.add(this.engine.world, this.mouseConstraint);
-			console.log(
-				`[reload] mouseConstraint added, total bodies: ${Composite.allBodies(this.engine.world).length}`
-			);
 		}
-
-		// 중복 바디 체크
-		const duplicateCount = this.checkDuplicateBodies();
-		console.log(`[reload] duplicate check complete, duplicates found: ${duplicateCount}`);
-
-		this.reloading = false;
 
 		this.updateRenderBounds();
-	}
-
-	// 중복 바디 체크
-	private checkDuplicateBodies() {
-		const allBodies = Composite.allBodies(this.engine.world);
-		const bodyIdCounts = new Map<number, number>();
-
-		for (const body of allBodies) {
-			const count = bodyIdCounts.get(body.id) || 0;
-			bodyIdCounts.set(body.id, count + 1);
-		}
-
-		const duplicates = Array.from(bodyIdCounts.entries()).filter(([_, count]) => count > 1);
-		if (duplicates.length > 0) {
-			console.warn('[checkDuplicateBodies] Duplicate body IDs found:', duplicates);
-		}
-		return duplicates.length;
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
@@ -275,7 +226,7 @@ export class WorldContext {
 
 	// 캐릭터 바디 동기화
 	syncWorldCharacterEntities(characters: Record<WorldCharacterId, WorldCharacter>) {
-		if (!this.initialized || this.reloading) return;
+		if (!this.initialized) return;
 
 		let changed = false;
 
@@ -296,9 +247,6 @@ export class WorldContext {
 					entity.addToWorld();
 					this.worldCharacterEntities[character.id] = entity;
 					changed = true;
-					console.log(
-						`[syncWorldCharacterEntities] character added: ${character.id}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-					);
 				} catch (error) {
 					// 스토어에 없는 삭제된 캐릭터는 건너뜀 (localStorage 정리 필요)
 					console.warn('Skipping character creation:', error);
@@ -314,7 +262,7 @@ export class WorldContext {
 
 	// 건물 엔티티 동기화
 	syncWorldBuildingEntities(buildings: Record<WorldBuildingId, WorldBuilding>) {
-		if (!this.initialized || this.reloading) return;
+		if (!this.initialized) return;
 
 		let changed = false;
 
@@ -335,9 +283,6 @@ export class WorldContext {
 					entity.addToWorld();
 					this.worldBuildingEntities[worldBuilding.id] = entity;
 					changed = true;
-					console.log(
-						`[syncWorldBuildingEntities] building added: ${worldBuilding.id}, total bodies: ${Composite.allBodies(this.engine.world).length}`
-					);
 				} catch (error) {
 					// 스토어에 없는 삭제된 건물은 건너뜀
 					console.warn('Skipping building creation:', error);
