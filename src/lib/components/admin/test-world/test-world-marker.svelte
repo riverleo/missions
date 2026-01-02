@@ -7,7 +7,7 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { snapPointToBuildingCenter, snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
+	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
 	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
 
 	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
@@ -68,13 +68,6 @@
 	const selectedBuilding = $derived(
 		$store.selectedBuildingId ? $buildingStore.data[$store.selectedBuildingId] : undefined
 	);
-
-	// 스냅된 건물 배치 좌표 (월드 좌표)
-	const snappedWorldPos = $derived(() => {
-		const pos = mouseWorldPos();
-		if (!selectedBuilding) return { x: pos.x, y: pos.y };
-		return snapPointToBuildingCenter(pos.x, pos.y, selectedBuilding.tile_cols, selectedBuilding.tile_rows);
-	});
 
 	// 건물 선택 시 world.planning.placement 업데이트
 	$effect(() => {
