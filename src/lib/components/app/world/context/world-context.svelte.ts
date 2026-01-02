@@ -1,4 +1,5 @@
 import Matter from 'matter-js';
+import { get } from 'svelte/store';
 import type {
 	Supabase,
 	Terrain,
@@ -8,6 +9,8 @@ import type {
 	WorldBuildingId,
 	WorldId,
 } from '$lib/types';
+import { useWorld } from '$lib/hooks/use-world';
+import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
@@ -26,13 +29,7 @@ export class WorldContext {
 	readonly camera: Camera;
 	readonly event: WorldEvent;
 	readonly terrainBody = new TerrainBody();
-	readonly worldId?: WorldId;
-
-	terrain = $state<Terrain | undefined>();
-
-	get terrainAssetUrl() {
-		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
-	}
+	readonly worldId: WorldId;
 
 	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
 	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
@@ -49,8 +46,8 @@ export class WorldContext {
 	private resizeObserver: ResizeObserver | undefined;
 	private respawningIds = new Set<string>();
 
-	constructor(supabase: Supabase, debug: boolean, worldId?: WorldId) {
-		this.supabase = supabase;
+	constructor(worldId: WorldId, debug: boolean = false) {
+		this.supabase = useServerPayload().supabase;
 		this.debug = debug;
 		this.worldId = worldId;
 		this.engine = Engine.create();
@@ -58,6 +55,14 @@ export class WorldContext {
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
 		this.planning.setWorldContext(this);
+	}
+
+	get terrain(): Terrain | null | undefined {
+		return get(useWorld().worldStore).data[this.worldId]?.terrain;
+	}
+
+	get terrainAssetUrl(): string | undefined {
+		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
 
 	// debug 변경 시 모든 엔티티 업데이트
@@ -168,8 +173,16 @@ export class WorldContext {
 		};
 	}
 
-	async reload() {
-		if (!this.terrain) return;
+	async load() {
+		if (!this.initialized) {
+			console.warn('Cannot load terrain: WorldContext not initialized');
+			return;
+		}
+
+		if (!this.terrain) {
+			console.warn('Cannot load terrain: No terrain found');
+			return;
+		}
 
 		// 기존 bodies 제거
 		Composite.clear(this.engine.world, false);
