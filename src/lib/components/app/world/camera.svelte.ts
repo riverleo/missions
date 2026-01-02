@@ -62,7 +62,7 @@ export class Camera {
 	}
 
 	// 팬 업데이트
-	updatePan(screenX: number, screenY: number): void {
+	applyPan(screenX: number, screenY: number): void {
 		const dx = screenX - this.panStartX;
 		const dy = screenY - this.panStartY;
 		this.x = this.panStartCameraX - dx / this.zoom;

@@ -52,7 +52,7 @@ export class WorldEvent {
 
 		if (!this.camera.isPanning) return;
 
-		this.camera.updatePan(e.clientX, e.clientY);
+		this.camera.applyPan(e.clientX, e.clientY);
 	};
 
 	onmouseup = () => {
