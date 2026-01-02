@@ -101,14 +101,6 @@ export class WorldContext {
 			},
 		});
 
-		// 드래그 종료 시 velocity 완전히 제거
-		Matter.Events.on(this.mouseConstraint, 'enddrag', (event: any) => {
-			if (event.body) {
-				Body.setVelocity(event.body, { x: 0, y: 0 });
-				Body.setAngularVelocity(event.body, 0);
-			}
-		});
-
 		Composite.add(this.engine.world, this.mouseConstraint);
 		this.render.mouse = mouse;
 
