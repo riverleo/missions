@@ -767,11 +767,20 @@ needs (욕구 정의)
   - 점프 불가능 (y축 자유 이동 제한)
 - **주요 기능**:
   - SVG 지형 로딩 및 물리 바디 생성
-  - 반응형 캔버스 (ResizeObserver로 컨테이너 크기 감지)
+  - 고정 크기 캔버스 (width/height props로 제어)
   - 디버그 모드로 물리 충돌 영역 시각화
 - **Props**:
-  - `terrain?: Terrain` - 지형 데이터 (game_asset 포함)
+  - `width: number` - 월드 너비 (기본값: 800)
+  - `height: number` - 월드 높이 (기본값: 400)
+  - `worldId: WorldId` - 월드 ID
   - `debug?: boolean` - 디버그 모드 (물리 바디 표시)
+  - `oncamerachange?: (camera: Camera) => void` - 카메라 변경 콜백
+- **WorldContext 클래스**:
+  - `load({ element, width?, height? })`: 월드 초기화
+    - element: HTMLDivElement (Matter.js 렌더러가 붙을 DOM)
+    - width, height: 기본값 각각 800, 400
+  - `reload()`: 지형 및 엔티티 재로드 (terrain 변경 시)
+  - `blueprint`: WorldContextBlueprint 인스턴스 (건물 배치 미리보기)
 - **SVG → 물리 바디 변환 로직**:
   - `fill && stroke` 둘 다 있으면: fill은 다각형, stroke는 선
   - `fill`만 또는 `stroke`만 있으면: 선으로 처리 (벡터 브러쉬 대응)
@@ -794,6 +803,43 @@ needs (욕구 정의)
   - `setWalkable(tileX, tileY, walkable)`: 타일 이동 가능 여부 설정
   - `blockRect(tileX, tileY, tileCols, tileRows)`: 사각형 영역 이동 불가 설정
 - **TODO**: 사다리 시스템 구현 시 walkable 그리드 로직 추가 필요
+
+### WorldBlueprint 시스템 (건물 배치 미리보기)
+
+- **위치**: `$lib/components/app/world/context/world-context-blueprint.svelte.ts`
+- **목적**: 건물을 배치하기 전에 타일 그리드와 미리보기를 표시
+- **WorldContextBlueprint 클래스**:
+  - `cursor: WorldBlueprintCursor | undefined` - 현재 마우스 커서를 따라다니는 건물 미리보기
+    - `building`: 배치할 건물 데이터
+    - `tileX`, `tileY`: 좌상단 타일 좌표
+  - `getOverlappingCells()`: 현재 커서와 기존 건물이 겹치는 셀 계산
+  - `canPlace`: 겹치는 셀이 없는지 여부 (getter)
+- **WorldBlueprintCursor 타입**:
+  - `$lib/components/app/world/context/index.ts`에 정의
+  - 인터페이스: `{ building: Building; tileX: number; tileY: number }`
+- **컴포넌트 구조**:
+  - `world-blueprint.svelte`: 타일 그리드 렌더링 + WorldBlueprintCursor 포함
+  - `world-blueprint-cursor.svelte`: 건물 미리보기 + 셀 하이라이트 (겹침 표시)
+- **사용 패턴**:
+  - `cursor`가 있으면 자동으로 그리드와 미리보기 표시
+  - `cursor`를 `undefined`로 설정하면 비활성화
+  - 예시:
+    ```typescript
+    // 건물 배치 시작
+    world.blueprint.cursor = {
+      building: selectedBuilding,
+      tileX: mouseToTileX,
+      tileY: mouseToTileY,
+    };
+
+    // 배치 가능 여부 확인
+    if (world.blueprint.canPlace) {
+      // 건물 배치 로직
+    }
+
+    // 배치 종료
+    world.blueprint.cursor = undefined;
+    ```
 
 ## Storage 유틸리티
 
