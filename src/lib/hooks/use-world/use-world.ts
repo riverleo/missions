@@ -54,18 +54,17 @@ function createWorldStore() {
 			const player = get(usePlayer().current);
 			if (!player) return;
 
-			// World 조회 (player_id로 필터링, terrain join)
+			// World 조회 (player_id로 필터링)
 			const { data: worldData, error: worldError } = await supabase
 				.from('worlds')
-				.select('*, terrain:terrains(*)')
-				.eq('player_id', player.id)
-				.returns<World[]>();
+				.select('*')
+				.eq('player_id', player.id);
 
 			if (worldError) throw worldError;
 
 			const worldRecord: Record<WorldId, World> = {};
 			for (const world of worldData ?? []) {
-				worldRecord[world.id] = world;
+				worldRecord[world.id as WorldId] = world as World;
 			}
 
 			worldStore.set({

@@ -3,6 +3,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
 	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
@@ -27,10 +28,12 @@
 	const world = useWorldContext();
 	const { terrainBody, camera, event } = world;
 	const { worldStore, worldBuildingStore, worldCharacterStore } = useWorld();
+	const { store: terrainStore } = useTerrain();
 	const { supabase } = useServerPayload();
 
-	// terrain을 worldStore에서 직접 구독
-	const terrain = $derived($worldStore.data[world.worldId]?.terrain);
+	// terrain을 terrainStore에서 구독
+	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
+	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
 	// terrain asset URL을 $derived로 관리
 	const terrainAssetUrl = $derived(

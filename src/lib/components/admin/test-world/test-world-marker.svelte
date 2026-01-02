@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
+	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
@@ -13,12 +14,14 @@
 		useWorldTest();
 	const world = useWorldContext();
 	const { worldStore } = useWorld();
+	const { store: terrainStore } = useTerrain();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
 
-	// terrain을 worldStore에서 직접 구독
-	const terrain = $derived($worldStore.data[world.worldId]?.terrain);
+	// terrain을 terrainStore에서 구독
+	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
+	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
 	// 건물 선택 시 planning 그리드 표시
 	$effect(() => {

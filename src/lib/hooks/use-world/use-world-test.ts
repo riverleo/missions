@@ -7,6 +7,7 @@ import type {
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldId,
+	UserId,
 	PlayerId,
 	ScenarioId,
 	TerrainId,
@@ -80,7 +81,7 @@ function loadFromStorage(): WorldTestStoreState {
 			const world = persisted.worlds?.[TEST_WORLD_ID];
 			return {
 				...defaultState,
-				selectedTerrainId: world?.terrain?.id,
+				selectedTerrainId: world?.terrain_id ?? undefined,
 				worlds: persisted.worlds ?? {},
 				worldCharacters: persisted.worldCharacters ?? {},
 				worldBuildings: persisted.worldBuildings ?? {},
@@ -171,10 +172,10 @@ function createTestWorldStore() {
 
 			const newWorld: World = {
 				id: TEST_WORLD_ID,
-				user_id: crypto.randomUUID(),
+				user_id: crypto.randomUUID() as UserId,
 				player_id: TEST_PLAYER_ID,
 				scenario_id: TEST_SCENARIO_ID,
-				terrain: terrain,
+				terrain_id: terrain.id,
 				name: 'Test World',
 				created_at: new Date().toISOString(),
 			} as World;

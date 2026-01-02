@@ -3,6 +3,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { WorldId } from '$lib/types';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
+	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
@@ -28,19 +29,21 @@
 
 	const worldContext = new WorldContext(worldId, debug);
 	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
+	const { store: terrainStore } = useTerrain();
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
+	const terrainId = $derived(world?.terrain_id);
+	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
 	// oncamerachange prop 변경 시 worldContext 업데이트
 	$effect(() => {
 		worldContext.oncamerachange = oncamerachange;
 	});
 
-	// world의 terrain 변경 시 load 호출
+	// terrain 변경 시 load 호출
 	$effect(() => {
-		const currentTerrain = world?.terrain;
-		if (currentTerrain) {
+		if (terrain) {
 			worldContext.load();
 		}
 	});

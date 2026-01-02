@@ -10,6 +10,7 @@ import type {
 	WorldId,
 } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
+import { useTerrain } from '$lib/hooks/use-terrain';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
@@ -57,7 +58,9 @@ export class WorldContext {
 	}
 
 	private get terrain(): Terrain | null | undefined {
-		return get(useWorld().worldStore).data[this.worldId]?.terrain;
+		const world = get(useWorld().worldStore).data[this.worldId];
+		if (!world?.terrain_id) return null;
+		return get(useTerrain().store).data[world.terrain_id];
 	}
 
 	// debug 변경 시 모든 엔티티 업데이트

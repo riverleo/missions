@@ -35,6 +35,7 @@ export type NarrativeNodeId = Brand<string, 'NarrativeNodeId'>;
 export type NarrativeNodeChoiceId = Brand<string, 'NarrativeNodeChoiceId'>;
 export type NarrativeDiceRollId = Brand<string, 'NarrativeDiceRollId'>;
 export type DiceId = Brand<string, 'DiceId'>;
+export type UserId = Brand<string, 'UserId'>;
 export type PlayerId = Brand<string, 'PlayerId'>;
 export type PlayerScenarioId = Brand<string, 'PlayerScenarioId'>;
 export type PlayerChapterId = Brand<string, 'PlayerChapterId'>;
@@ -556,21 +557,24 @@ export type CharacterUpdate = Omit<
 
 // World types
 type WorldRow = Tables<'worlds'>;
-export type World = Omit<WorldRow, 'id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type World = Omit<WorldRow, 'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
 	id: WorldId;
+	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
-	terrain: Terrain | null;
+	terrain_id: TerrainId | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
-export type WorldInsert = Omit<WorldInsertRow, 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type WorldInsert = Omit<WorldInsertRow, 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id?: TerrainId | null;
 };
 type WorldUpdateRow = TablesUpdate<'worlds'>;
-export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
 	id?: WorldId;
+	user_id?: UserId;
 	player_id?: PlayerId;
 	scenario_id?: ScenarioId;
 	terrain_id?: TerrainId | null;
