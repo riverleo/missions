@@ -1,4 +1,5 @@
 import { TILE_SIZE } from './constants';
+import type { Building } from '$lib/types';
 
 /**
  * 픽셀 좌표를 타일 인덱스로 변환
@@ -62,6 +63,29 @@ export function snapPointToBuildingCenter(
 	return {
 		x: snapToBuildingCenter(x, cols),
 		y: snapToBuildingCenter(y, rows),
+	};
+}
+
+/**
+ * 마우스 위치로부터 건물의 좌상단 타일 인덱스 계산
+ */
+export function snapToTopLeftTile(pixel: number, tileCount: number): number {
+	const centerPixel = snapToBuildingCenter(pixel, tileCount);
+	return pixelToTile(centerPixel) - Math.floor(tileCount / 2);
+}
+
+/**
+ * 마우스 위치로부터 건물의 좌상단 타일 인덱스 계산 (x, y 동시 처리)
+ */
+export function snapPointToTopLeftTile(
+	x: number,
+	y: number,
+	cols: number,
+	rows: number
+): { tileX: number; tileY: number } {
+	return {
+		tileX: snapToTopLeftTile(x, cols),
+		tileY: snapToTopLeftTile(y, rows),
 	};
 }
 

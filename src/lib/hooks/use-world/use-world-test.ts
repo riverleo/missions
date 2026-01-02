@@ -277,21 +277,18 @@ function createTestWorldStore() {
 		);
 	}
 
-	function addWorldBuilding(buildingId: BuildingId, x: number, y: number) {
-		// 픽셀 좌표를 타일 좌표로 변환
-		const tile_x = Math.floor(x / TILE_SIZE);
-		const tile_y = Math.floor(y / TILE_SIZE);
-
+	function addWorldBuilding(buildingId: BuildingId, tileX: number, tileY: number) {
 		const worldBuilding: WorldBuilding = {
 			id: crypto.randomUUID() as WorldBuildingId,
-			user_id: crypto.randomUUID(),
+			user_id: crypto.randomUUID() as UserId,
 			player_id: TEST_PLAYER_ID,
 			scenario_id: TEST_SCENARIO_ID,
 			world_id: TEST_WORLD_ID,
 			building_id: buildingId,
-			tile_x,
-			tile_y,
+			tile_x: tileX,
+			tile_y: tileY,
 			created_at: new Date().toISOString(),
+			created_at_tick: 0,
 		} as WorldBuilding;
 
 		// 로컬 스토어 업데이트

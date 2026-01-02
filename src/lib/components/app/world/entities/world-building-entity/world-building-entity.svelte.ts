@@ -42,9 +42,11 @@ export class WorldBuildingEntity extends Entity {
 		const height = building.tile_rows * TILE_SIZE;
 		this.size = { width, height };
 
-		// 타일 좌표를 픽셀 좌표로 변환 (중앙 기준)
-		const x = worldBuilding.tile_x * TILE_SIZE + TILE_SIZE / 2;
-		const y = worldBuilding.tile_y * TILE_SIZE + TILE_SIZE / 2;
+		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
+		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
+		const leftTopY = worldBuilding.tile_y * TILE_SIZE;
+		const x = leftTopX + width / 2;
+		const y = leftTopY + height / 2;
 
 		// 사각형 static 바디 생성
 		this.body = Bodies.rectangle(x, y, width, height, {

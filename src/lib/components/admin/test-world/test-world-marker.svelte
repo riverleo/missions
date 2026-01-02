@@ -7,7 +7,7 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { snapPointToBuildingCenter } from '$lib/components/app/world/tiles';
+	import { snapPointToBuildingCenter, snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
 	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
 
 	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
@@ -117,9 +117,15 @@
 		// 겹치는 셀이 있으면 배치하지 않음
 		if (!world.planning.canPlace) return;
 
-		const pos = snappedWorldPos();
+		const pos = mouseWorldPos();
 		if (selectedBuilding) {
-			addWorldBuilding(selectedBuilding.id, pos.x, pos.y);
+			const { tileX, tileY } = snapPointToTopLeftTile(
+				pos.x,
+				pos.y,
+				selectedBuilding.tile_cols,
+				selectedBuilding.tile_rows
+			);
+			addWorldBuilding(selectedBuilding.id, tileX, tileY);
 		}
 	}
 
