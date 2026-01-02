@@ -1,7 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import type { WorldId } from '$lib/types';
+	import type {
+		WorldId,
+		WorldBuilding,
+		WorldBuildingId,
+		WorldCharacter,
+		WorldCharacterId,
+	} from '$lib/types';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
@@ -58,21 +64,23 @@
 
 	// worldBuildings 변경 시 엔티티 동기화
 	$effect(() => {
-		const buildings = Object.fromEntries(
-			Object.values($worldBuildingStore.data)
-				.filter((b) => !worldId || b.world_id === worldId)
-				.map((b) => [b.id, b])
-		);
+		const buildings = Object.values($worldBuildingStore.data)
+			.filter((b) => b.world_id === worldId)
+			.reduce((acc, b) => {
+				acc[b.id] = b;
+				return acc;
+			}, {} as Record<WorldBuildingId, WorldBuilding>);
 		worldContext.syncWorldBuildingEntities(buildings);
 	});
 
 	// worldCharacters 변경 시 엔티티 동기화
 	$effect(() => {
-		const characters = Object.fromEntries(
-			Object.values($worldCharacterStore.data)
-				.filter((c) => !worldId || c.world_id === worldId)
-				.map((c) => [c.id, c])
-		);
+		const characters = Object.values($worldCharacterStore.data)
+			.filter((c) => c.world_id === worldId)
+			.reduce((acc, c) => {
+				acc[c.id] = c;
+				return acc;
+			}, {} as Record<WorldCharacterId, WorldCharacter>);
 		worldContext.syncWorldCharacterEntities(characters);
 	});
 

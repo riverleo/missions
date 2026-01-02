@@ -303,13 +303,13 @@ export class WorldContext {
 		if (width === 0 || height === 0) return;
 
 		for (const worldCharacterEntity of Object.values(this.worldCharacterEntities)) {
-			if (this.isOutOfBounds(worldCharacterEntity)) {
-				this.respawnWorldCharacter(worldCharacterEntity.id);
+			if (this.isOutOfWorldCharacterEntityBounds(worldCharacterEntity)) {
+				this.respawnWorldCharacterEntity(worldCharacterEntity.id);
 			}
 		}
 	}
 
-	private isOutOfBounds(worldCharacterEntity: WorldCharacterEntity) {
+	private isOutOfWorldCharacterEntityBounds(worldCharacterEntity: WorldCharacterEntity) {
 		const characterBody = worldCharacterEntity.characterBody;
 		if (!characterBody) return false;
 
@@ -325,15 +325,15 @@ export class WorldContext {
 		);
 	}
 
-	private respawnWorldCharacter(worldCharacterId: WorldCharacterId) {
+	private respawnWorldCharacterEntity(worldCharacterId: WorldCharacterId) {
 		if (this.respawningIds.has(worldCharacterId)) return;
 		this.respawningIds.add(worldCharacterId);
 
-		const characterEntity = this.worldCharacterEntities[worldCharacterId];
-		if (!characterEntity) return;
+		const worldCharacterEntity = this.worldCharacterEntities[worldCharacterId];
+		if (!worldCharacterEntity) return;
 
 		// world에서만 제거 (엔티티는 유지)
-		characterEntity.removeFromWorld();
+		worldCharacterEntity.removeFromWorld();
 
 		// 1초 후 시작 위치로 다시 추가
 		setTimeout(() => {
@@ -341,15 +341,15 @@ export class WorldContext {
 			const y = this.terrain?.start_y ?? 0;
 
 			// Body 위치 재설정
-			Body.setPosition(characterEntity.body, { x, y });
+			Body.setPosition(worldCharacterEntity.body, { x, y });
 
 			// position state 업데이트
-			characterEntity.x = x;
-			characterEntity.y = y;
-			characterEntity.angle = 0;
+			worldCharacterEntity.x = x;
+			worldCharacterEntity.y = y;
+			worldCharacterEntity.angle = 0;
 
 			// 다시 world에 추가
-			characterEntity.addToWorld();
+			worldCharacterEntity.addToWorld();
 
 			this.respawningIds.delete(worldCharacterId);
 		}, 1000);
