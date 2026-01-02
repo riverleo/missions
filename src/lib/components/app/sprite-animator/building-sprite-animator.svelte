@@ -50,7 +50,7 @@
 	});
 </script>
 
-<div class="relative inline-flex items-center justify-center">
+<div class="relative">
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />
 	{/if}
