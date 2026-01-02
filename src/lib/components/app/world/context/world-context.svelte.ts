@@ -41,7 +41,6 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
-	private resizeObserver: ResizeObserver | undefined;
 	private respawningWorldCharacterIds = new Set<string>();
 
 	constructor(worldId: WorldId, debug: boolean = false) {
@@ -80,8 +79,8 @@ export class WorldContext {
 			element: container,
 			engine: this.engine,
 			options: {
-				width: container.clientWidth,
-				height: container.clientHeight,
+				width: 800,
+				height: 400,
 				wireframes: false,
 				background: 'transparent',
 				hasBounds: true,
@@ -103,25 +102,6 @@ export class WorldContext {
 		});
 
 		this.render.mouse = mouse;
-
-		// ResizeObserver 설정
-		this.resizeObserver = new ResizeObserver((entries) => {
-			const entry = entries[0];
-			if (!entry) return;
-
-			const { width, height } = entry.contentRect;
-			if (width === 0 || height === 0) return;
-
-			if (this.render) {
-				this.render.canvas.width = width;
-				this.render.canvas.height = height;
-				this.render.options.width = width;
-				this.render.options.height = height;
-				this.updateRenderBounds();
-			}
-		});
-		this.resizeObserver.observe(container);
-
 		this.initialized = true;
 
 		// 지형 및 엔티티 로드
@@ -137,7 +117,6 @@ export class WorldContext {
 
 		return () => {
 			this.initialized = false;
-			this.resizeObserver?.disconnect();
 			Runner.stop(this.runner);
 			Engine.clear(this.engine);
 
