@@ -4,6 +4,7 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
+	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { TILE_SIZE } from '$lib/components/app/world/constants';
@@ -58,6 +59,11 @@
 	{onchange}
 	{ondelete}
 >
+	{#snippet preview()}
+		{#if buildingState}
+			<BuildingSpriteAnimator buildingState={buildingState} resolution={2} />
+		{/if}
+	{/snippet}
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && building}
 			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">

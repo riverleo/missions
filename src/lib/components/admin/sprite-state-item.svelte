@@ -17,8 +17,6 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { AspectRatio } from '$lib/components/ui/aspect-ratio';
 	import { atlases, DEFAULT_FPS, DEFAULT_FRAME_FROM } from '$lib/components/app/sprite-animator';
-	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
-	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import ItemFooter from '$lib/components/ui/item/item-footer.svelte';
 	import { IconAdjustmentsHorizontal } from '@tabler/icons-svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -63,8 +61,6 @@
 		{ value: 'ping-pong-once', label: '핑퐁 1회' },
 	];
 
-	let animator = $state<SpriteAnimator | undefined>(undefined);
-
 	function getFrameCount(atlasName: string | undefined) {
 		if (!atlasName) return 0;
 		return atlases[atlasName]?.frameCount ?? 0;
@@ -73,50 +69,6 @@
 	function range(count: number) {
 		return Array.from({ length: count }, (_, i) => i + 1);
 	}
-
-	// atlas_name이 변경되면 animator 재생성
-	$effect(() => {
-		const atlasName = spriteState?.atlas_name;
-		if (!atlasName) {
-			animator?.stop();
-			animator = undefined;
-			return;
-		}
-
-		SpriteAnimator.create(atlasName).then((newAnimator) => {
-			animator?.stop();
-			newAnimator.init({
-				name: type,
-				from: spriteState?.frame_from ?? undefined,
-				to: spriteState?.frame_to ?? undefined,
-				fps: spriteState?.fps ?? undefined,
-			});
-			newAnimator.play({ name: type, loop: spriteState?.loop ?? 'loop' });
-			animator = newAnimator;
-		});
-
-		return () => {
-			animator?.stop();
-		};
-	});
-
-	// frame_from, frame_to, fps, loop이 변경되면 애니메이션 재시작
-	$effect(() => {
-		const frameFrom = spriteState?.frame_from;
-		const frameTo = spriteState?.frame_to;
-		const fps = spriteState?.fps;
-		const loop = spriteState?.loop;
-
-		if (animator && spriteState?.atlas_name) {
-			animator.init({
-				name: type,
-				from: frameFrom ?? undefined,
-				to: frameTo ?? undefined,
-				fps: fps ?? undefined,
-			});
-			animator.play({ name: type, loop: loop ?? 'loop' });
-		}
-	});
 
 	function onAtlasChange(atlasName: string) {
 		onchange({ atlas_name: atlasName });
@@ -151,8 +103,6 @@
 			<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
 				{#if preview}
 					{@render preview()}
-				{:else if animator}
-					<SpriteAnimatorRenderer {animator} resolution={2} />
 				{:else}
 					<Skeleton class="h-full w-full" />
 				{/if}

@@ -4,6 +4,7 @@
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
+	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getItemStateLabel } from '$lib/utils/state-label';
 
@@ -41,4 +42,10 @@
 	spriteState={itemState}
 	{onchange}
 	{ondelete}
-/>
+>
+	{#snippet preview()}
+		{#if itemState}
+			<ItemSpriteAnimator {itemState} resolution={2} />
+		{/if}
+	{/snippet}
+</SpriteStateItem>

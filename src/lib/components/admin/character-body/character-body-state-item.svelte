@@ -8,9 +8,11 @@
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
+	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Toggle } from '$lib/components/ui/toggle';
@@ -142,6 +144,11 @@
 					</Tooltip>
 				</ButtonGroup>
 			</ButtonGroup>
+		{/if}
+	{/snippet}
+	{#snippet preview()}
+		{#if bodyState}
+			<CharacterSpriteAnimator {bodyState} resolution={2} />
 		{/if}
 	{/snippet}
 	{#snippet overlay()}
