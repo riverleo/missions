@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
 	import { useWorldContext } from '$lib/hooks/use-world';
-	import { pixelToTile } from './tiles';
 
 	interface Props {
 		cols: number;
@@ -25,13 +24,9 @@
 	function isCellOverlapping(localCol: number, localRow: number): boolean {
 		if (!world.planning.placement) return false;
 
-		const { x, y } = world.planning.placement;
-		// 건물 중심 기준 좌상단 타일 인덱스
-		const startCol = pixelToTile(x) - Math.floor(cols / 2);
-		const startRow = pixelToTile(y) - Math.floor(rows / 2);
-
-		const absoluteCol = startCol + localCol;
-		const absoluteRow = startRow + localRow;
+		const { tileX, tileY } = world.planning.placement;
+		const absoluteCol = tileX + localCol;
+		const absoluteRow = tileY + localRow;
 
 		return overlappingCellSet().has(`${absoluteCol},${absoluteRow}`);
 	}

@@ -4,6 +4,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import WorldPlanningPlacementRect from './world-planning-placement-rect.svelte';
+	import { TILE_SIZE } from './constants';
 
 	const world = useWorldContext();
 	const { stateStore: buildingStateStore } = useBuilding();
@@ -16,6 +17,21 @@
 	const buildingStates = $derived(
 		placementBuilding ? ($buildingStateStore.data[placementBuilding.id] ?? []) : []
 	);
+
+	// 좌상단 타일 인덱스를 건물 중심 픽셀 좌표로 변환
+	const centerX = $derived(() => {
+		if (!world.planning.placement) return 0;
+		const { tileX, building } = world.planning.placement;
+		const width = building.tile_cols * TILE_SIZE;
+		return tileX * TILE_SIZE + width / 2;
+	});
+
+	const centerY = $derived(() => {
+		if (!world.planning.placement) return 0;
+		const { tileY, building } = world.planning.placement;
+		const height = building.tile_rows * TILE_SIZE;
+		return tileY * TILE_SIZE + height / 2;
+	});
 
 	// placement가 변경되면 animator 생성
 	$effect(() => {
@@ -47,10 +63,12 @@
 </script>
 
 {#if world.planning.placement}
+	{@const x = centerX()}
+	{@const y = centerY()}
 	<!-- 배치 셀 하이라이트 -->
 	<div
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {world.planning.placement.x}px; top: {world.planning.placement.y}px;"
+		style="left: {x}px; top: {y}px;"
 	>
 		<WorldPlanningPlacementRect
 			cols={world.planning.placement.building.tile_cols}
@@ -62,7 +80,7 @@
 	{#if animator}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
-			style="left: {world.planning.placement.x}px; top: {world.planning.placement.y}px;"
+			style="left: {x}px; top: {y}px;"
 		>
 			<SpriteAnimatorRenderer {animator} resolution={2} />
 		</div>

@@ -79,11 +79,17 @@
 	// 건물 선택 시 world.planning.placement 업데이트
 	$effect(() => {
 		if (selectedBuilding) {
-			const pos = snappedWorldPos();
+			const pos = mouseWorldPos();
+			const { tileX, tileY } = snapPointToTopLeftTile(
+				pos.x,
+				pos.y,
+				selectedBuilding.tile_cols,
+				selectedBuilding.tile_rows
+			);
 			world.planning.placement = {
 				building: selectedBuilding,
-				x: pos.x,
-				y: pos.y,
+				tileX,
+				tileY,
 			};
 		} else {
 			world.planning.placement = undefined;

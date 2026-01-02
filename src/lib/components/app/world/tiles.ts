@@ -95,31 +95,45 @@ export interface TileCell {
 }
 
 /**
- * 건물 중심 좌표와 크기로 차지하는 타일 셀들 계산
- * @param centerX 건물 중심 X 픽셀 좌표
- * @param centerY 건물 중심 Y 픽셀 좌표
+ * 좌상단 타일 인덱스로 건물이 차지하는 셀들 계산
+ * @param tileX 건물 좌상단 X 타일 인덱스
+ * @param tileY 건물 좌상단 Y 타일 인덱스
  * @param cols 건물 가로 타일 수
  * @param rows 건물 세로 타일 수
  */
 export function getBuildingOccupiedCells(
-	centerX: number,
-	centerY: number,
+	tileX: number,
+	tileY: number,
 	cols: number,
 	rows: number
 ): TileCell[] {
 	const cells: TileCell[] = [];
 
-	// 건물 좌상단 타일 인덱스 계산
-	const startCol = pixelToTile(centerX) - Math.floor(cols / 2);
-	const startRow = pixelToTile(centerY) - Math.floor(rows / 2);
-
 	for (let row = 0; row < rows; row++) {
 		for (let col = 0; col < cols; col++) {
-			cells.push({ col: startCol + col, row: startRow + row });
+			cells.push({ col: tileX + col, row: tileY + row });
 		}
 	}
 
 	return cells;
+}
+
+/**
+ * 건물 중심 픽셀 좌표로 차지하는 셀들 계산
+ * @param centerX 건물 중심 X 픽셀 좌표
+ * @param centerY 건물 중심 Y 픽셀 좌표
+ * @param cols 건물 가로 타일 수
+ * @param rows 건물 세로 타일 수
+ */
+export function getBuildingOccupiedCellsFromCenter(
+	centerX: number,
+	centerY: number,
+	cols: number,
+	rows: number
+): TileCell[] {
+	const tileX = pixelToTile(centerX) - Math.floor(cols / 2);
+	const tileY = pixelToTile(centerY) - Math.floor(rows / 2);
+	return getBuildingOccupiedCells(tileX, tileY, cols, rows);
 }
 
 /**

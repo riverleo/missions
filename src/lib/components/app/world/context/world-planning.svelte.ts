@@ -1,19 +1,14 @@
 import { get } from 'svelte/store';
 import type { Building } from '$lib/types';
-import {
-	getBuildingOccupiedCells,
-	getOverlappingCells,
-	tileToCenterPixel,
-	type TileCell,
-} from '../tiles';
+import { getBuildingOccupiedCells, getOverlappingCells, type TileCell } from '../tiles';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import type { WorldContext } from './world-context.svelte';
 
 export interface WorldPlanningPlacement {
 	building: Building;
-	x: number;
-	y: number;
+	tileX: number;
+	tileY: number;
 }
 
 export class WorldPlanning {
@@ -32,8 +27,13 @@ export class WorldPlanning {
 	getOverlappingCells(): TileCell[] {
 		if (!this.placement || !this.worldContext) return [];
 
-		const { building, x, y } = this.placement;
-		const placementCells = getBuildingOccupiedCells(x, y, building.tile_cols, building.tile_rows);
+		const { building, tileX, tileY } = this.placement;
+		const placementCells = getBuildingOccupiedCells(
+			tileX,
+			tileY,
+			building.tile_cols,
+			building.tile_rows
+		);
 
 		// 기존 건물들이 차지하는 모든 셀 수집
 		const buildingStore = get(useBuilding().store).data;
@@ -49,12 +49,9 @@ export class WorldPlanning {
 			const buildingData = buildingStore[worldBuilding.building_id];
 			if (!buildingData) continue;
 
-			// tile_x, tile_y는 타일 인덱스이므로 픽셀 좌표로 변환
-			const centerX = tileToCenterPixel(worldBuilding.tile_x);
-			const centerY = tileToCenterPixel(worldBuilding.tile_y);
 			const cells = getBuildingOccupiedCells(
-				centerX,
-				centerY,
+				worldBuilding.tile_x,
+				worldBuilding.tile_y,
 				buildingData.tile_cols,
 				buildingData.tile_rows
 			);
