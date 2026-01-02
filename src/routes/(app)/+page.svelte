@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { UserId } from '$lib/types';
 	import { useCurrentUser } from '$lib/hooks/use-current-user';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
@@ -15,7 +16,7 @@
 
 			if (data.user) {
 				// 플레이어 생성
-				await createPlayer({ user_id: data.user.id, name: '모험가' });
+				await createPlayer({ user_id: data.user.id as UserId, name: '모험가' });
 			}
 
 			// 페이지 새로고침하여 새 유저 정보 로드
