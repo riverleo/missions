@@ -60,15 +60,15 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		{#if buildingState}
-			<BuildingSpriteAnimator buildingState={buildingState} resolution={2} />
-		{/if}
-	{/snippet}
-	{#snippet overlay()}
-		{#if $uiStore.showBodyPreview && building}
-			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
-			</div>
-		{/if}
+		<div class="relative inline-flex items-center justify-center">
+			{#if buildingState}
+				<BuildingSpriteAnimator buildingState={buildingState} resolution={2} />
+			{/if}
+			{#if $uiStore.showBodyPreview && building}
+				<div class="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+					<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
+				</div>
+			{/if}
+		</div>
 	{/snippet}
 </SpriteStateItem>

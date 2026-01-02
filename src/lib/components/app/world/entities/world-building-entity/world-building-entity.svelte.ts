@@ -13,7 +13,7 @@ import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 
-const { Bodies, Composite } = Matter;
+const { Bodies } = Matter;
 
 export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
