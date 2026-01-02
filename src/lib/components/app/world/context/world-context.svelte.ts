@@ -11,7 +11,6 @@ import type {
 } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
@@ -57,12 +56,8 @@ export class WorldContext {
 		this.planning.setWorldContext(this);
 	}
 
-	get terrain(): Terrain | null | undefined {
+	private get terrain(): Terrain | null | undefined {
 		return get(useWorld().worldStore).data[this.worldId]?.terrain;
-	}
-
-	get terrainAssetUrl(): string | undefined {
-		return this.terrain ? getGameAssetUrl(this.supabase, 'terrain', this.terrain) : undefined;
 	}
 
 	// debug 변경 시 모든 엔티티 업데이트

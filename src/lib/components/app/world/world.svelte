@@ -31,7 +31,6 @@
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
-	const terrain = $derived(world?.terrain ?? null);
 
 	// oncamerachange prop 변경 시 worldContext 업데이트
 	$effect(() => {

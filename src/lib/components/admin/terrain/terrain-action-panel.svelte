@@ -13,8 +13,6 @@
 	import {
 		IconUpload,
 		IconLoader2,
-		IconBug,
-		IconBugOff,
 		IconHeading,
 		IconMapPin,
 		IconMapPinOff,
@@ -133,27 +131,6 @@
 				{/snippet}
 			</TooltipTrigger>
 			<TooltipContent>지형 파일 업로드</TooltipContent>
-		</Tooltip>
-		<Tooltip>
-			<TooltipTrigger>
-				{#snippet child({ props })}
-					<Button
-						{...props}
-						onclick={() => admin.setDebug(!$uiStore.debug)}
-						size="icon-lg"
-						variant="outline"
-					>
-						{#if $uiStore.debug}
-							<IconBugOff />
-						{:else}
-							<IconBug />
-						{/if}
-					</Button>
-				{/snippet}
-			</TooltipTrigger>
-			<TooltipContent>
-				{$uiStore.debug ? '디버그 모드 끄기' : '디버그 모드 켜기'}
-			</TooltipContent>
 		</Tooltip>
 	</ButtonGroup>
 	<ButtonGroup>

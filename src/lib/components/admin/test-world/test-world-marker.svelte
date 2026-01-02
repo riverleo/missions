@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { useWorldTest } from '$lib/hooks/use-world';
-	import { useWorldContext } from '$lib/hooks/use-world';
+	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
@@ -13,9 +12,13 @@
 	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
 		useWorldTest();
 	const world = useWorldContext();
+	const { worldStore } = useWorld();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
+
+	// terrain을 worldStore에서 직접 구독
+	const terrain = $derived($worldStore.data[world.worldId]?.terrain);
 
 	// 건물 선택 시 planning 그리드 표시
 	$effect(() => {
@@ -24,13 +27,13 @@
 
 	// 시작지점 좌표 (카메라 변환 적용)
 	const startLeft = $derived(
-		world.terrain?.start_x != null
-			? `${(world.terrain.start_x - world.camera.x) * world.camera.zoom}px`
+		terrain?.start_x != null
+			? `${(terrain.start_x - world.camera.x) * world.camera.zoom}px`
 			: undefined
 	);
 	const startTop = $derived(
-		world.terrain?.start_y != null
-			? `${(world.terrain.start_y - world.camera.y) * world.camera.zoom}px`
+		terrain?.start_y != null
+			? `${(terrain.start_y - world.camera.y) * world.camera.zoom}px`
 			: undefined
 	);
 

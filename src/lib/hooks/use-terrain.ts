@@ -26,7 +26,6 @@ function createTerrainStore() {
 
 	// 어드민 UI 상태
 	const uiStore = writable({
-		debug: false,
 		isSettingStartMarker: false,
 	});
 
@@ -83,11 +82,7 @@ function createTerrainStore() {
 	}
 
 	const admin = {
-		uiStore: uiStore as Readable<{ debug: boolean; isSettingStartMarker: boolean }>,
-
-		setDebug(value: boolean) {
-			uiStore.update((s) => ({ ...s, debug: value }));
-		},
+		uiStore: uiStore as Readable<{ isSettingStartMarker: boolean }>,
 
 		setSettingStartMarker(value: boolean) {
 			uiStore.update((s) => ({ ...s, isSettingStartMarker: value }));

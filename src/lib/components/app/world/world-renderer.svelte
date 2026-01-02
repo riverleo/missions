@@ -3,6 +3,8 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
 	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
 	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
 	import WorldPlanning from './world-planning.svelte';
@@ -24,7 +26,16 @@
 
 	const world = useWorldContext();
 	const { terrainBody, camera, event } = world;
-	const { worldBuildingStore, worldCharacterStore } = useWorld();
+	const { worldStore, worldBuildingStore, worldCharacterStore } = useWorld();
+	const { supabase } = useServerPayload();
+
+	// terrain을 worldStore에서 직접 구독
+	const terrain = $derived($worldStore.data[world.worldId]?.terrain);
+
+	// terrain asset URL을 $derived로 관리
+	const terrainAssetUrl = $derived(
+		terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined
+	);
 
 	let container: HTMLDivElement;
 
@@ -75,12 +86,12 @@
 			transform: scale({camera.zoom}) translate({-camera.x}px, {-camera.y}px);
 		"
 	>
-		{#if world.terrainAssetUrl}
+		{#if terrainAssetUrl}
 			<img
-				src={world.terrainAssetUrl}
+				src={terrainAssetUrl}
 				class="absolute inset-0 h-full w-full"
 				style="opacity: {world.debug ? 0 : 1};"
-				alt={world.terrain?.title}
+				alt={terrain?.title}
 			/>
 		{/if}
 		{#if world.planning.showGrid}
