@@ -3,7 +3,6 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { WorldId } from '$lib/types';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
@@ -29,22 +28,25 @@
 
 	const worldContext = new WorldContext(worldId, debug);
 	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
-	const { store: terrainStore } = useTerrain();
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
 	const terrainId = $derived(world?.terrain_id);
-	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
 	// oncamerachange prop 변경 시 worldContext 업데이트
 	$effect(() => {
 		worldContext.oncamerachange = oncamerachange;
 	});
 
-	// terrain 변경 시 load 호출
+	// terrainId 변경 시 load 호출 (초기 마운트 제외)
+	let prevTerrainId: typeof terrainId | undefined = undefined;
 	$effect(() => {
-		if (terrain) {
-			worldContext.load();
+		if (terrainId !== prevTerrainId) {
+			// 초기 마운트가 아닐 때만 reload
+			if (prevTerrainId !== undefined && terrainId) {
+				worldContext.load();
+			}
+			prevTerrainId = terrainId;
 		}
 	});
 
@@ -52,11 +54,6 @@
 	$effect(() => {
 		worldContext.debug = debug;
 		worldContext.setDebugEntities(debug);
-	});
-
-	// 카메라 변경 시 렌더 바운드 업데이트
-	$effect(() => {
-		worldContext.updateRenderBounds();
 	});
 
 	// worldBuildings 변경 시 엔티티 동기화

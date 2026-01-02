@@ -14,7 +14,6 @@ import type {
 	CharacterId,
 	BuildingId,
 } from '$lib/types';
-import { TILE_SIZE } from '$lib/components/app/world/constants';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { useTerrain } from '../use-terrain';

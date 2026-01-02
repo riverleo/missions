@@ -48,6 +48,8 @@ export class Camera {
 		this.x = mouseWorldPos.x - (mouseWorldPos.x - this.x) / zoomRatio;
 		this.y = mouseWorldPos.y - (mouseWorldPos.y - this.y) / zoomRatio;
 		this.zoom = newZoom;
+
+		this.world.updateRenderBounds();
 	}
 
 	// 팬 시작
@@ -65,6 +67,8 @@ export class Camera {
 		const dy = screenY - this.panStartY;
 		this.x = this.panStartCameraX - dx / this.zoom;
 		this.y = this.panStartCameraY - dy / this.zoom;
+
+		this.world.updateRenderBounds();
 	}
 
 	// 팬 종료
