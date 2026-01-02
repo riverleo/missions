@@ -21,7 +21,7 @@
 			x1={i * TILE_SIZE}
 			y1={0}
 			x2={i * TILE_SIZE}
-			y2={height}
+			y2={rows * TILE_SIZE}
 			stroke="rgba(255, 255, 255, 0.05)"
 			stroke-width="1"
 		/>
@@ -31,7 +31,7 @@
 		<line
 			x1={0}
 			y1={i * TILE_SIZE}
-			x2={width}
+			x2={cols * TILE_SIZE}
 			y2={i * TILE_SIZE}
 			stroke="rgba(255, 255, 255, 0.05)"
 			stroke-width="1"
