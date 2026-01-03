@@ -28,8 +28,6 @@ export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
 export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 
-export type { WorldTestStoreState };
-
 let instance: ReturnType<typeof createTestWorldStore> | null = null;
 
 function createTestWorldStore() {
