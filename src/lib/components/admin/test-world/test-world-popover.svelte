@@ -76,7 +76,7 @@
 	<div class="flex flex-1 gap-0">
 		<!-- 좌측: 커맨드 목록 -->
 		{#if $store.commandPanelOpen}
-			<div class="w-80 shrink-0 border-r">
+			<div class="w-80 shrink-0 overflow-y-auto border-r" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldCommandPanel />
 			</div>
 		{/if}
