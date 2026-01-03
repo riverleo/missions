@@ -21,11 +21,6 @@
 	});
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
-	let isDragging = $state(false);
-	let dragStartX = $state(0);
-	let dragStartY = $state(0);
-	let modalStartX = $state(0);
-	let modalStartY = $state(0);
 
 	// 단축키: Ctrl/Cmd + Shift + P (열기/닫기), ESC (닫기)
 	function onkeydown(e: KeyboardEvent) {
@@ -50,10 +45,6 @@
 		setOpen(true);
 	}
 
-	function onclickClose() {
-		setOpen(false);
-	}
-
 	// 초기 마운트 시 모달이 중앙에 위치하도록 설정
 	$effect(() => {
 		if (modalRef && $store.modalX === 0 && $store.modalY === 0) {
@@ -62,51 +53,6 @@
 			const centerY = (window.innerHeight - modalRect.height) / 2;
 			setModalPosition(centerX, centerY);
 		}
-	});
-
-	// 헤더 드래그 시작
-	function onmousedownHeader(e: MouseEvent) {
-		isDragging = true;
-		dragStartX = e.clientX;
-		dragStartY = e.clientY;
-		modalStartX = $store.modalX;
-		modalStartY = $store.modalY;
-	}
-
-	// 드래그 중 마우스 이동
-	function onmousemove(e: MouseEvent) {
-		if (!isDragging || !modalRef) return;
-
-		const deltaX = e.clientX - dragStartX;
-		const deltaY = e.clientY - dragStartY;
-
-		let newX = modalStartX + deltaX;
-		let newY = modalStartY + deltaY;
-
-		// 화면 경계 제한
-		const modalRect = modalRef.getBoundingClientRect();
-		const maxX = window.innerWidth - modalRect.width;
-		const maxY = window.innerHeight - modalRect.height;
-
-		newX = Math.max(0, Math.min(newX, maxX));
-		newY = Math.max(0, Math.min(newY, maxY));
-
-		setModalPosition(newX, newY);
-	}
-
-	// 드래그 종료
-	function onmouseup() {
-		isDragging = false;
-	}
-
-	// window에 mousemove, mouseup 이벤트 리스너 등록
-	$effect(() => {
-		window.addEventListener('mousemove', onmousemove);
-		window.addEventListener('mouseup', onmouseup);
-		return () => {
-			window.removeEventListener('mousemove', onmousemove);
-			window.removeEventListener('mouseup', onmouseup);
-		};
 	});
 </script>
 
@@ -121,7 +67,7 @@
 	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalX}px; top: {$store.modalY}px;"
 >
 	<!-- Header -->
-	<TestWorldPopoverHeader onmousedown={onmousedownHeader} onclose={onclickClose} />
+	<TestWorldPopoverHeader />
 
 	<!-- Content -->
 	<div class="flex flex-1 gap-0">
