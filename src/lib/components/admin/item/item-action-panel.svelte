@@ -7,8 +7,9 @@
 		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { useItem } from '$lib/hooks/use-item';
-	import { IconRuler2, IconX } from '@tabler/icons-svelte';
+	import { IconEye, IconEyeOff, IconRuler2, IconX } from '@tabler/icons-svelte';
 
 	interface Props {
 		item: Item;
@@ -17,6 +18,7 @@
 	let { item }: Props = $props();
 
 	const { admin } = useItem();
+	const { uiStore } = admin;
 
 	let scale = $state(item.scale.toString());
 	let width = $state(item.width.toString());
@@ -63,6 +65,10 @@
 			(e.target as HTMLInputElement).blur();
 			updateDimensions();
 		}
+	}
+
+	function toggleShowBodyPreview() {
+		admin.setShowBodyPreview(!$uiStore.showBodyPreview);
 	}
 </script>
 
@@ -111,6 +117,21 @@
 			onkeydown={onkeydownDimensions}
 		/>
 		<InputGroupAddon align="inline-end">
+			<Tooltip>
+				<TooltipTrigger>
+					<InputGroupButton
+						onclick={toggleShowBodyPreview}
+						variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}
+					>
+						{#if $uiStore.showBodyPreview}
+							<IconEye />
+						{:else}
+							<IconEyeOff />
+						{/if}
+					</InputGroupButton>
+				</TooltipTrigger>
+				<TooltipContent>크기 확인하기</TooltipContent>
+			</Tooltip>
 			<InputGroupButton onclick={updateDimensions} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>

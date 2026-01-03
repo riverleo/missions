@@ -38,6 +38,10 @@ function createItemStore() {
 
 	const dialogStore = writable<ItemDialogState>(undefined);
 
+	const uiStore = writable({
+		showBodyPreview: false,
+	});
+
 	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
 
@@ -106,6 +110,12 @@ function createItemStore() {
 	}
 
 	const admin = {
+		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
+
+		setShowBodyPreview(value: boolean) {
+			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
+		},
+
 		async create(item: Omit<ItemInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useItem: currentScenarioId is not set.');
