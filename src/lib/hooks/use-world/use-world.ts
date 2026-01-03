@@ -6,9 +6,11 @@ import type {
 	World,
 	WorldCharacter,
 	WorldBuilding,
+	WorldItem,
 	WorldId,
 	WorldCharacterId,
 	WorldBuildingId,
+	WorldItemId,
 	EntityId,
 } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
@@ -36,6 +38,11 @@ function createWorldStore() {
 	});
 
 	const worldBuildingStore = writable<RecordFetchState<WorldBuildingId, WorldBuilding>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const worldItemStore = writable<RecordFetchState<WorldItemId, WorldItem>>({
 		status: 'idle',
 		data: {},
 	});
@@ -126,6 +133,27 @@ function createWorldStore() {
 					draft.error = undefined;
 				})
 			);
+
+			// WorldItem 조회 (player_id로 필터링)
+			const { data: itemData, error: itemError } = await supabase
+				.from('world_items')
+				.select('*')
+				.eq('player_id', player.id);
+
+			if (itemError) throw itemError;
+
+			const itemRecord: Record<WorldItemId, WorldItem> = {};
+			for (const item of itemData ?? []) {
+				itemRecord[item.id as WorldItemId] = item as WorldItem;
+			}
+
+			worldItemStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = itemRecord;
+					draft.error = undefined;
+				})
+			);
 		} catch (error) {
 			console.error('Failed to fetch world:', error);
 			worldStore.update((state) => ({
@@ -140,6 +168,7 @@ function createWorldStore() {
 		worldStore,
 		worldCharacterStore,
 		worldBuildingStore,
+		worldItemStore,
 		selectedEntityStore,
 		init,
 		fetch,
