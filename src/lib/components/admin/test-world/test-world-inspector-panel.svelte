@@ -1,5 +1,13 @@
 <script lang="ts">
 	import { useWorldTest } from '$lib/hooks/use-world';
+	import {
+		Accordion,
+		AccordionContent,
+		AccordionItem,
+		AccordionTrigger,
+	} from '$lib/components/ui/accordion';
+	import { Button } from '$lib/components/ui/button';
+	import { ItemGroup, Item, ItemContent, ItemActions } from '$lib/components/ui/item';
 
 	const { store } = useWorldTest();
 
@@ -8,30 +16,27 @@
 
 	// TODO: 캐릭터 행동 목록 시스템 구현 후 실제 데이터 연결
 	const characterActions = $derived<Array<{ characterId: string; action: string }>>([]);
+
+	function onResetTick() {
+		// TODO: 틱 초기화 로직
+		console.log('Reset tick');
+	}
 </script>
 
-<div class="flex flex-col gap-4 p-4">
-	<div class="flex flex-col gap-2">
-		<h3 class="text-sm font-semibold">틱 정보</h3>
-		<div class="rounded-md border bg-muted/50 p-2">
-			<p class="text-sm text-muted-foreground">현재 틱: {currentTick}</p>
-		</div>
-	</div>
-
-	<div class="flex flex-col gap-2">
-		<h3 class="text-sm font-semibold">캐릭터 행동 목록</h3>
-		<div class="rounded-md border bg-muted/50 p-2">
-			{#if characterActions.length > 0}
-				<ul class="space-y-1">
-					{#each characterActions as { characterId, action } (characterId)}
-						<li class="text-sm text-muted-foreground">
-							{characterId}: {action}
-						</li>
-					{/each}
-				</ul>
-			{:else}
-				<p class="text-sm text-muted-foreground">행동 중인 캐릭터 없음</p>
-			{/if}
-		</div>
-	</div>
+<div class="flex flex-col p-4">
+	<Accordion type="single" value="world">
+		<AccordionItem value="world2">
+			<AccordionTrigger>월드</AccordionTrigger>
+			<AccordionContent>
+				<ItemGroup>
+					<Item size="sm" class="p-0">
+						<ItemContent>틱: {currentTick}</ItemContent>
+						<ItemActions>
+							<Button variant="ghost" size="sm" onclick={onResetTick}>초기화</Button>
+						</ItemActions>
+					</Item>
+				</ItemGroup>
+			</AccordionContent>
+		</AccordionItem>
+	</Accordion>
 </div>
