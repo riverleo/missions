@@ -67,18 +67,25 @@ export class WorldContext {
 
 	// 마우스 클릭 처리
 	private handleMouseDown(event: Matter.IEvent<Matter.MouseConstraint>) {
-		const body = event.source.body;
 		const { setSelectedEntityId, selectedEntityStore } = useWorld();
 		const selectedEntityId = get(selectedEntityStore).entityId;
 
-		if (!body) {
-			// 빈 공간 클릭 시 선택 해제
+		// 마우스 위치에서 모든 body 찾기 (건물 포함)
+		if (!this.mouseConstraint?.mouse) return;
+		const mousePosition = this.mouseConstraint.mouse.position;
+		const bodies = Matter.Query.point(Composite.allBodies(this.engine.world), mousePosition);
+
+		// 엔티티 바디만 필터링 (지형 제외)
+		const entityBody = bodies.find((body) => this.entities[body.label]);
+
+		if (!entityBody) {
+			// 빈 공간이나 지형 클릭 시 선택 해제
 			setSelectedEntityId(undefined);
 			return;
 		}
 
 		// 클릭한 바디의 엔티티 찾기
-		const entity = this.entities[body.label];
+		const entity = this.entities[entityBody.label];
 		if (entity) {
 			// 이미 선택된 엔티티를 다시 클릭하면 해제
 			if (selectedEntityId?.value === entity.id && selectedEntityId?.type === entity.type) {
@@ -86,9 +93,6 @@ export class WorldContext {
 			} else {
 				setSelectedEntityId({ value: entity.id, type: entity.type });
 			}
-		} else {
-			// 지형이나 다른 바디 클릭 시 선택 해제
-			setSelectedEntityId(undefined);
 		}
 	}
 

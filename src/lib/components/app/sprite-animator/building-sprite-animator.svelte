@@ -12,6 +12,7 @@
 		characterScale?: number;
 		characterRotation?: number;
 		resolution?: 1 | 2 | 3;
+		selected?: boolean;
 	}
 
 	let {
@@ -22,7 +23,10 @@
 		characterScale = 1,
 		characterRotation = 0,
 		resolution = 2,
+		selected = false,
 	}: Props = $props();
+
+	const OUTLINE_WIDTH = 8;
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -51,6 +55,17 @@
 </script>
 
 <div class="relative">
+	<!-- 선택 시 외곽선 -->
+	{#if selected && animator}
+		<div
+			class="pointer-events-none absolute -z-10"
+			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
+			style:filter="brightness(0) invert(1)"
+		>
+			<SpriteAnimatorRenderer animator={animator} {resolution} />
+		</div>
+	{/if}
+
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />
 	{/if}
