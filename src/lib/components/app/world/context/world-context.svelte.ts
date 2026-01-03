@@ -284,10 +284,10 @@ export class WorldContext {
 		}
 	}
 
-	// Matter.js body 위치를 스토어에 동기화
+	// Matter.js body 위치를 엔티티 state에 동기화
 	private updateWorldCharacterEntityPositions() {
 		for (const entity of Object.values(this.entities)) {
-			if (entity.type === 'character') {
+			if (entity.type === 'character' || entity.type === 'item') {
 				entity.updatePosition();
 			}
 		}

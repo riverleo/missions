@@ -45,13 +45,13 @@ export class WorldItemEntity extends Entity {
 		const height = ITEM_SIZE;
 		this.size = { width, height };
 
-		// 사각형 static 바디 생성
+		// 사각형 dynamic 바디 생성 (회전 가능, 아이템끼리만 충돌)
 		this.body = Bodies.rectangle(worldItem.x, worldItem.y, width, height, {
 			label: id,
-			isStatic: true,
+			isStatic: false,
 			collisionFilter: {
 				category: CATEGORY_ITEM,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
+				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
 			},
 			render: this.world.debug
 				? { visible: true, fillStyle: DEBUG_ITEM_FILL_STYLE }
@@ -72,7 +72,7 @@ export class WorldItemEntity extends Entity {
 	}
 
 	saveToStore(): void {
-		// 아이템은 static이므로 실제로 위치 변경 없음
-		// 하지만 일관성을 위해 인터페이스 제공
+		// 아이템은 물리 시뮬레이션으로 위치가 변경되지만 DB에 저장하지 않음
+		// (게임 로직에서 필요시 구현)
 	}
 }
