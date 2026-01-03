@@ -62,7 +62,6 @@ export class WorldCharacterEntity extends Entity {
 			label: this.id,
 			restitution: 0.1,
 			friction: 0.8,
-			frictionAir: 0.1,
 			inertia: Infinity,
 			collisionFilter: {
 				category: CATEGORY_CHARACTER,
