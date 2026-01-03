@@ -11,5 +11,5 @@
 
 <div class="flex items-center justify-between text-xs">
 	<div>{label}</div>
-	<div class="font-bold">{@render children()}</div>
+	<div class="font-medium">{@render children()}</div>
 </div>

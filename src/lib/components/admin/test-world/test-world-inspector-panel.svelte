@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useWorldTest, useWorld, TEST_WORLD_ID } from '$lib/hooks/use-world';
+	import { useWorldTest, useWorld } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
@@ -13,15 +13,9 @@
 		AccordionItem,
 		AccordionTrigger,
 	} from '$lib/components/ui/accordion';
-	import {
-		InputGroup,
-		InputGroupAddon,
-		InputGroupText,
-		InputGroupInput,
-		InputGroupButton,
-	} from '$lib/components/ui/input-group';
 	import { Badge } from '$lib/components/ui/badge';
 	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
+	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -79,17 +73,19 @@
 	<AccordionItem value="world">
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
-			<div class="flex flex-col gap-2">
-				<InputGroup>
-					<InputGroupAddon>
-						<InputGroupText>현재 틱</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput type="number" value={currentTick} disabled />
-					<InputGroupAddon align="inline-end">
-						<InputGroupButton onclick={onResetTick}>초기화</InputGroupButton>
-					</InputGroupAddon>
-				</InputGroup>
-			</div>
+			<TestWorldInspectorItem label="현재 틱">
+				<div class="flex items-center gap-2">
+					{currentTick}
+					<Button
+						size="sm"
+						variant="ghost"
+						class="h-auto rounded-sm px-2 py-1 text-xs"
+						onclick={onResetTick}
+					>
+						초기화
+					</Button>
+				</div>
+			</TestWorldInspectorItem>
 		</AccordionContent>
 	</AccordionItem>
 
@@ -108,11 +104,9 @@
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
-					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem label="좌표">
-							({Math.round(characterEntity.x)}, {Math.round(characterEntity.y)})
-						</TestWorldInspectorItem>
-					</div>
+					<TestWorldInspectorItem label="좌표">
+						({Math.round(characterEntity.x)}, {Math.round(characterEntity.y)})
+					</TestWorldInspectorItem>
 				</AccordionContent>
 			</AccordionItem>
 		{:else if entity.type === 'building'}
@@ -129,11 +123,9 @@
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
-					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem label="타일 좌표">
-							({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
-						</TestWorldInspectorItem>
-					</div>
+					<TestWorldInspectorItem label="타일 좌표">
+						({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
+					</TestWorldInspectorItem>
 				</AccordionContent>
 			</AccordionItem>
 		{:else if entity.type === 'item'}
@@ -148,13 +140,11 @@
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
-					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem label="좌표">
-							({Math.round(itemEntity.x)}, {Math.round(itemEntity.y)}), {Math.round(
-								(itemEntity.angle * 180) / Math.PI
-							)}°
-						</TestWorldInspectorItem>
-					</div>
+					<TestWorldInspectorItem label="좌표와 각도">
+						({Math.round(itemEntity.x)}, {Math.round(itemEntity.y)}), {Math.round(
+							(itemEntity.angle * 180) / Math.PI
+						)}°
+					</TestWorldInspectorItem>
 				</AccordionContent>
 			</AccordionItem>
 		{/if}
