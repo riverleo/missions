@@ -7,6 +7,7 @@
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
+	import type { EntityId } from '$lib/types';
 	import {
 		Accordion,
 		AccordionContent,
@@ -46,7 +47,7 @@
 		const entityId = $selectedEntityStore.entityId;
 		if (!entityId) return 'world';
 
-		return `${entityId.type}-${entityId.value}`;
+		return entityId;
 	});
 
 	function onResetTick() {
@@ -58,13 +59,8 @@
 		if (!value || value === 'world') {
 			setSelectedEntityId(undefined);
 		} else {
-			// value는 "character-{id}" 또는 "building-{id}" 형태
-			const parts = value.split('-');
-			if (parts.length > 1) {
-				const type = parts[0] as 'character' | 'building' | 'item';
-				const id = parts.slice(1).join('-');
-				setSelectedEntityId({ value: id, type });
-			}
+			// value는 EntityId 형태 ("character-{id}", "building-{id}", "item-{id}")
+			setSelectedEntityId(value as EntityId);
 		}
 	}
 </script>
@@ -96,7 +92,7 @@
 			{@const characterData = worldCharacter
 				? $characterStore.data[worldCharacter.character_id]
 				: undefined}
-			<AccordionItem value={`character-${characterEntity.id}`}>
+			<AccordionItem value={characterEntity.toEntityId()}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
 						{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
@@ -115,7 +111,7 @@
 			{@const buildingData = worldBuilding
 				? $buildingStore.data[worldBuilding.building_id]
 				: undefined}
-			<AccordionItem value={`building-${buildingEntity.id}`}>
+			<AccordionItem value={buildingEntity.toEntityId()}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
 						{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
@@ -132,7 +128,7 @@
 			{@const itemEntity = entity as WorldItemEntity}
 			{@const worldItem = $worldItemStore.data[itemEntity.id]}
 			{@const itemData = worldItem ? $itemStore.data[worldItem.item_id] : undefined}
-			<AccordionItem value={`item-${itemEntity.id}`}>
+			<AccordionItem value={itemEntity.toEntityId()}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
 						{itemData?.name ?? '아이템'} ({itemEntity.id.split('-')[0]})

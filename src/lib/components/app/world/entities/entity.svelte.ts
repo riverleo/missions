@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
 import type { WorldContext } from '../context';
+import type { EntityId } from '$lib/types';
 
 const { Composite } = Matter;
 
@@ -16,6 +17,10 @@ export abstract class Entity {
 	angle = $state(0);
 	width = $state(0);
 	height = $state(0);
+
+	toEntityId(): EntityId {
+		return `${this.type}-${this.id}` as EntityId;
+	}
 
 	updatePosition(): void {
 		const newX = this.body.position.x;

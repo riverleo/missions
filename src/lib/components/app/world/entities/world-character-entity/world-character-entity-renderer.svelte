@@ -17,10 +17,7 @@
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
-	const selected = $derived(
-		$selectedEntityStore.entityId?.value === entity.id &&
-			$selectedEntityStore.entityId?.type === 'character'
-	);
+	const selected = $derived($selectedEntityStore.entityId === entity.toEntityId());
 </script>
 
 {#if character}

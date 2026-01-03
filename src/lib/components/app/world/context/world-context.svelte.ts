@@ -12,6 +12,7 @@ import type {
 	WorldId,
 	EntityId,
 } from '$lib/types';
+import { parseEntityId } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';
@@ -43,7 +44,7 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
-	private respawningEntityIds: EntityId[] = [];
+	private respawningEntityIds = new Set<EntityId>();
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -90,7 +91,7 @@ export class WorldContext {
 		// 클릭한 바디의 엔티티 찾기
 		const entity = this.entities[entityBody.label];
 		if (entity) {
-			setSelectedEntityId({ value: entity.id, type: entity.type });
+			setSelectedEntityId(entity.toEntityId());
 		}
 	}
 
@@ -307,12 +308,9 @@ export class WorldContext {
 			if (!this.isOutOfEntityBounds(entity)) continue;
 
 			// 리스폰 중인 엔티티는 건너뛰기
-			const isRespawning = this.respawningEntityIds.some(
-				(id) => id.value === entity.id && id.type === entity.type
-			);
-			if (isRespawning) continue;
+			if (this.respawningEntityIds.has(entity.toEntityId())) continue;
 
-			this.respawnEntity({ value: entity.id, type: entity.type });
+			this.respawnEntity(entity.toEntityId());
 		}
 	}
 
@@ -330,14 +328,12 @@ export class WorldContext {
 	}
 
 	private respawnEntity(entityId: EntityId) {
-		const isRespawning = this.respawningEntityIds.some(
-			(id) => id.value === entityId.value && id.type === entityId.type
-		);
-		if (isRespawning) return;
+		if (this.respawningEntityIds.has(entityId)) return;
 
-		this.respawningEntityIds.push(entityId);
+		this.respawningEntityIds.add(entityId);
 
-		const entity = this.entities[entityId.value];
+		const { value: id } = parseEntityId(entityId);
+		const entity = this.entities[id];
 		if (!entity) return;
 
 		// 1초 후 리스폰 위치로 다시 추가
@@ -358,9 +354,7 @@ export class WorldContext {
 			// 다시 world에 추가
 			entity.addToWorld();
 
-			this.respawningEntityIds = this.respawningEntityIds.filter(
-				(id) => id.value !== entityId.value || id.type !== entityId.type
-			);
+			this.respawningEntityIds.delete(entityId);
 		}, 1000);
 	}
 }

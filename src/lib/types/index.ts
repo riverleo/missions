@@ -26,10 +26,15 @@ export interface RecordFetchState<K extends string, T> {
 // Branded types for type-safe IDs
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
-// Entity ID with type information
-export interface EntityId {
+// Entity ID with type information (branded string type)
+export type EntityId = `character-${string}` | `building-${string}` | `item-${string}`;
+
+export function parseEntityId(entityId: EntityId): {
 	value: string;
 	type: 'character' | 'building' | 'item';
+} {
+	const [type, ...rest] = entityId.split('-');
+	return { value: rest.join('-'), type: type as 'character' | 'building' | 'item' };
 }
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;

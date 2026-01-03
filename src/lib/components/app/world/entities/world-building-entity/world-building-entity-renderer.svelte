@@ -17,10 +17,7 @@
 	const building = $derived(worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined);
 	const buildingStates = $derived(building ? ($buildingStateStore.data[building.id] ?? []) : []);
 	const buildingState = $derived(buildingStates.find((s) => s.type === 'idle'));
-	const selected = $derived(
-		$selectedEntityStore.entityId?.value === entity.id &&
-			$selectedEntityStore.entityId?.type === 'building'
-	);
+	const selected = $derived($selectedEntityStore.entityId === entity.toEntityId());
 </script>
 
 {#if buildingState}

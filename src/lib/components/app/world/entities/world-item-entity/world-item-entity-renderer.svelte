@@ -15,10 +15,7 @@
 
 	const worldItem = $derived($worldItemStore.data[entity.id]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
-	const selected = $derived(
-		$selectedEntityStore.entityId?.value === entity.id &&
-			$selectedEntityStore.entityId?.type === 'item'
-	);
+	const selected = $derived($selectedEntityStore.entityId === entity.toEntityId());
 </script>
 
 {#if item}
