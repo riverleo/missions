@@ -20,10 +20,10 @@
 	} from '$lib/components/ui/input-group';
 
 	interface Props {
-		context?: WorldContext;
+		worldContext?: WorldContext;
 	}
 
-	let { context }: Props = $props();
+	let { worldContext }: Props = $props();
 
 	const { store } = useWorldTest();
 	const { worldCharacterStore, worldBuildingStore, selectedEntityStore, setSelectedEntityId } =
@@ -35,7 +35,7 @@
 	const currentTick = $derived(0);
 
 	// WorldContext에서 실시간 엔티티 정보 가져오기
-	const entities = $derived(context ? Object.values(context.entities) : []);
+	const entities = $derived(worldContext ? Object.values(worldContext.entities) : []);
 
 	// 아코디언 value (entityId 기반)
 	const accordionValue = $derived.by(() => {

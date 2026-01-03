@@ -84,7 +84,7 @@
 		<!-- 중앙: 월드 -->
 		<div class="relative flex flex-1 items-center justify-center p-4">
 			{#if hasSelectedTerrain}
-				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug} bind:context={worldContext}>
+				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug} bind:worldContext>
 					<TestWorldMarker />
 				</World>
 			{:else}
@@ -100,7 +100,7 @@
 		<!-- 우측: 인스펙터 패널 -->
 		{#if $store.inspectorPanelOpen}
 			<div class="w-80 shrink-0 overflow-y-auto border-l" style="height: {WORLD_HEIGHT + 32}px;">
-				<TestWorldInspectorPanel context={worldContext} />
+				<TestWorldInspectorPanel {worldContext} />
 			</div>
 		{/if}
 	</div>
