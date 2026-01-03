@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CharacterBody } from '$lib/types';
+	import type { CharacterBody, ColliderType } from '$lib/types';
 	import {
 		InputGroup,
 		InputGroupAddon,
@@ -7,9 +7,24 @@
 		InputGroupInput,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
+	import {
+		DropdownMenu,
+		DropdownMenuTrigger,
+		DropdownMenuContent,
+		DropdownMenuRadioGroup,
+		DropdownMenuRadioItem,
+	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconEye, IconEyeOff, IconHeading, IconRuler2, IconX } from '@tabler/icons-svelte';
+	import {
+		IconEye,
+		IconEyeOff,
+		IconHeading,
+		IconRuler2,
+		IconX,
+		IconShape,
+	} from '@tabler/icons-svelte';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { getColliderTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		body: CharacterBody;
@@ -19,6 +34,9 @@
 
 	const { admin } = useCharacterBody();
 	const { uiStore } = admin;
+
+	const colliderTypes: ColliderType[] = ['circle', 'rectangle'];
+	let selectedColliderType = $state(body.collider_type);
 
 	let name = $state(body.name ?? '');
 	let width = $state(body.collider_width === 0 ? '' : body.collider_width.toString());
@@ -30,6 +48,9 @@
 	});
 	$effect(() => {
 		height = body.collider_height === 0 ? '' : body.collider_height.toString();
+	});
+	$effect(() => {
+		selectedColliderType = body.collider_type;
 	});
 
 	async function updateName() {
@@ -59,6 +80,12 @@
 		}
 	}
 
+	$effect(() => {
+		if (selectedColliderType !== body.collider_type) {
+			admin.update(body.id, { collider_type: selectedColliderType });
+		}
+	});
+
 	function toggleShowBodyPreview() {
 		admin.setShowBodyPreview(!$uiStore.showBodyPreview);
 	}
@@ -79,24 +106,46 @@
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>
-				<IconRuler2 class="size-4" />
+				<IconShape class="size-4" />
 			</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupAddon>
+			<DropdownMenu>
+				<DropdownMenuTrigger>
+					{#snippet child({ props })}
+						<InputGroupButton {...props} variant="ghost">
+							{getColliderTypeLabel(selectedColliderType)}
+						</InputGroupButton>
+					{/snippet}
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					<DropdownMenuRadioGroup bind:value={selectedColliderType}>
+						{#each colliderTypes as type (type)}
+							<DropdownMenuRadioItem value={type}>
+								{getColliderTypeLabel(type)}
+							</DropdownMenuRadioItem>
+						{/each}
+					</DropdownMenuRadioGroup>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</InputGroupAddon>
 		<InputGroupInput
 			bind:value={width}
 			type="number"
 			class="w-16"
-			placeholder="넓이"
+			placeholder={selectedColliderType === 'circle' ? '반지름' : '넓이'}
 			onkeydown={onkeydownSize}
 		/>
-		<InputGroupText><IconX /></InputGroupText>
-		<InputGroupInput
-			bind:value={height}
-			type="number"
-			class="w-16"
-			placeholder="높이"
-			onkeydown={onkeydownSize}
-		/>
+		{#if selectedColliderType === 'rectangle'}
+			<InputGroupText><IconX /></InputGroupText>
+			<InputGroupInput
+				bind:value={height}
+				type="number"
+				class="w-16"
+				placeholder="높이"
+				onkeydown={onkeydownSize}
+			/>
+		{/if}
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
 				<TooltipTrigger>

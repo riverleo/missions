@@ -51,14 +51,23 @@
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}
 			<svg class="pointer-events-none absolute inset-0 h-full w-full">
-				<rect
-					x="50%"
-					y="50%"
-					width={item.collider_width}
-					height={item.collider_height}
-					transform="translate(-{item.collider_width / 2}, -{item.collider_height / 2})"
-					fill={DEBUG_ITEM_FILL_STYLE}
-				/>
+				{#if item.collider_type === 'circle'}
+					<circle
+						cx="50%"
+						cy="50%"
+						r={item.collider_width / 2}
+						fill={DEBUG_ITEM_FILL_STYLE}
+					/>
+				{:else}
+					<rect
+						x="50%"
+						y="50%"
+						width={item.collider_width}
+						height={item.collider_height}
+						transform="translate(-{item.collider_width / 2}, -{item.collider_height / 2})"
+						fill={DEBUG_ITEM_FILL_STYLE}
+					/>
+				{/if}
 			</svg>
 		{/if}
 	{/snippet}

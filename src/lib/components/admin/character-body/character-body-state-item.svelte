@@ -182,13 +182,23 @@
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && body && (body.collider_width > 0 || body.collider_height > 0)}
 			<svg class="pointer-events-none absolute inset-0 h-full w-full">
-				<ellipse
-					cx="50%"
-					cy="50%"
-					rx={body.collider_width / 2}
-					ry={body.collider_height / 2}
-					fill={DEBUG_CHARACTER_FILL_STYLE}
-				/>
+				{#if body.collider_type === 'circle'}
+					<circle
+						cx="50%"
+						cy="50%"
+						r={body.collider_width / 2}
+						fill={DEBUG_CHARACTER_FILL_STYLE}
+					/>
+				{:else}
+					<rect
+						x="50%"
+						y="50%"
+						width={body.collider_width}
+						height={body.collider_height}
+						transform="translate(-{body.collider_width / 2}, -{body.collider_height / 2})"
+						fill={DEBUG_CHARACTER_FILL_STYLE}
+					/>
+				{/if}
 			</svg>
 		{/if}
 	{/snippet}

@@ -4,10 +4,16 @@ import type {
 	BuildingStateType,
 	CharacterBehaviorType,
 	ItemStateType,
+	ColliderType,
 	NeedBehavior,
 	ConditionBehavior,
 	ItemBehavior,
 } from '$lib/types';
+
+const colliderTypeLabels: Record<ColliderType, string> = {
+	circle: '원형',
+	rectangle: '사각형',
+};
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
 	idle: '대기',
@@ -35,6 +41,10 @@ const characterBehaviorTypeLabels: Record<CharacterBehaviorType, string> = {
 	repair: '수리',
 	clean: '청소',
 };
+
+export function getColliderTypeLabel(type: ColliderType): string {
+	return colliderTypeLabels[type];
+}
 
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
 	return characterBodyStateLabels[state];

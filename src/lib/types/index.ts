@@ -501,6 +501,7 @@ export type TerrainUpdate = Omit<TerrainUpdateRow, 'id' | 'scenario_id' | 'creat
 };
 
 // CharacterBody types
+export type ColliderType = Enums<'collider_type'>;
 export type CharacterBodyStateType = Enums<'character_body_state_type'>;
 export type LoopMode = Enums<'loop_mode'>;
 type CharacterBodyStateRow = Tables<'character_body_states'>;
