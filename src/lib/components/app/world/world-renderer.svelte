@@ -6,8 +6,14 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
-	import { WorldCharacterEntityRenderer } from './entities/world-character-entity';
-	import { WorldBuildingEntityRenderer } from './entities/world-building-entity';
+	import {
+		WorldCharacterEntityRenderer,
+		type WorldCharacterEntity,
+	} from './entities/world-character-entity';
+	import {
+		WorldBuildingEntityRenderer,
+		type WorldBuildingEntity,
+	} from './entities/world-building-entity';
 	import WorldBlueprint from './world-blueprint.svelte';
 	import { cn } from '$lib/utils';
 
@@ -36,18 +42,8 @@
 
 	let element: HTMLDivElement;
 
-	// worldId 필터링된 buildings와 characters
-	const buildings = $derived(
-		Object.values($worldBuildingStore.data).filter(
-			(b) => !world.worldId || b.world_id === world.worldId
-		)
-	);
-
-	const characters = $derived(
-		Object.values($worldCharacterStore.data).filter(
-			(c) => !world.worldId || c.world_id === world.worldId
-		)
-	);
+	// worldId 필터링된 entities
+	const entities = $derived(Object.values(world.entities));
 
 	// 카메라 줌 핸들러
 	function onwheel(e: WheelEvent) {
@@ -94,16 +90,11 @@
 		{#if world.blueprint.cursor}
 			<WorldBlueprint width={terrainBody.width} height={terrainBody.height} />
 		{/if}
-		{#each buildings as building (building.id)}
-			{@const entity = world.worldBuildingEntities[building.id]}
-			{#if entity}
-				<WorldBuildingEntityRenderer {entity} />
-			{/if}
-		{/each}
-		{#each characters as character (character.id)}
-			{@const entity = world.worldCharacterEntities[character.id]}
-			{#if entity}
-				<WorldCharacterEntityRenderer {entity} />
+		{#each entities as entity (entity.id)}
+			{#if entity.type === 'building'}
+				<WorldBuildingEntityRenderer entity={entity as WorldBuildingEntity} />
+			{:else if entity.type === 'character'}
+				<WorldCharacterEntityRenderer entity={entity as WorldCharacterEntity} />
 			{/if}
 		{/each}
 	</div>

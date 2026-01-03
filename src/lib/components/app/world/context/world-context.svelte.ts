@@ -16,6 +16,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
+import { Entity } from '../entities/entity.svelte';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
 
@@ -30,8 +31,7 @@ export class WorldContext {
 	readonly worldId: WorldId;
 	readonly blueprint: WorldContextBlueprint;
 
-	worldBuildingEntities = $state<Record<WorldBuildingId, WorldBuildingEntity>>({});
-	worldCharacterEntities = $state<Record<WorldCharacterId, WorldCharacterEntity>>({});
+	entities = $state<Record<string, Entity>>({});
 
 	debug = $state(false);
 	initialized = $state(false);
@@ -60,16 +60,13 @@ export class WorldContext {
 	// debug 변경 시 모든 엔티티 업데이트
 	setDebugEntities(debug: boolean) {
 		this.terrainBody.setDebug(debug);
-		for (const entity of Object.values(this.worldBuildingEntities)) {
-			entity.setDebug(debug);
-		}
-		for (const entity of Object.values(this.worldCharacterEntities)) {
+		for (const entity of Object.values(this.entities)) {
 			entity.setDebug(debug);
 		}
 	}
 
 	// 마우스 클릭 처리
-	private handleMouseDown(event: Matter.IEventCollision<Matter.MouseConstraint>) {
+	private handleMouseDown(event: Matter.IEvent<Matter.MouseConstraint>) {
 		const body = event.source.body;
 		const { setSelectedEntityId, selectedEntityStore } = useWorld();
 		const selectedEntityId = get(selectedEntityStore).entityId;
@@ -80,14 +77,14 @@ export class WorldContext {
 			return;
 		}
 
-		// 클릭한 바디가 캐릭터 엔티티인지 확인
-		const entity = this.worldCharacterEntities[body.label as WorldCharacterId];
+		// 클릭한 바디의 엔티티 찾기
+		const entity = this.entities[body.label];
 		if (entity) {
-			// 이미 선택된 캐릭터를 다시 클릭하면 해제
-			if (selectedEntityId?.value === entity.id && selectedEntityId?.type === 'character') {
+			// 이미 선택된 엔티티를 다시 클릭하면 해제
+			if (selectedEntityId?.value === entity.id && selectedEntityId?.type === entity.type) {
 				setSelectedEntityId(undefined);
 			} else {
-				setSelectedEntityId({ value: entity.id, type: 'character' });
+				setSelectedEntityId({ value: entity.id, type: entity.type });
 			}
 		} else {
 			// 지형이나 다른 바디 클릭 시 선택 해제
@@ -184,13 +181,8 @@ export class WorldContext {
 				this.terrainBody.setDebug(this.debug);
 			}
 
-			// 건물 바디 재추가
-			for (const entity of Object.values(this.worldBuildingEntities)) {
-				entity.addToWorld();
-			}
-
-			// 캐릭터 바디 재추가
-			for (const entity of Object.values(this.worldCharacterEntities)) {
+			// 엔티티 바디 재추가
+			for (const entity of Object.values(this.entities)) {
 				entity.addToWorld();
 			}
 
@@ -225,50 +217,45 @@ export class WorldContext {
 		this.oncamerachange?.(camera);
 	}
 
-	// 캐릭터 바디 동기화
-	syncWorldCharacterEntities(worldCharacters: Record<WorldCharacterId, WorldCharacter>) {
+	// 엔티티 동기화
+	syncEntities(
+		worldCharacters: Record<WorldCharacterId, WorldCharacter>,
+		worldBuildings: Record<WorldBuildingId, WorldBuilding>
+	) {
 		// 제거될 엔티티들 cleanup
-		for (const entity of Object.values(this.worldCharacterEntities)) {
-			if (!worldCharacters[entity.id]) {
+		for (const entity of Object.values(this.entities)) {
+			const isCharacterRemoved =
+				entity.type === 'character' && !worldCharacters[entity.id as WorldCharacterId];
+			const isBuildingRemoved =
+				entity.type === 'building' && !worldBuildings[entity.id as WorldBuildingId];
+
+			if (isCharacterRemoved || isBuildingRemoved) {
 				entity.removeFromWorld();
-				delete this.worldCharacterEntities[entity.id];
+				delete this.entities[entity.id];
 			}
 		}
 
-		// 새 엔티티 추가
+		// 새 캐릭터 엔티티 추가
 		for (const character of Object.values(worldCharacters)) {
-			if (!this.worldCharacterEntities[character.id]) {
+			if (!this.entities[character.id]) {
 				try {
 					const entity = new WorldCharacterEntity(character.id);
 					entity.addToWorld();
-					this.worldCharacterEntities[character.id] = entity;
+					this.entities[character.id] = entity;
 				} catch (error) {
-					// 스토어에 없는 삭제된 캐릭터는 건너뜀 (localStorage 정리 필요)
 					console.warn('Skipping character creation:', error);
 				}
 			}
 		}
-	}
 
-	// 건물 엔티티 동기화
-	syncWorldBuildingEntities(worldBuildings: Record<WorldBuildingId, WorldBuilding>) {
-		// 제거될 엔티티들 cleanup
-		for (const entity of Object.values(this.worldBuildingEntities)) {
-			if (!worldBuildings[entity.id]) {
-				entity.removeFromWorld();
-				delete this.worldBuildingEntities[entity.id];
-			}
-		}
-
-		// 새 엔티티 추가
-		for (const worldBuilding of Object.values(worldBuildings)) {
-			if (!this.worldBuildingEntities[worldBuilding.id]) {
+		// 새 건물 엔티티 추가
+		for (const building of Object.values(worldBuildings)) {
+			if (!this.entities[building.id]) {
 				try {
-					const entity = new WorldBuildingEntity(worldBuilding.id);
+					const entity = new WorldBuildingEntity(building.id);
 					entity.addToWorld();
-					this.worldBuildingEntities[worldBuilding.id] = entity;
+					this.entities[building.id] = entity;
 				} catch (error) {
-					// 스토어에 없는 삭제된 건물은 건너뜀
 					console.warn('Skipping building creation:', error);
 				}
 			}
@@ -277,8 +264,10 @@ export class WorldContext {
 
 	// Matter.js body 위치를 스토어에 동기화
 	private updateWorldCharacterEntityPositions() {
-		for (const worldCharacterEntity of Object.values(this.worldCharacterEntities)) {
-			worldCharacterEntity.updatePosition();
+		for (const entity of Object.values(this.entities)) {
+			if (entity.type === 'character') {
+				entity.updatePosition();
+			}
 		}
 	}
 
@@ -287,9 +276,12 @@ export class WorldContext {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
 
-		for (const worldCharacterEntity of Object.values(this.worldCharacterEntities)) {
-			if (this.isOutOfWorldCharacterEntityBounds(worldCharacterEntity)) {
-				this.respawnWorldCharacterEntity(worldCharacterEntity.id);
+		for (const entity of Object.values(this.entities)) {
+			if (
+				entity.type === 'character' &&
+				this.isOutOfWorldCharacterEntityBounds(entity as WorldCharacterEntity)
+			) {
+				this.respawnWorldCharacterEntity(entity.id as WorldCharacterId);
 			}
 		}
 	}
@@ -314,7 +306,7 @@ export class WorldContext {
 		if (this.respawningWorldCharacterIds.has(worldCharacterId)) return;
 		this.respawningWorldCharacterIds.add(worldCharacterId);
 
-		const worldCharacterEntity = this.worldCharacterEntities[worldCharacterId];
+		const worldCharacterEntity = this.entities[worldCharacterId] as WorldCharacterEntity;
 		if (!worldCharacterEntity) return;
 
 		// world에서만 제거 (엔티티는 유지)

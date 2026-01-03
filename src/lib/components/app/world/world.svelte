@@ -63,7 +63,7 @@
 		worldContext.setDebugEntities(debug);
 	});
 
-	// worldBuildings 변경 시 엔티티 동기화
+	// worldBuildings 및 worldCharacters 변경 시 엔티티 동기화
 	$effect(() => {
 		const buildings = Object.values($worldBuildingStore.data)
 			.filter((b) => b.world_id === worldId)
@@ -74,11 +74,7 @@
 				},
 				{} as Record<WorldBuildingId, WorldBuilding>
 			);
-		worldContext.syncWorldBuildingEntities(buildings);
-	});
 
-	// worldCharacters 변경 시 엔티티 동기화
-	$effect(() => {
 		const characters = Object.values($worldCharacterStore.data)
 			.filter((c) => c.world_id === worldId)
 			.reduce(
@@ -88,7 +84,8 @@
 				},
 				{} as Record<WorldCharacterId, WorldCharacter>
 			);
-		worldContext.syncWorldCharacterEntities(characters);
+
+		worldContext.syncEntities(characters, buildings);
 	});
 
 	setWorldContext(worldContext);

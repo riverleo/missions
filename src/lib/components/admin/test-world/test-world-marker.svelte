@@ -9,6 +9,8 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
 	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
+	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
+	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 
 	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
 		useWorldTest();
@@ -133,30 +135,30 @@
 	function onclickEraserOverlay() {
 		const pos = mouseWorldPos();
 
-		// 클릭 위치에 있는 캐릭터 찾기
-		for (const [id, entity] of Object.entries(world.worldCharacterEntities)) {
-			const characterBody = entity.characterBody;
-			if (!characterBody) continue;
-
+		// 클릭 위치에 있는 엔티티 찾기
+		for (const entity of Object.values(world.entities)) {
 			const dx = pos.x - entity.body.position.x;
 			const dy = pos.y - entity.body.position.y;
-			const halfWidth = characterBody.width / 2;
-			const halfHeight = characterBody.height / 2;
-			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-				removeWorldCharacter(id as WorldCharacterId);
-				return;
-			}
-		}
 
-		// 클릭 위치에 있는 건물 찾기
-		for (const [id, entity] of Object.entries(world.worldBuildingEntities)) {
-			const dx = pos.x - entity.body.position.x;
-			const dy = pos.y - entity.body.position.y;
-			const halfWidth = entity.size.width / 2;
-			const halfHeight = entity.size.height / 2;
-			if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-				removeWorldBuilding(id as WorldBuildingId);
-				return;
+			if (entity.type === 'character') {
+				const characterEntity = entity as WorldCharacterEntity;
+				const characterBody = characterEntity.characterBody;
+				if (!characterBody) continue;
+
+				const halfWidth = characterBody.width / 2;
+				const halfHeight = characterBody.height / 2;
+				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
+					removeWorldCharacter(characterEntity.id);
+					return;
+				}
+			} else if (entity.type === 'building') {
+				const buildingEntity = entity as WorldBuildingEntity;
+				const halfWidth = buildingEntity.size.width / 2;
+				const halfHeight = buildingEntity.size.height / 2;
+				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
+					removeWorldBuilding(buildingEntity.id);
+					return;
+				}
 			}
 		}
 	}
