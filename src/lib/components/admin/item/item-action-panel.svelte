@@ -76,7 +76,6 @@
 			type="number"
 			step="0.01"
 			min="0"
-			class="w-16"
 			onkeydown={onkeydownScale}
 		/>
 		<InputGroupAddon align="inline-end">
