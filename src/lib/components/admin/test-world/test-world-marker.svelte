@@ -29,7 +29,7 @@
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
-	const { store: itemStore, stateStore: itemStateStore } = useItem();
+	const { store: itemStore } = useItem();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
@@ -118,10 +118,6 @@
 	const selectedItem = $derived(
 		$store.selectedItemId ? $itemStore.data[$store.selectedItemId] : undefined
 	);
-	const selectedItemStates = $derived(
-		selectedItem ? ($itemStateStore.data[selectedItem.id] ?? []) : []
-	);
-	const selectedItemState = $derived(selectedItemStates.find((s) => s.type === 'idle'));
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {
@@ -285,13 +281,13 @@
 		onclick={onclickItemOverlay}
 	></button>
 	<!-- 커맨드 키 누를 때 아이템 미리보기 -->
-	{#if isCommandPressed && selectedItemState}
+	{#if isCommandPressed && selectedItem}
 		{@const pos = mouseContainerPos()}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
 			style="left: {pos.x}px; top: {pos.y}px;"
 		>
-			<ItemSpriteAnimator itemState={selectedItemState} resolution={2} />
+			<ItemSpriteAnimator itemId={selectedItem.id} state="idle" resolution={2} />
 		</div>
 	{/if}
 {/if}

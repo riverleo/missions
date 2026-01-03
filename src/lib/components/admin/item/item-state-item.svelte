@@ -46,9 +46,7 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		{#if itemState}
-			<ItemSpriteAnimator {itemState} resolution={2} />
-		{/if}
+		<ItemSpriteAnimator itemId={itemId as ItemId} state={type} resolution={2} />
 	{/snippet}
 	{#snippet overlay()}
 		{#if $uiStore.showBodyPreview && item && (item.width > 0 || item.height > 0)}

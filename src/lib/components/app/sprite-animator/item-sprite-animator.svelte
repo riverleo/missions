@@ -1,23 +1,31 @@
 <script lang="ts">
-	import type { ItemState, LoopMode } from '$lib/types';
+	import type { ItemId, ItemStateType, LoopMode } from '$lib/types';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
+	import { useItem } from '$lib/hooks/use-item';
 
 	const OUTLINE_WIDTH = 10;
 
 	interface Props {
-		itemState: ItemState;
-		scale?: number;
+		itemId: ItemId;
+		state: ItemStateType;
 		resolution?: 1 | 2 | 3;
 		selected?: boolean;
 	}
 
-	let { itemState, scale = 1, resolution = 1, selected = false }: Props = $props();
+	let { itemId, state, resolution = 1, selected = false }: Props = $props();
+
+	const { store, stateStore } = useItem();
+	const item = $derived($store.data[itemId]);
+	const itemStates = $derived($stateStore.data[itemId] ?? []);
+	const itemState = $derived(itemStates.find((s) => s.type === state));
+	const scale = $derived(item?.scale ?? 1);
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
 	$effect(() => {
-		const atlasName = itemState.atlas_name;
+		const atlasName = itemState?.atlas_name;
+		if (!atlasName) return;
 
 		SpriteAnimator.create(atlasName).then((newAnimator) => {
 			animator?.stop();

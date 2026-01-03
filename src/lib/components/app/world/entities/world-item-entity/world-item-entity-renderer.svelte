@@ -10,24 +10,22 @@
 
 	let { entity }: Props = $props();
 
-	const { store: itemStore, stateStore: itemStateStore } = useItem();
+	const { store: itemStore } = useItem();
 	const { worldItemStore, selectedEntityStore } = useWorld();
 
 	const worldItem = $derived($worldItemStore.data[entity.id]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
-	const itemStates = $derived(item ? ($itemStateStore.data[item.id] ?? []) : []);
-	const itemState = $derived(itemStates.find((s) => s.type === 'idle'));
 	const selected = $derived(
 		$selectedEntityStore.entityId?.value === entity.id &&
 			$selectedEntityStore.entityId?.type === 'item'
 	);
 </script>
 
-{#if itemState}
+{#if item}
 	<div
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x}px; top: {entity.y}px; rotate: {entity.angle}rad;"
 	>
-		<ItemSpriteAnimator {itemState} resolution={2} {selected} />
+		<ItemSpriteAnimator itemId={item.id} state="idle" resolution={2} {selected} />
 	</div>
 {/if}
