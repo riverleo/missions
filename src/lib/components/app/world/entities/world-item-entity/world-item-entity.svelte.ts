@@ -50,17 +50,30 @@ export class WorldItemEntity extends Entity {
 	}
 
 	private createBody(width: number, height: number, x: number, y: number): Matter.Body {
-		return Bodies.rectangle(x, y, width, height, {
+		const item = this.item;
+		if (!item) {
+			throw new Error('Cannot create body: item not found');
+		}
+
+		const options = {
 			label: this.id,
 			isStatic: false,
 			collisionFilter: {
 				category: CATEGORY_ITEM,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
 			},
-			render: this.world.debug
-				? { visible: true, fillStyle: DEBUG_ITEM_FILL_STYLE }
-				: { visible: false },
-		});
+			render: {
+				visible: this.world.debug,
+				fillStyle: this.world.debug ? DEBUG_ITEM_FILL_STYLE : undefined,
+			},
+		};
+
+		if (item.collider_type === 'circle') {
+			const radius = width / 2;
+			return Bodies.circle(x, y, radius, options);
+		} else {
+			return Bodies.rectangle(x, y, width, height, options);
+		}
 	}
 
 	get item(): Item | undefined {

@@ -7,7 +7,6 @@ import {
 	CATEGORY_CHARACTER,
 	DEBUG_CHARACTER_FILL_STYLE,
 } from '../../constants';
-import { createEllipseVertices } from '../../vertices';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -54,11 +53,12 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	private createBody(width: number, height: number): Matter.Body {
-		const rx = width / 2;
-		const ry = height / 2;
-		const vertices = createEllipseVertices(0, 0, rx, ry);
+		const characterBody = this.characterBody;
+		if (!characterBody) {
+			throw new Error('Cannot create body: characterBody not found');
+		}
 
-		const body = Bodies.fromVertices(0, 0, [vertices], {
+		const options = {
 			label: this.id,
 			restitution: 0.1,
 			friction: 0.8,
@@ -68,14 +68,18 @@ export class WorldCharacterEntity extends Entity {
 				category: CATEGORY_CHARACTER,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN,
 			},
-			render: { visible: this.world.debug },
-		});
+			render: {
+				visible: this.world.debug,
+				fillStyle: this.world.debug ? DEBUG_CHARACTER_FILL_STYLE : undefined,
+			},
+		};
 
-		if (this.world.debug) {
-			body.render.fillStyle = DEBUG_CHARACTER_FILL_STYLE;
+		if (characterBody.collider_type === 'circle') {
+			const radius = width / 2;
+			return Bodies.circle(0, 0, radius, options);
+		} else {
+			return Bodies.rectangle(0, 0, width, height, options);
 		}
-
-		return body;
 	}
 
 	get characterBody(): CharacterBody | undefined {

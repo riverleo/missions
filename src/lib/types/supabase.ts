@@ -2886,7 +2886,7 @@ export type Database = {
       character_behavior_type: "demolish" | "use" | "repair" | "clean"
       character_body_state_type: "idle" | "walk" | "run" | "jump"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
-      collider_type: "rectangle" | "ellipse"
+      collider_type: "circle" | "rectangle"
       condition_fulfillment_type: "character" | "item" | "idle"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       item_state_type: "idle" | "broken"
@@ -3035,7 +3035,7 @@ export const Constants = {
       character_behavior_type: ["demolish", "use", "repair", "clean"],
       character_body_state_type: ["idle", "walk", "run", "jump"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
-      collider_type: ["rectangle", "ellipse"],
+      collider_type: ["circle", "rectangle"],
       condition_fulfillment_type: ["character", "item", "idle"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       item_state_type: ["idle", "broken"],
