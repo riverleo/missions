@@ -5,6 +5,7 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
+	import { DEBUG_ITEM_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getItemStateLabel } from '$lib/utils/state-label';
 
@@ -16,6 +17,7 @@
 	let { itemId, type }: Props = $props();
 
 	const { store, stateStore, admin } = useItem();
+	const { uiStore } = admin;
 
 	const item = $derived($store.data[itemId as ItemId]);
 	const itemStates = $derived($stateStore.data[itemId as ItemId] ?? []);
@@ -46,6 +48,20 @@
 	{#snippet preview()}
 		{#if itemState}
 			<ItemSpriteAnimator {itemState} resolution={2} />
+		{/if}
+	{/snippet}
+	{#snippet overlay()}
+		{#if $uiStore.showBodyPreview && item && (item.width > 0 || item.height > 0)}
+			<svg class="pointer-events-none absolute inset-0 h-full w-full">
+				<rect
+					x="50%"
+					y="50%"
+					width={item.width}
+					height={item.height}
+					transform="translate(-{item.width / 2}, -{item.height / 2})"
+					fill={DEBUG_ITEM_FILL_STYLE}
+				/>
+			</svg>
 		{/if}
 	{/snippet}
 </SpriteStateItem>
