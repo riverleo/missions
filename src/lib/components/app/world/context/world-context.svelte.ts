@@ -17,6 +17,7 @@ import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
+import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
@@ -70,8 +71,8 @@ export class WorldContext {
 	// 월드 로드, cleanup 함수 반환
 	load({
 		element,
-		width = 800,
-		height = 400,
+		width = WORLD_WIDTH,
+		height = WORLD_HEIGHT,
 	}: {
 		element: HTMLDivElement;
 		width?: number;

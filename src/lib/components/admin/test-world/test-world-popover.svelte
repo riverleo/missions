@@ -8,6 +8,7 @@
 	import TestWorldPanel from './test-world-panel.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
+	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';
 
 	const { store, setOpen, setModalPosition, init } = useWorldTest();
 	const { fetchAllStatus } = useScenario();
@@ -150,7 +151,12 @@
 				</World>
 				<TestWorldPanel />
 			{:else}
-				<p class="text-sm text-muted-foreground">지형을 선택해주세요</p>
+				<div
+					class="flex items-center justify-center"
+					style="width: {WORLD_WIDTH}px; height: {WORLD_HEIGHT}px;"
+				>
+					<p class="text-sm text-muted-foreground">지형을 선택해주세요</p>
+				</div>
 			{/if}
 		</div>
 	</div>

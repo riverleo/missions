@@ -17,12 +17,7 @@ import type {
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { useTerrain } from '../use-terrain';
-import {
-	loadFromStorage,
-	saveToStorage,
-	type StoredState,
-	type WorldTestStoreState,
-} from './use-world-test-storage';
+import { loadFromStorage, saveToStorage, type WorldTestStoreState } from './use-world-test-storage';
 
 export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
@@ -44,9 +39,9 @@ function createTestWorldStore() {
 		eraser: stored.eraser,
 	});
 
-	// 1초마다 localStorage에 저장
+	// 5초마다 localStorage에 저장
 	if (browser) {
-		setInterval(() => saveToStorage(get(store)), 1000);
+		setInterval(() => saveToStorage(get(store)), 5000);
 	}
 
 	function selectTerrain(terrainId: TerrainId) {

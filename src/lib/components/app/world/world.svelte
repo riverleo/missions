@@ -12,6 +12,7 @@
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
+	import { WORLD_WIDTH, WORLD_HEIGHT } from './constants';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width?: number;
@@ -23,8 +24,8 @@
 	}
 
 	let {
-		width = 800,
-		height = 400,
+		width = WORLD_WIDTH,
+		height = WORLD_HEIGHT,
 		worldId,
 		debug = false,
 		children,
