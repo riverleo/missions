@@ -32,7 +32,6 @@
 
 	let name = $state('');
 	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
-	let scale = $state<number>(1.0);
 	let isSubmitting = $state(false);
 
 	const selectedBodyLabel = $derived(
@@ -45,7 +44,6 @@
 		if (open && character) {
 			name = character.name ?? '';
 			characterBodyId = character.character_body_id ?? undefined;
-			scale = character.scale ?? 1.0;
 		}
 	});
 
@@ -66,7 +64,7 @@
 		isSubmitting = true;
 
 		admin
-			.update(characterId, { name: name.trim(), character_body_id: characterBodyId, scale })
+			.update(characterId, { name: name.trim(), character_body_id: characterBodyId })
 			.then(() => {
 				closeDialog();
 			})
@@ -84,7 +82,7 @@
 		<DialogHeader>
 			<DialogTitle>캐릭터 수정</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit} class="space-y-4">
+		<form {onsubmit}>
 			<ButtonGroup class="w-full">
 				<ButtonGroup>
 					<ButtonGroupText>바디</ButtonGroupText>
@@ -110,16 +108,7 @@
 					</InputGroup>
 				</ButtonGroup>
 			</ButtonGroup>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<InputGroupText>스케일</InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput type="number" step="0.01" min="0" bind:value={scale} />
-				<InputGroupAddon align="inline-end">
-					<InputGroupText>배</InputGroupText>
-				</InputGroupAddon>
-			</InputGroup>
-			<DialogFooter>
+			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting || !characterBodyId || !name.trim()}>
 					{isSubmitting ? '저장 중...' : '저장'}
 				</Button>

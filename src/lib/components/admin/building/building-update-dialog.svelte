@@ -26,7 +26,6 @@
 
 	let name = $state('');
 	let itemMaxCapacity = $state('');
-	let scale = $state<number>(1.0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
@@ -34,7 +33,6 @@
 			name = building.name ?? '';
 			itemMaxCapacity =
 				building.item_max_capacity === 0 ? '' : building.item_max_capacity.toString();
-			scale = building.scale ?? 1.0;
 		}
 	});
 
@@ -56,7 +54,6 @@
 			.update(buildingId, {
 				name: name.trim(),
 				item_max_capacity: capacity,
-				scale,
 			})
 			.then(() => {
 				closeDialog();
@@ -97,15 +94,6 @@
 						min="0"
 						bind:value={itemMaxCapacity}
 					/>
-				</InputGroup>
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<InputGroupText>스케일</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput type="number" step="0.01" min="0" bind:value={scale} />
-					<InputGroupAddon align="inline-end">
-						<InputGroupText>배</InputGroupText>
-					</InputGroupAddon>
 				</InputGroup>
 			</div>
 			<DialogFooter>

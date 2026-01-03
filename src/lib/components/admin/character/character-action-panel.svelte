@@ -2,6 +2,13 @@
 	import type { Character, CharacterBodyStateType } from '$lib/types';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
+	import {
+		InputGroup,
+		InputGroupAddon,
+		InputGroupInput,
+		InputGroupText,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel } from '$lib/utils/state-label';
 
@@ -18,6 +25,26 @@
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
 	const selectedBodyStateLabel = $derived(getCharacterBodyStateLabel(previewBodyStateType));
+
+	let scale = $state(character.scale.toString());
+
+	// character prop 변경 시 상태 동기화
+	$effect(() => {
+		scale = character.scale.toString();
+	});
+
+	async function updateScale() {
+		const newScale = parseFloat(scale) || 1.0;
+		if (newScale === character.scale) return;
+		await admin.update(character.id, { scale: newScale });
+	}
+
+	function onkeydownScale(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			(e.target as HTMLInputElement).blur();
+			updateScale();
+		}
+	}
 
 	function onBodyStateChange(value: string | undefined) {
 		if (value) {
@@ -42,4 +69,20 @@
 			</SelectContent>
 		</Select>
 	</ButtonGroup>
+	<InputGroup>
+		<InputGroupAddon align="inline-start">
+			<InputGroupText>스케일</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupInput
+			bind:value={scale}
+			type="number"
+			step="0.01"
+			min="0"
+			class="w-16"
+			onkeydown={onkeydownScale}
+		/>
+		<InputGroupAddon align="inline-end">
+			<InputGroupText>배</InputGroupText>
+		</InputGroupAddon>
+	</InputGroup>
 </div>

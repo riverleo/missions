@@ -22,6 +22,7 @@
 
 	let tileCols = $state(building.tile_cols === 0 ? '' : building.tile_cols.toString());
 	let tileRows = $state(building.tile_rows === 0 ? '' : building.tile_rows.toString());
+	let scale = $state(building.scale.toString());
 
 	// building prop 변경 시 상태 동기화
 	$effect(() => {
@@ -29,6 +30,9 @@
 	});
 	$effect(() => {
 		tileRows = building.tile_rows === 0 ? '' : building.tile_rows.toString();
+	});
+	$effect(() => {
+		scale = building.scale.toString();
 	});
 
 	async function updateTileSize() {
@@ -45,12 +49,41 @@
 		}
 	}
 
+	async function updateScale() {
+		const newScale = parseFloat(scale) || 1.0;
+		if (newScale === building.scale) return;
+		await admin.update(building.id, { scale: newScale });
+	}
+
+	function onkeydownScale(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			(e.target as HTMLInputElement).blur();
+			updateScale();
+		}
+	}
+
 	function toggleShowBodyPreview() {
 		admin.setShowBodyPreview(!$uiStore.showBodyPreview);
 	}
 </script>
 
 <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2">
+	<InputGroup>
+		<InputGroupAddon align="inline-start">
+			<InputGroupText>스케일</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupInput
+			bind:value={scale}
+			type="number"
+			step="0.01"
+			min="0"
+			class="w-16"
+			onkeydown={onkeydownScale}
+		/>
+		<InputGroupAddon align="inline-end">
+			<InputGroupText>배</InputGroupText>
+		</InputGroupAddon>
+	</InputGroup>
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>

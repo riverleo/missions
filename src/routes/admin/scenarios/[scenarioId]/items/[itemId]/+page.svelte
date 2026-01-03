@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { useItem } from '$lib/hooks/use-item';
 	import ItemStateItemGroup from '$lib/components/admin/item/item-state-item-group.svelte';
+	import ItemActionPanel from '$lib/components/admin/item/item-action-panel.svelte';
 	import type { ItemId } from '$lib/types';
 
 	const { store } = useItem();
@@ -14,6 +15,7 @@
 		<div class="flex p-4 pt-16">
 			<ItemStateItemGroup {itemId} />
 		</div>
+		<ItemActionPanel {item} />
 	</div>
 {:else}
 	<div class="flex h-full items-center justify-center">
