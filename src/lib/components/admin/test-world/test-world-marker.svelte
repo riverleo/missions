@@ -5,7 +5,7 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
-	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
+	import { CharacterSpriteAnimator, ItemSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
@@ -29,7 +29,7 @@
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
-	const { store: itemStore } = useItem();
+	const { store: itemStore, stateStore: itemStateStore } = useItem();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
@@ -118,6 +118,10 @@
 	const selectedItem = $derived(
 		$store.selectedItemId ? $itemStore.data[$store.selectedItemId] : undefined
 	);
+	const selectedItemStates = $derived(
+		selectedItem ? ($itemStateStore.data[selectedItem.id] ?? []) : []
+	);
+	const selectedItemState = $derived(selectedItemStates.find((s) => s.type === 'idle'));
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {
@@ -281,13 +285,13 @@
 		onclick={onclickItemOverlay}
 	></button>
 	<!-- 커맨드 키 누를 때 아이템 미리보기 -->
-	{#if isCommandPressed}
+	{#if isCommandPressed && selectedItemState}
 		{@const pos = mouseContainerPos()}
 		<div
-			class="pointer-events-none absolute flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded bg-white/20 opacity-70"
+			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
 			style="left: {pos.x}px; top: {pos.y}px;"
 		>
-			<span class="text-xs font-bold text-white">{selectedItem.name.charAt(0)}</span>
+			<ItemSpriteAnimator itemState={selectedItemState} resolution={2} />
 		</div>
 	{/if}
 {/if}
