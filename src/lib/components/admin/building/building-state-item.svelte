@@ -61,7 +61,7 @@
 >
 	{#snippet preview()}
 		{#if buildingState}
-			<BuildingSpriteAnimator buildingState={buildingState} resolution={2} />
+			<BuildingSpriteAnimator buildingId={buildingId as BuildingId} stateType={type} resolution={2} />
 		{/if}
 	{/snippet}
 	{#snippet overlay()}

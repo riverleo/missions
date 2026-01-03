@@ -5,33 +5,32 @@
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
 
 	const world = useWorldContext();
-	const { stateStore: buildingStateStore } = useBuilding();
+	const { store: buildingStore } = useBuilding();
 
-	// 배치할 건물의 상태 조회
-	const placementBuilding = $derived(world.blueprint.cursor?.building);
-	const buildingStates = $derived(
-		placementBuilding ? ($buildingStateStore.data[placementBuilding.id] ?? []) : []
+	// 배치할 건물
+	const placementBuildingId = $derived(world.blueprint.cursor?.buildingId);
+	const placementBuilding = $derived(
+		placementBuildingId ? $buildingStore.data[placementBuildingId] : undefined
 	);
-	const buildingIdleState = $derived(buildingStates.find((s) => s.type === 'idle'));
 
 	// 건물 타일 크기
-	const cols = $derived(world.blueprint.cursor?.building.tile_cols ?? 0);
-	const rows = $derived(world.blueprint.cursor?.building.tile_rows ?? 0);
+	const cols = $derived(placementBuilding?.tile_cols ?? 0);
+	const rows = $derived(placementBuilding?.tile_rows ?? 0);
 	const width = $derived(cols * TILE_SIZE);
 	const height = $derived(rows * TILE_SIZE);
 
 	// 좌상단 타일 인덱스를 건물 중심 픽셀 좌표로 변환
 	const centerX = $derived(() => {
-		if (!world.blueprint.cursor) return 0;
-		const { tileX, building } = world.blueprint.cursor;
-		const width = building.tile_cols * TILE_SIZE;
+		if (!world.blueprint.cursor || !placementBuilding) return 0;
+		const { tileX } = world.blueprint.cursor;
+		const width = placementBuilding.tile_cols * TILE_SIZE;
 		return tileX * TILE_SIZE + width / 2;
 	});
 
 	const centerY = $derived(() => {
-		if (!world.blueprint.cursor) return 0;
-		const { tileY, building } = world.blueprint.cursor;
-		const height = building.tile_rows * TILE_SIZE;
+		if (!world.blueprint.cursor || !placementBuilding) return 0;
+		const { tileY } = world.blueprint.cursor;
+		const height = placementBuilding.tile_rows * TILE_SIZE;
 		return tileY * TILE_SIZE + height / 2;
 	});
 
@@ -80,12 +79,12 @@
 	</div>
 
 	<!-- 건물 스프라이트 미리보기 -->
-	{#if buildingIdleState}
+	{#if placementBuilding}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {x}px; top: {y}px;"
 		>
-			<BuildingSpriteAnimator buildingState={buildingIdleState} resolution={2} />
+			<BuildingSpriteAnimator buildingId={placementBuilding.id} stateType="idle" resolution={2} />
 		</div>
 	{/if}
 {/if}

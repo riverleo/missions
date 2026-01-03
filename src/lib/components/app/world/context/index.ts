@@ -1,7 +1,7 @@
-import type { Building } from '$lib/types';
+import type { BuildingId } from '$lib/types';
 
 export interface WorldBlueprintCursor {
-	building: Building;
+	buildingId: BuildingId;
 	tileX: number;
 	tileY: number;
 }

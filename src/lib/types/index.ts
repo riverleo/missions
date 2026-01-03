@@ -28,14 +28,7 @@ type Brand<T, B extends string> = T & { readonly __brand: B };
 
 // Entity ID with type information (branded string type)
 export type EntityId = `character-${string}` | `building-${string}` | `item-${string}`;
-
-export function parseEntityId(entityId: EntityId): {
-	value: string;
-	type: 'character' | 'building' | 'item';
-} {
-	const [type, ...rest] = entityId.split('-');
-	return { value: rest.join('-'), type: type as 'character' | 'building' | 'item' };
-}
+export type EntityType = 'character' | 'building' | 'item';
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;
 export type ChapterId = Brand<string, 'ChapterId'>;

@@ -17,19 +17,14 @@
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
+	import type { EntityId } from '$lib/types';
 
 	const { supabase } = useServerPayload();
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
 	const { store: itemStore } = useItem();
-	const {
-		store: testWorldStore,
-		selectTerrain,
-		selectCharacter,
-		selectBuilding,
-		selectItem,
-	} = useWorldTest();
+	const { store: testWorldStore, selectTerrain, selectEntity } = useWorldTest();
 
 	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
@@ -67,11 +62,12 @@
 		{#if characters.length > 0}
 			<CommandGroup heading="캐릭터">
 				{#each characters as character (character.id)}
-					<CommandItem onSelect={() => selectCharacter(character.id)}>
+					{@const entityId = `character-${character.id}` as EntityId}
+					<CommandItem onSelect={() => selectEntity(entityId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								character.id === $testWorldStore.selectedCharacterId ? 'opacity-100' : 'opacity-0'
+								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -84,11 +80,12 @@
 		{#if buildings.length > 0}
 			<CommandGroup heading="건물">
 				{#each buildings as building (building.id)}
-					<CommandItem onSelect={() => selectBuilding(building.id)}>
+					{@const entityId = `building-${building.id}` as EntityId}
+					<CommandItem onSelect={() => selectEntity(entityId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								building.id === $testWorldStore.selectedBuildingId ? 'opacity-100' : 'opacity-0'
+								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -101,11 +98,12 @@
 		{#if items.length > 0}
 			<CommandGroup heading="아이템">
 				{#each items as item (item.id)}
-					<CommandItem onSelect={() => selectItem(item.id)}>
+					{@const entityId = `item-${item.id}` as EntityId}
+					<CommandItem onSelect={() => selectEntity(entityId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								item.id === $testWorldStore.selectedItemId ? 'opacity-100' : 'opacity-0'
+								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">

@@ -11,6 +11,7 @@ import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
+import type { PathPoint } from '../../pathfinder';
 
 const { Bodies, Body, Composite } = Matter;
 
@@ -18,6 +19,7 @@ export class WorldCharacterEntity extends Entity {
 	readonly id: WorldCharacterId;
 	readonly type = 'character' as const;
 	body: Matter.Body;
+	path: PathPoint[] = $state([]);
 
 	protected readonly world = useWorldContext();
 	protected get debugFillStyle(): string {
@@ -128,5 +130,20 @@ export class WorldCharacterEntity extends Entity {
 
 	saveToStore(): void {
 		// 스토어에 현재 위치 저장 (수동 호출)
+	}
+
+	moveTo(targetX: number, targetY: number): void {
+		const currentX = this.body.position.x;
+		const currentY = this.body.position.y;
+
+		// pathfinder로 경로 계산
+		const rawPath = this.world.pathfinder.findPath(currentX, currentY, targetX, targetY);
+
+		// 경로 스무딩
+		this.path = this.world.pathfinder.smoothPath(rawPath);
+	}
+
+	clearPath(): void {
+		this.path = [];
 	}
 }

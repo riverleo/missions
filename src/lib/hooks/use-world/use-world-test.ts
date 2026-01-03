@@ -13,6 +13,7 @@ import type {
 	PlayerId,
 	ScenarioId,
 	TerrainId,
+	EntityId,
 	CharacterId,
 	BuildingId,
 	ItemId,
@@ -87,34 +88,16 @@ function createTestWorldStore() {
 		});
 	}
 
-	function selectCharacter(characterId: CharacterId) {
+	function selectEntity(entityId: EntityId) {
 		store.update((state) => ({
 			...state,
-			selectedCharacterId: state.selectedCharacterId === characterId ? undefined : characterId,
-			selectedBuildingId: undefined,
-			selectedItemId: undefined,
+			selectedEntityId: state.selectedEntityId === entityId ? undefined : entityId,
 			eraser: false,
 		}));
-	}
 
-	function selectBuilding(buildingId: BuildingId) {
-		store.update((state) => ({
-			...state,
-			selectedBuildingId: state.selectedBuildingId === buildingId ? undefined : buildingId,
-			selectedCharacterId: undefined,
-			selectedItemId: undefined,
-			eraser: false,
-		}));
-	}
-
-	function selectItem(itemId: ItemId) {
-		store.update((state) => ({
-			...state,
-			selectedItemId: state.selectedItemId === itemId ? undefined : itemId,
-			selectedCharacterId: undefined,
-			selectedBuildingId: undefined,
-			eraser: false,
-		}));
+		// useWorld의 selectedEntityIdStore 클리어 (store 업데이트 후에)
+		const world = useWorld();
+		world.selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
 	}
 
 	function setDebug(debug: boolean) {
@@ -125,9 +108,7 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			eraser,
-			selectedCharacterId: undefined,
-			selectedBuildingId: undefined,
-			selectedItemId: undefined,
+			selectedEntityId: undefined,
 		}));
 	}
 
@@ -286,9 +267,7 @@ function createTestWorldStore() {
 	return {
 		store,
 		selectTerrain,
-		selectCharacter,
-		selectBuilding,
-		selectItem,
+		selectEntity,
 		setDebug,
 		setEraser,
 		setOpen,

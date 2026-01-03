@@ -84,11 +84,7 @@
 			: buildings[0]
 	);
 
-	// 미리보기용 건물 상태
-	const previewBuildingStates = $derived(
-		previewBuilding ? ($buildingStateStore.data[previewBuilding.id] ?? []) : []
-	);
-	const previewBuildingState = $derived(previewBuildingStates.find((s) => s.type === 'idle'));
+	// 미리보기용 건물은 previewBuilding 그대로 사용
 
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
@@ -300,7 +296,7 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if previewBuildingState && previewBodyState}
+						{#if previewBuilding && previewBodyState}
 							<Separator />
 
 							<div class="flex flex-col gap-2">
@@ -308,9 +304,10 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									{#if previewBuildingState && previewCharacter && changes?.character_body_state_type}
+									{#if previewBuilding && previewCharacter && changes?.character_body_state_type}
 										<BuildingSpriteAnimator
-											buildingState={previewBuildingState}
+											buildingId={previewBuilding.id}
+											stateType="idle"
 											characterId={previewCharacter.id}
 											characterBodyStateType={changes.character_body_state_type}
 											characterFaceStateType={changes.character_face_state_type ?? undefined}

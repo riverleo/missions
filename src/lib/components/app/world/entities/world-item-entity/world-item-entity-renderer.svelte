@@ -11,11 +11,11 @@
 	let { entity }: Props = $props();
 
 	const { store: itemStore } = useItem();
-	const { worldItemStore, selectedEntityStore } = useWorld();
+	const { worldItemStore, selectedEntityIdStore } = useWorld();
 
 	const worldItem = $derived($worldItemStore.data[entity.id]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
-	const selected = $derived($selectedEntityStore.entityId === entity.toEntityId());
+	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
 </script>
 
 {#if item}

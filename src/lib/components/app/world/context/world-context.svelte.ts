@@ -12,7 +12,7 @@ import type {
 	WorldId,
 	EntityId,
 } from '$lib/types';
-import { parseEntityId } from '$lib/types';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';
@@ -23,6 +23,7 @@ import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';
 import { Entity } from '../entities/entity.svelte';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
+import { Pathfinder } from '../pathfinder';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
@@ -35,6 +36,7 @@ export class WorldContext {
 	readonly terrainBody = new TerrainBody();
 	readonly worldId: WorldId;
 	readonly blueprint: WorldContextBlueprint;
+	readonly pathfinder: Pathfinder;
 
 	entities = $state<Record<string, Entity>>({});
 
@@ -54,6 +56,9 @@ export class WorldContext {
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
 		this.blueprint = new WorldContextBlueprint(this);
+		this.pathfinder = new Pathfinder(WORLD_WIDTH, WORLD_HEIGHT);
+		// 모든 타일을 walkable로 초기화
+		this.pathfinder.reset();
 	}
 
 	private get terrain(): Terrain | null | undefined {
@@ -327,7 +332,7 @@ export class WorldContext {
 
 		this.respawningEntityIds.add(entityId);
 
-		const { value: id } = parseEntityId(entityId);
+		const { value: id } = EntityIdUtils.parse(entityId);
 		const entity = this.entities[id];
 		if (!entity) return;
 

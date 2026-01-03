@@ -20,17 +20,21 @@ export class WorldContextBlueprint {
 	getOverlappingCells(): TileCell[] {
 		if (!this.cursor || !this.context) return [];
 
-		const { building, tileX, tileY } = this.cursor;
+		const { buildingId, tileX, tileY } = this.cursor;
+
+		// 기존 건물들이 차지하는 모든 셀 수집
+		const buildingStore = get(useBuilding().store).data;
+		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
+
+		const building = buildingStore[buildingId];
+		if (!building) return [];
+
 		const placementCells = getBuildingOccupiedCells(
 			tileX,
 			tileY,
 			building.tile_cols,
 			building.tile_rows
 		);
-
-		// 기존 건물들이 차지하는 모든 셀 수집
-		const buildingStore = get(useBuilding().store).data;
-		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
 		const existingCells: TileCell[] = [];
 
 		// worldId 필터링

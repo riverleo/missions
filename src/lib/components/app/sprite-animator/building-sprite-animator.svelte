@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type {
-		BuildingState,
+		BuildingId,
+		BuildingStateType,
 		CharacterId,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
@@ -9,9 +10,11 @@
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
+	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
-		buildingState: BuildingState;
+		buildingId: BuildingId;
+		stateType: BuildingStateType;
 		characterId?: CharacterId;
 		characterBodyStateType?: CharacterBodyStateType;
 		characterFaceStateType?: CharacterFaceStateType;
@@ -24,7 +27,8 @@
 	}
 
 	let {
-		buildingState,
+		buildingId,
+		stateType,
 		characterId,
 		characterBodyStateType,
 		characterFaceStateType,
@@ -36,11 +40,18 @@
 		selected = false,
 	}: Props = $props();
 
+	const { store, stateStore } = useBuilding();
+	const building = $derived($store.data[buildingId]);
+	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
+	const buildingState = $derived(buildingStates.find((s) => s.type === stateType));
+
 	const OUTLINE_WIDTH = 8;
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
 	$effect(() => {
+		if (!buildingState) return;
+
 		const atlasName = buildingState.atlas_name;
 
 		SpriteAnimator.create(atlasName).then((newAnimator) => {

@@ -10,9 +10,7 @@ import type {
 	WorldBuildingId,
 	WorldItemId,
 	TerrainId,
-	CharacterId,
-	BuildingId,
-	ItemId,
+	EntityId,
 } from '$lib/types';
 import { useWorld } from './use-world';
 
@@ -22,9 +20,7 @@ const TEST_WORLD_ID = 'test-world-id' as WorldId;
 export interface WorldTestStoreState {
 	open: boolean;
 	selectedTerrainId?: TerrainId;
-	selectedCharacterId?: CharacterId;
-	selectedBuildingId?: BuildingId;
-	selectedItemId?: ItemId;
+	selectedEntityId?: EntityId;
 	// 모달 위치 (픽셀 단위)
 	modalX: number;
 	modalY: number;
@@ -45,9 +41,7 @@ export interface StoredState extends WorldTestStoreState {
 const defaultState: WorldTestStoreState = {
 	open: false,
 	selectedTerrainId: undefined,
-	selectedCharacterId: undefined,
-	selectedBuildingId: undefined,
-	selectedItemId: undefined,
+	selectedEntityId: undefined,
 	modalX: 0,
 	modalY: 0,
 	debug: false,
@@ -67,9 +61,7 @@ export function loadFromStorage(): StoredState {
 			return {
 				open: stored.open ?? defaultState.open,
 				selectedTerrainId: world?.terrain_id ?? undefined,
-				selectedCharacterId: stored.selectedCharacterId,
-				selectedBuildingId: stored.selectedBuildingId,
-				selectedItemId: stored.selectedItemId,
+				selectedEntityId: stored.selectedEntityId,
 				modalX: stored.modalX ?? defaultState.modalX,
 				modalY: stored.modalY ?? defaultState.modalY,
 				debug: stored.debug ?? defaultState.debug,

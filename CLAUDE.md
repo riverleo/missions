@@ -628,6 +628,48 @@ const newId = crypto.randomUUID() as WorldId;
   - 타입 안전성 보장
   - 일관된 ID 형식 유지
 
+## EntityIdUtils 유틸리티
+
+- **위치**: `$lib/utils/entity-id.ts`
+- **목적**: EntityId의 생성, 파싱, 타입 체크를 중앙화
+- **함수**:
+  - `parse(entityId)`: EntityId를 파싱하여 `{ type, value }` 반환
+  - `is(type, entityId)`: EntityId가 특정 타입인지 확인
+  - `create(type, id)`: EntityId 생성
+- **EntityType**: `'character' | 'building' | 'item'` (타입은 `$lib/types/index.ts`에 정의)
+- **예시**:
+
+  ```typescript
+  import { EntityIdUtils } from '$lib/utils/entity-id';
+
+  // ✅ 파싱 및 타입 추출
+  const { type, value: id } = EntityIdUtils.parse(entityId);
+
+  // ✅ 타입 체크
+  if (EntityIdUtils.is('character', entityId)) {
+    // entityId는 character 타입
+  }
+
+  // ✅ EntityId 생성
+  const newEntityId = EntityIdUtils.create('building', buildingId);
+
+  // ❌ 나쁜 예: 직접 문자열 조작
+  if (entityId.startsWith('character-')) { ... }
+  const id = entityId.replace('character-', '');
+  ```
+
+- **패턴**: 파싱 결과를 `$derived`로 캐싱하여 재사용
+  ```typescript
+  const selectedEntityType = $derived.by(() => {
+    if (!$store.selectedEntityId) return undefined;
+    const { type } = EntityIdUtils.parse($store.selectedEntityId);
+    return type;
+  });
+
+  // type을 여러 곳에서 재사용
+  if (selectedEntityType === 'building') { ... }
+  ```
+
 ## RecordFetchState 타입
 
 - `data` 필드는 **항상 정의됨** (non-optional)
@@ -948,6 +990,38 @@ needs (욕구 정의)
   	}
   });
   ```
+
+- **반응성 추적 주의사항**: `$effect` 내에서 사용하는 모든 reactive 값은 자동으로 의존성에 추가됨
+  - 마우스 좌표 등 자주 변경되는 값을 추적하면 과도한 재실행 발생
+  - **잘못된 예**: `untrack()`으로 감싸면 변경 시 업데이트되지 않음
+    ```typescript
+    // ❌ 나쁜 예: mouseX, mouseY 변경 시 cursor가 업데이트되지 않음
+    $effect(() => {
+      const pos = untrack(() => {
+        return { x: mouseX, y: mouseY };
+      });
+      world.blueprint.cursor = { ...pos };
+    });
+    ```
+  - **올바른 예**: 필요한 값은 직접 추적
+    ```typescript
+    // ✅ 좋은 예: mouseX, mouseY 변경 시 cursor가 업데이트됨
+    $effect(() => {
+      const pos = { x: mouseX, y: mouseY };
+      world.blueprint.cursor = { ...pos };
+    });
+    ```
+  - **성능 최적화가 필요한 경우**: `$derived`로 분리하여 선택적으로 추적
+    ```typescript
+    const throttledPos = $derived.by(() => {
+      // 필요한 경우 throttle 로직 추가
+      return { x: mouseX, y: mouseY };
+    });
+
+    $effect(() => {
+      world.blueprint.cursor = { ...throttledPos };
+    });
+    ```
 
 ## Supabase Storage 버킷
 

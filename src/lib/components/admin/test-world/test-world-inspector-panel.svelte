@@ -29,7 +29,7 @@
 		worldCharacterStore,
 		worldBuildingStore,
 		worldItemStore,
-		selectedEntityStore,
+		selectedEntityIdStore,
 		setSelectedEntityId,
 	} = useWorld();
 	const { store: characterStore } = useCharacter();
@@ -44,7 +44,7 @@
 
 	// 아코디언 value (entityId 기반)
 	const accordionValue = $derived.by(() => {
-		const entityId = $selectedEntityStore.entityId;
+		const entityId = $selectedEntityIdStore.entityId;
 		if (!entityId) return 'world';
 
 		return entityId;

@@ -16,6 +16,7 @@ import type {
 import type { WorldContext } from '$lib/components/app/world/context';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { usePlayer } from '../use-player';
+import { useWorldTest } from './use-world-test';
 
 // WorldContext (Svelte context)
 export const [useWorldContext, setWorldContext] = createContext<WorldContext>();
@@ -47,7 +48,7 @@ function createWorldStore() {
 		data: {},
 	});
 
-	const selectedEntityStore = writable<{ entityId: EntityId | undefined }>({
+	const selectedEntityIdStore = writable<{ entityId: EntityId | undefined }>({
 		entityId: undefined,
 	});
 
@@ -56,7 +57,14 @@ function createWorldStore() {
 	}
 
 	function setSelectedEntityId(entityId: EntityId | undefined) {
-		selectedEntityStore.update((state) => ({ ...state, entityId }));
+		selectedEntityIdStore.update((state) => ({ ...state, entityId }));
+
+		// useWorldTest의 selectedEntityId 클리어 (store 업데이트 후에)
+		const testWorld = useWorldTest();
+		testWorld.store.update((state) => ({
+			...state,
+			selectedEntityId: undefined,
+		}));
 	}
 
 	async function fetch() {
@@ -169,7 +177,7 @@ function createWorldStore() {
 		worldCharacterStore,
 		worldBuildingStore,
 		worldItemStore,
-		selectedEntityStore,
+		selectedEntityIdStore,
 		init,
 		fetch,
 		setSelectedEntityId,

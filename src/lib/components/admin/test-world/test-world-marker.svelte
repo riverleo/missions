@@ -1,15 +1,13 @@
 <script lang="ts">
 	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useItem } from '$lib/hooks/use-item';
-	import { CharacterSpriteAnimator, ItemSpriteAnimator } from '$lib/components/app/sprite-animator';
+	import { EntitySpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
-	import type { WorldCharacterId, WorldBuildingId, WorldItemId } from '$lib/types';
+	import { EntityIdUtils } from '$lib/utils/entity-id';
+	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
@@ -24,12 +22,9 @@
 		removeWorldItem,
 	} = useWorldTest();
 	const world = useWorldContext();
-	const { worldStore } = useWorld();
+	const { worldStore, selectedEntityIdStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
-	const { store: characterStore, faceStateStore } = useCharacter();
-	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
-	const { store: itemStore } = useItem();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
@@ -52,102 +47,110 @@
 	let mouseX = $state(0);
 	let mouseY = $state(0);
 
-	// 컨테이너 기준 마우스 좌표 계산
-	const mouseContainerPos = $derived(() => {
-		if (!containerRef) return { x: 0, y: 0 };
-		const rect = containerRef.getBoundingClientRect();
-		return {
-			x: mouseX - rect.left,
-			y: mouseY - rect.top,
-		};
+	// 선택된 엔티티 타입
+	const selectedEntityType = $derived.by(() => {
+		if (!$store.selectedEntityId) return undefined;
+		const { type } = EntityIdUtils.parse($store.selectedEntityId);
+		return type;
 	});
 
-	// 마우스의 월드 좌표 계산
-	const mouseWorldPos = $derived(() => {
-		const containerPos = mouseContainerPos();
-		return {
-			x: containerPos.x / world.camera.zoom + world.camera.x,
-			y: containerPos.y / world.camera.zoom + world.camera.y,
-		};
-	});
-
-	// 선택된 건물 (from useBuilding)
-	const selectedBuilding = $derived(
-		$store.selectedBuildingId ? $buildingStore.data[$store.selectedBuildingId] : undefined
+	const isOverlayActive = $derived(
+		$store.eraser || selectedEntityType === 'building' || (selectedEntityType && isCommandPressed)
+	);
+	const cursor = $derived(
+		$store.eraser || selectedEntityType === 'building'
+			? 'cursor-pointer'
+			: selectedEntityType && isCommandPressed
+				? 'cursor-none'
+				: ''
 	);
 
 	// 건물 선택 시 world.blueprint.cursor 업데이트
 	$effect(() => {
-		if (selectedBuilding) {
-			const pos = mouseWorldPos();
-			const { tileX, tileY } = snapPointToTopLeftTile(
-				pos.x,
-				pos.y,
-				selectedBuilding.tile_cols,
-				selectedBuilding.tile_rows
-			);
-			world.blueprint.cursor = {
-				building: selectedBuilding,
-				tileX,
-				tileY,
-			};
-		} else {
+		if (!$store.selectedEntityId || selectedEntityType !== 'building') {
 			world.blueprint.cursor = undefined;
+			return;
 		}
+
+		const { value: id } = EntityIdUtils.parse($store.selectedEntityId);
+		const building = $buildingStore.data[id as BuildingId];
+		if (!building) {
+			world.blueprint.cursor = undefined;
+			return;
+		}
+
+		if (!containerRef) {
+			world.blueprint.cursor = undefined;
+			return;
+		}
+
+		const rect = containerRef.getBoundingClientRect();
+		const containerX = mouseX - rect.left;
+		const containerY = mouseY - rect.top;
+		const worldX = containerX / world.camera.zoom + world.camera.x;
+		const worldY = containerY / world.camera.zoom + world.camera.y;
+
+		const { tileX, tileY } = snapPointToTopLeftTile(
+			worldX,
+			worldY,
+			building.tile_cols,
+			building.tile_rows
+		);
+		world.blueprint.cursor = {
+			buildingId: building.id,
+			tileX,
+			tileY,
+		};
 	});
-
-	// 선택된 캐릭터
-	const selectedCharacter = $derived(
-		$store.selectedCharacterId ? $characterStore.data[$store.selectedCharacterId] : undefined
-	);
-
-	// 선택된 아이템 (from useItem)
-	const selectedItem = $derived(
-		$store.selectedItemId ? $itemStore.data[$store.selectedItemId] : undefined
-	);
 
 	// 컨테이너 참조 가져오기
 	$effect(() => {
 		containerRef = document.querySelector('[data-slot="world-container"]') as HTMLElement;
 	});
 
-	function onclickBuildingOverlay() {
-		// 겹치는 셀이 있으면 배치하지 않음
-		if (!world.blueprint.canPlace) return;
+	function onclickEntityOverlay() {
+		if (!$store.selectedEntityId) return;
 
-		const pos = mouseWorldPos();
-		if (selectedBuilding) {
+		if (!containerRef) return;
+		const rect = containerRef.getBoundingClientRect();
+		const containerX = mouseX - rect.left;
+		const containerY = mouseY - rect.top;
+		const worldX = containerX / world.camera.zoom + world.camera.x;
+		const worldY = containerY / world.camera.zoom + world.camera.y;
+
+		const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
+
+		if (type === 'building') {
+			// 겹치는 셀이 있으면 배치하지 않음
+			if (!world.blueprint.canPlace) return;
+			const building = $buildingStore.data[id as BuildingId];
+			if (!building) return;
 			const { tileX, tileY } = snapPointToTopLeftTile(
-				pos.x,
-				pos.y,
-				selectedBuilding.tile_cols,
-				selectedBuilding.tile_rows
+				worldX,
+				worldY,
+				building.tile_cols,
+				building.tile_rows
 			);
-			addWorldBuilding(selectedBuilding.id, tileX, tileY);
-		}
-	}
-
-	function onclickCharacterOverlay(e: MouseEvent) {
-		const pos = mouseWorldPos();
-		if (selectedCharacter) {
-			addWorldCharacter(selectedCharacter.id, pos.x, pos.y);
-		}
-	}
-
-	function onclickItemOverlay() {
-		const pos = mouseWorldPos();
-		if (selectedItem) {
-			addWorldItem(selectedItem.id, pos.x, pos.y);
+			addWorldBuilding(building.id, tileX, tileY);
+		} else if (type === 'character') {
+			addWorldCharacter(id as CharacterId, worldX, worldY);
+		} else if (type === 'item') {
+			addWorldItem(id as ItemId, worldX, worldY);
 		}
 	}
 
 	function onclickEraserOverlay() {
-		const pos = mouseWorldPos();
+		if (!containerRef) return;
+		const rect = containerRef.getBoundingClientRect();
+		const containerX = mouseX - rect.left;
+		const containerY = mouseY - rect.top;
+		const worldX = containerX / world.camera.zoom + world.camera.x;
+		const worldY = containerY / world.camera.zoom + world.camera.y;
 
 		// 클릭 위치에 있는 엔티티 찾기
 		for (const entity of Object.values(world.entities)) {
-			const dx = pos.x - entity.body.position.x;
-			const dy = pos.y - entity.body.position.y;
+			const dx = worldX - entity.body.position.x;
+			const dy = worldY - entity.body.position.y;
 
 			if (entity.type === 'character') {
 				const characterEntity = entity as WorldCharacterEntity;
@@ -184,6 +187,46 @@
 		}
 	}
 
+	// 통합된 오버레이 핸들러
+	function onclickOverlay(e: MouseEvent) {
+		if ($store.eraser) {
+			onclickEraserOverlay();
+		} else {
+			if (!selectedEntityType) return;
+
+			// 건물은 항상 클릭 가능, 캐릭터/아이템은 Cmd 키 필요
+			if (selectedEntityType === 'building' || isCommandPressed) {
+				onclickEntityOverlay();
+			}
+		}
+	}
+
+	function oncontextmenuOverlay(e: MouseEvent) {
+		// 캐릭터 엔티티 선택 시 이동
+		const selectedEntityId = $selectedEntityIdStore.entityId;
+		if (
+			!$store.eraser &&
+			!$store.selectedEntityId &&
+			EntityIdUtils.is('character', selectedEntityId) &&
+			isCommandPressed
+		) {
+			e.preventDefault();
+
+			if (!containerRef || !selectedEntityId) return;
+			const rect = containerRef.getBoundingClientRect();
+			const containerX = mouseX - rect.left;
+			const containerY = mouseY - rect.top;
+			const worldX = containerX / world.camera.zoom + world.camera.x;
+			const worldY = containerY / world.camera.zoom + world.camera.y;
+
+			const { value: characterId } = EntityIdUtils.parse(selectedEntityId);
+			const entity = world.entities[characterId];
+			if (entity && entity.type === 'character') {
+				(entity as WorldCharacterEntity).moveTo(worldX, worldY);
+			}
+		}
+	}
+
 	function onmousemove(e: MouseEvent) {
 		mouseX = e.clientX;
 		mouseY = e.clientY;
@@ -200,86 +243,31 @@
 			isCommandPressed = false;
 		}
 	}
-
-	$effect(() => {
-		window.addEventListener('keydown', onkeydown);
-		window.addEventListener('keyup', onkeyup);
-		window.addEventListener('mousemove', onmousemove);
-		return () => {
-			window.removeEventListener('keydown', onkeydown);
-			window.removeEventListener('keyup', onkeyup);
-			window.removeEventListener('mousemove', onmousemove);
-		};
-	});
 </script>
 
-<!-- 지우개 활성화 시 클릭 오버레이 -->
-{#if $store.eraser}
-	<button
-		type="button"
-		class="absolute inset-0 cursor-pointer bg-transparent"
-		aria-label="지우개"
-		onclick={onclickEraserOverlay}
-	></button>
-{/if}
+<svelte:window {onkeydown} {onkeyup} {onmousemove} />
 
-<!-- 건물 선택 시 클릭 오버레이 -->
-{#if selectedBuilding}
+<!-- 통합 오버레이 -->
+{#if $store.eraser || selectedEntityType}
 	<button
 		type="button"
-		class="absolute inset-0 cursor-pointer bg-transparent"
-		aria-label="건물 배치"
-		onclick={onclickBuildingOverlay}
+		class="absolute inset-0 bg-transparent {cursor}"
+		style="pointer-events: {isOverlayActive ? 'auto' : 'none'};"
+		aria-label="오버레이"
+		onclick={onclickOverlay}
+		oncontextmenu={oncontextmenuOverlay}
 	></button>
-{/if}
 
-<!-- 캐릭터 선택 시 클릭 오버레이 -->
-{#if selectedCharacter}
-	<button
-		type="button"
-		class="absolute inset-0 bg-transparent"
-		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed
-			? 'auto'
-			: 'none'};"
-		aria-label="캐릭터 배치"
-		onclick={onclickCharacterOverlay}
-	></button>
 	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-	{#if isCommandPressed && selectedCharacter}
-		{@const pos = mouseContainerPos()}
+	{#if isCommandPressed && $store.selectedEntityId && containerRef}
+		{@const rect = containerRef.getBoundingClientRect()}
+		{@const posX = mouseX - rect.left}
+		{@const posY = mouseY - rect.top}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
-			style="left: {pos.x}px; top: {pos.y}px;"
+			style="left: {posX}px; top: {posY}px;"
 		>
-			<CharacterSpriteAnimator
-				characterId={selectedCharacter.id}
-				bodyStateType="idle"
-				faceStateType="idle"
-				resolution={2}
-			/>
-		</div>
-	{/if}
-{/if}
-
-<!-- 아이템 선택 시 클릭 오버레이 -->
-{#if selectedItem}
-	<button
-		type="button"
-		class="absolute inset-0 bg-transparent"
-		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed
-			? 'auto'
-			: 'none'};"
-		aria-label="아이템 배치"
-		onclick={onclickItemOverlay}
-	></button>
-	<!-- 커맨드 키 누를 때 아이템 미리보기 -->
-	{#if isCommandPressed && selectedItem}
-		{@const pos = mouseContainerPos()}
-		<div
-			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
-			style="left: {pos.x}px; top: {pos.y}px;"
-		>
-			<ItemSpriteAnimator itemId={selectedItem.id} stateType="idle" resolution={2} />
+			<EntitySpriteAnimator entityId={$store.selectedEntityId} resolution={2} />
 		</div>
 	{/if}
 {/if}

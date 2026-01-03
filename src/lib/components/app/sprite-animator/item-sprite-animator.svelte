@@ -21,10 +21,6 @@
 	const itemState = $derived(itemStates.find((s) => s.type === stateType));
 	const scale = $derived(item?.scale ?? 1);
 
-	$effect(() => {
-		console.log('[ItemSpriteAnimator] itemId:', itemId, 'scale:', scale, 'item:', item);
-	});
-
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
 	$effect(() => {
