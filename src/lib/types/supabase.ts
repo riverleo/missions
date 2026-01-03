@@ -2318,9 +2318,9 @@ export type Database = {
           game_asset: string | null
           height: number
           id: string
+          respawn_x: number | null
+          respawn_y: number | null
           scenario_id: string
-          start_x: number | null
-          start_y: number | null
           title: string
           width: number
         }
@@ -2331,9 +2331,9 @@ export type Database = {
           game_asset?: string | null
           height?: number
           id?: string
+          respawn_x?: number | null
+          respawn_y?: number | null
           scenario_id: string
-          start_x?: number | null
-          start_y?: number | null
           title?: string
           width?: number
         }
@@ -2344,9 +2344,9 @@ export type Database = {
           game_asset?: string | null
           height?: number
           id?: string
+          respawn_x?: number | null
+          respawn_y?: number | null
           scenario_id?: string
-          start_x?: number | null
-          start_y?: number | null
           title?: string
           width?: number
         }

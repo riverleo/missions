@@ -35,11 +35,11 @@
 	let isUploading = $state(false);
 	let title = $state(terrain.title ?? '');
 
-	const hasStartMarker = $derived(terrain.start_x != null && terrain.start_y != null);
+	const hasStartMarker = $derived(terrain.respawn_x != null && terrain.respawn_y != null);
 
 	async function onclickStartMarker() {
 		if (hasStartMarker) {
-			await admin.update(terrain.id, { start_x: null, start_y: null });
+			await admin.update(terrain.id, { respawn_x: null, respawn_y: null });
 		} else {
 			admin.setSettingStartMarker(!$uiStore.isSettingStartMarker);
 		}

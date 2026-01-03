@@ -6,8 +6,8 @@ create table terrains (
   game_asset text,
   width real not null default 0,
   height real not null default 0,
-  start_x real,
-  start_y real,
+  respawn_x real,
+  respawn_y real,
   display_order integer not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null

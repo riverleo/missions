@@ -333,8 +333,8 @@ export class WorldContext {
 
 		// 1초 후 리스폰 위치로 다시 추가
 		setTimeout(() => {
-			const x = this.terrain?.start_x ?? 0;
-			const y = this.terrain?.start_y ?? 0;
+			const x = this.terrain?.respawn_x ?? 0;
+			const y = this.terrain?.respawn_y ?? 0;
 
 			entity.removeFromWorld();
 

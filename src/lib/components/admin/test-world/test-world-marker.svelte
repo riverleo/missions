@@ -37,13 +37,13 @@
 
 	// 시작지점 좌표 (카메라 변환 적용)
 	const startLeft = $derived(
-		terrain?.start_x != null
-			? `${(terrain.start_x - world.camera.x) * world.camera.zoom}px`
+		terrain?.respawn_x != null
+			? `${(terrain.respawn_x - world.camera.x) * world.camera.zoom}px`
 			: undefined
 	);
 	const startTop = $derived(
-		terrain?.start_y != null
-			? `${(terrain.start_y - world.camera.y) * world.camera.zoom}px`
+		terrain?.respawn_y != null
+			? `${(terrain.respawn_y - world.camera.y) * world.camera.zoom}px`
 			: undefined
 	);
 

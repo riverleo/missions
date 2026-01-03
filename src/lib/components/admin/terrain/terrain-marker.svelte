@@ -20,8 +20,8 @@
 	let dragY = $state<number | undefined>(undefined);
 
 	// 현재 표시할 좌표 (드래그 중이면 드래그 좌표, 아니면 terrain 좌표)
-	const currentX = $derived(isDragging && dragX != null ? dragX : terrain.start_x);
-	const currentY = $derived(isDragging && dragY != null ? dragY : terrain.start_y);
+	const currentX = $derived(isDragging && dragX != null ? dragX : terrain.respawn_x);
+	const currentY = $derived(isDragging && dragY != null ? dragY : terrain.respawn_y);
 
 	// 월드 좌표를 화면 좌표로 변환 (카메라 변환 적용)
 	const left = $derived(
@@ -35,8 +35,8 @@
 		e.preventDefault();
 		e.stopPropagation();
 		isDragging = true;
-		dragX = terrain.start_x ?? 0;
-		dragY = terrain.start_y ?? 0;
+		dragX = terrain.respawn_x ?? 0;
+		dragY = terrain.respawn_y ?? 0;
 
 		window.addEventListener('mousemove', onmousemove);
 		window.addEventListener('mouseup', onmouseup);
@@ -62,7 +62,7 @@
 		window.removeEventListener('mouseup', onmouseup);
 
 		if (isDragging && dragX != null && dragY != null) {
-			await admin.update(terrain.id, { start_x: dragX, start_y: dragY });
+			await admin.update(terrain.id, { respawn_x: dragX, respawn_y: dragY });
 		}
 
 		isDragging = false;
@@ -76,7 +76,7 @@
 		const x = ((e.clientX - rect.left) / rect.width) * world.terrainBody.width;
 		const y = ((e.clientY - rect.top) / rect.height) * world.terrainBody.height;
 
-		await admin.update(terrain.id, { start_x: x, start_y: y });
+		await admin.update(terrain.id, { respawn_x: x, respawn_y: y });
 		admin.setSettingStartMarker(false);
 	}
 </script>
