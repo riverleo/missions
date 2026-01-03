@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
-	import { IconX } from '@tabler/icons-svelte';
 	import World from '$lib/components/app/world/world.svelte';
 	import TestWorldCommand from './test-world-command.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPanel from './test-world-panel.svelte';
+	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';
@@ -115,26 +115,13 @@
 	<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
 </Button>
 
-<!-- Modal -->
 <div
 	bind:this={modalRef}
 	class="fixed z-50 flex-col gap-0 rounded-lg border bg-background shadow-lg"
 	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalX}px; top: {$store.modalY}px;"
 >
 	<!-- Header -->
-	<div class="relative flex shrink-0 items-center justify-between border-b p-2">
-		<Button variant="ghost" size="sm" class="cursor-move" onmousedown={onmousedownHeader}>
-			테스트 월드
-		</Button>
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			onclick={onclickClose}
-			class="absolute top-1/2 right-2 -translate-y-1/2"
-		>
-			<IconX class="size-4" />
-		</Button>
-	</div>
+	<TestWorldPopoverHeader onmousedown={onmousedownHeader} onclose={onclickClose} />
 
 	<!-- Content -->
 	<div class="flex flex-1 gap-0">
