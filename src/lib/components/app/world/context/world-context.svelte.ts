@@ -307,9 +307,6 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			if (!this.isOutOfEntityBounds(entity)) continue;
 
-			// 리스폰 중인 엔티티는 건너뛰기
-			if (this.respawningEntityIds.has(entity.toEntityId())) continue;
-
 			this.respawnEntity(entity.toEntityId());
 		}
 	}
