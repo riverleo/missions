@@ -84,5 +84,8 @@
 		<InputGroupAddon align="inline-end">
 			<InputGroupText>배</InputGroupText>
 		</InputGroupAddon>
+		<InputGroupAddon align="inline-end">
+			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
+		</InputGroupAddon>
 	</InputGroup>
 </div>

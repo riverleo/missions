@@ -8,6 +8,7 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { useItem } from '$lib/hooks/use-item';
+	import { IconRuler, IconX } from '@tabler/icons-svelte';
 
 	interface Props {
 		item: Item;
@@ -37,12 +38,7 @@
 		const newWidth = parseFloat(width) || 32.0;
 		const newHeight = parseFloat(height) || 32.0;
 
-		if (
-			newScale === item.scale &&
-			newWidth === item.width &&
-			newHeight === item.height
-		)
-			return;
+		if (newScale === item.scale && newWidth === item.width && newHeight === item.height) return;
 
 		await admin.update(item.id, {
 			scale: newScale,
@@ -78,7 +74,7 @@
 	</InputGroup>
 	<InputGroup>
 		<InputGroupAddon align="inline-start">
-			<InputGroupText>너비</InputGroupText>
+			<InputGroupText><IconRuler /></InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput
 			bind:value={width}
@@ -88,14 +84,7 @@
 			class="w-16"
 			onkeydown={onkeydownDimensions}
 		/>
-		<InputGroupAddon align="inline-end">
-			<InputGroupText>px</InputGroupText>
-		</InputGroupAddon>
-	</InputGroup>
-	<InputGroup>
-		<InputGroupAddon align="inline-start">
-			<InputGroupText>높이</InputGroupText>
-		</InputGroupAddon>
+		<InputGroupText><IconX /></InputGroupText>
 		<InputGroupInput
 			bind:value={height}
 			type="number"
@@ -105,7 +94,7 @@
 			onkeydown={onkeydownDimensions}
 		/>
 		<InputGroupAddon align="inline-end">
-			<InputGroupText>px</InputGroupText>
+			<InputGroupButton onclick={updateDimensions} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>
