@@ -139,7 +139,10 @@ export class WorldContext {
 		Render.run(this.render);
 
 		// 물리 시뮬레이션 시작
-		Matter.Events.on(this.engine, 'beforeUpdate', () => this.checkWorldCharacterBounds());
+		Matter.Events.on(this.engine, 'beforeUpdate', () => {
+			this.syncEntities();
+			this.checkWorldCharacterBounds();
+		});
 		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateWorldCharacterEntityPositions());
 
 		// 마우스 클릭 감지
@@ -275,6 +278,13 @@ export class WorldContext {
 					console.warn('Skipping item creation:', error);
 				}
 			}
+		}
+	}
+
+	// 스토어 데이터 변경사항을 엔티티에 동기화
+	private syncEntities() {
+		for (const entity of Object.values(this.entities)) {
+			entity.sync();
 		}
 	}
 

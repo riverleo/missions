@@ -17,8 +17,7 @@ const { Bodies } = Matter;
 export class WorldItemEntity extends Entity {
 	readonly id: WorldItemId;
 	readonly type = 'item' as const;
-	readonly body: Matter.Body;
-	readonly size: { width: number; height: number };
+	body: Matter.Body;
 
 	protected readonly world = useWorldContext();
 	protected get debugFillStyle(): string {
@@ -37,14 +36,18 @@ export class WorldItemEntity extends Entity {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${id}`);
 		}
 
-		// 아이템 크기 (item 데이터에서 가져옴)
-		const width = item.width;
-		const height = item.height;
-		this.size = { width, height };
+		// 바디 생성
+		this.body = this.createBody(item.width, item.height, worldItem.x, worldItem.y);
 
-		// 사각형 dynamic 바디 생성 (회전 가능, 아이템끼리만 충돌)
-		this.body = Bodies.rectangle(worldItem.x, worldItem.y, width, height, {
-			label: id,
+		// 초기 위치 설정
+		this.x = worldItem.x;
+		this.y = worldItem.y;
+		this.angle = worldItem.rotation;
+	}
+
+	private createBody(width: number, height: number, x: number, y: number): Matter.Body {
+		return Bodies.rectangle(x, y, width, height, {
+			label: this.id,
 			isStatic: false,
 			collisionFilter: {
 				category: CATEGORY_ITEM,
@@ -54,11 +57,6 @@ export class WorldItemEntity extends Entity {
 				? { visible: true, fillStyle: DEBUG_ITEM_FILL_STYLE }
 				: { visible: false },
 		});
-
-		// 초기 위치 설정
-		this.x = worldItem.x;
-		this.y = worldItem.y;
-		this.angle = worldItem.rotation;
 	}
 
 	get item(): Item | undefined {
@@ -66,6 +64,35 @@ export class WorldItemEntity extends Entity {
 		if (!worldItem) return undefined;
 
 		return get(useItem().store).data[worldItem.item_id];
+	}
+
+	sync(): void {
+		const item = this.item;
+		if (!item) return;
+
+		// bounds에서 현재 바디 크기 추출
+		const currentWidth = this.body.bounds.max.x - this.body.bounds.min.x;
+		const currentHeight = this.body.bounds.max.y - this.body.bounds.min.y;
+
+		// 크기가 변경되었으면 바디 재생성
+		if (Math.abs(currentWidth - item.width) > 0.01 || Math.abs(currentHeight - item.height) > 0.01) {
+			const currentPosition = this.body.position;
+			const currentVelocity = this.body.velocity;
+			const currentAngle = this.body.angle;
+
+			// 월드에서 기존 바디 제거
+			Matter.Composite.remove(this.world.engine.world, this.body);
+
+			// 새 바디 생성
+			this.body = this.createBody(item.width, item.height, currentPosition.x, currentPosition.y);
+
+			// 속도/각도 복원
+			Matter.Body.setVelocity(this.body, currentVelocity);
+			Matter.Body.setAngle(this.body, currentAngle);
+
+			// 월드에 새 바디 추가
+			Matter.Composite.add(this.world.engine.world, this.body);
+		}
 	}
 
 	saveToStore(): void {

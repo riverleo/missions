@@ -18,8 +18,7 @@ const { Bodies } = Matter;
 export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
 	readonly type = 'building' as const;
-	readonly body: Matter.Body;
-	readonly size: { width: number; height: number };
+	body: Matter.Body;
 
 	protected readonly world = useWorldContext();
 	protected get debugFillStyle(): string {
@@ -41,7 +40,6 @@ export class WorldBuildingEntity extends Entity {
 		// 타일 기반 크기 계산
 		const width = building.tile_cols * TILE_SIZE;
 		const height = building.tile_rows * TILE_SIZE;
-		this.size = { width, height };
 
 		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
 		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
@@ -49,9 +47,18 @@ export class WorldBuildingEntity extends Entity {
 		const x = leftTopX + width / 2;
 		const y = leftTopY + height / 2;
 
-		// 사각형 static 바디 생성
-		this.body = Bodies.rectangle(x, y, width, height, {
-			label: id,
+		// 바디 생성
+		this.body = this.createBody(width, height, x, y);
+
+		// 초기 위치 설정
+		this.x = x;
+		this.y = y;
+		this.angle = 0;
+	}
+
+	private createBody(width: number, height: number, x: number, y: number): Matter.Body {
+		return Bodies.rectangle(x, y, width, height, {
+			label: this.id,
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,
@@ -61,11 +68,6 @@ export class WorldBuildingEntity extends Entity {
 				? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE }
 				: { visible: false },
 		});
-
-		// 초기 위치 설정
-		this.x = x;
-		this.y = y;
-		this.angle = 0;
 	}
 
 	get building(): Building | undefined {
@@ -73,6 +75,42 @@ export class WorldBuildingEntity extends Entity {
 		if (!worldBuilding) return undefined;
 
 		return get(useBuilding().store).data[worldBuilding.building_id];
+	}
+
+	sync(): void {
+		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
+		const building = this.building;
+		if (!worldBuilding || !building) return;
+
+		// 새 크기 계산
+		const newWidth = building.tile_cols * TILE_SIZE;
+		const newHeight = building.tile_rows * TILE_SIZE;
+
+		// bounds에서 현재 바디 크기 추출
+		const currentWidth = this.body.bounds.max.x - this.body.bounds.min.x;
+		const currentHeight = this.body.bounds.max.y - this.body.bounds.min.y;
+
+		// 크기가 변경되었으면 바디 재생성
+		if (Math.abs(currentWidth - newWidth) > 0.01 || Math.abs(currentHeight - newHeight) > 0.01) {
+			// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
+			const leftTopX = worldBuilding.tile_x * TILE_SIZE;
+			const leftTopY = worldBuilding.tile_y * TILE_SIZE;
+			const x = leftTopX + newWidth / 2;
+			const y = leftTopY + newHeight / 2;
+
+			// 월드에서 기존 바디 제거
+			Matter.Composite.remove(this.world.engine.world, this.body);
+
+			// 새 바디 생성
+			this.body = this.createBody(newWidth, newHeight, x, y);
+
+			// 위치 업데이트
+			this.x = x;
+			this.y = y;
+
+			// 월드에 새 바디 추가
+			Matter.Composite.add(this.world.engine.world, this.body);
+		}
 	}
 
 	saveToStore(): void {
