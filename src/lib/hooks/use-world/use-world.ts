@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { createContext } from 'svelte';
+import { produce } from 'immer';
 import type {
 	RecordFetchState,
 	World,
@@ -18,10 +19,10 @@ export const [useWorldContext, setWorldContext] = createContext<WorldContext>();
 
 // World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;
-let initialized = false;
 
 function createWorldStore() {
 	const { supabase } = useServerPayload();
+	let initialized = false;
 
 	const worldStore = writable<RecordFetchState<WorldId, World>>({
 		status: 'idle',
@@ -67,11 +68,13 @@ function createWorldStore() {
 				worldRecord[world.id as WorldId] = world as World;
 			}
 
-			worldStore.set({
-				status: 'success',
-				data: worldRecord,
-				error: undefined,
-			});
+			worldStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = worldRecord;
+					draft.error = undefined;
+				})
+			);
 
 			// WorldCharacter 조회 (player_id로 필터링)
 			const { data: characterData, error: characterError } = await supabase
@@ -86,11 +89,13 @@ function createWorldStore() {
 				characterRecord[character.id as WorldCharacterId] = character as WorldCharacter;
 			}
 
-			worldCharacterStore.set({
-				status: 'success',
-				data: characterRecord,
-				error: undefined,
-			});
+			worldCharacterStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = characterRecord;
+					draft.error = undefined;
+				})
+			);
 
 			// WorldBuilding 조회 (player_id로 필터링)
 			const { data: buildingData, error: buildingError } = await supabase
@@ -105,11 +110,13 @@ function createWorldStore() {
 				buildingRecord[building.id as WorldBuildingId] = building as WorldBuilding;
 			}
 
-			worldBuildingStore.set({
-				status: 'success',
-				data: buildingRecord,
-				error: undefined,
-			});
+			worldBuildingStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = buildingRecord;
+					draft.error = undefined;
+				})
+			);
 		} catch (error) {
 			console.error('Failed to fetch world:', error);
 			worldStore.update((state) => ({
