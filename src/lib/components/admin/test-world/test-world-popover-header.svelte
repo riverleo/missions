@@ -3,8 +3,7 @@
 	import { IconBug, IconEraser, IconX } from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
-	import { ToggleGroup } from '$lib/components/ui/toggle-group';
-	import { Toggle } from '$lib/components/ui/toggle';
+	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
 	const { store, setOpen, setModalPosition, setDebug, setEraser } = useWorldTest();
 
@@ -55,13 +54,23 @@
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
 	<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
 	<ButtonGroup>
-		<ToggleGroup type="multiple">
-			<Toggle size="sm" pressed={$store.debug} onPressedChange={(pressed) => setDebug(pressed)}>
+		<ToggleGroup
+			type="multiple"
+			value={[
+				...($store.debug ? ['debug'] : []),
+				...($store.eraser ? ['eraser'] : [])
+			]}
+			onValueChange={(values) => {
+				setDebug(values.includes('debug'));
+				setEraser(values.includes('eraser'));
+			}}
+		>
+			<ToggleGroupItem value="debug" size="sm">
 				<IconBug />
-			</Toggle>
-			<Toggle size="sm" pressed={$store.eraser} onPressedChange={(pressed) => setEraser(pressed)}>
+			</ToggleGroupItem>
+			<ToggleGroupItem value="eraser" size="sm">
 				<IconEraser />
-			</Toggle>
+			</ToggleGroupItem>
 		</ToggleGroup>
 		<ButtonGroup>
 			<Button variant="ghost" size="icon-sm" {onclick}>
