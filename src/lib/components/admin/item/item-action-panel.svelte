@@ -33,15 +33,26 @@
 		height = item.height.toString();
 	});
 
-	async function updateDimensions() {
+	async function updateScale() {
 		const newScale = parseFloat(scale) || 1.0;
+		if (newScale === item.scale) return;
+		await admin.update(item.id, { scale: newScale });
+	}
+
+	function onkeydownScale(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			(e.target as HTMLInputElement).blur();
+			updateScale();
+		}
+	}
+
+	async function updateDimensions() {
 		const newWidth = parseFloat(width) || 32.0;
 		const newHeight = parseFloat(height) || 32.0;
 
-		if (newScale === item.scale && newWidth === item.width && newHeight === item.height) return;
+		if (newWidth === item.width && newHeight === item.height) return;
 
 		await admin.update(item.id, {
-			scale: newScale,
 			width: newWidth,
 			height: newHeight,
 		});
@@ -66,10 +77,13 @@
 			step="0.01"
 			min="0"
 			class="w-16"
-			onkeydown={onkeydownDimensions}
+			onkeydown={onkeydownScale}
 		/>
 		<InputGroupAddon align="inline-end">
 			<InputGroupText>배</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupAddon align="inline-end">
+			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 	<InputGroup>
