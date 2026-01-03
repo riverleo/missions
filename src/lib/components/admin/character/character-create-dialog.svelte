@@ -31,6 +31,7 @@
 
 	let name = $state('');
 	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
+	let scale = $state<number>(1.0);
 	let isSubmitting = $state(false);
 
 	const selectedBodyLabel = $derived(
@@ -43,6 +44,7 @@
 		if (open) {
 			name = '';
 			characterBodyId = undefined;
+			scale = 1.0;
 		}
 	});
 
@@ -63,7 +65,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim(), character_body_id: characterBodyId })
+			.create({ name: name.trim(), character_body_id: characterBodyId, scale })
 			.then((character) => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/characters/${character.id}`);
@@ -82,7 +84,7 @@
 		<DialogHeader>
 			<DialogTitle>새로운 캐릭터 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit}>
+		<form {onsubmit} class="space-y-4">
 			<ButtonGroup class="flex w-full gap-2">
 				<ButtonGroup>
 					<Select type="single" value={characterBodyId} onValueChange={onBodyChange}>
@@ -107,6 +109,20 @@
 					</InputGroup>
 				</ButtonGroup>
 			</ButtonGroup>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<InputGroupText>스케일</InputGroupText>
+				</InputGroupAddon>
+				<InputGroupInput
+					type="number"
+					step="0.01"
+					min="0"
+					bind:value={scale}
+				/>
+				<InputGroupAddon align="inline-end">
+					<InputGroupText>배</InputGroupText>
+				</InputGroupAddon>
+			</InputGroup>
 			{#if bodies.length === 0}
 				<p class="mt-4 text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
 			{/if}

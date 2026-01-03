@@ -7,11 +7,12 @@
 
 	interface Props {
 		itemState: ItemState;
+		scale?: number;
 		resolution?: 1 | 2 | 3;
 		selected?: boolean;
 	}
 
-	let { itemState, resolution = 1, selected = false }: Props = $props();
+	let { itemState, scale = 1, resolution = 1, selected = false }: Props = $props();
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -39,7 +40,7 @@
 	});
 </script>
 
-<div class="relative inline-flex items-center justify-center">
+<div class="relative inline-flex items-center justify-center" style:transform={`scale(${scale})`}>
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && animator}
 		<div

@@ -24,12 +24,18 @@
 
 	let name = $state('');
 	let maxDurabilityTicks = $state<number | undefined>(undefined);
+	let scale = $state<number>(1.0);
+	let width = $state<number>(32.0);
+	let height = $state<number>(32.0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open && item) {
 			name = item.name ?? '';
 			maxDurabilityTicks = item.max_durability_ticks ?? undefined;
+			scale = item.scale ?? 1.0;
+			width = item.width ?? 32.0;
+			height = item.height ?? 32.0;
 		}
 	});
 
@@ -49,6 +55,9 @@
 			.update(itemId, {
 				name: name.trim(),
 				max_durability_ticks: maxDurabilityTicks ?? null,
+				scale,
+				width,
+				height,
 			})
 			.then(() => {
 				closeDialog();
@@ -93,6 +102,35 @@
 						<InputGroupText>틱</InputGroupText>
 					</InputGroupAddon>
 				</InputGroup>
+				<div class="flex gap-2">
+					<InputGroup class="flex-1">
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>너비</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" step="0.01" min="0" bind:value={width} />
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>px</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
+					<InputGroup class="flex-1">
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>높이</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" step="0.01" min="0" bind:value={height} />
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>px</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
+					<InputGroup class="flex-1">
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>스케일</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" step="0.01" min="0" bind:value={scale} />
+						<InputGroupAddon align="inline-end">
+							<InputGroupText>배</InputGroupText>
+						</InputGroupAddon>
+					</InputGroup>
+				</div>
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !name.trim()}>

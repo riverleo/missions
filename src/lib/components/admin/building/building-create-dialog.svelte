@@ -25,11 +25,13 @@
 	const open = $derived($dialogStore?.type === 'create');
 
 	let name = $state('');
+	let scale = $state<number>(1.0);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open) {
 			name = '';
+			scale = 1.0;
 		}
 	});
 
@@ -46,7 +48,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim() })
+			.create({ name: name.trim(), scale })
 			.then((building) => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/buildings/${building.id}`);
@@ -65,12 +67,26 @@
 		<DialogHeader>
 			<DialogTitle>새로운 건물 생성</DialogTitle>
 		</DialogHeader>
-		<form {onsubmit} class="space-y-6">
+		<form {onsubmit} class="space-y-4">
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
 					<InputGroupText><IconHeading /></InputGroupText>
 				</InputGroupAddon>
 				<InputGroupInput placeholder="이름" bind:value={name} />
+			</InputGroup>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<InputGroupText>스케일</InputGroupText>
+				</InputGroupAddon>
+				<InputGroupInput
+					type="number"
+					step="0.01"
+					min="0"
+					bind:value={scale}
+				/>
+				<InputGroupAddon align="inline-end">
+					<InputGroupText>배</InputGroupText>
+				</InputGroupAddon>
 			</InputGroup>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>

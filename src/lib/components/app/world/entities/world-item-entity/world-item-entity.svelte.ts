@@ -14,9 +14,6 @@ import { Entity } from '../entity.svelte';
 
 const { Bodies } = Matter;
 
-// 아이템 크기 (픽셀)
-const ITEM_SIZE = 32;
-
 export class WorldItemEntity extends Entity {
 	readonly id: WorldItemId;
 	readonly type = 'item' as const;
@@ -40,9 +37,9 @@ export class WorldItemEntity extends Entity {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${id}`);
 		}
 
-		// 아이템 크기 (고정)
-		const width = ITEM_SIZE;
-		const height = ITEM_SIZE;
+		// 아이템 크기 (item 데이터에서 가져옴)
+		const width = item.width;
+		const height = item.height;
 		this.size = { width, height };
 
 		// 사각형 dynamic 바디 생성 (회전 가능, 아이템끼리만 충돌)

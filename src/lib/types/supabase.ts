@@ -213,6 +213,7 @@ export type Database = {
           id: string
           item_max_capacity: number
           name: string
+          scale: number
           scenario_id: string
           tile_cols: number
           tile_rows: number
@@ -223,6 +224,7 @@ export type Database = {
           id?: string
           item_max_capacity?: number
           name?: string
+          scale?: number
           scenario_id: string
           tile_cols?: number
           tile_rows?: number
@@ -233,6 +235,7 @@ export type Database = {
           id?: string
           item_max_capacity?: number
           name?: string
+          scale?: number
           scenario_id?: string
           tile_cols?: number
           tile_rows?: number
@@ -520,6 +523,7 @@ export type Database = {
           created_by: string | null
           id: string
           name: string
+          scale: number
           scenario_id: string
         }
         Insert: {
@@ -528,6 +532,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+          scale?: number
           scenario_id: string
         }
         Update: {
@@ -536,6 +541,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+          scale?: number
           scenario_id?: string
         }
         Relationships: [
@@ -1154,26 +1160,35 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          height: number
           id: string
           max_durability_ticks: number | null
           name: string
+          scale: number
           scenario_id: string
+          width: number
         }
         Insert: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           max_durability_ticks?: number | null
           name?: string
+          scale?: number
           scenario_id: string
+          width?: number
         }
         Update: {
           created_at?: string
           created_by?: string | null
+          height?: number
           id?: string
           max_durability_ticks?: number | null
           name?: string
+          scale?: number
           scenario_id?: string
+          width?: number
         }
         Relationships: [
           {

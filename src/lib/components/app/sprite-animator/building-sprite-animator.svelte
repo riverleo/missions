@@ -11,6 +11,7 @@
 		characterOffset?: { x: number; y: number };
 		characterScale?: number;
 		characterRotation?: number;
+		scale?: number;
 		resolution?: 1 | 2 | 3;
 		selected?: boolean;
 	}
@@ -22,6 +23,7 @@
 		characterOffset = { x: 0, y: 0 },
 		characterScale = 1,
 		characterRotation = 0,
+		scale = 1,
 		resolution = 2,
 		selected = false,
 	}: Props = $props();
@@ -54,7 +56,7 @@
 	});
 </script>
 
-<div class="relative">
+<div class="relative" style:transform={`scale(${scale})`}>
 	<!-- 선택 시 외곽선 -->
 	{#if selected && animator}
 		<div

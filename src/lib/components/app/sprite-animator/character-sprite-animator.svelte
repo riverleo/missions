@@ -12,6 +12,7 @@
 		heldItemOffset?: { x: number; y: number };
 		heldItemScale?: number;
 		heldItemRotation?: number;
+		scale?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 		selected?: boolean;
@@ -24,6 +25,7 @@
 		heldItemOffset,
 		heldItemScale = 1,
 		heldItemRotation = 0,
+		scale = 1,
 		resolution = 2,
 		flip = false,
 		selected = false,
@@ -159,7 +161,7 @@
 
 <div
 	class="relative inline-flex items-center justify-center"
-	style:transform={flip ? 'scaleX(-1)' : undefined}
+	style:transform={flip ? `scale(${scale}, ${-scale})` : `scale(${scale})`}
 >
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && bodyAnimator}
