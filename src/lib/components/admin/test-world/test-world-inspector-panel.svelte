@@ -21,7 +21,7 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Badge } from '$lib/components/ui/badge';
-	import { IconX } from '@tabler/icons-svelte';
+	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -103,20 +103,20 @@
 			<AccordionItem value={`character-${characterEntity.id}`}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
-						<Badge variant="secondary">캐릭터</Badge>
 						{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
+						<Badge variant="secondary">캐릭터</Badge>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<InputGroup>
-							<InputGroupAddon>
-								<InputGroupText>위치</InputGroupText>
-							</InputGroupAddon>
-							<InputGroupInput value={Math.round(characterEntity.x)} disabled />
-							<InputGroupText><IconX /></InputGroupText>
-							<InputGroupInput value={Math.round(characterEntity.y)} disabled />
-						</InputGroup>
+						<TestWorldInspectorItem>
+							{#snippet label()}
+								좌표
+							{/snippet}
+							{#snippet value()}
+								({Math.round(characterEntity.x)}, {Math.round(characterEntity.y)})
+							{/snippet}
+						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
 			</AccordionItem>
@@ -129,20 +129,20 @@
 			<AccordionItem value={`building-${buildingEntity.id}`}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
-						<Badge variant="secondary">건물</Badge>
 						{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
+						<Badge variant="secondary">건물</Badge>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<InputGroup>
-							<InputGroupAddon>
-								<InputGroupText>위치 (타일 기준)</InputGroupText>
-							</InputGroupAddon>
-							<InputGroupInput value={worldBuilding?.tile_x ?? 0} disabled />
-							<InputGroupText><IconX /></InputGroupText>
-							<InputGroupInput value={worldBuilding?.tile_y ?? 0} disabled />
-						</InputGroup>
+						<TestWorldInspectorItem>
+							{#snippet label()}
+								타일 좌표
+							{/snippet}
+							{#snippet value()}
+								({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
+							{/snippet}
+						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
 			</AccordionItem>
@@ -153,31 +153,22 @@
 			<AccordionItem value={`item-${itemEntity.id}`}>
 				<AccordionTrigger class="py-3 text-xs">
 					<div class="flex items-center gap-2">
-						<Badge variant="secondary">아이템</Badge>
 						{itemData?.name ?? '아이템'} ({itemEntity.id.split('-')[0]})
+						<Badge variant="secondary">아이템</Badge>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<div class="flex gap-2">
-							<InputGroup>
-								<InputGroupAddon>
-									<InputGroupText>위치</InputGroupText>
-								</InputGroupAddon>
-								<InputGroupInput value={Math.round(itemEntity.x)} disabled />
-								<InputGroupText><IconX /></InputGroupText>
-								<InputGroupInput value={Math.round(itemEntity.y)} disabled />
-							</InputGroup>
-							<InputGroup>
-								<InputGroupAddon>
-									<InputGroupText>회전</InputGroupText>
-								</InputGroupAddon>
-								<InputGroupInput value={Math.round((itemEntity.angle * 180) / Math.PI)} disabled />
-								<InputGroupAddon align="inline-end">
-									<InputGroupText>도</InputGroupText>
-								</InputGroupAddon>
-							</InputGroup>
-						</div>
+						<TestWorldInspectorItem>
+							{#snippet label()}
+								좌표
+							{/snippet}
+							{#snippet value()}
+								({Math.round(itemEntity.x)}, {Math.round(itemEntity.y)}), {Math.round(
+									(itemEntity.angle * 180) / Math.PI
+								)}°
+							{/snippet}
+						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
 			</AccordionItem>
