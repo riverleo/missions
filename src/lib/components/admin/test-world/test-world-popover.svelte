@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import World from '$lib/components/app/world/world.svelte';
 	import TestWorldCommandPanel from './test-world-command-panel.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
@@ -76,9 +77,9 @@
 	<div class="flex flex-1 gap-0">
 		<!-- 좌측: 커맨드 목록 -->
 		{#if $store.commandPanelOpen}
-			<div class="w-80 shrink-0 overflow-y-auto border-r" style="height: {WORLD_HEIGHT + 32}px;">
+			<ScrollArea class="w-80 shrink-0 border-r" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldCommandPanel />
-			</div>
+			</ScrollArea>
 		{/if}
 
 		<!-- 중앙: 월드 -->
@@ -99,9 +100,9 @@
 
 		<!-- 우측: 인스펙터 패널 -->
 		{#if $store.inspectorPanelOpen}
-			<div class="w-80 shrink-0 overflow-y-auto border-l" style="height: {WORLD_HEIGHT + 32}px;">
+			<ScrollArea class="w-80 shrink-0 border-l" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldInspectorPanel {worldContext} />
-			</div>
+			</ScrollArea>
 		{/if}
 	</div>
 </div>
