@@ -8,7 +8,7 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { useItem } from '$lib/hooks/use-item';
-	import { IconRuler, IconX } from '@tabler/icons-svelte';
+	import { IconRuler2, IconX } from '@tabler/icons-svelte';
 
 	interface Props {
 		item: Item;
@@ -86,8 +86,10 @@
 		</InputGroupAddon>
 	</InputGroup>
 	<InputGroup>
-		<InputGroupAddon align="inline-start">
-			<InputGroupText><IconRuler /></InputGroupText>
+		<InputGroupAddon>
+			<InputGroupText>
+				<IconRuler2 class="size-4" />
+			</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput
 			bind:value={width}
@@ -95,6 +97,7 @@
 			step="0.01"
 			min="0"
 			class="w-16"
+			placeholder="넓이"
 			onkeydown={onkeydownDimensions}
 		/>
 		<InputGroupText><IconX /></InputGroupText>
@@ -104,6 +107,7 @@
 			step="0.01"
 			min="0"
 			class="w-16"
+			placeholder="높이"
 			onkeydown={onkeydownDimensions}
 		/>
 		<InputGroupAddon align="inline-end">
