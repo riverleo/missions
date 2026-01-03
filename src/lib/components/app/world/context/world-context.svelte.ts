@@ -11,7 +11,6 @@ import type {
 } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
-import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
@@ -22,7 +21,6 @@ import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
 export class WorldContext {
-	readonly supabase: Supabase;
 	readonly engine: Matter.Engine;
 	readonly runner: Matter.Runner;
 	readonly camera: Camera;
@@ -40,10 +38,9 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
-	private respawningWorldCharacterIds = new Set<string>();
+	private respawningWorldCharacterIds = new Set<WorldCharacterId>();
 
 	constructor(worldId: WorldId, debug: boolean = false) {
-		this.supabase = useServerPayload().supabase;
 		this.debug = debug;
 		this.worldId = worldId;
 		this.engine = Engine.create();
@@ -147,7 +144,7 @@ export class WorldContext {
 		Composite.clear(this.engine.world, false);
 
 		// 지형 로드
-		this.terrainBody.load(this.supabase, this.terrain).then(() => {
+		this.terrainBody.load(this.terrain).then(() => {
 			if (this.terrainBody.bodies.length > 0) {
 				Composite.add(this.engine.world, this.terrainBody.bodies);
 				this.terrainBody.setDebug(this.debug);

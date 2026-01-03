@@ -10,6 +10,7 @@ import {
 	DEBUG_TERRAIN_FILL_STYLE,
 	HIDDEN_BODY_STYLE,
 } from './constants';
+import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 const { Bodies, Vertices, Svg } = Matter;
 
@@ -124,7 +125,7 @@ export class TerrainBody {
 		return [ground, leftWall, rightWall, ceiling];
 	}
 
-	async load(supabase: Supabase, terrain: Terrain) {
+	async load(terrain: Terrain) {
 		// 정적 크기 사용
 		this.width = terrain.width;
 		this.height = terrain.height;
@@ -135,6 +136,7 @@ export class TerrainBody {
 			return;
 		}
 
+		const { supabase } = useServerPayload();
 		const url = getGameAssetUrl(supabase, 'terrain', terrain);
 		if (!url) {
 			this.bodies = this.createBoundaryWalls();
