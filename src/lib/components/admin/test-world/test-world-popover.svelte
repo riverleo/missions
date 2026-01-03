@@ -2,9 +2,9 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
 	import World from '$lib/components/app/world/world.svelte';
-	import TestWorldCommand from './test-world-command.svelte';
+	import TestWorldCommandPanel from './test-world-command-panel.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
-	import TestWorldPanel from './test-world-panel.svelte';
+	import TestWorldToolbar from './test-world-toolbar.svelte';
 	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
@@ -73,7 +73,7 @@
 	<div class="flex flex-1 gap-0">
 		<!-- 좌측: 커맨드 목록 -->
 		<div class="w-80 shrink-0 border-r">
-			<TestWorldCommand />
+			<TestWorldCommandPanel />
 		</div>
 
 		<!-- 우측: 월드 -->
@@ -82,7 +82,7 @@
 				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug}>
 					<TestWorldMarker />
 				</World>
-				<TestWorldPanel />
+				<TestWorldToolbar />
 			{:else}
 				<div
 					class="flex items-center justify-center"
