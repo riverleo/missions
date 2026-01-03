@@ -9,9 +9,12 @@
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';
+	import type { WorldContext } from '$lib/components/app/world/context';
 
 	const { store, setOpen, setModalPosition, init } = useWorldTest();
 	const { fetchAllStatus } = useScenario();
+
+	let worldContext = $state<WorldContext | undefined>(undefined);
 
 	// fetchAll 완료 후 테스트 데이터 초기화
 	$effect(() => {
@@ -81,7 +84,7 @@
 		<!-- 중앙: 월드 -->
 		<div class="relative flex flex-1 items-center justify-center p-4">
 			{#if hasSelectedTerrain}
-				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug}>
+				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug} bind:context={worldContext}>
 					<TestWorldMarker />
 				</World>
 			{:else}
@@ -97,7 +100,7 @@
 		<!-- 우측: 인스펙터 패널 -->
 		{#if $store.inspectorPanelOpen}
 			<div class="w-80 shrink-0 overflow-y-auto border-l" style="height: {WORLD_HEIGHT + 32}px;">
-				<TestWorldInspectorPanel />
+				<TestWorldInspectorPanel context={worldContext} />
 			</div>
 		{/if}
 	</div>

@@ -21,6 +21,7 @@
 		debug?: boolean;
 		children?: Snippet;
 		oncamerachange?: (camera: Camera) => void;
+		context?: WorldContext;
 	}
 
 	let {
@@ -30,10 +31,12 @@
 		debug = false,
 		children,
 		oncamerachange,
+		context = $bindable(),
 		...restProps
 	}: Props = $props();
 
 	const worldContext = new WorldContext(worldId, debug);
+	context = worldContext;
 	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
 
 	// worldId로 useWorld에서 world 조회
