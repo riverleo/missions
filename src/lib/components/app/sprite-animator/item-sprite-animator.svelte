@@ -8,17 +8,17 @@
 
 	interface Props {
 		itemId: ItemId;
-		state: ItemStateType;
+		stateType: ItemStateType;
 		resolution?: 1 | 2 | 3;
 		selected?: boolean;
 	}
 
-	let { itemId, state, resolution = 1, selected = false }: Props = $props();
+	let { itemId, stateType, resolution = 1, selected = false }: Props = $props();
 
 	const { store, stateStore } = useItem();
 	const item = $derived($store.data[itemId]);
 	const itemStates = $derived($stateStore.data[itemId] ?? []);
-	const itemState = $derived(itemStates.find((s) => s.type === state));
+	const itemState = $derived(itemStates.find((s) => s.type === stateType));
 	const scale = $derived(item?.scale ?? 1);
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);

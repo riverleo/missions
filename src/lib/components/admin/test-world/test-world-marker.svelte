@@ -175,16 +175,20 @@
 				}
 			} else if (entity.type === 'building') {
 				const buildingEntity = entity as WorldBuildingEntity;
-				const halfWidth = buildingEntity.size.width / 2;
-				const halfHeight = buildingEntity.size.height / 2;
+				const width = buildingEntity.body.bounds.max.x - buildingEntity.body.bounds.min.x;
+				const height = buildingEntity.body.bounds.max.y - buildingEntity.body.bounds.min.y;
+				const halfWidth = width / 2;
+				const halfHeight = height / 2;
 				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 					removeWorldBuilding(buildingEntity.id);
 					return;
 				}
 			} else if (entity.type === 'item') {
 				const itemEntity = entity as WorldItemEntity;
-				const halfWidth = itemEntity.size.width / 2;
-				const halfHeight = itemEntity.size.height / 2;
+				const width = itemEntity.body.bounds.max.x - itemEntity.body.bounds.min.x;
+				const height = itemEntity.body.bounds.max.y - itemEntity.body.bounds.min.y;
+				const halfWidth = width / 2;
+				const halfHeight = height / 2;
 				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 					removeWorldItem(itemEntity.id);
 					return;
@@ -287,7 +291,7 @@
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
 			style="left: {pos.x}px; top: {pos.y}px;"
 		>
-			<ItemSpriteAnimator itemId={selectedItem.id} state="idle" resolution={2} />
+			<ItemSpriteAnimator itemId={selectedItem.id} stateType="idle" resolution={2} />
 		</div>
 	{/if}
 {/if}

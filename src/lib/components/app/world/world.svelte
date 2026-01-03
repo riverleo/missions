@@ -100,7 +100,7 @@
 				{} as Record<WorldItemId, WorldItem>
 			);
 
-		worldContext.syncEntities(characters, buildings, items);
+		worldContext.createOrDeleteEntities(characters, buildings, items);
 	});
 
 	setWorldContext(worldContext);

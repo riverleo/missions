@@ -221,8 +221,8 @@ export class WorldContext {
 		this.oncamerachange?.(camera);
 	}
 
-	// 엔티티 동기화
-	syncEntities(
+	// 엔티티 생성 또는 삭제
+	createOrDeleteEntities(
 		worldCharacters: Record<WorldCharacterId, WorldCharacter>,
 		worldBuildings: Record<WorldBuildingId, WorldBuilding>,
 		worldItems: Record<WorldItemId, WorldItem>

@@ -26,6 +26,6 @@
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x}px; top: {entity.y}px; rotate: {entity.angle}rad;"
 	>
-		<ItemSpriteAnimator itemId={item.id} state="idle" resolution={2} {selected} />
+		<ItemSpriteAnimator itemId={item.id} stateType="idle" resolution={2} {selected} />
 	</div>
 {/if}
