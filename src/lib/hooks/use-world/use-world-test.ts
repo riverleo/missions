@@ -32,10 +32,6 @@ interface WorldTestStoreState {
 	worlds: Record<WorldId, World>;
 	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
-	// 카메라 상태: test-world-marker에서 클릭 좌표를 월드 좌표로 변환할 때 사용
-	cameraX: number;
-	cameraY: number;
-	cameraZoom: number;
 	// 모달 위치 (픽셀 단위)
 	modalX: number;
 	modalY: number;
@@ -51,9 +47,6 @@ const defaultState: WorldTestStoreState = {
 	worlds: {},
 	worldCharacters: {},
 	worldBuildings: {},
-	cameraX: 0,
-	cameraY: 0,
-	cameraZoom: 1,
 	modalX: 0,
 	modalY: 0,
 	debug: false,
@@ -237,10 +230,6 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, open: !state.open }));
 	}
 
-	function setCamera(x: number, y: number, zoom: number) {
-		store.update((state) => ({ ...state, cameraX: x, cameraY: y, cameraZoom: zoom }));
-	}
-
 	function setModalPosition(x: number, y: number) {
 		store.update((state) => ({ ...state, modalX: x, modalY: y }));
 	}
@@ -376,7 +365,6 @@ function createTestWorldStore() {
 		setEraser,
 		setOpen,
 		toggleOpen,
-		setCamera,
 		setModalPosition,
 		addWorldCharacter,
 		addWorldBuilding,
