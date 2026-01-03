@@ -154,8 +154,8 @@
 				const characterBody = characterEntity.characterBody;
 				if (!characterBody) continue;
 
-				const halfWidth = characterBody.width / 2;
-				const halfHeight = characterBody.height / 2;
+				const halfWidth = characterBody.collider_width / 2;
+				const halfHeight = characterBody.collider_height / 2;
 				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 					removeWorldCharacter(characterEntity.id);
 					return;

@@ -21,15 +21,15 @@
 	const { uiStore } = admin;
 
 	let name = $state(body.name ?? '');
-	let width = $state(body.width === 0 ? '' : body.width.toString());
-	let height = $state(body.height === 0 ? '' : body.height.toString());
+	let width = $state(body.collider_width === 0 ? '' : body.collider_width.toString());
+	let height = $state(body.collider_height === 0 ? '' : body.collider_height.toString());
 
 	// body prop 변경 시 상태 동기화
 	$effect(() => {
-		width = body.width === 0 ? '' : body.width.toString();
+		width = body.collider_width === 0 ? '' : body.collider_width.toString();
 	});
 	$effect(() => {
-		height = body.height === 0 ? '' : body.height.toString();
+		height = body.collider_height === 0 ? '' : body.collider_height.toString();
 	});
 
 	async function updateName() {
@@ -41,8 +41,8 @@
 	async function updateSize() {
 		const newWidth = parseFloat(width) || 0;
 		const newHeight = parseFloat(height) || 0;
-		if (newWidth === body.width && newHeight === body.height) return;
-		await admin.update(body.id, { width: newWidth, height: newHeight });
+		if (newWidth === body.collider_width && newHeight === body.collider_height) return;
+		await admin.update(body.id, { collider_width: newWidth, collider_height: newHeight });
 	}
 
 	function onkeydownName(e: KeyboardEvent) {

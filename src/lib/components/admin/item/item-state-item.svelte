@@ -49,14 +49,14 @@
 		<ItemSpriteAnimator itemId={itemId as ItemId} stateType={type} resolution={2} />
 	{/snippet}
 	{#snippet overlay()}
-		{#if $uiStore.showBodyPreview && item && (item.width > 0 || item.height > 0)}
+		{#if $uiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}
 			<svg class="pointer-events-none absolute inset-0 h-full w-full">
 				<rect
 					x="50%"
 					y="50%"
-					width={item.width}
-					height={item.height}
-					transform="translate(-{item.width / 2}, -{item.height / 2})"
+					width={item.collider_width}
+					height={item.collider_height}
+					transform="translate(-{item.collider_width / 2}, -{item.collider_height / 2})"
 					fill={DEBUG_ITEM_FILL_STYLE}
 				/>
 			</svg>

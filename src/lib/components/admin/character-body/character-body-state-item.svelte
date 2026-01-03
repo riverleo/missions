@@ -76,12 +76,12 @@
 		}
 
 		// body의 width/height가 0이면 atlas frame 크기로 설정
-		if (change.atlas_name && body && body.width === 0 && body.height === 0) {
+		if (change.atlas_name && body && body.collider_width === 0 && body.collider_height === 0) {
 			const metadata = atlases[change.atlas_name];
 			if (metadata) {
 				await admin.update(bodyId as CharacterBodyId, {
-					width: metadata.frameWidth / 2,
-					height: metadata.frameHeight / 2,
+					collider_width: metadata.frameWidth / 2,
+					collider_height: metadata.frameHeight / 2,
 				});
 			}
 		}
@@ -180,13 +180,13 @@
 		{/if}
 	{/snippet}
 	{#snippet overlay()}
-		{#if $uiStore.showBodyPreview && body && (body.width > 0 || body.height > 0)}
+		{#if $uiStore.showBodyPreview && body && (body.collider_width > 0 || body.collider_height > 0)}
 			<svg class="pointer-events-none absolute inset-0 h-full w-full">
 				<ellipse
 					cx="50%"
 					cy="50%"
-					rx={body.width / 2}
-					ry={body.height / 2}
+					rx={body.collider_width / 2}
+					ry={body.collider_height / 2}
 					fill={DEBUG_CHARACTER_FILL_STYLE}
 				/>
 			</svg>

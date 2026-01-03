@@ -38,11 +38,11 @@ export class WorldCharacterEntity extends Entity {
 		}
 
 		// 초기 크기 설정
-		this.width = characterBody.width;
-		this.height = characterBody.height;
+		this.width = characterBody.collider_width;
+		this.height = characterBody.collider_height;
 
 		// 바디 생성
-		this.body = this.createBody(characterBody.width, characterBody.height);
+		this.body = this.createBody(characterBody.collider_width, characterBody.collider_height);
 
 		// 바디 위치 설정
 		Body.setPosition(this.body, { x: worldCharacter.x, y: worldCharacter.y });
@@ -94,8 +94,8 @@ export class WorldCharacterEntity extends Entity {
 		if (!characterBody) return;
 
 		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.width - characterBody.width);
-		const heightDiff = Math.abs(this.height - characterBody.height);
+		const widthDiff = Math.abs(this.width - characterBody.collider_width);
+		const heightDiff = Math.abs(this.height - characterBody.collider_height);
 
 		// 크기가 변경되었으면 바디 재생성
 		if (widthDiff > 0.01 || heightDiff > 0.01) {
@@ -107,7 +107,7 @@ export class WorldCharacterEntity extends Entity {
 			Composite.remove(this.world.engine.world, this.body);
 
 			// 새 바디 생성
-			this.body = this.createBody(characterBody.width, characterBody.height);
+			this.body = this.createBody(characterBody.collider_width, characterBody.collider_height);
 
 			// 위치/속도/각도 복원
 			Body.setPosition(this.body, currentPosition);
@@ -118,8 +118,8 @@ export class WorldCharacterEntity extends Entity {
 			Composite.add(this.world.engine.world, this.body);
 
 			// 크기 업데이트
-			this.width = characterBody.width;
-			this.height = characterBody.height;
+			this.width = characterBody.collider_width;
+			this.height = characterBody.collider_height;
 		}
 	}
 

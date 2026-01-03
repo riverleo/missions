@@ -37,11 +37,11 @@ export class WorldItemEntity extends Entity {
 		}
 
 		// 초기 크기 설정
-		this.width = item.width;
-		this.height = item.height;
+		this.width = item.collider_width;
+		this.height = item.collider_height;
 
 		// 바디 생성
-		this.body = this.createBody(item.width, item.height, worldItem.x, worldItem.y);
+		this.body = this.createBody(item.collider_width, item.collider_height, worldItem.x, worldItem.y);
 
 		// 초기 위치 설정
 		this.x = worldItem.x;
@@ -75,8 +75,8 @@ export class WorldItemEntity extends Entity {
 		if (!item) return;
 
 		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.width - item.width);
-		const heightDiff = Math.abs(this.height - item.height);
+		const widthDiff = Math.abs(this.width - item.collider_width);
+		const heightDiff = Math.abs(this.height - item.collider_height);
 
 		// 크기가 변경되었으면 바디 재생성
 		if (widthDiff > 0.01 || heightDiff > 0.01) {
@@ -88,7 +88,7 @@ export class WorldItemEntity extends Entity {
 			Matter.Composite.remove(this.world.engine.world, this.body);
 
 			// 새 바디 생성
-			this.body = this.createBody(item.width, item.height, currentPosition.x, currentPosition.y);
+			this.body = this.createBody(item.collider_width, item.collider_height, currentPosition.x, currentPosition.y);
 
 			// 속도/각도 복원
 			Matter.Body.setVelocity(this.body, currentVelocity);
@@ -98,8 +98,8 @@ export class WorldItemEntity extends Entity {
 			Matter.Composite.add(this.world.engine.world, this.body);
 
 			// 크기 업데이트
-			this.width = item.width;
-			this.height = item.height;
+			this.width = item.collider_width;
+			this.height = item.collider_height;
 		}
 	}
 

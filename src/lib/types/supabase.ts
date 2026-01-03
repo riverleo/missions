@@ -314,31 +314,34 @@ export type Database = {
       }
       character_bodies: {
         Row: {
+          collider_height: number
+          collider_type: Database["public"]["Enums"]["collider_type"]
+          collider_width: number
           created_at: string
           created_by: string | null
-          height: number
           id: string
           name: string
           scenario_id: string
-          width: number
         }
         Insert: {
+          collider_height?: number
+          collider_type?: Database["public"]["Enums"]["collider_type"]
+          collider_width?: number
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id: string
-          width?: number
         }
         Update: {
+          collider_height?: number
+          collider_type?: Database["public"]["Enums"]["collider_type"]
+          collider_width?: number
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           name?: string
           scenario_id?: string
-          width?: number
         }
         Relationships: [
           {
@@ -1158,37 +1161,40 @@ export type Database = {
       }
       items: {
         Row: {
+          collider_height: number
+          collider_type: Database["public"]["Enums"]["collider_type"]
+          collider_width: number
           created_at: string
           created_by: string | null
-          height: number
           id: string
           max_durability_ticks: number | null
           name: string
           scale: number
           scenario_id: string
-          width: number
         }
         Insert: {
+          collider_height?: number
+          collider_type?: Database["public"]["Enums"]["collider_type"]
+          collider_width?: number
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           max_durability_ticks?: number | null
           name?: string
           scale?: number
           scenario_id: string
-          width?: number
         }
         Update: {
+          collider_height?: number
+          collider_type?: Database["public"]["Enums"]["collider_type"]
+          collider_width?: number
           created_at?: string
           created_by?: string | null
-          height?: number
           id?: string
           max_durability_ticks?: number | null
           name?: string
           scale?: number
           scenario_id?: string
-          width?: number
         }
         Relationships: [
           {
@@ -2880,6 +2886,7 @@ export type Database = {
       character_behavior_type: "demolish" | "use" | "repair" | "clean"
       character_body_state_type: "idle" | "walk" | "run" | "jump"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
+      collider_type: "rectangle" | "ellipse"
       condition_fulfillment_type: "character" | "item" | "idle"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       item_state_type: "idle" | "broken"
@@ -3028,6 +3035,7 @@ export const Constants = {
       character_behavior_type: ["demolish", "use", "repair", "clean"],
       character_body_state_type: ["idle", "walk", "run", "jump"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
+      collider_type: ["rectangle", "ellipse"],
       condition_fulfillment_type: ["character", "item", "idle"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       item_state_type: ["idle", "broken"],

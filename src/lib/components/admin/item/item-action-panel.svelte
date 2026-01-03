@@ -21,18 +21,18 @@
 	const { uiStore } = admin;
 
 	let scale = $state(item.scale.toString());
-	let width = $state(item.width.toString());
-	let height = $state(item.height.toString());
+	let width = $state(item.collider_width.toString());
+	let height = $state(item.collider_height.toString());
 
 	// item prop 변경 시 상태 동기화
 	$effect(() => {
 		scale = item.scale.toString();
 	});
 	$effect(() => {
-		width = item.width.toString();
+		width = item.collider_width.toString();
 	});
 	$effect(() => {
-		height = item.height.toString();
+		height = item.collider_height.toString();
 	});
 
 	async function updateScale() {
@@ -52,11 +52,11 @@
 		const newWidth = parseFloat(width) || 32.0;
 		const newHeight = parseFloat(height) || 32.0;
 
-		if (newWidth === item.width && newHeight === item.height) return;
+		if (newWidth === item.collider_width && newHeight === item.collider_height) return;
 
 		await admin.update(item.id, {
-			width: newWidth,
-			height: newHeight,
+			collider_width: newWidth,
+			collider_height: newHeight,
 		});
 	}
 

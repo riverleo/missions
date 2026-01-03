@@ -15,13 +15,17 @@ create type character_behavior_type as enum (
 -- loop_mode enum
 create type loop_mode as enum ('loop', 'once', 'ping-pong', 'ping-pong-once');
 
+-- collider_type enum
+create type collider_type as enum ('rectangle', 'ellipse');
+
 -- character_bodies 테이블 (공유 가능한 몸통)
 create table character_bodies (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   name text not null default '',
-  width real not null default 0,
-  height real not null default 0,
+  collider_type collider_type not null default 'rectangle',
+  collider_width real not null default 0,
+  collider_height real not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 

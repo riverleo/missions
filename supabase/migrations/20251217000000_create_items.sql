@@ -5,8 +5,9 @@ create table items (
   name text not null default '',
   max_durability_ticks bigint, -- nullable: 내구도가 없는 아이템도 있음
   scale real not null default 1.0,
-  width real not null default 32.0,
-  height real not null default 32.0,
+  collider_type collider_type not null default 'rectangle',
+  collider_width real not null default 32.0,
+  collider_height real not null default 32.0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
