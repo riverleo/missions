@@ -9,7 +9,7 @@
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
 
-	const { store, toggleOpen, setOpen, setModalPosition, init } = useWorldTest();
+	const { store, setOpen, setModalPosition, init } = useWorldTest();
 	const { fetchAllStatus } = useScenario();
 
 	// fetchAll 완료 후 테스트 데이터 초기화
@@ -30,7 +30,7 @@
 	function onkeydown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'p') {
 			e.preventDefault();
-			toggleOpen();
+			setOpen(!$store.open);
 		} else if (e.key === 'Escape' && $store.open) {
 			e.preventDefault();
 			setOpen(false);

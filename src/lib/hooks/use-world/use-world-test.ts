@@ -47,42 +47,39 @@ const defaultState: WorldTestStoreState = {
 	eraser: false,
 };
 
-// localStorage에 저장할 필드만 정의
-interface PersistedState {
-	worlds: Record<WorldId, World>;
-	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
-	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
-	modalX: number;
-	modalY: number;
-	debug: boolean;
+// localStorage 저장 포맷 (WorldTestStoreState + world 데이터)
+interface StoredState extends WorldTestStoreState {
+	worlds?: Record<WorldId, World>;
+	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
+	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
 }
 
-function loadFromStorage(): {
-	uiState: WorldTestStoreState;
-	persisted: PersistedState | null;
-} {
-	if (!browser) return { uiState: defaultState, persisted: null };
+function loadFromStorage(): StoredState {
+	if (!browser) return defaultState;
 	try {
 		const saved = localStorage.getItem(STORAGE_KEY);
 		if (saved) {
-			const persisted: PersistedState = JSON.parse(saved);
+			const stored: StoredState = JSON.parse(saved);
 			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
-			const world = persisted.worlds?.[TEST_WORLD_ID];
+			const world = stored.worlds?.[TEST_WORLD_ID];
 			return {
-				uiState: {
-					...defaultState,
-					selectedTerrainId: world?.terrain_id ?? undefined,
-					modalX: persisted.modalX ?? 0,
-					modalY: persisted.modalY ?? 0,
-					debug: persisted.debug ?? false,
-				},
-				persisted,
+				open: stored.open ?? defaultState.open,
+				selectedTerrainId: world?.terrain_id ?? undefined,
+				selectedCharacterId: stored.selectedCharacterId,
+				selectedBuildingId: stored.selectedBuildingId,
+				modalX: stored.modalX ?? defaultState.modalX,
+				modalY: stored.modalY ?? defaultState.modalY,
+				debug: stored.debug ?? defaultState.debug,
+				eraser: stored.eraser ?? defaultState.eraser,
+				worlds: stored.worlds,
+				worldCharacters: stored.worldCharacters,
+				worldBuildings: stored.worldBuildings,
 			};
 		}
 	} catch {
 		// ignore parse errors
 	}
-	return { uiState: defaultState, persisted: null };
+	return defaultState;
 }
 
 function saveToStorage(state: WorldTestStoreState) {
@@ -110,15 +107,13 @@ function saveToStorage(state: WorldTestStoreState) {
 			}
 		}
 
-		const persisted: PersistedState = {
+		const stored: StoredState = {
+			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
 			worldCharacters: testWorldCharacters,
 			worldBuildings: testWorldBuildings,
-			modalX: state.modalX,
-			modalY: state.modalY,
-			debug: state.debug,
 		};
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(persisted));
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 	} catch {
 		// ignore storage errors
 	}
@@ -127,9 +122,18 @@ function saveToStorage(state: WorldTestStoreState) {
 let instance: ReturnType<typeof createTestWorldStore> | null = null;
 
 function createTestWorldStore() {
-	const { uiState, persisted } = loadFromStorage();
+	const stored = loadFromStorage();
 
-	const store = writable<WorldTestStoreState>(uiState);
+	const store = writable<WorldTestStoreState>({
+		open: stored.open,
+		selectedTerrainId: stored.selectedTerrainId,
+		selectedCharacterId: stored.selectedCharacterId,
+		selectedBuildingId: stored.selectedBuildingId,
+		modalX: stored.modalX,
+		modalY: stored.modalY,
+		debug: stored.debug,
+		eraser: stored.eraser,
+	});
 
 	// 1초마다 localStorage에 저장
 	if (browser) {
@@ -220,10 +224,6 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, open }));
 	}
 
-	function toggleOpen() {
-		store.update((state) => ({ ...state, open: !state.open }));
-	}
-
 	function setModalPosition(x: number, y: number) {
 		store.update((state) => ({ ...state, modalX: x, modalY: y }));
 	}
@@ -294,30 +294,35 @@ function createTestWorldStore() {
 	}
 
 	function init() {
-		// localStorage에서 테스트 데이터 로드하여 use-world 스토어에 추가
-		const { persisted } = loadFromStorage();
-		if (!persisted) return;
-
+		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
 
-		world.worldStore.update((state) =>
-			produce(state, (draft) => {
-				Object.assign(draft.data, persisted.worlds);
-				draft.status = 'success';
-			})
-		);
-		world.worldCharacterStore.update((state) =>
-			produce(state, (draft) => {
-				Object.assign(draft.data, persisted.worldCharacters);
-				draft.status = 'success';
-			})
-		);
-		world.worldBuildingStore.update((state) =>
-			produce(state, (draft) => {
-				Object.assign(draft.data, persisted.worldBuildings);
-				draft.status = 'success';
-			})
-		);
+		if (stored.worlds) {
+			world.worldStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worlds);
+					draft.status = 'success';
+				})
+			);
+		}
+
+		if (stored.worldCharacters) {
+			world.worldCharacterStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldCharacters);
+					draft.status = 'success';
+				})
+			);
+		}
+
+		if (stored.worldBuildings) {
+			world.worldBuildingStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldBuildings);
+					draft.status = 'success';
+				})
+			);
+		}
 	}
 
 	return {
@@ -328,7 +333,6 @@ function createTestWorldStore() {
 		setDebug,
 		setEraser,
 		setOpen,
-		toggleOpen,
 		setModalPosition,
 		addWorldCharacter,
 		addWorldBuilding,
