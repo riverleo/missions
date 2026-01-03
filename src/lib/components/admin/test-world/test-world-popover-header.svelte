@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { IconBug, IconEraser, IconX, IconLayoutSidebarLeftExpandFilled } from '@tabler/icons-svelte';
+	import { IconBug, IconEraser, IconX, IconLayoutSidebar } from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -73,7 +73,7 @@
 			}}
 		>
 			<ToggleGroupItem value="panels" size="sm">
-				<IconLayoutSidebarLeftExpandFilled />
+				<IconLayoutSidebar />
 			</ToggleGroupItem>
 			<ToggleGroupItem value="debug" size="sm">
 				<IconBug />

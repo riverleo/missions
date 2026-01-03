@@ -96,7 +96,7 @@
 
 		<!-- 우측: 인스펙터 패널 -->
 		{#if $store.inspectorPanelOpen}
-			<div class="w-80 shrink-0 border-l">
+			<div class="w-80 shrink-0 overflow-y-auto border-l" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldInspectorPanel />
 			</div>
 		{/if}
