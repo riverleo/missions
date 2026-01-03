@@ -117,8 +117,13 @@
 		{/if}
 	{/snippet}
 	{#snippet preview()}
-		{#if previewBodyState}
-			<CharacterSpriteAnimator bodyState={previewBodyState} {faceState} resolution={2} />
+		{#if character && previewBodyStateType}
+			<CharacterSpriteAnimator
+				characterId={character.id}
+				bodyStateType={previewBodyStateType}
+				faceStateType={type}
+				resolution={2}
+			/>
 		{/if}
 	{/snippet}
 </SpriteStateItem>

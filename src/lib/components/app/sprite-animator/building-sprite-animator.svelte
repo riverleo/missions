@@ -1,13 +1,20 @@
 <script lang="ts">
-	import type { BuildingState, CharacterBodyState, CharacterFaceState, LoopMode } from '$lib/types';
+	import type {
+		BuildingState,
+		CharacterId,
+		CharacterBodyStateType,
+		CharacterFaceStateType,
+		LoopMode,
+	} from '$lib/types';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 
 	interface Props {
 		buildingState: BuildingState;
-		characterBodyState?: CharacterBodyState;
-		characterFaceState?: CharacterFaceState;
+		characterId?: CharacterId;
+		characterBodyStateType?: CharacterBodyStateType;
+		characterFaceStateType?: CharacterFaceStateType;
 		characterOffset?: { x: number; y: number };
 		characterScale?: number;
 		characterRotation?: number;
@@ -18,8 +25,9 @@
 
 	let {
 		buildingState,
-		characterBodyState,
-		characterFaceState,
+		characterId,
+		characterBodyStateType,
+		characterFaceStateType,
 		characterOffset = { x: 0, y: 0 },
 		characterScale = 1,
 		characterRotation = 0,
@@ -71,15 +79,16 @@
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />
 	{/if}
-	{#if characterBodyState}
+	{#if characterId && characterBodyStateType}
 		<div
 			class="absolute bottom-0 left-1/2"
 			style:transform="translate(calc(-50% + {characterOffset.x / resolution}px), {-characterOffset.y /
 				resolution}px) scale({characterScale}) rotate({characterRotation}deg)"
 		>
 			<CharacterSpriteAnimator
-				bodyState={characterBodyState}
-				faceState={characterFaceState}
+				{characterId}
+				bodyStateType={characterBodyStateType}
+				faceStateType={characterFaceStateType}
 				{resolution}
 				flip={characterOffset.x < 0}
 			/>

@@ -308,18 +308,21 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									<BuildingSpriteAnimator
-										buildingState={previewBuildingState}
-										characterBodyState={previewBodyState}
-										characterFaceState={previewFaceState}
-										characterOffset={{
-											x: changes.character_offset_x,
-											y: changes.character_offset_y,
-										}}
-										characterScale={changes.character_scale}
-										characterRotation={changes.character_rotation}
-										resolution={2}
-									/>
+									{#if previewBuildingState && previewCharacter && changes?.character_body_state_type}
+										<BuildingSpriteAnimator
+											buildingState={previewBuildingState}
+											characterId={previewCharacter.id}
+											characterBodyStateType={changes.character_body_state_type}
+											characterFaceStateType={changes.character_face_state_type ?? undefined}
+											characterOffset={{
+												x: changes.character_offset_x,
+												y: changes.character_offset_y,
+											}}
+											characterScale={changes.character_scale}
+											characterRotation={changes.character_rotation}
+											resolution={2}
+										/>
+									{/if}
 								</div>
 
 								{#if !behaviorHasSpecificCharacter}

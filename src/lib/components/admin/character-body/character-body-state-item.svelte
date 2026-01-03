@@ -4,11 +4,13 @@
 		CharacterFaceStateType,
 		CharacterBodyId,
 		CharacterBodyState,
+		LoopMode,
 	} from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
-	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
+	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
+	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -36,6 +38,32 @@
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
 	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
+
+	let animator = $state<SpriteAnimator | undefined>(undefined);
+
+	$effect(() => {
+		const atlasName = bodyState?.atlas_name;
+		if (!atlasName) return;
+
+		SpriteAnimator.create(atlasName).then((newAnimator) => {
+			animator?.stop();
+			newAnimator.init({
+				name: bodyState.type,
+				from: bodyState.frame_from ?? undefined,
+				to: bodyState.frame_to ?? undefined,
+				fps: bodyState.fps ?? undefined,
+			});
+			newAnimator.play({
+				name: bodyState.type,
+				loop: (bodyState.loop as LoopMode) ?? 'loop',
+			});
+			animator = newAnimator;
+		});
+
+		return () => {
+			animator?.stop();
+		};
+	});
 
 	async function onchange(change: SpriteStateChange) {
 		if (bodyState) {
@@ -147,8 +175,8 @@
 		{/if}
 	{/snippet}
 	{#snippet preview()}
-		{#if bodyState}
-			<CharacterSpriteAnimator {bodyState} resolution={2} />
+		{#if animator}
+			<SpriteAnimatorRenderer {animator} resolution={2} />
 		{/if}
 	{/snippet}
 	{#snippet overlay()}

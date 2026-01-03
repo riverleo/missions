@@ -391,11 +391,14 @@
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
 									style:height="120px"
 								>
-									<CharacterSpriteAnimator
-										bodyState={previewBodyState}
-										faceState={previewFaceState}
-										resolution={2}
-									/>
+									{#if previewCharacter && changes?.character_body_state_type}
+										<CharacterSpriteAnimator
+											characterId={previewCharacter.id}
+											bodyStateType={changes.character_body_state_type}
+											faceStateType={changes.character_face_state_type ?? undefined}
+											resolution={2}
+										/>
+									{/if}
 								</div>
 
 								{#if !behaviorHasSpecificCharacter}

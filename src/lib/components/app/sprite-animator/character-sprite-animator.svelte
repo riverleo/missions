@@ -1,38 +1,53 @@
 <script lang="ts">
-	import type { CharacterBodyState, CharacterFaceState, ItemState, LoopMode } from '$lib/types';
+	import type { CharacterId, CharacterBodyStateType, CharacterFaceStateType, ItemState, LoopMode } from '$lib/types';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 
 	const OUTLINE_WIDTH = 10;
 
 	interface Props {
-		bodyState: CharacterBodyState;
-		faceState?: CharacterFaceState;
+		characterId: CharacterId;
+		bodyStateType: CharacterBodyStateType;
+		faceStateType?: CharacterFaceStateType;
 		heldItemState?: ItemState;
 		heldItemOffset?: { x: number; y: number };
 		heldItemScale?: number;
 		heldItemRotation?: number;
-		scale?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 		selected?: boolean;
 	}
 
 	let {
-		bodyState,
-		faceState,
+		characterId,
+		bodyStateType,
+		faceStateType,
 		heldItemState,
 		heldItemOffset,
 		heldItemScale = 1,
 		heldItemRotation = 0,
-		scale = 1,
 		resolution = 2,
 		flip = false,
 		selected = false,
 	}: Props = $props();
 
+	const { store, faceStateStore } = useCharacter();
+	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+
+	const character = $derived($store.data[characterId]);
+	const scale = $derived(character?.scale ?? 1);
+
+	const characterBody = $derived(character ? $characterBodyStore.data[character.character_body_id] : undefined);
+	const bodyStates = $derived(characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []);
+	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
+
+	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
+	const faceState = $derived(faceStateType ? faceStates.find((s) => s.type === faceStateType) : undefined);
+
 	// Body가 앞에 렌더링되는지
-	const isBodyInFront = $derived(bodyState.in_front);
+	const isBodyInFront = $derived(bodyState?.in_front ?? false);
 
 	let bodyAnimator = $state<SpriteAnimator | undefined>(undefined);
 	let faceAnimator = $state<SpriteAnimator | undefined>(undefined);
@@ -40,6 +55,12 @@
 
 	// Body animator 생성 및 재생
 	$effect(() => {
+		if (!bodyState) {
+			bodyAnimator?.stop();
+			bodyAnimator = undefined;
+			return;
+		}
+
 		const atlasName = bodyState.atlas_name;
 
 		SpriteAnimator.create(atlasName).then((newAnimator) => {
@@ -161,7 +182,7 @@
 
 <div
 	class="relative inline-flex items-center justify-center"
-	style:transform={flip ? `scale(${scale}, ${-scale})` : `scale(${scale})`}
+	style:transform={flip ? `scale(${-scale}, ${scale})` : `scale(${scale})`}
 >
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && bodyAnimator}

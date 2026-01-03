@@ -96,23 +96,10 @@
 		}
 	});
 
-	// 선택된 캐릭터 -> 바디 -> 바디 상태 조회
+	// 선택된 캐릭터
 	const selectedCharacter = $derived(
 		$store.selectedCharacterId ? $characterStore.data[$store.selectedCharacterId] : undefined
 	);
-	const selectedCharacterBody = $derived(
-		selectedCharacter ? $characterBodyStore.data[selectedCharacter.character_body_id] : undefined
-	);
-	const selectedBodyStates = $derived(
-		selectedCharacterBody ? ($bodyStateStore.data[selectedCharacterBody.id] ?? []) : []
-	);
-	const selectedCharacterBodyState = $derived(selectedBodyStates.find((s) => s.type === 'idle'));
-
-	// 선택된 캐릭터 -> 얼굴 상태 조회
-	const selectedFaceStates = $derived(
-		selectedCharacter ? ($faceStateStore.data[selectedCharacter.id] ?? []) : []
-	);
-	const selectedCharacterFaceState = $derived(selectedFaceStates.find((s) => s.type === 'idle'));
 
 	// 선택된 아이템 (from useItem)
 	const selectedItem = $derived(
@@ -258,15 +245,16 @@
 		onclick={onclickCharacterOverlay}
 	></button>
 	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-	{#if isCommandPressed && selectedCharacterBodyState}
+	{#if isCommandPressed && selectedCharacter}
 		{@const pos = mouseContainerPos()}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
 			style="left: {pos.x}px; top: {pos.y}px;"
 		>
 			<CharacterSpriteAnimator
-				bodyState={selectedCharacterBodyState}
-				faceState={selectedCharacterFaceState}
+				characterId={selectedCharacter.id}
+				bodyStateType="idle"
+				faceStateType="idle"
 				resolution={2}
 			/>
 		</div>
