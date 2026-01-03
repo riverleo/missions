@@ -249,7 +249,7 @@ export class WorldContext {
 		}
 	}
 
-	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 시작 위치에 다시 추가
+	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 리스폰 위치에 다시 추가
 	private checkWorldCharacterBounds() {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
@@ -287,7 +287,7 @@ export class WorldContext {
 		// world에서만 제거 (엔티티는 유지)
 		worldCharacterEntity.removeFromWorld();
 
-		// 1초 후 시작 위치로 다시 추가
+		// 1초 후 리스폰 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.start_x ?? 0;
 			const y = this.terrain?.start_y ?? 0;

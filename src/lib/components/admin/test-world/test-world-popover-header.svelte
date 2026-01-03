@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { IconX } from '@tabler/icons-svelte';
+	import { IconBug, IconEraser, IconX } from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
+	import { ToggleGroup } from '$lib/components/ui/toggle-group';
+	import { Toggle } from '$lib/components/ui/toggle';
 
-	const { store, setOpen, setModalPosition } = useWorldTest();
+	const { store, setOpen, setModalPosition, setDebug, setEraser } = useWorldTest();
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -50,15 +53,20 @@
 </script>
 
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
-	<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>
-		테스트 월드
-	</Button>
-	<Button
-		variant="ghost"
-		size="icon-sm"
-		{onclick}
-		class="absolute top-1/2 right-2 -translate-y-1/2"
-	>
-		<IconX class="size-4" />
-	</Button>
+	<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
+	<ButtonGroup>
+		<ToggleGroup type="multiple">
+			<Toggle size="sm" pressed={$store.debug} onPressedChange={(pressed) => setDebug(pressed)}>
+				<IconBug />
+			</Toggle>
+			<Toggle size="sm" pressed={$store.eraser} onPressedChange={(pressed) => setEraser(pressed)}>
+				<IconEraser />
+			</Toggle>
+		</ToggleGroup>
+		<ButtonGroup>
+			<Button variant="ghost" size="icon-sm" {onclick}>
+				<IconX class="size-4" />
+			</Button>
+		</ButtonGroup>
+	</ButtonGroup>
 </div>

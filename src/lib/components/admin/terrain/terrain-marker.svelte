@@ -92,7 +92,7 @@
 		>
 			<IconNorthStar class="size-4" />
 		</TooltipTrigger>
-		<TooltipContent>시작 위치</TooltipContent>
+		<TooltipContent>리스폰 위치</TooltipContent>
 	</Tooltip>
 {/if}
 
@@ -100,7 +100,7 @@
 	<button
 		type="button"
 		class="absolute inset-0 cursor-crosshair bg-transparent"
-		aria-label="시작 위치 설정"
+		aria-label="리스폰 위치 설정"
 		onclick={onclickOverlay}
 	></button>
 {/if}

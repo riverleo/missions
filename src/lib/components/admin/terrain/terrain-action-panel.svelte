@@ -153,11 +153,11 @@
 			</TooltipTrigger>
 			<TooltipContent>
 				{#if hasStartMarker}
-					시작 위치 제거
+					리스폰 위치 제거
 				{:else if $uiStore.isSettingStartMarker}
-					시작 위치 설정 중...
+					리스폰 위치 설정 중...
 				{:else}
-					시작 위치 설정
+					리스폰 위치 설정
 				{/if}
 			</TooltipContent>
 		</Tooltip>

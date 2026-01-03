@@ -4,7 +4,6 @@
 	import World from '$lib/components/app/world/world.svelte';
 	import TestWorldCommandPanel from './test-world-command-panel.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
-	import TestWorldToolbar from './test-world-toolbar.svelte';
 	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
@@ -82,7 +81,6 @@
 				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug}>
 					<TestWorldMarker />
 				</World>
-				<TestWorldToolbar />
 			{:else}
 				<div
 					class="flex items-center justify-center"
