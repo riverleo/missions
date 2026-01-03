@@ -13,6 +13,7 @@ import type {
 	TerrainId,
 	CharacterId,
 	BuildingId,
+	ItemId,
 } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
@@ -89,6 +90,7 @@ function createTestWorldStore() {
 			...state,
 			selectedCharacterId: state.selectedCharacterId === characterId ? undefined : characterId,
 			selectedBuildingId: undefined,
+			selectedItemId: undefined,
 			eraser: false,
 		}));
 	}
@@ -98,6 +100,17 @@ function createTestWorldStore() {
 			...state,
 			selectedBuildingId: state.selectedBuildingId === buildingId ? undefined : buildingId,
 			selectedCharacterId: undefined,
+			selectedItemId: undefined,
+			eraser: false,
+		}));
+	}
+
+	function selectItem(itemId: ItemId) {
+		store.update((state) => ({
+			...state,
+			selectedItemId: state.selectedItemId === itemId ? undefined : itemId,
+			selectedCharacterId: undefined,
+			selectedBuildingId: undefined,
 			eraser: false,
 		}));
 	}
@@ -112,6 +125,7 @@ function createTestWorldStore() {
 			eraser,
 			selectedCharacterId: undefined,
 			selectedBuildingId: undefined,
+			selectedItemId: undefined,
 		}));
 	}
 
@@ -229,6 +243,7 @@ function createTestWorldStore() {
 		selectTerrain,
 		selectCharacter,
 		selectBuilding,
+		selectItem,
 		setDebug,
 		setEraser,
 		setOpen,

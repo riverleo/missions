@@ -12,6 +12,7 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useItem } from '$lib/hooks/use-item';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
@@ -21,11 +22,19 @@
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
-	const { store: testWorldStore, selectTerrain, selectCharacter, selectBuilding } = useWorldTest();
+	const { store: itemStore } = useItem();
+	const {
+		store: testWorldStore,
+		selectTerrain,
+		selectCharacter,
+		selectBuilding,
+		selectItem,
+	} = useWorldTest();
 
 	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
+	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
 </script>
 
 <Command class="h-full w-full rounded-none border-none bg-transparent">
@@ -84,6 +93,23 @@
 						/>
 						<span class="flex-1 truncate">
 							{building.name || `이름없음 (${building.id.split('-')[0]})`}
+						</span>
+					</CommandItem>
+				{/each}
+			</CommandGroup>
+		{/if}
+		{#if items.length > 0}
+			<CommandGroup heading="아이템">
+				{#each items as item (item.id)}
+					<CommandItem onSelect={() => selectItem(item.id)}>
+						<IconCheck
+							class={cn(
+								'mr-2 size-4',
+								item.id === $testWorldStore.selectedItemId ? 'opacity-100' : 'opacity-0'
+							)}
+						/>
+						<span class="flex-1 truncate">
+							{item.name || `이름없음 (${item.id.split('-')[0]})`}
 						</span>
 					</CommandItem>
 				{/each}
