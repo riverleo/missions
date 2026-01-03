@@ -160,6 +160,51 @@
      - Structural sharing으로 성능 최적화
      - 중첩된 업데이트가 간단함
 
+7. **컴포넌트 독립성 유지 - 스토어를 통한 상태 공유**
+   - 컴포넌트 간 의존도를 낮추기 위해 **props 대신 스토어 직접 사용**
+   - 자식 컴포넌트가 부모로부터 콜백/상태를 props로 받지 않고, 직접 스토어에 접근하여 처리
+   - 이렇게 하면 컴포넌트를 독립적으로 사용 가능 (`<Component />` 형태로 깔끔하게)
+   - 예시:
+
+     ```typescript
+     // ❌ 나쁜 예: props로 콜백과 상태를 전달
+     // 부모 컴포넌트
+     const { store, setOpen, setPosition } = useWorldTest();
+     function ondragstart(e: MouseEvent) { /* ... */ }
+     function onclose() { setOpen(false); }
+
+     // 자식 컴포넌트
+     <Header ondragstart={ondragstart} onclose={onclose} />
+
+     // ✅ 좋은 예: 자식 컴포넌트에서 스토어 직접 사용
+     // 자식 컴포넌트
+     const { store, setOpen, setPosition } = useWorldTest();
+     function ondragstart(e: MouseEvent) { /* ... */ }
+     function onclose() { setOpen(false); }
+
+     // 부모 컴포넌트
+     <Header />  // props 없이 깔끔하게 사용
+     ```
+
+   - **적용 사례**: `TestWorldPopoverHeader` 컴포넌트는 props 없이 독립적으로 동작
+
+8. **관련 로직은 별도 파일로 분리**
+   - localStorage, 파일 I/O 등 특정 책임을 가진 로직은 별도 파일로 분리
+   - 훅 파일이 너무 커지는 것을 방지하고 관심사 분리
+   - 예시: `use-world-test-storage.ts`에 localStorage 관련 로직 분리
+     - `loadFromStorage()`, `saveToStorage()` 함수
+     - `WorldTestStoreState`, `StoredState` 타입 정의
+
+9. **상수는 constants.ts에 중앙화**
+   - 리터럴 값을 여러 곳에서 사용하지 말고 상수로 정의
+   - 도메인별로 `constants.ts` 파일 생성
+   - 예시: `src/lib/components/app/world/constants.ts`
+     ```typescript
+     export const WORLD_WIDTH = 800;
+     export const WORLD_HEIGHT = 400;
+     export const TILE_SIZE = 6;
+     ```
+
 ## 데이터베이스 규칙
 
 1. **데이터 무결성은 데이터베이스에서 보장**
