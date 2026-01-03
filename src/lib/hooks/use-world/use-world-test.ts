@@ -29,9 +29,6 @@ interface WorldTestStoreState {
 	selectedTerrainId?: TerrainId;
 	selectedCharacterId?: CharacterId;
 	selectedBuildingId?: BuildingId;
-	worlds: Record<WorldId, World>;
-	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
-	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
 	// 모달 위치 (픽셀 단위)
 	modalX: number;
 	modalY: number;
@@ -44,9 +41,6 @@ const defaultState: WorldTestStoreState = {
 	selectedTerrainId: undefined,
 	selectedCharacterId: undefined,
 	selectedBuildingId: undefined,
-	worlds: {},
-	worldCharacters: {},
-	worldBuildings: {},
 	modalX: 0,
 	modalY: 0,
 	debug: false,
@@ -63,8 +57,11 @@ interface PersistedState {
 	debug: boolean;
 }
 
-function loadFromStorage(): WorldTestStoreState {
-	if (!browser) return defaultState;
+function loadFromStorage(): {
+	uiState: WorldTestStoreState;
+	persisted: PersistedState | null;
+} {
+	if (!browser) return { uiState: defaultState, persisted: null };
 	try {
 		const saved = localStorage.getItem(STORAGE_KEY);
 		if (saved) {
@@ -72,37 +69,42 @@ function loadFromStorage(): WorldTestStoreState {
 			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
 			const world = persisted.worlds?.[TEST_WORLD_ID];
 			return {
-				...defaultState,
-				selectedTerrainId: world?.terrain_id ?? undefined,
-				worlds: persisted.worlds ?? {},
-				worldCharacters: persisted.worldCharacters ?? {},
-				worldBuildings: persisted.worldBuildings ?? {},
-				modalX: persisted.modalX ?? 0,
-				modalY: persisted.modalY ?? 0,
-				debug: persisted.debug ?? false,
+				uiState: {
+					...defaultState,
+					selectedTerrainId: world?.terrain_id ?? undefined,
+					modalX: persisted.modalX ?? 0,
+					modalY: persisted.modalY ?? 0,
+					debug: persisted.debug ?? false,
+				},
+				persisted,
 			};
 		}
 	} catch {
 		// ignore parse errors
 	}
-	return defaultState;
+	return { uiState: defaultState, persisted: null };
 }
 
 function saveToStorage(state: WorldTestStoreState) {
 	if (!browser) return;
 	try {
-		// TEST_WORLD_ID와 관련된 데이터만 필터링
-		const testWorld = state.worlds[TEST_WORLD_ID];
+		// useWorld 스토어에서 TEST_WORLD_ID와 관련된 데이터만 필터링
+		const world = useWorld();
+		const worlds = get(world.worldStore).data;
+		const worldCharacters = get(world.worldCharacterStore).data;
+		const worldBuildings = get(world.worldBuildingStore).data;
+
+		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
 		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
 
-		for (const [id, character] of Object.entries(state.worldCharacters)) {
+		for (const [id, character] of Object.entries(worldCharacters)) {
 			if (character.world_id === TEST_WORLD_ID) {
 				testWorldCharacters[id as WorldCharacterId] = character;
 			}
 		}
 
-		for (const [id, building] of Object.entries(state.worldBuildings)) {
+		for (const [id, building] of Object.entries(worldBuildings)) {
 			if (building.world_id === TEST_WORLD_ID) {
 				testWorldBuildings[id as WorldBuildingId] = building;
 			}
@@ -125,9 +127,9 @@ function saveToStorage(state: WorldTestStoreState) {
 let instance: ReturnType<typeof createTestWorldStore> | null = null;
 
 function createTestWorldStore() {
-	const state = loadFromStorage();
+	const { uiState, persisted } = loadFromStorage();
 
-	const store = writable<WorldTestStoreState>(state);
+	const store = writable<WorldTestStoreState>(uiState);
 
 	// 1초마다 localStorage에 저장
 	if (browser) {
@@ -140,10 +142,7 @@ function createTestWorldStore() {
 
 			// 같은 terrain 선택 시 선택 해제 및 world 제거
 			if (isSameTerrain) {
-				const newWorlds = { ...state.worlds };
-				delete newWorlds[TEST_WORLD_ID];
-
-				// use-world 스토어도 업데이트
+				// use-world 스토어 업데이트
 				const world = useWorld();
 				world.worldStore.update((state) =>
 					produce(state, (draft) => {
@@ -154,7 +153,6 @@ function createTestWorldStore() {
 				return {
 					...state,
 					selectedTerrainId: undefined,
-					worlds: newWorlds,
 				};
 			}
 
@@ -172,7 +170,7 @@ function createTestWorldStore() {
 				created_at: new Date().toISOString(),
 			} as World;
 
-			// use-world 스토어도 업데이트
+			// use-world 스토어 업데이트
 			const world = useWorld();
 			world.worldStore.update((state) =>
 				produce(state, (draft) => {
@@ -183,10 +181,6 @@ function createTestWorldStore() {
 			return {
 				...state,
 				selectedTerrainId: terrainId,
-				worlds: {
-					...state.worlds,
-					[TEST_WORLD_ID]: newWorld,
-				},
 			};
 		});
 	}
@@ -247,15 +241,6 @@ function createTestWorldStore() {
 			created_at: new Date().toISOString(),
 		} as WorldCharacter;
 
-		// 로컬 스토어 업데이트
-		store.update((state) => ({
-			...state,
-			worldCharacters: {
-				...state.worldCharacters,
-				[worldCharacter.id]: worldCharacter,
-			},
-		}));
-
 		// use-world 스토어 업데이트
 		const world = useWorld();
 		world.worldCharacterStore.update((state) =>
@@ -279,15 +264,6 @@ function createTestWorldStore() {
 			created_at_tick: 0,
 		} as WorldBuilding;
 
-		// 로컬 스토어 업데이트
-		store.update((state) => ({
-			...state,
-			worldBuildings: {
-				...state.worldBuildings,
-				[worldBuilding.id]: worldBuilding,
-			},
-		}));
-
 		// use-world 스토어 업데이트
 		const world = useWorld();
 		world.worldBuildingStore.update((state) =>
@@ -298,16 +274,6 @@ function createTestWorldStore() {
 	}
 
 	function removeWorldCharacter(worldCharacterId: WorldCharacterId) {
-		// 로컬 스토어 업데이트
-		store.update((state) => {
-			const newData = { ...state.worldCharacters };
-			delete newData[worldCharacterId];
-			return {
-				...state,
-				worldCharacters: newData,
-			};
-		});
-
 		// use-world 스토어 업데이트
 		const world = useWorld();
 		world.worldCharacterStore.update((state) =>
@@ -318,16 +284,6 @@ function createTestWorldStore() {
 	}
 
 	function removeWorldBuilding(worldBuildingId: WorldBuildingId) {
-		// 로컬 스토어 업데이트
-		store.update((state) => {
-			const newData = { ...state.worldBuildings };
-			delete newData[worldBuildingId];
-			return {
-				...state,
-				worldBuildings: newData,
-			};
-		});
-
 		// use-world 스토어 업데이트
 		const world = useWorld();
 		world.worldBuildingStore.update((state) =>
@@ -338,22 +294,30 @@ function createTestWorldStore() {
 	}
 
 	function init() {
-		// use-world 스토어에 테스트 데이터 주입
-		const testState = get(store);
+		// localStorage에서 테스트 데이터 로드하여 use-world 스토어에 추가
+		const { persisted } = loadFromStorage();
+		if (!persisted) return;
+
 		const world = useWorld();
 
-		world.worldStore.set({
-			status: 'success',
-			data: testState.worlds,
-		});
-		world.worldCharacterStore.set({
-			status: 'success',
-			data: testState.worldCharacters,
-		});
-		world.worldBuildingStore.set({
-			status: 'success',
-			data: testState.worldBuildings,
-		});
+		world.worldStore.update((state) =>
+			produce(state, (draft) => {
+				Object.assign(draft.data, persisted.worlds);
+				draft.status = 'success';
+			})
+		);
+		world.worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				Object.assign(draft.data, persisted.worldCharacters);
+				draft.status = 'success';
+			})
+		);
+		world.worldBuildingStore.update((state) =>
+			produce(state, (draft) => {
+				Object.assign(draft.data, persisted.worldBuildings);
+				draft.status = 'success';
+			})
+		);
 	}
 
 	return {
