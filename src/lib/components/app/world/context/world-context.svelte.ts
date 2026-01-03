@@ -70,8 +70,7 @@ export class WorldContext {
 
 	// 마우스 클릭 처리
 	private handleMouseDown(event: Matter.IEvent<Matter.MouseConstraint>) {
-		const { setSelectedEntityId, selectedEntityStore } = useWorld();
-		const selectedEntityId = get(selectedEntityStore).entityId;
+		const { setSelectedEntityId } = useWorld();
 
 		// 마우스 위치에서 모든 body 찾기 (건물 포함)
 		if (!this.mouseConstraint?.mouse) return;
@@ -90,12 +89,7 @@ export class WorldContext {
 		// 클릭한 바디의 엔티티 찾기
 		const entity = this.entities[entityBody.label];
 		if (entity) {
-			// 이미 선택된 엔티티를 다시 클릭하면 해제
-			if (selectedEntityId?.value === entity.id && selectedEntityId?.type === entity.type) {
-				setSelectedEntityId(undefined);
-			} else {
-				setSelectedEntityId({ value: entity.id, type: entity.type });
-			}
+			setSelectedEntityId({ value: entity.id, type: entity.type });
 		}
 	}
 

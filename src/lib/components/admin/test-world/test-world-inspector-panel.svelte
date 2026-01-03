@@ -21,6 +21,7 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Badge } from '$lib/components/ui/badge';
+	import { IconX } from '@tabler/icons-svelte';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -110,9 +111,10 @@
 					<div class="flex flex-col gap-2">
 						<InputGroup>
 							<InputGroupAddon>
-								<InputGroupText>좌표</InputGroupText>
+								<InputGroupText>위치</InputGroupText>
 							</InputGroupAddon>
 							<InputGroupInput value={Math.round(characterEntity.x)} disabled />
+							<InputGroupText><IconX /></InputGroupText>
 							<InputGroupInput value={Math.round(characterEntity.y)} disabled />
 						</InputGroup>
 					</div>
@@ -135,9 +137,10 @@
 					<div class="flex flex-col gap-2">
 						<InputGroup>
 							<InputGroupAddon>
-								<InputGroupText>타일</InputGroupText>
+								<InputGroupText>위치 (타일 기준)</InputGroupText>
 							</InputGroupAddon>
 							<InputGroupInput value={worldBuilding?.tile_x ?? 0} disabled />
+							<InputGroupText><IconX /></InputGroupText>
 							<InputGroupInput value={worldBuilding?.tile_y ?? 0} disabled />
 						</InputGroup>
 					</div>
@@ -156,25 +159,25 @@
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<InputGroup>
-							<InputGroupAddon>
-								<InputGroupText>좌표</InputGroupText>
-							</InputGroupAddon>
-							<InputGroupInput value={Math.round(itemEntity.x)} disabled />
-							<InputGroupInput value={Math.round(itemEntity.y)} disabled />
-						</InputGroup>
-						<InputGroup>
-							<InputGroupAddon>
-								<InputGroupText>회전</InputGroupText>
-							</InputGroupAddon>
-							<InputGroupInput
-								value={Math.round((itemEntity.angle * 180) / Math.PI)}
-								disabled
-							/>
-							<InputGroupAddon align="inline-end">
-								<InputGroupText>°</InputGroupText>
-							</InputGroupAddon>
-						</InputGroup>
+						<div class="flex gap-2">
+							<InputGroup>
+								<InputGroupAddon>
+									<InputGroupText>위치</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput value={Math.round(itemEntity.x)} disabled />
+								<InputGroupText><IconX /></InputGroupText>
+								<InputGroupInput value={Math.round(itemEntity.y)} disabled />
+							</InputGroup>
+							<InputGroup>
+								<InputGroupAddon>
+									<InputGroupText>회전</InputGroupText>
+								</InputGroupAddon>
+								<InputGroupInput value={Math.round((itemEntity.angle * 180) / Math.PI)} disabled />
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>도</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
 					</div>
 				</AccordionContent>
 			</AccordionItem>
