@@ -2,14 +2,14 @@
 	import type { Snippet } from 'svelte';
 
 	interface Props {
-		label: Snippet;
-		value: Snippet;
+		label: string;
+		children: Snippet;
 	}
 
-	let { label, value }: Props = $props();
+	let { label, children }: Props = $props();
 </script>
 
 <div class="flex items-center justify-between text-xs">
-	<div>{@render label()}</div>
-	<div class="font-bold">{@render value()}</div>
+	<div>{label}</div>
+	<div class="font-bold">{@render children()}</div>
 </div>

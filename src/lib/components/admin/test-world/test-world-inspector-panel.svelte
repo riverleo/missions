@@ -109,13 +109,8 @@
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem>
-							{#snippet label()}
-								좌표
-							{/snippet}
-							{#snippet value()}
-								({Math.round(characterEntity.x)}, {Math.round(characterEntity.y)})
-							{/snippet}
+						<TestWorldInspectorItem label="좌표">
+							({Math.round(characterEntity.x)}, {Math.round(characterEntity.y)})
 						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
@@ -135,13 +130,8 @@
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem>
-							{#snippet label()}
-								타일 좌표
-							{/snippet}
-							{#snippet value()}
-								({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
-							{/snippet}
+						<TestWorldInspectorItem label="타일 좌표">
+							({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
 						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
@@ -159,15 +149,10 @@
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
-						<TestWorldInspectorItem>
-							{#snippet label()}
-								좌표
-							{/snippet}
-							{#snippet value()}
-								({Math.round(itemEntity.x)}, {Math.round(itemEntity.y)}), {Math.round(
-									(itemEntity.angle * 180) / Math.PI
-								)}°
-							{/snippet}
+						<TestWorldInspectorItem label="좌표">
+							({Math.round(itemEntity.x)}, {Math.round(itemEntity.y)}), {Math.round(
+								(itemEntity.angle * 180) / Math.PI
+							)}°
 						</TestWorldInspectorItem>
 					</div>
 				</AccordionContent>
