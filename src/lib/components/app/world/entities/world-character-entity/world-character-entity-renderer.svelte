@@ -13,7 +13,7 @@
 
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
-	const { worldCharacterStore } = useWorld();
+	const { worldCharacterStore, selectedEntityStore } = useWorld();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.id]);
 	const character = $derived(
@@ -26,6 +26,10 @@
 	const bodyState = $derived(bodyStates.find((s) => s.type === 'idle'));
 	const faceStates = $derived(character ? ($faceStateStore.data[character.id] ?? []) : []);
 	const faceState = $derived(faceStates.find((s) => s.type === 'idle'));
+	const selected = $derived(
+		$selectedEntityStore.entityId?.value === entity.id &&
+			$selectedEntityStore.entityId?.type === 'character'
+	);
 </script>
 
 {#if bodyState}
@@ -33,6 +37,6 @@
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x}px; top: {entity.y}px;"
 	>
-		<CharacterSpriteAnimator {bodyState} {faceState} />
+		<CharacterSpriteAnimator {bodyState} {faceState} {selected} />
 	</div>
 {/if}

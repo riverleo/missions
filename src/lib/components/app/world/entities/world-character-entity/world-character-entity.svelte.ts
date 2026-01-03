@@ -17,6 +17,7 @@ const { Bodies, Body } = Matter;
 
 export class WorldCharacterEntity extends Entity {
 	readonly id: WorldCharacterId;
+	readonly type = 'character' as const;
 	readonly body: Matter.Body;
 
 	protected readonly world = useWorldContext();

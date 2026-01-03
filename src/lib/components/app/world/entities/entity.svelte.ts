@@ -11,6 +11,7 @@ export interface BodyPosition {
 
 export abstract class Entity {
 	abstract readonly id: string;
+	abstract readonly type: 'character' | 'building';
 	abstract readonly body: Matter.Body;
 
 	protected abstract readonly world: WorldContext;

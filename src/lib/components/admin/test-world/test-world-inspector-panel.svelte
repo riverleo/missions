@@ -17,7 +17,8 @@
 	} from '$lib/components/ui/input-group';
 
 	const { store } = useWorldTest();
-	const { worldCharacterStore, worldBuildingStore } = useWorld();
+	const { worldCharacterStore, worldBuildingStore, selectedEntityStore, setSelectedEntityId } =
+		useWorld();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
 
@@ -32,13 +33,35 @@
 		Object.values($worldBuildingStore.data).filter((b) => b.world_id === TEST_WORLD_ID)
 	);
 
+	// 아코디언 value (entityId 기반)
+	const accordionValue = $derived.by(() => {
+		const entityId = $selectedEntityStore.entityId;
+		if (!entityId) return 'world';
+
+		return `${entityId.type}-${entityId.value}`;
+	});
+
 	function onResetTick() {
 		// TODO: 틱 초기화 로직
 		console.log('Reset tick');
 	}
+
+	function onValueChange(value: string | undefined) {
+		if (!value || value === 'world') {
+			setSelectedEntityId(undefined);
+		} else {
+			// value는 "character-{id}" 또는 "building-{id}" 형태
+			const parts = value.split('-');
+			if (parts.length > 1) {
+				const type = parts[0] as 'character' | 'building' | 'item';
+				const id = parts.slice(1).join('-');
+				setSelectedEntityId({ value: id, type });
+			}
+		}
+	}
 </script>
 
-<Accordion type="single" value="world" class="px-3 py-1">
+<Accordion type="single" value={accordionValue} {onValueChange} class="px-3 py-1">
 	<AccordionItem value="world">
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
@@ -56,7 +79,7 @@
 		</AccordionContent>
 	</AccordionItem>
 
-	{#each worldCharacters as character, index (character.id)}
+	{#each worldCharacters as character (character.id)}
 		{@const characterData = $characterStore.data[character.character_id]}
 		<AccordionItem value={`character-${character.id}`}>
 			<AccordionTrigger class="py-3 text-xs">
@@ -66,25 +89,17 @@
 				<div class="flex flex-col gap-2">
 					<InputGroup>
 						<InputGroupAddon>
-							<InputGroupText>ID</InputGroupText>
+							<InputGroupText>타일</InputGroupText>
 						</InputGroupAddon>
-						<InputGroupInput value={character.character_id} disabled />
-					</InputGroup>
-					<InputGroup>
-						<InputGroupAddon>
-							<InputGroupText>위치</InputGroupText>
-						</InputGroupAddon>
-						<InputGroupInput
-							value={`(${Math.round(character.x)}, ${Math.round(character.y)})`}
-							disabled
-						/>
+						<InputGroupInput value={`${character.x}`} disabled />
+						<InputGroupInput value={`${character.y}`} disabled />
 					</InputGroup>
 				</div>
 			</AccordionContent>
 		</AccordionItem>
 	{/each}
 
-	{#each worldBuildings as building, index (building.id)}
+	{#each worldBuildings as building (building.id)}
 		{@const buildingData = $buildingStore.data[building.building_id]}
 		<AccordionItem value={`building-${building.id}`}>
 			<AccordionTrigger class="py-3 text-xs">
@@ -94,15 +109,10 @@
 				<div class="flex flex-col gap-2">
 					<InputGroup>
 						<InputGroupAddon>
-							<InputGroupText>ID</InputGroupText>
-						</InputGroupAddon>
-						<InputGroupInput value={building.building_id} disabled />
-					</InputGroup>
-					<InputGroup>
-						<InputGroupAddon>
 							<InputGroupText>타일</InputGroupText>
 						</InputGroupAddon>
-						<InputGroupInput value={`(${building.tile_x}, ${building.tile_y})`} disabled />
+						<InputGroupInput value={`${building.tile_x}`} disabled />
+						<InputGroupInput value={`${building.tile_y}`} disabled />
 					</InputGroup>
 				</div>
 			</AccordionContent>

@@ -3,6 +3,8 @@
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 
+	const OUTLINE_WIDTH = 10;
+
 	interface Props {
 		bodyState: CharacterBodyState;
 		faceState?: CharacterFaceState;
@@ -12,6 +14,7 @@
 		heldItemRotation?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
+		selected?: boolean;
 	}
 
 	let {
@@ -23,6 +26,7 @@
 		heldItemRotation = 0,
 		resolution = 2,
 		flip = false,
+		selected = false,
 	}: Props = $props();
 
 	// Body가 앞에 렌더링되는지
@@ -157,6 +161,37 @@
 	class="relative inline-flex items-center justify-center"
 	style:transform={flip ? 'scaleX(-1)' : undefined}
 >
+	<!-- 선택 시 외곽선 레이어 -->
+	{#if selected && bodyAnimator}
+		<div
+			class="pointer-events-none absolute -z-10"
+			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
+			style:filter="brightness(0) invert(1)"
+		>
+			{#if isBodyInFront}
+				{#if faceAnimator}
+					<div class="absolute" style:transform={faceTransform}>
+						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
+					</div>
+				{/if}
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			{:else}
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+				{#if faceAnimator}
+					<div class="absolute" style:transform={faceTransform}>
+						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
+					</div>
+				{/if}
+			{/if}
+			{#if heldItemAnimator}
+				<div class="absolute" style:transform={handTransform}>
+					<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- 실제 캐릭터 -->
 	{#if isBodyInFront}
 		{#if faceAnimator}
 			<div class="absolute" style:transform={faceTransform}>

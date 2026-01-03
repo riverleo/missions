@@ -17,6 +17,7 @@ const { Bodies } = Matter;
 
 export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
+	readonly type = 'building' as const;
 	readonly body: Matter.Body;
 	readonly size: { width: number; height: number };
 

@@ -68,6 +68,33 @@ export class WorldContext {
 		}
 	}
 
+	// 마우스 클릭 처리
+	private handleMouseDown(event: Matter.IEventCollision<Matter.MouseConstraint>) {
+		const body = event.source.body;
+		const { setSelectedEntityId, selectedEntityStore } = useWorld();
+		const selectedEntityId = get(selectedEntityStore).entityId;
+
+		if (!body) {
+			// 빈 공간 클릭 시 선택 해제
+			setSelectedEntityId(undefined);
+			return;
+		}
+
+		// 클릭한 바디가 캐릭터 엔티티인지 확인
+		const entity = this.worldCharacterEntities[body.label as WorldCharacterId];
+		if (entity) {
+			// 이미 선택된 캐릭터를 다시 클릭하면 해제
+			if (selectedEntityId?.value === entity.id && selectedEntityId?.type === 'character') {
+				setSelectedEntityId(undefined);
+			} else {
+				setSelectedEntityId({ value: entity.id, type: 'character' });
+			}
+		} else {
+			// 지형이나 다른 바디 클릭 시 선택 해제
+			setSelectedEntityId(undefined);
+		}
+	}
+
 	// 월드 로드, cleanup 함수 반환
 	load({
 		element,
@@ -116,6 +143,12 @@ export class WorldContext {
 		// 물리 시뮬레이션 시작
 		Matter.Events.on(this.engine, 'beforeUpdate', () => this.checkWorldCharacterBounds());
 		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateWorldCharacterEntityPositions());
+
+		// 마우스 클릭 감지
+		Matter.Events.on(this.mouseConstraint, 'mousedown', (event) => {
+			this.handleMouseDown(event);
+		});
+
 		Runner.run(this.runner, this.engine);
 
 		return () => {

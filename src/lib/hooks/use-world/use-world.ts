@@ -9,6 +9,7 @@ import type {
 	WorldId,
 	WorldCharacterId,
 	WorldBuildingId,
+	EntityId,
 } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
@@ -39,8 +40,16 @@ function createWorldStore() {
 		data: {},
 	});
 
+	const selectedEntityStore = writable<{ entityId: EntityId | undefined }>({
+		entityId: undefined,
+	});
+
 	function init() {
 		initialized = true;
+	}
+
+	function setSelectedEntityId(entityId: EntityId | undefined) {
+		selectedEntityStore.update((state) => ({ ...state, entityId }));
 	}
 
 	async function fetch() {
@@ -131,8 +140,10 @@ function createWorldStore() {
 		worldStore,
 		worldCharacterStore,
 		worldBuildingStore,
+		selectedEntityStore,
 		init,
 		fetch,
+		setSelectedEntityId,
 	};
 }
 

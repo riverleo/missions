@@ -26,6 +26,12 @@ export interface RecordFetchState<K extends string, T> {
 // Branded types for type-safe IDs
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
+// Entity ID with type information
+export interface EntityId {
+	value: string;
+	type: 'character' | 'building' | 'item';
+}
+
 export type ScenarioId = Brand<string, 'ScenarioId'>;
 export type ChapterId = Brand<string, 'ChapterId'>;
 export type QuestId = Brand<string, 'QuestId'>;
