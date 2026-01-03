@@ -5,6 +5,7 @@
 	import TestWorldCommandPanel from './test-world-command-panel.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
+	import TestWorldInspectorPanel from './test-world-inspector-panel.svelte';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';
@@ -71,11 +72,13 @@
 	<!-- Content -->
 	<div class="flex flex-1 gap-0">
 		<!-- 좌측: 커맨드 목록 -->
-		<div class="w-80 shrink-0 border-r">
-			<TestWorldCommandPanel />
-		</div>
+		{#if $store.commandPanelOpen}
+			<div class="w-80 shrink-0 border-r">
+				<TestWorldCommandPanel />
+			</div>
+		{/if}
 
-		<!-- 우측: 월드 -->
+		<!-- 중앙: 월드 -->
 		<div class="relative flex flex-1 items-center justify-center p-4">
 			{#if hasSelectedTerrain}
 				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug}>
@@ -90,5 +93,12 @@
 				</div>
 			{/if}
 		</div>
+
+		<!-- 우측: 인스펙터 패널 -->
+		{#if $store.inspectorPanelOpen}
+			<div class="w-80 shrink-0 border-l">
+				<TestWorldInspectorPanel />
+			</div>
+		{/if}
 	</div>
 </div>

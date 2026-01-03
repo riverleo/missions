@@ -447,6 +447,9 @@ const newId = crypto.randomUUID() as WorldId;
   - `@tabler/icons-svelte` 사용 (lucide-svelte 사용 금지)
   - Icon 접두사를 붙여서 import
   - 예: `import { IconTrash, IconPlus } from '@tabler/icons-svelte';`
+  - **아이콘에 class 속성 넣지 말기** - `class="size-4"` 같은 스타일 속성 사용 금지
+    - ❌ `<IconX class="size-4" />`
+    - ✅ `<IconX />`
 
 - **Label 사용 금지**
   - `<Label>` 컴포넌트 대신 `InputGroupText` 또는 `ButtonGroupText` 사용

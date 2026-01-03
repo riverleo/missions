@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { IconBug, IconEraser, IconX } from '@tabler/icons-svelte';
+	import { IconBug, IconEraser, IconX, IconLayoutSidebarLeftExpandFilled } from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
-	const { store, setOpen, setModalPosition, setDebug, setEraser } = useWorldTest();
+	const { store, setOpen, setModalPosition, setDebug, setEraser, setPanelsOpen } = useWorldTest();
+
+	const panelsOpen = $derived($store.commandPanelOpen && $store.inspectorPanelOpen);
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -52,19 +54,27 @@
 </script>
 
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
-	<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
-	<ButtonGroup>
+	<div class="flex items-center gap-2">
+		<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
+	</div>
+	<div class="flex items-center gap-2">
 		<ToggleGroup
+			size="sm"
 			type="multiple"
 			value={[
+				...(panelsOpen ? ['panels'] : []),
 				...($store.debug ? ['debug'] : []),
-				...($store.eraser ? ['eraser'] : [])
+				...($store.eraser ? ['eraser'] : []),
 			]}
 			onValueChange={(values) => {
+				setPanelsOpen(values.includes('panels'));
 				setDebug(values.includes('debug'));
 				setEraser(values.includes('eraser'));
 			}}
 		>
+			<ToggleGroupItem value="panels" size="sm">
+				<IconLayoutSidebarLeftExpandFilled />
+			</ToggleGroupItem>
 			<ToggleGroupItem value="debug" size="sm">
 				<IconBug />
 			</ToggleGroupItem>
@@ -74,8 +84,8 @@
 		</ToggleGroup>
 		<ButtonGroup>
 			<Button variant="ghost" size="icon-sm" {onclick}>
-				<IconX class="size-4" />
+				<IconX />
 			</Button>
 		</ButtonGroup>
-	</ButtonGroup>
+	</div>
 </div>

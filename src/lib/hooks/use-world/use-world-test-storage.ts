@@ -26,6 +26,8 @@ export interface WorldTestStoreState {
 	modalY: number;
 	debug: boolean;
 	eraser: boolean;
+	commandPanelOpen: boolean;
+	inspectorPanelOpen: boolean;
 }
 
 // localStorage 저장 포맷 (WorldTestStoreState + world 데이터)
@@ -44,6 +46,8 @@ const defaultState: WorldTestStoreState = {
 	modalY: 0,
 	debug: false,
 	eraser: false,
+	commandPanelOpen: true,
+	inspectorPanelOpen: true,
 };
 
 export function loadFromStorage(): StoredState {
@@ -63,6 +67,8 @@ export function loadFromStorage(): StoredState {
 				modalY: stored.modalY ?? defaultState.modalY,
 				debug: stored.debug ?? defaultState.debug,
 				eraser: stored.eraser ?? defaultState.eraser,
+				commandPanelOpen: stored.commandPanelOpen ?? defaultState.commandPanelOpen,
+				inspectorPanelOpen: stored.inspectorPanelOpen ?? defaultState.inspectorPanelOpen,
 				worlds: stored.worlds,
 				worldCharacters: stored.worldCharacters,
 				worldBuildings: stored.worldBuildings,

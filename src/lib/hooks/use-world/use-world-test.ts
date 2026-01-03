@@ -37,6 +37,8 @@ function createTestWorldStore() {
 		modalY: stored.modalY,
 		debug: stored.debug,
 		eraser: stored.eraser,
+		commandPanelOpen: stored.commandPanelOpen,
+		inspectorPanelOpen: stored.inspectorPanelOpen,
 	});
 
 	// 5초마다 localStorage에 저장
@@ -130,6 +132,10 @@ function createTestWorldStore() {
 
 	function setModalPosition(x: number, y: number) {
 		store.update((state) => ({ ...state, modalX: x, modalY: y }));
+	}
+
+	function setPanelsOpen(open: boolean) {
+		store.update((state) => ({ ...state, commandPanelOpen: open, inspectorPanelOpen: open }));
 	}
 
 	function addWorldCharacter(characterId: CharacterId, x: number, y: number) {
@@ -238,6 +244,7 @@ function createTestWorldStore() {
 		setEraser,
 		setOpen,
 		setModalPosition,
+		setPanelsOpen,
 		addWorldCharacter,
 		addWorldBuilding,
 		removeWorldCharacter,
