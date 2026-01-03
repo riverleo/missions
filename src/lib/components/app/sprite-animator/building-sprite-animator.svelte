@@ -62,7 +62,7 @@
 			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
 			style:filter="brightness(0) invert(1)"
 		>
-			<SpriteAnimatorRenderer animator={animator} {resolution} />
+			<SpriteAnimatorRenderer {animator} {resolution} />
 		</div>
 	{/if}
 
