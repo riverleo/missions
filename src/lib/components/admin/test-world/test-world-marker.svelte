@@ -4,22 +4,32 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useItem } from '$lib/hooks/use-item';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
-	import type { WorldCharacterId, WorldBuildingId } from '$lib/types';
+	import type { WorldCharacterId, WorldBuildingId, WorldItemId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
+	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
 
-	const { store, addWorldCharacter, addWorldBuilding, removeWorldCharacter, removeWorldBuilding } =
-		useWorldTest();
+	const {
+		store,
+		addWorldCharacter,
+		addWorldBuilding,
+		addWorldItem,
+		removeWorldCharacter,
+		removeWorldBuilding,
+		removeWorldItem,
+	} = useWorldTest();
 	const world = useWorldContext();
 	const { worldStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
 	const { store: characterStore, faceStateStore } = useCharacter();
 	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
 	const { store: buildingStore } = useBuilding();
+	const { store: itemStore } = useItem();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
@@ -104,6 +114,11 @@
 	);
 	const selectedCharacterFaceState = $derived(selectedFaceStates.find((s) => s.type === 'idle'));
 
+	// 선택된 아이템 (from useItem)
+	const selectedItem = $derived(
+		$store.selectedItemId ? $itemStore.data[$store.selectedItemId] : undefined
+	);
+
 	// 컨테이너 참조 가져오기
 	$effect(() => {
 		containerRef = document.querySelector('[data-slot="world-container"]') as HTMLElement;
@@ -132,6 +147,13 @@
 		}
 	}
 
+	function onclickItemOverlay() {
+		const pos = mouseWorldPos();
+		if (selectedItem) {
+			addWorldItem(selectedItem.id, pos.x, pos.y);
+		}
+	}
+
 	function onclickEraserOverlay() {
 		const pos = mouseWorldPos();
 
@@ -157,6 +179,14 @@
 				const halfHeight = buildingEntity.size.height / 2;
 				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
 					removeWorldBuilding(buildingEntity.id);
+					return;
+				}
+			} else if (entity.type === 'item') {
+				const itemEntity = entity as WorldItemEntity;
+				const halfWidth = itemEntity.size.width / 2;
+				const halfHeight = itemEntity.size.height / 2;
+				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
+					removeWorldItem(itemEntity.id);
 					return;
 				}
 			}
@@ -235,6 +265,29 @@
 				faceState={selectedCharacterFaceState}
 				resolution={2}
 			/>
+		</div>
+	{/if}
+{/if}
+
+<!-- 아이템 선택 시 클릭 오버레이 -->
+{#if selectedItem}
+	<button
+		type="button"
+		class="absolute inset-0 bg-transparent"
+		style="cursor: {isCommandPressed ? 'none' : 'inherit'}; pointer-events: {isCommandPressed
+			? 'auto'
+			: 'none'};"
+		aria-label="아이템 배치"
+		onclick={onclickItemOverlay}
+	></button>
+	<!-- 커맨드 키 누를 때 아이템 미리보기 -->
+	{#if isCommandPressed}
+		{@const pos = mouseContainerPos()}
+		<div
+			class="pointer-events-none absolute flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded bg-white/20 opacity-70"
+			style="left: {pos.x}px; top: {pos.y}px;"
+		>
+			<span class="text-xs font-bold text-white">{selectedItem.name.charAt(0)}</span>
 		</div>
 	{/if}
 {/if}

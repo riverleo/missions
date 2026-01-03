@@ -19,11 +19,13 @@ export const CATEGORY_WALL = 0x0001;
 export const CATEGORY_TERRAIN = 0x0002;
 export const CATEGORY_CHARACTER = 0x0004;
 export const CATEGORY_BUILDING = 0x0008;
+export const CATEGORY_ITEM = 0x0010;
 
 // 디버그 렌더링 스타일
 export const DEBUG_TERRAIN_FILL_STYLE = 'rgba(255, 0, 0, 0.5)';
 export const DEBUG_CHARACTER_FILL_STYLE = 'rgba(0, 255, 0, 0.5)';
 export const DEBUG_BUILDING_FILL_STYLE = 'rgba(0, 0, 255, 0.5)';
+export const DEBUG_ITEM_FILL_STYLE = 'rgba(255, 255, 0, 0.5)';
 
 // 플래닝 타일 스타일
 export const PLANNING_TILE_FILL_STYLE = 'rgba(34, 197, 94, 0.8)';

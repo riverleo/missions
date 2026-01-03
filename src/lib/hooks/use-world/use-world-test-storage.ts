@@ -4,9 +4,11 @@ import type {
 	World,
 	WorldCharacter,
 	WorldBuilding,
+	WorldItem,
 	WorldId,
 	WorldCharacterId,
 	WorldBuildingId,
+	WorldItemId,
 	TerrainId,
 	CharacterId,
 	BuildingId,
@@ -37,6 +39,7 @@ export interface StoredState extends WorldTestStoreState {
 	worlds?: Record<WorldId, World>;
 	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
+	worldItems?: Record<WorldItemId, WorldItem>;
 }
 
 const defaultState: WorldTestStoreState = {
@@ -76,6 +79,7 @@ export function loadFromStorage(): StoredState {
 				worlds: stored.worlds,
 				worldCharacters: stored.worldCharacters,
 				worldBuildings: stored.worldBuildings,
+				worldItems: stored.worldItems,
 			};
 		}
 	} catch {
@@ -92,10 +96,12 @@ export function saveToStorage(state: WorldTestStoreState) {
 		const worlds = get(world.worldStore).data;
 		const worldCharacters = get(world.worldCharacterStore).data;
 		const worldBuildings = get(world.worldBuildingStore).data;
+		const worldItems = get(world.worldItemStore).data;
 
 		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
 		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
+		const testWorldItems: Record<WorldItemId, WorldItem> = {};
 
 		for (const [id, character] of Object.entries(worldCharacters)) {
 			if (character.world_id === TEST_WORLD_ID) {
@@ -109,11 +115,18 @@ export function saveToStorage(state: WorldTestStoreState) {
 			}
 		}
 
+		for (const [id, item] of Object.entries(worldItems)) {
+			if (item.world_id === TEST_WORLD_ID) {
+				testWorldItems[id as WorldItemId] = item;
+			}
+		}
+
 		const stored: StoredState = {
 			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
 			worldCharacters: testWorldCharacters,
 			worldBuildings: testWorldBuildings,
+			worldItems: testWorldItems,
 		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 	} catch (e) {

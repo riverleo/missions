@@ -14,6 +14,7 @@
 		WorldBuildingEntityRenderer,
 		type WorldBuildingEntity,
 	} from './entities/world-building-entity';
+	import { WorldItemEntityRenderer, type WorldItemEntity } from './entities/world-item-entity';
 	import WorldBlueprint from './world-blueprint.svelte';
 	import { cn } from '$lib/utils';
 
@@ -95,6 +96,8 @@
 				<WorldBuildingEntityRenderer entity={entity as WorldBuildingEntity} />
 			{:else if entity.type === 'character'}
 				<WorldCharacterEntityRenderer entity={entity as WorldCharacterEntity} />
+			{:else if entity.type === 'item'}
+				<WorldItemEntityRenderer entity={entity as WorldItemEntity} />
 			{/if}
 		{/each}
 	</div>

@@ -7,6 +7,8 @@ import type {
 	WorldCharacterId,
 	WorldBuilding,
 	WorldBuildingId,
+	WorldItem,
+	WorldItemId,
 	WorldId,
 } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
@@ -16,6 +18,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
+import { WorldItemEntity } from '../entities/world-item-entity';
 import { Entity } from '../entities/entity.svelte';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
@@ -224,7 +227,8 @@ export class WorldContext {
 	// 엔티티 동기화
 	syncEntities(
 		worldCharacters: Record<WorldCharacterId, WorldCharacter>,
-		worldBuildings: Record<WorldBuildingId, WorldBuilding>
+		worldBuildings: Record<WorldBuildingId, WorldBuilding>,
+		worldItems: Record<WorldItemId, WorldItem>
 	) {
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.entities)) {
@@ -232,8 +236,9 @@ export class WorldContext {
 				entity.type === 'character' && !worldCharacters[entity.id as WorldCharacterId];
 			const isBuildingRemoved =
 				entity.type === 'building' && !worldBuildings[entity.id as WorldBuildingId];
+			const isItemRemoved = entity.type === 'item' && !worldItems[entity.id as WorldItemId];
 
-			if (isCharacterRemoved || isBuildingRemoved) {
+			if (isCharacterRemoved || isBuildingRemoved || isItemRemoved) {
 				entity.removeFromWorld();
 				delete this.entities[entity.id];
 			}
@@ -261,6 +266,19 @@ export class WorldContext {
 					this.entities[building.id] = entity;
 				} catch (error) {
 					console.warn('Skipping building creation:', error);
+				}
+			}
+		}
+
+		// 새 아이템 엔티티 추가
+		for (const item of Object.values(worldItems)) {
+			if (!this.entities[item.id]) {
+				try {
+					const entity = new WorldItemEntity(item.id);
+					entity.addToWorld();
+					this.entities[item.id] = entity;
+				} catch (error) {
+					console.warn('Skipping item creation:', error);
 				}
 			}
 		}

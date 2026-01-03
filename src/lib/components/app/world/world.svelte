@@ -7,6 +7,8 @@
 		WorldBuildingId,
 		WorldCharacter,
 		WorldCharacterId,
+		WorldItem,
+		WorldItemId,
 	} from '$lib/types';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldContext } from './context';
@@ -37,7 +39,7 @@
 
 	const worldContext = new WorldContext(worldId, debug);
 	worldContextRef = worldContext;
-	const { worldStore, worldCharacterStore, worldBuildingStore } = useWorld();
+	const { worldStore, worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
@@ -66,7 +68,7 @@
 		worldContext.setDebugEntities(debug);
 	});
 
-	// worldBuildings 및 worldCharacters 변경 시 엔티티 동기화
+	// worldBuildings, worldCharacters, worldItems 변경 시 엔티티 동기화
 	$effect(() => {
 		const buildings = Object.values($worldBuildingStore.data)
 			.filter((b) => b.world_id === worldId)
@@ -88,7 +90,17 @@
 				{} as Record<WorldCharacterId, WorldCharacter>
 			);
 
-		worldContext.syncEntities(characters, buildings);
+		const items = Object.values($worldItemStore.data)
+			.filter((i) => i.world_id === worldId)
+			.reduce(
+				(acc, i) => {
+					acc[i.id] = i;
+					return acc;
+				},
+				{} as Record<WorldItemId, WorldItem>
+			);
+
+		worldContext.syncEntities(characters, buildings, items);
 	});
 
 	setWorldContext(worldContext);

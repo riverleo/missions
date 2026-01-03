@@ -4,8 +4,10 @@ import type {
 	World,
 	WorldCharacter,
 	WorldBuilding,
+	WorldItem,
 	WorldCharacterId,
 	WorldBuildingId,
+	WorldItemId,
 	WorldId,
 	UserId,
 	PlayerId,
@@ -206,6 +208,40 @@ function createTestWorldStore() {
 		);
 	}
 
+	function addWorldItem(itemId: ItemId, x: number, y: number, rotation: number = 0) {
+		const worldItem: WorldItem = {
+			id: crypto.randomUUID() as WorldItemId,
+			user_id: crypto.randomUUID() as UserId,
+			player_id: TEST_PLAYER_ID,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: TEST_WORLD_ID,
+			item_id: itemId,
+			x,
+			y,
+			rotation,
+			created_at: new Date().toISOString(),
+			created_at_tick: 0,
+		} as WorldItem;
+
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldItemStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[worldItem.id] = worldItem;
+			})
+		);
+	}
+
+	function removeWorldItem(worldItemId: WorldItemId) {
+		// use-world 스토어 업데이트
+		const world = useWorld();
+		world.worldItemStore.update((state) =>
+			produce(state, (draft) => {
+				delete draft.data[worldItemId];
+			})
+		);
+	}
+
 	function init() {
 		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
@@ -236,6 +272,15 @@ function createTestWorldStore() {
 				})
 			);
 		}
+
+		if (stored.worldItems) {
+			world.worldItemStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldItems);
+					draft.status = 'success';
+				})
+			);
+		}
 	}
 
 	return {
@@ -251,8 +296,10 @@ function createTestWorldStore() {
 		setPanelsOpen,
 		addWorldCharacter,
 		addWorldBuilding,
+		addWorldItem,
 		removeWorldCharacter,
 		removeWorldBuilding,
+		removeWorldItem,
 		init,
 	};
 }

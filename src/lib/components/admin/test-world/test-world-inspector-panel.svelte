@@ -18,6 +18,7 @@
 		InputGroupInput,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
+	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -92,7 +93,10 @@
 				: undefined}
 			<AccordionItem value={`character-${characterEntity.id}`}>
 				<AccordionTrigger class="py-3 text-xs">
-					{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
+					<div class="flex items-center gap-2">
+						<Badge variant="secondary">캐릭터</Badge>
+						{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
+					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
@@ -114,7 +118,10 @@
 				: undefined}
 			<AccordionItem value={`building-${buildingEntity.id}`}>
 				<AccordionTrigger class="py-3 text-xs">
-					{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
+					<div class="flex items-center gap-2">
+						<Badge variant="secondary">건물</Badge>
+						{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
+					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
 					<div class="flex flex-col gap-2">
