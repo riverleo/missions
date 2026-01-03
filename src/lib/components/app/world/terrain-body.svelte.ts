@@ -7,6 +7,7 @@ import {
 	CATEGORY_TERRAIN,
 	CATEGORY_CHARACTER,
 	CATEGORY_BUILDING,
+	CATEGORY_ITEM,
 	DEBUG_TERRAIN_FILL_STYLE,
 	HIDDEN_BODY_STYLE,
 } from './constants';
@@ -63,7 +64,7 @@ export class TerrainBody {
 			angle,
 			collisionFilter: {
 				category: CATEGORY_TERRAIN,
-				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING | CATEGORY_ITEM,
 			},
 			render: HIDDEN_BODY_STYLE,
 		});
@@ -77,7 +78,7 @@ export class TerrainBody {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_TERRAIN,
-				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING | CATEGORY_ITEM,
 			},
 			render: HIDDEN_BODY_STYLE,
 		});
@@ -89,7 +90,7 @@ export class TerrainBody {
 			render: HIDDEN_BODY_STYLE,
 			collisionFilter: {
 				category: CATEGORY_WALL,
-				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING,
+				mask: CATEGORY_CHARACTER | CATEGORY_BUILDING | CATEGORY_ITEM,
 			},
 		};
 
