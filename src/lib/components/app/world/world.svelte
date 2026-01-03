@@ -103,7 +103,7 @@
 		class="flex flex-col items-center justify-center"
 		style="width: {width}px; height: {height}px;"
 	>
-		<p class="text-sm text-muted-foreground">존재하지 않는 세계입니다.</p>
+		<p class="text-sm text-muted-foreground">존재하지 않는 월드입니다.</p>
 		<p class="text-sm text-muted">아이디 - {worldId}</p>
 	</div>
 {/if}

@@ -112,7 +112,7 @@ export function saveToStorage(state: WorldTestStoreState) {
 			worldBuildings: testWorldBuildings,
 		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-	} catch {
-		// ignore storage errors
+	} catch (e) {
+		console.error(e);
 	}
 }

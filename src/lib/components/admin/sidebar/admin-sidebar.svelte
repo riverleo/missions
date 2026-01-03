@@ -50,7 +50,7 @@
 			],
 		},
 		{
-			label: '세계',
+			label: '월드',
 			items: [
 				{ title: '지형', href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined },
 				{

@@ -28,18 +28,7 @@ let instance: ReturnType<typeof createTestWorldStore> | null = null;
 function createTestWorldStore() {
 	const stored = loadFromStorage();
 
-	const store = writable<WorldTestStoreState>({
-		open: stored.open,
-		selectedTerrainId: stored.selectedTerrainId,
-		selectedCharacterId: stored.selectedCharacterId,
-		selectedBuildingId: stored.selectedBuildingId,
-		modalX: stored.modalX,
-		modalY: stored.modalY,
-		debug: stored.debug,
-		eraser: stored.eraser,
-		commandPanelOpen: stored.commandPanelOpen,
-		inspectorPanelOpen: stored.inspectorPanelOpen,
-	});
+	const store = writable<WorldTestStoreState>(stored);
 
 	// 5초마다 localStorage에 저장
 	if (browser) {

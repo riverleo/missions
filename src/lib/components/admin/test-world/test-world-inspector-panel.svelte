@@ -6,8 +6,13 @@
 		AccordionItem,
 		AccordionTrigger,
 	} from '$lib/components/ui/accordion';
-	import { Button } from '$lib/components/ui/button';
-	import { ItemGroup, Item, ItemContent, ItemActions } from '$lib/components/ui/item';
+	import {
+		InputGroup,
+		InputGroupAddon,
+		InputGroupText,
+		InputGroupInput,
+		InputGroupButton,
+	} from '$lib/components/ui/input-group';
 
 	const { store } = useWorldTest();
 
@@ -23,20 +28,19 @@
 	}
 </script>
 
-<div class="flex flex-col p-4">
-	<Accordion type="single" value="world">
-		<AccordionItem value="world2">
-			<AccordionTrigger>월드</AccordionTrigger>
-			<AccordionContent>
-				<ItemGroup>
-					<Item size="sm" class="p-0">
-						<ItemContent>틱: {currentTick}</ItemContent>
-						<ItemActions>
-							<Button variant="ghost" size="sm" onclick={onResetTick}>초기화</Button>
-						</ItemActions>
-					</Item>
-				</ItemGroup>
-			</AccordionContent>
-		</AccordionItem>
-	</Accordion>
-</div>
+<Accordion type="single" value="world" class="px-4">
+	<AccordionItem value="world">
+		<AccordionTrigger>월드 정보</AccordionTrigger>
+		<AccordionContent>
+			<InputGroup>
+				<InputGroupAddon>
+					<InputGroupText>틱</InputGroupText>
+				</InputGroupAddon>
+				<InputGroupInput type="number" value={currentTick} disabled />
+				<InputGroupAddon align="inline-end">
+					<InputGroupButton onclick={onResetTick}>초기화</InputGroupButton>
+				</InputGroupAddon>
+			</InputGroup>
+		</AccordionContent>
+	</AccordionItem>
+</Accordion>
