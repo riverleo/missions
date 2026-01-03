@@ -10,6 +10,7 @@ import type {
 	WorldItem,
 	WorldItemId,
 	WorldId,
+	EntityId,
 } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
@@ -42,7 +43,7 @@ export class WorldContext {
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
-	private respawningWorldCharacterIds = new Set<WorldCharacterId>();
+	private respawningEntityIds: EntityId[] = [];
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -141,9 +142,9 @@ export class WorldContext {
 		// 물리 시뮬레이션 시작
 		Matter.Events.on(this.engine, 'beforeUpdate', () => {
 			this.syncEntities();
-			this.checkWorldCharacterBounds();
+			this.checkEntityBounds();
 		});
-		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateWorldCharacterEntityPositions());
+		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateEntityPositions());
 
 		// 마우스 클릭 감지
 		Matter.Events.on(this.mouseConstraint, 'mousedown', (event) => {
@@ -289,7 +290,7 @@ export class WorldContext {
 	}
 
 	// Matter.js body 위치를 엔티티 state에 동기화
-	private updateWorldCharacterEntityPositions() {
+	private updateEntityPositions() {
 		for (const entity of Object.values(this.entities)) {
 			if (entity.type === 'character' || entity.type === 'item') {
 				entity.updatePosition();
@@ -297,28 +298,28 @@ export class WorldContext {
 		}
 	}
 
-	// 바디가 경계를 벗어나면 제거 후 0.2초 뒤 리스폰 위치에 다시 추가
-	private checkWorldCharacterBounds() {
+	// 바디가 경계를 벗어나면 제거 후 1초 뒤 리스폰 위치에 다시 추가
+	private checkEntityBounds() {
 		const { width, height } = this.terrainBody;
 		if (width === 0 || height === 0) return;
 
 		for (const entity of Object.values(this.entities)) {
-			if (
-				entity.type === 'character' &&
-				this.isOutOfWorldCharacterEntityBounds(entity as WorldCharacterEntity)
-			) {
-				this.respawnWorldCharacterEntity(entity.id as WorldCharacterId);
-			}
+			if (!this.isOutOfEntityBounds(entity)) continue;
+
+			// 리스폰 중인 엔티티는 건너뛰기
+			const isRespawning = this.respawningEntityIds.some(
+				(id) => id.value === entity.id && id.type === entity.type
+			);
+			if (isRespawning) continue;
+
+			this.respawnEntity({ value: entity.id, type: entity.type });
 		}
 	}
 
-	private isOutOfWorldCharacterEntityBounds(worldCharacterEntity: WorldCharacterEntity) {
-		const characterBody = worldCharacterEntity.characterBody;
-		if (!characterBody) return false;
-
-		const halfWidth = characterBody.width / 2;
-		const halfHeight = characterBody.height / 2;
-		const { x, y } = worldCharacterEntity.body.position;
+	private isOutOfEntityBounds(entity: Entity) {
+		const halfWidth = entity.width / 2;
+		const halfHeight = entity.height / 2;
+		const { x, y } = entity.body.position;
 
 		return (
 			x - halfWidth < 0 ||
@@ -328,33 +329,38 @@ export class WorldContext {
 		);
 	}
 
-	private respawnWorldCharacterEntity(worldCharacterId: WorldCharacterId) {
-		if (this.respawningWorldCharacterIds.has(worldCharacterId)) return;
-		this.respawningWorldCharacterIds.add(worldCharacterId);
+	private respawnEntity(entityId: EntityId) {
+		const isRespawning = this.respawningEntityIds.some(
+			(id) => id.value === entityId.value && id.type === entityId.type
+		);
+		if (isRespawning) return;
 
-		const worldCharacterEntity = this.entities[worldCharacterId] as WorldCharacterEntity;
-		if (!worldCharacterEntity) return;
+		this.respawningEntityIds.push(entityId);
 
-		// world에서만 제거 (엔티티는 유지)
-		worldCharacterEntity.removeFromWorld();
+		const entity = this.entities[entityId.value];
+		if (!entity) return;
 
 		// 1초 후 리스폰 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.start_x ?? 0;
 			const y = this.terrain?.start_y ?? 0;
 
+			entity.removeFromWorld();
+
 			// Body 위치 재설정
-			Body.setPosition(worldCharacterEntity.body, { x, y });
+			Body.setPosition(entity.body, { x, y });
 
 			// position state 업데이트
-			worldCharacterEntity.x = x;
-			worldCharacterEntity.y = y;
-			worldCharacterEntity.angle = 0;
+			entity.x = x;
+			entity.y = y;
+			entity.angle = 0;
 
 			// 다시 world에 추가
-			worldCharacterEntity.addToWorld();
+			entity.addToWorld();
 
-			this.respawningWorldCharacterIds.delete(worldCharacterId);
+			this.respawningEntityIds = this.respawningEntityIds.filter(
+				(id) => id.value !== entityId.value || id.type !== entityId.type
+			);
 		}, 1000);
 	}
 }
