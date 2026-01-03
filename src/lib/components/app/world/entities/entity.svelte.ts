@@ -3,12 +3,6 @@ import type { WorldContext } from '../context';
 
 const { Composite } = Matter;
 
-export interface BodyPosition {
-	x: number;
-	y: number;
-	angle: number;
-}
-
 export abstract class Entity {
 	abstract readonly id: string;
 	abstract readonly type: 'character' | 'building' | 'item';
@@ -20,6 +14,8 @@ export abstract class Entity {
 	x = $state(0);
 	y = $state(0);
 	angle = $state(0);
+	width = $state(0);
+	height = $state(0);
 
 	updatePosition(): void {
 		const newX = this.body.position.x;

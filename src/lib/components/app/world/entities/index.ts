@@ -1,4 +1,3 @@
-export type { BodyPosition } from './entity.svelte';
 export { Entity } from './entity.svelte';
 export { WorldBuildingEntity } from './world-building-entity';
 export { WorldBuildingEntityRenderer } from './world-building-entity';

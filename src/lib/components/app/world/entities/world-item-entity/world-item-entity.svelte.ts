@@ -36,6 +36,10 @@ export class WorldItemEntity extends Entity {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${id}`);
 		}
 
+		// 초기 크기 설정
+		this.width = item.width;
+		this.height = item.height;
+
 		// 바디 생성
 		this.body = this.createBody(item.width, item.height, worldItem.x, worldItem.y);
 
@@ -70,12 +74,12 @@ export class WorldItemEntity extends Entity {
 		const item = this.item;
 		if (!item) return;
 
-		// bounds에서 현재 바디 크기 추출
-		const currentWidth = this.body.bounds.max.x - this.body.bounds.min.x;
-		const currentHeight = this.body.bounds.max.y - this.body.bounds.min.y;
+		// 스토어 값이 실제로 변경되었는지 확인
+		const widthDiff = Math.abs(this.width - item.width);
+		const heightDiff = Math.abs(this.height - item.height);
 
 		// 크기가 변경되었으면 바디 재생성
-		if (Math.abs(currentWidth - item.width) > 0.01 || Math.abs(currentHeight - item.height) > 0.01) {
+		if (widthDiff > 0.01 || heightDiff > 0.01) {
 			const currentPosition = this.body.position;
 			const currentVelocity = this.body.velocity;
 			const currentAngle = this.body.angle;
@@ -92,6 +96,10 @@ export class WorldItemEntity extends Entity {
 
 			// 월드에 새 바디 추가
 			Matter.Composite.add(this.world.engine.world, this.body);
+
+			// 크기 업데이트
+			this.width = item.width;
+			this.height = item.height;
 		}
 	}
 

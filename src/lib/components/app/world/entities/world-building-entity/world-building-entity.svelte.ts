@@ -41,6 +41,10 @@ export class WorldBuildingEntity extends Entity {
 		const width = building.tile_cols * TILE_SIZE;
 		const height = building.tile_rows * TILE_SIZE;
 
+		// 초기 크기 설정
+		this.width = width;
+		this.height = height;
+
 		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
 		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
 		const leftTopY = worldBuilding.tile_y * TILE_SIZE;
@@ -86,12 +90,12 @@ export class WorldBuildingEntity extends Entity {
 		const newWidth = building.tile_cols * TILE_SIZE;
 		const newHeight = building.tile_rows * TILE_SIZE;
 
-		// bounds에서 현재 바디 크기 추출
-		const currentWidth = this.body.bounds.max.x - this.body.bounds.min.x;
-		const currentHeight = this.body.bounds.max.y - this.body.bounds.min.y;
+		// 스토어 값이 실제로 변경되었는지 확인
+		const widthDiff = Math.abs(this.width - newWidth);
+		const heightDiff = Math.abs(this.height - newHeight);
 
 		// 크기가 변경되었으면 바디 재생성
-		if (Math.abs(currentWidth - newWidth) > 0.01 || Math.abs(currentHeight - newHeight) > 0.01) {
+		if (widthDiff > 0.01 || heightDiff > 0.01) {
 			// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
 			const leftTopX = worldBuilding.tile_x * TILE_SIZE;
 			const leftTopY = worldBuilding.tile_y * TILE_SIZE;
@@ -107,6 +111,10 @@ export class WorldBuildingEntity extends Entity {
 			// 위치 업데이트
 			this.x = x;
 			this.y = y;
+
+			// 크기 업데이트
+			this.width = newWidth;
+			this.height = newHeight;
 
 			// 월드에 새 바디 추가
 			Matter.Composite.add(this.world.engine.world, this.body);
