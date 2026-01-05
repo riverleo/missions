@@ -192,17 +192,29 @@ export class WorldContext {
 			render: { visible: this.debug },
 		};
 
-		// 상단 벽
-		const topWall = Bodies.rectangle(width / 2, -thickness / 2, width, thickness, {
-			...wallOptions,
-			label: 'boundary-top',
-		});
+		// 상단 벽 (좌우로 두께만큼 더 넓게)
+		const topWall = Bodies.rectangle(
+			width / 2,
+			-thickness / 2,
+			width + thickness * 2,
+			thickness,
+			{
+				...wallOptions,
+				label: 'boundary-top',
+			}
+		);
 
-		// 하단 벽
-		const bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, {
-			...wallOptions,
-			label: 'boundary-bottom',
-		});
+		// 하단 벽 (좌우로 두께만큼 더 넓게)
+		const bottomWall = Bodies.rectangle(
+			width / 2,
+			height + thickness / 2,
+			width + thickness * 2,
+			thickness,
+			{
+				...wallOptions,
+				label: 'boundary-bottom',
+			}
+		);
 
 		// 좌측 벽
 		const leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, {

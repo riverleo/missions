@@ -32,7 +32,10 @@
 {#if character}
 	<!-- 경로 시각화는 월드 레벨에서 렌더링 -->
 	{#if entity.path.length > 0}
-		<svg class="pointer-events-none absolute top-0 left-0" style="width: 100%; height: 100%;">
+		<svg
+			class="pointer-events-none absolute top-0 left-0 opacity-30"
+			style="width: 100%; height: 100%;"
+		>
 			<path d={pathString} stroke="white" stroke-width="1" fill="none" />
 		</svg>
 	{/if}
@@ -46,6 +49,7 @@
 			characterId={character.id}
 			bodyStateType="idle"
 			faceStateType="idle"
+			flip={entity.direction === 'right'}
 			{selected}
 		/>
 	</div>

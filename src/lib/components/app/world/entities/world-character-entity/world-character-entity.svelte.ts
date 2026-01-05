@@ -13,6 +13,7 @@ import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
 import type { PathPoint } from '../../pathfinder';
+import type { WorldCharacterEntityDirection } from './index';
 
 const { Bodies, Body, Composite } = Matter;
 
@@ -21,6 +22,7 @@ export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
 	body: Matter.Body;
 	path: PathPoint[] = $state([]);
+	direction: WorldCharacterEntityDirection = $state('right');
 
 	protected readonly world = useWorldContext();
 	protected get debugFillStyle(): string {
@@ -148,6 +150,13 @@ export class WorldCharacterEntity extends Entity {
 		const dx = targetPoint.x - currentPos.x;
 		const dy = targetPoint.y - currentPos.y;
 		const distance = Math.sqrt(dx * dx + dy * dy);
+
+		// 이동 방향 업데이트
+		if (dx > 0) {
+			this.direction = 'right';
+		} else if (dx < 0) {
+			this.direction = 'left';
+		}
 
 		// 도착 판정 거리
 		const arrivalThreshold = 5;
