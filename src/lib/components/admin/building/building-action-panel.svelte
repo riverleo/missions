@@ -22,6 +22,8 @@
 
 	let tileCols = $state(building.tile_cols === 0 ? '' : building.tile_cols.toString());
 	let tileRows = $state(building.tile_rows === 0 ? '' : building.tile_rows.toString());
+	let colliderOffsetX = $state(building.collider_offset_x.toString());
+	let colliderOffsetY = $state(building.collider_offset_y.toString());
 	let scale = $state(building.scale.toString());
 
 	// building prop 변경 시 상태 동기화
@@ -32,20 +34,41 @@
 		tileRows = building.tile_rows === 0 ? '' : building.tile_rows.toString();
 	});
 	$effect(() => {
+		colliderOffsetX = building.collider_offset_x.toString();
+	});
+	$effect(() => {
+		colliderOffsetY = building.collider_offset_y.toString();
+	});
+	$effect(() => {
 		scale = building.scale.toString();
 	});
 
-	async function updateTileSize() {
-		const newCols = parseInt(tileCols) || 1;
-		const newRows = parseInt(tileRows) || 1;
-		if (newCols === building.tile_cols && newRows === building.tile_rows) return;
-		await admin.update(building.id, { tile_cols: newCols, tile_rows: newRows });
+	async function updateCollider() {
+		const newTileCols = parseInt(tileCols) || 1;
+		const newTileRows = parseInt(tileRows) || 1;
+		const newColliderOffsetX = parseFloat(colliderOffsetX) || 0;
+		const newColliderOffsetY = parseFloat(colliderOffsetY) || 0;
+
+		if (
+			newTileCols === building.tile_cols &&
+			newTileRows === building.tile_rows &&
+			newColliderOffsetX === building.collider_offset_x &&
+			newColliderOffsetY === building.collider_offset_y
+		)
+			return;
+
+		await admin.update(building.id, {
+			tile_cols: newTileCols,
+			tile_rows: newTileRows,
+			collider_offset_x: newColliderOffsetX,
+			collider_offset_y: newColliderOffsetY,
+		});
 	}
 
-	function onkeydownTileSize(e: KeyboardEvent) {
+	function onkeydownCollider(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
-			updateTileSize();
+			updateCollider();
 		}
 	}
 
@@ -98,7 +121,7 @@
 			min="1"
 			class="w-16"
 			placeholder="가로"
-			onkeydown={onkeydownTileSize}
+			onkeydown={onkeydownCollider}
 		/>
 		<InputGroupText><IconX /></InputGroupText>
 		<InputGroupInput
@@ -107,7 +130,23 @@
 			min="1"
 			class="w-16"
 			placeholder="세로"
-			onkeydown={onkeydownTileSize}
+			onkeydown={onkeydownCollider}
+		/>
+		<InputGroupText>오프셋</InputGroupText>
+		<InputGroupInput
+			bind:value={colliderOffsetX}
+			type="number"
+			class="w-16"
+			placeholder="X"
+			onkeydown={onkeydownCollider}
+		/>
+		<InputGroupText><IconX /></InputGroupText>
+		<InputGroupInput
+			bind:value={colliderOffsetY}
+			type="number"
+			class="w-16"
+			placeholder="Y"
+			onkeydown={onkeydownCollider}
 		/>
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
@@ -121,7 +160,7 @@
 				</TooltipTrigger>
 				<TooltipContent>그리드 확인하기</TooltipContent>
 			</Tooltip>
-			<InputGroupButton onclick={updateTileSize} variant="ghost">저장</InputGroupButton>
+			<InputGroupButton onclick={updateCollider} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

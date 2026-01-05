@@ -66,7 +66,9 @@
 	{/snippet}
 	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && building}
-			<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
+			<div style="transform: translate({-building.collider_offset_x}px, {-building.collider_offset_y}px);">
+				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
+			</div>
 		{/if}
 	{/snippet}
 </SpriteStateItem>
