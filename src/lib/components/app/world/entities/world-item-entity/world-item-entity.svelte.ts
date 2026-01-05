@@ -11,6 +11,7 @@ import {
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
+import type { BeforeUpdateEvent } from '../../context';
 
 const { Bodies } = Matter;
 
@@ -119,5 +120,9 @@ export class WorldItemEntity extends Entity {
 	saveToStore(): void {
 		// 아이템은 물리 시뮬레이션으로 위치가 변경되지만 DB에 저장하지 않음
 		// (게임 로직에서 필요시 구현)
+	}
+
+	update(event: BeforeUpdateEvent): void {
+		// 아이템은 물리 엔진이 자동으로 처리하므로 update 로직 없음
 	}
 }

@@ -22,6 +22,7 @@ import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';
 import { Entity } from '../entities/entity.svelte';
+import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
@@ -57,8 +58,6 @@ export class WorldContext {
 		this.event = new WorldEvent(this, this.camera);
 		this.blueprint = new WorldContextBlueprint(this);
 		this.pathfinder = new Pathfinder(WORLD_WIDTH, WORLD_HEIGHT);
-		// 모든 타일을 walkable로 초기화
-		this.pathfinder.reset();
 	}
 
 	private get terrain(): Terrain | null | undefined {
@@ -146,8 +145,9 @@ export class WorldContext {
 		Render.run(this.render);
 
 		// 물리 시뮬레이션 시작
-		Matter.Events.on(this.engine, 'beforeUpdate', () => {
+		Matter.Events.on(this.engine, 'beforeUpdate', (event) => {
 			this.syncEntities();
+			this.updateEntities(event as BeforeUpdateEvent);
 			this.checkEntityBounds();
 		});
 		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateEntityPositions());
@@ -185,11 +185,19 @@ export class WorldContext {
 		// 기존 bodies 제거
 		Composite.clear(this.engine.world, false);
 
+		// pathfinder 초기화
+		this.pathfinder.reset();
+
 		// 지형 로드
 		this.terrainBody.load(this.terrain).then(() => {
 			if (this.terrainBody.bodies.length > 0) {
 				Composite.add(this.engine.world, this.terrainBody.bodies);
 				this.terrainBody.setDebug(this.debug);
+
+				// 지형 바디들을 pathfinder에 반영
+				for (const body of this.terrainBody.bodies) {
+					this.pathfinder.blockBody(body);
+				}
 			}
 
 			// 엔티티 바디 재추가
@@ -299,6 +307,13 @@ export class WorldContext {
 	private updateEntityPositions() {
 		for (const entity of Object.values(this.entities)) {
 			entity.updatePosition();
+		}
+	}
+
+	// 엔티티 업데이트 (경로 따라가기 등)
+	private updateEntities(event: BeforeUpdateEvent) {
+		for (const entity of Object.values(this.entities)) {
+			entity.update(event);
 		}
 	}
 

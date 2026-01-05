@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldContext } from '../context';
+import type { WorldContext, BeforeUpdateEvent } from '../context';
 import type { EntityId } from '$lib/types';
 
 const { Composite } = Matter;
@@ -37,6 +37,9 @@ export abstract class Entity {
 	abstract sync(): void;
 
 	abstract saveToStore(): void;
+
+	// 매 프레임마다 호출되는 업데이트 로직
+	abstract update(event: BeforeUpdateEvent): void;
 
 	setDebug(debug: boolean): void {
 		this.body.render.visible = debug;

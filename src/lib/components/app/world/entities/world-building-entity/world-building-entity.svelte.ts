@@ -12,6 +12,7 @@ import {
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
+import type { BeforeUpdateEvent } from '../../context';
 
 const { Bodies } = Matter;
 
@@ -124,5 +125,9 @@ export class WorldBuildingEntity extends Entity {
 	saveToStore(): void {
 		// 건물은 static이므로 실제로 위치 변경 없음
 		// 하지만 일관성을 위해 인터페이스 제공
+	}
+
+	update(event: BeforeUpdateEvent): void {
+		// 건물은 static이므로 update 로직 없음
 	}
 }

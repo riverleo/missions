@@ -19,12 +19,14 @@
 	);
 	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
 
-	// 경로를 SVG path 문자열로 변환
-	const pathString = $derived(
-		entity.path.length === 0
-			? ''
-			: entity.path.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-	);
+	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
+	const pathString = $derived.by(() => {
+		if (entity.path.length === 0) return '';
+
+		// 현재 캐릭터 위치에서 시작
+		const points = [{ x: entity.x, y: entity.y }, ...entity.path];
+		return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+	});
 </script>
 
 {#if character}

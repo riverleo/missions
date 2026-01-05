@@ -1,4 +1,12 @@
 import type { BuildingId } from '$lib/types';
+import type Matter from 'matter-js';
+
+export interface BeforeUpdateEvent {
+	timestamp: number;
+	delta: number;
+	source: Matter.Engine;
+	name: string;
+}
 
 export interface WorldBlueprintCursor {
 	buildingId: BuildingId;

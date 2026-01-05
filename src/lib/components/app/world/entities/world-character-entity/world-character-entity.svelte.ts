@@ -11,6 +11,7 @@ import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
+import type { BeforeUpdateEvent } from '../../context';
 import type { PathPoint } from '../../pathfinder';
 
 const { Bodies, Body, Composite } = Matter;
@@ -132,6 +133,57 @@ export class WorldCharacterEntity extends Entity {
 		// 스토어에 현재 위치 저장 (수동 호출)
 	}
 
+	update(event: BeforeUpdateEvent): void {
+		if (this.path.length === 0) {
+			return;
+		}
+
+		const currentPos = this.body.position;
+		const targetPoint = this.path[0];
+		if (!targetPoint) {
+			return;
+		}
+
+		// 목표 지점까지의 거리 계산
+		const dx = targetPoint.x - currentPos.x;
+		const dy = targetPoint.y - currentPos.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+
+		// 도착 판정 거리
+		const arrivalThreshold = 5;
+
+		if (distance < arrivalThreshold) {
+			// 목표 지점에 도착하면 path에서 제거
+			this.path = this.path.slice(1);
+			return;
+		}
+
+		// 이동 속도 (픽셀/초)
+		const speed = 100;
+
+		// delta를 초 단위로 변환 (밀리초 → 초)
+		const deltaSeconds = event.delta / 1000;
+
+		// 이번 프레임에서 이동할 거리
+		const moveDistance = speed * deltaSeconds;
+
+		// 목표 지점까지의 거리보다 이동 거리가 크면 목표 지점으로 바로 이동
+		if (moveDistance >= distance) {
+			Body.setPosition(this.body, { x: targetPoint.x, y: targetPoint.y });
+			this.path = this.path.slice(1);
+			return;
+		}
+
+		// 정규화된 방향 벡터에 이동 거리를 곱해서 새 위치 계산
+		const moveX = (dx / distance) * moveDistance;
+		const moveY = (dy / distance) * moveDistance;
+
+		Body.setPosition(this.body, {
+			x: currentPos.x + moveX,
+			y: currentPos.y + moveY,
+		});
+	}
+
 	moveTo(targetX: number, targetY: number): void {
 		const currentX = this.body.position.x;
 		const currentY = this.body.position.y;
@@ -141,9 +193,5 @@ export class WorldCharacterEntity extends Entity {
 
 		// 경로 스무딩
 		this.path = this.world.pathfinder.smoothPath(rawPath);
-	}
-
-	clearPath(): void {
-		this.path = [];
 	}
 }

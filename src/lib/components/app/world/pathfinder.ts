@@ -20,8 +20,10 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / tileSize);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder({
-			allowDiagonal: false,
+			allowDiagonal: true,
 		});
+
+		this.reset();
 	}
 
 	/**
@@ -144,6 +146,22 @@ export class Pathfinder {
 		for (let dy = 0; dy < tileRows; dy++) {
 			for (let dx = 0; dx < tileCols; dx++) {
 				this.setWalkable(tileX + dx, tileY + dy, false);
+			}
+		}
+	}
+
+	/**
+	 * Matter.js 바디를 기반으로 unwalkable 영역 설정
+	 */
+	blockBody(body: Matter.Body) {
+		const minX = this.pixelToTileIndex(body.bounds.min.x);
+		const minY = this.pixelToTileIndex(body.bounds.min.y);
+		const maxX = this.pixelToTileIndex(body.bounds.max.x);
+		const maxY = this.pixelToTileIndex(body.bounds.max.y);
+
+		for (let y = minY; y <= maxY; y++) {
+			for (let x = minX; x <= maxX; x++) {
+				this.setWalkable(x, y, false);
 			}
 		}
 	}
