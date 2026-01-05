@@ -95,7 +95,7 @@
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>
-				<IconHeading class="size-4" />
+				<IconHeading />
 			</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput bind:value={name} placeholder="바디 이름" onkeydown={onkeydownName} />
@@ -106,7 +106,7 @@
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>
-				<IconShape class="size-4" />
+				<IconShape />
 			</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupAddon>

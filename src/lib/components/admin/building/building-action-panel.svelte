@@ -8,7 +8,7 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconGridDots, IconGrid4x4, IconX } from '@tabler/icons-svelte';
+	import { IconGridDots, IconX, IconShape } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
@@ -89,7 +89,7 @@
 	<InputGroup>
 		<InputGroupAddon>
 			<InputGroupText>
-				<IconGrid4x4 class="size-4" />
+				<IconShape />
 			</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput

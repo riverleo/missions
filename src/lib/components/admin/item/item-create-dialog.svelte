@@ -14,36 +14,24 @@
 		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import {
-		DropdownMenu,
-		DropdownMenuTrigger,
-		DropdownMenuContent,
-		DropdownMenuRadioGroup,
-		DropdownMenuRadioItem,
-	} from '$lib/components/ui/dropdown-menu';
-	import { IconHeading, IconClock, IconShape } from '@tabler/icons-svelte';
+	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { useItem } from '$lib/hooks/use-item';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { ScenarioId, ColliderType } from '$lib/types';
-	import { getColliderTypeLabel } from '$lib/utils/state-label';
+	import type { ScenarioId } from '$lib/types';
 
 	const { admin, dialogStore, closeDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($dialogStore?.type === 'create');
 
-	const colliderTypes: ColliderType[] = ['circle', 'rectangle'];
-
 	let name = $state('');
-	let colliderType = $state<ColliderType>('rectangle');
 	let maxDurabilityTicks = $state<number | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open) {
 			name = '';
-			colliderType = 'rectangle';
 			maxDurabilityTicks = undefined;
 		}
 	});
@@ -63,7 +51,6 @@
 		admin
 			.create({
 				name: name.trim(),
-				collider_type: colliderType,
 				max_durability_ticks: maxDurabilityTicks ?? null,
 			})
 			.then((item) => {
@@ -93,33 +80,6 @@
 						</InputGroupText>
 					</InputGroupAddon>
 					<InputGroupInput placeholder="이름" bind:value={name} />
-				</InputGroup>
-				<InputGroup>
-					<InputGroupAddon>
-						<InputGroupText>
-							<IconShape />
-						</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupAddon>
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost">
-										{getColliderTypeLabel(colliderType)}
-									</InputGroupButton>
-								{/snippet}
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								<DropdownMenuRadioGroup bind:value={colliderType}>
-									{#each colliderTypes as type (type)}
-										<DropdownMenuRadioItem value={type}>
-											{getColliderTypeLabel(type)}
-										</DropdownMenuRadioItem>
-									{/each}
-								</DropdownMenuRadioGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</InputGroupAddon>
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
