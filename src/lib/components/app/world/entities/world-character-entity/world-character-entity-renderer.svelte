@@ -24,12 +24,6 @@
 	);
 	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
 
-	// 스프라이트 위치 계산 (바디 바닥 = 스프라이트 바닥)
-	const spriteX = $derived(entity.x + (characterBody?.collider_offset_x ?? 0));
-	const spriteY = $derived(
-		entity.y + entity.height / 2 + (characterBody?.collider_offset_y ?? 0)
-	);
-
 	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
 	const pathString = $derived.by(() => {
 		if (entity.path.length === 0) return '';
@@ -41,6 +35,12 @@
 
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);
+
+	// wrapper 크기 (circle 타입은 width만 사용)
+	const wrapperWidth = $derived(entity.width);
+	const wrapperHeight = $derived(
+		characterBody?.collider_type === 'circle' ? entity.width : entity.height
+	);
 </script>
 
 {#if character}
@@ -54,14 +54,23 @@
 		</svg>
 	{/if}
 
-	<!-- 캐릭터 스프라이트 -->
-	<CharacterSpriteAnimator
-		characterId={character.id}
-		bodyStateType="idle"
-		faceStateType="idle"
-		flip={entity.direction === 'right'}
-		{selected}
-		class="pointer-events-none absolute -translate-x-1/2 -translate-y-full"
-		style="left: {spriteX}px; top: {spriteY}px; opacity: {opacity};"
-	/>
+	<!-- 바디 크기 wrapper -->
+	<div
+		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+		style="left: {entity.x}px; top: {entity.y}px; width: {wrapperWidth}px; height: {wrapperHeight}px;"
+	>
+		<!-- 스프라이트: wrapper 내부에서 bottom-center 기준 -->
+		<div
+			class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-full"
+			style="left: {characterBody?.collider_offset_x ?? 0}px; bottom: {characterBody?.collider_offset_y ?? 0}px; opacity: {opacity};"
+		>
+			<CharacterSpriteAnimator
+				characterId={character.id}
+				bodyStateType="idle"
+				faceStateType="idle"
+				flip={entity.direction === 'right'}
+				{selected}
+			/>
+		</div>
+	</div>
 {/if}
