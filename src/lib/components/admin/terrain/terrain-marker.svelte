@@ -49,12 +49,12 @@
 		if (!container) return;
 
 		const rect = container.getBoundingClientRect();
-		dragX = ((e.clientX - rect.left) / rect.width) * world.terrainBody.width;
-		dragY = ((e.clientY - rect.top) / rect.height) * world.terrainBody.height;
+		dragX = ((e.clientX - rect.left) / rect.width) * terrain.width;
+		dragY = ((e.clientY - rect.top) / rect.height) * terrain.height;
 
 		// 범위 제한
-		dragX = Math.max(0, Math.min(world.terrainBody.width, dragX));
-		dragY = Math.max(0, Math.min(world.terrainBody.height, dragY));
+		dragX = Math.max(0, Math.min(terrain.width, dragX));
+		dragY = Math.max(0, Math.min(terrain.height, dragY));
 	}
 
 	async function onmouseup() {
@@ -73,8 +73,8 @@
 	async function onclickOverlay(e: MouseEvent) {
 		const target = e.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
-		const x = ((e.clientX - rect.left) / rect.width) * world.terrainBody.width;
-		const y = ((e.clientY - rect.top) / rect.height) * world.terrainBody.height;
+		const x = ((e.clientX - rect.left) / rect.width) * terrain.width;
+		const y = ((e.clientY - rect.top) / rect.height) * terrain.height;
 
 		await admin.update(terrain.id, { respawn_x: x, respawn_y: y });
 		admin.setSettingStartMarker(false);

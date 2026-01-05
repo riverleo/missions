@@ -17,7 +17,6 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
-import { TerrainBody } from '../terrain-body.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';
@@ -25,16 +24,15 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { WORLD_WIDTH, WORLD_HEIGHT } from '../constants';
+import { WORLD_WIDTH, WORLD_HEIGHT, WALL_THICKNESS, CATEGORY_WALL } from '../constants';
 
-const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
+const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body, Bodies } = Matter;
 
 export class WorldContext {
 	readonly engine: Matter.Engine;
 	readonly runner: Matter.Runner;
 	readonly camera: Camera;
 	readonly event: WorldEvent;
-	readonly terrainBody = new TerrainBody();
 	readonly worldId: WorldId;
 	readonly blueprint: WorldContextBlueprint;
 	readonly pathfinder: Pathfinder;
@@ -60,17 +58,24 @@ export class WorldContext {
 		this.pathfinder = new Pathfinder(WORLD_WIDTH, WORLD_HEIGHT);
 	}
 
-	private get terrain(): Terrain | null | undefined {
+	private get terrain(): Terrain | undefined {
 		const world = get(useWorld().worldStore).data[this.worldId];
-		if (!world?.terrain_id) return null;
+		if (!world?.terrain_id) return undefined;
 		return get(useTerrain().store).data[world.terrain_id];
 	}
 
-	// debug 변경 시 모든 엔티티 업데이트
+	// debug 변경 시 모든 엔티티 및 바운더리 업데이트
 	setDebugEntities(debug: boolean) {
-		this.terrainBody.setDebug(debug);
 		for (const entity of Object.values(this.entities)) {
 			entity.setDebug(debug);
+		}
+
+		// 바운더리 벽 visibility 업데이트
+		const bodies = Composite.allBodies(this.engine.world);
+		for (const body of bodies) {
+			if (body.label.startsWith('boundary-')) {
+				body.render.visible = debug;
+			}
 		}
 	}
 
@@ -171,6 +176,55 @@ export class WorldContext {
 		};
 	}
 
+	// 월드 바운더리 생성
+	private createBoundaryWalls() {
+		if (!this.terrain) return;
+
+		const { width, height } = this.terrain;
+		const thickness = WALL_THICKNESS;
+
+		const wallOptions = {
+			isStatic: true,
+			collisionFilter: {
+				category: CATEGORY_WALL,
+				mask: 0xffffffff, // 모든 카테고리와 충돌
+			},
+			render: { visible: this.debug },
+		};
+
+		// 상단 벽
+		const topWall = Bodies.rectangle(width / 2, -thickness / 2, width, thickness, {
+			...wallOptions,
+			label: 'boundary-top',
+		});
+
+		// 하단 벽
+		const bottomWall = Bodies.rectangle(width / 2, height + thickness / 2, width, thickness, {
+			...wallOptions,
+			label: 'boundary-bottom',
+		});
+
+		// 좌측 벽
+		const leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, {
+			...wallOptions,
+			label: 'boundary-left',
+		});
+
+		// 우측 벽
+		const rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, {
+			...wallOptions,
+			label: 'boundary-right',
+		});
+
+		Composite.add(this.engine.world, [topWall, bottomWall, leftWall, rightWall]);
+
+		// pathfinder에도 경계 벽 추가
+		this.pathfinder.blockBody(topWall);
+		this.pathfinder.blockBody(bottomWall);
+		this.pathfinder.blockBody(leftWall);
+		this.pathfinder.blockBody(rightWall);
+	}
+
 	reload() {
 		if (!this.initialized) {
 			console.warn('Cannot reload terrain: WorldContext not initialized');
@@ -185,42 +239,32 @@ export class WorldContext {
 		// 기존 bodies 제거
 		Composite.clear(this.engine.world, false);
 
-		// pathfinder 초기화
+		// pathfinder 초기화 (모든 타일을 walkable로)
 		this.pathfinder.reset();
 
-		// 지형 로드
-		this.terrainBody.load(this.terrain).then(() => {
-			if (this.terrainBody.bodies.length > 0) {
-				Composite.add(this.engine.world, this.terrainBody.bodies);
-				this.terrainBody.setDebug(this.debug);
+		// 바운더리 생성
+		this.createBoundaryWalls();
 
-				// 지형 바디들을 pathfinder에 반영
-				for (const body of this.terrainBody.bodies) {
-					this.pathfinder.blockBody(body);
-				}
-			}
+		// 엔티티 바디 재추가
+		for (const entity of Object.values(this.entities)) {
+			entity.addToWorld();
+		}
 
-			// 엔티티 바디 재추가
-			for (const entity of Object.values(this.entities)) {
-				entity.addToWorld();
-			}
+		// mouseConstraint 재추가
+		if (this.mouseConstraint) {
+			Composite.add(this.engine.world, this.mouseConstraint);
+		}
 
-			// mouseConstraint 재추가
-			if (this.mouseConstraint) {
-				Composite.add(this.engine.world, this.mouseConstraint);
-			}
-
-			this.updateRenderBounds();
-		});
+		this.updateRenderBounds();
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
 	updateRenderBounds() {
-		const { render, terrainBody, camera } = this;
-		if (!render || terrainBody.width === 0 || terrainBody.height === 0) return;
+		const { render, terrain, camera } = this;
+		if (!render || !terrain) return;
 
-		const viewWidth = terrainBody.width / camera.zoom;
-		const viewHeight = terrainBody.height / camera.zoom;
+		const viewWidth = terrain.width / camera.zoom;
+		const viewHeight = terrain.height / camera.zoom;
 
 		render.bounds.min.x = camera.x;
 		render.bounds.min.y = camera.y;
@@ -319,8 +363,7 @@ export class WorldContext {
 
 	// 바디가 경계를 벗어나면 제거 후 1초 뒤 리스폰 위치에 다시 추가
 	private checkEntityBounds() {
-		const { width, height } = this.terrainBody;
-		if (width === 0 || height === 0) return;
+		if (!this.terrain) return;
 
 		for (const entity of Object.values(this.entities)) {
 			if (!this.isOutOfEntityBounds(entity)) continue;
@@ -330,16 +373,12 @@ export class WorldContext {
 	}
 
 	private isOutOfEntityBounds(entity: Entity) {
-		const halfWidth = entity.width / 2;
-		const halfHeight = entity.height / 2;
+		if (!this.terrain) return false;
+
 		const { x, y } = entity.body.position;
 
-		return (
-			x - halfWidth < 0 ||
-			x + halfWidth > this.terrainBody.width ||
-			y - halfHeight < 0 ||
-			y + halfHeight > this.terrainBody.height
-		);
+		// 엔티티 중심점이 경계를 완전히 벗어난 경우만 체크 (바운더리 벽이 있으므로 여유롭게)
+		return x < 0 || x > this.terrain.width || y < 0 || y > this.terrain.height;
 	}
 
 	private respawnEntity(entityId: EntityId) {

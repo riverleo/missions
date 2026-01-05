@@ -27,7 +27,7 @@
 	let { class: className, width, height, children, ...restProps }: Props = $props();
 
 	const world = useWorldContext();
-	const { terrainBody, camera, event } = world;
+	const { camera, event } = world;
 	const { worldStore, worldBuildingStore, worldCharacterStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
 	const { supabase } = useServerPayload();
@@ -75,8 +75,8 @@
 	<div
 		class="pointer-events-none absolute origin-top-left"
 		style="
-			width: {terrainBody.width}px;
-			height: {terrainBody.height}px;
+			width: {terrain?.width ?? 0}px;
+			height: {terrain?.height ?? 0}px;
 			transform: scale({camera.zoom}) translate({-camera.x}px, {-camera.y}px);
 		"
 	>
@@ -88,8 +88,8 @@
 				alt={terrain?.title}
 			/>
 		{/if}
-		{#if world.blueprint.cursor}
-			<WorldBlueprint width={terrainBody.width} height={terrainBody.height} />
+		{#if world.blueprint.cursor && terrain}
+			<WorldBlueprint width={terrain.width} height={terrain.height} />
 		{/if}
 		{#each entities as entity (entity.id)}
 			{#if entity.type === 'building'}
