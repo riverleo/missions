@@ -33,9 +33,10 @@ export class WorldCharacterEntity extends Entity {
 			throw new Error(`Cannot create WorldCharacterEntity: missing data for id ${id}`);
 		}
 
-		// 초기 크기 설정
-		this.width = characterBody.collider_width;
-		this.height = characterBody.collider_height;
+		// 초기 collider 설정
+		this.colliderType = characterBody.collider_type;
+		this.colliderWidth = characterBody.collider_width;
+		this.colliderHeight = characterBody.collider_height;
 
 		// 바디 생성
 		this.body = this.createBody(characterBody.collider_width, characterBody.collider_height);
@@ -93,11 +94,12 @@ export class WorldCharacterEntity extends Entity {
 		if (!characterBody) return;
 
 		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.width - characterBody.collider_width);
-		const heightDiff = Math.abs(this.height - characterBody.collider_height);
+		const widthDiff = Math.abs(this.colliderWidth - characterBody.collider_width);
+		const heightDiff = Math.abs(this.colliderHeight - characterBody.collider_height);
+		const typeChanged = this.colliderType !== characterBody.collider_type;
 
-		// 크기가 변경되었으면 바디 재생성
-		if (widthDiff > 0.01 || heightDiff > 0.01) {
+		// 크기 또는 타입이 변경되었으면 바디 재생성
+		if (widthDiff > 0.01 || heightDiff > 0.01 || typeChanged) {
 			const currentPosition = this.body.position;
 			const currentVelocity = this.body.velocity;
 			const currentAngle = this.body.angle;
@@ -116,9 +118,10 @@ export class WorldCharacterEntity extends Entity {
 			// 월드에 새 바디 추가
 			Composite.add(this.world.engine.world, this.body);
 
-			// 크기 업데이트
-			this.width = characterBody.collider_width;
-			this.height = characterBody.collider_height;
+			// collider 상태 업데이트
+			this.colliderType = characterBody.collider_type;
+			this.colliderWidth = characterBody.collider_width;
+			this.colliderHeight = characterBody.collider_height;
 		}
 	}
 

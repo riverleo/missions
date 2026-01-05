@@ -39,8 +39,8 @@ export class WorldBuildingEntity extends Entity {
 		const height = building.tile_rows * TILE_SIZE;
 
 		// 초기 크기 설정
-		this.width = width;
-		this.height = height;
+		this.colliderWidth = width;
+		this.colliderHeight = height;
 
 		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
 		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
@@ -88,8 +88,8 @@ export class WorldBuildingEntity extends Entity {
 		const newHeight = building.tile_rows * TILE_SIZE;
 
 		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.width - newWidth);
-		const heightDiff = Math.abs(this.height - newHeight);
+		const widthDiff = Math.abs(this.colliderWidth - newWidth);
+		const heightDiff = Math.abs(this.colliderHeight - newHeight);
 
 		// 크기가 변경되었으면 바디 재생성
 		if (widthDiff > 0.01 || heightDiff > 0.01) {
@@ -110,8 +110,8 @@ export class WorldBuildingEntity extends Entity {
 			this.y = y;
 
 			// 크기 업데이트
-			this.width = newWidth;
-			this.height = newHeight;
+			this.colliderWidth = newWidth;
+			this.colliderHeight = newHeight;
 
 			// 월드에 새 바디 추가
 			Matter.Composite.add(this.world.engine.world, this.body);

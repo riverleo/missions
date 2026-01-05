@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import type { WorldContext, BeforeUpdateEvent } from '../context';
-import type { EntityId } from '$lib/types';
+import type { EntityId, ColliderType } from '$lib/types';
 
 const { Composite } = Matter;
 
@@ -14,8 +14,9 @@ export abstract class Entity {
 	x = $state(0);
 	y = $state(0);
 	angle = $state(0);
-	width = $state(0);
-	height = $state(0);
+	colliderType = $state<ColliderType>('rectangle');
+	colliderWidth = $state(0);
+	colliderHeight = $state(0);
 
 	get debug(): boolean {
 		return this.world.debug;

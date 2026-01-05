@@ -22,6 +22,7 @@
 		IconRuler2,
 		IconX,
 		IconShape,
+		IconArrowsMove,
 	} from '@tabler/icons-svelte';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { getColliderTypeLabel } from '$lib/utils/state-label';
@@ -41,6 +42,8 @@
 	let name = $state(body.name ?? '');
 	let width = $state(body.collider_width === 0 ? '' : body.collider_width.toString());
 	let height = $state(body.collider_height === 0 ? '' : body.collider_height.toString());
+	let offsetX = $state(body.collider_offset_x.toString());
+	let offsetY = $state(body.collider_offset_y.toString());
 
 	// body prop 변경 시 상태 동기화
 	$effect(() => {
