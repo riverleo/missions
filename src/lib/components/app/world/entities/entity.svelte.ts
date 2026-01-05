@@ -10,13 +10,16 @@ export abstract class Entity {
 	abstract readonly body: Matter.Body;
 
 	protected abstract readonly world: WorldContext;
-	protected abstract get debugFillStyle(): string;
 
 	x = $state(0);
 	y = $state(0);
 	angle = $state(0);
 	width = $state(0);
 	height = $state(0);
+
+	get debug(): boolean {
+		return this.world.debug;
+	}
 
 	toEntityId(): EntityId {
 		return `${this.type}-${this.id}` as EntityId;
@@ -43,9 +46,6 @@ export abstract class Entity {
 
 	setDebug(debug: boolean): void {
 		this.body.render.visible = debug;
-		if (debug) {
-			this.body.render.fillStyle = this.debugFillStyle;
-		}
 	}
 
 	addToWorld(): void {

@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { CharacterId, CharacterBodyStateType, CharacterFaceStateType, ItemState, LoopMode } from '$lib/types';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { cn } from '$lib/utils';
 
 	const OUTLINE_WIDTH = 10;
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		characterId: CharacterId;
 		bodyStateType: CharacterBodyStateType;
 		faceStateType?: CharacterFaceStateType;
@@ -31,6 +33,8 @@
 		resolution = 2,
 		flip = false,
 		selected = false,
+		class: className,
+		...restProps
 	}: Props = $props();
 
 	const { store, faceStateStore } = useCharacter();
@@ -181,7 +185,8 @@
 </script>
 
 <div
-	class="relative inline-flex items-center justify-center"
+	{...restProps}
+	class={cn('relative inline-flex items-center justify-center', className)}
 	style:transform={flip ? `scale(${-scale}, ${scale})` : `scale(${scale})`}
 >
 	<!-- 선택 시 외곽선 레이어 -->

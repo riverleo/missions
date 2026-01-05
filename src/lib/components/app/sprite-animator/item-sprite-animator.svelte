@@ -1,19 +1,21 @@
 <script lang="ts">
 	import type { ItemId, ItemStateType, LoopMode } from '$lib/types';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import { useItem } from '$lib/hooks/use-item';
+	import { cn } from '$lib/utils';
 
 	const OUTLINE_WIDTH = 10;
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		itemId: ItemId;
 		stateType: ItemStateType;
 		resolution?: 1 | 2 | 3;
 		selected?: boolean;
 	}
 
-	let { itemId, stateType, resolution = 1, selected = false }: Props = $props();
+	let { itemId, stateType, resolution = 1, selected = false, class: className, ...restProps }: Props = $props();
 
 	const { store, stateStore } = useItem();
 	const item = $derived($store.data[itemId]);
@@ -48,7 +50,7 @@
 	});
 </script>
 
-<div class="relative inline-flex items-center justify-center" style:transform={`scale(${scale})`}>
+<div {...restProps} class={cn('relative inline-flex items-center justify-center', className)} style:transform={`scale(${scale})`}>
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && animator}
 		<div

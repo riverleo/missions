@@ -27,6 +27,9 @@
 		const points = [{ x: entity.x, y: entity.y }, ...entity.path];
 		return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 	});
+
+	// 디버그 모드일 때 opacity 낮춤
+	const opacity = $derived(entity.debug ? 0.6 : 1);
 </script>
 
 {#if character}
@@ -41,16 +44,13 @@
 	{/if}
 
 	<!-- 캐릭터 스프라이트 -->
-	<div
+	<CharacterSpriteAnimator
+		characterId={character.id}
+		bodyStateType="idle"
+		faceStateType="idle"
+		flip={entity.direction === 'right'}
+		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x}px; top: {entity.y}px;"
-	>
-		<CharacterSpriteAnimator
-			characterId={character.id}
-			bodyStateType="idle"
-			faceStateType="idle"
-			flip={entity.direction === 'right'}
-			{selected}
-		/>
-	</div>
+		style="left: {entity.x}px; top: {entity.y}px; opacity: {opacity};"
+	/>
 {/if}

@@ -12,7 +12,6 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
-	import { DEBUG_CHARACTER_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
@@ -187,7 +186,7 @@
 						cx="50%"
 						cy="50%"
 						r={body.collider_width / 2}
-						fill={DEBUG_CHARACTER_FILL_STYLE}
+						fill="rgba(0, 255, 0, 0.5)"
 					/>
 				{:else}
 					<rect
@@ -196,7 +195,7 @@
 						width={body.collider_width}
 						height={body.collider_height}
 						transform="translate(-{body.collider_width / 2}, -{body.collider_height / 2})"
-						fill={DEBUG_CHARACTER_FILL_STYLE}
+						fill="rgba(0, 255, 0, 0.5)"
 					/>
 				{/if}
 			</svg>

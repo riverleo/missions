@@ -1,12 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldCharacterId, CharacterBody } from '$lib/types';
-import {
-	CATEGORY_WALL,
-	CATEGORY_TERRAIN,
-	CATEGORY_CHARACTER,
-	DEBUG_CHARACTER_FILL_STYLE,
-} from '../../constants';
+import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_CHARACTER } from '../../constants';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -25,9 +20,6 @@ export class WorldCharacterEntity extends Entity {
 	direction: WorldCharacterEntityDirection = $state('right');
 
 	protected readonly world = useWorldContext();
-	protected get debugFillStyle(): string {
-		return DEBUG_CHARACTER_FILL_STYLE;
-	}
 
 	constructor(id: WorldCharacterId) {
 		super();
@@ -74,7 +66,6 @@ export class WorldCharacterEntity extends Entity {
 			},
 			render: {
 				visible: this.world.debug,
-				fillStyle: this.world.debug ? DEBUG_CHARACTER_FILL_STYLE : undefined,
 			},
 		};
 

@@ -6,7 +6,6 @@ import {
 	CATEGORY_TERRAIN,
 	CATEGORY_ITEM,
 	CATEGORY_CHARACTER,
-	DEBUG_ITEM_FILL_STYLE,
 } from '../../constants';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
@@ -21,9 +20,6 @@ export class WorldItemEntity extends Entity {
 	body: Matter.Body;
 
 	protected readonly world = useWorldContext();
-	protected get debugFillStyle(): string {
-		return DEBUG_ITEM_FILL_STYLE;
-	}
 
 	constructor(id: WorldItemId) {
 		super();
@@ -65,7 +61,6 @@ export class WorldItemEntity extends Entity {
 			},
 			render: {
 				visible: this.world.debug,
-				fillStyle: this.world.debug ? DEBUG_ITEM_FILL_STYLE : undefined,
 			},
 		};
 

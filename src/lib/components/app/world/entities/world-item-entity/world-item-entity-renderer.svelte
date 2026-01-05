@@ -16,13 +16,18 @@
 	const worldItem = $derived($worldItemStore.data[entity.id]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
 	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
+
+	// 디버그 모드일 때 opacity 낮춤
+	const opacity = $derived(entity.debug ? 0.6 : 1);
 </script>
 
 {#if item}
-	<div
+	<ItemSpriteAnimator
+		itemId={item.id}
+		stateType="idle"
+		resolution={2}
+		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x}px; top: {entity.y}px; rotate: {entity.angle}rad;"
-	>
-		<ItemSpriteAnimator itemId={item.id} stateType="idle" resolution={2} {selected} />
-	</div>
+		style="left: {entity.x}px; top: {entity.y}px; rotate: {entity.angle}rad; opacity: {opacity};"
+	/>
 {/if}

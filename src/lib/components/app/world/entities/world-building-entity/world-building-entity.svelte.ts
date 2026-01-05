@@ -6,7 +6,6 @@ import {
 	CATEGORY_TERRAIN,
 	CATEGORY_BUILDING,
 	CATEGORY_CHARACTER,
-	DEBUG_BUILDING_FILL_STYLE,
 	TILE_SIZE,
 } from '../../constants';
 import { useWorldContext, useWorld } from '$lib/hooks/use-world';
@@ -22,9 +21,6 @@ export class WorldBuildingEntity extends Entity {
 	body: Matter.Body;
 
 	protected readonly world = useWorldContext();
-	protected get debugFillStyle(): string {
-		return DEBUG_BUILDING_FILL_STYLE;
-	}
 
 	constructor(id: WorldBuildingId) {
 		super();
@@ -69,9 +65,9 @@ export class WorldBuildingEntity extends Entity {
 				category: CATEGORY_BUILDING,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
-			render: this.world.debug
-				? { visible: true, fillStyle: DEBUG_BUILDING_FILL_STYLE }
-				: { visible: false },
+			render: {
+				visible: this.world.debug,
+			},
 		});
 	}
 

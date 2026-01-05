@@ -5,7 +5,6 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
-	import { DEBUG_ITEM_FILL_STYLE } from '$lib/components/app/world/constants';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getItemStateLabel } from '$lib/utils/state-label';
 
@@ -56,7 +55,7 @@
 						cx="50%"
 						cy="50%"
 						r={item.collider_width / 2}
-						fill={DEBUG_ITEM_FILL_STYLE}
+						fill="rgba(255, 255, 0, 0.5)"
 					/>
 				{:else}
 					<rect
@@ -65,7 +64,7 @@
 						width={item.collider_width}
 						height={item.collider_height}
 						transform="translate(-{item.collider_width / 2}, -{item.collider_height / 2})"
-						fill={DEBUG_ITEM_FILL_STYLE}
+						fill="rgba(255, 255, 0, 0.5)"
 					/>
 				{/if}
 			</svg>

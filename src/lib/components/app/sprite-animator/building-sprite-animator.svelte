@@ -7,12 +7,14 @@
 		CharacterFaceStateType,
 		LoopMode,
 	} from '$lib/types';
+	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { cn } from '$lib/utils';
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		buildingId: BuildingId;
 		stateType: BuildingStateType;
 		characterId?: CharacterId;
@@ -38,10 +40,11 @@
 		scale = 1,
 		resolution = 2,
 		selected = false,
+		class: className,
+		...restProps
 	}: Props = $props();
 
 	const { store, stateStore } = useBuilding();
-	const building = $derived($store.data[buildingId]);
 	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s) => s.type === stateType));
 
@@ -75,7 +78,7 @@
 	});
 </script>
 
-<div class="relative" style:transform={`scale(${scale})`}>
+<div {...restProps} class={cn('relative', className)} style:transform={`scale(${scale})`}>
 	<!-- 선택 시 외곽선 -->
 	{#if selected && animator}
 		<div
