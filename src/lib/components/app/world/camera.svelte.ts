@@ -45,6 +45,24 @@ export class Camera {
 		};
 	}
 
+	// 카메라 위치를 월드 경계 내로 제한
+	private clampPosition(): void {
+		const terrain = this.world.terrain;
+		if (!terrain) return;
+
+		const canvas = this.world.render?.canvas;
+		if (!canvas) return;
+
+		const viewWidth = canvas.width / this.zoom;
+		const viewHeight = canvas.height / this.zoom;
+
+		const maxX = Math.max(0, terrain.width - viewWidth);
+		const maxY = Math.max(0, terrain.height - viewHeight);
+
+		this.x = Math.max(0, Math.min(maxX, this.x));
+		this.y = Math.max(0, Math.min(maxY, this.y));
+	}
+
 	// 줌 (마우스 위치 중심)
 	applyZoom(deltaY: number, screenX: number, screenY: number): void {
 		const mouseWorldPos = this.screenToWorld(screenX, screenY);
@@ -58,6 +76,7 @@ export class Camera {
 		this.y = mouseWorldPos.y - (mouseWorldPos.y - this.y) / zoomRatio;
 		this.zoom = newZoom;
 
+		this.clampPosition();
 		this.world.updateRenderBounds();
 	}
 
@@ -77,6 +96,7 @@ export class Camera {
 		this.x = this.panStartCameraX - dx / this.zoom;
 		this.y = this.panStartCameraY - dy / this.zoom;
 
+		this.clampPosition();
 		this.world.updateRenderBounds();
 	}
 

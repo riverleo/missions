@@ -159,7 +159,7 @@ export class WorldCharacterEntity extends Entity {
 		}
 
 		// 이동 속도 (픽셀/초)
-		const speed = 100;
+		const speed = 50;
 
 		// delta를 초 단위로 변환 (밀리초 → 초)
 		const deltaSeconds = event.delta / 1000;

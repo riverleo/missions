@@ -70,6 +70,9 @@
 
 	// worldBuildings, worldCharacters, worldItems 변경 시 엔티티 동기화
 	$effect(() => {
+		// initialized가 false면 아직 벽이 생성되지 않았으므로 스킵
+		if (!worldContext.initialized) return;
+
 		const buildings = Object.values($worldBuildingStore.data)
 			.filter((b) => b.world_id === worldId)
 			.reduce(

@@ -12,7 +12,7 @@ export const PATHFINDING_TILE_SIZE = 4;
 export const TICK_INTERVAL = 1000; // 1 tick = 1초
 
 // 물리 엔진 설정
-export const WALL_THICKNESS = 10;
+export const WALL_THICKNESS = 30;
 
 // 충돌 카테고리 (비트마스크)
 export const CATEGORY_WALL = 0x0001;

@@ -58,7 +58,7 @@ export class WorldContext {
 		this.pathfinder = new Pathfinder(WORLD_WIDTH, WORLD_HEIGHT);
 	}
 
-	private get terrain(): Terrain | undefined {
+	get terrain(): Terrain | undefined {
 		const world = get(useWorld().worldStore).data[this.worldId];
 		if (!world?.terrain_id) return undefined;
 		return get(useTerrain().store).data[world.terrain_id];
@@ -193,16 +193,10 @@ export class WorldContext {
 		};
 
 		// 상단 벽 (좌우로 두께만큼 더 넓게)
-		const topWall = Bodies.rectangle(
-			width / 2,
-			-thickness / 2,
-			width + thickness * 2,
-			thickness,
-			{
-				...wallOptions,
-				label: 'boundary-top',
-			}
-		);
+		const topWall = Bodies.rectangle(width / 2, -thickness / 2, width + thickness * 2, thickness, {
+			...wallOptions,
+			label: 'boundary-top',
+		});
 
 		// 하단 벽 (좌우로 두께만큼 더 넓게)
 		const bottomWall = Bodies.rectangle(
@@ -275,8 +269,8 @@ export class WorldContext {
 		const { render, terrain, camera } = this;
 		if (!render || !terrain) return;
 
-		const viewWidth = terrain.width / camera.zoom;
-		const viewHeight = terrain.height / camera.zoom;
+		const viewWidth = render.canvas.width / camera.zoom;
+		const viewHeight = render.canvas.height / camera.zoom;
 
 		render.bounds.min.x = camera.x;
 		render.bounds.min.y = camera.y;
