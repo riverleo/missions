@@ -22,17 +22,26 @@ export class Camera {
 		this.world = world;
 	}
 
-	// 화면 좌표를 월드 좌표로 변환
-	screenToWorld(screenX: number, screenY: number): { x: number; y: number } | undefined {
+	// 화면 좌표를 컨테이너 좌표로 변환
+	screenToContainer(screenX: number, screenY: number): { x: number; y: number } | undefined {
 		const canvas = this.world.render?.canvas;
 		if (!canvas) return undefined;
 
 		const rect = canvas.getBoundingClientRect();
-		const containerX = screenX - rect.left;
-		const containerY = screenY - rect.top;
 		return {
-			x: containerX / this.zoom + this.x,
-			y: containerY / this.zoom + this.y,
+			x: screenX - rect.left,
+			y: screenY - rect.top,
+		};
+	}
+
+	// 화면 좌표를 월드 좌표로 변환
+	screenToWorld(screenX: number, screenY: number): { x: number; y: number } | undefined {
+		const containerPos = this.screenToContainer(screenX, screenY);
+		if (!containerPos) return undefined;
+
+		return {
+			x: containerPos.x / this.zoom + this.x,
+			y: containerPos.y / this.zoom + this.y,
 		};
 	}
 
