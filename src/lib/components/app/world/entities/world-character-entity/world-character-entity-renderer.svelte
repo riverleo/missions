@@ -32,9 +32,6 @@
 	{#if entity.path.length > 0}
 		<svg class="pointer-events-none absolute top-0 left-0" style="width: 100%; height: 100%;">
 			<path d={pathString} stroke="white" stroke-width="1" fill="none" />
-			{#each entity.path as point, i (i)}
-				<circle cx={point.x} cy={point.y} r="1" fill="white" />
-			{/each}
 		</svg>
 	{/if}
 

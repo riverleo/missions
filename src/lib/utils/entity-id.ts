@@ -17,6 +17,13 @@ export const EntityIdUtils = {
 	},
 
 	/**
+	 * EntityId가 특정 타입이 아닌지 확인
+	 */
+	not(type: EntityType, entityId: EntityId | undefined): boolean {
+		return !this.is(type, entityId);
+	},
+
+	/**
 	 * EntityId 생성
 	 */
 	create(type: EntityType, id: string): EntityId {

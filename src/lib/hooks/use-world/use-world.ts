@@ -63,6 +63,7 @@ function createWorldStore() {
 		const testWorld = useWorldTest();
 		testWorld.store.update((state) => ({
 			...state,
+			eraser: false,
 			selectedEntityId: undefined,
 		}));
 	}
