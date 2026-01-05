@@ -6,7 +6,7 @@
 	import TestWorldCommandPanel from './test-world-command-panel.svelte';
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
-	import TestWorldInspectorPanel from './test-world-inspector-panel.svelte';
+	import TestWorldInspectorPanel from './test-world-inspector-panel';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';

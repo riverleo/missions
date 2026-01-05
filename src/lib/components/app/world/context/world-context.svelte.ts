@@ -1,7 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type {
-	Supabase,
 	Terrain,
 	WorldCharacter,
 	WorldCharacterId,
