@@ -84,7 +84,6 @@
 			<img
 				src={terrainAssetUrl}
 				class="absolute inset-0 h-full w-full"
-				style="opacity: {world.debug ? 0 : 1};"
 				alt={terrain?.title}
 			/>
 		{/if}
