@@ -24,17 +24,13 @@
 </script>
 
 {#if building}
-	<!-- 바디 크기 wrapper -->
-	<div
+	<!-- 건물 스프라이트 -->
+	<BuildingSpriteAnimator
+		buildingId={building.id}
+		stateType="idle"
+		resolution={2}
+		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x}px; top: {entity.y}px; width: {entity.width}px; height: {entity.height}px;"
-	>
-		<!-- 스프라이트: wrapper 내부에서 bottom-center 기준 -->
-		<div
-			class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-full"
-			style="left: {building?.collider_offset_x ?? 0}px; bottom: {building?.collider_offset_y ?? 0}px; opacity: {opacity}; rotate: {entity.angle}rad;"
-		>
-			<BuildingSpriteAnimator buildingId={building.id} stateType="idle" resolution={2} {selected} />
-		</div>
-	</div>
+		style="left: {entity.x + (building?.collider_offset_x ?? 0)}px; top: {entity.y + (building?.collider_offset_y ?? 0)}px; opacity: {opacity}; rotate: {entity.angle}rad;"
+	/>
 {/if}

@@ -15,7 +15,14 @@
 		selected?: boolean;
 	}
 
-	let { itemId, stateType, resolution = 1, selected = false, class: className, ...restProps }: Props = $props();
+	let {
+		itemId,
+		stateType,
+		resolution = 1,
+		selected = false,
+		class: className,
+		...restProps
+	}: Props = $props();
 
 	const { store, stateStore } = useItem();
 	const item = $derived($store.data[itemId]);
@@ -50,7 +57,11 @@
 	});
 </script>
 
-<div {...restProps} class={cn('relative inline-flex items-center justify-center', className)} style:transform={`scale(${scale})`}>
+<div
+	{...restProps}
+	class={cn('relative flex items-center justify-center', className)}
+	style:transform={`scale(${scale})`}
+>
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && animator}
 		<div

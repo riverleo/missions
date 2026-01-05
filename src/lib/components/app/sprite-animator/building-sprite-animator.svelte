@@ -78,7 +78,7 @@
 	});
 </script>
 
-<div {...restProps} class={cn('relative', className)} style:transform={`scale(${scale})`}>
+<div {...restProps} class={cn('relative flex items-center justify-center', className)} style:transform={`scale(${scale})`}>
 	<!-- 선택 시 외곽선 -->
 	{#if selected && animator}
 		<div

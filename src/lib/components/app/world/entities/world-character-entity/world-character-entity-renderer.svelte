@@ -35,12 +35,6 @@
 
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);
-
-	// wrapper 크기 (circle 타입은 width만 사용)
-	const wrapperWidth = $derived(entity.width);
-	const wrapperHeight = $derived(
-		characterBody?.collider_type === 'circle' ? entity.width : entity.height
-	);
 </script>
 
 {#if character}
@@ -54,23 +48,14 @@
 		</svg>
 	{/if}
 
-	<!-- 바디 크기 wrapper -->
-	<div
+	<!-- 캐릭터 스프라이트 -->
+	<CharacterSpriteAnimator
+		characterId={character.id}
+		bodyStateType="idle"
+		faceStateType="idle"
+		flip={entity.direction === 'right'}
+		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x}px; top: {entity.y}px; width: {wrapperWidth}px; height: {wrapperHeight}px;"
-	>
-		<!-- 스프라이트: wrapper 내부에서 bottom-center 기준 -->
-		<div
-			class="absolute bottom-0 left-1/2 -translate-x-1/2 -translate-y-full"
-			style="left: {characterBody?.collider_offset_x ?? 0}px; bottom: {characterBody?.collider_offset_y ?? 0}px; opacity: {opacity};"
-		>
-			<CharacterSpriteAnimator
-				characterId={character.id}
-				bodyStateType="idle"
-				faceStateType="idle"
-				flip={entity.direction === 'right'}
-				{selected}
-			/>
-		</div>
-	</div>
+		style="left: {entity.x + (characterBody?.collider_offset_x ?? 0)}px; top: {entity.y + (characterBody?.collider_offset_y ?? 0)}px; opacity: {opacity};"
+	/>
 {/if}

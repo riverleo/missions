@@ -1,5 +1,11 @@
 <script lang="ts">
-	import type { CharacterId, CharacterBodyStateType, CharacterFaceStateType, ItemState, LoopMode } from '$lib/types';
+	import type {
+		CharacterId,
+		CharacterBodyStateType,
+		CharacterFaceStateType,
+		ItemState,
+		LoopMode,
+	} from '$lib/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
@@ -43,12 +49,16 @@
 	const character = $derived($store.data[characterId]);
 	const scale = $derived(character?.scale ?? 1);
 
-	const characterBody = $derived(character ? $characterBodyStore.data[character.character_body_id] : undefined);
+	const characterBody = $derived(
+		character ? $characterBodyStore.data[character.character_body_id] : undefined
+	);
 	const bodyStates = $derived(characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []);
 	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
 
 	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
-	const faceState = $derived(faceStateType ? faceStates.find((s) => s.type === faceStateType) : undefined);
+	const faceState = $derived(
+		faceStateType ? faceStates.find((s) => s.type === faceStateType) : undefined
+	);
 
 	// Body가 앞에 렌더링되는지
 	const isBodyInFront = $derived(bodyState?.in_front ?? false);
@@ -186,7 +196,7 @@
 
 <div
 	{...restProps}
-	class={cn('relative inline-flex items-center justify-center', className)}
+	class={cn('relative flex items-center justify-center', className)}
 	style:transform={flip ? `scale(${-scale}, ${scale})` : `scale(${scale})`}
 >
 	<!-- 선택 시 외곽선 레이어 -->
