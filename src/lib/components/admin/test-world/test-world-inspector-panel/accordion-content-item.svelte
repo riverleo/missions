@@ -10,6 +10,6 @@
 </script>
 
 <div class="flex items-center justify-between text-xs">
-	<div>{label}</div>
-	<div class="font-medium">{@render children()}</div>
+	<div class="text-muted-foreground">{label}</div>
+	<div class="flex items-center gap-2 font-medium">{@render children()}</div>
 </div>

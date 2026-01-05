@@ -12,7 +12,7 @@
 		AccordionTrigger,
 	} from '$lib/components/ui/accordion';
 	import { Button } from '$lib/components/ui/button';
-	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
+	import AccordionContentItem from './accordion-content-item.svelte';
 	import WorldCharacterEntityAccordionItem from './accordion-item-world-character-entity.svelte';
 	import WorldBuildingEntityAccordionItem from './accordion-item-world-building-entity.svelte';
 	import WorldItemEntityAccordionItem from './accordion-item-world-item-entity.svelte';
@@ -58,19 +58,17 @@
 	<AccordionItem value="world">
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
-			<TestWorldInspectorItem label="현재 틱">
-				<div class="flex items-center gap-2">
-					{currentTick}
-					<Button
-						size="sm"
-						variant="ghost"
-						class="h-auto rounded-sm px-2 py-1 text-xs"
-						onclick={onResetTick}
-					>
-						초기화
-					</Button>
-				</div>
-			</TestWorldInspectorItem>
+			<AccordionContentItem label="현재 틱">
+				{currentTick}
+				<Button
+					size="sm"
+					variant="ghost"
+					class="h-auto rounded-sm px-2 py-1 text-xs"
+					onclick={onResetTick}
+				>
+					초기화
+				</Button>
+			</AccordionContentItem>
 		</AccordionContent>
 	</AccordionItem>
 

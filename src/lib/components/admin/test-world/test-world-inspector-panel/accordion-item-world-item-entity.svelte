@@ -7,7 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { IconTrash } from '@tabler/icons-svelte';
-	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
+	import AccordionContentItem from './accordion-content-item.svelte';
 
 	interface Props {
 		entity: WorldItemEntity;
@@ -45,10 +45,10 @@
 	</AccordionTrigger>
 	<AccordionContent class="flex flex-col gap-3 pb-3">
 		<Separator />
-		<TestWorldInspectorItem label="좌표와 각도">
+		<AccordionContentItem label="좌표와 각도">
 			({Math.round(entity.x)}, {Math.round(entity.y)}), {Math.round(
 				(entity.angle * 180) / Math.PI
 			)}°
-		</TestWorldInspectorItem>
+		</AccordionContentItem>
 	</AccordionContent>
 </AccordionItem>

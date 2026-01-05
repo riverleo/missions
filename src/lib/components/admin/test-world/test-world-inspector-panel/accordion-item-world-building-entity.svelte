@@ -7,7 +7,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { IconTrash } from '@tabler/icons-svelte';
-	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
+	import AccordionContentItem from './accordion-content-item.svelte';
 
 	interface Props {
 		entity: WorldBuildingEntity;
@@ -47,8 +47,8 @@
 	</AccordionTrigger>
 	<AccordionContent class="flex flex-col gap-3 pb-3">
 		<Separator />
-		<TestWorldInspectorItem label="타일 좌표">
+		<AccordionContentItem label="타일 좌표">
 			({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
-		</TestWorldInspectorItem>
+		</AccordionContentItem>
 	</AccordionContent>
 </AccordionItem>
