@@ -2,6 +2,7 @@
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useWorld } from '$lib/hooks/use-world';
 
 	interface Props {
@@ -11,13 +12,23 @@
 	let { entity }: Props = $props();
 
 	const { store: characterStore } = useCharacter();
+	const { store: characterBodyStore } = useCharacterBody();
 	const { worldCharacterStore, selectedEntityIdStore } = useWorld();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.id]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
+	const characterBody = $derived(
+		character ? $characterBodyStore.data[character.character_body_id] : undefined
+	);
 	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
+
+	// 스프라이트 위치 계산 (바디 바닥 = 스프라이트 바닥)
+	const spriteX = $derived(entity.x + (characterBody?.collider_offset_x ?? 0));
+	const spriteY = $derived(
+		entity.y + entity.height / 2 + (characterBody?.collider_offset_y ?? 0)
+	);
 
 	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
 	const pathString = $derived.by(() => {
@@ -50,7 +61,7 @@
 		faceStateType="idle"
 		flip={entity.direction === 'right'}
 		{selected}
-		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x}px; top: {entity.y}px; opacity: {opacity};"
+		class="pointer-events-none absolute -translate-x-1/2 -translate-y-full"
+		style="left: {spriteX}px; top: {spriteY}px; opacity: {opacity};"
 	/>
 {/if}

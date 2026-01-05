@@ -208,6 +208,8 @@ export type Database = {
       }
       buildings: {
         Row: {
+          collider_offset_x: number
+          collider_offset_y: number
           created_at: string
           created_by: string | null
           id: string
@@ -219,6 +221,8 @@ export type Database = {
           tile_rows: number
         }
         Insert: {
+          collider_offset_x?: number
+          collider_offset_y?: number
           created_at?: string
           created_by?: string | null
           id?: string
@@ -230,6 +234,8 @@ export type Database = {
           tile_rows?: number
         }
         Update: {
+          collider_offset_x?: number
+          collider_offset_y?: number
           created_at?: string
           created_by?: string | null
           id?: string
@@ -315,6 +321,8 @@ export type Database = {
       character_bodies: {
         Row: {
           collider_height: number
+          collider_offset_x: number
+          collider_offset_y: number
           collider_type: Database["public"]["Enums"]["collider_type"]
           collider_width: number
           created_at: string
@@ -325,6 +333,8 @@ export type Database = {
         }
         Insert: {
           collider_height?: number
+          collider_offset_x?: number
+          collider_offset_y?: number
           collider_type?: Database["public"]["Enums"]["collider_type"]
           collider_width?: number
           created_at?: string
@@ -335,6 +345,8 @@ export type Database = {
         }
         Update: {
           collider_height?: number
+          collider_offset_x?: number
+          collider_offset_y?: number
           collider_type?: Database["public"]["Enums"]["collider_type"]
           collider_width?: number
           created_at?: string
@@ -1162,6 +1174,8 @@ export type Database = {
       items: {
         Row: {
           collider_height: number
+          collider_offset_x: number
+          collider_offset_y: number
           collider_type: Database["public"]["Enums"]["collider_type"]
           collider_width: number
           created_at: string
@@ -1174,6 +1188,8 @@ export type Database = {
         }
         Insert: {
           collider_height?: number
+          collider_offset_x?: number
+          collider_offset_y?: number
           collider_type?: Database["public"]["Enums"]["collider_type"]
           collider_width?: number
           created_at?: string
@@ -1186,6 +1202,8 @@ export type Database = {
         }
         Update: {
           collider_height?: number
+          collider_offset_x?: number
+          collider_offset_y?: number
           collider_type?: Database["public"]["Enums"]["collider_type"]
           collider_width?: number
           created_at?: string

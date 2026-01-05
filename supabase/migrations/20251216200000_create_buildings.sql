@@ -7,6 +7,8 @@ create table buildings (
   tile_rows integer not null default 0,
   item_max_capacity integer not null default 0,
   scale real not null default 1.0,
+  collider_offset_x real not null default 0,
+  collider_offset_y real not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 

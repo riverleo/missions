@@ -26,6 +26,8 @@ create table character_bodies (
   collider_type collider_type not null default 'circle',
   collider_width real not null default 0,
   collider_height real not null default 0,
+  collider_offset_x real not null default 0,
+  collider_offset_y real not null default 0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
