@@ -32,18 +32,26 @@
 	let selectedColliderType = $state(item.collider_type);
 
 	let scale = $state(item.scale.toString());
-	let width = $state(item.collider_width.toString());
-	let height = $state(item.collider_height.toString());
+	let colliderWidth = $state(item.collider_width.toString());
+	let colliderHeight = $state(item.collider_height.toString());
+	let colliderOffsetX = $state(item.collider_offset_x.toString());
+	let colliderOffsetY = $state(item.collider_offset_y.toString());
 
 	// item prop 변경 시 상태 동기화
 	$effect(() => {
 		scale = item.scale.toString();
 	});
 	$effect(() => {
-		width = item.collider_width.toString();
+		colliderWidth = item.collider_width.toString();
 	});
 	$effect(() => {
-		height = item.collider_height.toString();
+		colliderHeight = item.collider_height.toString();
+	});
+	$effect(() => {
+		colliderOffsetX = item.collider_offset_x.toString();
+	});
+	$effect(() => {
+		colliderOffsetY = item.collider_offset_y.toString();
 	});
 	$effect(() => {
 		selectedColliderType = item.collider_type;
@@ -62,22 +70,32 @@
 		}
 	}
 
-	async function updateDimensions() {
-		const newWidth = parseFloat(width) || 32.0;
-		const newHeight = parseFloat(height) || 32.0;
+	async function updateCollider() {
+		const newColliderWidth = parseFloat(colliderWidth) || 0;
+		const newColliderHeight = parseFloat(colliderHeight) || 0;
+		const newColliderOffsetX = parseFloat(colliderOffsetX) || 0;
+		const newColliderOffsetY = parseFloat(colliderOffsetY) || 0;
 
-		if (newWidth === item.collider_width && newHeight === item.collider_height) return;
+		if (
+			newColliderWidth === item.collider_width &&
+			newColliderHeight === item.collider_height &&
+			newColliderOffsetX === item.collider_offset_x &&
+			newColliderOffsetY === item.collider_offset_y
+		)
+			return;
 
 		await admin.update(item.id, {
-			collider_width: newWidth,
-			collider_height: newHeight,
+			collider_width: newColliderWidth,
+			collider_height: newColliderHeight,
+			collider_offset_x: newColliderOffsetX,
+			collider_offset_y: newColliderOffsetY,
 		});
 	}
 
-	function onkeydownDimensions(e: KeyboardEvent) {
+	function onkeydownCollider(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
-			updateDimensions();
+			updateCollider();
 		}
 	}
 
@@ -138,26 +156,38 @@
 			</DropdownMenu>
 		</InputGroupAddon>
 		<InputGroupInput
-			bind:value={width}
+			bind:value={colliderWidth}
 			type="number"
-			step="0.01"
-			min="0"
 			class="w-16"
 			placeholder={selectedColliderType === 'circle' ? '반지름' : '넓이'}
-			onkeydown={onkeydownDimensions}
+			onkeydown={onkeydownCollider}
 		/>
 		{#if selectedColliderType === 'rectangle'}
 			<InputGroupText><IconX /></InputGroupText>
 			<InputGroupInput
-				bind:value={height}
+				bind:value={colliderHeight}
 				type="number"
-				step="0.01"
-				min="0"
 				class="w-16"
 				placeholder="높이"
-				onkeydown={onkeydownDimensions}
+				onkeydown={onkeydownCollider}
 			/>
 		{/if}
+		<InputGroupText>오프셋</InputGroupText>
+		<InputGroupInput
+			bind:value={colliderOffsetX}
+			type="number"
+			class="w-16"
+			placeholder="X"
+			onkeydown={onkeydownCollider}
+		/>
+		<InputGroupText><IconX /></InputGroupText>
+		<InputGroupInput
+			bind:value={colliderOffsetY}
+			type="number"
+			class="w-16"
+			placeholder="Y"
+			onkeydown={onkeydownCollider}
+		/>
 		<InputGroupAddon align="inline-end">
 			<Tooltip>
 				<TooltipTrigger>
@@ -174,7 +204,7 @@
 				</TooltipTrigger>
 				<TooltipContent>크기 확인하기</TooltipContent>
 			</Tooltip>
-			<InputGroupButton onclick={updateDimensions} variant="ghost">저장</InputGroupButton>
+			<InputGroupButton onclick={updateCollider} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

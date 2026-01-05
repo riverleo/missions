@@ -178,25 +178,22 @@
 			<SpriteAnimatorRenderer {animator} resolution={2} />
 		{/if}
 	{/snippet}
-	{#snippet overlay()}
+	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && body && (body.collider_width > 0 || body.collider_height > 0)}
-			<svg class="pointer-events-none absolute inset-0 h-full w-full">
+			<svg
+				width={body.collider_width}
+				height={body.collider_height}
+				style="transform: translate({-body.collider_offset_x}px, {-body.collider_offset_y}px);"
+			>
 				{#if body.collider_type === 'circle'}
 					<circle
-						cx="50%"
-						cy="50%"
+						cx={body.collider_width / 2}
+						cy={body.collider_height / 2}
 						r={body.collider_width / 2}
 						fill="rgba(0, 255, 0, 0.5)"
 					/>
 				{:else}
-					<rect
-						x="50%"
-						y="50%"
-						width={body.collider_width}
-						height={body.collider_height}
-						transform="translate(-{body.collider_width / 2}, -{body.collider_height / 2})"
-						fill="rgba(0, 255, 0, 0.5)"
-					/>
+					<rect width={body.collider_width} height={body.collider_height} fill="rgba(0, 255, 0, 0.5)" />
 				{/if}
 			</svg>
 		{/if}

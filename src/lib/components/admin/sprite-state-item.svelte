@@ -45,11 +45,11 @@
 		onchange: (change: SpriteStateChange) => void;
 		ondelete?: () => void;
 		preview?: Snippet;
-		overlay?: Snippet;
+		collider?: Snippet;
 		headerAction?: Snippet;
 	}
 
-	let { type, label, spriteState, onchange, ondelete, preview, overlay, headerAction }: Props =
+	let { type, label, spriteState, onchange, ondelete, preview, collider, headerAction }: Props =
 		$props();
 
 	const atlasNames = Object.keys(atlases);
@@ -106,8 +106,10 @@
 				{:else}
 					<Skeleton class="h-full w-full" />
 				{/if}
-				{#if overlay}
-					{@render overlay()}
+				{#if collider}
+					<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+						{@render collider()}
+					</div>
 				{/if}
 			</div>
 		</AspectRatio>

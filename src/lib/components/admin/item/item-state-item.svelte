@@ -47,25 +47,22 @@
 	{#snippet preview()}
 		<ItemSpriteAnimator itemId={itemId as ItemId} stateType={type} resolution={2} />
 	{/snippet}
-	{#snippet overlay()}
+	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}
-			<svg class="pointer-events-none absolute inset-0 h-full w-full">
+			<svg
+				width={item.collider_width}
+				height={item.collider_height}
+				style="transform: translate({-item.collider_offset_x}px, {-item.collider_offset_y}px);"
+			>
 				{#if item.collider_type === 'circle'}
 					<circle
-						cx="50%"
-						cy="50%"
+						cx={item.collider_width / 2}
+						cy={item.collider_height / 2}
 						r={item.collider_width / 2}
 						fill="rgba(255, 255, 0, 0.5)"
 					/>
 				{:else}
-					<rect
-						x="50%"
-						y="50%"
-						width={item.collider_width}
-						height={item.collider_height}
-						transform="translate(-{item.collider_width / 2}, -{item.collider_height / 2})"
-						fill="rgba(255, 255, 0, 0.5)"
-					/>
+					<rect width={item.collider_width} height={item.collider_height} fill="rgba(255, 255, 0, 0.5)" />
 				{/if}
 			</svg>
 		{/if}

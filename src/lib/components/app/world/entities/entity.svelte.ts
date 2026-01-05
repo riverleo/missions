@@ -51,7 +51,7 @@ export abstract class Entity {
 		colliderHeight: number,
 		x: number,
 		y: number,
-		bodyDefinition: Matter.IBodyDefinition
+		bodyDefinition: Matter.IChamferableBodyDefinition
 	): Matter.Body {
 		// Entity 상태 설정
 		this.colliderType = colliderType;
@@ -60,7 +60,7 @@ export abstract class Entity {
 		this.x = x;
 		this.y = y;
 
-		const baseOptions: Matter.IBodyDefinition = {
+		const baseOptions: Matter.IChamferableBodyDefinition = {
 			label: this.id,
 			render: {
 				visible: this.world.debug,
@@ -72,7 +72,7 @@ export abstract class Entity {
 			const radius = colliderWidth / 2;
 			return Bodies.circle(x, y, radius, baseOptions);
 		} else {
-			return Bodies.rectangle(x, y, colliderWidth, colliderHeight, baseOptions as Matter.IChamferableBodyDefinition);
+			return Bodies.rectangle(x, y, colliderWidth, colliderHeight, baseOptions);
 		}
 	}
 

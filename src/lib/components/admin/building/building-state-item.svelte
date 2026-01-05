@@ -64,11 +64,9 @@
 			<BuildingSpriteAnimator buildingId={buildingId as BuildingId} stateType={type} resolution={2} />
 		{/if}
 	{/snippet}
-	{#snippet overlay()}
+	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && building}
-			<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
-			</div>
+			<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
 		{/if}
 	{/snippet}
 </SpriteStateItem>
