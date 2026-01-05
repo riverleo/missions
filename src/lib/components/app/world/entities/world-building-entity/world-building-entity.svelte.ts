@@ -38,37 +38,22 @@ export class WorldBuildingEntity extends Entity {
 		const width = building.tile_cols * TILE_SIZE;
 		const height = building.tile_rows * TILE_SIZE;
 
-		// 초기 크기 설정
-		this.colliderWidth = width;
-		this.colliderHeight = height;
-
 		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
 		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
 		const leftTopY = worldBuilding.tile_y * TILE_SIZE;
 		const x = leftTopX + width / 2;
 		const y = leftTopY + height / 2;
 
-		// 바디 생성
-		this.body = this.createBody(width, height, x, y);
-
-		// 초기 위치 설정
-		this.x = x;
-		this.y = y;
-		this.angle = 0;
-	}
-
-	private createBody(width: number, height: number, x: number, y: number): Matter.Body {
-		return Bodies.rectangle(x, y, width, height, {
-			label: this.id,
+		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
+		this.body = this.createBody('rectangle', width, height, x, y, {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
-			render: {
-				visible: this.world.debug,
-			},
 		});
+
+		this.angle = 0;
 	}
 
 	get building(): Building | undefined {
@@ -102,16 +87,14 @@ export class WorldBuildingEntity extends Entity {
 			// 월드에서 기존 바디 제거
 			Matter.Composite.remove(this.world.engine.world, this.body);
 
-			// 새 바디 생성
-			this.body = this.createBody(newWidth, newHeight, x, y);
-
-			// 위치 업데이트
-			this.x = x;
-			this.y = y;
-
-			// 크기 업데이트
-			this.colliderWidth = newWidth;
-			this.colliderHeight = newHeight;
+			// 새 바디 생성 (위치 및 크기 상태도 함께 설정됨)
+			this.body = this.createBody('rectangle', newWidth, newHeight, x, y, {
+				isStatic: true,
+				collisionFilter: {
+					category: CATEGORY_BUILDING,
+					mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
+				},
+			});
 
 			// 월드에 새 바디 추가
 			Matter.Composite.add(this.world.engine.world, this.body);

@@ -33,49 +33,25 @@ export class WorldCharacterEntity extends Entity {
 			throw new Error(`Cannot create WorldCharacterEntity: missing data for id ${id}`);
 		}
 
-		// 초기 collider 설정
-		this.colliderType = characterBody.collider_type;
-		this.colliderWidth = characterBody.collider_width;
-		this.colliderHeight = characterBody.collider_height;
+		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
+		this.body = this.createBody(
+			characterBody.collider_type,
+			characterBody.collider_width,
+			characterBody.collider_height,
+			worldCharacter.x,
+			worldCharacter.y,
+			{
+				restitution: 0.1,
+				friction: 0.8,
+				inertia: Infinity,
+				collisionFilter: {
+					category: CATEGORY_CHARACTER,
+					mask: CATEGORY_WALL | CATEGORY_TERRAIN,
+				},
+			}
+		);
 
-		// 바디 생성
-		this.body = this.createBody(characterBody.collider_width, characterBody.collider_height);
-
-		// 바디 위치 설정
-		Body.setPosition(this.body, { x: worldCharacter.x, y: worldCharacter.y });
-
-		// 초기 위치 설정
-		this.x = worldCharacter.x;
-		this.y = worldCharacter.y;
 		this.angle = 0;
-	}
-
-	private createBody(width: number, height: number): Matter.Body {
-		const characterBody = this.characterBody;
-		if (!characterBody) {
-			throw new Error('Cannot create body: characterBody not found');
-		}
-
-		const options = {
-			label: this.id,
-			restitution: 0.1,
-			friction: 0.8,
-			inertia: Infinity,
-			collisionFilter: {
-				category: CATEGORY_CHARACTER,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN,
-			},
-			render: {
-				visible: this.world.debug,
-			},
-		};
-
-		if (characterBody.collider_type === 'circle') {
-			const radius = width / 2;
-			return Bodies.circle(0, 0, radius, options);
-		} else {
-			return Bodies.rectangle(0, 0, width, height, options);
-		}
 	}
 
 	get characterBody(): CharacterBody | undefined {
@@ -108,20 +84,29 @@ export class WorldCharacterEntity extends Entity {
 			Composite.remove(this.world.engine.world, this.body);
 
 			// 새 바디 생성
-			this.body = this.createBody(characterBody.collider_width, characterBody.collider_height);
+			this.body = this.createBody(
+				characterBody.collider_type,
+				characterBody.collider_width,
+				characterBody.collider_height,
+				currentPosition.x,
+				currentPosition.y,
+				{
+					restitution: 0.1,
+					friction: 0.8,
+					inertia: Infinity,
+					collisionFilter: {
+						category: CATEGORY_CHARACTER,
+						mask: CATEGORY_WALL | CATEGORY_TERRAIN,
+					},
+				}
+			);
 
-			// 위치/속도/각도 복원
-			Body.setPosition(this.body, currentPosition);
+			// 속도/각도 복원
 			Body.setVelocity(this.body, currentVelocity);
 			Body.setAngle(this.body, currentAngle);
 
 			// 월드에 새 바디 추가
 			Composite.add(this.world.engine.world, this.body);
-
-			// collider 상태 업데이트
-			this.colliderType = characterBody.collider_type;
-			this.colliderWidth = characterBody.collider_width;
-			this.colliderHeight = characterBody.collider_height;
 		}
 	}
 

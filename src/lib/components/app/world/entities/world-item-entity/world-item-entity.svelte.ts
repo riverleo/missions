@@ -33,44 +33,16 @@ export class WorldItemEntity extends Entity {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${id}`);
 		}
 
-		// 초기 collider 설정
-		this.colliderType = item.collider_type;
-		this.colliderWidth = item.collider_width;
-		this.colliderHeight = item.collider_height;
-
-		// 바디 생성
-		this.body = this.createBody(item.collider_width, item.collider_height, worldItem.x, worldItem.y);
-
-		// 초기 위치 설정
-		this.x = worldItem.x;
-		this.y = worldItem.y;
-		this.angle = worldItem.rotation;
-	}
-
-	private createBody(width: number, height: number, x: number, y: number): Matter.Body {
-		const item = this.item;
-		if (!item) {
-			throw new Error('Cannot create body: item not found');
-		}
-
-		const options = {
-			label: this.id,
+		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
+		this.body = this.createBody(item.collider_type, item.collider_width, item.collider_height, worldItem.x, worldItem.y, {
 			isStatic: false,
 			collisionFilter: {
 				category: CATEGORY_ITEM,
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
 			},
-			render: {
-				visible: this.world.debug,
-			},
-		};
+		});
 
-		if (item.collider_type === 'circle') {
-			const radius = width / 2;
-			return Bodies.circle(x, y, radius, options);
-		} else {
-			return Bodies.rectangle(x, y, width, height, options);
-		}
+		this.angle = worldItem.rotation;
 	}
 
 	get item(): Item | undefined {
@@ -98,8 +70,21 @@ export class WorldItemEntity extends Entity {
 			// 월드에서 기존 바디 제거
 			Matter.Composite.remove(this.world.engine.world, this.body);
 
-			// 새 바디 생성
-			this.body = this.createBody(item.collider_width, item.collider_height, currentPosition.x, currentPosition.y);
+			// 새 바디 생성 (위치 및 크기 상태도 함께 설정됨)
+			this.body = this.createBody(
+				item.collider_type,
+				item.collider_width,
+				item.collider_height,
+				currentPosition.x,
+				currentPosition.y,
+				{
+					isStatic: false,
+					collisionFilter: {
+						category: CATEGORY_ITEM,
+						mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
+					},
+				}
+			);
 
 			// 속도/각도 복원
 			Matter.Body.setVelocity(this.body, currentVelocity);
@@ -107,11 +92,6 @@ export class WorldItemEntity extends Entity {
 
 			// 월드에 새 바디 추가
 			Matter.Composite.add(this.world.engine.world, this.body);
-
-			// collider 상태 업데이트
-			this.colliderType = item.collider_type;
-			this.colliderWidth = item.collider_width;
-			this.colliderHeight = item.collider_height;
 		}
 	}
 
