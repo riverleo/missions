@@ -92,7 +92,6 @@ function createTestWorldStore() {
 		store.update((state) => ({
 			...state,
 			selectedEntityId: state.selectedEntityId === entityId ? undefined : entityId,
-			eraser: false,
 		}));
 
 		// useWorld의 selectedEntityIdStore 클리어 (store 업데이트 후에)
@@ -102,14 +101,6 @@ function createTestWorldStore() {
 
 	function setDebug(debug: boolean) {
 		store.update((state) => ({ ...state, debug }));
-	}
-
-	function setEraser(eraser: boolean) {
-		store.update((state) => ({
-			...state,
-			eraser,
-			selectedEntityId: undefined,
-		}));
 	}
 
 	function setOpen(open: boolean) {
@@ -269,7 +260,6 @@ function createTestWorldStore() {
 		selectTerrain,
 		selectEntity,
 		setDebug,
-		setEraser,
 		setOpen,
 		setModalPosition,
 		setPanelsOpen,

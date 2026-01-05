@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { IconBug, IconEraser, IconX, IconLayoutSidebar } from '@tabler/icons-svelte';
+	import { IconBug, IconX, IconLayoutSidebar } from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
-	const { store, setOpen, setModalPosition, setDebug, setEraser, setPanelsOpen } = useWorldTest();
+	const { store, setOpen, setModalPosition, setDebug, setPanelsOpen } = useWorldTest();
 
 	const panelsOpen = $derived($store.commandPanelOpen && $store.inspectorPanelOpen);
 
@@ -61,15 +61,10 @@
 		<ToggleGroup
 			size="sm"
 			type="multiple"
-			value={[
-				...(panelsOpen ? ['panels'] : []),
-				...($store.debug ? ['debug'] : []),
-				...($store.eraser ? ['eraser'] : []),
-			]}
+			value={[...(panelsOpen ? ['panels'] : []), ...($store.debug ? ['debug'] : [])]}
 			onValueChange={(values) => {
 				setPanelsOpen(values.includes('panels'));
 				setDebug(values.includes('debug'));
-				setEraser(values.includes('eraser'));
 			}}
 		>
 			<ToggleGroupItem value="panels" size="sm">
@@ -77,9 +72,6 @@
 			</ToggleGroupItem>
 			<ToggleGroupItem value="debug" size="sm">
 				<IconBug />
-			</ToggleGroupItem>
-			<ToggleGroupItem value="eraser" size="sm">
-				<IconEraser />
 			</ToggleGroupItem>
 		</ToggleGroup>
 		<ButtonGroup>

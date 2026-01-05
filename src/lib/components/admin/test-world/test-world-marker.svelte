@@ -12,15 +12,7 @@
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
 
-	const {
-		store,
-		addWorldCharacter,
-		addWorldBuilding,
-		addWorldItem,
-		removeWorldCharacter,
-		removeWorldBuilding,
-		removeWorldItem,
-	} = useWorldTest();
+	const { store, addWorldCharacter, addWorldBuilding, addWorldItem } = useWorldTest();
 	const world = useWorldContext();
 	const { worldStore, selectedEntityIdStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
@@ -83,101 +75,46 @@
 	});
 
 	function onclickEntityOverlay() {
-		if (!$store.selectedEntityId) return;
-
 		const worldPos = world.camera.screenToWorld(mouseX, mouseY);
 		if (!worldPos) return;
 
-		const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
+		// useWorldTest에서 선택한 엔티티가 있으면 배치
+		if ($store.selectedEntityId) {
+			const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
 
-		if (type === 'building') {
-			// 겹치는 셀이 있으면 배치하지 않음
-			if (!world.blueprint.canPlace) return;
-			const building = $buildingStore.data[id as BuildingId];
-			if (!building) return;
-			const { tileX, tileY } = snapPointToTopLeftTile(
-				worldPos.x,
-				worldPos.y,
-				building.tile_cols,
-				building.tile_rows
-			);
-			addWorldBuilding(building.id, tileX, tileY);
-		} else if (type === 'character') {
-			addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);
-		} else if (type === 'item') {
-			addWorldItem(id as ItemId, worldPos.x, worldPos.y);
-		}
-	}
-
-	function onclickEraserOverlay() {
-		const worldPos = world.camera.screenToWorld(mouseX, mouseY);
-		if (!worldPos) return;
-
-		// 클릭 위치에 있는 엔티티 찾기
-		for (const entity of Object.values(world.entities)) {
-			const dx = worldPos.x - entity.body.position.x;
-			const dy = worldPos.y - entity.body.position.y;
-
-			if (entity.type === 'character') {
-				const characterEntity = entity as WorldCharacterEntity;
-				const characterBody = characterEntity.characterBody;
-				if (!characterBody) continue;
-
-				const halfWidth = characterBody.collider_width / 2;
-				const halfHeight = characterBody.collider_height / 2;
-				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-					removeWorldCharacter(characterEntity.id);
-					return;
-				}
-			} else if (entity.type === 'building') {
-				const buildingEntity = entity as WorldBuildingEntity;
-				const width = buildingEntity.body.bounds.max.x - buildingEntity.body.bounds.min.x;
-				const height = buildingEntity.body.bounds.max.y - buildingEntity.body.bounds.min.y;
-				const halfWidth = width / 2;
-				const halfHeight = height / 2;
-				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-					removeWorldBuilding(buildingEntity.id);
-					return;
-				}
-			} else if (entity.type === 'item') {
-				const itemEntity = entity as WorldItemEntity;
-				const width = itemEntity.body.bounds.max.x - itemEntity.body.bounds.min.x;
-				const height = itemEntity.body.bounds.max.y - itemEntity.body.bounds.min.y;
-				const halfWidth = width / 2;
-				const halfHeight = height / 2;
-				if (Math.abs(dx) <= halfWidth && Math.abs(dy) <= halfHeight) {
-					removeWorldItem(itemEntity.id);
-					return;
-				}
+			if (type === 'building') {
+				// 겹치는 셀이 있으면 배치하지 않음
+				if (!world.blueprint.canPlace) return;
+				const building = $buildingStore.data[id as BuildingId];
+				if (!building) return;
+				const { tileX, tileY } = snapPointToTopLeftTile(
+					worldPos.x,
+					worldPos.y,
+					building.tile_cols,
+					building.tile_rows
+				);
+				addWorldBuilding(building.id, tileX, tileY);
+			} else if (type === 'character') {
+				addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);
+			} else if (type === 'item') {
+				addWorldItem(id as ItemId, worldPos.x, worldPos.y);
 			}
+			return;
 		}
-	}
 
-	// 통합된 오버레이 핸들러
-	function onclickOverlay(e: MouseEvent) {
-		if ($store.eraser) {
-			onclickEraserOverlay();
-		} else {
-			onclickEntityOverlay();
-		}
-	}
-
-	function oncontextmenuOverlay(e: MouseEvent) {
-		// 캐릭터 엔티티 선택 시 이동
+		// useWorld에서 선택한 캐릭터가 있으면 이동
 		const selectedEntityId = $selectedEntityIdStore.entityId;
-		if (EntityIdUtils.is('character', selectedEntityId) && isCommandPressed) {
-			e.preventDefault();
-
-			if (!selectedEntityId) return;
-			const worldPos = world.camera.screenToWorld(mouseX, mouseY);
-			if (!worldPos) return;
-
-			const { value: characterId } = EntityIdUtils.parse(selectedEntityId);
+		if (EntityIdUtils.is('character', selectedEntityId)) {
+			const { value: characterId } = EntityIdUtils.parse(selectedEntityId!);
 			const entity = world.entities[characterId];
 			if (entity && entity.type === 'character') {
 				(entity as WorldCharacterEntity).moveTo(worldPos.x, worldPos.y);
 			}
 		}
+	}
+
+	function onclickCommandOverlay(e: MouseEvent) {
+		onclickEntityOverlay();
 	}
 
 	function onmousemove(e: MouseEvent) {
@@ -205,8 +142,8 @@
 	<button
 		type="button"
 		class="pointer-events-auto absolute inset-0 border-2 border-emerald-400"
-		onclick={onclickOverlay}
-		oncontextmenu={oncontextmenuOverlay}
+		aria-label="커맨드 키를 누른 상태에서 오버레이"
+		onclick={onclickCommandOverlay}
 	></button>
 
 	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->

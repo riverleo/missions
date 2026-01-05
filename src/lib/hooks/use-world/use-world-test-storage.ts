@@ -25,7 +25,6 @@ export interface WorldTestStoreState {
 	modalX: number;
 	modalY: number;
 	debug: boolean;
-	eraser: boolean;
 	commandPanelOpen: boolean;
 	inspectorPanelOpen: boolean;
 }
@@ -45,7 +44,6 @@ const defaultState: WorldTestStoreState = {
 	modalX: 0,
 	modalY: 0,
 	debug: false,
-	eraser: false,
 	commandPanelOpen: true,
 	inspectorPanelOpen: true,
 };
@@ -65,7 +63,6 @@ export function loadFromStorage(): StoredState {
 				modalX: stored.modalX ?? defaultState.modalX,
 				modalY: stored.modalY ?? defaultState.modalY,
 				debug: stored.debug ?? defaultState.debug,
-				eraser: stored.eraser ?? defaultState.eraser,
 				commandPanelOpen: stored.commandPanelOpen ?? defaultState.commandPanelOpen,
 				inspectorPanelOpen: stored.inspectorPanelOpen ?? defaultState.inspectorPanelOpen,
 				worlds: stored.worlds,

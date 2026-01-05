@@ -15,8 +15,9 @@
 		AccordionTrigger,
 	} from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
-	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { IconTrash } from '@tabler/icons-svelte';
+	import TestWorldInspectorItem from './test-world-inspector-item.svelte';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -24,7 +25,7 @@
 
 	let { worldContext }: Props = $props();
 
-	const { store } = useWorldTest();
+	const { store, removeWorldCharacter, removeWorldBuilding, removeWorldItem } = useWorldTest();
 	const {
 		worldCharacterStore,
 		worldBuildingStore,
@@ -93,10 +94,23 @@
 				? $characterStore.data[worldCharacter.character_id]
 				: undefined}
 			<AccordionItem value={characterEntity.toEntityId()}>
-				<AccordionTrigger class="py-3 text-xs">
-					<div class="flex items-center gap-2">
-						{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
-						<Badge variant="secondary">캐릭터</Badge>
+				<AccordionTrigger class="gap-3 py-3 text-xs">
+					<div class="flex flex-1 items-center justify-between">
+						<div>
+							{characterData?.name ?? '캐릭터'} ({characterEntity.id.split('-')[0]})
+							<Badge variant="secondary">캐릭터</Badge>
+						</div>
+						<Button
+							size="icon-sm"
+							variant="ghost"
+							class="size-3"
+							onclick={(e) => {
+								e.stopPropagation();
+								removeWorldCharacter(characterEntity.id);
+							}}
+						>
+							<IconTrash />
+						</Button>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
@@ -112,10 +126,23 @@
 				? $buildingStore.data[worldBuilding.building_id]
 				: undefined}
 			<AccordionItem value={buildingEntity.toEntityId()}>
-				<AccordionTrigger class="py-3 text-xs">
-					<div class="flex items-center gap-2">
-						{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
-						<Badge variant="secondary">건물</Badge>
+				<AccordionTrigger class="gap-3 py-3 text-xs">
+					<div class="flex flex-1 items-center justify-between">
+						<div>
+							{buildingData?.name ?? '건물'} ({buildingEntity.id.split('-')[0]})
+							<Badge variant="secondary">건물</Badge>
+						</div>
+						<Button
+							size="icon-sm"
+							variant="ghost"
+							class="size-3"
+							onclick={(e) => {
+								e.stopPropagation();
+								removeWorldBuilding(buildingEntity.id);
+							}}
+						>
+							<IconTrash />
+						</Button>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
@@ -129,10 +156,23 @@
 			{@const worldItem = $worldItemStore.data[itemEntity.id]}
 			{@const itemData = worldItem ? $itemStore.data[worldItem.item_id] : undefined}
 			<AccordionItem value={itemEntity.toEntityId()}>
-				<AccordionTrigger class="py-3 text-xs">
-					<div class="flex items-center gap-2">
-						{itemData?.name ?? '아이템'} ({itemEntity.id.split('-')[0]})
-						<Badge variant="secondary">아이템</Badge>
+				<AccordionTrigger class="gap-3 py-3 text-xs">
+					<div class="flex flex-1 items-center justify-between">
+						<div>
+							{itemData?.name ?? '아이템'} ({itemEntity.id.split('-')[0]})
+							<Badge variant="secondary">아이템</Badge>
+						</div>
+						<Button
+							size="icon-sm"
+							variant="ghost"
+							class="size-3"
+							onclick={(e) => {
+								e.stopPropagation();
+								removeWorldItem(itemEntity.id);
+							}}
+						>
+							<IconTrash />
+						</Button>
 					</div>
 				</AccordionTrigger>
 				<AccordionContent class="pb-3">
