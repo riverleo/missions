@@ -7,6 +7,7 @@
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getItemStateLabel } from '$lib/utils/state-label';
+	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
 		itemId: string;
@@ -15,12 +16,22 @@
 
 	let { itemId, type }: Props = $props();
 
-	const { store, stateStore, admin } = useItem();
+	const { store, stateStore, admin, openStateDialog } = useItem();
 	const { uiStore } = admin;
 
 	const item = $derived($store.data[itemId as ItemId]);
 	const itemStates = $derived($stateStore.data[itemId as ItemId] ?? []);
 	const itemState = $derived(itemStates.find((s) => s.type === type));
+
+	const durabilityPreview = $derived.by(() => {
+		if (type === 'idle') return undefined;
+
+		if (!itemState) return undefined;
+
+		if (!item?.max_durability_ticks) return '최대 내구도 없음';
+
+		return `내구도 (${itemState.min_durability.toLocaleString()}~${itemState.max_durability.toLocaleString()} 틱)`;
+	});
 
 	async function onchange(change: SpriteStateChange) {
 		if (itemState) {
@@ -33,6 +44,12 @@
 	async function ondelete() {
 		if (itemState) {
 			await admin.removeItemState(itemState.id, itemId as ItemId);
+		}
+	}
+
+	function onDurabilityClick() {
+		if (itemState) {
+			openStateDialog({ type: 'update', itemStateId: itemState.id });
 		}
 	}
 </script>
@@ -62,9 +79,25 @@
 						fill="rgba(255, 255, 0, 0.5)"
 					/>
 				{:else}
-					<rect width={item.collider_width} height={item.collider_height} fill="rgba(255, 255, 0, 0.5)" />
+					<rect
+						width={item.collider_width}
+						height={item.collider_height}
+						fill="rgba(255, 255, 0, 0.5)"
+					/>
 				{/if}
 			</svg>
+		{/if}
+	{/snippet}
+	{#snippet action()}
+		{#if durabilityPreview !== undefined}
+			<Button
+				variant="ghost"
+				size="sm"
+				disabled={!itemState || type === 'idle' || !item?.max_durability_ticks}
+				onclick={onDurabilityClick}
+			>
+				{durabilityPreview}
+			</Button>
 		{/if}
 	{/snippet}
 </SpriteStateItem>

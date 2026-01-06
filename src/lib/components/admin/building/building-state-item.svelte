@@ -35,7 +35,7 @@
 		if (type === 'idle') return undefined;
 
 		if (!condition) {
-			return '컨디션 선택 필요';
+			return '건물 상태 수정';
 		}
 
 		return `${condition.name} (${buildingState?.min_value}~${buildingState?.max_value})`;

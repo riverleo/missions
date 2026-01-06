@@ -39,10 +39,10 @@
 		if (type === 'idle') return undefined;
 
 		if (!need) {
-			return '욕구 선택 필요';
+			return '페이스 상태 수정';
 		}
 
-		return `${need.name} (${faceState.min_value}~${faceState.max_value})`;
+		return `${need.name} (${faceState?.min_value}~${faceState?.max_value})`;
 	});
 
 	async function onchange(change: SpriteStateChange) {

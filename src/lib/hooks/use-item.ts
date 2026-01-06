@@ -20,6 +20,8 @@ type ItemDialogState =
 	| { type: 'delete'; itemId: ItemId }
 	| undefined;
 
+type ItemStateDialogState = { type: 'update'; itemStateId: ItemStateId } | undefined;
+
 let instance: ReturnType<typeof createItemStore> | null = null;
 
 function createItemStore() {
@@ -37,6 +39,7 @@ function createItemStore() {
 	});
 
 	const dialogStore = writable<ItemDialogState>(undefined);
+	const stateDialogStore = writable<ItemStateDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -107,6 +110,14 @@ function createItemStore() {
 
 	function closeDialog() {
 		dialogStore.set(undefined);
+	}
+
+	function openStateDialog(state: NonNullable<ItemStateDialogState>) {
+		stateDialogStore.set(state);
+	}
+
+	function closeStateDialog() {
+		stateDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -246,10 +257,13 @@ function createItemStore() {
 		store: store as Readable<RecordFetchState<ItemId, Item>>,
 		stateStore: stateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
 		dialogStore: dialogStore as Readable<ItemDialogState>,
+		stateDialogStore: stateDialogStore as Readable<ItemStateDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
+		openStateDialog,
+		closeStateDialog,
 		admin,
 	};
 }

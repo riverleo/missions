@@ -11,6 +11,7 @@
 	import ItemCreateDialog from './item-create-dialog.svelte';
 	import ItemUpdateDialog from './item-update-dialog.svelte';
 	import ItemDeleteDialog from './item-delete-dialog.svelte';
+	import ItemStateUpdateDialog from './item-state-update-dialog.svelte';
 
 	const { openDialog } = useItem();
 	const currentItemId = $derived(page.params.itemId);
@@ -97,3 +98,4 @@
 <ItemCreateDialog />
 <ItemUpdateDialog />
 <ItemDeleteDialog />
+<ItemStateUpdateDialog />
