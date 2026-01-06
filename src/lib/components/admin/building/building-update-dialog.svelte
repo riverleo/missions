@@ -13,7 +13,7 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { IconHeading, IconBox } from '@tabler/icons-svelte';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
 	const { store, admin, dialogStore, closeDialog } = useBuilding();
@@ -84,12 +84,10 @@
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>
-							<IconBox />
-						</InputGroupText>
+						<InputGroupText>아이템 저장 수</InputGroupText>
 					</InputGroupAddon>
 					<InputGroupInput
-						placeholder="아이템 최대 소지 개수"
+						placeholder="숫자 입력"
 						type="number"
 						min="0"
 						bind:value={itemMaxCapacity}

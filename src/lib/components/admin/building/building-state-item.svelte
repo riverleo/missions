@@ -11,7 +11,6 @@
 	import { TILE_SIZE } from '$lib/components/app/world/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
-	import { IconSettings } from '@tabler/icons-svelte';
 	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {

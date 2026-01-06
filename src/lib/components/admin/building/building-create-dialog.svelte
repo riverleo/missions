@@ -13,7 +13,7 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { IconBuilding, IconHeading } from '@tabler/icons-svelte';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -25,11 +25,13 @@
 	const open = $derived($dialogStore?.type === 'create');
 
 	let name = $state('');
+	let itemMaxCapacity = $state('');
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open) {
 			name = '';
+			itemMaxCapacity = '';
 		}
 	});
 
@@ -45,8 +47,13 @@
 
 		isSubmitting = true;
 
+		const capacity = parseInt(itemMaxCapacity) || 0;
+
 		admin
-			.create({ name: name.trim() })
+			.create({
+				name: name.trim(),
+				item_max_capacity: capacity,
+			})
 			.then((building) => {
 				closeDialog();
 				goto(`/admin/scenarios/${scenarioId}/buildings/${building.id}`);
@@ -66,14 +73,29 @@
 			<DialogTitle>새로운 건물 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<InputGroupText><IconHeading /></InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput placeholder="이름" bind:value={name} />
-			</InputGroup>
+			<div class="flex flex-col gap-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput placeholder="건물 이름" bind:value={name} />
+				</InputGroup>
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>아이템 저장 수</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput
+						placeholder="숫자 입력"
+						type="number"
+						min="0"
+						bind:value={itemMaxCapacity}
+					/>
+				</InputGroup>
+			</div>
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !name.trim()}>
 					{isSubmitting ? '생성 중...' : '생성하기'}
 				</Button>
 			</DialogFooter>
