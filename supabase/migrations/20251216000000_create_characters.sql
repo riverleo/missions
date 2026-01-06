@@ -64,7 +64,7 @@ create policy "admins can delete character_bodies"
 create table character_body_states (
   id uuid primary key default gen_random_uuid(),
   body_id uuid not null references character_bodies(id) on delete cascade,
-  type character_body_state_type not null,
+  type character_body_state_type not null default 'idle',
   atlas_name text not null,
   frame_from integer,
   frame_to integer,
@@ -146,7 +146,7 @@ create policy "admins can delete characters"
 create table character_face_states (
   id uuid primary key default gen_random_uuid(),
   character_id uuid not null references characters(id) on delete cascade,
-  type character_face_state_type not null,
+  type character_face_state_type not null default 'idle',
   atlas_name text not null,
   frame_from integer,
   frame_to integer,
@@ -155,6 +155,12 @@ create table character_face_states (
   -- 얼굴 위치 offset (캐릭터별, 표정별로 세밀하게 조정)
   offset_x real not null default 0,
   offset_y real not null default 0,
+
+  -- 상태 활성화 조건 (need 기반)
+  need_id uuid references needs(id) on delete set null,
+  min_value real not null default 0,
+  max_value real not null default 100,
+  priority int not null default 0,
 
   constraint uq_character_face_states_character_id_type unique (character_id, type)
 );

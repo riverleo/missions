@@ -641,18 +641,21 @@ export type WorldCharacterUpdate = Omit<
 // BuildingState types
 export type BuildingStateType = Enums<'building_state_type'>;
 type BuildingStateRow = Tables<'building_states'>;
-export type BuildingState = Omit<BuildingStateRow, 'id' | 'building_id'> & {
+export type BuildingState = Omit<BuildingStateRow, 'id' | 'building_id' | 'condition_id'> & {
 	id: BuildingStateId;
 	building_id: BuildingId;
+	condition_id: ConditionId | null;
 };
 type BuildingStateInsertRow = TablesInsert<'building_states'>;
-export type BuildingStateInsert = Omit<BuildingStateInsertRow, 'building_id'> & {
+export type BuildingStateInsert = Omit<BuildingStateInsertRow, 'building_id' | 'condition_id'> & {
 	building_id: BuildingId;
+	condition_id?: ConditionId | null;
 };
 type BuildingStateUpdateRow = TablesUpdate<'building_states'>;
-export type BuildingStateUpdate = Omit<BuildingStateUpdateRow, 'id' | 'building_id'> & {
+export type BuildingStateUpdate = Omit<BuildingStateUpdateRow, 'id' | 'building_id' | 'condition_id'> & {
 	id?: BuildingStateId;
 	building_id?: BuildingId;
+	condition_id?: ConditionId | null;
 };
 
 // Building types

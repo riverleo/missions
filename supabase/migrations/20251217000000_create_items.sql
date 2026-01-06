@@ -49,12 +49,16 @@ create type item_state_type as enum ('idle', 'broken');
 create table item_states (
   id uuid primary key default gen_random_uuid(),
   item_id uuid not null references items(id) on delete cascade,
-  type item_state_type not null,
+  type item_state_type not null default 'idle',
   atlas_name text not null,
   frame_from integer,
   frame_to integer,
   fps integer,
   loop loop_mode not null default 'loop',
+
+  -- 상태 활성화 조건 (내구도 기반)
+  min_durability int not null default 0,
+  max_durability int not null default 100,
 
   constraint uq_item_states_item_id_type unique (item_id, type)
 );

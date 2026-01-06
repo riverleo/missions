@@ -28,7 +28,7 @@
 
 	const world = useWorldContext();
 	const { camera, event } = world;
-	const { worldStore, worldBuildingStore, worldCharacterStore } = useWorld();
+	const { worldStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
 	const { supabase } = useServerPayload();
 
@@ -52,7 +52,7 @@
 		camera.applyZoom(e.deltaY, e.clientX, e.clientY);
 	}
 
-	onMount(() => world.load({ element, width, height }));
+	onMount(() => world.load({ element, width: width, height: height }));
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
@@ -81,11 +81,7 @@
 		"
 	>
 		{#if terrainAssetUrl}
-			<img
-				src={terrainAssetUrl}
-				class="absolute inset-0 h-full w-full"
-				alt={terrain?.title}
-			/>
+			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
 		{/if}
 		{#if world.blueprint.cursor && terrain}
 			<WorldBlueprint width={terrain.width} height={terrain.height} />

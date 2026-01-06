@@ -92,7 +92,7 @@
 	{onchange}
 	{ondelete}
 >
-	{#snippet headerAction()}
+	{#snippet action()}
 		{#if faceState}
 			<InputGroup class="max-w-44">
 				<InputGroupAddon align="inline-start">

@@ -11,6 +11,7 @@
 	import BuildingCreateDialog from './building-create-dialog.svelte';
 	import BuildingUpdateDialog from './building-update-dialog.svelte';
 	import BuildingDeleteDialog from './building-delete-dialog.svelte';
+	import BuildingStateUpdateDialog from './building-state-update-dialog.svelte';
 
 	const { openDialog } = useBuilding();
 	const currentBuildingId = $derived(page.params.buildingId);
@@ -99,3 +100,4 @@
 <BuildingCreateDialog />
 <BuildingUpdateDialog />
 <BuildingDeleteDialog />
+<BuildingStateUpdateDialog />

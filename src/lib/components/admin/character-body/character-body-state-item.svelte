@@ -117,7 +117,7 @@
 	{onchange}
 	{ondelete}
 >
-	{#snippet headerAction()}
+	{#snippet action()}
 		{#if bodyState}
 			<ButtonGroup>
 				<ButtonGroup>

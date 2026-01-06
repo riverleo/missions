@@ -169,31 +169,43 @@ export type Database = {
         Row: {
           atlas_name: string
           building_id: string
+          condition_id: string | null
           fps: number | null
           frame_from: number | null
           frame_to: number | null
           id: string
           loop: Database["public"]["Enums"]["loop_mode"]
+          max_value: number
+          min_value: number
+          priority: number
           type: Database["public"]["Enums"]["building_state_type"]
         }
         Insert: {
           atlas_name: string
           building_id: string
+          condition_id?: string | null
           fps?: number | null
           frame_from?: number | null
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_value?: number
+          min_value?: number
+          priority?: number
           type: Database["public"]["Enums"]["building_state_type"]
         }
         Update: {
           atlas_name?: string
           building_id?: string
+          condition_id?: string | null
           fps?: number | null
           frame_from?: number | null
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_value?: number
+          min_value?: number
+          priority?: number
           type?: Database["public"]["Enums"]["building_state_type"]
         }
         Relationships: [
@@ -202,6 +214,13 @@ export type Database = {
             columns: ["building_id"]
             isOneToOne: false
             referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_states_condition_id_fkey"
+            columns: ["condition_id"]
+            isOneToOne: false
+            referencedRelation: "conditions"
             referencedColumns: ["id"]
           },
         ]
@@ -434,8 +453,12 @@ export type Database = {
           frame_to: number | null
           id: string
           loop: Database["public"]["Enums"]["loop_mode"]
+          max_value: number
+          min_value: number
+          need_id: string | null
           offset_x: number
           offset_y: number
+          priority: number
           type: Database["public"]["Enums"]["character_face_state_type"]
         }
         Insert: {
@@ -446,8 +469,12 @@ export type Database = {
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_value?: number
+          min_value?: number
+          need_id?: string | null
           offset_x?: number
           offset_y?: number
+          priority?: number
           type: Database["public"]["Enums"]["character_face_state_type"]
         }
         Update: {
@@ -458,8 +485,12 @@ export type Database = {
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_value?: number
+          min_value?: number
+          need_id?: string | null
           offset_x?: number
           offset_y?: number
+          priority?: number
           type?: Database["public"]["Enums"]["character_face_state_type"]
         }
         Relationships: [
@@ -468,6 +499,13 @@ export type Database = {
             columns: ["character_id"]
             isOneToOne: false
             referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_face_states_need_id_fkey"
+            columns: ["need_id"]
+            isOneToOne: false
+            referencedRelation: "needs"
             referencedColumns: ["id"]
           },
         ]
@@ -1139,6 +1177,8 @@ export type Database = {
           id: string
           item_id: string
           loop: Database["public"]["Enums"]["loop_mode"]
+          max_durability: number
+          min_durability: number
           type: Database["public"]["Enums"]["item_state_type"]
         }
         Insert: {
@@ -1149,6 +1189,8 @@ export type Database = {
           id?: string
           item_id: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_durability?: number
+          min_durability?: number
           type: Database["public"]["Enums"]["item_state_type"]
         }
         Update: {
@@ -1159,6 +1201,8 @@ export type Database = {
           id?: string
           item_id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
+          max_durability?: number
+          min_durability?: number
           type?: Database["public"]["Enums"]["item_state_type"]
         }
         Relationships: [
@@ -2391,6 +2435,161 @@ export type Database = {
           },
         ]
       }
+      terrains_tiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          scenario_id: string
+          terrain_id: string
+          tile_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scenario_id: string
+          terrain_id: string
+          tile_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scenario_id?: string
+          terrain_id?: string
+          tile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "terrains_tiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terrains_tiles_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terrains_tiles_terrain_id_fkey"
+            columns: ["terrain_id"]
+            isOneToOne: false
+            referencedRelation: "terrains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "terrains_tiles_tile_id_fkey"
+            columns: ["tile_id"]
+            isOneToOne: false
+            referencedRelation: "tiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tile_states: {
+        Row: {
+          atlas_name: string
+          created_at: string
+          created_by: string | null
+          fps: number | null
+          frame_from: number | null
+          frame_to: number | null
+          id: string
+          loop: Database["public"]["Enums"]["loop_mode"]
+          max_durability: number
+          min_durability: number
+          tile_id: string
+          type: Database["public"]["Enums"]["tile_state_type"]
+        }
+        Insert: {
+          atlas_name: string
+          created_at?: string
+          created_by?: string | null
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          max_durability?: number
+          min_durability?: number
+          tile_id: string
+          type?: Database["public"]["Enums"]["tile_state_type"]
+        }
+        Update: {
+          atlas_name?: string
+          created_at?: string
+          created_by?: string | null
+          fps?: number | null
+          frame_from?: number | null
+          frame_to?: number | null
+          id?: string
+          loop?: Database["public"]["Enums"]["loop_mode"]
+          max_durability?: number
+          min_durability?: number
+          tile_id?: string
+          type?: Database["public"]["Enums"]["tile_state_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tile_states_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tile_states_tile_id_fkey"
+            columns: ["tile_id"]
+            isOneToOne: false
+            referencedRelation: "tiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          scenario_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiles_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2756,7 +2955,6 @@ export type Database = {
           player_id: string
           rotation: number
           scenario_id: string
-          state: Database["public"]["Enums"]["item_state_type"]
           user_id: string
           world_building_id: string | null
           world_id: string
@@ -2772,7 +2970,6 @@ export type Database = {
           player_id: string
           rotation?: number
           scenario_id: string
-          state?: Database["public"]["Enums"]["item_state_type"]
           user_id?: string
           world_building_id?: string | null
           world_id: string
@@ -2788,7 +2985,6 @@ export type Database = {
           player_id?: string
           rotation?: number
           scenario_id?: string
-          state?: Database["public"]["Enums"]["item_state_type"]
           user_id?: string
           world_building_id?: string | null
           world_id?: string
@@ -2826,6 +3022,68 @@ export type Database = {
           },
           {
             foreignKeyName: "world_items_world_id_fkey"
+            columns: ["world_id"]
+            isOneToOne: false
+            referencedRelation: "worlds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      world_tile_maps: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          player_id: string
+          scenario_id: string
+          terrain_id: string
+          user_id: string
+          world_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          player_id: string
+          scenario_id: string
+          terrain_id: string
+          user_id: string
+          world_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          player_id?: string
+          scenario_id?: string
+          terrain_id?: string
+          user_id?: string
+          world_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "world_tile_maps_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_tile_maps_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_tile_maps_terrain_id_fkey"
+            columns: ["terrain_id"]
+            isOneToOne: false
+            referencedRelation: "terrains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_tile_maps_world_id_fkey"
             columns: ["world_id"]
             isOneToOne: false
             referencedRelation: "worlds"
@@ -2918,6 +3176,7 @@ export type Database = {
       player_scenario_status: "in_progress" | "completed"
       publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
+      tile_state_type: "idle"
       user_role_type: "admin"
     }
     CompositeTypes: {
@@ -3067,6 +3326,7 @@ export const Constants = {
       player_scenario_status: ["in_progress", "completed"],
       publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
+      tile_state_type: ["idle"],
       user_role_type: ["admin"],
     },
   },

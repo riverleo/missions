@@ -52,12 +52,18 @@ create type building_state_type as enum ('idle', 'damaged', 'planning');
 create table building_states (
   id uuid primary key default gen_random_uuid(),
   building_id uuid not null references buildings(id) on delete cascade,
-  type building_state_type not null,
+  type building_state_type not null default 'idle',
   atlas_name text not null,
   frame_from integer,
   frame_to integer,
   fps integer,
   loop loop_mode not null default 'loop',
+
+  -- 상태 활성화 조건
+  condition_id uuid references conditions(id) on delete set null,
+  min_value real not null default 0,
+  max_value real not null default 100,
+  priority int not null default 0,
 
   constraint uq_building_states_building_id_type unique (building_id, type)
 );

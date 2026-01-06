@@ -229,6 +229,29 @@
    - 예: 중복 레코드가 있으면 `.limit(1)` 같은 방법으로 회피하지 말고, DB에서 unique constraint로 원천 차단
    - 이유: 데이터가 실제로 꼬였을 때 애플리케이션에서 에러가 발생해야 문제를 감지할 수 있음
 
+1-0. **RLS 정책 네이밍 컨벤션**
+
+- 정책 이름은 **소문자로 시작**
+- 주체는 **복수형** 사용: `anyone`, `admins`, `players`, `owner or admin`
+- 예시:
+  ```sql
+  create policy "anyone can view tiles"
+    on tiles for select using (true);
+
+  create policy "admins can insert tiles"
+    on tiles for insert
+    to authenticated
+    with check (is_admin());
+
+  create policy "owner or admin can insert world_buildings"
+    on world_buildings for insert
+    to authenticated
+    with check (is_world_owner(world_id) or is_admin());
+  ```
+- **world_ 테이블의 RLS 패턴**: `is_world_owner(world_id)` 함수 사용
+  - `is_world_owner(wid uuid)`: 현재 유저가 해당 월드의 소유자인지 확인
+  - 정의 위치: `supabase/migrations/20251216100000_create_world_characters.sql`
+
 1-1. **DB default 값 우선 사용**
 
 - 테이블 컬럼에 default 값이 정의되어 있으면 애플리케이션에서 명시적으로 값을 넣지 말 것
@@ -265,6 +288,66 @@
 - 로컬 DB도 리셋하면 기존 데이터가 모두 삭제되므로 주의
 - `supabase db reset --linked` (원격 DB)는 Claude가 절대 실행하지 말 것
 
+4-2. **데이터베이스 헬퍼 함수**
+
+Migration 파일에서 정의된 헬퍼 함수들은 RLS 정책과 애플리케이션 로직에서 사용됩니다.
+
+**권한 확인 함수**:
+
+- `is_admin()`: 현재 유저가 관리자인지 확인
+  - 반환: `boolean`
+  - 용도: RLS 정책에서 admin 권한 체크
+  - 예시: `with check (is_admin())`
+  - 정의 위치: `20251201084039_create_user_roles.sql`
+
+- `is_me(target_user_id uuid)`: 특정 user_id가 현재 로그인한 유저인지 확인
+  - 반환: `boolean`
+  - 용도: 본인 데이터 확인
+  - 예시: `using (is_me(user_id))`
+  - 정의 위치: `20251201000000_create_helper_functions.sql`
+
+- `is_own_player(target_user_id uuid, target_player_id uuid)`: 특정 플레이어가 본인 플레이어인지 확인
+  - 반환: `boolean`
+  - 용도: 플레이어 데이터 권한 체크 (user_id와 player_id 모두 검증)
+  - 예시: `with check (is_own_player(user_id, player_id))`
+  - 정의 위치: `20251202181500_add_is_own_player_function.sql`
+
+- `is_world_owner(wid uuid)`: 현재 유저가 특정 월드의 소유자인지 확인
+  - 반환: `boolean`
+  - 용도: world_* 테이블 RLS 정책
+  - 예시: `with check (is_world_owner(world_id) or is_admin())`
+  - 정의 위치: `20251216100000_create_world_characters.sql`
+
+**유틸리티 함수**:
+
+- `current_user_role_id()`: 현재 유저의 user_role id 반환
+  - 반환: `uuid | null`
+  - 용도: Audit 컬럼 `created_by` 기본값
+  - 예시: `created_by uuid default current_user_role_id()`
+  - 정의 위치: `20251201084039_create_user_roles.sql`
+
+**트리거 함수**:
+
+- `update_updated_at()`: updated_at 컬럼을 현재 시각으로 자동 업데이트
+  - 반환: `trigger`
+  - 용도: UPDATE 트리거에서 사용
+  - 예시:
+    ```sql
+    create trigger update_users_updated_at
+      before update on users
+      for each row
+      execute function update_updated_at();
+    ```
+  - 정의 위치: `20251201000000_create_helper_functions.sql`
+
+- `create_player_rolled_dice_value()`: 주사위 굴림 시 자동으로 dice_id와 value 설정
+  - 반환: `trigger`
+  - 용도: INSERT 트리거에서 사용 (player_rolled_dices 테이블)
+  - 동작:
+    - `dice_id`가 null이면 기본 주사위로 설정
+    - `value`가 null이면 1 ~ faces 범위의 랜덤 값 생성
+  - 정의 위치: `20251204075000_create_dice_roll.sql`
+
 5. **Constraint 및 Index 명명 규칙**
    - 모든 constraint와 index는 명시적으로 이름을 지정할 것
    - Unique: `uq_<table_name>_<column_name>` (복수 컬럼: `uq_<table_name>_<col1>_<col2>`)
@@ -289,6 +372,59 @@
        constraint uq_users_email_name unique (email, name)
      );
      ```
+
+6-1. **Migration 파일 구조**
+
+- **테이블과 RLS를 번갈아 배치**: `[table] [rls] [table] [rls]` 패턴
+  - 테이블 정의 직후 해당 테이블의 RLS 정책을 바로 작성
+  - 이렇게 하면 가독성이 좋고, 관련 코드가 함께 모여있음
+- **Index는 나중에 추가**:
+  - 초기 migration에서는 index 생성을 생략
+  - 성능 테스트 후 필요한 index만 별도 migration으로 추가
+  - 이유: 조기 최적화를 피하고, 실제 성능 병목을 측정한 후 대응
+- 예시:
+
+  ```sql
+  -- 테이블 1
+  create table tiles (
+    id uuid primary key default gen_random_uuid(),
+    scenario_id uuid not null references scenarios(id) on delete cascade,
+    name text not null default '',
+
+    constraint uq_tiles_scenario_name unique (scenario_id, name)
+  );
+
+  -- 테이블 1의 RLS
+  alter table tiles enable row level security;
+
+  create policy "anyone can view tiles"
+    on tiles for select using (true);
+
+  create policy "admins can insert tiles"
+    on tiles for insert
+    to authenticated
+    with check (is_admin());
+
+  -- 테이블 2
+  create table tile_states (
+    id uuid primary key default gen_random_uuid(),
+    tile_id uuid not null references tiles(id) on delete cascade,
+    type tile_state_type not null default 'idle',
+
+    constraint uq_tile_states_tile_type unique (tile_id, type)
+  );
+
+  -- 테이블 2의 RLS
+  alter table tile_states enable row level security;
+
+  create policy "anyone can view tile_states"
+    on tile_states for select using (true);
+
+  create policy "admins can insert tile_states"
+    on tile_states for insert
+    to authenticated
+    with check (is_admin());
+  ```
 
 7. **테이블명과 관계 데이터 명명**
    - 테이블명은 복수형 사용 (예: `dices`, `narrative_dice_rolls`, `narratives`)
@@ -834,6 +970,157 @@ needs (욕구 정의)
 - **시각화**: 선 하나 위에 주민들이 살고 있는 모습
 - **주민**: 배고픔 상태, 행동 상태 등을 가짐
 - **건물**: 집 등 (돈으로 건설)
+
+### State 시스템 (공통 패턴)
+
+모든 엔티티(Building, Item, Tile)는 **상태(state) 시스템**을 가지며, 각 상태는 애니메이션과 활성화 조건을 정의합니다.
+
+**공통 구조**:
+- `*_states` 테이블: 상태별 애니메이션 + 활성화 조건
+- 런타임에 조건을 확인하여 현재 어떤 상태를 보여줄지 결정
+
+**엔티티별 조건 타입**:
+
+| 엔티티 | 조건 기준 | states 테이블 필드 |
+|--------|-----------|-------------------|
+| Building | condition 값 (청결도, 안정성 등) | `condition_id`, `min_value`, `max_value`, `priority` |
+| Character (Face) | need 값 (배고픔, 행복 등) | `need_id`, `min_value`, `max_value`, `priority` |
+| Item | durability | `min_durability`, `max_durability` |
+| Tile | durability | `min_durability`, `max_durability` |
+
+**Building State 결정 로직**:
+```sql
+-- priority 높은 순으로 정렬하여 첫 번째 매칭되는 state 사용
+SELECT * FROM building_states
+WHERE building_id = '...'
+  AND condition_id = '...'
+  AND min_value <= current_value
+  AND max_value >= current_value
+ORDER BY priority DESC
+LIMIT 1;
+
+-- condition_id가 null이면 조건 없는 fallback state (보통 'idle')
+SELECT * FROM building_states
+WHERE building_id = '...'
+  AND condition_id IS NULL;
+```
+
+**Item/Tile State 결정 로직**:
+```sql
+-- 현재 durability에 맞는 state 찾기
+SELECT * FROM item_states
+WHERE item_id = '...'
+  AND min_durability <= current_durability
+  AND max_durability >= current_durability
+LIMIT 1;
+
+-- 매칭되는 state 없으면 'idle' 사용
+```
+
+**예시 - Building States**:
+```sql
+INSERT INTO building_states VALUES
+  (building_id, 'damaged', 'atlas1', condition_id: '안정성', min: 0, max: 50, priority: 1),
+  (building_id, 'dirty', 'atlas2', condition_id: '청결도', min: 0, max: 30, priority: 2),
+  (building_id, 'idle', 'atlas3', condition_id: NULL, min: 0, max: 100, priority: 0);
+
+-- 안정성 40, 청결도 20인 건물:
+-- 1. 안정성 체크 (40 in [0,50]) → 'damaged' (priority 1)
+```
+
+**예시 - Character Face States**:
+```sql
+INSERT INTO character_face_states VALUES
+  (character_id, 'sad', 'face-sad', need_id: '배고픔', min: 0, max: 30, priority: 1),     -- 굶주림
+  (character_id, 'angry', 'face-angry', need_id: '행복', min: 0, max: 20, priority: 2),  -- 불행
+  (character_id, 'happy', 'face-happy', need_id: '행복', min: 80, max: 100, priority: 3),
+  (character_id, 'idle', 'face-idle', need_id: NULL, min: 0, max: 100, priority: 0);
+
+-- 배고픔 20, 행복 50인 캐릭터:
+-- 1. 배고픔 체크 (20 in [0,30]) → 'sad' (priority 1)
+```
+
+**예시 - Item States**:
+```sql
+INSERT INTO item_states VALUES
+  (item_id, 'idle', 'axe-normal', min: 50, max: 100),
+  (item_id, 'damaged', 'axe-chipped', min: 20, max: 49),
+  (item_id, 'broken', 'axe-broken', min: 0, max: 19);
+
+-- durability 35인 아이템:
+-- 35 in [20,49] → 'damaged'
+```
+
+**world_items.state 제거**:
+- 이전: `world_items.state` 컬럼에 상태 저장
+- 현재: `durability_ticks` 값으로 런타임에 `item_states` 조건 체크하여 계산
+- 이유: 단일 진실 공급원 (조건 정의가 DB에 있으므로)
+
+### 타일 시스템 (Tile System)
+
+타일은 게임 월드의 지형을 구성하는 기본 단위입니다. 각 타일은 재사용 가능한 타입으로 정의되며, 여러 지형에서 공유될 수 있습니다.
+
+**DB 구조**:
+
+```
+tiles (타일 타입 정의)
+├── tile_states (타일 스프라이트 상태)
+├── terrains_tiles (terrain과 N:N 매핑)
+└── world_tile_maps (월드별 타일맵)
+```
+
+**tiles 테이블** (재사용 가능한 타일 타입):
+- `scenario_id`: 시나리오별 타일 정의
+- `name`: 타일 이름 (시나리오 내 유니크)
+
+**tile_states 테이블** (타일 스프라이트 + 조건):
+- `tile_id`: 타일 참조
+- `type`: tile_state_type enum (현재는 'idle'만 존재)
+- 스프라이트 정보: `atlas_name`, `frame_from`, `frame_to`, `fps`, `loop` (loop_mode 타입)
+- 활성화 조건: `min_durability`, `max_durability` (기본값 0~100)
+
+**terrains_tiles 테이블** (N:N 매핑):
+- `terrain_id`, `tile_id`: 지형과 타일 연결
+- `scenario_id`: 조인 편의를 위한 중복 컬럼
+- 용도: 어드민 UI에서 플로우차트로 시각화
+
+**world_tile_maps 테이블** (월드별 타일맵 - sparse storage):
+- `world_id`, `terrain_id`: 월드와 지형 참조
+- `data`: JSONB 타입, `{"x,y": {"tile_id": "...", "durability": 100}, ...}` 형식
+  - 타일이 배치된 좌표만 저장 (sparse data)
+  - 각 타일은 `tile_id`와 `durability` 정보 포함
+  - 빈 공간은 key 없음 (용량 효율적)
+- `scenario_id`, `user_id`, `player_id`: 조인 편의를 위한 중복 컬럼
+- unique constraint: `(world_id, terrain_id)` - world당 terrain마다 하나의 타일맵
+
+**JSONB 타일맵 사용 예시**:
+```typescript
+// 특정 좌표의 타일 정보 가져오기 - O(1)
+SELECT data->'5,3' as tile_data FROM world_tile_maps WHERE world_id = '...';
+// 결과: {"tile_id": "...", "durability": 100}
+
+// 타일 배치
+UPDATE world_tile_maps
+SET data = jsonb_set(data, '{5,3}', '{"tile_id": "tile-uuid", "durability": 100}')
+WHERE world_id = '...';
+
+// 내구도만 변경
+UPDATE world_tile_maps
+SET data = jsonb_set(data, '{5,3,durability}', '80')
+WHERE world_id = '...';
+
+// 타일 제거
+UPDATE world_tile_maps
+SET data = data - '5,3'
+WHERE world_id = '...';
+```
+
+**설계 패턴**:
+- **재사용 가능한 타입 + 상태 패턴**: tiles는 타입 정의, tile_states는 애니메이션 상태
+- **N:N 매핑 테이블**: terrains_tiles로 지형과 타일 관계 표현
+- **Sparse Storage 패턴**: JSONB로 좌표→타일 매핑, 빈 공간은 저장 안 함
+- **조인 편의 컬럼**: 하위 테이블에 상위 ID 중복 저장 (중간 조인 없이 직접 쿼리 가능)
+- **동적 맵 크기**: terrain SVG 크기에 따라 맵 크기 동적 결정
 
 ### 기술 스택 (나라 뷰)
 

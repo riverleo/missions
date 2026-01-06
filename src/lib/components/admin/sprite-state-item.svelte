@@ -46,11 +46,10 @@
 		ondelete?: () => void;
 		preview?: Snippet;
 		collider?: Snippet;
-		headerAction?: Snippet;
+		action?: Snippet;
 	}
 
-	let { type, label, spriteState, onchange, ondelete, preview, collider, headerAction }: Props =
-		$props();
+	let { type, label, spriteState, onchange, ondelete, preview, collider, action }: Props = $props();
 
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
@@ -94,8 +93,10 @@
 <Item variant="muted">
 	<ItemHeader>
 		<ItemTitle>{label ?? type}</ItemTitle>
-		{#if headerAction}
-			{@render headerAction()}
+		{#if action}
+			<div class="flex items-center gap-2">
+				{@render action()}
+			</div>
 		{/if}
 	</ItemHeader>
 	<ItemContent class="w-full overflow-hidden">
@@ -107,7 +108,7 @@
 					<Skeleton class="h-full w-full" />
 				{/if}
 				{#if collider}
-					<div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+					<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
 						{@render collider()}
 					</div>
 				{/if}

@@ -6,9 +6,13 @@
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCondition } from '$lib/hooks/use-condition';
 	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { TILE_SIZE } from '$lib/components/app/world/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
+	import { Button } from '$lib/components/ui/button';
+	import { IconSettings } from '@tabler/icons-svelte';
+	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
 		buildingId: string;
@@ -17,12 +21,26 @@
 
 	let { buildingId, type }: Props = $props();
 
-	const { store, stateStore, admin } = useBuilding();
+	const { store, stateStore, admin, openStateDialog } = useBuilding();
 	const { uiStore } = admin;
+	const { conditionStore } = useCondition();
 
 	const building = $derived($store.data[buildingId as BuildingId]);
 	const buildingStates = $derived($stateStore.data[buildingId as BuildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
+	const condition = $derived(
+		buildingState?.condition_id ? $conditionStore.data[buildingState.condition_id] : undefined
+	);
+
+	const conditionPreview = $derived.by(() => {
+		if (!buildingState || type === 'idle') return undefined;
+
+		if (!condition) {
+			return '컨디션 필요';
+		}
+
+		return `${condition.name} (${buildingState.min_value}~${buildingState.max_value})`;
+	});
 
 	async function onchange(change: SpriteStateChange) {
 		if (buildingState) {
@@ -50,6 +68,12 @@
 			await admin.removeBuildingState(buildingState.id, buildingId as BuildingId);
 		}
 	}
+
+	function onConditionClick() {
+		if (buildingState) {
+			openStateDialog({ type: 'update', buildingStateId: buildingState.id });
+		}
+	}
 </script>
 
 <SpriteStateItem
@@ -61,14 +85,35 @@
 >
 	{#snippet preview()}
 		{#if buildingState}
-			<BuildingSpriteAnimator buildingId={buildingId as BuildingId} stateType={type} resolution={2} />
+			<BuildingSpriteAnimator
+				buildingId={buildingId as BuildingId}
+				stateType={type}
+				resolution={2}
+			/>
 		{/if}
 	{/snippet}
 	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && building}
-			<div style="transform: translate({-building.collider_offset_x}px, {-building.collider_offset_y}px);">
+			<div
+				style="transform: translate({-building.collider_offset_x}px, {-building.collider_offset_y}px);"
+			>
 				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
 			</div>
+		{/if}
+	{/snippet}
+	{#snippet action()}
+		{#if conditionPreview !== undefined}
+			<Button
+				variant={condition ? 'ghost' : 'outline'}
+				size="sm"
+				disabled={!buildingState || type === 'idle'}
+				onclick={onConditionClick}
+			>
+				{#if condition}
+					<Badge variant="secondary">{buildingState?.priority}</Badge>
+				{/if}
+				{conditionPreview}
+			</Button>
 		{/if}
 	{/snippet}
 </SpriteStateItem>

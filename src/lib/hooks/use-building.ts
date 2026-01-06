@@ -20,6 +20,10 @@ type BuildingDialogState =
 	| { type: 'delete'; buildingId: BuildingId }
 	| undefined;
 
+type BuildingStateDialogState =
+	| { type: 'update'; buildingStateId: BuildingStateId }
+	| undefined;
+
 let instance: ReturnType<typeof createBuildingStore> | null = null;
 
 function createBuildingStore() {
@@ -37,6 +41,7 @@ function createBuildingStore() {
 	});
 
 	const dialogStore = writable<BuildingDialogState>(undefined);
+	const stateDialogStore = writable<BuildingStateDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -107,6 +112,14 @@ function createBuildingStore() {
 
 	function closeDialog() {
 		dialogStore.set(undefined);
+	}
+
+	function openStateDialog(state: NonNullable<BuildingStateDialogState>) {
+		stateDialogStore.set(state);
+	}
+
+	function closeStateDialog() {
+		stateDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -253,10 +266,13 @@ function createBuildingStore() {
 		store: store as Readable<RecordFetchState<BuildingId, Building>>,
 		stateStore: stateStore as Readable<RecordFetchState<BuildingId, BuildingState[]>>,
 		dialogStore: dialogStore as Readable<BuildingDialogState>,
+		stateDialogStore: stateDialogStore as Readable<BuildingStateDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
+		openStateDialog,
+		closeStateDialog,
 		admin,
 	};
 }
