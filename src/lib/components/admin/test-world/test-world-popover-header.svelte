@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { IconBug, IconX, IconLayoutSidebar } from '@tabler/icons-svelte';
+	import {
+		IconBug,
+		IconX,
+		IconLayoutSidebarLeftCollapse,
+		IconLayoutSidebarLeftExpand,
+	} from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
 	const { store, setOpen, setModalPosition, setDebug, setPanelsOpen } = useWorldTest();
+
+	const panelsOpen = $derived($store.commandPanelOpen && $store.inspectorPanelOpen);
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -53,12 +60,12 @@
 
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
 	<div class="flex items-center gap-2">
-		<Button
-			variant="ghost"
-			size="icon-sm"
-			onclick={() => setPanelsOpen(!($store.commandPanelOpen && $store.inspectorPanelOpen))}
-		>
-			<IconLayoutSidebar />
+		<Button variant="ghost" size="icon-sm" onclick={() => setPanelsOpen(!panelsOpen)}>
+			{#if panelsOpen}
+				<IconLayoutSidebarLeftCollapse />
+			{:else}
+				<IconLayoutSidebarLeftExpand />
+			{/if}
 		</Button>
 		<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
 	</div>
