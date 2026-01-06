@@ -394,6 +394,8 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			entity.updatePosition();
 		}
+
+		this.tileMapEntity?.updatePosition();
 	}
 
 	// 엔티티 업데이트 (경로 따라가기 등)
@@ -401,6 +403,8 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			entity.update(event);
 		}
+
+		this.tileMapEntity?.update(event);
 	}
 
 	// 바디가 경계를 벗어나면 제거 후 1초 뒤 리스폰 위치에 다시 추가

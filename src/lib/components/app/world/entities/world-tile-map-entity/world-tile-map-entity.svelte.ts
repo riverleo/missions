@@ -27,6 +27,7 @@ export class WorldTileMapEntity extends Entity {
 			throw new Error(`Cannot create WorldTileMapEntity: missing data for id ${id}`);
 		}
 
+		this.data = worldTileMap.data;
 		this.body = this.createBodies(worldTileMap.data);
 	}
 
@@ -36,16 +37,11 @@ export class WorldTileMapEntity extends Entity {
 
 	// 여러 타일 바디 생성 (순수 함수)
 	private createBodies(data: WorldTileMap['data']): Map<WorldTileMapVector, Matter.Body> {
-		this.data = data;
-
 		const { tileStore } = useTerrain();
 		const tiles = get(tileStore).data;
 		const newBodies = new Map<WorldTileMapVector, Matter.Body>();
 
 		for (const [vector, tileData] of Object.entries(data)) {
-			// 이미 body에 있으면 스킵
-			if (this.body?.has(vector as WorldTileMapVector)) continue;
-
 			const coords = vector.split(',').map(Number);
 			const tileX = coords[0];
 			const tileY = coords[1];
@@ -94,7 +90,8 @@ export class WorldTileMapEntity extends Entity {
 	// 월드에서 모든 타일 바디 제거
 	removeFromWorld(): void {
 		const allBodies = Composite.allBodies(this.world.engine.world);
-		const bodiesToRemove = allBodies.filter((body) => body.label.startsWith('tile-'));
+		const bodyLabels = new Set(Array.from(this.body.values()).map((b) => b.label));
+		const bodiesToRemove = allBodies.filter((body) => bodyLabels.has(body.label));
 
 		if (bodiesToRemove.length > 0) {
 			Composite.remove(this.world.engine.world, bodiesToRemove);
@@ -110,6 +107,9 @@ export class WorldTileMapEntity extends Entity {
 		if (this.data === worldTileMap.data) return;
 
 		this.removeFromWorld();
+
+		// data 업데이트
+		this.data = worldTileMap.data;
 
 		// body Map 내용을 새로 생성된 것으로 교체
 		const newBodies = this.createBodies(worldTileMap.data);
