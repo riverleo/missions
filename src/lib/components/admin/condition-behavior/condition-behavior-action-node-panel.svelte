@@ -201,12 +201,7 @@
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>지속 시간(틱)</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput
-								type="number"
-								step="0.1"
-								min="0"
-								bind:value={changes.duration_ticks}
-							/>
+							<InputGroupInput type="number" step="1" min="0" bind:value={changes.duration_ticks} />
 						</InputGroup>
 
 						<InputGroup>

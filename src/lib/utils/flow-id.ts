@@ -18,6 +18,9 @@ import type {
 	Need,
 	NeedBehaviorAction,
 	NeedFulfillment,
+	Terrain,
+	Tile,
+	TerrainTile,
 } from '$lib/types';
 
 // Node IDs
@@ -433,4 +436,47 @@ export function parseConditionEffectEdgeId(edgeId: string): {
 
 export function isConditionEffectEdgeId(edgeId: string): boolean {
 	return edgeId.startsWith('condition-effect-');
+}
+
+// Terrain Node
+export function createTerrainNodeId(terrain: Terrain): string {
+	return `terrain-${terrain.id}`;
+}
+
+export function parseTerrainNodeId(nodeId: string): string {
+	return nodeId.replace('terrain-', '');
+}
+
+export function isTerrainNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('terrain-');
+}
+
+// Tile Node
+export function createTileNodeId(tile: Tile): string {
+	return `tile-${tile.id}`;
+}
+
+export function parseTileNodeId(nodeId: string): string {
+	return nodeId.replace('tile-', '');
+}
+
+export function isTileNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('tile-');
+}
+
+// Terrain-Tile Edge
+export function createTerrainTileEdgeId(terrainTile: TerrainTile): string {
+	return `terrain-tile-${terrainTile.terrain_id}-${terrainTile.tile_id}`;
+}
+
+export function parseTerrainTileEdgeId(edgeId: string): {
+	terrainId: string;
+	tileId: string;
+} {
+	const [, , terrainId, tileId] = edgeId.split('-');
+	return { terrainId: terrainId ?? '', tileId: tileId ?? '' };
+}
+
+export function isTerrainTileEdgeId(edgeId: string): boolean {
+	return edgeId.startsWith('terrain-tile-');
 }

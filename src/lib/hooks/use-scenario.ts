@@ -116,6 +116,7 @@ function createScenarioStore() {
 				useTerrain().fetch(scenarioId),
 				useTerrain().fetchTiles(scenarioId),
 				useTerrain().fetchTileStates(scenarioId),
+				useTerrain().fetchTerrainTiles(scenarioId),
 				useCharacter().fetch(scenarioId),
 				useCharacterBody().fetch(scenarioId),
 				useBuilding().fetch(scenarioId),

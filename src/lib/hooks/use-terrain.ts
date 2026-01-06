@@ -14,6 +14,9 @@ import type {
 	TileStateInsert,
 	TileStateUpdate,
 	TileStateId,
+	TerrainTile,
+	TerrainTileInsert,
+	TerrainTileId,
 	ScenarioId,
 } from '$lib/types';
 import { useServerPayload } from './use-server-payload.svelte';
@@ -53,6 +56,11 @@ function createTerrainStore() {
 	});
 
 	const tileStateDialogStore = writable<TileStateDialogState>(undefined);
+
+	const terrainTileStore = writable<RecordFetchState<TerrainTileId, TerrainTile>>({
+		status: 'idle',
+		data: {},
+	});
 
 	// 어드민 UI 상태
 	const uiStore = writable({
@@ -178,6 +186,41 @@ function createTerrainStore() {
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			tileStateStore.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+		}
+	}
+
+	async function fetchTerrainTiles(scenarioId: ScenarioId) {
+		if (!initialized) {
+			throw new Error('useTerrain not initialized. Call init() first.');
+		}
+
+		terrainTileStore.update((state) => ({ ...state, status: 'loading' }));
+
+		try {
+			const { data, error } = await supabase
+				.from('terrains_tiles')
+				.select('*')
+				.eq('scenario_id', scenarioId);
+
+			if (error) throw error;
+
+			const record: Record<TerrainTileId, TerrainTile> = {};
+			for (const item of data ?? []) {
+				record[item.id as TerrainTileId] = item as TerrainTile;
+			}
+
+			terrainTileStore.set({
+				status: 'success',
+				data: record,
+				error: undefined,
+			});
+		} catch (error) {
+			const err = error instanceof Error ? error : new Error('Unknown error');
+			terrainTileStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -380,6 +423,46 @@ function createTerrainStore() {
 				})
 			);
 		},
+
+		// TerrainTile CRUD operations
+		async createTerrainTile(terrainTile: Omit<TerrainTileInsert, 'scenario_id'>) {
+			if (!currentScenarioId) {
+				throw new Error('useTerrain: currentScenarioId is not set.');
+			}
+
+			const { data, error } = await supabase
+				.from('terrains_tiles')
+				.insert({
+					...terrainTile,
+					scenario_id: currentScenarioId,
+				})
+				.select()
+				.single<TerrainTile>();
+
+			if (error) throw error;
+
+			terrainTileStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as TerrainTileId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async removeTerrainTile(id: TerrainTileId) {
+			const { error } = await supabase.from('terrains_tiles').delete().eq('id', id);
+
+			if (error) throw error;
+
+			terrainTileStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
 	};
 
 	return {
@@ -389,10 +472,12 @@ function createTerrainStore() {
 		tileDialogStore: tileDialogStore as Readable<TileDialogState>,
 		tileStateStore: tileStateStore as Readable<RecordFetchState<TileId, TileState[]>>,
 		tileStateDialogStore: tileStateDialogStore as Readable<TileStateDialogState>,
+		terrainTileStore: terrainTileStore as Readable<RecordFetchState<TerrainTileId, TerrainTile>>,
 		init,
 		fetch,
 		fetchTiles,
 		fetchTileStates,
+		fetchTerrainTiles,
 		openDialog,
 		closeDialog,
 		openTileDialog,

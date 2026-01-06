@@ -1,0 +1,199 @@
+<script lang="ts">
+	import {
+		SvelteFlow,
+		Controls,
+		Background,
+		BackgroundVariant,
+		MiniMap,
+		useNodes,
+		useEdges,
+	} from '@xyflow/svelte';
+	import type { Node, Edge, Connection } from '@xyflow/svelte';
+	import { mode } from 'mode-watcher';
+	import { useTerrain } from '$lib/hooks/use-terrain';
+	import {
+		createTerrainNodeId,
+		parseTerrainNodeId,
+		createTileNodeId,
+		parseTileNodeId,
+		createTerrainTileEdgeId,
+		isTerrainTileEdgeId,
+	} from '$lib/utils/flow-id';
+	import TerrainNode from './terrain-node.svelte';
+	import TileNode from './tile-node.svelte';
+	import TerrainTileEdgePanel from './terrain-tile-edge-panel.svelte';
+	import type { TerrainId, TileId } from '$lib/types';
+
+	const { store: terrainStore, tileStore, terrainTileStore, admin } = useTerrain();
+
+	const flowNodes = useNodes();
+	const flowEdges = useEdges();
+
+	// 데이터
+	const terrains = $derived(Object.values($terrainStore.data));
+	const tiles = $derived(Object.values($tileStore.data));
+	const terrainTiles = $derived(Object.values($terrainTileStore.data));
+
+	// 선택된 엣지
+	const selectedEdge = $derived(flowEdges.current.find((e) => e.selected));
+	const selectedTerrainTile = $derived(() => {
+		if (!selectedEdge || !isTerrainTileEdgeId(selectedEdge.id)) return undefined;
+		return terrainTiles.find((tt) => createTerrainTileEdgeId(tt) === selectedEdge.id);
+	});
+
+	const nodeTypes = {
+		terrain: TerrainNode,
+		tile: TileNode,
+	};
+
+	let nodes = $state<Node[]>([]);
+	let edges = $state<Edge[]>([]);
+	let skipConvertEffect = $state(false);
+
+	function isValidConnection(connection: Connection | Edge) {
+		const sourceNode = nodes.find((n) => n.id === connection.source);
+		const targetNode = nodes.find((n) => n.id === connection.target);
+
+		if (!sourceNode || !targetNode) return false;
+
+		// terrain → tile 연결만 허용
+		if (sourceNode.type === 'terrain' && targetNode.type === 'tile') {
+			return true;
+		}
+
+		return false;
+	}
+
+	async function onconnect(connection: Connection) {
+		try {
+			const sourceNode = nodes.find((n) => n.id === connection.source);
+			const targetNode = nodes.find((n) => n.id === connection.target);
+
+			if (!sourceNode || !targetNode) return;
+
+			// terrain → tile 연결: terrains_tiles 생성
+			if (sourceNode.type === 'terrain' && targetNode.type === 'tile') {
+				const terrainId = parseTerrainNodeId(connection.source);
+				const tileId = parseTileNodeId(connection.target);
+
+				const newTerrainTile = await admin.createTerrainTile({
+					terrain_id: terrainId as TerrainId,
+					tile_id: tileId as TileId,
+				});
+
+				edges = [
+					...edges,
+					{
+						id: createTerrainTileEdgeId(newTerrainTile),
+						source: connection.source,
+						target: connection.target,
+						data: { terrainTile: newTerrainTile },
+						deletable: true,
+						style: 'stroke: var(--color-blue-500)',
+					},
+				];
+			}
+		} catch (error) {
+			console.error('Failed to connect:', error);
+		}
+	}
+
+	async function ondelete({ edges: edgesToDelete }: { nodes: Node[]; edges: Edge[] }) {
+		try {
+			// 엣지 삭제 처리
+			for (const edge of edgesToDelete) {
+				// terrains_tiles 삭제
+				if (isTerrainTileEdgeId(edge.id)) {
+					const terrainTile = terrainTiles.find((tt) => createTerrainTileEdgeId(tt) === edge.id);
+					if (terrainTile) {
+						await admin.removeTerrainTile(terrainTile.id);
+					}
+				}
+			}
+
+			// 로컬 업데이트
+			edges = edges.filter((e) => !edgesToDelete.find((ed) => ed.id === e.id));
+		} catch (error) {
+			console.error('Failed to delete:', error);
+		}
+	}
+
+	function convertToNodesAndEdges() {
+		const newNodes: Node[] = [];
+		const newEdges: Edge[] = [];
+
+		const COLUMN_GAP = 300;
+		const ROW_GAP = 100;
+
+		// 1. Terrain 노드 (왼쪽 열)
+		terrains.forEach((terrain, index) => {
+			newNodes.push({
+				id: createTerrainNodeId(terrain),
+				type: 'terrain',
+				data: { terrain },
+				position: { x: 0, y: index * ROW_GAP },
+				deletable: false,
+			});
+		});
+
+		// 2. Tile 노드 (오른쪽 열)
+		tiles.forEach((tile, index) => {
+			newNodes.push({
+				id: createTileNodeId(tile),
+				type: 'tile',
+				data: { tile },
+				position: { x: COLUMN_GAP, y: index * ROW_GAP },
+				deletable: false,
+			});
+		});
+
+		// 3. terrains_tiles 엣지
+		terrainTiles.forEach((tt) => {
+			const terrain = terrains.find((t) => t.id === tt.terrain_id);
+			const tile = tiles.find((t) => t.id === tt.tile_id);
+			if (!terrain || !tile) return;
+
+			newEdges.push({
+				id: createTerrainTileEdgeId(tt),
+				source: createTerrainNodeId(terrain),
+				target: createTileNodeId(tile),
+				data: { terrainTile: tt },
+				deletable: true,
+				style: 'stroke: var(--color-blue-500)',
+			});
+		});
+
+		nodes = newNodes;
+		edges = newEdges;
+	}
+
+	// 데이터 변경 시 노드/엣지 재생성
+	$effect(() => {
+		if (skipConvertEffect) return;
+
+		terrains;
+		tiles;
+		terrainTiles;
+
+		convertToNodesAndEdges();
+	});
+</script>
+
+<SvelteFlow
+	{nodes}
+	{edges}
+	{nodeTypes}
+	{isValidConnection}
+	colorMode={mode.current}
+	{onconnect}
+	{ondelete}
+	fitView
+>
+	<Controls />
+	<Background variant={BackgroundVariant.Dots} />
+	<MiniMap />
+
+	{#if selectedTerrainTile()}
+		<TerrainTileEdgePanel terrainTile={selectedTerrainTile()!} />
+	{/if}
+</SvelteFlow>

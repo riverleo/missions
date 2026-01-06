@@ -275,7 +275,7 @@
 								</InputGroupAddon>
 								<InputGroupInput
 									type="number"
-									step="0.1"
+									step="1"
 									min="0"
 									bind:value={changes.task_duration_ticks}
 								/>

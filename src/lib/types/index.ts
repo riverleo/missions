@@ -78,6 +78,7 @@ export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
 export type WorldItemId = Brand<string, 'WorldItemId'>;
 export type TileId = Brand<string, 'TileId'>;
 export type TileStateId = Brand<string, 'TileStateId'>;
+export type TerrainTileId = Brand<string, 'TerrainTileId'>;
 
 // Bulk update types
 export interface BulkChanges<T> {
@@ -1317,6 +1318,30 @@ type TileUpdateRow = TablesUpdate<'tiles'>;
 export type TileUpdate = Omit<TileUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
 	id?: TileId;
 	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// TerrainTile types
+type TerrainTileRow = Tables<'terrains_tiles'>;
+export type TerrainTile = Omit<TerrainTileRow, 'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'> & {
+	id: TerrainTileId;
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId;
+	tile_id: TileId;
+	created_by: UserRoleId | null;
+};
+type TerrainTileInsertRow = TablesInsert<'terrains_tiles'>;
+export type TerrainTileInsert = Omit<TerrainTileInsertRow, 'scenario_id' | 'terrain_id' | 'tile_id'> & {
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId;
+	tile_id: TileId;
+};
+type TerrainTileUpdateRow = TablesUpdate<'terrains_tiles'>;
+export type TerrainTileUpdate = Omit<TerrainTileUpdateRow, 'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'> & {
+	id?: TerrainTileId;
+	scenario_id?: ScenarioId;
+	terrain_id?: TerrainId;
+	tile_id?: TileId;
 	created_by?: UserRoleId | null;
 };
 
