@@ -29,11 +29,8 @@
 		return [bodyLabel, faceLabel].filter(Boolean).join(' + ');
 	});
 
-	const durationLabel = $derived(() => {
-		if (action.duration_ticks > 0) {
-			return `${action.duration_ticks}틱`;
-		}
-		return undefined;
+	const typeLabel = $derived(() => {
+		return `${action.duration_ticks}틱 대기`;
 	});
 </script>
 
@@ -52,15 +49,11 @@
 			{#if action.root}
 				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			{#if stateLabel()}
-				{stateLabel()}
-			{:else}
-				<span class="text-neutral-400">캐릭터 상태 미설정</span>
-			{/if}
+			{typeLabel()}
 		</div>
-		{#if durationLabel()}
+		{#if stateLabel()}
 			<div class="text-xs text-neutral-500">
-				{durationLabel()}
+				{stateLabel()}
 			</div>
 		{/if}
 	</div>
