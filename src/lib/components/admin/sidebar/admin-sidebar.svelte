@@ -52,7 +52,23 @@
 		{
 			label: '월드',
 			items: [
-				{ title: '지형', href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined },
+				{
+					title: '지형',
+					subItems: [
+						{
+							title: '생성 및 관리',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined,
+						},
+						{
+							title: '타일',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/tiles` : undefined,
+						},
+						{
+							title: '지형과 타일 연결',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains-tiles` : undefined,
+						},
+					],
+				},
 				{
 					title: '캐릭터',
 					subItems: [

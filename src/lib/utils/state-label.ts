@@ -4,6 +4,7 @@ import type {
 	BuildingStateType,
 	CharacterBehaviorType,
 	ItemStateType,
+	TileStateType,
 	ColliderType,
 	NeedBehavior,
 	ConditionBehavior,
@@ -16,21 +17,21 @@ const colliderTypeLabels: Record<ColliderType, string> = {
 };
 
 const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
-	idle: '대기',
+	idle: '기본',
 	walk: '걷기',
 	run: '달리기',
 	jump: '점프',
 };
 
 const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
-	idle: '평온',
+	idle: '기본',
 	happy: '행복',
 	sad: '슬픔',
 	angry: '화남',
 };
 
 const buildingStateLabels: Record<BuildingStateType, string> = {
-	idle: '대기',
+	idle: '기본',
 	damaged: '손상됨',
 	planning: '건설 중',
 };
@@ -63,12 +64,22 @@ export function getCharacterBehaviorTypeLabel(type: CharacterBehaviorType): stri
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {
-	idle: '정상',
+	idle: '기본',
 	broken: '파손',
 };
 
 export function getItemStateLabel(state: ItemStateType): string {
 	return itemStateLabels[state];
+}
+
+const tileStateLabels: Record<TileStateType, string> = {
+	idle: '기본',
+	damaged_1: '손상 1단계',
+	damaged_2: '손상 2단계',
+};
+
+export function getTileStateLabel(state: TileStateType): string {
+	return tileStateLabels[state];
 }
 
 // Behavior 라벨 생성 함수들

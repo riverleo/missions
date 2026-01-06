@@ -208,7 +208,7 @@
 		>
 			{#if isBodyInFront}
 				{#if faceAnimator}
-					<div class="absolute" style:transform={faceTransform}>
+					<div class="absolute top-0 left-0" style:transform={faceTransform}>
 						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
 					</div>
 				{/if}
@@ -216,13 +216,13 @@
 			{:else}
 				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
 				{#if faceAnimator}
-					<div class="absolute" style:transform={faceTransform}>
+					<div class="absolute top-0 left-0" style:transform={faceTransform}>
 						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
 					</div>
 				{/if}
 			{/if}
 			{#if heldItemAnimator}
-				<div class="absolute" style:transform={handTransform}>
+				<div class="absolute top-0 left-0" style:transform={handTransform}>
 					<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
 				</div>
 			{/if}

@@ -1,11 +1,12 @@
 -- Enums
-create type tile_state_type as enum ('idle');
+create type tile_state_type as enum ('idle', 'damaged_1', 'damaged_2');
 
 -- tiles: 재사용 가능한 타일 타입 정의
 create table tiles (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   name text not null default '',
+  max_durability int not null default 1000,
 
   -- Audit
   created_at timestamptz not null default now(),
@@ -30,9 +31,15 @@ create policy "admins can update tiles"
   to authenticated
   using (is_admin());
 
+create policy "admins can delete tiles"
+  on tiles for delete
+  to authenticated
+  using (is_admin());
+
 -- tile_states: 타일 스프라이트 상태
 create table tile_states (
   id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
   tile_id uuid not null references tiles(id) on delete cascade,
   type tile_state_type not null default 'idle',
 
@@ -67,6 +74,11 @@ create policy "admins can insert tile_states"
 
 create policy "admins can update tile_states"
   on tile_states for update
+  to authenticated
+  using (is_admin());
+
+create policy "admins can delete tile_states"
+  on tile_states for delete
   to authenticated
   using (is_admin());
 

@@ -76,6 +76,8 @@ export type ItemBehaviorId = Brand<string, 'ItemBehaviorId'>;
 export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
 export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
 export type WorldItemId = Brand<string, 'WorldItemId'>;
+export type TileId = Brand<string, 'TileId'>;
+export type TileStateId = Brand<string, 'TileStateId'>;
 
 // Bulk update types
 export interface BulkChanges<T> {
@@ -1276,6 +1278,44 @@ export type ItemInsert = Omit<ItemInsertRow, 'scenario_id'> & {
 type ItemUpdateRow = TablesUpdate<'items'>;
 export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
 	id?: ItemId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// TileState types
+export type TileStateType = Enums<'tile_state_type'>;
+type TileStateRow = Tables<'tile_states'>;
+export type TileState = Omit<TileStateRow, 'id' | 'scenario_id' | 'tile_id'> & {
+	id: TileStateId;
+	scenario_id: ScenarioId;
+	tile_id: TileId;
+};
+type TileStateInsertRow = TablesInsert<'tile_states'>;
+export type TileStateInsert = Omit<TileStateInsertRow, 'scenario_id' | 'tile_id'> & {
+	scenario_id: ScenarioId;
+	tile_id: TileId;
+};
+type TileStateUpdateRow = TablesUpdate<'tile_states'>;
+export type TileStateUpdate = Omit<TileStateUpdateRow, 'id' | 'scenario_id' | 'tile_id'> & {
+	id?: TileStateId;
+	scenario_id?: ScenarioId;
+	tile_id?: TileId;
+};
+
+// Tile types
+type TileRow = Tables<'tiles'>;
+export type Tile = Omit<TileRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: TileId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type TileInsertRow = TablesInsert<'tiles'>;
+export type TileInsert = Omit<TileInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type TileUpdateRow = TablesUpdate<'tiles'>;
+export type TileUpdate = Omit<TileUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: TileId;
 	scenario_id?: ScenarioId;
 	created_by?: UserRoleId | null;
 };

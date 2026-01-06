@@ -102,7 +102,7 @@
 	<ItemContent class="w-full overflow-hidden">
 		<AspectRatio ratio={4 / 3}>
 			<div class="relative flex h-full w-full items-center justify-center overflow-hidden">
-				{#if preview}
+				{#if spriteState && preview}
 					{@render preview()}
 				{:else}
 					<Skeleton class="h-full w-full" />

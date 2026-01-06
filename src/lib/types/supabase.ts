@@ -2503,6 +2503,7 @@ export type Database = {
           loop: Database["public"]["Enums"]["loop_mode"]
           max_durability: number
           min_durability: number
+          scenario_id: string
           tile_id: string
           type: Database["public"]["Enums"]["tile_state_type"]
         }
@@ -2517,6 +2518,7 @@ export type Database = {
           loop?: Database["public"]["Enums"]["loop_mode"]
           max_durability?: number
           min_durability?: number
+          scenario_id: string
           tile_id: string
           type?: Database["public"]["Enums"]["tile_state_type"]
         }
@@ -2531,6 +2533,7 @@ export type Database = {
           loop?: Database["public"]["Enums"]["loop_mode"]
           max_durability?: number
           min_durability?: number
+          scenario_id?: string
           tile_id?: string
           type?: Database["public"]["Enums"]["tile_state_type"]
         }
@@ -2540,6 +2543,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tile_states_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
           {
@@ -2556,6 +2566,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          max_durability: number
           name: string
           scenario_id: string
         }
@@ -2563,6 +2574,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          max_durability?: number
           name?: string
           scenario_id: string
         }
@@ -2570,6 +2582,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          max_durability?: number
           name?: string
           scenario_id?: string
         }
@@ -3176,7 +3189,7 @@ export type Database = {
       player_scenario_status: "in_progress" | "completed"
       publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
-      tile_state_type: "idle"
+      tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
     }
     CompositeTypes: {
@@ -3326,7 +3339,7 @@ export const Constants = {
       player_scenario_status: ["in_progress", "completed"],
       publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
-      tile_state_type: ["idle"],
+      tile_state_type: ["idle", "damaged_1", "damaged_2"],
       user_role_type: ["admin"],
     },
   },
