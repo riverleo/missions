@@ -52,7 +52,7 @@ create table tile_states (
 
   -- 상태 활성화 조건 (내구도 기반)
   min_durability int not null default 0,
-  max_durability int not null default 100,
+  max_durability int not null default 1000,
 
   -- Audit
   created_at timestamptz not null default now(),

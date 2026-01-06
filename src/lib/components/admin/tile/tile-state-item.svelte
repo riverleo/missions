@@ -23,7 +23,7 @@
 	const tileState = $derived(tileStates.find((s) => s.type === type));
 
 	const durabilityPreview = $derived.by(() => {
-		if (!tileState) return undefined;
+		if (!tileState || type === 'idle') return undefined;
 
 		if (!tile?.max_durability) return '최대 내구도 없음';
 
@@ -66,7 +66,7 @@
 			<Button
 				variant="ghost"
 				size="sm"
-				disabled={!tileState || type === 'idle' || !tile?.max_durability}
+				disabled={!tileState || !tile?.max_durability}
 				onclick={onDurabilityClick}
 			>
 				{durabilityPreview}
