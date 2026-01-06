@@ -74,28 +74,20 @@ export class WorldTileMapEntity extends Entity {
 		return newBodies;
 	}
 
-	// 월드에 모든 타일 바디 추가 (data에 있는데 body에 없는 것들)
+	// 월드에 모든 타일 바디 추가
 	addToWorld(): void {
-		const allBodies = Composite.allBodies(this.world.engine.world);
+		const bodiesToAdd = Array.from(this.body.values()).filter(
+			(body) => !Composite.get(this.world.engine.world, body.id, 'body')
+		);
 
-		for (const body of this.body.values()) {
-			const exists = allBodies.some((currentBody) => currentBody.label === body.label);
-
-			if (!exists) {
-				Composite.add(this.world.engine.world, body);
-			}
+		if (bodiesToAdd.length > 0) {
+			Composite.add(this.world.engine.world, bodiesToAdd);
 		}
 	}
 
 	// 월드에서 모든 타일 바디 제거
 	removeFromWorld(): void {
-		const allBodies = Composite.allBodies(this.world.engine.world);
-		const bodyLabels = new Set(Array.from(this.body.values()).map((b) => b.label));
-		const bodiesToRemove = allBodies.filter((body) => bodyLabels.has(body.label));
-
-		if (bodiesToRemove.length > 0) {
-			Composite.remove(this.world.engine.world, bodiesToRemove);
-		}
+		Composite.remove(this.world.engine.world, Array.from(this.body.values()));
 	}
 
 	// 스토어 데이터 변경사항을 엔티티에 동기화

@@ -82,20 +82,12 @@ export abstract class Entity {
 	}
 
 	addToWorld(): void {
-		const allBodies = Composite.allBodies(this.world.engine.world);
-		const exists = allBodies.some((body) => body.label === this.body.label);
-
-		if (!exists) {
+		if (!Composite.get(this.world.engine.world, this.body.id, 'body')) {
 			Composite.add(this.world.engine.world, this.body);
 		}
 	}
 
 	removeFromWorld(): void {
-		const allBodies = Composite.allBodies(this.world.engine.world);
-		const bodiesToRemove = allBodies.filter((body) => body.label === this.body.label);
-
-		if (bodiesToRemove.length > 0) {
-			Composite.remove(this.world.engine.world, bodiesToRemove);
-		}
+		Composite.remove(this.world.engine.world, this.body);
 	}
 }
