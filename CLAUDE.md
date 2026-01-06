@@ -1056,6 +1056,115 @@ INSERT INTO item_states VALUES
 - 현재: `durability_ticks` 값으로 런타임에 `item_states` 조건 체크하여 계산
 - 이유: 단일 진실 공급원 (조건 정의가 DB에 있으므로)
 
+**State 조건 관리 UI 패턴**:
+
+어드민 UI에서 각 state의 활성화 조건을 편집할 수 있는 패턴을 따릅니다.
+
+**Hook 추가 사항**:
+```typescript
+// use-{entity}.ts
+type {Entity}StateDialogState =
+  | { type: 'update'; {entity}StateId: {Entity}StateId }
+  | undefined;
+
+const stateDialogStore = writable<{Entity}StateDialogState>(undefined);
+
+function openStateDialog(state: NonNullable<{Entity}StateDialogState>) {
+  stateDialogStore.set(state);
+}
+
+function closeStateDialog() {
+  stateDialogStore.set(undefined);
+}
+
+return {
+  // ...
+  stateDialogStore: stateDialogStore as Readable<{Entity}StateDialogState>,
+  openStateDialog,
+  closeStateDialog,
+  // ...
+};
+```
+
+**컴포넌트 구조**:
+- `{entity}-state-update-dialog.svelte`: 조건 편집 다이얼로그
+  - Building: condition 선택, min/max value, priority 입력
+  - Character Face: need 선택, min/max value, priority 입력
+  - Item/Tile: min/max durability 입력 (내구도 기반, priority 없음)
+- `{entity}-state-item.svelte`: action snippet에 조건 preview 버튼 추가
+  - Building: `${condition.name} (${min}~${max})` + priority badge
+  - Character Face: `${need.name} (${min}~${max})` + priority badge
+  - Item: `내구도 (${min}~${max} 틱)`
+
+**공통 패턴**:
+```typescript
+// Preview 버튼 스타일
+<Button
+  variant={hasCondition ? 'ghost' : 'outline'}  // 조건 있으면 ghost, 없으면 outline
+  size="sm"
+  disabled={!state || type === 'idle'}
+  onclick={onConditionClick}
+>
+  {#if hasCondition}
+    <Badge variant="secondary">{state.priority}</Badge>  // priority가 있는 경우만
+  {/if}
+  {preview}
+</Button>
+```
+
+**다이얼로그 입력 필드**:
+```svelte
+<!-- Building/Character Face: Dropdown으로 condition/need 선택 -->
+<InputGroup>
+  <InputGroupAddon align="inline-start">
+    <Tooltip>
+      <TooltipTrigger>
+        {#snippet child({ props })}
+          <InputGroupButton {...props}>조건</InputGroupButton>
+        {/snippet}
+      </TooltipTrigger>
+      <TooltipContent>설명...</TooltipContent>
+    </Tooltip>
+  </InputGroupAddon>
+  <InputGroupInput placeholder="최소" type="number" bind:value={minValue} />
+  <InputGroupText>~</InputGroupText>
+  <InputGroupInput placeholder="최대" type="number" bind:value={maxValue} />
+  <InputGroupAddon align="inline-end">
+    {#if selectedCondition}
+      <InputGroupText>최대 {selectedCondition.max_value.toLocaleString()}</InputGroupText>
+    {/if}
+  </InputGroupAddon>
+</InputGroup>
+
+<!-- Item/Tile: 내구도 입력 (max_durability_ticks 표시) -->
+<InputGroup>
+  <InputGroupAddon align="inline-start">
+    <Tooltip>
+      <TooltipTrigger>
+        {#snippet child({ props })}
+          <InputGroupButton {...props}>내구도</InputGroupButton>
+        {/snippet}
+      </TooltipTrigger>
+      <TooltipContent>이 상태가 활성화되는 내구도 범위를 설정합니다</TooltipContent>
+    </Tooltip>
+  </InputGroupAddon>
+  <InputGroupInput type="number" bind:value={minDurability} disabled={!item?.max_durability_ticks} />
+  <InputGroupText>~</InputGroupText>
+  <InputGroupInput type="number" bind:value={maxDurability} disabled={!item?.max_durability_ticks} />
+  <InputGroupAddon align="inline-end">
+    {#if item?.max_durability_ticks}
+      <InputGroupText>틱 (최대 {item.max_durability_ticks.toLocaleString()} 틱)</InputGroupText>
+    {:else}
+      <InputGroupText>최대 내구도 없음</InputGroupText>
+    {/if}
+  </InputGroupAddon>
+</InputGroup>
+```
+
+**숫자 포맷팅**:
+- 천단위 콤마: `number.toLocaleString()` 사용
+- 예: `max_durability_ticks.toLocaleString()` → "1,000"
+
 ### 타일 시스템 (Tile System)
 
 타일은 게임 월드의 지형을 구성하는 기본 단위입니다. 각 타일은 재사용 가능한 타입으로 정의되며, 여러 지형에서 공유될 수 있습니다.

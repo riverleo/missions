@@ -57,7 +57,7 @@
 					title: '캐릭터',
 					subItems: [
 						{
-							title: '생성',
+							title: '생성 및 상태 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
@@ -78,7 +78,7 @@
 					title: '건물',
 					subItems: [
 						{
-							title: '생성',
+							title: '생성 및 상태 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
 						},
 						{
@@ -95,7 +95,7 @@
 					title: '아이템',
 					subItems: [
 						{
-							title: '생성',
+							title: '생성 및 상태 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
 						},
 						{
