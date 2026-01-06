@@ -1,18 +1,11 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldItemId, Item } from '$lib/types';
-import {
-	CATEGORY_WALL,
-	CATEGORY_TERRAIN,
-	CATEGORY_ITEM,
-	CATEGORY_CHARACTER,
-} from '../../constants';
+import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_ITEM } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
-
-const { Bodies } = Matter;
 
 export class WorldItemEntity extends Entity {
 	readonly id: WorldItemId;
@@ -73,7 +66,7 @@ export class WorldItemEntity extends Entity {
 			const currentAngle = this.body.angle;
 
 			// 월드에서 기존 바디 제거
-			Matter.Composite.remove(this.world.engine.world, this.body);
+			this.removeFromWorld();
 
 			// 새 바디 생성 (위치 및 크기 상태도 함께 설정됨)
 			this.body = this.createBody(
@@ -96,7 +89,7 @@ export class WorldItemEntity extends Entity {
 			Matter.Body.setAngle(this.body, currentAngle);
 
 			// 월드에 새 바디 추가
-			Matter.Composite.add(this.world.engine.world, this.body);
+			this.addToWorld();
 		}
 	}
 
@@ -105,7 +98,7 @@ export class WorldItemEntity extends Entity {
 		// (게임 로직에서 필요시 구현)
 	}
 
-	update(event: BeforeUpdateEvent): void {
+	update(_: BeforeUpdateEvent): void {
 		// 아이템은 물리 엔진이 자동으로 처리하므로 update 로직 없음
 	}
 }

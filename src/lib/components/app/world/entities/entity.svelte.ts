@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldContext, BeforeUpdateEvent } from '../context';
+import type { BeforeUpdateEvent } from '../context';
 import type { EntityId, ColliderType } from '$lib/types';
 import { useWorldContext } from '$lib/hooks/use-world';
 

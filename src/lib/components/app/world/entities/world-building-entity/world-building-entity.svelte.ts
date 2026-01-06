@@ -48,8 +48,6 @@ export class WorldBuildingEntity extends Entity {
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
 		});
-
-		this.angle = 0;
 	}
 
 	get building(): Building | undefined {
@@ -81,7 +79,7 @@ export class WorldBuildingEntity extends Entity {
 			const y = leftTopY + newHeight / 2;
 
 			// 월드에서 기존 바디 제거
-			Matter.Composite.remove(this.world.engine.world, this.body);
+			this.removeFromWorld();
 
 			// 새 바디 생성 (위치 및 크기 상태도 함께 설정됨)
 			this.body = this.createBody('rectangle', newWidth, newHeight, x, y, {
@@ -93,7 +91,7 @@ export class WorldBuildingEntity extends Entity {
 			});
 
 			// 월드에 새 바디 추가
-			Matter.Composite.add(this.world.engine.world, this.body);
+			this.addToWorld();
 		}
 	}
 
@@ -102,7 +100,7 @@ export class WorldBuildingEntity extends Entity {
 		// 하지만 일관성을 위해 인터페이스 제공
 	}
 
-	update(event: BeforeUpdateEvent): void {
+	update(_: BeforeUpdateEvent): void {
 		// 건물은 static이므로 update 로직 없음
 	}
 }
