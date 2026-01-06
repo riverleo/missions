@@ -33,7 +33,9 @@
 
 	const open = $derived($faceStateDialogStore?.type === 'update');
 	const characterFaceStateId = $derived(
-		$faceStateDialogStore?.type === 'update' ? $faceStateDialogStore.characterFaceStateId : undefined
+		$faceStateDialogStore?.type === 'update'
+			? $faceStateDialogStore.characterFaceStateId
+			: undefined
 	);
 
 	// Find the face state from all character face states

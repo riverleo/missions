@@ -18,7 +18,9 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($tileDialogStore?.type === 'delete');
-	const tileId = $derived($tileDialogStore?.type === 'delete' ? $tileDialogStore.tileId : undefined);
+	const tileId = $derived(
+		$tileDialogStore?.type === 'delete' ? $tileDialogStore.tileId : undefined
+	);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {

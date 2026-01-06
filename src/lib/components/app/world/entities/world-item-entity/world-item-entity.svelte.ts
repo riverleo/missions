@@ -34,13 +34,20 @@ export class WorldItemEntity extends Entity {
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
-		this.body = this.createBody(item.collider_type, item.collider_width, item.collider_height, worldItem.x, worldItem.y, {
-			isStatic: false,
-			collisionFilter: {
-				category: CATEGORY_ITEM,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
-			},
-		});
+		this.body = this.createBody(
+			item.collider_type,
+			item.collider_width,
+			item.collider_height,
+			worldItem.x,
+			worldItem.y,
+			{
+				isStatic: false,
+				collisionFilter: {
+					category: CATEGORY_ITEM,
+					mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
+				},
+			}
+		);
 
 		this.angle = worldItem.rotation;
 	}

@@ -20,7 +20,7 @@
 	import type { EntityId } from '$lib/types';
 
 	const { supabase } = useServerPayload();
-	const { store: terrainStore } = useTerrain();
+	const { store: terrainStore, tileStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
 	const { store: itemStore } = useItem();
@@ -30,6 +30,7 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
+	const tiles = $derived(alphabetical(Object.values($tileStore.data), (t) => t.name));
 </script>
 
 <Command class="h-full w-full rounded-none border-none bg-transparent">
@@ -108,6 +109,24 @@
 						/>
 						<span class="flex-1 truncate">
 							{item.name || `이름없음 (${item.id.split('-')[0]})`}
+						</span>
+					</CommandItem>
+				{/each}
+			</CommandGroup>
+		{/if}
+		{#if tiles.length > 0}
+			<CommandGroup heading="타일">
+				{#each tiles as tile (tile.id)}
+					{@const entityId = `tile-${tile.id}` as EntityId}
+					<CommandItem onSelect={() => selectEntity(entityId)}>
+						<IconCheck
+							class={cn(
+								'mr-2 size-4',
+								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
+							)}
+						/>
+						<span class="flex-1 truncate">
+							{tile.name || `이름없음 (${tile.id.split('-')[0]})`}
 						</span>
 					</CommandItem>
 				{/each}

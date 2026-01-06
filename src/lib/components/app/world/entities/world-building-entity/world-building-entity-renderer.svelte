@@ -31,6 +31,7 @@
 		resolution={2}
 		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x + (building?.collider_offset_x ?? 0)}px; top: {entity.y + (building?.collider_offset_y ?? 0)}px; opacity: {opacity}; rotate: {entity.angle}rad;"
+		style="left: {entity.x + (building?.collider_offset_x ?? 0)}px; top: {entity.y +
+			(building?.collider_offset_y ?? 0)}px; opacity: {opacity}; rotate: {entity.angle}rad;"
 	/>
 {/if}

@@ -138,7 +138,7 @@ create table world_tile_maps (
   -- Audit
   created_at timestamptz not null default now(),
 
-  constraint uq_world_tile_maps unique (world_id, terrain_id)
+  constraint uq_world_tile_maps_world_id unique (world_id)
 );
 
 alter table world_tile_maps enable row level security;

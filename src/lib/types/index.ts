@@ -27,8 +27,12 @@ export interface RecordFetchState<K extends string, T> {
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
 // Entity ID with type information (branded string type)
-export type EntityId = `character-${string}` | `building-${string}` | `item-${string}`;
-export type EntityType = 'character' | 'building' | 'item';
+export type EntityId =
+	| `character-${string}`
+	| `building-${string}`
+	| `item-${string}`
+	| `tile-${string}`;
+export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;
 export type ChapterId = Brand<string, 'ChapterId'>;
@@ -79,6 +83,7 @@ export type WorldItemId = Brand<string, 'WorldItemId'>;
 export type TileId = Brand<string, 'TileId'>;
 export type TileStateId = Brand<string, 'TileStateId'>;
 export type TerrainTileId = Brand<string, 'TerrainTileId'>;
+export type WorldTileMapId = Brand<string, 'WorldTileMapId'>;
 
 // Bulk update types
 export interface BulkChanges<T> {
@@ -115,14 +120,20 @@ export type ScenarioUpdate = Omit<ScenarioUpdateRow, 'id'> & {
 	id?: ScenarioId;
 };
 type PlayerScenarioRow = Tables<'player_scenarios'>;
-export type PlayerScenario = Omit<PlayerScenarioRow, 'id' | 'user_id' | 'player_id' | 'scenario_id'> & {
+export type PlayerScenario = Omit<
+	PlayerScenarioRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id'
+> & {
 	id: PlayerScenarioId;
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 };
 type PlayerScenarioInsertRow = TablesInsert<'player_scenarios'>;
-export type PlayerScenarioInsert = Omit<PlayerScenarioInsertRow, 'user_id' | 'player_id' | 'scenario_id'> & {
+export type PlayerScenarioInsert = Omit<
+	PlayerScenarioInsertRow,
+	'user_id' | 'player_id' | 'scenario_id'
+> & {
 	user_id?: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
@@ -217,7 +228,10 @@ export type QuestBranchUpdate = Omit<
 	created_by?: UserRoleId | null;
 };
 type PlayerQuestRow = Tables<'player_quests'>;
-export type PlayerQuest = Omit<PlayerQuestRow, 'id' | 'user_id' | 'player_id' | 'scenario_id' | 'quest_id'> & {
+export type PlayerQuest = Omit<
+	PlayerQuestRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'quest_id'
+> & {
 	id: PlayerQuestId;
 	user_id: UserId;
 	player_id: PlayerId;
@@ -237,7 +251,13 @@ export type PlayerQuestInsert = Omit<
 type PlayerQuestBranchRow = Tables<'player_quest_branches'>;
 export type PlayerQuestBranch = Omit<
 	PlayerQuestBranchRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id' | 'player_quest_id'
+	| 'id'
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
 > & {
 	id: PlayerQuestBranchId;
 	user_id: UserId;
@@ -544,7 +564,10 @@ export type CharacterFaceState = Omit<CharacterFaceStateRow, 'id' | 'character_i
 	need_id: NeedId | null;
 };
 type CharacterFaceStateInsertRow = TablesInsert<'character_face_states'>;
-export type CharacterFaceStateInsert = Omit<CharacterFaceStateInsertRow, 'character_id' | 'need_id'> & {
+export type CharacterFaceStateInsert = Omit<
+	CharacterFaceStateInsertRow,
+	'character_id' | 'need_id'
+> & {
 	character_id: CharacterId;
 	need_id?: NeedId | null;
 };
@@ -587,7 +610,10 @@ export type CharacterUpdate = Omit<
 
 // World types
 type WorldRow = Tables<'worlds'>;
-export type World = Omit<WorldRow, 'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type World = Omit<
+	WorldRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
 	id: WorldId;
 	user_id: UserId;
 	player_id: PlayerId;
@@ -595,14 +621,20 @@ export type World = Omit<WorldRow, 'id' | 'user_id' | 'player_id' | 'scenario_id
 	terrain_id: TerrainId | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
-export type WorldInsert = Omit<WorldInsertRow, 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type WorldInsert = Omit<
+	WorldInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id?: TerrainId | null;
 };
 type WorldUpdateRow = TablesUpdate<'worlds'>;
-export type WorldUpdate = Omit<WorldUpdateRow, 'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'> & {
+export type WorldUpdate = Omit<
+	WorldUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
 	id?: WorldId;
 	user_id?: UserId;
 	player_id?: PlayerId;
@@ -661,7 +693,10 @@ export type BuildingStateInsert = Omit<BuildingStateInsertRow, 'building_id' | '
 	condition_id?: ConditionId | null;
 };
 type BuildingStateUpdateRow = TablesUpdate<'building_states'>;
-export type BuildingStateUpdate = Omit<BuildingStateUpdateRow, 'id' | 'building_id' | 'condition_id'> & {
+export type BuildingStateUpdate = Omit<
+	BuildingStateUpdateRow,
+	'id' | 'building_id' | 'condition_id'
+> & {
 	id?: BuildingStateId;
 	building_id?: BuildingId;
 	condition_id?: ConditionId | null;
@@ -1029,7 +1064,13 @@ export type WorldCharacterNeed = Omit<
 type WorldCharacterNeedInsertRow = TablesInsert<'world_character_needs'>;
 export type WorldCharacterNeedInsert = Omit<
 	WorldCharacterNeedInsertRow,
-	'user_id' | 'world_id' | 'world_character_id' | 'character_id' | 'need_id' | 'player_id' | 'scenario_id'
+	| 'user_id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
 > & {
 	user_id?: UserId;
 	world_id: WorldId;
@@ -1323,7 +1364,10 @@ export type TileUpdate = Omit<TileUpdateRow, 'id' | 'scenario_id' | 'created_by'
 
 // TerrainTile types
 type TerrainTileRow = Tables<'terrains_tiles'>;
-export type TerrainTile = Omit<TerrainTileRow, 'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'> & {
+export type TerrainTile = Omit<
+	TerrainTileRow,
+	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
+> & {
 	id: TerrainTileId;
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId;
@@ -1331,13 +1375,19 @@ export type TerrainTile = Omit<TerrainTileRow, 'id' | 'scenario_id' | 'terrain_i
 	created_by: UserRoleId | null;
 };
 type TerrainTileInsertRow = TablesInsert<'terrains_tiles'>;
-export type TerrainTileInsert = Omit<TerrainTileInsertRow, 'scenario_id' | 'terrain_id' | 'tile_id'> & {
+export type TerrainTileInsert = Omit<
+	TerrainTileInsertRow,
+	'scenario_id' | 'terrain_id' | 'tile_id'
+> & {
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId;
 	tile_id: TileId;
 };
 type TerrainTileUpdateRow = TablesUpdate<'terrains_tiles'>;
-export type TerrainTileUpdate = Omit<TerrainTileUpdateRow, 'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'> & {
+export type TerrainTileUpdate = Omit<
+	TerrainTileUpdateRow,
+	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
+> & {
 	id?: TerrainTileId;
 	scenario_id?: ScenarioId;
 	terrain_id?: TerrainId;
@@ -1347,7 +1397,10 @@ export type TerrainTileUpdate = Omit<TerrainTileUpdateRow, 'id' | 'scenario_id' 
 
 // WorldItem types
 type WorldItemRow = Tables<'world_items'>;
-export type WorldItem = Omit<WorldItemRow, 'id' | 'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'> & {
+export type WorldItem = Omit<
+	WorldItemRow,
+	'id' | 'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
+> & {
 	id: WorldItemId;
 	user_id: UserId;
 	world_id: WorldId;
@@ -1356,7 +1409,10 @@ export type WorldItem = Omit<WorldItemRow, 'id' | 'user_id' | 'world_id' | 'item
 	scenario_id: ScenarioId;
 };
 type WorldItemInsertRow = TablesInsert<'world_items'>;
-export type WorldItemInsert = Omit<WorldItemInsertRow, 'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'> & {
+export type WorldItemInsert = Omit<
+	WorldItemInsertRow,
+	'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
+> & {
 	user_id?: UserId;
 	world_id: WorldId;
 	item_id: ItemId;
@@ -1374,6 +1430,47 @@ export type WorldItemUpdate = Omit<
 	item_id?: ItemId;
 	scenario_id?: ScenarioId;
 	player_id?: PlayerId;
+};
+
+// WorldTileMap types
+export type WorldTileMapVector = `${number},${number}`;
+
+type WorldTileMapRow = Tables<'world_tile_maps'>;
+export type WorldTileMap = Omit<
+	WorldTileMapRow,
+	'scenario_id' | 'user_id' | 'player_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	terrain_id: TerrainId;
+	data: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
+};
+type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
+export type WorldTileMapInsert = Omit<
+	WorldTileMapInsertRow,
+	'scenario_id' | 'user_id' | 'player_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	scenario_id: ScenarioId;
+	user_id?: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	terrain_id: TerrainId;
+	data?: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
+};
+type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
+export type WorldTileMapUpdate = Omit<
+	WorldTileMapUpdateRow,
+	'id' | 'scenario_id' | 'user_id' | 'player_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	id?: WorldTileMapId;
+	scenario_id?: ScenarioId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	world_id?: WorldId;
+	terrain_id?: TerrainId;
+	data?: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
 };
 
 // ItemBehavior types

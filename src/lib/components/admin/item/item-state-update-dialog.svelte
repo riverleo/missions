@@ -113,7 +113,9 @@
 					/>
 					<InputGroupAddon align="inline-end">
 						{#if item?.max_durability_ticks}
-							<InputGroupText>틱 (최대 {item.max_durability_ticks.toLocaleString()} 틱)</InputGroupText>
+							<InputGroupText>
+								틱 (최대 {item.max_durability_ticks.toLocaleString()} 틱)
+							</InputGroupText>
 						{:else}
 							<InputGroupText>최대 내구도 없음</InputGroupText>
 						{/if}

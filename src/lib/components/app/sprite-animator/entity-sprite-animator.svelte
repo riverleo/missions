@@ -1,9 +1,10 @@
 <script lang="ts">
-	import type { EntityId, BuildingId, CharacterId, ItemId } from '$lib/types';
+	import type { EntityId, BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
 	import ItemSpriteAnimator from './item-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
+	import TileSpriteAnimator from './tile-sprite-animator.svelte';
 
 	interface Props {
 		entityId: EntityId;
@@ -26,4 +27,6 @@
 	<ItemSpriteAnimator itemId={id as ItemId} stateType="idle" {resolution} />
 {:else if type === 'building'}
 	<BuildingSpriteAnimator buildingId={id as BuildingId} stateType="idle" {resolution} />
+{:else if type === 'tile'}
+	<TileSpriteAnimator tileId={id as TileId} stateType="idle" {resolution} />
 {/if}

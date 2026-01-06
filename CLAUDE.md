@@ -12,6 +12,7 @@
 ❌ **절대 금지**: 원인 파악 없이 무작정 코드 전체를 수정하는 것
 
 예시:
+
 - 마우스 드래그 버그 발생
 - ❌ 나쁜 접근: createBody() 시그니처부터 전부 수정
 - ✅ 좋은 접근: 로깅 추가 → 원인 파악 (bounds 계산 문제) → 한 엔티티에만 수정 → 테스트 → 전체 반영
@@ -234,6 +235,7 @@
 - 정책 이름은 **소문자로 시작**
 - 주체는 **복수형** 사용: `anyone`, `admins`, `players`, `owner or admin`
 - 예시:
+
   ```sql
   create policy "anyone can view tiles"
     on tiles for select using (true);
@@ -248,7 +250,8 @@
     to authenticated
     with check (is_world_owner(world_id) or is_admin());
   ```
-- **world_ 테이블의 RLS 패턴**: `is_world_owner(world_id)` 함수 사용
+
+- **world\_ 테이블의 RLS 패턴**: `is_world_owner(world_id)` 함수 사용
   - `is_world_owner(wid uuid)`: 현재 유저가 해당 월드의 소유자인지 확인
   - 정의 위치: `supabase/migrations/20251216100000_create_world_characters.sql`
 
@@ -314,7 +317,7 @@ Migration 파일에서 정의된 헬퍼 함수들은 RLS 정책과 애플리케�
 
 - `is_world_owner(wid uuid)`: 현재 유저가 특정 월드의 소유자인지 확인
   - 반환: `boolean`
-  - 용도: world_* 테이블 RLS 정책
+  - 용도: world\_\* 테이블 RLS 정책
   - 예시: `with check (is_world_owner(world_id) or is_admin())`
   - 정의 위치: `20251216100000_create_world_characters.sql`
 
@@ -795,6 +798,7 @@ const newId = crypto.randomUUID() as WorldId;
   ```
 
 - **패턴**: 파싱 결과를 `$derived`로 캐싱하여 재사용
+
   ```typescript
   const selectedEntityType = $derived.by(() => {
     if (!$store.selectedEntityId) return undefined;
@@ -976,19 +980,21 @@ needs (욕구 정의)
 모든 엔티티(Building, Item, Tile)는 **상태(state) 시스템**을 가지며, 각 상태는 애니메이션과 활성화 조건을 정의합니다.
 
 **공통 구조**:
+
 - `*_states` 테이블: 상태별 애니메이션 + 활성화 조건
 - 런타임에 조건을 확인하여 현재 어떤 상태를 보여줄지 결정
 
 **엔티티별 조건 타입**:
 
-| 엔티티 | 조건 기준 | states 테이블 필드 |
-|--------|-----------|-------------------|
-| Building | condition 값 (청결도, 안정성 등) | `condition_id`, `min_value`, `max_value`, `priority` |
-| Character (Face) | need 값 (배고픔, 행복 등) | `need_id`, `min_value`, `max_value`, `priority` |
-| Item | durability | `min_durability`, `max_durability` |
-| Tile | durability | `min_durability`, `max_durability` |
+| 엔티티           | 조건 기준                        | states 테이블 필드                                   |
+| ---------------- | -------------------------------- | ---------------------------------------------------- |
+| Building         | condition 값 (청결도, 안정성 등) | `condition_id`, `min_value`, `max_value`, `priority` |
+| Character (Face) | need 값 (배고픔, 행복 등)        | `need_id`, `min_value`, `max_value`, `priority`      |
+| Item             | durability                       | `min_durability`, `max_durability`                   |
+| Tile             | durability                       | `min_durability`, `max_durability`                   |
 
 **Building State 결정 로직**:
+
 ```sql
 -- priority 높은 순으로 정렬하여 첫 번째 매칭되는 state 사용
 SELECT * FROM building_states
@@ -1006,6 +1012,7 @@ WHERE building_id = '...'
 ```
 
 **Item/Tile State 결정 로직**:
+
 ```sql
 -- 현재 durability에 맞는 state 찾기
 SELECT * FROM item_states
@@ -1018,6 +1025,7 @@ LIMIT 1;
 ```
 
 **예시 - Building States**:
+
 ```sql
 INSERT INTO building_states VALUES
   (building_id, 'damaged', 'atlas1', condition_id: '안정성', min: 0, max: 50, priority: 1),
@@ -1029,6 +1037,7 @@ INSERT INTO building_states VALUES
 ```
 
 **예시 - Character Face States**:
+
 ```sql
 INSERT INTO character_face_states VALUES
   (character_id, 'sad', 'face-sad', need_id: '배고픔', min: 0, max: 30, priority: 1),     -- 굶주림
@@ -1041,6 +1050,7 @@ INSERT INTO character_face_states VALUES
 ```
 
 **예시 - Item States**:
+
 ```sql
 INSERT INTO item_states VALUES
   (item_id, 'idle', 'axe-normal', min: 50, max: 100),
@@ -1052,6 +1062,7 @@ INSERT INTO item_states VALUES
 ```
 
 **world_items.state 제거**:
+
 - 이전: `world_items.state` 컬럼에 상태 저장
 - 현재: `durability_ticks` 값으로 런타임에 `item_states` 조건 체크하여 계산
 - 이유: 단일 진실 공급원 (조건 정의가 DB에 있으므로)
@@ -1061,6 +1072,7 @@ INSERT INTO item_states VALUES
 어드민 UI에서 각 state의 활성화 조건을 편집할 수 있는 패턴을 따릅니다.
 
 **Hook 추가 사항**:
+
 ```typescript
 // use-{entity}.ts
 type {Entity}StateDialogState =
@@ -1087,6 +1099,7 @@ return {
 ```
 
 **컴포넌트 구조**:
+
 - `{entity}-state-update-dialog.svelte`: 조건 편집 다이얼로그
   - Building: condition 선택, min/max value, priority 입력
   - Character Face: need 선택, min/max value, priority 입력
@@ -1097,6 +1110,7 @@ return {
   - Item: `내구도 (${min}~${max} 틱)`
 
 **공통 패턴**:
+
 ```typescript
 // Preview 버튼 스타일
 <Button
@@ -1113,55 +1127,65 @@ return {
 ```
 
 **다이얼로그 입력 필드**:
+
 ```svelte
 <!-- Building/Character Face: Dropdown으로 condition/need 선택 -->
 <InputGroup>
-  <InputGroupAddon align="inline-start">
-    <Tooltip>
-      <TooltipTrigger>
-        {#snippet child({ props })}
-          <InputGroupButton {...props}>조건</InputGroupButton>
-        {/snippet}
-      </TooltipTrigger>
-      <TooltipContent>설명...</TooltipContent>
-    </Tooltip>
-  </InputGroupAddon>
-  <InputGroupInput placeholder="최소" type="number" bind:value={minValue} />
-  <InputGroupText>~</InputGroupText>
-  <InputGroupInput placeholder="최대" type="number" bind:value={maxValue} />
-  <InputGroupAddon align="inline-end">
-    {#if selectedCondition}
-      <InputGroupText>최대 {selectedCondition.max_value.toLocaleString()}</InputGroupText>
-    {/if}
-  </InputGroupAddon>
+	<InputGroupAddon align="inline-start">
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<InputGroupButton {...props}>조건</InputGroupButton>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>설명...</TooltipContent>
+		</Tooltip>
+	</InputGroupAddon>
+	<InputGroupInput placeholder="최소" type="number" bind:value={minValue} />
+	<InputGroupText>~</InputGroupText>
+	<InputGroupInput placeholder="최대" type="number" bind:value={maxValue} />
+	<InputGroupAddon align="inline-end">
+		{#if selectedCondition}
+			<InputGroupText>최대 {selectedCondition.max_value.toLocaleString()}</InputGroupText>
+		{/if}
+	</InputGroupAddon>
 </InputGroup>
 
 <!-- Item/Tile: 내구도 입력 (max_durability_ticks 표시) -->
 <InputGroup>
-  <InputGroupAddon align="inline-start">
-    <Tooltip>
-      <TooltipTrigger>
-        {#snippet child({ props })}
-          <InputGroupButton {...props}>내구도</InputGroupButton>
-        {/snippet}
-      </TooltipTrigger>
-      <TooltipContent>이 상태가 활성화되는 내구도 범위를 설정합니다</TooltipContent>
-    </Tooltip>
-  </InputGroupAddon>
-  <InputGroupInput type="number" bind:value={minDurability} disabled={!item?.max_durability_ticks} />
-  <InputGroupText>~</InputGroupText>
-  <InputGroupInput type="number" bind:value={maxDurability} disabled={!item?.max_durability_ticks} />
-  <InputGroupAddon align="inline-end">
-    {#if item?.max_durability_ticks}
-      <InputGroupText>틱 (최대 {item.max_durability_ticks.toLocaleString()} 틱)</InputGroupText>
-    {:else}
-      <InputGroupText>최대 내구도 없음</InputGroupText>
-    {/if}
-  </InputGroupAddon>
+	<InputGroupAddon align="inline-start">
+		<Tooltip>
+			<TooltipTrigger>
+				{#snippet child({ props })}
+					<InputGroupButton {...props}>내구도</InputGroupButton>
+				{/snippet}
+			</TooltipTrigger>
+			<TooltipContent>이 상태가 활성화되는 내구도 범위를 설정합니다</TooltipContent>
+		</Tooltip>
+	</InputGroupAddon>
+	<InputGroupInput
+		type="number"
+		bind:value={minDurability}
+		disabled={!item?.max_durability_ticks}
+	/>
+	<InputGroupText>~</InputGroupText>
+	<InputGroupInput
+		type="number"
+		bind:value={maxDurability}
+		disabled={!item?.max_durability_ticks}
+	/>
+	<InputGroupAddon align="inline-end">
+		{#if item?.max_durability_ticks}
+			<InputGroupText>틱 (최대 {item.max_durability_ticks.toLocaleString()} 틱)</InputGroupText>
+		{:else}
+			<InputGroupText>최대 내구도 없음</InputGroupText>
+		{/if}
+	</InputGroupAddon>
 </InputGroup>
 ```
 
 **숫자 포맷팅**:
+
 - 천단위 콤마: `number.toLocaleString()` 사용
 - 예: `max_durability_ticks.toLocaleString()` → "1,000"
 
@@ -1179,21 +1203,25 @@ tiles (타일 타입 정의)
 ```
 
 **tiles 테이블** (재사용 가능한 타일 타입):
+
 - `scenario_id`: 시나리오별 타일 정의
 - `name`: 타일 이름 (시나리오 내 유니크)
 
 **tile_states 테이블** (타일 스프라이트 + 조건):
+
 - `tile_id`: 타일 참조
 - `type`: tile_state_type enum (현재는 'idle'만 존재)
 - 스프라이트 정보: `atlas_name`, `frame_from`, `frame_to`, `fps`, `loop` (loop_mode 타입)
 - 활성화 조건: `min_durability`, `max_durability` (기본값 0~100)
 
 **terrains_tiles 테이블** (N:N 매핑):
+
 - `terrain_id`, `tile_id`: 지형과 타일 연결
 - `scenario_id`: 조인 편의를 위한 중복 컬럼
 - 용도: 어드민 UI에서 플로우차트로 시각화
 
 **world_tile_maps 테이블** (월드별 타일맵 - sparse storage):
+
 - `world_id`, `terrain_id`: 월드와 지형 참조
 - `data`: JSONB 타입, `{"x,y": {"tile_id": "...", "durability": 100}, ...}` 형식
   - 타일이 배치된 좌표만 저장 (sparse data)
@@ -1203,6 +1231,7 @@ tiles (타일 타입 정의)
 - unique constraint: `(world_id, terrain_id)` - world당 terrain마다 하나의 타일맵
 
 **JSONB 타일맵 사용 예시**:
+
 ```typescript
 // 특정 좌표의 타일 정보 가져오기 - O(1)
 SELECT data->'5,3' as tile_data FROM world_tile_maps WHERE world_id = '...';
@@ -1225,6 +1254,7 @@ WHERE world_id = '...';
 ```
 
 **설계 패턴**:
+
 - **재사용 가능한 타입 + 상태 패턴**: tiles는 타입 정의, tile_states는 애니메이션 상태
 - **N:N 매핑 테이블**: terrains_tiles로 지형과 타일 관계 표현
 - **Sparse Storage 패턴**: JSONB로 좌표→타일 매핑, 빈 공간은 저장 안 함
@@ -1326,17 +1356,18 @@ WHERE world_id = '...';
   - `cursor`가 있으면 자동으로 그리드와 미리보기 표시
   - `cursor`를 `undefined`로 설정하면 비활성화
   - 예시:
+
     ```typescript
     // 건물 배치 시작
     world.blueprint.cursor = {
-      building: selectedBuilding,
-      tileX: mouseToTileX,
-      tileY: mouseToTileY,
+    	building: selectedBuilding,
+    	tileX: mouseToTileX,
+    	tileY: mouseToTileY,
     };
 
     // 배치 가능 여부 확인
     if (world.blueprint.canPlace) {
-      // 건물 배치 로직
+    	// 건물 배치 로직
     }
 
     // 배치 종료
@@ -1393,29 +1424,30 @@ WHERE world_id = '...';
     ```typescript
     // ❌ 나쁜 예: mouseX, mouseY 변경 시 cursor가 업데이트되지 않음
     $effect(() => {
-      const pos = untrack(() => {
-        return { x: mouseX, y: mouseY };
-      });
-      world.blueprint.cursor = { ...pos };
+    	const pos = untrack(() => {
+    		return { x: mouseX, y: mouseY };
+    	});
+    	world.blueprint.cursor = { ...pos };
     });
     ```
   - **올바른 예**: 필요한 값은 직접 추적
     ```typescript
     // ✅ 좋은 예: mouseX, mouseY 변경 시 cursor가 업데이트됨
     $effect(() => {
-      const pos = { x: mouseX, y: mouseY };
-      world.blueprint.cursor = { ...pos };
+    	const pos = { x: mouseX, y: mouseY };
+    	world.blueprint.cursor = { ...pos };
     });
     ```
   - **성능 최적화가 필요한 경우**: `$derived`로 분리하여 선택적으로 추적
+
     ```typescript
     const throttledPos = $derived.by(() => {
-      // 필요한 경우 throttle 로직 추가
-      return { x: mouseX, y: mouseY };
+    	// 필요한 경우 throttle 로직 추가
+    	return { x: mouseX, y: mouseY };
     });
 
     $effect(() => {
-      world.blueprint.cursor = { ...throttledPos };
+    	world.blueprint.cursor = { ...throttledPos };
     });
     ```
 

@@ -56,6 +56,7 @@
 		flip={entity.direction === 'right'}
 		{selected}
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {entity.x + (characterBody?.collider_offset_x ?? 0)}px; top: {entity.y + (characterBody?.collider_offset_y ?? 0)}px; opacity: {opacity};"
+		style="left: {entity.x + (characterBody?.collider_offset_x ?? 0)}px; top: {entity.y +
+			(characterBody?.collider_offset_y ?? 0)}px; opacity: {opacity};"
 	/>
 {/if}

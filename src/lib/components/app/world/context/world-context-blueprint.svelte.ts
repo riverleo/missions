@@ -2,8 +2,10 @@ import { get } from 'svelte/store';
 import { getBuildingOccupiedCells, getOverlappingCells, type TileCell } from '../tiles';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
+import type { BuildingId } from '$lib/types';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
@@ -15,27 +17,37 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 현재 배치하려는 건물과 기존 건물들의 겹치는 셀들 계산
+	 * 현재 배치하려는 건물/타일과 기존 건물들의 겹치는 셀들 계산
 	 */
 	getOverlappingCells(): TileCell[] {
 		if (!this.cursor || !this.context) return [];
 
-		const { buildingId, tileX, tileY } = this.cursor;
+		const { entityId, tileX, tileY } = this.cursor;
+
+		// 배치하려는 셀 계산
+		let targetTileCells: TileCell[];
+		if (EntityIdUtils.is('building', entityId)) {
+			const { value: buildingId } = EntityIdUtils.parse<BuildingId>(entityId);
+			const buildingStore = get(useBuilding().store).data;
+			const building = buildingStore[buildingId];
+			if (!building) return [];
+			targetTileCells = getBuildingOccupiedCells(
+				tileX,
+				tileY,
+				building.tile_cols,
+				building.tile_rows
+			);
+		} else if (EntityIdUtils.is('tile', entityId)) {
+			// 타일은 1x1
+			targetTileCells = getBuildingOccupiedCells(tileX, tileY, 1, 1);
+		} else {
+			return [];
+		}
 
 		// 기존 건물들이 차지하는 모든 셀 수집
 		const buildingStore = get(useBuilding().store).data;
 		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
-
-		const building = buildingStore[buildingId];
-		if (!building) return [];
-
-		const placementCells = getBuildingOccupiedCells(
-			tileX,
-			tileY,
-			building.tile_cols,
-			building.tile_rows
-		);
-		const existingCells: TileCell[] = [];
+		const existingTileCells: TileCell[] = [];
 
 		// worldId 필터링
 		const worldBuildings = Object.values(worldBuildingStore).filter(
@@ -52,10 +64,10 @@ export class WorldContextBlueprint {
 				buildingData.tile_cols,
 				buildingData.tile_rows
 			);
-			existingCells.push(...cells);
+			existingTileCells.push(...cells);
 		}
 
-		return getOverlappingCells(placementCells, existingCells);
+		return getOverlappingCells(targetTileCells, existingTileCells);
 	}
 
 	/**

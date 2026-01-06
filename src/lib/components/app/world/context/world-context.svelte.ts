@@ -19,6 +19,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';
+import { WorldTileMapEntity } from '../entities/world-tile-map-entity';
 import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
@@ -37,6 +38,7 @@ export class WorldContext {
 	readonly pathfinder: Pathfinder;
 
 	entities = $state<Record<string, Entity>>({});
+	tileMapEntity: WorldTileMapEntity | undefined = $state(undefined);
 
 	debug = $state(false);
 	initialized = $state(false);
@@ -67,6 +69,11 @@ export class WorldContext {
 	setDebugEntities(debug: boolean) {
 		for (const entity of Object.values(this.entities)) {
 			entity.setDebug(debug);
+		}
+
+		// TileMap 엔티티 디버그 업데이트
+		if (this.tileMapEntity) {
+			this.tileMapEntity.setDebug(debug);
 		}
 
 		// 바운더리 벽 visibility 업데이트
@@ -250,6 +257,11 @@ export class WorldContext {
 		// 바운더리 생성
 		this.createBoundaryWalls();
 
+		// WorldTileMap 엔티티 추가
+		if (this.tileMapEntity) {
+			this.tileMapEntity.addToWorld();
+		}
+
 		// 엔티티 바디 재추가
 		for (const entity of Object.values(this.entities)) {
 			entity.addToWorld();
@@ -343,12 +355,38 @@ export class WorldContext {
 				}
 			}
 		}
+
+		// WorldTileMap 엔티티 처리
+		const { worldTileMapStore } = useWorld();
+		const worldTileMap = get(worldTileMapStore).data[this.worldId];
+
+		if (worldTileMap) {
+			if (!this.tileMapEntity) {
+				// TileMap 엔티티 생성
+				try {
+					const entity = new WorldTileMapEntity(this.worldId);
+					entity.addToWorld();
+					this.tileMapEntity = entity;
+				} catch (error) {
+					console.warn('Skipping tilemap creation:', error);
+				}
+			}
+		} else if (this.tileMapEntity) {
+			// TileMap이 제거되었으면 엔티티 제거
+			this.tileMapEntity.removeFromWorld();
+			this.tileMapEntity = undefined;
+		}
 	}
 
 	// 스토어 데이터 변경사항을 엔티티에 동기화
 	private syncEntities() {
 		for (const entity of Object.values(this.entities)) {
 			entity.sync();
+		}
+
+		// TileMap 엔티티 동기화
+		if (this.tileMapEntity) {
+			this.tileMapEntity.sync();
 		}
 	}
 

@@ -5,6 +5,8 @@ import type {
 	WorldCharacter,
 	WorldBuilding,
 	WorldItem,
+	WorldTileMap,
+	WorldTileMapVector,
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldItemId,
@@ -17,6 +19,7 @@ import type {
 	CharacterId,
 	BuildingId,
 	ItemId,
+	TileId,
 } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
@@ -43,11 +46,18 @@ function createTestWorldStore() {
 		store.update((state) => {
 			const isSameTerrain = state.selectedTerrainId === terrainId;
 
-			// 같은 terrain 선택 시 선택 해제 및 world 제거
+			// 같은 terrain 선택 시 선택 해제 및 world, worldTileMap 제거
 			if (isSameTerrain) {
 				// use-world 스토어 업데이트
 				const world = useWorld();
 				world.worldStore.update((state) =>
+					produce(state, (draft) => {
+						delete draft.data[TEST_WORLD_ID];
+					})
+				);
+
+				// worldTileMap 제거
+				world.worldTileMapStore.update((state) =>
 					produce(state, (draft) => {
 						delete draft.data[TEST_WORLD_ID];
 					})
@@ -78,6 +88,24 @@ function createTestWorldStore() {
 			world.worldStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[TEST_WORLD_ID] = newWorld;
+				})
+			);
+
+			// worldTileMap 생성 (world_id를 키로 사용)
+			const newWorldTileMap: WorldTileMap = {
+				id: crypto.randomUUID(),
+				scenario_id: TEST_SCENARIO_ID,
+				user_id: crypto.randomUUID() as UserId,
+				player_id: TEST_PLAYER_ID,
+				world_id: TEST_WORLD_ID,
+				terrain_id: terrain.id,
+				data: {},
+				created_at: new Date().toISOString(),
+			};
+
+			world.worldTileMapStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[TEST_WORLD_ID] = newWorldTileMap;
 				})
 			);
 
@@ -214,6 +242,52 @@ function createTestWorldStore() {
 		);
 	}
 
+	function addTileToWorldTileMap(tileId: TileId, tileX: number, tileY: number) {
+		const world = useWorld();
+		let worldTileMap = get(world.worldTileMapStore).data[TEST_WORLD_ID];
+
+		// WorldTileMap이 없으면 생성
+		if (!worldTileMap) {
+			const testWorld = get(world.worldStore).data[TEST_WORLD_ID];
+			if (!testWorld) {
+				return console.error('Test world not found');
+			}
+
+			const newWorldTileMap: WorldTileMap = {
+				id: crypto.randomUUID(),
+				scenario_id: TEST_SCENARIO_ID,
+				user_id: crypto.randomUUID() as UserId,
+				player_id: TEST_PLAYER_ID,
+				world_id: TEST_WORLD_ID,
+				terrain_id: testWorld.terrain_id!,
+				data: {},
+				created_at: new Date().toISOString(),
+			};
+
+			world.worldTileMapStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[TEST_WORLD_ID] = newWorldTileMap;
+				})
+			);
+
+			worldTileMap = newWorldTileMap;
+		}
+
+		// 타일 추가
+		world.worldTileMapStore.update((state) =>
+			produce(state, (draft) => {
+				const tileMap = draft.data[TEST_WORLD_ID];
+				if (tileMap) {
+					const vector: WorldTileMapVector = `${tileX},${tileY}`;
+					tileMap.data[vector] = {
+						tile_id: tileId,
+						durability: 100, // 기본 내구도
+					};
+				}
+			})
+		);
+	}
+
 	function init() {
 		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
@@ -253,6 +327,15 @@ function createTestWorldStore() {
 				})
 			);
 		}
+
+		if (stored.worldTileMaps) {
+			world.worldTileMapStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldTileMaps);
+					draft.status = 'success';
+				})
+			);
+		}
 	}
 
 	return {
@@ -266,6 +349,7 @@ function createTestWorldStore() {
 		addWorldCharacter,
 		addWorldBuilding,
 		addWorldItem,
+		addTileToWorldTileMap,
 		removeWorldCharacter,
 		removeWorldBuilding,
 		removeWorldItem,

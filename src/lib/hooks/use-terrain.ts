@@ -360,7 +360,10 @@ function createTerrainStore() {
 		},
 
 		// TileState CRUD operations
-		async createTileState(tileId: TileId, tileState: Omit<TileStateInsert, 'tile_id' | 'scenario_id'>) {
+		async createTileState(
+			tileId: TileId,
+			tileState: Omit<TileStateInsert, 'tile_id' | 'scenario_id'>
+		) {
 			if (!currentScenarioId) {
 				throw new Error('useTerrain: currentScenarioId is not set.');
 			}

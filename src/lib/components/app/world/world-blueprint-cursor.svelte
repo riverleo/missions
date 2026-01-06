@@ -1,36 +1,42 @@
 <script lang="ts">
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
+	import type { BuildingId } from '$lib/types';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
 
-	// 배치할 건물
-	const placementBuildingId = $derived(world.blueprint.cursor?.buildingId);
-	const placementBuilding = $derived(
-		placementBuildingId ? $buildingStore.data[placementBuildingId] : undefined
-	);
+	const entityId = $derived(world.blueprint.cursor?.entityId);
 
-	// 건물 타일 크기
-	const cols = $derived(placementBuilding?.tile_cols ?? 0);
-	const rows = $derived(placementBuilding?.tile_rows ?? 0);
+	const building = $derived.by(() => {
+		if (!entityId || !EntityIdUtils.is('building', entityId)) return undefined;
+		const { value: buildingId } = EntityIdUtils.parse<BuildingId>(entityId);
+		return $buildingStore.data[buildingId];
+	});
+
+	const isTile = $derived(entityId && EntityIdUtils.is('tile', entityId));
+
+	const cols = $derived(building?.tile_cols ?? (isTile ? 1 : 0));
+	const rows = $derived(building?.tile_rows ?? (isTile ? 1 : 0));
 	const width = $derived(cols * TILE_SIZE);
 	const height = $derived(rows * TILE_SIZE);
 
-	// 좌상단 타일 인덱스를 건물 중심 픽셀 좌표로 변환
-	const centerX = $derived(() => {
-		if (!world.blueprint.cursor || !placementBuilding) return 0;
+	const centerX = $derived.by(() => {
+		if (!world.blueprint.cursor) return 0;
 		const { tileX } = world.blueprint.cursor;
-		const width = placementBuilding.tile_cols * TILE_SIZE;
+		const tileCols = building?.tile_cols ?? (isTile ? 1 : 0);
+		const width = tileCols * TILE_SIZE;
 		return tileX * TILE_SIZE + width / 2;
 	});
 
-	const centerY = $derived(() => {
-		if (!world.blueprint.cursor || !placementBuilding) return 0;
+	const centerY = $derived.by(() => {
+		if (!world.blueprint.cursor) return 0;
 		const { tileY } = world.blueprint.cursor;
-		const height = placementBuilding.tile_rows * TILE_SIZE;
+		const tileRows = building?.tile_rows ?? (isTile ? 1 : 0);
+		const height = tileRows * TILE_SIZE;
 		return tileY * TILE_SIZE + height / 2;
 	});
 
@@ -55,12 +61,10 @@
 </script>
 
 {#if world.blueprint.cursor}
-	{@const x = centerX()}
-	{@const y = centerY()}
 	<!-- 배치 셀 하이라이트 -->
 	<div
 		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
-		style="left: {x}px; top: {y}px;"
+		style="left: {centerX}px; top: {centerY}px;"
 	>
 		<svg class="pointer-events-none overflow-visible" {width} {height}>
 			{#each Array(rows) as _, row}
@@ -79,12 +83,12 @@
 	</div>
 
 	<!-- 건물 스프라이트 미리보기 -->
-	{#if placementBuilding}
+	{#if building}
 		<div
 			class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
-			style="left: {x}px; top: {y}px;"
+			style="left: {centerX}px; top: {centerY}px;"
 		>
-			<BuildingSpriteAnimator buildingId={placementBuilding.id} stateType="idle" resolution={2} />
+			<BuildingSpriteAnimator buildingId={building.id} stateType="idle" resolution={2} />
 		</div>
 	{/if}
 {/if}

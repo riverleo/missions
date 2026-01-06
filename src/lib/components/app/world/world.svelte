@@ -39,7 +39,8 @@
 
 	const worldContext = new WorldContext(worldId, debug);
 	worldContextRef = worldContext;
-	const { worldStore, worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
+	const { worldStore, worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } =
+		useWorld();
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
@@ -68,7 +69,7 @@
 		worldContext.setDebugEntities(debug);
 	});
 
-	// worldBuildings, worldCharacters, worldItems 변경 시 엔티티 동기화
+	// worldBuildings, worldCharacters, worldItems, worldTileMaps 변경 시 엔티티 동기화
 	$effect(() => {
 		// initialized가 false면 아직 벽이 생성되지 않았으므로 스킵
 		if (!worldContext.initialized) return;
@@ -102,6 +103,9 @@
 				},
 				{} as Record<WorldItemId, WorldItem>
 			);
+
+		// worldTileMapStore도 구독하여 변경 감지
+		$worldTileMapStore.data;
 
 		worldContext.createOrDeleteEntities(characters, buildings, items);
 	});

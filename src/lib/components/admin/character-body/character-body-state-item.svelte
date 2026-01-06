@@ -193,7 +193,11 @@
 						fill="rgba(0, 255, 0, 0.5)"
 					/>
 				{:else}
-					<rect width={body.collider_width} height={body.collider_height} fill="rgba(0, 255, 0, 0.5)" />
+					<rect
+						width={body.collider_width}
+						height={body.collider_height}
+						fill="rgba(0, 255, 0, 0.5)"
+					/>
 				{/if}
 			</svg>
 		{/if}

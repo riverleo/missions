@@ -20,9 +20,7 @@ type BuildingDialogState =
 	| { type: 'delete'; buildingId: BuildingId }
 	| undefined;
 
-type BuildingStateDialogState =
-	| { type: 'update'; buildingStateId: BuildingStateId }
-	| undefined;
+type BuildingStateDialogState = { type: 'update'; buildingStateId: BuildingStateId } | undefined;
 
 let instance: ReturnType<typeof createBuildingStore> | null = null;
 

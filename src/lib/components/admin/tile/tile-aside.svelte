@@ -59,7 +59,8 @@
 								size="icon"
 								disabled={!currentTileId}
 								onclick={() =>
-									currentTileId && openTileDialog({ type: 'update', tileId: currentTileId as TileId })}
+									currentTileId &&
+									openTileDialog({ type: 'update', tileId: currentTileId as TileId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +80,8 @@
 							size="icon"
 							disabled={!currentTileId}
 							onclick={() =>
-								currentTileId && openTileDialog({ type: 'delete', tileId: currentTileId as TileId })}
+								currentTileId &&
+								openTileDialog({ type: 'delete', tileId: currentTileId as TileId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

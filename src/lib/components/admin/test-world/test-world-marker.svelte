@@ -7,12 +7,11 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
-	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
+	import type { BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
-	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
-	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
 
-	const { store, addWorldCharacter, addWorldBuilding, addWorldItem } = useWorldTest();
+	const { store, addWorldCharacter, addWorldBuilding, addWorldItem, addTileToWorldTileMap } =
+		useWorldTest();
 	const world = useWorldContext();
 	const { worldStore, selectedEntityIdStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
@@ -38,19 +37,14 @@
 	let mouseY = $state(0);
 	let isCommandPressed = $state(false);
 
-	// 건물 선택 시 world.blueprint.cursor 업데이트
+	// 건물/타일 선택 시 world.blueprint.cursor 업데이트
 	$effect(() => {
 		if (
 			isCommandPressed &&
 			$store.selectedEntityId &&
-			EntityIdUtils.is('building', $store.selectedEntityId)
+			EntityIdUtils.or(['building', 'tile'], $store.selectedEntityId)
 		) {
-			const { value: id } = EntityIdUtils.parse($store.selectedEntityId);
-			const building = $buildingStore.data[id as BuildingId];
-			if (!building) {
-				world.blueprint.cursor = undefined;
-				return;
-			}
+			const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
 
 			const worldPos = world.camera.screenToWorld(mouseX, mouseY);
 			if (!worldPos) {
@@ -58,17 +52,34 @@
 				return;
 			}
 
-			const { tileX, tileY } = snapPointToTopLeftTile(
-				worldPos.x,
-				worldPos.y,
-				building.tile_cols,
-				building.tile_rows
-			);
-			world.blueprint.cursor = {
-				buildingId: building.id,
-				tileX,
-				tileY,
-			};
+			if (type === 'building') {
+				const building = $buildingStore.data[id as BuildingId];
+				if (!building) {
+					world.blueprint.cursor = undefined;
+					return;
+				}
+
+				const { tileX, tileY } = snapPointToTopLeftTile(
+					worldPos.x,
+					worldPos.y,
+					building.tile_cols,
+					building.tile_rows
+				);
+				world.blueprint.cursor = {
+					entityId: $store.selectedEntityId,
+					tileX,
+					tileY,
+				};
+			} else if (type === 'tile') {
+				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+				world.blueprint.cursor = {
+					entityId: $store.selectedEntityId,
+					tileX,
+					tileY,
+				};
+			} else {
+				world.blueprint.cursor = undefined;
+			}
 		} else {
 			world.blueprint.cursor = undefined;
 		}
@@ -94,6 +105,11 @@
 					building.tile_rows
 				);
 				addWorldBuilding(building.id, tileX, tileY);
+			} else if (type === 'tile') {
+				// 겹치는 셀이 있으면 배치하지 않음
+				if (!world.blueprint.canPlace) return;
+				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+				addTileToWorldTileMap(id as TileId, tileX, tileY);
 			} else if (type === 'character') {
 				addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);
 			} else if (type === 'item') {

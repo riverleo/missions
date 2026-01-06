@@ -6,6 +6,7 @@ import type {
 	WorldCharacter,
 	WorldBuilding,
 	WorldItem,
+	WorldTileMap,
 	WorldId,
 	WorldCharacterId,
 	WorldBuildingId,
@@ -39,6 +40,11 @@ function createWorldStore() {
 	});
 
 	const worldItemStore = writable<RecordFetchState<WorldItemId, WorldItem>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const worldTileMapStore = writable<RecordFetchState<WorldId, WorldTileMap>>({
 		status: 'idle',
 		data: {},
 	});
@@ -157,6 +163,27 @@ function createWorldStore() {
 					draft.error = undefined;
 				})
 			);
+
+			// WorldTileMap 조회 (player_id로 필터링)
+			const { data: tileMapData, error: tileMapError } = await supabase
+				.from('world_tile_maps')
+				.select('*')
+				.eq('player_id', player.id);
+
+			if (tileMapError) throw tileMapError;
+
+			const tileMapRecord: Record<WorldId, WorldTileMap> = {};
+			for (const tileMap of tileMapData ?? []) {
+				tileMapRecord[tileMap.world_id as WorldId] = tileMap as WorldTileMap;
+			}
+
+			worldTileMapStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = tileMapRecord;
+					draft.error = undefined;
+				})
+			);
 		} catch (error) {
 			console.error('Failed to fetch world:', error);
 			worldStore.update((state) => ({
@@ -172,6 +199,7 @@ function createWorldStore() {
 		worldCharacterStore,
 		worldBuildingStore,
 		worldItemStore,
+		worldTileMapStore,
 		selectedEntityIdStore,
 		init,
 		fetch,

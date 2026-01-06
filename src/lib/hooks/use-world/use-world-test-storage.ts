@@ -5,17 +5,19 @@ import type {
 	WorldCharacter,
 	WorldBuilding,
 	WorldItem,
+	WorldTileMap,
 	WorldId,
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldItemId,
+	WorldTileMapId,
 	TerrainId,
 	EntityId,
 } from '$lib/types';
 import { useWorld } from './use-world';
+import { TEST_WORLD_ID } from './use-world-test';
 
 const STORAGE_KEY = 'test-world-state';
-const TEST_WORLD_ID = 'test-world-id' as WorldId;
 
 export interface WorldTestStoreState {
 	open: boolean;
@@ -35,6 +37,7 @@ export interface StoredState extends WorldTestStoreState {
 	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
 	worldItems?: Record<WorldItemId, WorldItem>;
+	worldTileMaps?: Record<WorldId, WorldTileMap>;
 }
 
 const defaultState: WorldTestStoreState = {
@@ -69,6 +72,7 @@ export function loadFromStorage(): StoredState {
 				worldCharacters: stored.worldCharacters,
 				worldBuildings: stored.worldBuildings,
 				worldItems: stored.worldItems,
+				worldTileMaps: stored.worldTileMaps,
 			};
 		}
 	} catch {
@@ -86,11 +90,13 @@ export function saveToStorage(state: WorldTestStoreState) {
 		const worldCharacters = get(world.worldCharacterStore).data;
 		const worldBuildings = get(world.worldBuildingStore).data;
 		const worldItems = get(world.worldItemStore).data;
+		const worldTileMaps = get(world.worldTileMapStore).data;
 
 		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
 		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
 		const testWorldItems: Record<WorldItemId, WorldItem> = {};
+		const testWorldTileMaps: Record<WorldId, WorldTileMap> = {};
 
 		for (const [id, character] of Object.entries(worldCharacters)) {
 			if (character.world_id === TEST_WORLD_ID) {
@@ -110,12 +116,19 @@ export function saveToStorage(state: WorldTestStoreState) {
 			}
 		}
 
+		for (const [id, tileMap] of Object.entries(worldTileMaps)) {
+			if (tileMap.world_id === TEST_WORLD_ID) {
+				testWorldTileMaps[id as WorldId] = tileMap;
+			}
+		}
+
 		const stored: StoredState = {
 			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
 			worldCharacters: testWorldCharacters,
 			worldBuildings: testWorldBuildings,
 			worldItems: testWorldItems,
+			worldTileMaps: testWorldTileMaps,
 		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 	} catch (e) {

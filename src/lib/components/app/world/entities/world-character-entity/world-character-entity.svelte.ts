@@ -10,7 +10,7 @@ import type { BeforeUpdateEvent } from '../../context';
 import type { PathPoint } from '../../pathfinder';
 import type { WorldCharacterEntityDirection } from './index';
 
-const { Bodies, Body, Composite } = Matter;
+const { Body } = Matter;
 
 export class WorldCharacterEntity extends Entity {
 	readonly id: WorldCharacterId;
@@ -50,8 +50,6 @@ export class WorldCharacterEntity extends Entity {
 				},
 			}
 		);
-
-		this.angle = 0;
 	}
 
 	get characterBody(): CharacterBody | undefined {
@@ -65,7 +63,7 @@ export class WorldCharacterEntity extends Entity {
 		return character ? characterBodyStore[character.character_body_id] : undefined;
 	}
 
-	sync(): void {
+	override sync(): void {
 		const characterBody = this.characterBody;
 		if (!characterBody) return;
 
@@ -81,7 +79,7 @@ export class WorldCharacterEntity extends Entity {
 			const currentAngle = this.body.angle;
 
 			// 월드에서 기존 바디 제거
-			Composite.remove(this.world.engine.world, this.body);
+			this.removeFromWorld();
 
 			// 새 바디 생성
 			this.body = this.createBody(
@@ -105,16 +103,15 @@ export class WorldCharacterEntity extends Entity {
 			Body.setVelocity(this.body, currentVelocity);
 			Body.setAngle(this.body, currentAngle);
 
-			// 월드에 새 바디 추가
-			Composite.add(this.world.engine.world, this.body);
+			this.addToWorld();
 		}
 	}
 
-	saveToStore(): void {
+	override saveToStore(): void {
 		// 스토어에 현재 위치 저장 (수동 호출)
 	}
 
-	update(event: BeforeUpdateEvent): void {
+	override update(event: BeforeUpdateEvent): void {
 		if (this.path.length === 0) {
 			return;
 		}

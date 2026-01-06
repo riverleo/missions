@@ -13,8 +13,6 @@ import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
 
-const { Bodies } = Matter;
-
 export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
 	readonly type = 'building' as const;
