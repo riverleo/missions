@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldCharacterId, CharacterBody } from '$lib/types';
 import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_CHARACTER } from '../../constants';
-import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
@@ -18,8 +18,6 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: PathPoint[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-
-	protected readonly world = useWorldContext();
 
 	constructor(id: WorldCharacterId) {
 		super();

@@ -1,26 +1,24 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldId, WorldTileMapVector, WorldTileMap } from '$lib/types';
+import type { WorldId, WorldTileMapVector, WorldTileMap, ColliderType } from '$lib/types';
 import { CATEGORY_TERRAIN, TILE_SIZE } from '../../constants';
-import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import type { BeforeUpdateEvent } from '../../context';
+import { Entity } from '../entity.svelte';
 
 const { Bodies, Composite } = Matter;
 
-export class WorldTileMapEntity {
+export class WorldTileMapEntity extends Entity {
 	readonly id: WorldId;
 	readonly type = 'tilemap' as const;
+	readonly body: Map<WorldTileMapVector, Matter.Body>;
 
 	// 타일 데이터를 $state로 관리
 	data = $state<WorldTileMap['data']>({});
 
-	// 타일별 바디를 관리하는 Map
-	private bodies = new Map<WorldTileMapVector, Matter.Body>();
-
-	protected readonly world = useWorldContext();
-
 	constructor(id: WorldId) {
+		super();
 		this.id = id;
 
 		// 스토어에서 데이터 조회 (초기값만)
@@ -29,15 +27,11 @@ export class WorldTileMapEntity {
 			throw new Error(`Cannot create WorldTileMapEntity: missing data for id ${id}`);
 		}
 
-		this.bodies = this.createBodies(worldTileMap.data);
+		this.body = this.createBodies(worldTileMap.data);
 	}
 
 	get worldTileMap(): WorldTileMap | undefined {
 		return get(useWorld().worldTileMapStore).data[this.id];
-	}
-
-	get debug(): boolean {
-		return this.world.debug;
 	}
 
 	// 여러 타일 바디 생성 (순수 함수)
@@ -49,8 +43,8 @@ export class WorldTileMapEntity {
 		const newBodies = new Map<WorldTileMapVector, Matter.Body>();
 
 		for (const [vector, tileData] of Object.entries(data)) {
-			// 이미 bodies에 있으면 스킵
-			if (this.bodies.has(vector as WorldTileMapVector)) continue;
+			// 이미 body에 있으면 스킵
+			if (this.body?.has(vector as WorldTileMapVector)) continue;
 
 			const coords = vector.split(',').map(Number);
 			const tileX = coords[0];
@@ -84,11 +78,11 @@ export class WorldTileMapEntity {
 		return newBodies;
 	}
 
-	// 월드에 모든 타일 바디 추가 (data에 있는데 bodies에 없는 것들)
+	// 월드에 모든 타일 바디 추가 (data에 있는데 body에 없는 것들)
 	addToWorld(): void {
 		const allBodies = Composite.allBodies(this.world.engine.world);
 
-		for (const body of this.bodies.values()) {
+		for (const body of this.body.values()) {
 			const exists = allBodies.some((currentBody) => currentBody.label === body.label);
 
 			if (!exists) {
@@ -116,15 +110,27 @@ export class WorldTileMapEntity {
 		if (this.data === worldTileMap.data) return;
 
 		this.removeFromWorld();
-		this.bodies = this.createBodies(worldTileMap.data);
+
+		// body Map 내용을 새로 생성된 것으로 교체
+		const newBodies = this.createBodies(worldTileMap.data);
+		this.body.clear();
+		for (const [vector, body] of newBodies.entries()) {
+			this.body.set(vector, body);
+		}
+
 		this.addToWorld();
 	}
 
 	// 디버그 모드 설정
 	setDebug(debug: boolean): void {
-		for (const body of this.bodies.values()) {
+		for (const body of this.body.values()) {
 			body.render.visible = debug;
 		}
+	}
+
+	// 스토어에 저장 (WorldTileMapEntity는 저장 불필요)
+	saveToStore(): void {
+		// TileMap은 스토어에서만 관리되므로 저장 로직 없음
 	}
 
 	// 업데이트 로직 (타일맵은 static이므로 비어있음)

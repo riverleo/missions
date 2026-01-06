@@ -8,7 +8,7 @@ import {
 	CATEGORY_CHARACTER,
 	TILE_SIZE,
 } from '../../constants';
-import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
@@ -17,8 +17,6 @@ export class WorldBuildingEntity extends Entity {
 	readonly id: WorldBuildingId;
 	readonly type = 'building' as const;
 	body: Matter.Body;
-
-	protected readonly world = useWorldContext();
 
 	constructor(id: WorldBuildingId) {
 		super();

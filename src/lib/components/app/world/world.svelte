@@ -104,9 +104,6 @@
 				{} as Record<WorldItemId, WorldItem>
 			);
 
-		// worldTileMapStore도 구독하여 변경 감지
-		$worldTileMapStore.data;
-
 		worldContext.createOrDeleteEntities(characters, buildings, items);
 	});
 
