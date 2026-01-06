@@ -19,5 +19,5 @@
 		{terrain.title}
 	</span>
 
-	<Handle type="source" position={Position.Right} style="background-color: var(--color-blue-500)" />
+	<Handle type="source" position={Position.Right} />
 </div>

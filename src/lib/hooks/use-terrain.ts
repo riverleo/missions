@@ -16,6 +16,7 @@ import type {
 	TileStateId,
 	TerrainTile,
 	TerrainTileInsert,
+	TerrainTileUpdate,
 	TerrainTileId,
 	ScenarioId,
 } from '$lib/types';
@@ -448,6 +449,20 @@ function createTerrainStore() {
 			);
 
 			return data;
+		},
+
+		async updateTerrainTile(id: TerrainTileId, terrainTile: TerrainTileUpdate) {
+			const { error } = await supabase.from('terrains_tiles').update(terrainTile).eq('id', id);
+
+			if (error) throw error;
+
+			terrainTileStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], terrainTile);
+					}
+				})
+			);
 		},
 
 		async removeTerrainTile(id: TerrainTileId) {

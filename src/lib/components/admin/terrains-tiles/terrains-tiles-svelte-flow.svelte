@@ -21,6 +21,7 @@
 	} from '$lib/utils/flow-id';
 	import TerrainNode from './terrain-node.svelte';
 	import TileNode from './tile-node.svelte';
+	import TerrainTileEdge from './terrain-tile-edge.svelte';
 	import TerrainTileEdgePanel from './terrain-tile-edge-panel.svelte';
 	import type { TerrainId, TileId } from '$lib/types';
 
@@ -44,6 +45,10 @@
 	const nodeTypes = {
 		terrain: TerrainNode,
 		tile: TileNode,
+	};
+
+	const edgeTypes = {
+		terrainTile: TerrainTileEdge,
 	};
 
 	let nodes = $state<Node[]>([]);
@@ -85,11 +90,11 @@
 					...edges,
 					{
 						id: createTerrainTileEdgeId(newTerrainTile),
+						type: 'terrainTile',
 						source: connection.source,
 						target: connection.target,
 						data: { terrainTile: newTerrainTile },
 						deletable: true,
-						style: 'stroke: var(--color-blue-500)',
 					},
 				];
 			}
@@ -155,11 +160,11 @@
 
 			newEdges.push({
 				id: createTerrainTileEdgeId(tt),
+				type: 'terrainTile',
 				source: createTerrainNodeId(terrain),
 				target: createTileNodeId(tile),
 				data: { terrainTile: tt },
 				deletable: true,
-				style: 'stroke: var(--color-blue-500)',
 			});
 		});
 
@@ -183,6 +188,7 @@
 	{nodes}
 	{edges}
 	{nodeTypes}
+	{edgeTypes}
 	{isValidConnection}
 	colorMode={mode.current}
 	{onconnect}

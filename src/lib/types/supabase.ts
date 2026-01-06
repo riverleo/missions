@@ -2440,7 +2440,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          max_cluster_size: number
+          min_cluster_size: number
           scenario_id: string
+          spawn_weight: number
           terrain_id: string
           tile_id: string
         }
@@ -2448,7 +2451,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          max_cluster_size?: number
+          min_cluster_size?: number
           scenario_id: string
+          spawn_weight?: number
           terrain_id: string
           tile_id: string
         }
@@ -2456,7 +2462,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          max_cluster_size?: number
+          min_cluster_size?: number
           scenario_id?: string
+          spawn_weight?: number
           terrain_id?: string
           tile_id?: string
         }

@@ -89,6 +89,11 @@ create table terrains_tiles (
   terrain_id uuid not null references terrains(id) on delete cascade,
   tile_id uuid not null references tiles(id) on delete cascade,
 
+  -- 맵 자동 생성 설정
+  spawn_weight int not null default 100,
+  min_cluster_size int not null default 1,
+  max_cluster_size int not null default 1,
+
   -- Audit
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,

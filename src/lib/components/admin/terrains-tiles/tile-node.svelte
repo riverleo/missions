@@ -19,5 +19,5 @@
 		{tile.name}
 	</span>
 
-	<Handle type="target" position={Position.Left} style="background-color: var(--color-blue-500)" />
+	<Handle type="target" position={Position.Left} />
 </div>
