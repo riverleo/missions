@@ -7,8 +7,6 @@
 
 	const { store, setOpen, setModalPosition, setDebug, setPanelsOpen } = useWorldTest();
 
-	const panelsOpen = $derived($store.commandPanelOpen && $store.inspectorPanelOpen);
-
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
 	let dragStartY = $state(0);
@@ -55,21 +53,24 @@
 
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
 	<div class="flex items-center gap-2">
+		<Button
+			variant="ghost"
+			size="icon-sm"
+			onclick={() => setPanelsOpen(!($store.commandPanelOpen && $store.inspectorPanelOpen))}
+		>
+			<IconLayoutSidebar />
+		</Button>
 		<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
 	</div>
 	<div class="flex items-center gap-2">
 		<ToggleGroup
 			size="sm"
-			type="multiple"
-			value={[...(panelsOpen ? ['panels'] : []), ...($store.debug ? ['debug'] : [])]}
-			onValueChange={(values) => {
-				setPanelsOpen(values.includes('panels'));
-				setDebug(values.includes('debug'));
+			type="single"
+			value={$store.debug ? 'debug' : ''}
+			onValueChange={(value) => {
+				setDebug(value === 'debug');
 			}}
 		>
-			<ToggleGroupItem value="panels" size="sm">
-				<IconLayoutSidebar />
-			</ToggleGroupItem>
 			<ToggleGroupItem value="debug" size="sm">
 				<IconBug />
 			</ToggleGroupItem>
