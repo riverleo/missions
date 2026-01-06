@@ -535,18 +535,24 @@ export type CharacterBodyUpdate = Omit<
 // CharacterFaceState types
 export type CharacterFaceStateType = Enums<'character_face_state_type'>;
 type CharacterFaceStateRow = Tables<'character_face_states'>;
-export type CharacterFaceState = Omit<CharacterFaceStateRow, 'id' | 'character_id'> & {
+export type CharacterFaceState = Omit<CharacterFaceStateRow, 'id' | 'character_id' | 'need_id'> & {
 	id: CharacterFaceStateId;
 	character_id: CharacterId;
+	need_id: NeedId | null;
 };
 type CharacterFaceStateInsertRow = TablesInsert<'character_face_states'>;
-export type CharacterFaceStateInsert = Omit<CharacterFaceStateInsertRow, 'character_id'> & {
+export type CharacterFaceStateInsert = Omit<CharacterFaceStateInsertRow, 'character_id' | 'need_id'> & {
 	character_id: CharacterId;
+	need_id?: NeedId | null;
 };
 type CharacterFaceStateUpdateRow = TablesUpdate<'character_face_states'>;
-export type CharacterFaceStateUpdate = Omit<CharacterFaceStateUpdateRow, 'id' | 'character_id'> & {
+export type CharacterFaceStateUpdate = Omit<
+	CharacterFaceStateUpdateRow,
+	'id' | 'character_id' | 'need_id'
+> & {
 	id?: CharacterFaceStateId;
 	character_id?: CharacterId;
+	need_id?: NeedId | null;
 };
 
 // Character types

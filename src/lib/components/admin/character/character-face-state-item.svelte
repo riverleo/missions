@@ -11,15 +11,10 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useNeed } from '$lib/hooks/use-need';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
-	import {
-		InputGroup,
-		InputGroupAddon,
-		InputGroupInput,
-		InputGroupText,
-	} from '$lib/components/ui/input-group';
-	import { IconX } from '@tabler/icons-svelte';
-	import { debounce } from 'radash';
+	import { Button } from '$lib/components/ui/button';
+	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
 		characterId: string;
@@ -28,30 +23,26 @@
 
 	let { characterId, type }: Props = $props();
 
-	const { store, faceStateStore, admin } = useCharacter();
-	const { bodyStateStore } = useCharacterBody();
+	const { store, faceStateStore, admin, openFaceStateDialog } = useCharacter();
+	const { needStore } = useNeed();
 
 	const character = $derived($store.data[characterId as CharacterId]);
 	const faceStates = $derived($faceStateStore.data[characterId as CharacterId] ?? []);
 	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
+	const need = $derived(faceState?.need_id ? $needStore.data[faceState.need_id] : undefined);
 
 	// 선택된 바디 상태 가져오기
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-	const bodyStates = $derived(
-		character ? ($bodyStateStore.data[character.character_body_id] ?? []) : []
-	);
-	const previewBodyState = $derived(bodyStates.find((s) => s.type === previewBodyStateType));
 
-	let offsetX = $state('');
-	let offsetY = $state('');
+	const needPreview = $derived.by(() => {
+		if (type === 'idle') return undefined;
 
-	// faceState 변경 시 offset 값 동기화
-	$effect(() => {
-		offsetX = faceState?.offset_x?.toString() ?? '0';
-	});
-	$effect(() => {
-		offsetY = faceState?.offset_y?.toString() ?? '0';
+		if (!need) {
+			return '욕구 선택 필요';
+		}
+
+		return `${need.name} (${faceState.min_value}~${faceState.max_value})`;
 	});
 
 	async function onchange(change: SpriteStateChange) {
@@ -71,18 +62,11 @@
 		}
 	}
 
-	async function updateOffset() {
-		if (!faceState) return;
-		const newOffsetX = parseInt(offsetX) || 0;
-		const newOffsetY = parseInt(offsetY) || 0;
-		if (newOffsetX === faceState.offset_x && newOffsetY === faceState.offset_y) return;
-		await admin.updateCharacterFaceState(faceState.id, characterId as CharacterId, {
-			offset_x: newOffsetX,
-			offset_y: newOffsetY,
-		});
+	function onNeedClick() {
+		if (faceState) {
+			openFaceStateDialog({ type: 'update', characterFaceStateId: faceState.id });
+		}
 	}
-
-	const debouncedUpdateOffset = debounce({ delay: 300 }, updateOffset);
 </script>
 
 <SpriteStateItem
@@ -93,27 +77,18 @@
 	{ondelete}
 >
 	{#snippet action()}
-		{#if faceState}
-			<InputGroup class="max-w-44">
-				<InputGroupAddon align="inline-start">
-					<InputGroupText>오프셋</InputGroupText>
-				</InputGroupAddon>
-				<InputGroupInput
-					type="number"
-					bind:value={offsetX}
-					oninput={debouncedUpdateOffset}
-					placeholder="x"
-				/>
-				<InputGroupText>
-					<IconX class="size-3" />
-				</InputGroupText>
-				<InputGroupInput
-					type="number"
-					bind:value={offsetY}
-					oninput={debouncedUpdateOffset}
-					placeholder="y"
-				/>
-			</InputGroup>
+		{#if needPreview !== undefined}
+			<Button
+				variant={need ? 'ghost' : 'outline'}
+				size="sm"
+				disabled={!faceState || type === 'idle'}
+				onclick={onNeedClick}
+			>
+				{#if need}
+					<Badge variant="secondary">{faceState?.priority}</Badge>
+				{/if}
+				{needPreview}
+			</Button>
 		{/if}
 	{/snippet}
 	{#snippet preview()}

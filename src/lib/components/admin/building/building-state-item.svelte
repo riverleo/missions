@@ -32,13 +32,13 @@
 	);
 
 	const conditionPreview = $derived.by(() => {
-		if (!buildingState || type === 'idle') return undefined;
+		if (type === 'idle') return undefined;
 
 		if (!condition) {
-			return '컨디션 필요';
+			return '컨디션 선택 필요';
 		}
 
-		return `${condition.name} (${buildingState.min_value}~${buildingState.max_value})`;
+		return `${condition.name} (${buildingState?.min_value}~${buildingState?.max_value})`;
 	});
 
 	async function onchange(change: SpriteStateChange) {

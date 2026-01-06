@@ -21,6 +21,10 @@ type CharacterDialogState =
 	| { type: 'delete'; characterId: CharacterId }
 	| undefined;
 
+type CharacterFaceStateDialogState =
+	| { type: 'update'; characterFaceStateId: CharacterFaceStateId }
+	| undefined;
+
 let instance: ReturnType<typeof createCharacterStore> | null = null;
 
 function createCharacterStore() {
@@ -38,6 +42,7 @@ function createCharacterStore() {
 	});
 
 	const dialogStore = writable<CharacterDialogState>(undefined);
+	const faceStateDialogStore = writable<CharacterFaceStateDialogState>(undefined);
 
 	const uiStore = writable<{
 		previewBodyStateType: CharacterBodyStateType;
@@ -116,6 +121,14 @@ function createCharacterStore() {
 
 	function closeDialog() {
 		dialogStore.set(undefined);
+	}
+
+	function openFaceStateDialog(state: NonNullable<CharacterFaceStateDialogState>) {
+		faceStateDialogStore.set(state);
+	}
+
+	function closeFaceStateDialog() {
+		faceStateDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -267,10 +280,13 @@ function createCharacterStore() {
 		store: store as Readable<RecordFetchState<CharacterId, Character>>,
 		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterId, CharacterFaceState[]>>,
 		dialogStore: dialogStore as Readable<CharacterDialogState>,
+		faceStateDialogStore: faceStateDialogStore as Readable<CharacterFaceStateDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
+		openFaceStateDialog,
+		closeFaceStateDialog,
 		admin,
 	};
 }
