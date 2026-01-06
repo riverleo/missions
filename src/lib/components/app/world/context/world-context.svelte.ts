@@ -10,6 +10,7 @@ import type {
 	WorldItemId,
 	WorldId,
 	EntityId,
+	WorldTileMap,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
@@ -301,7 +302,8 @@ export class WorldContext {
 	createOrDeleteEntities(
 		worldCharacters: Record<WorldCharacterId, WorldCharacter>,
 		worldBuildings: Record<WorldBuildingId, WorldBuilding>,
-		worldItems: Record<WorldItemId, WorldItem>
+		worldItems: Record<WorldItemId, WorldItem>,
+		worldTileMap: WorldTileMap | undefined
 	) {
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.entities)) {
@@ -357,9 +359,6 @@ export class WorldContext {
 		}
 
 		// WorldTileMap 엔티티 처리
-		const { worldTileMapStore } = useWorld();
-		const worldTileMap = get(worldTileMapStore).data[this.worldId];
-
 		if (worldTileMap) {
 			if (!this.tileMapEntity) {
 				// TileMap 엔티티 생성

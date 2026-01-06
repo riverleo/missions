@@ -104,7 +104,12 @@
 				{} as Record<WorldItemId, WorldItem>
 			);
 
-		worldContext.createOrDeleteEntities(characters, buildings, items);
+		worldContext.createOrDeleteEntities(
+			characters,
+			buildings,
+			items,
+			$worldTileMapStore.data[worldId]
+		);
 	});
 
 	setWorldContext(worldContext);
