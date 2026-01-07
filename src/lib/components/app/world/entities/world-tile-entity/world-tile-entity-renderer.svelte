@@ -11,7 +11,7 @@
 	let { entity }: Props = $props();
 
 	// 타일 중심 좌표 계산
-	const coords = $derived(entity.id.split(',').map(Number));
+	const coords = $derived(entity.instanceId.split(',').map(Number));
 	const tileX = $derived(coords[0] ?? 0);
 	const tileY = $derived(coords[1] ?? 0);
 	const centerX = $derived(tileToCenterPixel(tileX));

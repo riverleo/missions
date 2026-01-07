@@ -2,7 +2,6 @@
 	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
@@ -37,13 +36,9 @@
 	let mouseY = $state(0);
 	let isCommandPressed = $state(false);
 
-	// 건물/타일 선택 시 world.blueprint.cursor 업데이트
+	// 엔티티 선택 시 world.blueprint.cursor 업데이트
 	$effect(() => {
-		if (
-			isCommandPressed &&
-			$store.selectedEntityTemplateId &&
-			EntityIdUtils.template.or(['building', 'tile'], $store.selectedEntityTemplateId)
-		) {
+		if (isCommandPressed && $store.selectedEntityTemplateId) {
 			const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
 
 			const worldPos = world.camera.screenToWorld(mouseX, mouseY);
@@ -71,6 +66,14 @@
 					tileY,
 				};
 			} else if (type === 'tile') {
+				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+				world.blueprint.cursor = {
+					entityTemplateId: $store.selectedEntityTemplateId,
+					tileX,
+					tileY,
+				};
+			} else if (type === 'character' || type === 'item') {
+				// 캐릭터/아이템은 픽셀 좌표 그대로
 				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 				world.blueprint.cursor = {
 					entityTemplateId: $store.selectedEntityTemplateId,
@@ -160,22 +163,6 @@
 		aria-label="커맨드 키를 누른 상태에서 오버레이"
 		onclick={onclickCommandOverlay}
 	></button>
-
-	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-	{#if $store.selectedEntityTemplateId}
-		{@const containerPos = world.camera.screenToContainer(mouseX, mouseY)}
-		{#if containerPos}
-			<div
-				class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
-				style="left: {containerPos.x}px; top: {containerPos.y}px;"
-			>
-				<EntityTemplateSpriteAnimator
-					entityTemplateId={$store.selectedEntityTemplateId}
-					resolution={2}
-				/>
-			</div>
-		{/if}
-	{/if}
 {/if}
 
 <!-- 디버그 모드일 때 시작지점 표시 -->
