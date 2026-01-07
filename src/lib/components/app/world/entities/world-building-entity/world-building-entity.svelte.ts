@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldBuildingId, Building } from '$lib/types';
+import type { WorldBuildingId, Building, WorldId } from '$lib/types';
 import {
 	CATEGORY_WALL,
 	CATEGORY_TERRAIN,
@@ -48,6 +48,12 @@ export class WorldBuildingEntity extends Entity {
 				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
 			},
 		});
+	}
+
+	get worldId(): WorldId {
+		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
+		if (!worldBuilding) throw new Error(`WorldBuilding not found: ${this.id}`);
+		return worldBuilding.world_id;
 	}
 
 	get building(): Building | undefined {

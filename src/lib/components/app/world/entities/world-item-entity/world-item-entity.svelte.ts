@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldItemId, Item } from '$lib/types';
+import type { WorldItemId, Item, WorldId } from '$lib/types';
 import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_ITEM } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
@@ -41,6 +41,12 @@ export class WorldItemEntity extends Entity {
 		);
 
 		this.angle = worldItem.rotation;
+	}
+
+	get worldId(): WorldId {
+		const worldItem = get(useWorld().worldItemStore).data[this.id];
+		if (!worldItem) throw new Error(`WorldItem not found: ${this.id}`);
+		return worldItem.world_id;
 	}
 
 	get item(): Item | undefined {

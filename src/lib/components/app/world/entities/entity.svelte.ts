@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent } from '../context';
-import type { EntityId, ColliderType } from '$lib/types';
+import type { EntityId, ColliderType, WorldId } from '$lib/types';
 import { useWorldContext } from '$lib/hooks/use-world';
 
 const { Composite, Bodies } = Matter;
@@ -23,8 +23,10 @@ export abstract class Entity {
 		return this.world.debug;
 	}
 
+	abstract get worldId(): WorldId;
+
 	toEntityId(): EntityId {
-		return `${this.type}-${this.id}` as EntityId;
+		return `${this.type}_${this.worldId}_${this.id}` as EntityId;
 	}
 
 	updatePosition(): void {

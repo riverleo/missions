@@ -27,11 +27,12 @@ export interface RecordFetchState<K extends string, T> {
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
 // Entity ID with type information (branded string type)
+// Format: type_worldId_entityId
 export type EntityId =
-	| `character-${string}`
-	| `building-${string}`
-	| `item-${string}`
-	| `tile-${string}`;
+	| `character_${string}_${string}`
+	| `building_${string}_${string}`
+	| `item_${string}_${string}`
+	| `tile_${string}_${string}`;
 export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;

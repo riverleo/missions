@@ -31,6 +31,10 @@ export class WorldTileMapEntity extends Entity {
 		this.body = this.createBodies(worldTileMap.data);
 	}
 
+	get worldId(): WorldId {
+		return this.id;
+	}
+
 	get worldTileMap(): WorldTileMap | undefined {
 		return get(useWorld().worldTileMapStore).data[this.id];
 	}

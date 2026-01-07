@@ -1,65 +1,72 @@
 import type {
 	EntityId,
 	EntityType,
-	Building,
-	Character,
-	Item,
-	Tile,
-	BuildingId,
-	CharacterId,
-	ItemId,
-	TileId,
+	WorldBuilding,
+	WorldCharacter,
+	WorldItem,
+	WorldBuildingId,
+	WorldCharacterId,
+	WorldItemId,
+	WorldId,
 } from '$lib/types';
 
-type BrandedEntityId = BuildingId | CharacterId | ItemId | TileId;
-type EntityObject = Building | Character | Item | Tile;
+type BrandedEntityId = WorldBuildingId | WorldCharacterId | WorldItemId;
+type WorldEntity = WorldBuilding | WorldCharacter | WorldItem;
 
-function createEntityId(type: EntityType, id: string): EntityId;
-function createEntityId(entity: EntityObject): EntityId;
-function createEntityId(typeOrEntity: EntityType | EntityObject, id?: string): EntityId {
-	if (typeof typeOrEntity === 'string') {
-		return `${typeOrEntity}-${id}` as EntityId;
+function createEntityId(type: EntityType, worldId: WorldId, id: BrandedEntityId): EntityId;
+function createEntityId(worldEntity: WorldEntity): EntityId;
+function createEntityId(
+	typeOrWorldEntity: EntityType | WorldEntity,
+	worldId?: WorldId,
+	id?: BrandedEntityId
+): EntityId {
+	if (typeof typeOrWorldEntity === 'string') {
+		if (!worldId || !id) {
+			throw new Error('worldId and id are required when creating EntityId from type');
+		}
+		return `${typeOrWorldEntity}_${worldId}_${id}` as EntityId;
 	}
 
-	// 객체로부터 타입 추론
-	const entity = typeOrEntity;
+	// 객체로부터 EntityId 생성
+	const entity = typeOrWorldEntity;
 	let type: EntityType;
 
 	// 타입을 구별하기 위해 고유한 속성을 확인
-	if ('tile_cols' in entity && 'tile_rows' in entity) {
+	if ('building_id' in entity) {
 		type = 'building';
-	} else if ('character_body_id' in entity) {
+	} else if ('character_id' in entity) {
 		type = 'character';
-	} else if ('rotation' in entity && !('tile_cols' in entity)) {
+	} else if ('item_id' in entity) {
 		type = 'item';
-	} else if ('max_durability' in entity) {
-		type = 'tile';
 	} else {
 		throw new Error('Unknown entity type');
 	}
 
-	return `${type}-${entity.id}` as EntityId;
+	return `${type}_${entity.world_id}_${entity.id}` as EntityId;
 }
 
 export const EntityIdUtils = {
 	/**
-	 * EntityId를 파싱하여 타입과 값을 반환
+	 * EntityId를 파싱하여 타입, worldId, 값을 반환
 	 * @example
-	 * const { value } = EntityIdUtils.parse<BuildingId>(entityId); // value는 BuildingId 타입
-	 * const { value } = EntityIdUtils.parse(entityId); // value는 string 타입
+	 * const { worldId, value } = EntityIdUtils.parse<BuildingId>(entityId);
+	 * const { type, worldId, value } = EntityIdUtils.parse(entityId);
 	 */
 	parse<T extends BrandedEntityId | string = string>(
 		entityId: EntityId
-	): { type: EntityType; value: T } {
-		const [type, ...rest] = entityId.split('-');
-		return { type: type as EntityType, value: rest.join('-') as T };
+	): { type: EntityType; worldId: WorldId; value: T } {
+		const parts = entityId.split('_');
+		const type = parts[0] as EntityType;
+		const worldId = parts[1] as WorldId;
+		const value = parts.slice(2).join('_') as T;
+		return { type, worldId, value };
 	},
 
 	/**
 	 * EntityId가 특정 타입인지 확인
 	 */
 	is(type: EntityType, entityId: EntityId | undefined): boolean {
-		return entityId?.startsWith(`${type}-`) ?? false;
+		return entityId?.startsWith(`${type}_`) ?? false;
 	},
 
 	/**
@@ -79,8 +86,8 @@ export const EntityIdUtils = {
 	/**
 	 * EntityId 생성
 	 * @example
-	 * EntityIdUtils.create('building', buildingId) // "building-{buildingId}"
-	 * EntityIdUtils.create(building) // "building-{building.id}"
+	 * EntityIdUtils.create('building', worldId, buildingId) // "building_{worldId}_{buildingId}"
+	 * EntityIdUtils.create(building) // "building_{building.world_id}_{building.id}"
 	 */
 	create: createEntityId,
 };

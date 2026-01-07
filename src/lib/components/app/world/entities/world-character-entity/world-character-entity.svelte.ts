@@ -1,6 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldCharacterId, CharacterBody } from '$lib/types';
+import type { WorldCharacterId, CharacterBody, WorldId } from '$lib/types';
 import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_CHARACTER } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
@@ -48,6 +48,12 @@ export class WorldCharacterEntity extends Entity {
 				},
 			}
 		);
+	}
+
+	get worldId(): WorldId {
+		const worldCharacter = get(useWorld().worldCharacterStore).data[this.id];
+		if (!worldCharacter) throw new Error(`WorldCharacter not found: ${this.id}`);
+		return worldCharacter.world_id;
 	}
 
 	get characterBody(): CharacterBody | undefined {
