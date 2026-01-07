@@ -15,7 +15,7 @@
 		type WorldBuildingEntity,
 	} from './entities/world-building-entity';
 	import { WorldItemEntityRenderer, type WorldItemEntity } from './entities/world-item-entity';
-	import { WorldTileMapEntityRenderer } from './entities/world-tile-map-entity';
+	import { WorldTileEntityRenderer, type WorldTileEntity } from './entities/world-tile-entity';
 	import WorldBlueprint from './world-blueprint.svelte';
 	import { cn } from '$lib/utils';
 
@@ -84,14 +84,13 @@
 		{#if terrainAssetUrl}
 			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
 		{/if}
-		{#if world.tileMapEntity}
-			<WorldTileMapEntityRenderer entity={world.tileMapEntity} />
-		{/if}
 		{#if world.blueprint.cursor && terrain}
 			<WorldBlueprint width={terrain.width} height={terrain.height} />
 		{/if}
 		{#each entities as entity (entity.id)}
-			{#if entity.type === 'building'}
+			{#if entity.type === 'tile'}
+				<WorldTileEntityRenderer entity={entity as WorldTileEntity} />
+			{:else if entity.type === 'building'}
 				<WorldBuildingEntityRenderer entity={entity as WorldBuildingEntity} />
 			{:else if entity.type === 'character'}
 				<WorldCharacterEntityRenderer entity={entity as WorldCharacterEntity} />

@@ -11,6 +11,7 @@ import type {
 	WorldId,
 	EntityId,
 	WorldTileMap,
+	TileVector,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
@@ -20,7 +21,7 @@ import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';
-import { WorldTileMapEntity } from '../entities/world-tile-map-entity';
+import { WorldTileEntity } from '../entities/world-tile-entity';
 import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
@@ -39,8 +40,6 @@ export class WorldContext {
 	readonly pathfinder: Pathfinder;
 
 	entities = $state<Record<string, Entity>>({});
-	tileMapEntity: WorldTileMapEntity | undefined = $state(undefined);
-
 	debug = $state(false);
 	initialized = $state(false);
 	render: Matter.Render | undefined = $state.raw(undefined);
@@ -70,11 +69,6 @@ export class WorldContext {
 	setDebugEntities(debug: boolean) {
 		for (const entity of Object.values(this.entities)) {
 			entity.setDebug(debug);
-		}
-
-		// TileMap 엔티티 디버그 업데이트
-		if (this.tileMapEntity) {
-			this.tileMapEntity.setDebug(debug);
 		}
 
 		// 바운더리 벽 visibility 업데이트
@@ -258,11 +252,6 @@ export class WorldContext {
 		// 바운더리 생성
 		this.createBoundaryWalls();
 
-		// WorldTileMap 엔티티 추가
-		if (this.tileMapEntity) {
-			this.tileMapEntity.addToWorld();
-		}
-
 		// 엔티티 바디 재추가
 		for (const entity of Object.values(this.entities)) {
 			entity.addToWorld();
@@ -358,22 +347,42 @@ export class WorldContext {
 			}
 		}
 
-		// WorldTileMap 엔티티 처리
+		// WorldTile 엔티티 처리
 		if (worldTileMap) {
-			if (!this.tileMapEntity) {
-				// TileMap 엔티티 생성
-				try {
-					const entity = new WorldTileMapEntity(this.worldId);
-					entity.addToWorld();
-					this.tileMapEntity = entity;
-				} catch (error) {
-					console.warn('Skipping tilemap creation:', error);
+			// 기존 타일 엔티티 중 제거된 것들 삭제
+			for (const entity of Object.values(this.entities)) {
+				if (entity.type === 'tile') {
+					if (!worldTileMap.data[entity.id as TileVector]) {
+						entity.removeFromWorld();
+						delete this.entities[entity.id];
+					}
 				}
 			}
-		} else if (this.tileMapEntity) {
-			// TileMap이 제거되었으면 엔티티 제거
-			this.tileMapEntity.removeFromWorld();
-			this.tileMapEntity = undefined;
+
+			// 새로운 타일 엔티티 추가
+			for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
+				if (!this.entities[vector]) {
+					try {
+						const entity = new WorldTileEntity(
+							this.worldId,
+							vector as TileVector,
+							tileData.tile_id
+						);
+						entity.addToWorld();
+						this.entities[entity.id] = entity;
+					} catch (error) {
+						console.warn('Skipping tile creation:', error);
+					}
+				}
+			}
+		} else {
+			// TileMap이 제거되었으면 모든 타일 엔티티 제거
+			for (const entity of Object.values(this.entities)) {
+				if (entity.type === 'tile') {
+					entity.removeFromWorld();
+					delete this.entities[entity.id];
+				}
+			}
 		}
 	}
 
@@ -382,11 +391,6 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			entity.sync();
 		}
-
-		// TileMap 엔티티 동기화
-		if (this.tileMapEntity) {
-			this.tileMapEntity.sync();
-		}
 	}
 
 	// Matter.js body 위치를 엔티티 state에 동기화
@@ -394,8 +398,6 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			entity.updatePosition();
 		}
-
-		this.tileMapEntity?.updatePosition();
 	}
 
 	// 엔티티 업데이트 (경로 따라가기 등)
@@ -403,8 +405,6 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			entity.update(event);
 		}
-
-		this.tileMapEntity?.update(event);
 	}
 
 	// 바디가 경계를 벗어나면 제거 후 1초 뒤 리스폰 위치에 다시 추가

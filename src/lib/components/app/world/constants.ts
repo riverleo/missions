@@ -16,7 +16,7 @@ export const WALL_THICKNESS = 30;
 
 // 충돌 카테고리 (비트마스크)
 export const CATEGORY_WALL = 0x0001;
-export const CATEGORY_TERRAIN = 0x0002;
+export const CATEGORY_TILE = 0x0002;
 export const CATEGORY_CHARACTER = 0x0004;
 export const CATEGORY_BUILDING = 0x0008;
 export const CATEGORY_ITEM = 0x0010;

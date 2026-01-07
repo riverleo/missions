@@ -29,10 +29,10 @@ type Brand<T, B extends string> = T & { readonly __brand: B };
 // Entity ID with type information (branded string type)
 // Format: type_worldId_entityId
 export type EntityId =
-	| `character_${string}_${string}`
-	| `building_${string}_${string}`
-	| `item_${string}_${string}`
-	| `tile_${string}_${string}`;
+	| `character_${WorldId}_${CharacterId}`
+	| `building_${WorldId}_${BuildingId}`
+	| `item_${WorldId}_${ItemId}`
+	| `tile_${WorldId}_${TileVector}`;
 export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;
@@ -1434,7 +1434,8 @@ export type WorldItemUpdate = Omit<
 };
 
 // WorldTileMap types
-export type WorldTileMapVector = `${number},${number}`;
+export type TileVector = `${number},${number}`;
+export type WorldTileVector = `${WorldId}_${TileVector}`;
 
 type WorldTileMapRow = Tables<'world_tile_maps'>;
 export type WorldTileMap = Omit<
@@ -1446,7 +1447,7 @@ export type WorldTileMap = Omit<
 	player_id: PlayerId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
+	data: Record<TileVector, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
 export type WorldTileMapInsert = Omit<
@@ -1458,7 +1459,7 @@ export type WorldTileMapInsert = Omit<
 	player_id: PlayerId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data?: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
+	data?: Record<TileVector, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
 export type WorldTileMapUpdate = Omit<
@@ -1471,7 +1472,7 @@ export type WorldTileMapUpdate = Omit<
 	player_id?: PlayerId;
 	world_id?: WorldId;
 	terrain_id?: TerrainId;
-	data?: Record<WorldTileMapVector, { tile_id: TileId; durability: number }>;
+	data?: Record<TileVector, { tile_id: TileId; durability: number }>;
 };
 
 // ItemBehavior types

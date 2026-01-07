@@ -1,13 +1,13 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent } from '../context';
-import type { EntityId, ColliderType, WorldId } from '$lib/types';
+import type { EntityId, ColliderType, WorldId, EntityType } from '$lib/types';
 import { useWorldContext } from '$lib/hooks/use-world';
 
 const { Composite, Bodies } = Matter;
 
 export abstract class Entity {
 	abstract readonly id: string;
-	abstract readonly type: 'character' | 'building' | 'item' | 'tilemap';
+	abstract readonly type: EntityType | 'tilemap';
 	abstract readonly body: any;
 
 	protected readonly world = useWorldContext();

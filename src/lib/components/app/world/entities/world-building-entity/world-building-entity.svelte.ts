@@ -1,13 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldBuildingId, Building, WorldId } from '$lib/types';
-import {
-	CATEGORY_WALL,
-	CATEGORY_TERRAIN,
-	CATEGORY_BUILDING,
-	CATEGORY_CHARACTER,
-	TILE_SIZE,
-} from '../../constants';
+import { CATEGORY_BUILDING, TILE_SIZE } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
@@ -45,7 +39,7 @@ export class WorldBuildingEntity extends Entity {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,
-				mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
+				mask: 0, // 아무것과도 충돌하지 않음
 			},
 		});
 	}
@@ -92,7 +86,7 @@ export class WorldBuildingEntity extends Entity {
 				isStatic: true,
 				collisionFilter: {
 					category: CATEGORY_BUILDING,
-					mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_CHARACTER,
+					mask: 0, // 아무것과도 충돌하지 않음
 				},
 			});
 

@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldItemId, Item, WorldId } from '$lib/types';
-import { CATEGORY_WALL, CATEGORY_TERRAIN, CATEGORY_ITEM } from '../../constants';
+import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_ITEM } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
@@ -35,7 +35,7 @@ export class WorldItemEntity extends Entity {
 				isStatic: false,
 				collisionFilter: {
 					category: CATEGORY_ITEM,
-					mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
+					mask: CATEGORY_WALL | CATEGORY_TILE | CATEGORY_ITEM,
 				},
 			}
 		);
@@ -85,7 +85,7 @@ export class WorldItemEntity extends Entity {
 					isStatic: false,
 					collisionFilter: {
 						category: CATEGORY_ITEM,
-						mask: CATEGORY_WALL | CATEGORY_TERRAIN | CATEGORY_ITEM,
+						mask: CATEGORY_WALL | CATEGORY_TILE | CATEGORY_ITEM,
 					},
 				}
 			);

@@ -6,7 +6,7 @@ import type {
 	WorldBuilding,
 	WorldItem,
 	WorldTileMap,
-	WorldTileMapVector,
+	TileVector,
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldItemId,
@@ -278,7 +278,7 @@ function createTestWorldStore() {
 			produce(state, (draft) => {
 				const tileMap = draft.data[TEST_WORLD_ID];
 				if (tileMap) {
-					const vector: WorldTileMapVector = `${tileX},${tileY}`;
+					const vector: TileVector = `${tileX},${tileY}` as TileVector;
 					tileMap.data[vector] = {
 						tile_id: tileId,
 						durability: 100, // 기본 내구도
