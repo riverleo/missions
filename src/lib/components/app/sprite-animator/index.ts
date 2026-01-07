@@ -4,7 +4,7 @@ export { default as CharacterSpriteAnimator } from './character-sprite-animator.
 export { default as BuildingSpriteAnimator } from './building-sprite-animator.svelte';
 export { default as ItemSpriteAnimator } from './item-sprite-animator.svelte';
 export { default as TileSpriteAnimator } from './tile-sprite-animator.svelte';
-export { default as EntitySpriteAnimator } from './entity-sprite-animator.svelte';
+export { default as EntityTemplateSpriteAnimator } from './entity-template-sprite-animator.svelte';
 
 export const DEFAULT_FPS = 24;
 export const DEFAULT_FRAME_FROM = 1;

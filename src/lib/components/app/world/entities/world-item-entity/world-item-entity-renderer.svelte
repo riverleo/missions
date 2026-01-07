@@ -13,9 +13,9 @@
 	const { store: itemStore } = useItem();
 	const { worldItemStore, selectedEntityIdStore } = useWorld();
 
-	const worldItem = $derived($worldItemStore.data[entity.id]);
+	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
-	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
+	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
 
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);

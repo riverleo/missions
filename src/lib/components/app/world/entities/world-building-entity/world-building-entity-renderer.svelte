@@ -13,11 +13,11 @@
 	const { store: buildingStore } = useBuilding();
 	const { worldBuildingStore, selectedEntityIdStore } = useWorld();
 
-	const worldBuilding = $derived($worldBuildingStore.data[entity.id]);
+	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
 	const building = $derived(
 		worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined
 	);
-	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
+	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
 
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.3 : 1);

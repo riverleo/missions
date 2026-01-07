@@ -1,13 +1,14 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent } from '../context';
-import type { EntityId, ColliderType, WorldId, EntityType } from '$lib/types';
+import type { EntityId, EntityInstanceId, ColliderType, WorldId, EntityType } from '$lib/types';
 import { useWorldContext } from '$lib/hooks/use-world';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 
 const { Composite, Bodies } = Matter;
 
 export abstract class Entity {
-	abstract readonly id: string;
-	abstract readonly type: EntityType | 'tilemap';
+	readonly id: EntityId;
+	abstract readonly type: EntityType;
 	abstract readonly body: any;
 
 	protected readonly world = useWorldContext();
@@ -19,14 +20,20 @@ export abstract class Entity {
 	colliderWidth = $state(0);
 	colliderHeight = $state(0);
 
+	constructor(type: EntityType, worldId: WorldId, instanceId: EntityInstanceId) {
+		this.id = EntityIdUtils.create(type, worldId, instanceId);
+	}
+
 	get debug(): boolean {
 		return this.world.debug;
 	}
 
-	abstract get worldId(): WorldId;
+	get worldId(): WorldId {
+		return EntityIdUtils.worldId(this.id);
+	}
 
-	toEntityId(): EntityId {
-		return `${this.type}_${this.worldId}_${this.id}` as EntityId;
+	get instanceId(): EntityInstanceId {
+		return EntityIdUtils.instanceId(this.id);
 	}
 
 	updatePosition(): void {

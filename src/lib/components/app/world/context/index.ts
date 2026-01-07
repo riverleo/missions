@@ -1,4 +1,4 @@
-import type { EntityId } from '$lib/types';
+import type { EntityTemplateId } from '$lib/types';
 import type Matter from 'matter-js';
 
 export interface BeforeUpdateEvent {
@@ -9,7 +9,7 @@ export interface BeforeUpdateEvent {
 }
 
 export interface WorldBlueprintCursor {
-	entityId: EntityId;
+	entityTemplateId: EntityTemplateId;
 	tileX: number;
 	tileY: number;
 }

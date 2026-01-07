@@ -19,13 +19,13 @@
 	const { worldBuildingStore } = useWorld();
 	const { store: buildingStore } = useBuilding();
 
-	const worldBuilding = $derived($worldBuildingStore.data[entity.id]);
+	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
 	const building = $derived(
 		worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined
 	);
 </script>
 
-<AccordionItem value={entity.toEntityId()}>
+<AccordionItem value={entity.id}>
 	<AccordionTrigger class="gap-3 py-3 text-xs">
 		<div class="flex flex-1 items-center justify-between">
 			<div>
@@ -38,7 +38,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					removeWorldBuilding(entity.id);
+					removeWorldBuilding(entity.instanceId);
 				}}
 			>
 				<IconTrash />

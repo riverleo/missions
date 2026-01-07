@@ -1,24 +1,32 @@
 import type { WorldId, TileVector, TileId } from '$lib/types';
-import { CATEGORY_TILE, TILE_SIZE } from '$lib/components/app/world/constants';
+import { EntityIdUtils } from '$lib/utils/entity-id';
+import {
+	CATEGORY_TILE,
+	CATEGORY_BUILDING,
+	CATEGORY_CHARACTER,
+	CATEGORY_ITEM,
+	CATEGORY_WALL,
+	TILE_SIZE,
+} from '$lib/components/app/world/constants';
 import type { BeforeUpdateEvent } from '$lib/components/app/world/context';
 import { tileToCenterPixel } from '$lib/components/app/world/tiles';
 import { Entity } from '../entity.svelte';
 
 export class WorldTileEntity extends Entity {
-	readonly id: TileVector;
 	readonly type = 'tile' as const;
 	readonly body: Matter.Body;
-	readonly _worldId: WorldId;
 	readonly tileId: TileId;
 
+	override get instanceId(): TileVector {
+		return EntityIdUtils.instanceId<TileVector>(this.id);
+	}
+
 	constructor(worldId: WorldId, vector: TileVector, tileId: TileId) {
-		super();
-		this.id = vector;
-		this._worldId = worldId;
+		super('tile', worldId, vector);
 		this.tileId = tileId;
 
 		// 타일 좌표 파싱
-		const coords = this.id.split(',').map(Number);
+		const coords = vector.split(',').map(Number);
 		const tileX = coords[0];
 		const tileY = coords[1];
 
@@ -38,14 +46,10 @@ export class WorldTileEntity extends Entity {
 				label: this.id,
 				collisionFilter: {
 					category: CATEGORY_TILE,
-					mask: 0xffffffff,
+					mask: CATEGORY_WALL | CATEGORY_BUILDING | CATEGORY_CHARACTER | CATEGORY_ITEM,
 				},
 			}
 		);
-	}
-
-	get worldId(): WorldId {
-		return this._worldId;
 	}
 
 	sync(): void {

@@ -9,11 +9,12 @@
 	} from '$lib/components/ui/command';
 	import { IconCheck, IconMap } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
+	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
-	import { useWorldTest } from '$lib/hooks/use-world';
+	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
@@ -63,12 +64,12 @@
 		{#if characters.length > 0}
 			<CommandGroup heading="캐릭터">
 				{#each characters as character (character.id)}
-					{@const entityId = `character-${character.id}` as EntityId}
-					<CommandItem onSelect={() => selectEntity(entityId)}>
+					{@const templateId = EntityIdUtils.template.create('character', character.id)}
+					<CommandItem onSelect={() => selectEntity(templateId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
+								templateId === $testWorldStore.selectedEntityTemplateId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -81,12 +82,12 @@
 		{#if buildings.length > 0}
 			<CommandGroup heading="건물">
 				{#each buildings as building (building.id)}
-					{@const entityId = `building-${building.id}` as EntityId}
-					<CommandItem onSelect={() => selectEntity(entityId)}>
+					{@const templateId = EntityIdUtils.template.create('building', building.id)}
+					<CommandItem onSelect={() => selectEntity(templateId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
+								templateId === $testWorldStore.selectedEntityTemplateId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -99,12 +100,12 @@
 		{#if items.length > 0}
 			<CommandGroup heading="아이템">
 				{#each items as item (item.id)}
-					{@const entityId = `item-${item.id}` as EntityId}
-					<CommandItem onSelect={() => selectEntity(entityId)}>
+					{@const templateId = EntityIdUtils.template.create('item', item.id)}
+					<CommandItem onSelect={() => selectEntity(templateId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
+								templateId === $testWorldStore.selectedEntityTemplateId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">
@@ -117,12 +118,12 @@
 		{#if tiles.length > 0}
 			<CommandGroup heading="타일">
 				{#each tiles as tile (tile.id)}
-					{@const entityId = `tile-${tile.id}` as EntityId}
-					<CommandItem onSelect={() => selectEntity(entityId)}>
+					{@const templateId = EntityIdUtils.template.create('tile', tile.id)}
+					<CommandItem onSelect={() => selectEntity(templateId)}>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								entityId === $testWorldStore.selectedEntityId ? 'opacity-100' : 'opacity-0'
+								templateId === $testWorldStore.selectedEntityTemplateId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						<span class="flex-1 truncate">

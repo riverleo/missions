@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldCharacterId, CharacterBody, WorldId } from '$lib/types';
+import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_CHARACTER } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
@@ -13,22 +14,24 @@ import type { WorldCharacterEntityDirection } from './index';
 const { Body } = Matter;
 
 export class WorldCharacterEntity extends Entity {
-	readonly id: WorldCharacterId;
 	readonly type = 'character' as const;
 	body: Matter.Body;
 	path: PathPoint[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 
-	constructor(id: WorldCharacterId) {
-		super();
-		this.id = id;
+	override get instanceId(): WorldCharacterId {
+		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
+	}
+
+	constructor(worldId: WorldId, worldCharacterId: WorldCharacterId) {
+		super('character', worldId, worldCharacterId);
 
 		// 스토어에서 데이터 조회 (초기값만)
-		const worldCharacter = get(useWorld().worldCharacterStore).data[id];
+		const worldCharacter = get(useWorld().worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter || !characterBody) {
-			throw new Error(`Cannot create WorldCharacterEntity: missing data for id ${id}`);
+			throw new Error(`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`);
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
@@ -50,14 +53,8 @@ export class WorldCharacterEntity extends Entity {
 		);
 	}
 
-	get worldId(): WorldId {
-		const worldCharacter = get(useWorld().worldCharacterStore).data[this.id];
-		if (!worldCharacter) throw new Error(`WorldCharacter not found: ${this.id}`);
-		return worldCharacter.world_id;
-	}
-
 	get characterBody(): CharacterBody | undefined {
-		const worldCharacter = get(useWorld().worldCharacterStore).data[this.id];
+		const worldCharacter = get(useWorld().worldCharacterStore).data[this.instanceId];
 		if (!worldCharacter) return undefined;
 
 		const characterStore = get(useCharacter().store).data;

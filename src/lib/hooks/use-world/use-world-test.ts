@@ -15,7 +15,7 @@ import type {
 	PlayerId,
 	ScenarioId,
 	TerrainId,
-	EntityId,
+	EntityTemplateId,
 	CharacterId,
 	BuildingId,
 	ItemId,
@@ -116,10 +116,11 @@ function createTestWorldStore() {
 		});
 	}
 
-	function selectEntity(entityId: EntityId) {
+	function selectEntity(templateId: EntityTemplateId) {
 		store.update((state) => ({
 			...state,
-			selectedEntityId: state.selectedEntityId === entityId ? undefined : entityId,
+			selectedEntityTemplateId:
+				state.selectedEntityTemplateId === templateId ? undefined : templateId,
 		}));
 
 		// useWorld의 selectedEntityIdStore 클리어 (store 업데이트 후에)

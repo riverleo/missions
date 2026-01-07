@@ -39,7 +39,7 @@ export class WorldContext {
 	readonly blueprint: WorldContextBlueprint;
 	readonly pathfinder: Pathfinder;
 
-	entities = $state<Record<string, Entity>>({});
+	entities = $state<Record<EntityId, Entity>>({});
 	debug = $state(false);
 	initialized = $state(false);
 	render: Matter.Render | undefined = $state.raw(undefined);
@@ -90,7 +90,7 @@ export class WorldContext {
 		const bodies = Matter.Query.point(Composite.allBodies(this.engine.world), mousePosition);
 
 		// 엔티티 바디만 필터링 (지형 제외)
-		const entityBody = bodies.find((body) => this.entities[body.label]);
+		const entityBody = bodies.find((body) => this.entities[body.label as EntityId]);
 
 		if (!entityBody) {
 			// 빈 공간이나 지형 클릭 시 선택 해제
@@ -99,9 +99,9 @@ export class WorldContext {
 		}
 
 		// 클릭한 바디의 엔티티 찾기
-		const entity = this.entities[entityBody.label];
+		const entity = this.entities[entityBody.label as EntityId];
 		if (entity) {
-			setSelectedEntityId(entity.toEntityId());
+			setSelectedEntityId(entity.id);
 		}
 	}
 
@@ -297,24 +297,27 @@ export class WorldContext {
 		// 제거될 엔티티들 cleanup
 		for (const entity of Object.values(this.entities)) {
 			const isCharacterRemoved =
-				entity.type === 'character' && !worldCharacters[entity.id as WorldCharacterId];
+				entity.type === 'character' && !worldCharacters[entity.instanceId as WorldCharacterId];
 			const isBuildingRemoved =
-				entity.type === 'building' && !worldBuildings[entity.id as WorldBuildingId];
-			const isItemRemoved = entity.type === 'item' && !worldItems[entity.id as WorldItemId];
+				entity.type === 'building' && !worldBuildings[entity.instanceId as WorldBuildingId];
+			const isItemRemoved = entity.type === 'item' && !worldItems[entity.instanceId as WorldItemId];
 
 			if (isCharacterRemoved || isBuildingRemoved || isItemRemoved) {
+				// EntityId를 미리 계산 (스토어에서 삭제되기 전)
+				const entityId = EntityIdUtils.create(entity.type, this.worldId, entity.instanceId);
 				entity.removeFromWorld();
-				delete this.entities[entity.id];
+				delete this.entities[entityId];
 			}
 		}
 
 		// 새 캐릭터 엔티티 추가
 		for (const character of Object.values(worldCharacters)) {
-			if (!this.entities[character.id]) {
+			const entityId = EntityIdUtils.create('character', this.worldId, character.id);
+			if (!this.entities[entityId]) {
 				try {
-					const entity = new WorldCharacterEntity(character.id);
+					const entity = new WorldCharacterEntity(this.worldId, character.id);
 					entity.addToWorld();
-					this.entities[character.id] = entity;
+					this.entities[entity.id] = entity;
 				} catch (error) {
 					console.warn('Skipping character creation:', error);
 				}
@@ -323,11 +326,12 @@ export class WorldContext {
 
 		// 새 건물 엔티티 추가
 		for (const building of Object.values(worldBuildings)) {
-			if (!this.entities[building.id]) {
+			const entityId = EntityIdUtils.create('building', this.worldId, building.id);
+			if (!this.entities[entityId]) {
 				try {
-					const entity = new WorldBuildingEntity(building.id);
+					const entity = new WorldBuildingEntity(this.worldId, building.id);
 					entity.addToWorld();
-					this.entities[building.id] = entity;
+					this.entities[entity.id] = entity;
 				} catch (error) {
 					console.warn('Skipping building creation:', error);
 				}
@@ -336,11 +340,12 @@ export class WorldContext {
 
 		// 새 아이템 엔티티 추가
 		for (const item of Object.values(worldItems)) {
-			if (!this.entities[item.id]) {
+			const entityId = EntityIdUtils.create('item', this.worldId, item.id);
+			if (!this.entities[entityId]) {
 				try {
-					const entity = new WorldItemEntity(item.id);
+					const entity = new WorldItemEntity(this.worldId, item.id);
 					entity.addToWorld();
-					this.entities[item.id] = entity;
+					this.entities[entity.id] = entity;
 				} catch (error) {
 					console.warn('Skipping item creation:', error);
 				}
@@ -352,7 +357,7 @@ export class WorldContext {
 			// 기존 타일 엔티티 중 제거된 것들 삭제
 			for (const entity of Object.values(this.entities)) {
 				if (entity.type === 'tile') {
-					if (!worldTileMap.data[entity.id as TileVector]) {
+					if (!worldTileMap.data[entity.instanceId as TileVector]) {
 						entity.removeFromWorld();
 						delete this.entities[entity.id];
 					}
@@ -361,7 +366,8 @@ export class WorldContext {
 
 			// 새로운 타일 엔티티 추가
 			for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
-				if (!this.entities[vector]) {
+				const entityId = EntityIdUtils.create('tile', this.worldId, vector as TileVector);
+				if (!this.entities[entityId]) {
 					try {
 						const entity = new WorldTileEntity(
 							this.worldId,
@@ -414,7 +420,7 @@ export class WorldContext {
 		for (const entity of Object.values(this.entities)) {
 			if (!this.isOutOfEntityBounds(entity)) continue;
 
-			this.respawnEntity(entity.toEntityId());
+			this.respawnEntity(entity.id);
 		}
 	}
 
@@ -432,8 +438,7 @@ export class WorldContext {
 
 		this.respawningEntityIds.add(entityId);
 
-		const { value: id } = EntityIdUtils.parse(entityId);
-		const entity = this.entities[id];
+		const entity = this.entities[entityId];
 		if (!entity) return;
 
 		// 1초 후 리스폰 위치로 다시 추가

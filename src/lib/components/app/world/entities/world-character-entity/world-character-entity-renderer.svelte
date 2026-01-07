@@ -15,14 +15,14 @@
 	const { store: characterBodyStore } = useCharacterBody();
 	const { worldCharacterStore, selectedEntityIdStore } = useWorld();
 
-	const worldCharacter = $derived($worldCharacterStore.data[entity.id]);
+	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
-	const selected = $derived($selectedEntityIdStore.entityId === entity.toEntityId());
+	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
 
 	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
 	const pathString = $derived.by(() => {

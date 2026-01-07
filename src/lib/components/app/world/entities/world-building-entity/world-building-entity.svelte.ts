@@ -1,27 +1,30 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldBuildingId, Building, WorldId } from '$lib/types';
-import { CATEGORY_BUILDING, TILE_SIZE } from '../../constants';
+import { EntityIdUtils } from '$lib/utils/entity-id';
+import { CATEGORY_BUILDING, CATEGORY_TILE, TILE_SIZE } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
 
 export class WorldBuildingEntity extends Entity {
-	readonly id: WorldBuildingId;
 	readonly type = 'building' as const;
 	body: Matter.Body;
 
-	constructor(id: WorldBuildingId) {
-		super();
-		this.id = id;
+	override get instanceId(): WorldBuildingId {
+		return EntityIdUtils.instanceId<WorldBuildingId>(this.id);
+	}
+
+	constructor(worldId: WorldId, worldBuildingId: WorldBuildingId) {
+		super('building', worldId, worldBuildingId);
 
 		// 스토어에서 데이터 조회
-		const worldBuilding = get(useWorld().worldBuildingStore).data[id];
+		const worldBuilding = get(useWorld().worldBuildingStore).data[worldBuildingId];
 		const building = this.building;
 
 		if (!worldBuilding || !building) {
-			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${id}`);
+			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${worldBuildingId}`);
 		}
 
 		// 타일 기반 크기 계산
@@ -39,26 +42,20 @@ export class WorldBuildingEntity extends Entity {
 			isStatic: true,
 			collisionFilter: {
 				category: CATEGORY_BUILDING,
-				mask: 0, // 아무것과도 충돌하지 않음
+				mask: CATEGORY_TILE, // 타일과 겹칠 수 없음
 			},
 		});
 	}
 
-	get worldId(): WorldId {
-		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
-		if (!worldBuilding) throw new Error(`WorldBuilding not found: ${this.id}`);
-		return worldBuilding.world_id;
-	}
-
 	get building(): Building | undefined {
-		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
+		const worldBuilding = get(useWorld().worldBuildingStore).data[this.instanceId];
 		if (!worldBuilding) return undefined;
 
 		return get(useBuilding().store).data[worldBuilding.building_id];
 	}
 
 	sync(): void {
-		const worldBuilding = get(useWorld().worldBuildingStore).data[this.id];
+		const worldBuilding = get(useWorld().worldBuildingStore).data[this.instanceId];
 		const building = this.building;
 		if (!worldBuilding || !building) return;
 
@@ -86,7 +83,7 @@ export class WorldBuildingEntity extends Entity {
 				isStatic: true,
 				collisionFilter: {
 					category: CATEGORY_BUILDING,
-					mask: 0, // 아무것과도 충돌하지 않음
+					mask: CATEGORY_TILE, // 타일과 겹칠 수 없음
 				},
 			});
 

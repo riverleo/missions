@@ -37,11 +37,6 @@
 		}
 	}
 
-	$effect(() => {
-		window.addEventListener('keydown', onkeydown);
-		return () => window.removeEventListener('keydown', onkeydown);
-	});
-
 	// 지형이 선택되었는지 확인
 	const hasSelectedTerrain = $derived($store.selectedTerrainId !== undefined);
 
@@ -64,6 +59,8 @@
 	테스트 월드
 	<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
 </Button>
+
+<svelte:window {onkeydown} />
 
 <div
 	bind:this={modalRef}

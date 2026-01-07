@@ -27,13 +27,26 @@ export interface RecordFetchState<K extends string, T> {
 type Brand<T, B extends string> = T & { readonly __brand: B };
 
 // Entity ID with type information (branded string type)
-// Format: type_worldId_entityId
+// Format: type_worldId_worldEntityId
 export type EntityId =
-	| `character_${WorldId}_${CharacterId}`
-	| `building_${WorldId}_${BuildingId}`
-	| `item_${WorldId}_${ItemId}`
+	| `character_${WorldId}_${WorldCharacterId}`
+	| `building_${WorldId}_${WorldBuildingId}`
+	| `item_${WorldId}_${WorldItemId}`
 	| `tile_${WorldId}_${TileVector}`;
 export type EntityType = 'character' | 'building' | 'item' | 'tile';
+
+// Entity Template ID (템플릿 선택용, worldId 없음)
+// Format: type_templateId
+export type EntityTemplateId =
+	| `character_${CharacterId}`
+	| `building_${BuildingId}`
+	| `item_${ItemId}`
+	| `tile_${TileId}`;
+
+// Instance types for EntityId and EntityTemplateId
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileVector;
+export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
+export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
 
 export type ScenarioId = Brand<string, 'ScenarioId'>;
 export type ChapterId = Brand<string, 'ChapterId'>;

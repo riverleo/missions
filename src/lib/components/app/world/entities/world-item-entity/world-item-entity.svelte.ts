@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldItemId, Item, WorldId } from '$lib/types';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_ITEM } from '../../constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
@@ -8,20 +9,22 @@ import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
 
 export class WorldItemEntity extends Entity {
-	readonly id: WorldItemId;
 	readonly type = 'item' as const;
 	body: Matter.Body;
 
-	constructor(id: WorldItemId) {
-		super();
-		this.id = id;
+	override get instanceId(): WorldItemId {
+		return EntityIdUtils.instanceId<WorldItemId>(this.id);
+	}
+
+	constructor(worldId: WorldId, worldItemId: WorldItemId) {
+		super('item', worldId, worldItemId);
 
 		// 스토어에서 데이터 조회
-		const worldItem = get(useWorld().worldItemStore).data[id];
+		const worldItem = get(useWorld().worldItemStore).data[worldItemId];
 		const item = this.item;
 
 		if (!worldItem || !item) {
-			throw new Error(`Cannot create WorldItemEntity: missing data for id ${id}`);
+			throw new Error(`Cannot create WorldItemEntity: missing data for id ${worldItemId}`);
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
@@ -43,14 +46,8 @@ export class WorldItemEntity extends Entity {
 		this.angle = worldItem.rotation;
 	}
 
-	get worldId(): WorldId {
-		const worldItem = get(useWorld().worldItemStore).data[this.id];
-		if (!worldItem) throw new Error(`WorldItem not found: ${this.id}`);
-		return worldItem.world_id;
-	}
-
 	get item(): Item | undefined {
-		const worldItem = get(useWorld().worldItemStore).data[this.id];
+		const worldItem = get(useWorld().worldItemStore).data[this.instanceId];
 		if (!worldItem) return undefined;
 
 		return get(useItem().store).data[worldItem.item_id];

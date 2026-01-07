@@ -24,8 +24,7 @@
 		...restProps
 	}: Props = $props();
 
-	const { tileStore, tileStateStore } = useTerrain();
-	const tile = $derived($tileStore.data[tileId]);
+	const { tileStateStore } = useTerrain();
 	const tileStates = $derived($tileStateStore.data[tileId] ?? []);
 	const tileState = $derived(tileStates.find((s) => s.type === stateType));
 

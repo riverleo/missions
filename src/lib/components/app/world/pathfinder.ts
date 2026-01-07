@@ -177,6 +177,5 @@ export class Pathfinder {
 			}
 			output += '\n';
 		}
-		console.log(output);
 	}
 }

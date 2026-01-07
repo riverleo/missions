@@ -56,7 +56,6 @@
 	onMount(() => world.load({ element, width: width, height: height }));
 </script>
 
-<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 <div
 	bind:this={element}
@@ -65,7 +64,6 @@
 	class={cn('relative overflow-hidden border border-border', className)}
 	style="width: {width}px; height: {height}px;"
 	role="application"
-	tabindex="0"
 	{onwheel}
 	onmousedown={event.onmousedown}
 	onmousemove={event.onmousemove}

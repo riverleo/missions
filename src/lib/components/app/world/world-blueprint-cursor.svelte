@@ -9,15 +9,15 @@
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
 
-	const entityId = $derived(world.blueprint.cursor?.entityId);
+	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
 
 	const building = $derived.by(() => {
-		if (!entityId || !EntityIdUtils.is('building', entityId)) return undefined;
-		const { value: buildingId } = EntityIdUtils.parse<BuildingId>(entityId);
+		if (!entityTemplateId || !EntityIdUtils.template.is('building', entityTemplateId)) return undefined;
+		const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 		return $buildingStore.data[buildingId];
 	});
 
-	const isTile = $derived(entityId && EntityIdUtils.is('tile', entityId));
+	const isTile = $derived(entityTemplateId && EntityIdUtils.template.is('tile', entityTemplateId));
 
 	const cols = $derived(building?.tile_cols ?? (isTile ? 1 : 0));
 	const rows = $derived(building?.tile_rows ?? (isTile ? 1 : 0));

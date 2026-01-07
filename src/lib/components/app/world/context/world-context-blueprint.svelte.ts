@@ -22,12 +22,12 @@ export class WorldContextBlueprint {
 	getOverlappingCells(): TileCell[] {
 		if (!this.cursor || !this.context) return [];
 
-		const { entityId, tileX, tileY } = this.cursor;
+		const { entityTemplateId, tileX, tileY } = this.cursor;
 
 		// 배치하려는 셀 계산
 		let targetTileCells: TileCell[];
-		if (EntityIdUtils.is('building', entityId)) {
-			const { value: buildingId } = EntityIdUtils.parse<BuildingId>(entityId);
+		if (EntityIdUtils.template.is('building', entityTemplateId)) {
+			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
 			if (!building) return [];
@@ -37,7 +37,7 @@ export class WorldContextBlueprint {
 				building.tile_cols,
 				building.tile_rows
 			);
-		} else if (EntityIdUtils.is('tile', entityId)) {
+		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
 			// 타일은 1x1
 			targetTileCells = getBuildingOccupiedCells(tileX, tileY, 1, 1);
 		} else {
@@ -73,7 +73,7 @@ export class WorldContextBlueprint {
 	/**
 	 * 현재 배치가 유효한지 (겹치는 셀이 없는지)
 	 */
-	get canPlace(): boolean {
+	get placable(): boolean {
 		return this.getOverlappingCells().length === 0;
 	}
 }

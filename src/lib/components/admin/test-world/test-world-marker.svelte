@@ -2,7 +2,7 @@
 	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { EntitySpriteAnimator } from '$lib/components/app/sprite-animator';
+	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
@@ -41,10 +41,10 @@
 	$effect(() => {
 		if (
 			isCommandPressed &&
-			$store.selectedEntityId &&
-			EntityIdUtils.or(['building', 'tile'], $store.selectedEntityId)
+			$store.selectedEntityTemplateId &&
+			EntityIdUtils.template.or(['building', 'tile'], $store.selectedEntityTemplateId)
 		) {
-			const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
+			const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
 
 			const worldPos = world.camera.screenToWorld(mouseX, mouseY);
 			if (!worldPos) {
@@ -66,14 +66,14 @@
 					building.tile_rows
 				);
 				world.blueprint.cursor = {
-					entityId: $store.selectedEntityId,
+					entityTemplateId: $store.selectedEntityTemplateId,
 					tileX,
 					tileY,
 				};
 			} else if (type === 'tile') {
 				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 				world.blueprint.cursor = {
-					entityId: $store.selectedEntityId,
+					entityTemplateId: $store.selectedEntityTemplateId,
 					tileX,
 					tileY,
 				};
@@ -90,12 +90,12 @@
 		if (!worldPos) return;
 
 		// useWorldTest에서 선택한 엔티티가 있으면 배치
-		if ($store.selectedEntityId) {
-			const { type, value: id } = EntityIdUtils.parse($store.selectedEntityId);
+		if ($store.selectedEntityTemplateId) {
+			const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
 
 			if (type === 'building') {
 				// 겹치는 셀이 있으면 배치하지 않음
-				if (!world.blueprint.canPlace) return;
+				if (!world.blueprint.placable) return;
 				const building = $buildingStore.data[id as BuildingId];
 				if (!building) return;
 				const { tileX, tileY } = snapPointToTopLeftTile(
@@ -107,7 +107,7 @@
 				addWorldBuilding(building.id, tileX, tileY);
 			} else if (type === 'tile') {
 				// 겹치는 셀이 있으면 배치하지 않음
-				if (!world.blueprint.canPlace) return;
+				if (!world.blueprint.placable) return;
 				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 				addTileToWorldTileMap(id as TileId, tileX, tileY);
 			} else if (type === 'character') {
@@ -121,8 +121,7 @@
 		// useWorld에서 선택한 캐릭터가 있으면 이동
 		const selectedEntityId = $selectedEntityIdStore.entityId;
 		if (EntityIdUtils.is('character', selectedEntityId)) {
-			const { value: characterId } = EntityIdUtils.parse(selectedEntityId!);
-			const entity = world.entities[characterId];
+			const entity = world.entities[selectedEntityId!];
 			if (entity && entity.type === 'character') {
 				(entity as WorldCharacterEntity).moveTo(worldPos.x, worldPos.y);
 			}
@@ -163,14 +162,17 @@
 	></button>
 
 	<!-- 커맨드 키 누를 때 스프라이트 미리보기 -->
-	{#if $store.selectedEntityId}
+	{#if $store.selectedEntityTemplateId}
 		{@const containerPos = world.camera.screenToContainer(mouseX, mouseY)}
 		{#if containerPos}
 			<div
 				class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 opacity-70"
 				style="left: {containerPos.x}px; top: {containerPos.y}px;"
 			>
-				<EntitySpriteAnimator entityId={$store.selectedEntityId} resolution={2} />
+				<EntityTemplateSpriteAnimator
+					entityTemplateId={$store.selectedEntityTemplateId}
+					resolution={2}
+				/>
 			</div>
 		{/if}
 	{/if}

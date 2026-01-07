@@ -19,13 +19,13 @@
 	const { worldCharacterStore } = useWorld();
 	const { store: characterStore } = useCharacter();
 
-	const worldCharacter = $derived($worldCharacterStore.data[entity.id]);
+	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
 </script>
 
-<AccordionItem value={entity.toEntityId()}>
+<AccordionItem value={entity.id}>
 	<AccordionTrigger class="gap-3 py-3 text-xs">
 		<div class="flex flex-1 items-center justify-between">
 			<div>
@@ -38,7 +38,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					removeWorldCharacter(entity.id);
+					removeWorldCharacter(entity.instanceId);
 				}}
 			>
 				<IconTrash />

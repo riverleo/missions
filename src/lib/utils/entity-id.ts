@@ -1,34 +1,29 @@
 import type {
 	EntityId,
+	EntityTemplateId,
 	EntityType,
-	WorldBuilding,
-	WorldCharacter,
-	WorldItem,
-	WorldBuildingId,
-	WorldCharacterId,
-	WorldItemId,
+	EntityInstanceId,
+	EntityTemplateIdCandidate,
+	EntityInstance,
 	WorldId,
 } from '$lib/types';
 
-type BrandedEntityId = WorldBuildingId | WorldCharacterId | WorldItemId;
-type WorldEntity = WorldBuilding | WorldCharacter | WorldItem;
-
-function createEntityId(type: EntityType, worldId: WorldId, id: BrandedEntityId): EntityId;
-function createEntityId(worldEntity: WorldEntity): EntityId;
+function createEntityId(type: EntityType, worldId: WorldId, id: EntityInstanceId): EntityId;
+function createEntityId(candidate: EntityInstance): EntityId;
 function createEntityId(
-	typeOrWorldEntity: EntityType | WorldEntity,
+	candidate: EntityType | EntityInstance,
 	worldId?: WorldId,
-	id?: BrandedEntityId
+	id?: EntityInstanceId
 ): EntityId {
-	if (typeof typeOrWorldEntity === 'string') {
+	if (typeof candidate === 'string') {
 		if (!worldId || !id) {
 			throw new Error('worldId and id are required when creating EntityId from type');
 		}
-		return `${typeOrWorldEntity}_${worldId}_${id}` as EntityId;
+		return `${candidate}_${worldId}_${id}` as EntityId;
 	}
 
 	// 객체로부터 EntityId 생성
-	const entity = typeOrWorldEntity;
+	const entity = candidate;
 	let type: EntityType;
 
 	// 타입을 구별하기 위해 고유한 속성을 확인
@@ -47,19 +42,49 @@ function createEntityId(
 
 export const EntityIdUtils = {
 	/**
-	 * EntityId를 파싱하여 타입, worldId, 값을 반환
+	 * EntityId를 파싱하여 타입, worldId, instanceId를 반환
 	 * @example
-	 * const { worldId, value } = EntityIdUtils.parse<BuildingId>(entityId);
-	 * const { type, worldId, value } = EntityIdUtils.parse(entityId);
+	 * const { worldId, instanceId } = EntityIdUtils.parse<BuildingId>(entityId);
+	 * const { type, worldId, instanceId } = EntityIdUtils.parse(entityId);
 	 */
-	parse<T extends BrandedEntityId | string = string>(
+	parse<T extends EntityInstanceId | string = string>(
 		entityId: EntityId
-	): { type: EntityType; worldId: WorldId; value: T } {
+	): { type: EntityType; worldId: WorldId; instanceId: T } {
 		const parts = entityId.split('_');
 		const type = parts[0] as EntityType;
 		const worldId = parts[1] as WorldId;
-		const value = parts.slice(2).join('_') as T;
-		return { type, worldId, value };
+		const instanceId = parts.slice(2).join('_') as T;
+		return { type, worldId, instanceId };
+	},
+
+	/**
+	 * EntityId에서 type만 추출
+	 * @example
+	 * const type = EntityIdUtils.type(entityId);
+	 */
+	type(entityId: EntityId): EntityType {
+		const parts = entityId.split('_');
+		return parts[0] as EntityType;
+	},
+
+	/**
+	 * EntityId에서 worldId만 추출
+	 * @example
+	 * const worldId = EntityIdUtils.worldId(entityId);
+	 */
+	worldId(entityId: EntityId): WorldId {
+		const parts = entityId.split('_');
+		return parts[1] as WorldId;
+	},
+
+	/**
+	 * EntityId에서 instanceId만 추출
+	 * @example
+	 * const instanceId = EntityIdUtils.instanceId<WorldCharacterId>(entityId);
+	 */
+	instanceId<T extends EntityInstanceId | string = string>(entityId: EntityId): T {
+		const parts = entityId.split('_');
+		return parts.slice(2).join('_') as T;
 	},
 
 	/**
@@ -90,4 +115,46 @@ export const EntityIdUtils = {
 	 * EntityIdUtils.create(building) // "building_{building.world_id}_{building.id}"
 	 */
 	create: createEntityId,
+
+	/**
+	 * EntityTemplateId 유틸리티
+	 */
+	template: {
+		/**
+		 * EntityTemplateId 생성
+		 * @example
+		 * EntityIdUtils.template.create('building', buildingId) // "building_{buildingId}"
+		 */
+		create(type: EntityType, id: EntityTemplateIdCandidate): EntityTemplateId {
+			return `${type}_${id}` as EntityTemplateId;
+		},
+
+		/**
+		 * EntityTemplateId를 파싱하여 타입, 값을 반환
+		 * @example
+		 * const { type, value } = EntityIdUtils.template.parse(templateId);
+		 */
+		parse<T extends EntityTemplateIdCandidate | string = string>(
+			templateId: EntityTemplateId
+		): { type: EntityType; value: T } {
+			const parts = templateId.split('_');
+			const type = parts[0] as EntityType;
+			const value = parts.slice(1).join('_') as T;
+			return { type, value };
+		},
+
+		/**
+		 * EntityTemplateId가 특정 타입인지 확인
+		 */
+		is(type: EntityType, templateId: EntityTemplateId | undefined): boolean {
+			return templateId?.startsWith(`${type}_`) ?? false;
+		},
+
+		/**
+		 * EntityTemplateId가 여러 타입 중 하나인지 확인
+		 */
+		or(types: EntityType[], templateId: EntityTemplateId | undefined): boolean {
+			return types.some((type) => this.is(type, templateId));
+		},
+	},
 };
