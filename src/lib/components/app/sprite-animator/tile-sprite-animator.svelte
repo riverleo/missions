@@ -6,20 +6,16 @@
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { cn } from '$lib/utils';
 
-	const OUTLINE_WIDTH = 10;
-
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		tileId: TileId;
 		stateType: TileStateType;
 		resolution?: 1 | 2 | 3;
-		selected?: boolean;
 	}
 
 	let {
 		tileId,
 		stateType,
 		resolution = 1,
-		selected = false,
 		class: className,
 		...restProps
 	}: Props = $props();
@@ -56,18 +52,6 @@
 </script>
 
 <div {...restProps} class={cn('relative flex items-center justify-center', className)}>
-	<!-- 선택 시 외곽선 레이어 -->
-	{#if selected && animator}
-		<div
-			class="pointer-events-none absolute -z-10"
-			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
-			style:filter="brightness(0) invert(1)"
-		>
-			<SpriteAnimatorRenderer {animator} {resolution} />
-		</div>
-	{/if}
-
-	<!-- 실제 타일 -->
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />
 	{/if}

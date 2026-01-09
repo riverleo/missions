@@ -289,6 +289,18 @@ function createTestWorldStore() {
 		);
 	}
 
+	function removeTileFromWorldTileMap(tileVector: TileVector) {
+		const world = useWorld();
+		world.worldTileMapStore.update((state) =>
+			produce(state, (draft) => {
+				const tileMap = draft.data[TEST_WORLD_ID];
+				if (tileMap) {
+					delete tileMap.data[tileVector];
+				}
+			})
+		);
+	}
+
 	function init() {
 		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
@@ -351,6 +363,7 @@ function createTestWorldStore() {
 		addWorldBuilding,
 		addWorldItem,
 		addTileToWorldTileMap,
+		removeTileFromWorldTileMap,
 		removeWorldCharacter,
 		removeWorldBuilding,
 		removeWorldItem,

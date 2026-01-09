@@ -4,6 +4,7 @@
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
+	import type { WorldTileEntity } from '$lib/components/app/world/entities/world-tile-entity';
 	import type { EntityId } from '$lib/types';
 	import {
 		Accordion,
@@ -16,6 +17,7 @@
 	import WorldCharacterEntityAccordionItem from './accordion-item-world-character-entity.svelte';
 	import WorldBuildingEntityAccordionItem from './accordion-item-world-building-entity.svelte';
 	import WorldItemEntityAccordionItem from './accordion-item-world-item-entity.svelte';
+	import WorldTileEntityAccordionItem from './accordion-item-world-tile-entity.svelte';
 
 	interface Props {
 		worldContext?: WorldContext;
@@ -79,6 +81,8 @@
 			<WorldBuildingEntityAccordionItem entity={entity as WorldBuildingEntity} />
 		{:else if entity.type === 'item'}
 			<WorldItemEntityAccordionItem entity={entity as WorldItemEntity} />
+		{:else if entity.type === 'tile'}
+			<WorldTileEntityAccordionItem entity={entity as WorldTileEntity} />
 		{/if}
 	{/each}
 </Accordion>
