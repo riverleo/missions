@@ -70,6 +70,13 @@ export class SpriteAnimator {
 		this.currentFrame = animation.from ? animation.from - 1 : 0; // 0-based로 변환
 		this.direction = 1; // 항상 정방향으로 시작
 
+		// from과 to가 같으면 정적 이미지 (타이머 불필요)
+		const from = animation.from ?? DEFAULT_FRAME_FROM;
+		const to = animation.to ?? (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT);
+		if (from === to) {
+			return;
+		}
+
 		// 프레임 업데이트 시작
 		this.startFrameUpdate(animation, loop, onLoop, onComplete);
 	}
