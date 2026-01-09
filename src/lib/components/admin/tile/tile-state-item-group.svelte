@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { TileStateType } from '$lib/types';
+	import type { TileId, TileStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import TileStateItem from './tile-state-item.svelte';
 
 	interface Props {
-		tileId: string;
+		tileId: TileId;
 	}
 
 	let { tileId }: Props = $props();

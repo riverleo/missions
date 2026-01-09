@@ -114,9 +114,9 @@
     "type": "tileset",
     "frameWidth": 18,
     "frameHeight": 18,
+    "frameCount": 48,
     "columns": 12,
     "rows": 4,
-    "frameCount": 48,
     "step": 4
   }
 }

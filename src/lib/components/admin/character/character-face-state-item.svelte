@@ -10,14 +10,13 @@
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
-		characterId: string;
+		characterId: CharacterId;
 		type: CharacterFaceStateType;
 	}
 
@@ -26,8 +25,8 @@
 	const { store, faceStateStore, admin, openFaceStateDialog } = useCharacter();
 	const { needStore } = useNeed();
 
-	const character = $derived($store.data[characterId as CharacterId]);
-	const faceStates = $derived($faceStateStore.data[characterId as CharacterId] ?? []);
+	const character = $derived($store.data[characterId]);
+	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
 	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
 	const need = $derived(faceState?.need_id ? $needStore.data[faceState.need_id] : undefined);
 
@@ -47,9 +46,9 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (faceState) {
-			await admin.updateCharacterFaceState(faceState.id, characterId as CharacterId, change);
+			await admin.updateCharacterFaceState(faceState.id, characterId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterFaceState(characterId as CharacterId, {
+			await admin.createCharacterFaceState(characterId, {
 				type,
 				atlas_name: change.atlas_name,
 			});
@@ -58,7 +57,7 @@
 
 	async function ondelete() {
 		if (faceState) {
-			await admin.removeCharacterFaceState(faceState.id, characterId as CharacterId);
+			await admin.removeCharacterFaceState(faceState.id, characterId);
 		}
 	}
 

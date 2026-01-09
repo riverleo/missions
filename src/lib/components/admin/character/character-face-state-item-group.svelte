@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { CharacterFaceStateType } from '$lib/types';
+	import type { CharacterId, CharacterFaceStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import CharacterFaceStateItem from './character-face-state-item.svelte';
 
 	interface Props {
-		characterId: string;
+		characterId: CharacterId;
 	}
 
 	let { characterId }: Props = $props();

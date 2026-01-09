@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { CharacterBodyStateType } from '$lib/types';
+	import type { CharacterBodyId, CharacterBodyStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import CharacterBodyStateItem from './character-body-state-item.svelte';
 
 	interface Props {
-		bodyId: string;
+		bodyId: CharacterBodyId;
 	}
 
 	let { bodyId }: Props = $props();

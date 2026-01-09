@@ -10,7 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
-		tileId: string;
+		tileId: TileId;
 		type: TileStateType;
 	}
 
@@ -18,8 +18,8 @@
 
 	const { tileStore, tileStateStore, admin, openTileStateDialog } = useTerrain();
 
-	const tile = $derived($tileStore.data[tileId as TileId]);
-	const tileStates = $derived($tileStateStore.data[tileId as TileId] ?? []);
+	const tile = $derived($tileStore.data[tileId]);
+	const tileStates = $derived($tileStateStore.data[tileId] ?? []);
 	const tileState = $derived(tileStates.find((s) => s.type === type));
 
 	const durabilityPreview = $derived.by(() => {
@@ -32,15 +32,15 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (tileState) {
-			await admin.updateTileState(tileState.id, tileId as TileId, change);
+			await admin.updateTileState(tileState.id, tileId, change);
 		} else if (change.atlas_name) {
-			await admin.createTileState(tileId as TileId, { type, atlas_name: change.atlas_name });
+			await admin.createTileState(tileId, { type, atlas_name: change.atlas_name });
 		}
 	}
 
 	async function ondelete() {
 		if (tileState) {
-			await admin.removeTileState(tileState.id, tileId as TileId);
+			await admin.removeTileState(tileState.id, tileId);
 		}
 	}
 
@@ -59,7 +59,7 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		<TileSpriteAnimator tileId={tileId as TileId} stateType={type} />
+		<TileSpriteAnimator {tileId} stateType={type} />
 	{/snippet}
 	{#snippet action()}
 		{#if durabilityPreview !== undefined}

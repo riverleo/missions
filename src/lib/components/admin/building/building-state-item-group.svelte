@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { BuildingStateType } from '$lib/types';
+	import type { BuildingId, BuildingStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import BuildingStateItem from './building-state-item.svelte';
 
 	interface Props {
-		buildingId: string;
+		buildingId: BuildingId;
 	}
 
 	let { buildingId }: Props = $props();

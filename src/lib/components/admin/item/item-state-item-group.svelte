@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { ItemStateType } from '$lib/types';
+	import type { ItemId, ItemStateType } from '$lib/types';
 	import SpriteStateItemGroup from '$lib/components/admin/sprite-state-item-group.svelte';
 	import ItemStateItem from './item-state-item.svelte';
 
 	interface Props {
-		itemId: string;
+		itemId: ItemId;
 	}
 
 	let { itemId }: Props = $props();

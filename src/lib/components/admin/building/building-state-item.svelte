@@ -14,7 +14,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
-		buildingId: string;
+		buildingId: BuildingId;
 		type: BuildingStateType;
 	}
 
@@ -24,8 +24,8 @@
 	const { uiStore } = admin;
 	const { conditionStore } = useCondition();
 
-	const building = $derived($store.data[buildingId as BuildingId]);
-	const buildingStates = $derived($stateStore.data[buildingId as BuildingId] ?? []);
+	const building = $derived($store.data[buildingId]);
+	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
 	const condition = $derived(
 		buildingState?.condition_id ? $conditionStore.data[buildingState.condition_id] : undefined
@@ -43,9 +43,9 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (buildingState) {
-			await admin.updateBuildingState(buildingState.id, buildingId as BuildingId, change);
+			await admin.updateBuildingState(buildingState.id, buildingId, change);
 		} else if (change.atlas_name) {
-			await admin.createBuildingState(buildingId as BuildingId, {
+			await admin.createBuildingState(buildingId, {
 				type,
 				atlas_name: change.atlas_name,
 			});
@@ -57,14 +57,14 @@
 			if (atlas) {
 				const tile_cols = Math.max(1, Math.round(atlas.frameWidth / TILE_SIZE));
 				const tile_rows = Math.max(1, Math.round(atlas.frameHeight / TILE_SIZE));
-				await admin.update(buildingId as BuildingId, { tile_cols, tile_rows });
+				await admin.update(buildingId, { tile_cols, tile_rows });
 			}
 		}
 	}
 
 	async function ondelete() {
 		if (buildingState) {
-			await admin.removeBuildingState(buildingState.id, buildingId as BuildingId);
+			await admin.removeBuildingState(buildingState.id, buildingId);
 		}
 	}
 
@@ -84,11 +84,7 @@
 >
 	{#snippet preview()}
 		{#if buildingState}
-			<BuildingSpriteAnimator
-				buildingId={buildingId as BuildingId}
-				stateType={type}
-				resolution={2}
-			/>
+			<BuildingSpriteAnimator {buildingId} stateType={type} resolution={2} />
 		{/if}
 	{/snippet}
 	{#snippet collider()}

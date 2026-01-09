@@ -10,7 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
-		itemId: string;
+		itemId: ItemId;
 		type: ItemStateType;
 	}
 
@@ -19,8 +19,8 @@
 	const { store, stateStore, admin, openStateDialog } = useItem();
 	const { uiStore } = admin;
 
-	const item = $derived($store.data[itemId as ItemId]);
-	const itemStates = $derived($stateStore.data[itemId as ItemId] ?? []);
+	const item = $derived($store.data[itemId]);
+	const itemStates = $derived($stateStore.data[itemId] ?? []);
 	const itemState = $derived(itemStates.find((s) => s.type === type));
 
 	const durabilityPreview = $derived.by(() => {
@@ -35,15 +35,15 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (itemState) {
-			await admin.updateItemState(itemState.id, itemId as ItemId, change);
+			await admin.updateItemState(itemState.id, itemId, change);
 		} else if (change.atlas_name) {
-			await admin.createItemState(itemId as ItemId, { type, atlas_name: change.atlas_name });
+			await admin.createItemState(itemId, { type, atlas_name: change.atlas_name });
 		}
 	}
 
 	async function ondelete() {
 		if (itemState) {
-			await admin.removeItemState(itemState.id, itemId as ItemId);
+			await admin.removeItemState(itemState.id, itemId);
 		}
 	}
 
@@ -62,7 +62,7 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		<ItemSpriteAnimator itemId={itemId as ItemId} stateType={type} resolution={2} />
+		<ItemSpriteAnimator {itemId} stateType={type} resolution={2} />
 	{/snippet}
 	{#snippet collider()}
 		{#if $uiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}

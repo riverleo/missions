@@ -23,7 +23,7 @@
 	import { IconInfoCircle, IconLayersSubtract, IconQuestionMark } from '@tabler/icons-svelte';
 
 	interface Props {
-		bodyId: string;
+		bodyId: CharacterBodyId;
 		type: CharacterBodyStateType;
 	}
 
@@ -32,8 +32,8 @@
 	const { store, bodyStateStore, admin } = useCharacterBody();
 	const { uiStore } = admin;
 
-	const body = $derived($store.data[bodyId as CharacterBodyId]);
-	const bodyStates = $derived($bodyStateStore.data[bodyId as CharacterBodyId] ?? []);
+	const body = $derived($store.data[bodyId]);
+	const bodyStates = $derived($bodyStateStore.data[bodyId] ?? []);
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
 	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
@@ -66,9 +66,9 @@
 
 	async function onchange(change: SpriteStateChange) {
 		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, change);
+			await admin.updateCharacterBodyState(bodyState.id, bodyId, change);
 		} else if (change.atlas_name) {
-			await admin.createCharacterBodyState(bodyId as CharacterBodyId, {
+			await admin.createCharacterBodyState(bodyId, {
 				type,
 				atlas_name: change.atlas_name,
 			});
@@ -78,7 +78,7 @@
 		if (change.atlas_name && body && body.collider_width === 0 && body.collider_height === 0) {
 			const metadata = atlases[change.atlas_name];
 			if (metadata) {
-				await admin.update(bodyId as CharacterBodyId, {
+				await admin.update(bodyId, {
 					collider_width: metadata.frameWidth / 2,
 					collider_height: metadata.frameHeight / 2,
 				});
@@ -88,13 +88,13 @@
 
 	async function ondelete() {
 		if (bodyState) {
-			await admin.removeCharacterBodyState(bodyState.id, bodyId as CharacterBodyId);
+			await admin.removeCharacterBodyState(bodyState.id, bodyId);
 		}
 	}
 
 	async function onInFrontChange(pressed: boolean) {
 		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, {
+			await admin.updateCharacterBodyState(bodyState.id, bodyId, {
 				in_front: pressed,
 			});
 		}
@@ -103,7 +103,7 @@
 	async function onFaceStateChange(value: string) {
 		if (bodyState) {
 			const faceState = value === '' ? null : (value as CharacterFaceStateType);
-			await admin.updateCharacterBodyState(bodyState.id, bodyId as CharacterBodyId, {
+			await admin.updateCharacterBodyState(bodyState.id, bodyId, {
 				character_face_state: faceState,
 			});
 		}

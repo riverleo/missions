@@ -289,14 +289,14 @@ async function generateTileset(
 
 	// 각 이미지는 4x4 그리드
 	// https://www.boristhebrave.com/permanent/24/06/cr31/stagecast/wang/tiles_c.html
-	const gridSize = 4;
-	const frameWidth = width / gridSize;
-	const frameHeight = height / gridSize;
+	const step = 4;
+	const frameWidth = width / step;
+	const frameHeight = height / step;
 
 	// 메타데이터: 각 이미지가 4x4 그리드 (16개 타일)
-	const columns = imageCount * gridSize;
-	const rows = gridSize;
-	const frameCount = imageCount * gridSize * gridSize;
+	const columns = imageCount * step;
+	const rows = step;
+	const frameCount = imageCount * step * step;
 
 	console.log(`✓ [Tileset] ${groupName}.png (${frameCount} tiles, ${columns}x${rows} grid)`);
 
@@ -305,10 +305,10 @@ async function generateTileset(
 		type: 'tileset',
 		frameWidth,
 		frameHeight,
+		frameCount,
 		columns,
 		rows,
-		frameCount,
-		step: gridSize,
+		step,
 	};
 }
 
