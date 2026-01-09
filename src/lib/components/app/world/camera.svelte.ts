@@ -45,6 +45,21 @@ export class Camera {
 		};
 	}
 
+	// 맵 크기에 따른 최소 줌 레벨 계산
+	private getMinZoom(): number {
+		const terrain = this.world.terrain;
+		const canvas = this.world.render?.canvas;
+		if (!terrain || !canvas) return Camera.MIN_ZOOM;
+
+		// 맵이 화면을 꽉 채울 수 있는 최소 줌 계산
+		const minZoomX = canvas.width / terrain.width;
+		const minZoomY = canvas.height / terrain.height;
+		const minZoomForMap = Math.max(minZoomX, minZoomY);
+
+		// 전역 최소값과 맵 기반 최소값 중 큰 값 사용
+		return Math.max(Camera.MIN_ZOOM, minZoomForMap);
+	}
+
 	// 카메라 위치를 월드 경계 내로 제한
 	private clampPosition(): void {
 		const terrain = this.world.terrain;
@@ -69,7 +84,8 @@ export class Camera {
 		if (!mouseWorldPos) return;
 
 		const delta = deltaY > 0 ? -Camera.ZOOM_SPEED : Camera.ZOOM_SPEED;
-		const newZoom = Math.max(Camera.MIN_ZOOM, Math.min(Camera.MAX_ZOOM, this.zoom + delta));
+		const minZoom = this.getMinZoom();
+		const newZoom = Math.max(minZoom, Math.min(Camera.MAX_ZOOM, this.zoom + delta));
 		const zoomRatio = newZoom / this.zoom;
 
 		this.x = mouseWorldPos.x - (mouseWorldPos.x - this.x) / zoomRatio;
