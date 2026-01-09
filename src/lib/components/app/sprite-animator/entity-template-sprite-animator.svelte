@@ -38,7 +38,7 @@
 	<TileSpriteAnimator
 		tileId={id as TileId}
 		stateType="idle"
-		index={1}
+		index={16}
 		{resolution}
 		{...restProps}
 	/>

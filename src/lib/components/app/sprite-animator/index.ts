@@ -54,3 +54,22 @@ export function wangPatternToTilesetFrame(
 
 	throw new Error(`Invalid Wang pattern ${pattern}`);
 }
+
+// Calculate Wang Tile 2-corner pattern index from neighbor bitmask
+// Neighbors: top=1, right=2, bottom=4, left=8
+// Returns pattern index 1-16
+export function neighborsToWangPattern(neighbors: {
+	top: boolean;
+	right: boolean;
+	bottom: boolean;
+	left: boolean;
+}): TileWang2CornerIndex {
+	const bitmask =
+		(neighbors.top ? 1 : 0) |
+		(neighbors.right ? 2 : 0) |
+		(neighbors.bottom ? 4 : 0) |
+		(neighbors.left ? 8 : 0);
+
+	// bitmask 0-15 → pattern index 1-16
+	return (bitmask + 1) as TileWang2CornerIndex;
+}
