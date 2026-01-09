@@ -38,6 +38,7 @@
 <TileSpriteAnimator
 	tileId={entity.tileId}
 	stateType="idle"
+	index={2}
 	class="absolute -translate-x-1/2 -translate-y-1/2"
 	style="left: {centerX}px; top: {centerY}px; opacity: {opacity};"
 />

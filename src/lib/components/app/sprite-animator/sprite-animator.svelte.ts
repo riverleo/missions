@@ -1,6 +1,6 @@
 import type { LoopMode } from '$lib/types';
-import type { SpriteAnimation, AtlasMetadata } from './index';
-import { atlases, DEFAULT_FPS, DEFAULT_FRAME_FROM } from './index';
+import type { AtlasMetadata } from '$lib/types/atlas';
+import { atlases, DEFAULT_FPS, type SpriteAnimation } from './index';
 
 const DEFAULT_FRAME_COUNT = 1; // fallback when metadata is missing
 
@@ -21,11 +21,11 @@ export class SpriteAnimator {
 
 	static async create(atlasName: string) {
 		const animator = new SpriteAnimator(atlasName);
-		await animator.loadAtlas();
+		await animator.load();
 		return animator;
 	}
 
-	private async loadAtlas() {
+	private async load() {
 		try {
 			// atlases에서 메타데이터 찾기
 			this.metadata = atlases[this.atlasName];
@@ -67,12 +67,11 @@ export class SpriteAnimator {
 		this.stop();
 
 		this.currentAnimation = name;
-		this.currentFrame = animation.from ? animation.from - 1 : 0; // 0-based로 변환
 		this.direction = 1; // 항상 정방향으로 시작
 
 		// from과 to가 같으면 정적 이미지 (타이머 불필요)
-		const from = animation.from ?? DEFAULT_FRAME_FROM;
-		const to = animation.to ?? (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT);
+		const { from, to } = this.range;
+		this.currentFrame = from;
 		if (from === to) {
 			return;
 		}
@@ -89,14 +88,12 @@ export class SpriteAnimator {
 	) {
 		const fps = animation.fps ?? DEFAULT_FPS;
 		const frameDelay = 1000 / fps;
-		const from = animation.from ? animation.from - 1 : 0;
-		const to = animation.to
-			? animation.to - 1
-			: (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT) - 1;
+		const step = this.metadata?.type === 'tileset' ? this.metadata.step : 1;
+		const { from, to } = this.range;
 
 		const updateFrame = () => {
-			// 다음 프레임으로 이동
-			this.currentFrame += this.direction;
+			// 다음 프레임으로 이동 (tileset은 step만큼, sprite는 1씩)
+			this.currentFrame += this.direction * step;
 
 			// 루프 처리
 			if (loop === 'loop') {
@@ -113,16 +110,16 @@ export class SpriteAnimator {
 				}
 			} else if (loop === 'ping-pong') {
 				if (this.currentFrame > to) {
-					this.currentFrame = to - 1;
+					this.currentFrame = to - step;
 					this.direction = -1;
 				} else if (this.currentFrame < from) {
-					this.currentFrame = from + 1;
+					this.currentFrame = from + step;
 					this.direction = 1;
 					onLoop?.();
 				}
 			} else if (loop === 'ping-pong-once') {
 				if (this.direction === 1 && this.currentFrame > to) {
-					this.currentFrame = to - 1;
+					this.currentFrame = to - step;
 					this.direction = -1;
 				} else if (this.direction === -1 && this.currentFrame < from) {
 					this.currentFrame = from;
@@ -151,5 +148,25 @@ export class SpriteAnimator {
 
 	getAtlasUrl() {
 		return this.atlasUrl;
+	}
+
+	private get range(): { from: number; to: number } {
+		if (!this.currentAnimation) throw new Error('No animation set');
+
+		const animation = this.animations.get(this.currentAnimation);
+		if (!animation) throw new Error(`Animation "${this.currentAnimation}" not found`);
+
+		const from = animation.from ? animation.from - 1 : 0;
+		let to: number;
+
+		if (this.metadata?.type === 'tileset') {
+			const step = this.metadata.step;
+			const animationFrameCount = this.metadata.columns / step;
+			to = from + (animationFrameCount - 1) * step;
+		} else {
+			to = animation.to ? animation.to - 1 : (this.metadata?.frameCount ?? DEFAULT_FRAME_COUNT) - 1;
+		}
+
+		return { from, to };
 	}
 }

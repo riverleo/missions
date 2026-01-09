@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TileStateType } from '$lib/types';
+	import type { TileStateType, TileWang2CornerIndex } from '$lib/types';
 	import type { TileId } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
@@ -59,7 +59,13 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		<TileSpriteAnimator {tileId} stateType={type} />
+		<div class="grid grid-cols-4 grid-rows-4 gap-0">
+			{#each [[5, 4, 15, 7], [11, 8, 16, 14], [2, 10, 12, 13], [1, 3, 6, 9]] as row}
+				{#each row as index}
+					<TileSpriteAnimator {tileId} index={index as TileWang2CornerIndex} stateType={type} />
+				{/each}
+			{/each}
+		</div>
 	{/snippet}
 	{#snippet action()}
 		{#if durabilityPreview !== undefined}

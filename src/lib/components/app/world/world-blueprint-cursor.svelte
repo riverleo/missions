@@ -114,6 +114,7 @@
 			style="left: {centerX}px; top: {centerY}px;"
 			{tileId}
 			stateType="idle"
+			index={1}
 		/>
 	{:else if isCharacter || isItem}
 		<EntityTemplateSpriteAnimator

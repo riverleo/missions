@@ -60,6 +60,10 @@
 		{ value: 'ping-pong-once', label: '핑퐁 1회' },
 	];
 
+	const isTileset = $derived(
+		spriteState?.atlas_name ? atlases[spriteState.atlas_name]?.type === 'tileset' : false
+	);
+
 	function getFrameCount(atlasName: string | undefined) {
 		if (!atlasName) return 0;
 		return atlases[atlasName]?.frameCount ?? 0;
@@ -145,36 +149,38 @@
 					{/snippet}
 				</DropdownMenuTrigger>
 				<DropdownMenuContent>
-					<DropdownMenuSub>
-						<DropdownMenuSubTrigger>
-							시작 프레임 ({spriteState?.frame_from ?? DEFAULT_FRAME_FROM})
-						</DropdownMenuSubTrigger>
-						<DropdownMenuSubContent>
-							<DropdownMenuRadioGroup
-								value={spriteState?.frame_from?.toString() ?? ''}
-								onValueChange={onFrameFromChange}
-							>
-								{#each range(getFrameCount(spriteState?.atlas_name)) as frame (frame)}
-									<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
-								{/each}
-							</DropdownMenuRadioGroup>
-						</DropdownMenuSubContent>
-					</DropdownMenuSub>
-					<DropdownMenuSub>
-						<DropdownMenuSubTrigger>
-							종료 프레임 ({spriteState?.frame_to ?? getFrameCount(spriteState?.atlas_name)})
-						</DropdownMenuSubTrigger>
-						<DropdownMenuSubContent>
-							<DropdownMenuRadioGroup
-								value={spriteState?.frame_to?.toString() ?? ''}
-								onValueChange={onFrameToChange}
-							>
-								{#each range(getFrameCount(spriteState?.atlas_name)) as frame (frame)}
-									<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
-								{/each}
-							</DropdownMenuRadioGroup>
-						</DropdownMenuSubContent>
-					</DropdownMenuSub>
+					{#if !isTileset}
+						<DropdownMenuSub>
+							<DropdownMenuSubTrigger>
+								시작 프레임 ({spriteState?.frame_from ?? DEFAULT_FRAME_FROM})
+							</DropdownMenuSubTrigger>
+							<DropdownMenuSubContent>
+								<DropdownMenuRadioGroup
+									value={spriteState?.frame_from?.toString() ?? ''}
+									onValueChange={onFrameFromChange}
+								>
+									{#each range(getFrameCount(spriteState?.atlas_name)) as frame (frame)}
+										<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
+									{/each}
+								</DropdownMenuRadioGroup>
+							</DropdownMenuSubContent>
+						</DropdownMenuSub>
+						<DropdownMenuSub>
+							<DropdownMenuSubTrigger>
+								종료 프레임 ({spriteState?.frame_to ?? getFrameCount(spriteState?.atlas_name)})
+							</DropdownMenuSubTrigger>
+							<DropdownMenuSubContent>
+								<DropdownMenuRadioGroup
+									value={spriteState?.frame_to?.toString() ?? ''}
+									onValueChange={onFrameToChange}
+								>
+									{#each range(getFrameCount(spriteState?.atlas_name)) as frame (frame)}
+										<DropdownMenuRadioItem value={frame.toString()}>{frame}</DropdownMenuRadioItem>
+									{/each}
+								</DropdownMenuRadioGroup>
+							</DropdownMenuSubContent>
+						</DropdownMenuSub>
+					{/if}
 					<DropdownMenuSub>
 						<DropdownMenuSubTrigger>
 							FPS ({spriteState?.fps ?? DEFAULT_FPS})

@@ -35,5 +35,11 @@
 		{...restProps}
 	/>
 {:else if type === 'tile'}
-	<TileSpriteAnimator tileId={id as TileId} stateType="idle" {...restProps} />
+	<TileSpriteAnimator
+		tileId={id as TileId}
+		stateType="idle"
+		index={1}
+		{resolution}
+		{...restProps}
+	/>
 {/if}

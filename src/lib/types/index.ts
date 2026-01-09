@@ -1339,6 +1339,23 @@ export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'
 };
 
 // TileState types
+export type TileWang2CornerIndex =
+	| 1
+	| 2
+	| 3
+	| 4
+	| 5
+	| 6
+	| 7
+	| 8
+	| 9
+	| 10
+	| 11
+	| 12
+	| 13
+	| 14
+	| 15
+	| 16;
 export type TileStateType = Enums<'tile_state_type'>;
 type TileStateRow = Tables<'tile_states'>;
 export type TileState = Omit<TileStateRow, 'id' | 'scenario_id' | 'tile_id'> & {
