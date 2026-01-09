@@ -6,6 +6,7 @@
 	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
 	import type { BuildingId } from '$lib/types';
+	import TileSpriteAnimator from '../sprite-animator/tile-sprite-animator.svelte';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
@@ -100,8 +101,15 @@
 			stateType="idle"
 			resolution={2}
 		/>
-	{:else if isTile || isCharacter || isItem}
-		{centerX}, {centerY}
+	{:else if isTile}
+		<TileSpriteAnimator
+			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
+			style="left: {centerX}px; top: {centerY}px;"
+			tileId={entityTemplateId}
+			stateType="idle"
+			resolution={3}
+		/>
+	{:else if isCharacter || isItem}
 		<EntityTemplateSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"
