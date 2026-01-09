@@ -59,7 +59,7 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		<TileSpriteAnimator tileId={tileId as TileId} stateType={type} resolution={2} />
+		<TileSpriteAnimator tileId={tileId as TileId} stateType={type} />
 	{/snippet}
 	{#snippet action()}
 		{#if durabilityPreview !== undefined}

@@ -107,7 +107,6 @@
 			style="left: {centerX}px; top: {centerY}px;"
 			tileId={entityTemplateId}
 			stateType="idle"
-			resolution={3}
 		/>
 	{:else if isCharacter || isItem}
 		<EntityTemplateSpriteAnimator

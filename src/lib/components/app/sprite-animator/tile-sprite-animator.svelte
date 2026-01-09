@@ -12,13 +12,7 @@
 		resolution?: 1 | 2 | 3;
 	}
 
-	let {
-		tileId,
-		stateType,
-		resolution = 1,
-		class: className,
-		...restProps
-	}: Props = $props();
+	let { tileId, stateType, resolution = 3, class: className, ...restProps }: Props = $props();
 
 	const { tileStateStore } = useTerrain();
 	const tileStates = $derived($tileStateStore.data[tileId] ?? []);
