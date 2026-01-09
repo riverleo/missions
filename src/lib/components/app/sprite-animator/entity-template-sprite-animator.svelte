@@ -5,9 +5,9 @@
 	import ItemSpriteAnimator from './item-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 	import TileSpriteAnimator from './tile-sprite-animator.svelte';
-	import type { DOMAttributes } from 'svelte/elements';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	interface Props extends DOMAttributes<HTMLDivElement> {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		entityTemplateId: EntityTemplateId;
 		resolution?: 1 | 2 | 3;
 	}

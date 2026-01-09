@@ -5,7 +5,7 @@
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
-	import type { BuildingId } from '$lib/types';
+	import type { BuildingId, TileId } from '$lib/types';
 	import TileSpriteAnimator from '../sprite-animator/tile-sprite-animator.svelte';
 
 	const world = useWorldContext();
@@ -18,6 +18,13 @@
 			return undefined;
 		const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 		return $buildingStore.data[buildingId];
+	});
+
+	const tileId = $derived.by(() => {
+		if (!entityTemplateId || !EntityIdUtils.template.is('tile', entityTemplateId))
+			return undefined;
+		const { value } = EntityIdUtils.template.parse<TileId>(entityTemplateId);
+		return value;
 	});
 
 	const isTile = $derived(entityTemplateId && EntityIdUtils.template.is('tile', entityTemplateId));
@@ -101,18 +108,18 @@
 			stateType="idle"
 			resolution={2}
 		/>
-	{:else if isTile}
+	{:else if isTile && tileId}
 		<TileSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"
-			tileId={entityTemplateId}
+			{tileId}
 			stateType="idle"
 		/>
 	{:else if isCharacter || isItem}
 		<EntityTemplateSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"
-			{entityTemplateId}
+			entityTemplateId={entityTemplateId!}
 			resolution={2}
 		/>
 	{/if}

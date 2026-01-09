@@ -5,32 +5,17 @@ import { join } from 'path';
 import type { Plugin } from 'vite';
 import { debounce } from 'radash';
 import sharp from 'sharp';
+import type { AtlasMetadata, MarkerOffset } from '../src/lib/types/atlas';
 
 interface ImageSize {
 	width: number;
 	height: number;
 }
 
-interface MarkerOffset {
-	x: number;
-	y: number;
-}
-
 interface MarkerColor {
 	r: number;
 	g: number;
 	b: number;
-}
-
-interface AtlasMetadata {
-	name: string;
-	frameWidth: number;
-	frameHeight: number;
-	columns: number;
-	rows: number;
-	frameCount: number;
-	faceOffsets?: MarkerOffset[];
-	handOffsets?: MarkerOffset[];
 }
 
 // 마커 색상
@@ -224,13 +209,15 @@ async function generateSpriteSheet(
 	files: string[]
 ): Promise<AtlasMetadata | undefined> {
 	const frameCount = files.length;
+
+	// 정사각형 배치
 	const columns = Math.ceil(Math.sqrt(frameCount));
 	const rows = Math.ceil(frameCount / columns);
 
-	const inputPaths = files.join(' ');
+	const inputPaths = files.map((f) => `"${f}"`).join(' ');
 	const outputPath = join(GENERATED_DIR, `${groupName}.png`);
 
-	const command = `magick montage ${inputPaths} -tile ${columns}x${rows} -geometry +0+0 -background none ${outputPath}`;
+	const command = `magick montage ${inputPaths} -tile ${columns}x${rows} -geometry +0+0 -background none "${outputPath}"`;
 	execSync(command, { stdio: 'inherit' });
 
 	// 프레임 크기 확인 (첫 번째 이미지)
@@ -261,13 +248,67 @@ async function generateSpriteSheet(
 
 	return {
 		name: groupName,
+		type: 'sprite',
 		frameWidth,
 		frameHeight,
 		columns,
 		rows,
 		frameCount,
+		step: 1,
 		faceOffsets,
 		handOffsets,
+	};
+}
+
+/**
+ * Tileset 생성 (가로로 일렬 배치)
+ */
+async function generateTileset(
+	groupName: string,
+	files: string[]
+): Promise<AtlasMetadata | undefined> {
+	const imageCount = files.length;
+
+	// 가로로 일렬 배치 (montage용)
+	const montageColumns = imageCount;
+	const montageRows = 1;
+
+	const inputPaths = files.map((f) => `"${f}"`).join(' ');
+	const outputPath = join(GENERATED_DIR, `${groupName}.png`);
+
+	const command = `magick montage ${inputPaths} -tile ${montageColumns}x${montageRows} -geometry +0+0 -background none "${outputPath}"`;
+	execSync(command, { stdio: 'inherit' });
+
+	// 프레임 크기 확인 (첫 번째 이미지)
+	const firstFile = files[0];
+	if (!firstFile) {
+		console.warn(`⚠ [${groupName}] No files to process`);
+		return undefined;
+	}
+	const { width, height } = getImageSize(firstFile);
+
+	// 각 이미지는 4x4 그리드
+	// https://www.boristhebrave.com/permanent/24/06/cr31/stagecast/wang/tiles_c.html
+	const gridSize = 4;
+	const frameWidth = width / gridSize;
+	const frameHeight = height / gridSize;
+
+	// 메타데이터: 각 이미지가 4x4 그리드 (16개 타일)
+	const columns = imageCount * gridSize;
+	const rows = gridSize;
+	const frameCount = imageCount * gridSize * gridSize;
+
+	console.log(`✓ [Tileset] ${groupName}.png (${frameCount} tiles, ${columns}x${rows} grid)`);
+
+	return {
+		name: groupName,
+		type: 'tileset',
+		frameWidth,
+		frameHeight,
+		columns,
+		rows,
+		frameCount,
+		step: gridSize,
 	};
 }
 
@@ -291,7 +332,14 @@ async function generateAtlas(groupName: string): Promise<AtlasMetadata | undefin
 		const sortedFiles = sortByNumber(imageFiles);
 		const filePaths = sortedFiles.map((f) => join(groupPath, f));
 
-		return await generateSpriteSheet(groupName, filePaths);
+		// 타일셋 감지: 폴더명이 "tile-"로 시작하면 타일셋으로 표시
+		const isTileset = groupName.startsWith('tile-');
+
+		if (isTileset) {
+			return await generateTileset(groupName, filePaths);
+		} else {
+			return await generateSpriteSheet(groupName, filePaths);
+		}
 	} catch (error) {
 		console.error(`Failed to generate atlas for ${groupName}:`, error);
 		return undefined;
@@ -305,14 +353,13 @@ async function generateAtlases() {
 	try {
 		// sources 폴더의 하위 폴더들 탐색
 		const groups = await readdir(SOURCES_DIR, { withFileTypes: true });
-		const atlases: Record<string, Omit<AtlasMetadata, 'name'>> = {};
+		const atlases: Record<string, AtlasMetadata> = {};
 
 		for (const group of groups) {
 			if (!group.isDirectory()) continue;
 			const metadata = await generateAtlas(group.name);
 			if (metadata) {
-				const { name, ...rest } = metadata;
-				atlases[name] = rest;
+				atlases[metadata.name] = metadata;
 			}
 		}
 

@@ -1,10 +1,13 @@
 {
   "test": {
+    "name": "test",
+    "type": "sprite",
     "frameWidth": 70,
     "frameHeight": 80,
     "columns": 3,
     "rows": 3,
     "frameCount": 7,
+    "step": 1,
     "faceOffsets": [
       {
         "x": -15,
@@ -67,11 +70,14 @@
     ]
   },
   "test2": {
+    "name": "test2",
+    "type": "sprite",
     "frameWidth": 70,
     "frameHeight": 80,
     "columns": 3,
     "rows": 3,
     "frameCount": 7,
+    "step": 1,
     "faceOffsets": [
       {
         "x": -15,
@@ -103,11 +109,14 @@
       }
     ]
   },
-  "tile_sample": {
+  "tile-sample": {
+    "name": "tile-sample",
+    "type": "tileset",
     "frameWidth": 18,
     "frameHeight": 18,
-    "columns": 3,
-    "rows": 3,
-    "frameCount": 7
+    "columns": 12,
+    "rows": 4,
+    "frameCount": 48,
+    "step": 4
   }
 }

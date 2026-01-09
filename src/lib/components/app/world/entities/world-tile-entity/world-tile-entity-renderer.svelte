@@ -29,7 +29,7 @@
 <!-- 선택 시 외곽선 -->
 {#if selected}
 	<div
-		class="pointer-events-none absolute outline-1 outline-green-400"
+		class="absolute outline-1 outline-green-400"
 		style="left: {tileX * TILE_SIZE}px; top: {tileY *
 			TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px;"
 	></div>
@@ -38,6 +38,6 @@
 <TileSpriteAnimator
 	tileId={entity.tileId}
 	stateType="idle"
-	class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+	class="absolute -translate-x-1/2 -translate-y-1/2"
 	style="left: {centerX}px; top: {centerY}px; opacity: {opacity};"
 />

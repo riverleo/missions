@@ -14,7 +14,7 @@
 	const gridRows = $derived(Math.ceil(height / TILE_SIZE));
 </script>
 
-<svg class="pointer-events-none absolute inset-0 h-full w-full" style="overflow: visible;">
+<svg class="absolute inset-0 h-full w-full" style="overflow: visible;">
 	<!-- 세로 라인 -->
 	{#each Array(gridCols + 1) as _, i}
 		<line

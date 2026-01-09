@@ -73,8 +73,8 @@ export class WorldContextBlueprint {
 		if (worldTileMap) {
 			for (const vector of Object.keys(worldTileMap.data)) {
 				const [tileXStr, tileYStr] = vector.split(',');
-				const tileCellX = parseInt(tileXStr, 10);
-				const tileCellY = parseInt(tileYStr, 10);
+				const tileCellX = parseInt(tileXStr!, 10);
+				const tileCellY = parseInt(tileYStr!, 10);
 				existingTileCells.push({ col: tileCellX, row: tileCellY });
 			}
 		}

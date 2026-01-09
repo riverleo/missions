@@ -13,7 +13,7 @@
 	const atlasUrl = $derived(animator.getAtlasUrl());
 
 	// 현재 프레임에 따른 background-position 계산
-	const backgroundPosition = $derived(() => {
+	const backgroundPosition = $derived.by(() => {
 		if (!metadata) return '0 0';
 
 		const { frameWidth, frameHeight, columns } = metadata;
@@ -44,7 +44,7 @@
 		style:width="{displayWidth}px"
 		style:height="{displayHeight}px"
 		style:background-image="url({atlasUrl})"
-		style:background-position={backgroundPosition()}
+		style:background-position={backgroundPosition}
 		style:background-size={backgroundSize}
 	></div>
 {/if}

@@ -202,7 +202,7 @@
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && bodyAnimator}
 		<div
-			class="pointer-events-none absolute -z-10"
+			class="absolute -z-10"
 			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
 			style:filter="brightness(0) invert(1)"
 		>

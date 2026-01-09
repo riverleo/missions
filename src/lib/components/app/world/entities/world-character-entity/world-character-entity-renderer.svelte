@@ -40,10 +40,7 @@
 {#if character}
 	<!-- 경로 시각화는 월드 레벨에서 렌더링 -->
 	{#if entity.path.length > 0}
-		<svg
-			class="pointer-events-none absolute top-0 left-0 opacity-30"
-			style="width: 100%; height: 100%;"
-		>
+		<svg class="absolute top-0 left-0 opacity-30" style="width: 100%; height: 100%;">
 			<path d={pathString} stroke="white" stroke-width="1" fill="none" />
 		</svg>
 	{/if}
@@ -55,7 +52,7 @@
 		faceStateType="idle"
 		flip={entity.direction === 'right'}
 		{selected}
-		class="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+		class="absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x + (characterBody?.collider_offset_x ?? 0)}px; top: {entity.y +
 			(characterBody?.collider_offset_y ?? 0)}px; opacity: {opacity};"
 	/>

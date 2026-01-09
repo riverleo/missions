@@ -12,7 +12,7 @@
 	const height = $derived(rows * TILE_SIZE);
 </script>
 
-<svg class="pointer-events-none overflow-visible" {width} {height}>
+<svg class="overflow-visible" {width} {height}>
 	{#each Array(rows) as _, row}
 		{#each Array(cols) as _, col}
 			<rect

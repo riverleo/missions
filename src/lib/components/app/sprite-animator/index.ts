@@ -1,4 +1,5 @@
 import atlasesJson from '$lib/assets/atlas/generated/atlases.json';
+import type { AtlasMetadata, MarkerOffset } from '$lib/types/atlas';
 
 export { default as CharacterSpriteAnimator } from './character-sprite-animator.svelte';
 export { default as BuildingSpriteAnimator } from './building-sprite-animator.svelte';
@@ -16,19 +17,8 @@ export interface SpriteAnimation {
 	fps?: number;
 }
 
-export interface FaceOffset {
-	x: number;
-	y: number;
-}
+// Re-export for convenience
+export type { AtlasMetadata, MarkerOffset };
+export type FaceOffset = MarkerOffset;
 
-export interface SpriteMetadata {
-	frameWidth: number;
-	frameHeight: number;
-	columns: number;
-	rows: number;
-	frameCount: number;
-	faceOffsets?: FaceOffset[]; // 프레임별 얼굴 위치 offset (마젠타 마커에서 추출)
-	handOffsets?: FaceOffset[]; // 프레임별 손 위치 offset (초록 마커에서 추출)
-}
-
-export const atlases: Record<string, SpriteMetadata> = atlasesJson;
+export const atlases = atlasesJson as Record<string, AtlasMetadata>;

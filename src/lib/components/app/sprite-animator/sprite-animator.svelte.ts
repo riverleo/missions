@@ -1,12 +1,12 @@
 import type { LoopMode } from '$lib/types';
-import type { SpriteAnimation, SpriteMetadata } from './index';
+import type { SpriteAnimation, AtlasMetadata } from './index';
 import { atlases, DEFAULT_FPS, DEFAULT_FRAME_FROM } from './index';
 
 const DEFAULT_FRAME_COUNT = 1; // fallback when metadata is missing
 
 export class SpriteAnimator {
 	private atlasName: string;
-	private metadata: SpriteMetadata | undefined = undefined;
+	private metadata: AtlasMetadata | undefined = undefined;
 	private atlasUrl: string | undefined = undefined;
 	private animations = new Map<string, SpriteAnimation>();
 	private frameTimer: NodeJS.Timeout | undefined = undefined;
