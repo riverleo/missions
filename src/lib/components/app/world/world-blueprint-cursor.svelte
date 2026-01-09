@@ -25,15 +25,15 @@
 	);
 	const isItem = $derived(entityTemplateId && EntityIdUtils.template.is('item', entityTemplateId));
 
-	const cols = $derived(building?.tile_cols ?? (isTile ? 1 : 0));
-	const rows = $derived(building?.tile_rows ?? (isTile ? 1 : 0));
+	const cols = $derived(building?.tile_cols ?? (isTile || isCharacter || isItem ? 1 : 0));
+	const rows = $derived(building?.tile_rows ?? (isTile || isCharacter || isItem ? 1 : 0));
 	const width = $derived(cols * TILE_SIZE);
 	const height = $derived(rows * TILE_SIZE);
 
 	const centerX = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
 		const { tileX } = world.blueprint.cursor;
-		const tileCols = building?.tile_cols ?? (isTile ? 1 : 0);
+		const tileCols = building?.tile_cols ?? (isTile || isCharacter || isItem ? 1 : 0);
 		const width = tileCols * TILE_SIZE;
 		return tileX * TILE_SIZE + width / 2;
 	});
@@ -41,7 +41,7 @@
 	const centerY = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
 		const { tileY } = world.blueprint.cursor;
-		const tileRows = building?.tile_rows ?? (isTile ? 1 : 0);
+		const tileRows = building?.tile_rows ?? (isTile || isCharacter || isItem ? 1 : 0);
 		const height = tileRows * TILE_SIZE;
 		return tileY * TILE_SIZE + height / 2;
 	});
@@ -101,6 +101,7 @@
 			resolution={2}
 		/>
 	{:else if isTile || isCharacter || isItem}
+		{centerX}, {centerY}
 		<EntityTemplateSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"

@@ -36,57 +36,64 @@
 	let mouseY = $state(0);
 	let isCommandPressed = $state(false);
 
-	// 엔티티 선택 시 world.blueprint.cursor 업데이트
+	// isCommandPressed나 selectedEntityTemplateId 변경 시 cursor 클리어
 	$effect(() => {
-		if (isCommandPressed && $store.selectedEntityTemplateId) {
-			const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
+		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
+			world.blueprint.cursor = undefined;
+		}
+	});
 
-			const worldPos = world.camera.screenToWorld(mouseX, mouseY);
-			if (!worldPos) {
+	// cursor 업데이트 함수
+	function updateCursor(clientX: number, clientY: number) {
+		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
+			world.blueprint.cursor = undefined;
+			return;
+		}
+
+		const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
+		const worldPos = world.camera.screenToWorld(clientX, clientY);
+
+		if (!worldPos) {
+			world.blueprint.cursor = undefined;
+			return;
+		}
+
+		if (type === 'building') {
+			const building = $buildingStore.data[id as BuildingId];
+			if (!building) {
 				world.blueprint.cursor = undefined;
 				return;
 			}
 
-			if (type === 'building') {
-				const building = $buildingStore.data[id as BuildingId];
-				if (!building) {
-					world.blueprint.cursor = undefined;
-					return;
-				}
-
-				const { tileX, tileY } = snapPointToTopLeftTile(
-					worldPos.x,
-					worldPos.y,
-					building.tile_cols,
-					building.tile_rows
-				);
-				world.blueprint.cursor = {
-					entityTemplateId: $store.selectedEntityTemplateId,
-					tileX,
-					tileY,
-				};
-			} else if (type === 'tile') {
-				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
-				world.blueprint.cursor = {
-					entityTemplateId: $store.selectedEntityTemplateId,
-					tileX,
-					tileY,
-				};
-			} else if (type === 'character' || type === 'item') {
-				// 캐릭터/아이템은 픽셀 좌표 그대로
-				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
-				world.blueprint.cursor = {
-					entityTemplateId: $store.selectedEntityTemplateId,
-					tileX,
-					tileY,
-				};
-			} else {
-				world.blueprint.cursor = undefined;
-			}
+			const { tileX, tileY } = snapPointToTopLeftTile(
+				worldPos.x,
+				worldPos.y,
+				building.tile_cols,
+				building.tile_rows
+			);
+			world.blueprint.cursor = {
+				entityTemplateId: $store.selectedEntityTemplateId,
+				tileX,
+				tileY,
+			};
+		} else if (type === 'tile') {
+			const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			world.blueprint.cursor = {
+				entityTemplateId: $store.selectedEntityTemplateId,
+				tileX,
+				tileY,
+			};
+		} else if (type === 'character' || type === 'item') {
+			const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			world.blueprint.cursor = {
+				entityTemplateId: $store.selectedEntityTemplateId,
+				tileX,
+				tileY,
+			};
 		} else {
 			world.blueprint.cursor = undefined;
 		}
-	});
+	}
 
 	function onclickEntityOverlay() {
 		const worldPos = world.camera.screenToWorld(mouseX, mouseY);
@@ -138,11 +145,13 @@
 	function onmousemove(e: MouseEvent) {
 		mouseX = e.clientX;
 		mouseY = e.clientY;
+		updateCursor(e.clientX, e.clientY);
 	}
 
 	function onkeydown(e: KeyboardEvent) {
 		if (e.key === 'Meta') {
 			isCommandPressed = true;
+			updateCursor(mouseX, mouseY);
 		}
 	}
 

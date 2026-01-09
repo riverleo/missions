@@ -5,13 +5,14 @@
 	import ItemSpriteAnimator from './item-sprite-animator.svelte';
 	import BuildingSpriteAnimator from './building-sprite-animator.svelte';
 	import TileSpriteAnimator from './tile-sprite-animator.svelte';
+	import type { DOMAttributes } from 'svelte/elements';
 
-	interface Props {
+	interface Props extends DOMAttributes<HTMLDivElement> {
 		entityTemplateId: EntityTemplateId;
 		resolution?: 1 | 2 | 3;
 	}
 
-	let { entityTemplateId, resolution = 1 }: Props = $props();
+	let { entityTemplateId, resolution = 1, ...restProps }: Props = $props();
 
 	const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
 </script>
@@ -22,11 +23,17 @@
 		bodyStateType="idle"
 		faceStateType="idle"
 		{resolution}
+		{...restProps}
 	/>
 {:else if type === 'item'}
-	<ItemSpriteAnimator itemId={id as ItemId} stateType="idle" {resolution} />
+	<ItemSpriteAnimator itemId={id as ItemId} stateType="idle" {resolution} {...restProps} />
 {:else if type === 'building'}
-	<BuildingSpriteAnimator buildingId={id as BuildingId} stateType="idle" {resolution} />
+	<BuildingSpriteAnimator
+		buildingId={id as BuildingId}
+		stateType="idle"
+		{resolution}
+		{...restProps}
+	/>
 {:else if type === 'tile'}
-	<TileSpriteAnimator tileId={id as TileId} stateType="idle" {resolution} />
+	<TileSpriteAnimator tileId={id as TileId} stateType="idle" {resolution} {...restProps} />
 {/if}
