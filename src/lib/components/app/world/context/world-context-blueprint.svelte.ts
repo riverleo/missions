@@ -47,6 +47,7 @@ export class WorldContextBlueprint {
 		// 기존 건물들이 차지하는 모든 셀 수집
 		const buildingStore = get(useBuilding().store).data;
 		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
+		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
 		const existingTileCells: TileCell[] = [];
 
 		// worldId 필터링
@@ -65,6 +66,17 @@ export class WorldContextBlueprint {
 				buildingData.tile_rows
 			);
 			existingTileCells.push(...cells);
+		}
+
+		// 기존 타일들이 차지하는 셀 수집
+		const worldTileMap = worldTileMapStore[this.context.worldId];
+		if (worldTileMap) {
+			for (const vector of Object.keys(worldTileMap.data)) {
+				const [tileXStr, tileYStr] = vector.split(',');
+				const tileCellX = parseInt(tileXStr, 10);
+				const tileCellY = parseInt(tileYStr, 10);
+				existingTileCells.push({ col: tileCellX, row: tileCellY });
+			}
 		}
 
 		return getOverlappingCells(targetTileCells, existingTileCells);
