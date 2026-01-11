@@ -6,10 +6,9 @@
 	interface Props {
 		placement: Placement;
 		bitmasks: Record<Placement, number>;
-		isHovered?: boolean;
 	}
 
-	let { placement, bitmasks, isHovered = false }: Props = $props();
+	let { placement, bitmasks }: Props = $props();
 
 	const bitmask = $derived(bitmasks[placement]);
 
@@ -106,14 +105,4 @@
 			/>
 		{/if}
 	</svg>
-
-	<!-- 디버그: bitmask 번호 표시 (호버 시에만, 회전 없음) -->
-	{#if isHovered}
-		<div
-			class="absolute inset-0 flex items-center justify-center text-[6px] font-bold text-white"
-			style="transform: rotate({-rotation}deg);"
-		>
-			{bitmask}
-		</div>
-	{/if}
 </div>

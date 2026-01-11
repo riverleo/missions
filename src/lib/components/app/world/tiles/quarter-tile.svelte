@@ -1,21 +1,20 @@
 <script lang="ts">
 	import type { TileVector, WorldId } from '$lib/types';
-	import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
+	import { TILE_SIZE } from '$lib/constants';
 	import { calculate } from '$lib/utils/bitmask';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import QuarterTileCell from './quarter-tile-cell.svelte';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	interface Props {
+	interface Props extends HTMLAttributes<HTMLDivElement> {
 		worldId: WorldId;
 		tileX: number;
 		tileY: number;
 		opacity?: number;
 	}
 
-	let { worldId, tileX, tileY, opacity = 1 }: Props = $props();
-
-	let isHovered = $state(false);
+	let { worldId, tileX, tileY, style, ...restProps }: Props = $props();
 
 	const context = useWorldContext();
 
@@ -28,16 +27,11 @@
 		const tileId = EntityIdUtils.create('tile', worldId, tileVector);
 		if (context.entities[tileId]) return true;
 
-		// Cursor 체크 (타일 cursor가 해당 좌표에 있으면 true)
+		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)
 		const cursor = context.blueprint.cursor;
-		if (
-			cursor &&
-			EntityIdUtils.template.is('tile', cursor.entityTemplateId) &&
-			cursor.type === 'tile' &&
-			cursor.current.x === tx &&
-			cursor.current.y === ty
-		) {
-			return true;
+		if (cursor && EntityIdUtils.template.is('tile', cursor.entityTemplateId) && cursor.type === 'tile') {
+			const vectors = context.blueprint.getVectorsFromStart();
+			return vectors.some((v) => v.x === tx && v.y === ty);
 		}
 
 		return false;
@@ -81,15 +75,14 @@
 <div
 	class="absolute"
 	style="left: {tileX * TILE_SIZE}px; top: {tileY *
-		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; opacity: {opacity};"
+		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {style}"
 	role="button"
 	tabindex="-1"
-	onmouseenter={() => (isHovered = true)}
-	onmouseleave={() => (isHovered = false)}
+	{...restProps}
 >
 	<!-- 4개 quarter의 bitmask 번호 표시 -->
-	<QuarterTileCell placement="top-left" {bitmasks} {isHovered} />
-	<QuarterTileCell placement="top-right" {bitmasks} {isHovered} />
-	<QuarterTileCell placement="bottom-left" {bitmasks} {isHovered} />
-	<QuarterTileCell placement="bottom-right" {bitmasks} {isHovered} />
+	<QuarterTileCell placement="top-left" {bitmasks} />
+	<QuarterTileCell placement="top-right" {bitmasks} />
+	<QuarterTileCell placement="bottom-left" {bitmasks} />
+	<QuarterTileCell placement="bottom-right" {bitmasks} />
 </div>

@@ -14,6 +14,7 @@
 	const { store: buildingStore } = useBuilding();
 
 	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
+	const tileVectors = $derived(world.blueprint.getVectorsFromStart());
 
 	const building = $derived.by(() => {
 		if (!entityTemplateId || !EntityIdUtils.template.is('building', entityTemplateId))
@@ -157,10 +158,13 @@
 		/>
 	{:else if isTile && world.blueprint.cursor}
 		<!-- 타일 미리보기 -->
-		{#each world.blueprint.getVectorsFromStart() as vector (vector.x + ',' + vector.y)}
-			<div style="opacity: 0.5;">
-				<QuarterTile worldId={world.worldId} tileX={vector.x} tileY={vector.y} />
-			</div>
+		{#each tileVectors as vector (vector.x + ',' + vector.y)}
+			<QuarterTile
+				worldId={world.worldId}
+				tileX={vector.x}
+				tileY={vector.y}
+				style="opacity: 0.5;"
+			/>
 		{/each}
 	{:else if characterId}
 		<!-- 캐릭터 미리보기 -->
