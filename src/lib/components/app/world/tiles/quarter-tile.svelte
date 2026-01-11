@@ -29,7 +29,7 @@
 
 		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)
 		const cursor = context.blueprint.cursor;
-		if (cursor && EntityIdUtils.template.is('tile', cursor.entityTemplateId) && cursor.type === 'tile') {
+		if (cursor && cursor.type === 'tile') {
 			const vectors = context.blueprint.getVectorsFromStart();
 			return vectors.some((v) => v.x === tx && v.y === ty);
 		}
