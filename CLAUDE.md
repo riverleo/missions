@@ -176,6 +176,13 @@ tiles (타일 타입)
 
 **world_tile_maps.data**: `{"x,y": {"tile_id": "...", "durability": 100}}`
 
+**Quarter-Tile Autotiling**:
+- 1개 타일 = 4개 quarter (top-left, top-right, bottom-left, bottom-right)
+- Wang Tile 패턴: 4-bit bitmask (bit 0=현재, bit 1=인접1, bit 2=인접2, bit 3=대각선)
+- 대각선은 양쪽 인접이 모두 있을 때만 체크
+- `calculate(current, adj1, adj2, diagonal)` → 0~15 범위 bitmask
+- Blueprint cursor도 `getVectorsFromStart()`로 체크하여 미리보기
+
 ## 기술 스택
 
 ### sprite-animator
@@ -195,10 +202,21 @@ tiles (타일 타입)
 - `allowDiagonal: false`
 
 ### WorldBlueprint
-- **목적**: 건물 배치 미리보기
-- `cursor`: 마우스 커서 따라다니는 건물
-- `getOverlappingCells()`: 겹침 체크
-- `canPlace`: 배치 가능 여부 (겹침 없음)
+- **목적**: 엔티티 배치 미리보기 및 선택 상태 관리
+- **WorldBlueprintCursor**: `{ entityTemplateId, current: Vector, start?: Vector, type: 'tile' | 'cell' }`
+- **타일 배치**: 두 번 클릭 방식 (A → B)
+  - 첫 클릭: `start` 저장
+  - 마우스 이동: 범위 미리보기 (`getVectorsFromStart()`)
+  - 두 번째 클릭: 범위 내 타일 일괄 배치
+  - 범위 타입: 수평(dy=0), 수직(dx=0), 사각형
+- **선택 상태 규칙**:
+  - 템플릿 선택 시 → 엔티티 선택 해제
+  - 엔티티 선택 시 → 템플릿 선택 해제
+  - 템플릿 선택은 연속 배치를 위해 유지
+  - 빈 공간 클릭 시 → 엔티티 선택 해제 (템플릿 유지)
+- **클릭 처리 우선순위**: (1) 캐릭터 이동 (2) 엔티티 배치 (3) 선택 해제
+- `getOverlappingVectors()`: 겹침 체크 (셀 단위)
+- `placable`: 배치 가능 여부 (겹침 없음)
 
 ## Storage & Atlas
 
