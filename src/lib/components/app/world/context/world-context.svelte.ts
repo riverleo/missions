@@ -605,6 +605,11 @@ export class WorldContext {
 			// Body 위치 재설정
 			Body.setPosition(entity.body, { x, y });
 
+			// velocity와 force 초기화
+			Body.setVelocity(entity.body, { x: 0, y: 0 });
+			Body.setAngularVelocity(entity.body, 0);
+			entity.body.force = { x: 0, y: 0 };
+
 			// position state 업데이트
 			entity.x = x;
 			entity.y = y;
