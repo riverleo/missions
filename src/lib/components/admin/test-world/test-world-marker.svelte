@@ -4,7 +4,8 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { pointToTopLeft, TILE_SIZE, CELL_SIZE } from '$lib/utils/vector';
+	import { pointToTopLeft } from '$lib/utils/vector';
+	import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import type { BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
@@ -91,7 +92,7 @@
 			};
 			world.blueprint.gridType = 'tile';
 		} else if (type === 'character' || type === 'item') {
-			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
+			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, CELL_SIZE);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
 				x,

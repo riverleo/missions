@@ -1,5 +1,5 @@
+import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
-import { PATHFINDING_TILE_SIZE } from '$lib/constants';
 
 export interface PathPoint {
 	x: number;
@@ -14,7 +14,7 @@ export class Pathfinder {
 	readonly rows: number;
 	readonly tileSize: number;
 
-	constructor(width: number, height: number, tileSize: number = PATHFINDING_TILE_SIZE) {
+	constructor(width: number, height: number, tileSize: number = CELL_SIZE) {
 		this.tileSize = tileSize;
 		this.cols = Math.ceil(width / tileSize);
 		this.rows = Math.ceil(height / tileSize);

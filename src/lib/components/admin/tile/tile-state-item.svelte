@@ -1,10 +1,9 @@
 <script lang="ts">
-	import type { TileStateType, TileWang2CornerIndex } from '$lib/types';
+	import type { TileStateType } from '$lib/types';
 	import type { TileId } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
-	import TileSpriteAnimator from '$lib/components/app/sprite-animator/tile-sprite-animator.svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { getTileStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
@@ -59,12 +58,8 @@
 	{ondelete}
 >
 	{#snippet preview()}
-		<div class="grid grid-cols-4 grid-rows-4 gap-0">
-			{#each [[5, 4, 15, 7], [11, 8, 16, 14], [2, 10, 12, 13], [1, 3, 6, 9]] as row}
-				{#each row as index}
-					<TileSpriteAnimator {tileId} index={index as TileWang2CornerIndex} stateType={type} />
-				{/each}
-			{/each}
+		<div class="flex items-center justify-center p-4 text-sm text-gray-500">
+			Quarter-Tile 미리보기 (준비 중)
 		</div>
 	{/snippet}
 	{#snippet action()}

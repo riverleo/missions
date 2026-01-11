@@ -3,10 +3,11 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
-	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
+	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
+	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
+	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
-	import type { BuildingId, TileId } from '$lib/types';
-	import TileSpriteAnimator from '../sprite-animator/tile-sprite-animator.svelte';
+	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
@@ -20,17 +21,25 @@
 		return $buildingStore.data[buildingId];
 	});
 
-	const tileId = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('tile', entityTemplateId)) return undefined;
-		const { value } = EntityIdUtils.template.parse<TileId>(entityTemplateId);
-		return value;
-	});
-
 	const isTile = $derived(entityTemplateId && EntityIdUtils.template.is('tile', entityTemplateId));
 	const isCharacter = $derived(
 		entityTemplateId && EntityIdUtils.template.is('character', entityTemplateId)
 	);
 	const isItem = $derived(entityTemplateId && EntityIdUtils.template.is('item', entityTemplateId));
+
+	const characterId = $derived.by(() => {
+		if (!entityTemplateId || !EntityIdUtils.template.is('character', entityTemplateId))
+			return undefined;
+		const { value } = EntityIdUtils.template.parse<CharacterId>(entityTemplateId);
+		return value;
+	});
+
+	const itemId = $derived.by(() => {
+		if (!entityTemplateId || !EntityIdUtils.template.is('item', entityTemplateId))
+			return undefined;
+		const { value } = EntityIdUtils.template.parse<ItemId>(entityTemplateId);
+		return value;
+	});
 
 	// gridType에 따라 크기 단위 결정
 	const gridSize = $derived(world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE);
@@ -42,20 +51,40 @@
 
 	const centerX = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		const { x } = world.blueprint.cursor;
-		const size = world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE;
-		const tileCols = building?.cell_cols ?? (isTile || isCharacter || isItem ? 1 : 0);
-		const width = tileCols * size;
-		return x * size + width / 2;
+		let { x } = world.blueprint.cursor;
+
+		// 캐릭터/아이템은 항상 셀 단위
+		if (isCharacter || isItem) {
+			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
+			if (world.blueprint.gridType === 'tile') {
+				x = x * 2;
+			}
+			return x * CELL_SIZE + CELL_SIZE / 2;
+		}
+
+		// 건물/타일
+		const tileCols = building?.cell_cols ?? 1;
+		const width = tileCols * gridSize;
+		return x * gridSize + width / 2;
 	});
 
 	const centerY = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		const { y } = world.blueprint.cursor;
-		const size = world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE;
-		const tileRows = building?.cell_rows ?? (isTile || isCharacter || isItem ? 1 : 0);
-		const height = tileRows * size;
-		return y * size + height / 2;
+		let { y } = world.blueprint.cursor;
+
+		// 캐릭터/아이템은 항상 셀 단위
+		if (isCharacter || isItem) {
+			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
+			if (world.blueprint.gridType === 'tile') {
+				y = y * 2;
+			}
+			return y * CELL_SIZE + CELL_SIZE / 2;
+		}
+
+		// 건물/타일
+		const tileRows = building?.cell_rows ?? 1;
+		const height = tileRows * gridSize;
+		return y * gridSize + height / 2;
 	});
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
@@ -97,8 +126,8 @@
 </script>
 
 {#if world.blueprint.cursor}
-	{#if building || isTile}
-		<!-- 배치 셀 하이라이트 (건물/타일만) -->
+	{#if building}
+		<!-- 배치 셀 하이라이트 (건물만) -->
 		<div
 			class="absolute -translate-x-1/2 -translate-y-1/2"
 			style="left: {centerX}px; top: {centerY}px;"
@@ -130,19 +159,32 @@
 			stateType="idle"
 			resolution={2}
 		/>
-	{:else if isTile && tileId}
-		<TileSpriteAnimator
+	{:else if isTile && world.blueprint.cursor}
+		<!-- 타일 미리보기 -->
+		<div style="opacity: 0.5;">
+			<QuarterTile
+				worldId={world.worldId}
+				tileX={world.blueprint.cursor.x}
+				tileY={world.blueprint.cursor.y}
+			/>
+		</div>
+	{:else if characterId}
+		<!-- 캐릭터 미리보기 -->
+		<CharacterSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"
-			{tileId}
-			stateType="idle"
-			index={1}
+			{characterId}
+			bodyStateType="idle"
+			faceStateType="idle"
+			resolution={2}
 		/>
-	{:else if isCharacter || isItem}
-		<EntityTemplateSpriteAnimator
+	{:else if itemId}
+		<!-- 아이템 미리보기 -->
+		<ItemSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
 			style="left: {centerX}px; top: {centerY}px;"
-			entityTemplateId={entityTemplateId!}
+			{itemId}
+			stateType="idle"
 			resolution={2}
 		/>
 	{/if}

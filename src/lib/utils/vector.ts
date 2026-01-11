@@ -1,13 +1,7 @@
-import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
-
-// ========== Common Types ==========
-
 export interface Vector {
 	x: number;
 	y: number;
 }
-
-// ========== 범용 좌표 변환 함수들 ==========
 
 /**
  * 픽셀 좌표를 그리드 인덱스로 변환
@@ -78,8 +72,6 @@ export function pointToTopLeft(
 	};
 }
 
-// ========== 유틸리티 함수들 ==========
-
 /**
  * 좌상단 인덱스로 차지하는 벡터들 생성
  * @param x 좌상단 X 인덱스
@@ -106,7 +98,3 @@ export function getOverlappingVectors(vectorsA: Vector[], vectorsB: Vector[]): V
 	const setB = new Set(vectorsB.map((v) => `${v.x},${v.y}`));
 	return vectorsA.filter((v) => setB.has(`${v.x},${v.y}`));
 }
-
-// ========== 상수 Re-export ==========
-
-export { TILE_SIZE, CELL_SIZE };
