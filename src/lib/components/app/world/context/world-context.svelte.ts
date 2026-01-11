@@ -193,7 +193,29 @@ export class WorldContext {
 
 		// 엔티티 배치 (cursor가 있으면)
 		if (this.blueprint.cursor) {
-			this.placeEntity();
+			const { entityTemplateId } = this.blueprint.cursor;
+
+			// 타일 배치는 두 번의 클릭 필요
+			if (EntityIdUtils.template.is('tile', entityTemplateId)) {
+				if (!this.blueprint.cursor.start) {
+					// 첫 번째 클릭: 시작점 저장
+					this.blueprint.cursor = {
+						...this.blueprint.cursor,
+						start: { ...this.blueprint.cursor.current },
+					};
+				} else {
+					// 두 번째 클릭: 타일 일괄 설치
+					this.placeEntity();
+					// start 클리어
+					this.blueprint.cursor = {
+						...this.blueprint.cursor,
+						start: undefined,
+					};
+				}
+			} else {
+				// 타일이 아니면 바로 배치
+				this.placeEntity();
+			}
 			return;
 		}
 
@@ -227,9 +249,11 @@ export class WorldContext {
 			if (!building) return;
 			addWorldBuilding(building.id, x, y);
 		} else if (type === 'tile') {
-			// 겹치는 셀이 있으면 배치하지 않음
-			if (!this.blueprint.placable) return;
-			addTileToWorldTileMap(id as TileId, x, y);
+			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
+			const tileVectors = this.blueprint.getVectorsFromStart();
+			for (const vector of tileVectors) {
+				addTileToWorldTileMap(id as TileId, vector.x, vector.y);
+			}
 		} else if (type === 'character') {
 			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
 			const pixelX = x * CELL_SIZE + CELL_SIZE / 2;

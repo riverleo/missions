@@ -12,7 +12,6 @@
 		AccordionItem,
 		AccordionTrigger,
 	} from '$lib/components/ui/accordion';
-	import { Button } from '$lib/components/ui/button';
 	import AccordionContentItem from './accordion-content-item.svelte';
 	import WorldCharacterEntityAccordionItem from './accordion-item-world-character-entity.svelte';
 	import WorldBuildingEntityAccordionItem from './accordion-item-world-building-entity.svelte';
@@ -41,11 +40,6 @@
 		return entityId;
 	});
 
-	function onResetTick() {
-		// TODO: 틱 초기화 로직
-		console.log('Reset tick');
-	}
-
 	function onValueChange(value: string | undefined) {
 		if (!value || value === 'world') {
 			setSelectedEntityId(undefined);
@@ -61,15 +55,7 @@
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
 			<AccordionContentItem label="현재 틱">
-				{currentTick}
-				<Button
-					size="sm"
-					variant="ghost"
-					class="h-auto rounded-sm px-2 py-1 text-xs"
-					onclick={onResetTick}
-				>
-					초기화
-				</Button>
+				{currentTick} 틱
 			</AccordionContentItem>
 		</AccordionContent>
 	</AccordionItem>

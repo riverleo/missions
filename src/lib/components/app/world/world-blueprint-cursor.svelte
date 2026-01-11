@@ -157,13 +157,11 @@
 		/>
 	{:else if isTile && world.blueprint.cursor}
 		<!-- 타일 미리보기 -->
-		<div style="opacity: 0.5;">
-			<QuarterTile
-				worldId={world.worldId}
-				tileX={world.blueprint.cursor.current.x}
-				tileY={world.blueprint.cursor.current.y}
-			/>
-		</div>
+		{#each world.blueprint.getVectorsFromStart() as vector (vector.x + ',' + vector.y)}
+			<div style="opacity: 0.5;">
+				<QuarterTile worldId={world.worldId} tileX={vector.x} tileY={vector.y} />
+			</div>
+		{/each}
 	{:else if characterId}
 		<!-- 캐릭터 미리보기 -->
 		<CharacterSpriteAnimator

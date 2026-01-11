@@ -169,4 +169,58 @@ export class WorldContextBlueprint {
 	get placable(): boolean {
 		return this.getOverlappingVectors().length === 0;
 	}
+
+	/**
+	 * 타일 배치용 벡터 계산 (start → current)
+	 * - 수평/수직: 직선
+	 * - 그 외: 사각형 영역
+	 */
+	getVectorsFromStart(): Vector[] {
+		if (!this.cursor) return [];
+
+		const { current, start } = this.cursor;
+
+		// start가 없으면 단일 타일
+		if (!start) {
+			return [current];
+		}
+
+		const dx = current.x - start.x;
+		const dy = current.y - start.y;
+
+		// 수평 직선 (dy === 0)
+		if (dy === 0) {
+			const minX = Math.min(start.x, current.x);
+			const maxX = Math.max(start.x, current.x);
+			const vectors: Vector[] = [];
+			for (let x = minX; x <= maxX; x++) {
+				vectors.push({ x, y: start.y });
+			}
+			return vectors;
+		}
+
+		// 수직 직선 (dx === 0)
+		if (dx === 0) {
+			const minY = Math.min(start.y, current.y);
+			const maxY = Math.max(start.y, current.y);
+			const vectors: Vector[] = [];
+			for (let y = minY; y <= maxY; y++) {
+				vectors.push({ x: start.x, y });
+			}
+			return vectors;
+		}
+
+		// 사각형 영역
+		const minX = Math.min(start.x, current.x);
+		const maxX = Math.max(start.x, current.x);
+		const minY = Math.min(start.y, current.y);
+		const maxY = Math.max(start.y, current.y);
+		const vectors: Vector[] = [];
+		for (let y = minY; y <= maxY; y++) {
+			for (let x = minX; x <= maxX; x++) {
+				vectors.push({ x, y });
+			}
+		}
+		return vectors;
+	}
 }
