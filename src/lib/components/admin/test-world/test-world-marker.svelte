@@ -1,21 +1,13 @@
 <script lang="ts">
 	import { useWorldTest, useWorld, useWorldContext } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { pointToTopLeft } from '$lib/utils/vector';
-	import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
-	import { EntityIdUtils } from '$lib/utils/entity-id';
-	import type { BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
-	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 
-	const { store, addWorldCharacter, addWorldBuilding, addWorldItem, addTileToWorldTileMap } =
-		useWorldTest();
+	const { store } = useWorldTest();
 	const world = useWorldContext();
-	const { worldStore, selectedEntityIdStore } = useWorld();
+	const { worldStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
-	const { store: buildingStore } = useBuilding();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
@@ -32,158 +24,7 @@
 			? `${(terrain.respawn_y - world.camera.y) * world.camera.zoom}px`
 			: undefined
 	);
-
-	let mouseX = $state(0);
-	let mouseY = $state(0);
-	let isCommandPressed = $state(false);
-
-	// isCommandPressed나 selectedEntityTemplateId 변경 시 cursor 클리어
-	$effect(() => {
-		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
-			world.blueprint.cursor = undefined;
-			world.blueprint.gridType = 'cell';
-		}
-	});
-
-	// cursor 업데이트 함수
-	function updateCursor(clientX: number, clientY: number) {
-		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
-			world.blueprint.cursor = undefined;
-			world.blueprint.gridType = 'cell';
-			return;
-		}
-
-		const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
-		const worldPos = world.camera.screenToWorld(clientX, clientY);
-
-		if (!worldPos) {
-			world.blueprint.cursor = undefined;
-			world.blueprint.gridType = 'cell';
-			return;
-		}
-
-		if (type === 'building') {
-			const building = $buildingStore.data[id as BuildingId];
-			if (!building) {
-				world.blueprint.cursor = undefined;
-				world.blueprint.gridType = 'cell';
-				return;
-			}
-
-			const { x, y } = pointToTopLeft(
-				worldPos.x,
-				worldPos.y,
-				building.cell_cols,
-				building.cell_rows,
-				CELL_SIZE
-			);
-			world.blueprint.cursor = {
-				entityTemplateId: $store.selectedEntityTemplateId,
-				x,
-				y,
-			};
-			world.blueprint.gridType = 'cell';
-		} else if (type === 'tile') {
-			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
-			world.blueprint.cursor = {
-				entityTemplateId: $store.selectedEntityTemplateId,
-				x,
-				y,
-			};
-			world.blueprint.gridType = 'tile';
-		} else if (type === 'character' || type === 'item') {
-			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, CELL_SIZE);
-			world.blueprint.cursor = {
-				entityTemplateId: $store.selectedEntityTemplateId,
-				x,
-				y,
-			};
-			world.blueprint.gridType = 'cell';
-		} else {
-			world.blueprint.cursor = undefined;
-			world.blueprint.gridType = 'cell';
-		}
-	}
-
-	function onclickEntityOverlay() {
-		const worldPos = world.camera.screenToWorld(mouseX, mouseY);
-		if (!worldPos) return;
-
-		// useWorldTest에서 선택한 엔티티가 있으면 배치
-		if ($store.selectedEntityTemplateId) {
-			const { type, value: id } = EntityIdUtils.template.parse($store.selectedEntityTemplateId);
-
-			if (type === 'building') {
-				// 겹치는 셀이 있으면 배치하지 않음
-				if (!world.blueprint.placable) return;
-				const building = $buildingStore.data[id as BuildingId];
-				if (!building) return;
-				const { x: cellX, y: cellY } = pointToTopLeft(
-					worldPos.x,
-					worldPos.y,
-					building.cell_cols,
-					building.cell_rows,
-					CELL_SIZE
-				);
-				addWorldBuilding(building.id, cellX, cellY);
-			} else if (type === 'tile') {
-				// 겹치는 셀이 있으면 배치하지 않음
-				if (!world.blueprint.placable) return;
-				const { x: tileX, y: tileY } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
-				addTileToWorldTileMap(id as TileId, tileX, tileY);
-			} else if (type === 'character') {
-				addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);
-			} else if (type === 'item') {
-				addWorldItem(id as ItemId, worldPos.x, worldPos.y);
-			}
-			return;
-		}
-
-		// useWorld에서 선택한 캐릭터가 있으면 이동
-		const selectedEntityId = $selectedEntityIdStore.entityId;
-		if (EntityIdUtils.is('character', selectedEntityId)) {
-			const entity = world.entities[selectedEntityId!];
-			if (entity && entity.type === 'character') {
-				(entity as WorldCharacterEntity).moveTo(worldPos.x, worldPos.y);
-			}
-		}
-	}
-
-	function onclickCommandOverlay(e: MouseEvent) {
-		onclickEntityOverlay();
-	}
-
-	function onmousemove(e: MouseEvent) {
-		mouseX = e.clientX;
-		mouseY = e.clientY;
-		updateCursor(e.clientX, e.clientY);
-	}
-
-	function onkeydown(e: KeyboardEvent) {
-		if (e.key === 'Meta') {
-			isCommandPressed = true;
-			updateCursor(mouseX, mouseY);
-		}
-	}
-
-	function onkeyup(e: KeyboardEvent) {
-		if (e.key === 'Meta') {
-			isCommandPressed = false;
-		}
-	}
 </script>
-
-<svelte:window {onkeydown} {onkeyup} {onmousemove} />
-
-<!-- 통합 오버레이 -->
-{#if isCommandPressed}
-	<button
-		type="button"
-		class="pointer-events-auto absolute inset-0 border-2 border-emerald-400"
-		aria-label="커맨드 키를 누른 상태에서 오버레이"
-		onclick={onclickCommandOverlay}
-	></button>
-{/if}
 
 <!-- 디버그 모드일 때 시작지점 표시 -->
 {#if $store.debug && startLeft && startTop}
@@ -192,7 +33,7 @@
 			class="absolute -translate-x-1/2 -translate-y-1/2 animate-spin text-red-400"
 			style="left: {startLeft}; top: {startTop};"
 		>
-			<IconNorthStar class="size-4" />
+			<IconNorthStar />
 		</TooltipTrigger>
 		<TooltipContent>리스폰 위치</TooltipContent>
 	</Tooltip>

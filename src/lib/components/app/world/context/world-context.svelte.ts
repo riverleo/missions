@@ -12,10 +12,16 @@ import type {
 	EntityId,
 	WorldTileMap,
 	TileVector,
+	CharacterId,
+	ItemId,
+	TileId,
+	BuildingId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
+import { useWorldTest } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
+import { useBuilding } from '$lib/hooks/use-building';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
@@ -26,7 +32,13 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { WORLD_WIDTH, WORLD_HEIGHT, WALL_THICKNESS, CATEGORY_WALL } from '$lib/constants';
+import {
+	WORLD_WIDTH,
+	WORLD_HEIGHT,
+	WALL_THICKNESS,
+	CATEGORY_WALL,
+	CELL_SIZE,
+} from '$lib/constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body, Bodies } = Matter;
 
@@ -48,6 +60,7 @@ export class WorldContext {
 
 	private respawningEntityIds = new Set<EntityId>();
 	private draggedEntityPosition: { entityId: EntityId; x: number; y: number } | undefined;
+	private mouseDownScreenPosition: { x: number; y: number } | undefined;
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -81,7 +94,12 @@ export class WorldContext {
 		}
 	}
 
-	// 마우스 클릭 처리
+	// 마우스 클릭 처리 (canvas mousedown에서 screen 좌표 저장)
+	private handleCanvasMouseDown = (e: MouseEvent) => {
+		this.mouseDownScreenPosition = { x: e.clientX, y: e.clientY };
+	};
+
+	// Matter.js mousedown 처리
 	private handleMouseDown = (event: Matter.IEvent<Matter.MouseConstraint>) => {
 		const { setSelectedEntityId } = useWorld();
 
@@ -113,34 +131,113 @@ export class WorldContext {
 		}
 	};
 
-	// 마우스 드래그 종료 처리
-	private handleMouseUp = (event: Matter.IEvent<Matter.MouseConstraint>) => {
-		if (!this.draggedEntityPosition) return;
+	// canvas mouseup 처리
+	private handleCanvasMouseUp = (e: MouseEvent) => {
+		if (!this.mouseDownScreenPosition) return;
 
-		const entity = this.entities[this.draggedEntityPosition.entityId];
-		if (!entity) {
+		// 드래그 거리 계산 (클릭 판정: 5px 이내)
+		const dx = e.clientX - this.mouseDownScreenPosition.x;
+		const dy = e.clientY - this.mouseDownScreenPosition.y;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		const isClick = distance < 5;
+
+		// 엔티티를 드래그했으면 클릭 처리 안 함
+		const wasEntityDragged = this.draggedEntityPosition !== undefined;
+
+		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 또는 캐릭터 이동 처리
+		if (isClick && !wasEntityDragged) {
+			const worldPos = this.camera.screenToWorld(e.clientX, e.clientY);
+			if (worldPos) {
+				this.handleClick(worldPos.x, worldPos.y);
+			}
+		}
+
+		this.mouseDownScreenPosition = undefined;
+	};
+
+	// Matter.js mouseup 처리
+	private handleMouseUp = (event: Matter.IEvent<Matter.MouseConstraint>) => {
+		// 엔티티 드래그 처리
+		if (this.draggedEntityPosition) {
+			const entity = this.entities[this.draggedEntityPosition.entityId];
+			if (entity) {
+				// 현재 위치에서 충돌 체크 (타일, 벽, 건물과 충돌하는지)
+				const collisions = Matter.Query.collides(
+					entity.body,
+					Composite.allBodies(this.engine.world)
+				);
+
+				// static 바디(타일, 벽, 건물)와 충돌하면 이전 위치로 복원
+				const hasStaticCollision = collisions.some((collision) => {
+					const otherBody = collision.bodyA === entity.body ? collision.bodyB : collision.bodyA;
+					return otherBody.isStatic;
+				});
+
+				if (hasStaticCollision) {
+					Body.setPosition(entity.body, {
+						x: this.draggedEntityPosition.x,
+						y: this.draggedEntityPosition.y,
+					});
+				}
+			}
 			this.draggedEntityPosition = undefined;
+		}
+	};
+
+	// 클릭 처리: 엔티티 배치 또는 캐릭터 이동
+	private handleClick(worldX: number, worldY: number) {
+		const { selectedEntityIdStore } = useWorld();
+
+		// 엔티티 배치 (cursor가 있으면)
+		if (this.blueprint.cursor) {
+			this.placeEntity();
 			return;
 		}
 
-		// 현재 위치에서 충돌 체크 (타일, 벽, 건물과 충돌하는지)
-		const collisions = Matter.Query.collides(entity.body, Composite.allBodies(this.engine.world));
-
-		// static 바디(타일, 벽, 건물)와 충돌하면 이전 위치로 복원
-		const hasStaticCollision = collisions.some((collision) => {
-			const otherBody = collision.bodyA === entity.body ? collision.bodyB : collision.bodyA;
-			return otherBody.isStatic;
-		});
-
-		if (hasStaticCollision) {
-			Body.setPosition(entity.body, {
-				x: this.draggedEntityPosition.x,
-				y: this.draggedEntityPosition.y,
-			});
+		// 캐릭터 이동 (selectedEntityId가 character면)
+		const selectedEntityId = get(selectedEntityIdStore).entityId;
+		if (EntityIdUtils.is('character', selectedEntityId)) {
+			const entity = this.entities[selectedEntityId!];
+			if (entity && entity.type === 'character') {
+				(entity as WorldCharacterEntity).moveTo(worldX, worldY);
+			}
 		}
+	}
 
-		this.draggedEntityPosition = undefined;
-	};
+	// 엔티티 배치
+	private placeEntity() {
+		if (!this.blueprint.cursor) return;
+
+		const { addWorldCharacter, addWorldBuilding, addWorldItem, addTileToWorldTileMap } =
+			useWorldTest();
+		const { store: buildingStore } = useBuilding();
+		const buildings = get(buildingStore).data;
+
+		const { entityTemplateId, x, y } = this.blueprint.cursor;
+		const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
+
+		if (type === 'building') {
+			// 겹치는 셀이 있으면 배치하지 않음
+			if (!this.blueprint.placable) return;
+			const building = buildings[id as BuildingId];
+			if (!building) return;
+			addWorldBuilding(building.id, x, y);
+		} else if (type === 'tile') {
+			// 겹치는 셀이 있으면 배치하지 않음
+			if (!this.blueprint.placable) return;
+			addTileToWorldTileMap(id as TileId, x, y);
+		} else if (type === 'character') {
+			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			const pixelX = x * CELL_SIZE + CELL_SIZE / 2;
+			const pixelY = y * CELL_SIZE + CELL_SIZE / 2;
+			addWorldCharacter(id as CharacterId, pixelX, pixelY);
+		} else if (type === 'item') {
+			// item은 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			const pixelX = x * CELL_SIZE + CELL_SIZE / 2;
+			const pixelY = y * CELL_SIZE + CELL_SIZE / 2;
+			addWorldItem(id as ItemId, pixelX, pixelY);
+		}
+	}
 
 	// 마우스가 월드 바깥으로 나갔을 때 처리
 	private handleMouseLeave = () => {
@@ -148,6 +245,14 @@ export class WorldContext {
 
 		// 마우스 버튼 상태를 -1로 설정하여 마우스 제약 해제
 		this.mouseConstraint.mouse.button = -1;
+	};
+
+	// 마우스 이동 처리
+	private handleMouseMove = (e: MouseEvent) => {
+		// 카메라 팬 중에는 cursor 업데이트 안 함
+		if (this.camera.isPanning) return;
+
+		this.blueprint.updateCursor(e.clientX, e.clientY);
 	};
 
 	// 월드 로드, cleanup 함수 반환
@@ -200,14 +305,17 @@ export class WorldContext {
 			this.updateEntities(event as BeforeUpdateEvent);
 			this.checkEntityBounds();
 		});
-		Matter.Events.on(this.engine, 'afterUpdate', this.updateEntityPositions.bind(this));
+		Matter.Events.on(this.engine, 'afterUpdate', this.updateEntityPositions);
 
 		// 마우스 클릭 감지
-		Matter.Events.on(this.mouseConstraint, 'mousedown', this.handleMouseDown.bind(this));
-		Matter.Events.on(this.mouseConstraint, 'mouseup', this.handleMouseUp.bind(this));
+		Matter.Events.on(this.mouseConstraint, 'mousedown', this.handleMouseDown);
+		Matter.Events.on(this.mouseConstraint, 'mouseup', this.handleMouseUp);
 
-		// 마우스가 캔버스를 벗어났을 때 처리
-		this.render.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
+		// 캔버스 마우스 이벤트 처리
+		this.render.canvas.addEventListener('mousedown', this.handleCanvasMouseDown);
+		this.render.canvas.addEventListener('mouseup', this.handleCanvasMouseUp);
+		this.render.canvas.addEventListener('mousemove', this.handleMouseMove);
+		this.render.canvas.addEventListener('mouseleave', this.handleMouseLeave);
 
 		Runner.run(this.runner, this.engine);
 
@@ -218,6 +326,9 @@ export class WorldContext {
 
 			if (this.render) {
 				Render.stop(this.render);
+				this.render.canvas.removeEventListener('mousedown', this.handleCanvasMouseDown);
+				this.render.canvas.removeEventListener('mouseup', this.handleCanvasMouseUp);
+				this.render.canvas.removeEventListener('mousemove', this.handleMouseMove);
 				this.render.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
 				this.render.canvas.remove();
 			}

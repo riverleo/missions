@@ -144,6 +144,16 @@ export const EntityIdUtils = {
 		},
 
 		/**
+		 * EntityTemplateId를 파싱하여 타입, 값을 반환
+		 * @example
+		 * const { type, value } = EntityIdUtils.template.parse(templateId);
+		 */
+		id<T extends EntityTemplateIdCandidate | string = string>(templateId: EntityTemplateId): T {
+			const parts = templateId.split('_');
+			return parts.slice(1).join('_') as T;
+		},
+
+		/**
 		 * EntityTemplateId가 특정 타입인지 확인
 		 */
 		is(type: EntityType, templateId: EntityTemplateId | undefined): boolean {

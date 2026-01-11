@@ -8,6 +8,7 @@
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
 	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
+	import type { Vector } from '$lib/utils/vector';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
@@ -21,24 +22,19 @@
 		return $buildingStore.data[buildingId];
 	});
 
-	const isTile = $derived(entityTemplateId && EntityIdUtils.template.is('tile', entityTemplateId));
-	const isCharacter = $derived(
-		entityTemplateId && EntityIdUtils.template.is('character', entityTemplateId)
-	);
-	const isItem = $derived(entityTemplateId && EntityIdUtils.template.is('item', entityTemplateId));
+	const isTile = $derived(EntityIdUtils.template.is('tile', entityTemplateId));
+	const isCharacter = $derived(EntityIdUtils.template.is('character', entityTemplateId));
+	const isItem = $derived(EntityIdUtils.template.is('item', entityTemplateId));
 
 	const characterId = $derived.by(() => {
 		if (!entityTemplateId || !EntityIdUtils.template.is('character', entityTemplateId))
 			return undefined;
-		const { value } = EntityIdUtils.template.parse<CharacterId>(entityTemplateId);
-		return value;
+		return EntityIdUtils.template.id<CharacterId>(entityTemplateId);
 	});
 
 	const itemId = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('item', entityTemplateId))
-			return undefined;
-		const { value } = EntityIdUtils.template.parse<ItemId>(entityTemplateId);
-		return value;
+		if (!entityTemplateId || !EntityIdUtils.template.is('item', entityTemplateId)) return undefined;
+		return EntityIdUtils.template.id<ItemId>(entityTemplateId);
 	});
 
 	// gridType에 따라 크기 단위 결정
@@ -88,13 +84,13 @@
 	});
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
-	const overlappingCellSet = $derived(() => {
-		const cells = world.blueprint.getOverlappingVectors();
-		return new Set(cells.map((c) => `${c.x},${c.y}`));
+	const overlappingVectors = $derived(() => {
+		const vectors = world.blueprint.getOverlappingVectors();
+		return new Set(vectors.map((v) => `${v.x},${v.y}`));
 	});
 
 	// 셀이 겹치는지 확인 (절대 좌표 기준)
-	function isCellOverlapping(localCol: number, localRow: number): boolean {
+	function isVectorOverlapping(vector: Vector): boolean {
 		if (!world.blueprint.cursor) return false;
 
 		const { x, y } = world.blueprint.cursor;
@@ -106,7 +102,7 @@
 			// 타일은 2x2 셀을 차지하므로 각 셀을 체크
 			for (let dy = 0; dy < 2; dy++) {
 				for (let dx = 0; dx < 2; dx++) {
-					if (overlappingCellSet().has(`${cellX + dx},${cellY + dy}`)) {
+					if (overlappingVectors().has(`${cellX + dx},${cellY + dy}`)) {
 						return true;
 					}
 				}
@@ -115,10 +111,10 @@
 		}
 
 		// 셀인 경우 그대로 사용
-		const absoluteCol = x + localCol;
-		const absoluteRow = y + localRow;
+		const absoluteCol = x + vector.x;
+		const absoluteRow = y + vector.y;
 
-		return overlappingCellSet().has(`${absoluteCol},${absoluteRow}`);
+		return overlappingVectors().has(`${absoluteCol},${absoluteRow}`);
 	}
 
 	const OVERLAP_TILE_FILL_STYLE = 'rgba(239, 68, 68, 0.8)';
@@ -135,7 +131,7 @@
 			<svg class="overflow-visible" {width} {height}>
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
-						{@const isOverlapping = isCellOverlapping(col, row)}
+						{@const isOverlapping = isVectorOverlapping({ x: col, y: row })}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}

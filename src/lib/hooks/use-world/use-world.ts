@@ -59,13 +59,6 @@ function createWorldStore() {
 
 	function setSelectedEntityId(entityId: EntityId | undefined) {
 		selectedEntityIdStore.update((state) => ({ ...state, entityId }));
-
-		// useWorldTest의 selectedEntityTemplateId 클리어 (store 업데이트 후에)
-		const testWorld = useWorldTest();
-		testWorld.store.update((state) => ({
-			...state,
-			selectedEntityTemplateId: undefined,
-		}));
 	}
 
 	async function fetch() {

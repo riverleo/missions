@@ -1,8 +1,10 @@
 import { get } from 'svelte/store';
-import { createVectors, getOverlappingVectors, type Vector } from '$lib/utils/vector';
+import { createVectors, getOverlappingVectors, pointToTopLeft, type Vector } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
+import { useWorldTest } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId } from '$lib/types';
@@ -17,6 +19,74 @@ export class WorldContextBlueprint {
 
 	constructor(context: WorldContext) {
 		this.context = context;
+	}
+
+	/**
+	 * 마우스 위치에 따라 cursor 업데이트
+	 */
+	updateCursor(clientX: number, clientY: number) {
+		const { store } = useWorldTest();
+		const selectedEntityTemplateId = get(store).selectedEntityTemplateId;
+
+		if (!selectedEntityTemplateId) {
+			this.cursor = undefined;
+			this.gridType = 'cell';
+			return;
+		}
+
+		const { type, value: id } = EntityIdUtils.template.parse(selectedEntityTemplateId);
+		const worldPos = this.context.camera.screenToWorld(clientX, clientY);
+
+		if (!worldPos) {
+			this.cursor = undefined;
+			this.gridType = 'cell';
+			return;
+		}
+
+		const { store: buildingStore } = useBuilding();
+		const buildings = get(buildingStore).data;
+
+		if (type === 'building') {
+			const building = buildings[id as BuildingId];
+			if (!building) {
+				this.cursor = undefined;
+				this.gridType = 'cell';
+				return;
+			}
+
+			const { x, y } = pointToTopLeft(
+				worldPos.x,
+				worldPos.y,
+				building.cell_cols,
+				building.cell_rows,
+				CELL_SIZE
+			);
+			this.cursor = {
+				entityTemplateId: selectedEntityTemplateId,
+				x,
+				y,
+			};
+			this.gridType = 'cell';
+		} else if (type === 'tile') {
+			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
+			this.cursor = {
+				entityTemplateId: selectedEntityTemplateId,
+				x,
+				y,
+			};
+			this.gridType = 'tile';
+		} else if (type === 'character' || type === 'item') {
+			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, CELL_SIZE);
+			this.cursor = {
+				entityTemplateId: selectedEntityTemplateId,
+				x,
+				y,
+			};
+			this.gridType = 'cell';
+		} else {
+			this.cursor = undefined;
+			this.gridType = 'cell';
+		}
 	}
 
 	/**

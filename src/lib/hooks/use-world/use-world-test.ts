@@ -42,7 +42,7 @@ function createTestWorldStore() {
 		setInterval(() => saveToStorage(get(store)), 5000);
 	}
 
-	function selectTerrain(terrainId: TerrainId) {
+	function setSelectedTerrainId(terrainId: TerrainId) {
 		store.update((state) => {
 			const isSameTerrain = state.selectedTerrainId === terrainId;
 
@@ -116,16 +116,15 @@ function createTestWorldStore() {
 		});
 	}
 
-	function selectEntity(templateId: EntityTemplateId) {
+	function setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
 		store.update((state) => ({
 			...state,
 			selectedEntityTemplateId:
-				state.selectedEntityTemplateId === templateId ? undefined : templateId,
+				state.selectedEntityTemplateId === entityTemplateId ? undefined : entityTemplateId,
 		}));
 
 		// useWorld의 selectedEntityIdStore 클리어 (store 업데이트 후에)
-		const world = useWorld();
-		world.selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+		useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
 	}
 
 	function setDebug(debug: boolean) {
@@ -353,8 +352,8 @@ function createTestWorldStore() {
 
 	return {
 		store,
-		selectTerrain,
-		selectEntity,
+		setSelectedTerrainId,
+		setSelectedEntityTemplateId,
 		setDebug,
 		setOpen,
 		setModalPosition,
