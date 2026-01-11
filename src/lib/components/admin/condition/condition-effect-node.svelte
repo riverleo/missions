@@ -3,6 +3,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useNeed } from '$lib/hooks/use-need';
+	import { Separator } from '$lib/components/ui/separator';
 
 	interface Props {
 		data: {
@@ -23,11 +24,11 @@
 	);
 	const need = $derived($needStore.data[effect.need_id]);
 
-	const label = $derived(() => {
-		const characterName = character ? `${character.name}만` : '모든 캐릭터가';
+	const label = $derived.by(() => {
+		const characterName = character ? `${character.name}` : '모든 캐릭터';
 		const needName = need?.name ?? '욕구';
 		const changeSign = effect.change_per_tick >= 0 ? '증가' : '감소';
-		return `${characterName} 사용 시 ${effect.change_per_tick}씩 ${changeSign} (${needName})`;
+		return `${characterName} ${needName} ${effect.change_per_tick}씩 ${changeSign}`;
 	});
 </script>
 
@@ -35,11 +36,15 @@
 	<Handle type="target" position={Position.Top} style="background-color: var(--color-red-500)" />
 
 	<div class="flex flex-col gap-1">
-		<div class="truncate text-sm font-medium" class:text-muted-foreground={!effect.name}>
-			{effect.name ? effect.name : '이름 미입력'} ({effect.min_threshold}~{effect.max_threshold})
+		<div class="truncate text-sm font-bold" class:text-muted-foreground={!effect.name}>
+			{effect.name ? effect.name : '이름 미입력'}
 		</div>
-		<div class="truncate text-xs text-muted-foreground">
-			{label()}
+		<Separator class="my-1 bg-white/10" />
+		<div class="truncate text-sm text-accent-foreground">
+			{label}
+		</div>
+		<div class="text-xs text-muted-foreground">
+			{effect.min_threshold}~{effect.max_threshold} / 범위
 		</div>
 	</div>
 </div>

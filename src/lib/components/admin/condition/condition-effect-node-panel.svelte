@@ -17,6 +17,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { clone } from 'radash';
+	import { Separator } from '$lib/components/ui/separator';
 
 	interface Props {
 		effect: ConditionEffect | undefined;
@@ -135,6 +136,8 @@
 							<InputGroupText>~</InputGroupText>
 							<InputGroupInput type="number" step="0.1" bind:value={changes.max_threshold} />
 						</InputGroup>
+
+						<Separator />
 
 						<ButtonGroup class="w-full">
 							<Select
