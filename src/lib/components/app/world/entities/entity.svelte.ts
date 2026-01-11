@@ -47,10 +47,7 @@ export abstract class Entity {
 		this.angle = newAngle;
 	}
 
-	// 스토어 데이터 변경사항을 엔티티에 동기화
-	abstract sync(): void;
-
-	abstract saveToStore(): void;
+	abstract save(): void;
 
 	// 매 프레임마다 호출되는 업데이트 로직
 	abstract update(event: BeforeUpdateEvent): void;

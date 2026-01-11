@@ -54,47 +54,8 @@ export class WorldBuildingEntity extends Entity {
 		return get(useBuilding().store).data[worldBuilding.building_id];
 	}
 
-	sync(): void {
-		const worldBuilding = get(useWorld().worldBuildingStore).data[this.instanceId];
-		const building = this.building;
-		if (!worldBuilding || !building) return;
-
-		// 새 크기 계산
-		const newWidth = building.cell_cols * CELL_SIZE;
-		const newHeight = building.cell_rows * CELL_SIZE;
-
-		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.colliderWidth - newWidth);
-		const heightDiff = Math.abs(this.colliderHeight - newHeight);
-
-		// 크기가 변경되었으면 바디 재생성
-		if (widthDiff > 0.01 || heightDiff > 0.01) {
-			// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
-			const leftTopX = worldBuilding.cell_x * CELL_SIZE;
-			const leftTopY = worldBuilding.cell_y * CELL_SIZE;
-			const x = leftTopX + newWidth / 2;
-			const y = leftTopY + newHeight / 2;
-
-			// 월드에서 기존 바디 제거
-			this.removeFromWorld();
-
-			// 새 바디 생성 (위치 및 크기 상태도 함께 설정됨)
-			this.body = this.createBody('rectangle', newWidth, newHeight, x, y, {
-				isStatic: true,
-				collisionFilter: {
-					category: CATEGORY_BUILDING,
-					mask: CATEGORY_TILE, // 타일과 겹칠 수 없음
-				},
-			});
-
-			// 월드에 새 바디 추가
-			this.addToWorld();
-		}
-	}
-
-	saveToStore(): void {
-		// 건물은 static이므로 실제로 위치 변경 없음
-		// 하지만 일관성을 위해 인터페이스 제공
+	save(): void {
+		// 건물은 static이므로 위치가 변경되지 않음
 	}
 
 	update(_: BeforeUpdateEvent): void {

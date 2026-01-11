@@ -66,52 +66,24 @@ export class WorldCharacterEntity extends Entity {
 		return character ? characterBodyStore[character.character_body_id] : undefined;
 	}
 
-	override sync(): void {
-		const characterBody = this.characterBody;
-		if (!characterBody) return;
+	override save(): void {
+		const { worldCharacterStore } = useWorld();
+		const store = get(worldCharacterStore);
+		const worldCharacter = store.data[this.instanceId];
 
-		// 스토어 값이 실제로 변경되었는지 확인
-		const widthDiff = Math.abs(this.colliderWidth - characterBody.collider_width);
-		const heightDiff = Math.abs(this.colliderHeight - characterBody.collider_height);
-		const typeChanged = this.colliderType !== characterBody.collider_type;
-
-		// 크기 또는 타입이 변경되었으면 바디 재생성
-		if (widthDiff > 0.01 || heightDiff > 0.01 || typeChanged) {
-			const currentPosition = this.body.position;
-			const currentVelocity = this.body.velocity;
-			const currentAngle = this.body.angle;
-
-			// 월드에서 기존 바디 제거
-			this.removeFromWorld();
-
-			// 새 바디 생성
-			this.body = this.createBody(
-				characterBody.collider_type,
-				characterBody.collider_width,
-				characterBody.collider_height,
-				currentPosition.x,
-				currentPosition.y,
-				{
-					restitution: 0.1,
-					friction: 0.8,
-					inertia: Infinity,
-					collisionFilter: {
-						category: CATEGORY_CHARACTER,
-						mask: CATEGORY_WALL | CATEGORY_TILE,
+		if (worldCharacter) {
+			worldCharacterStore.set({
+				...store,
+				data: {
+					...store.data,
+					[this.instanceId]: {
+						...worldCharacter,
+						x: this.x,
+						y: this.y,
 					},
-				}
-			);
-
-			// 속도/각도 복원
-			Body.setVelocity(this.body, currentVelocity);
-			Body.setAngle(this.body, currentAngle);
-
-			this.addToWorld();
+				},
+			});
 		}
-	}
-
-	override saveToStore(): void {
-		// 스토어에 현재 위치 저장 (수동 호출)
 	}
 
 	override update(event: BeforeUpdateEvent): void {

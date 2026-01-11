@@ -152,7 +152,6 @@ export class WorldContext {
 
 		// 물리 시뮬레이션 시작
 		Matter.Events.on(this.engine, 'beforeUpdate', (event) => {
-			this.syncEntities();
 			this.updateEntities(event as BeforeUpdateEvent);
 			this.checkEntityBounds();
 		});
@@ -389,13 +388,6 @@ export class WorldContext {
 					delete this.entities[entity.id];
 				}
 			}
-		}
-	}
-
-	// 스토어 데이터 변경사항을 엔티티에 동기화
-	private syncEntities() {
-		for (const entity of Object.values(this.entities)) {
-			entity.sync();
 		}
 	}
 

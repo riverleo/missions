@@ -52,11 +52,7 @@ export class WorldTileEntity extends Entity {
 		);
 	}
 
-	sync(): void {
-		// 타일은 정적이므로 동기화 로직 없음
-	}
-
-	saveToStore(): void {
+	save(): void {
 		// 타일은 스토어에서만 관리되므로 저장 로직 없음
 	}
 
