@@ -9,7 +9,7 @@ import {
 	TILE_SIZE,
 } from '$lib/constants';
 import type { BeforeUpdateEvent } from '$lib/components/app/world/context';
-import { tileToCenterPixel } from '$lib/utils/tiles';
+import { toPixel } from '$lib/utils/vector';
 import { Entity } from '../entity.svelte';
 
 export class WorldTileEntity extends Entity {
@@ -39,8 +39,8 @@ export class WorldTileEntity extends Entity {
 			'rectangle',
 			TILE_SIZE,
 			TILE_SIZE,
-			tileToCenterPixel(tileX),
-			tileToCenterPixel(tileY),
+			toPixel(tileX, TILE_SIZE),
+			toPixel(tileY, TILE_SIZE),
 			{
 				isStatic: true,
 				label: this.id,

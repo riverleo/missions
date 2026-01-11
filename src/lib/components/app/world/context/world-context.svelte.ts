@@ -26,7 +26,7 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { WORLD_WIDTH, WORLD_HEIGHT, WALL_THICKNESS, CATEGORY_WALL } from '../constants';
+import { WORLD_WIDTH, WORLD_HEIGHT, WALL_THICKNESS, CATEGORY_WALL } from '$lib/constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body, Bodies } = Matter;
 

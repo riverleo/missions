@@ -227,6 +227,8 @@ export type Database = {
       }
       buildings: {
         Row: {
+          cell_cols: number
+          cell_rows: number
           collider_offset_x: number
           collider_offset_y: number
           created_at: string
@@ -236,10 +238,10 @@ export type Database = {
           name: string
           scale: number
           scenario_id: string
-          tile_cols: number
-          tile_rows: number
         }
         Insert: {
+          cell_cols?: number
+          cell_rows?: number
           collider_offset_x?: number
           collider_offset_y?: number
           created_at?: string
@@ -249,10 +251,10 @@ export type Database = {
           name?: string
           scale?: number
           scenario_id: string
-          tile_cols?: number
-          tile_rows?: number
         }
         Update: {
+          cell_cols?: number
+          cell_rows?: number
           collider_offset_x?: number
           collider_offset_y?: number
           created_at?: string
@@ -262,8 +264,6 @@ export type Database = {
           name?: string
           scale?: number
           scenario_id?: string
-          tile_cols?: number
-          tile_rows?: number
         }
         Relationships: [
           {

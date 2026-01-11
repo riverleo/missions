@@ -1,5 +1,5 @@
 import PF from 'pathfinding';
-import { PATHFINDING_TILE_SIZE } from './constants';
+import { PATHFINDING_TILE_SIZE } from '$lib/constants';
 
 export interface PathPoint {
 	x: number;
@@ -50,7 +50,7 @@ export class Pathfinder {
 	 * - tile index 2 → pixel 10 (타일 중심)
 	 *
 	 * x축과 y축 변환 공식이 동일하므로 1차원 헬퍼로 분리.
-	 * 2D 좌표가 필요하면 tileToCenterPixel(tileX, tileY) 사용.
+	 * 2D 좌표가 필요하면 tileToPixel(tileX, tileY) 사용.
 	 */
 	tileIndexToPixel(tile: number) {
 		return tile * this.tileSize + this.tileSize / 2;

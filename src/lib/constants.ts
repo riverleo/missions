@@ -3,8 +3,8 @@ export const WORLD_WIDTH = 800;
 export const WORLD_HEIGHT = 400;
 
 // 셀 및 타일 설정
-export const CELL_SIZE = 6; // 배치/겹침 계산 최소 단위 (격자 한 칸)
-export const TILE_SIZE = CELL_SIZE * 2; // 타일 렌더링 크기 (12px)
+export const CELL_SIZE = 8; // 배치/겹침 계산 최소 단위 (격자 한 칸)
+export const TILE_SIZE = CELL_SIZE * 2; // 타일 렌더링 크기 (16px)
 export const TILE_CELL_RATIO = TILE_SIZE / CELL_SIZE; // 타일이 차지하는 셀 수 (2x2)
 
 // 경로 탐색 타일 설정
@@ -22,10 +22,3 @@ export const CATEGORY_TILE = 0x0002;
 export const CATEGORY_CHARACTER = 0x0004;
 export const CATEGORY_BUILDING = 0x0008;
 export const CATEGORY_ITEM = 0x0010;
-
-// 플래닝 타일 스타일
-export const PLANNING_TILE_FILL_STYLE = 'rgba(34, 197, 94, 0.8)';
-
-export const HIDDEN_BODY_STYLE = {
-	visible: false,
-};

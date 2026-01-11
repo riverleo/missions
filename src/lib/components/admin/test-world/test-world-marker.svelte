@@ -4,7 +4,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { pointToTopLeftTile } from '$lib/utils/tiles';
+	import { pointToTopLeft, TILE_SIZE, CELL_SIZE } from '$lib/utils/vector';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import type { BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
@@ -40,6 +40,7 @@
 	$effect(() => {
 		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
 			world.blueprint.cursor = undefined;
+			world.blueprint.gridType = 'cell';
 		}
 	});
 
@@ -47,6 +48,7 @@
 	function updateCursor(clientX: number, clientY: number) {
 		if (!isCommandPressed || !$store.selectedEntityTemplateId) {
 			world.blueprint.cursor = undefined;
+			world.blueprint.gridType = 'cell';
 			return;
 		}
 
@@ -55,6 +57,7 @@
 
 		if (!worldPos) {
 			world.blueprint.cursor = undefined;
+			world.blueprint.gridType = 'cell';
 			return;
 		}
 
@@ -62,36 +65,42 @@
 			const building = $buildingStore.data[id as BuildingId];
 			if (!building) {
 				world.blueprint.cursor = undefined;
+				world.blueprint.gridType = 'cell';
 				return;
 			}
 
-			const { tileX, tileY } = pointToTopLeftTile(
+			const { x, y } = pointToTopLeft(
 				worldPos.x,
 				worldPos.y,
-				building.tile_cols,
-				building.tile_rows
+				building.cell_cols,
+				building.cell_rows,
+				CELL_SIZE
 			);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
-				tileX,
-				tileY,
+				x,
+				y,
 			};
+			world.blueprint.gridType = 'cell';
 		} else if (type === 'tile') {
-			const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
-				tileX,
-				tileY,
+				x,
+				y,
 			};
+			world.blueprint.gridType = 'tile';
 		} else if (type === 'character' || type === 'item') {
-			const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
-				tileX,
-				tileY,
+				x,
+				y,
 			};
+			world.blueprint.gridType = 'cell';
 		} else {
 			world.blueprint.cursor = undefined;
+			world.blueprint.gridType = 'cell';
 		}
 	}
 
@@ -108,17 +117,18 @@
 				if (!world.blueprint.placable) return;
 				const building = $buildingStore.data[id as BuildingId];
 				if (!building) return;
-				const { tileX, tileY } = pointToTopLeftTile(
+				const { x: cellX, y: cellY } = pointToTopLeft(
 					worldPos.x,
 					worldPos.y,
-					building.tile_cols,
-					building.tile_rows
+					building.cell_cols,
+					building.cell_rows,
+					CELL_SIZE
 				);
-				addWorldBuilding(building.id, tileX, tileY);
+				addWorldBuilding(building.id, cellX, cellY);
 			} else if (type === 'tile') {
 				// 겹치는 셀이 있으면 배치하지 않음
 				if (!world.blueprint.placable) return;
-				const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+				const { x: tileX, y: tileY } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
 				addTileToWorldTileMap(id as TileId, tileX, tileY);
 			} else if (type === 'character') {
 				addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);

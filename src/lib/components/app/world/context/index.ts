@@ -10,9 +10,9 @@ export interface BeforeUpdateEvent {
 
 export interface WorldBlueprintCursor {
 	entityTemplateId: EntityTemplateId;
-	tileX: number;
-	tileY: number;
+	x: number;
+	y: number;
 }
 
 export { WorldContext } from './world-context.svelte';
-export { WorldContextBlueprint } from './world-context-blueprint.svelte';
+export { WorldContextBlueprint, type GridType } from './world-context-blueprint.svelte';

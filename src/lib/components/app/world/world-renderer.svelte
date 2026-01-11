@@ -82,9 +82,7 @@
 		{#if terrainAssetUrl}
 			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
 		{/if}
-		{#if world.blueprint.cursor && terrain}
-			<WorldBlueprint width={terrain.width} height={terrain.height} />
-		{/if}
+		<WorldBlueprint />
 		{#each entities as entity (entity.id)}
 			{#if entity.type === 'tile'}
 				<WorldTileEntityRenderer entity={entity as WorldTileEntity} />

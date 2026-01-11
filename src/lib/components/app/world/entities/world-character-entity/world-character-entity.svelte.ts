@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_CHARACTER } from '../../constants';
+import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -31,7 +31,9 @@ export class WorldCharacterEntity extends Entity {
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter || !characterBody) {
-			throw new Error(`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`);
+			throw new Error(
+				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
+			);
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)

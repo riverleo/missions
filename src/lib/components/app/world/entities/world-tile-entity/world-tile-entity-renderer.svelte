@@ -4,8 +4,8 @@
 	import TileSpriteAnimator from '$lib/components/app/sprite-animator/tile-sprite-animator.svelte';
 	import { neighborsToWangPattern } from '$lib/components/app/sprite-animator';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
-	import { TILE_SIZE } from '../../constants';
-	import { tileToCenterPixel } from '../../tiles';
+	import { TILE_SIZE } from '$lib/constants';
+	import { toPixel } from '$lib/utils/vector';
 	import { useWorld, useWorldContext } from '$lib/hooks/use-world';
 
 	interface Props {
@@ -21,8 +21,8 @@
 	const coords = $derived(entity.instanceId.split(',').map(Number));
 	const tileX = $derived(coords[0] ?? 0);
 	const tileY = $derived(coords[1] ?? 0);
-	const centerX = $derived(tileToCenterPixel(tileX));
-	const centerY = $derived(tileY * TILE_SIZE + TILE_SIZE / 2);
+	const centerX = $derived(toPixel(tileX, TILE_SIZE));
+	const centerY = $derived(toPixel(tileY, TILE_SIZE));
 
 	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
 

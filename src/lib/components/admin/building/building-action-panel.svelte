@@ -20,18 +20,18 @@
 	const { admin } = useBuilding();
 	const { uiStore } = admin;
 
-	let tileCols = $state(building.tile_cols === 0 ? '' : building.tile_cols.toString());
-	let tileRows = $state(building.tile_rows === 0 ? '' : building.tile_rows.toString());
+	let tileCols = $state(building.cell_cols === 0 ? '' : building.cell_cols.toString());
+	let tileRows = $state(building.cell_rows === 0 ? '' : building.cell_rows.toString());
 	let colliderOffsetX = $state(building.collider_offset_x.toString());
 	let colliderOffsetY = $state(building.collider_offset_y.toString());
 	let scale = $state(building.scale.toString());
 
 	// building prop 변경 시 상태 동기화
 	$effect(() => {
-		tileCols = building.tile_cols === 0 ? '' : building.tile_cols.toString();
+		tileCols = building.cell_cols === 0 ? '' : building.cell_cols.toString();
 	});
 	$effect(() => {
-		tileRows = building.tile_rows === 0 ? '' : building.tile_rows.toString();
+		tileRows = building.cell_rows === 0 ? '' : building.cell_rows.toString();
 	});
 	$effect(() => {
 		colliderOffsetX = building.collider_offset_x.toString();
@@ -50,16 +50,16 @@
 		const newColliderOffsetY = parseFloat(colliderOffsetY) || 0;
 
 		if (
-			newTileCols === building.tile_cols &&
-			newTileRows === building.tile_rows &&
+			newTileCols === building.cell_cols &&
+			newTileRows === building.cell_rows &&
 			newColliderOffsetX === building.collider_offset_x &&
 			newColliderOffsetY === building.collider_offset_y
 		)
 			return;
 
 		await admin.update(building.id, {
-			tile_cols: newTileCols,
-			tile_rows: newTileRows,
+			cell_cols: newTileCols,
+			cell_rows: newTileRows,
 			collider_offset_x: newColliderOffsetX,
 			collider_offset_y: newColliderOffsetY,
 		});

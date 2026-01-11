@@ -8,7 +8,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import BuildingTileGrid from './building-tile-grid.svelte';
-	import { TILE_SIZE } from '$lib/constants';
+	import { CELL_SIZE } from '$lib/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
@@ -51,13 +51,13 @@
 			});
 		}
 
-		// 타일 값이 0이면 atlas 크기로 자동 계산
-		if (change.atlas_name && building && building.tile_cols === 0 && building.tile_rows === 0) {
+		// 셀 값이 0이면 atlas 크기로 자동 계산
+		if (change.atlas_name && building && building.cell_cols === 0 && building.cell_rows === 0) {
 			const atlas = atlases[change.atlas_name];
 			if (atlas) {
-				const tile_cols = Math.max(1, Math.round(atlas.frameWidth / TILE_SIZE));
-				const tile_rows = Math.max(1, Math.round(atlas.frameHeight / TILE_SIZE));
-				await admin.update(buildingId, { tile_cols, tile_rows });
+				const cell_cols = Math.max(1, Math.round(atlas.frameWidth / CELL_SIZE));
+				const cell_rows = Math.max(1, Math.round(atlas.frameHeight / CELL_SIZE));
+				await admin.update(buildingId, { cell_cols, cell_rows });
 			}
 		}
 	}
@@ -92,7 +92,7 @@
 			<div
 				style="transform: translate({-building.collider_offset_x}px, {-building.collider_offset_y}px);"
 			>
-				<BuildingTileGrid cols={building.tile_cols} rows={building.tile_rows} />
+				<BuildingTileGrid cols={building.cell_cols} rows={building.cell_rows} />
 			</div>
 		{/if}
 	{/snippet}

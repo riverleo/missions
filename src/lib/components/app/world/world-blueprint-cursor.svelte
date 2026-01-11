@@ -4,7 +4,7 @@
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { EntityTemplateSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from './constants';
+	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
 	import type { BuildingId, TileId } from '$lib/types';
 	import TileSpriteAnimator from '../sprite-animator/tile-sprite-animator.svelte';
 
@@ -21,8 +21,7 @@
 	});
 
 	const tileId = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('tile', entityTemplateId))
-			return undefined;
+		if (!entityTemplateId || !EntityIdUtils.template.is('tile', entityTemplateId)) return undefined;
 		const { value } = EntityIdUtils.template.parse<TileId>(entityTemplateId);
 		return value;
 	});
@@ -33,45 +32,68 @@
 	);
 	const isItem = $derived(entityTemplateId && EntityIdUtils.template.is('item', entityTemplateId));
 
-	const cols = $derived(building?.tile_cols ?? (isTile || isCharacter || isItem ? 1 : 0));
-	const rows = $derived(building?.tile_rows ?? (isTile || isCharacter || isItem ? 1 : 0));
-	const width = $derived(cols * TILE_SIZE);
-	const height = $derived(rows * TILE_SIZE);
+	// gridType에 따라 크기 단위 결정
+	const gridSize = $derived(world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE);
+
+	const cols = $derived(building?.cell_cols ?? (isTile || isCharacter || isItem ? 1 : 0));
+	const rows = $derived(building?.cell_rows ?? (isTile || isCharacter || isItem ? 1 : 0));
+	const width = $derived(cols * gridSize);
+	const height = $derived(rows * gridSize);
 
 	const centerX = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		const { tileX } = world.blueprint.cursor;
-		const tileCols = building?.tile_cols ?? (isTile || isCharacter || isItem ? 1 : 0);
-		const width = tileCols * TILE_SIZE;
-		return tileX * TILE_SIZE + width / 2;
+		const { x } = world.blueprint.cursor;
+		const size = world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE;
+		const tileCols = building?.cell_cols ?? (isTile || isCharacter || isItem ? 1 : 0);
+		const width = tileCols * size;
+		return x * size + width / 2;
 	});
 
 	const centerY = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		const { tileY } = world.blueprint.cursor;
-		const tileRows = building?.tile_rows ?? (isTile || isCharacter || isItem ? 1 : 0);
-		const height = tileRows * TILE_SIZE;
-		return tileY * TILE_SIZE + height / 2;
+		const { y } = world.blueprint.cursor;
+		const size = world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE;
+		const tileRows = building?.cell_rows ?? (isTile || isCharacter || isItem ? 1 : 0);
+		const height = tileRows * size;
+		return y * size + height / 2;
 	});
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
 	const overlappingCellSet = $derived(() => {
-		const cells = world.blueprint.getOverlappingCells();
-		return new Set(cells.map((c) => `${c.col},${c.row}`));
+		const cells = world.blueprint.getOverlappingVectors();
+		return new Set(cells.map((c) => `${c.x},${c.y}`));
 	});
 
 	// 셀이 겹치는지 확인 (절대 좌표 기준)
 	function isCellOverlapping(localCol: number, localRow: number): boolean {
 		if (!world.blueprint.cursor) return false;
 
-		const { tileX, tileY } = world.blueprint.cursor;
-		const absoluteCol = tileX + localCol;
-		const absoluteRow = tileY + localRow;
+		const { x, y } = world.blueprint.cursor;
+
+		// 타일인 경우 타일 좌표를 셀 좌표로 변환
+		if (world.blueprint.gridType === 'tile') {
+			const cellX = x * 2;
+			const cellY = y * 2;
+			// 타일은 2x2 셀을 차지하므로 각 셀을 체크
+			for (let dy = 0; dy < 2; dy++) {
+				for (let dx = 0; dx < 2; dx++) {
+					if (overlappingCellSet().has(`${cellX + dx},${cellY + dy}`)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		// 셀인 경우 그대로 사용
+		const absoluteCol = x + localCol;
+		const absoluteRow = y + localRow;
 
 		return overlappingCellSet().has(`${absoluteCol},${absoluteRow}`);
 	}
 
 	const OVERLAP_TILE_FILL_STYLE = 'rgba(239, 68, 68, 0.8)';
+	const PLANNING_TILE_FILL_STYLE = 'rgba(255, 255, 255, 0.8)';
 </script>
 
 {#if world.blueprint.cursor}
@@ -86,10 +108,10 @@
 					{#each Array(cols) as _, col}
 						{@const isOverlapping = isCellOverlapping(col, row)}
 						<rect
-							x={col * TILE_SIZE + 0.5}
-							y={row * TILE_SIZE + 0.5}
-							width={TILE_SIZE - 1}
-							height={TILE_SIZE - 1}
+							x={col * gridSize + 0.5}
+							y={row * gridSize + 0.5}
+							width={gridSize - 1}
+							height={gridSize - 1}
 							fill={isOverlapping ? OVERLAP_TILE_FILL_STYLE : PLANNING_TILE_FILL_STYLE}
 						/>
 					{/each}

@@ -10,11 +10,11 @@
 		WorldItem,
 		WorldItemId,
 	} from '$lib/types';
+	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';
-	import { WORLD_WIDTH, WORLD_HEIGHT } from './constants';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		width?: number;
