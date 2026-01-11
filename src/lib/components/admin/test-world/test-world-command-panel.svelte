@@ -18,17 +18,20 @@
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
+	import type { WorldContext } from '$lib/components/app/world/context';
+
+	interface Props {
+		worldContext?: WorldContext;
+	}
+
+	let { worldContext }: Props = $props();
 
 	const { supabase } = useServerPayload();
 	const { store: terrainStore, tileStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();
 	const { store: itemStore } = useItem();
-	const {
-		store: testWorldStore,
-		setSelectedTerrainId,
-		setSelectedEntityTemplateId,
-	} = useWorldTest();
+	const { store: testWorldStore, setSelectedTerrainId } = useWorldTest();
 
 	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
@@ -68,11 +71,13 @@
 			<CommandGroup heading="캐릭터">
 				{#each characters as character (character.id)}
 					{@const templateId = EntityIdUtils.template.create('character', character.id)}
-					<CommandItem onSelect={() => setSelectedEntityTemplateId(templateId)}>
+					<CommandItem
+						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+					>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === $testWorldStore.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -88,11 +93,13 @@
 			<CommandGroup heading="건물">
 				{#each buildings as building (building.id)}
 					{@const templateId = EntityIdUtils.template.create('building', building.id)}
-					<CommandItem onSelect={() => setSelectedEntityTemplateId(templateId)}>
+					<CommandItem
+						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+					>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === $testWorldStore.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -108,11 +115,13 @@
 			<CommandGroup heading="아이템">
 				{#each items as item (item.id)}
 					{@const templateId = EntityIdUtils.template.create('item', item.id)}
-					<CommandItem onSelect={() => setSelectedEntityTemplateId(templateId)}>
+					<CommandItem
+						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+					>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === $testWorldStore.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -128,11 +137,13 @@
 			<CommandGroup heading="타일">
 				{#each tiles as tile (tile.id)}
 					{@const templateId = EntityIdUtils.template.create('tile', tile.id)}
-					<CommandItem onSelect={() => setSelectedEntityTemplateId(templateId)}>
+					<CommandItem
+						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+					>
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === $testWorldStore.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}

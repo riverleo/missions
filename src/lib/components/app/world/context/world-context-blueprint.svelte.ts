@@ -2,18 +2,18 @@ import { get } from 'svelte/store';
 import { createVectors, getOverlappingVectors, pointToTopLeft, type Vector } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
-import { useWorldTest } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
-import type { BuildingId } from '$lib/types';
+import type { BuildingId, EntityTemplateId } from '$lib/types';
 
 export type GridType = 'tile' | 'cell';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
 	gridType = $state<GridType>('cell');
+	selectedEntityTemplateId = $state<EntityTemplateId | undefined>(undefined);
 
 	private context: WorldContext;
 
@@ -22,19 +22,28 @@ export class WorldContextBlueprint {
 	}
 
 	/**
+	 * 엔티티 템플릿 선택 (토글 방식)
+	 */
+	setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
+		// 토글 방식: 같은 것을 선택하면 해제
+		this.selectedEntityTemplateId =
+			this.selectedEntityTemplateId === entityTemplateId ? undefined : entityTemplateId;
+
+		// useWorld의 selectedEntityIdStore 클리어
+		useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+	}
+
+	/**
 	 * 마우스 위치에 따라 cursor 업데이트
 	 */
 	updateCursor(clientX: number, clientY: number) {
-		const { store } = useWorldTest();
-		const selectedEntityTemplateId = get(store).selectedEntityTemplateId;
-
-		if (!selectedEntityTemplateId) {
+		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
 			this.gridType = 'cell';
 			return;
 		}
 
-		const { type, value: id } = EntityIdUtils.template.parse(selectedEntityTemplateId);
+		const { type, value: id } = EntityIdUtils.template.parse(this.selectedEntityTemplateId);
 		const worldPos = this.context.camera.screenToWorld(clientX, clientY);
 
 		if (!worldPos) {
@@ -62,7 +71,7 @@ export class WorldContextBlueprint {
 				CELL_SIZE
 			);
 			this.cursor = {
-				entityTemplateId: selectedEntityTemplateId,
+				entityTemplateId: this.selectedEntityTemplateId,
 				x,
 				y,
 			};
@@ -70,7 +79,7 @@ export class WorldContextBlueprint {
 		} else if (type === 'tile') {
 			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
 			this.cursor = {
-				entityTemplateId: selectedEntityTemplateId,
+				entityTemplateId: this.selectedEntityTemplateId,
 				x,
 				y,
 			};
@@ -78,7 +87,7 @@ export class WorldContextBlueprint {
 		} else if (type === 'character' || type === 'item') {
 			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, CELL_SIZE);
 			this.cursor = {
-				entityTemplateId: selectedEntityTemplateId,
+				entityTemplateId: this.selectedEntityTemplateId,
 				x,
 				y,
 			};

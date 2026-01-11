@@ -26,14 +26,11 @@
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
 
-	// 단축키: Ctrl/Cmd + Shift + P (열기/닫기), ESC (닫기)
+	// 단축키: Ctrl/Cmd + Shift + P (열기/닫기)
 	function onkeydown(e: KeyboardEvent) {
 		if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'p') {
 			e.preventDefault();
 			setOpen(!$store.open);
-		} else if (e.key === 'Escape' && $store.open) {
-			e.preventDefault();
-			setOpen(false);
 		}
 	}
 
@@ -75,7 +72,7 @@
 		<!-- 좌측: 커맨드 목록 -->
 		{#if $store.commandPanelOpen}
 			<ScrollArea class="w-80 shrink-0 border-r" style="height: {WORLD_HEIGHT + 32}px;">
-				<TestWorldCommandPanel />
+				<TestWorldCommandPanel {worldContext} />
 			</ScrollArea>
 		{/if}
 
@@ -83,7 +80,7 @@
 		<div class="relative flex flex-1 items-center justify-center p-4">
 			{#if hasSelectedTerrain}
 				<World class="border-0" worldId={TEST_WORLD_ID} debug={$store.debug} bind:worldContext>
-					<TestWorldMarker />
+					<TestWorldMarker {worldContext} />
 				</World>
 			{:else}
 				<div

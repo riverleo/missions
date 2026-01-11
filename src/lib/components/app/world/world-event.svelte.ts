@@ -43,14 +43,13 @@ export class WorldEvent {
 
 	onmousemove = (e: MouseEvent) => {
 		// 호버 상태 업데이트
-		if (!this.camera.isPanning) {
+		if (!this.camera.panning) {
 			const newValue = this.checkDraggableAtPosition(e.clientX, e.clientY);
 			if (newValue !== this.isOverDraggable) {
 				this.isOverDraggable = newValue;
 			}
+			return;
 		}
-
-		if (!this.camera.isPanning) return;
 
 		this.camera.applyPan(e.clientX, e.clientY);
 	};

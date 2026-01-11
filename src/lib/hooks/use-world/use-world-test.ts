@@ -116,16 +116,6 @@ function createTestWorldStore() {
 		});
 	}
 
-	function setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
-		store.update((state) => ({
-			...state,
-			selectedEntityTemplateId:
-				state.selectedEntityTemplateId === entityTemplateId ? undefined : entityTemplateId,
-		}));
-
-		// useWorld의 selectedEntityIdStore 클리어 (store 업데이트 후에)
-		useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
-	}
 
 	function setDebug(debug: boolean) {
 		store.update((state) => ({ ...state, debug }));
@@ -353,7 +343,6 @@ function createTestWorldStore() {
 	return {
 		store,
 		setSelectedTerrainId,
-		setSelectedEntityTemplateId,
 		setDebug,
 		setOpen,
 		setModalPosition,

@@ -153,6 +153,9 @@ export class WorldContext {
 		}
 
 		this.mouseDownScreenPosition = undefined;
+
+		// 커서 업데이트 (마우스를 움직이지 않아도 배치 후 커서가 갱신되도록)
+		this.blueprint.updateCursor(e.clientX, e.clientY);
 	};
 
 	// Matter.js mouseup 처리
@@ -250,7 +253,7 @@ export class WorldContext {
 	// 마우스 이동 처리
 	private handleMouseMove = (e: MouseEvent) => {
 		// 카메라 팬 중에는 cursor 업데이트 안 함
-		if (this.camera.isPanning) return;
+		if (this.camera.panning) return;
 
 		this.blueprint.updateCursor(e.clientX, e.clientY);
 	};
