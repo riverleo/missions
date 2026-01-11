@@ -216,7 +216,8 @@ export class WorldContext {
 		const { store: buildingStore } = useBuilding();
 		const buildings = get(buildingStore).data;
 
-		const { entityTemplateId, x, y } = this.blueprint.cursor;
+		const { entityTemplateId, current } = this.blueprint.cursor;
+		const { x, y } = current;
 		const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
 
 		if (type === 'building') {

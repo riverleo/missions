@@ -1,4 +1,5 @@
 import type { EntityTemplateId } from '$lib/types';
+import type { Vector } from '$lib/utils/vector';
 import type Matter from 'matter-js';
 
 export interface BeforeUpdateEvent {
@@ -10,9 +11,10 @@ export interface BeforeUpdateEvent {
 
 export interface WorldBlueprintCursor {
 	entityTemplateId: EntityTemplateId;
-	x: number;
-	y: number;
+	current: Vector;
+	start?: Vector;
+	type: 'tile' | 'cell';
 }
 
 export { WorldContext } from './world-context.svelte';
-export { WorldContextBlueprint, type GridType } from './world-context-blueprint.svelte';
+export { WorldContextBlueprint } from './world-context-blueprint.svelte';

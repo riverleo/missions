@@ -15,7 +15,6 @@ import type {
 } from '$lib/types';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { usePlayer } from '../use-player';
-import { useWorldTest } from './use-world-test';
 
 // World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;

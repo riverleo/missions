@@ -38,7 +38,7 @@
 	});
 
 	// gridType에 따라 크기 단위 결정
-	const gridSize = $derived(world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE);
+	const gridSize = $derived(world.blueprint.cursor?.type === 'tile' ? TILE_SIZE : CELL_SIZE);
 
 	const cols = $derived(building?.cell_cols ?? (isTile || isCharacter || isItem ? 1 : 0));
 	const rows = $derived(building?.cell_rows ?? (isTile || isCharacter || isItem ? 1 : 0));
@@ -47,12 +47,12 @@
 
 	const centerX = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		let { x } = world.blueprint.cursor;
+		let { x } = world.blueprint.cursor.current;
 
 		// 캐릭터/아이템은 항상 셀 단위
 		if (isCharacter || isItem) {
 			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
-			if (world.blueprint.gridType === 'tile') {
+			if (world.blueprint.cursor.type === 'tile') {
 				x = x * 2;
 			}
 			return x * CELL_SIZE + CELL_SIZE / 2;
@@ -66,12 +66,12 @@
 
 	const centerY = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		let { y } = world.blueprint.cursor;
+		let { y } = world.blueprint.cursor.current;
 
 		// 캐릭터/아이템은 항상 셀 단위
 		if (isCharacter || isItem) {
 			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
-			if (world.blueprint.gridType === 'tile') {
+			if (world.blueprint.cursor.type === 'tile') {
 				y = y * 2;
 			}
 			return y * CELL_SIZE + CELL_SIZE / 2;
@@ -93,10 +93,10 @@
 	function isVectorOverlapping(vector: Vector): boolean {
 		if (!world.blueprint.cursor) return false;
 
-		const { x, y } = world.blueprint.cursor;
+		const { x, y } = world.blueprint.cursor.current;
 
 		// 타일인 경우 타일 좌표를 셀 좌표로 변환
-		if (world.blueprint.gridType === 'tile') {
+		if (world.blueprint.cursor.type === 'tile') {
 			const cellX = x * 2;
 			const cellY = y * 2;
 			// 타일은 2x2 셀을 차지하므로 각 셀을 체크
@@ -160,8 +160,8 @@
 		<div style="opacity: 0.5;">
 			<QuarterTile
 				worldId={world.worldId}
-				tileX={world.blueprint.cursor.x}
-				tileY={world.blueprint.cursor.y}
+				tileX={world.blueprint.cursor.current.x}
+				tileY={world.blueprint.cursor.current.y}
 			/>
 		</div>
 	{:else if characterId}

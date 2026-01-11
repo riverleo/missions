@@ -15,7 +15,7 @@
 	const height = $derived(terrain?.height ?? 0);
 
 	// 현재 그리드 타입에 따라 그리드 크기 결정
-	const gridSize = $derived(world.blueprint.gridType === 'tile' ? TILE_SIZE : CELL_SIZE);
+	const gridSize = $derived(world.blueprint.cursor?.type === 'tile' ? TILE_SIZE : CELL_SIZE);
 
 	// 그리드 라인 개수 계산
 	const gridCols = $derived(Math.ceil(width / gridSize));

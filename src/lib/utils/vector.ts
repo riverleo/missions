@@ -59,16 +59,15 @@ export function pixelToTopLeft(pixel: number, count: number, size: number): numb
 /**
  * 마우스 위치로부터 좌상단 그리드 인덱스 계산 (x, y 동시 처리)
  */
-export function pointToTopLeft(
-	x: number,
-	y: number,
+export function vectorToTopLeftVector(
+	vector: Vector,
 	cols: number,
 	rows: number,
 	size: number
 ): Vector {
 	return {
-		x: pixelToTopLeft(x, cols, size),
-		y: pixelToTopLeft(y, rows, size),
+		x: pixelToTopLeft(vector.x, cols, size),
+		y: pixelToTopLeft(vector.y, rows, size),
 	};
 }
 

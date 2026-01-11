@@ -33,9 +33,9 @@
 		if (
 			cursor &&
 			EntityIdUtils.template.is('tile', cursor.entityTemplateId) &&
-			context.blueprint.gridType === 'tile' &&
-			cursor.x === tx &&
-			cursor.y === ty
+			cursor.type === 'tile' &&
+			cursor.current.x === tx &&
+			cursor.current.y === ty
 		) {
 			return true;
 		}

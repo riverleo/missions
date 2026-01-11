@@ -1,5 +1,10 @@
 import { get } from 'svelte/store';
-import { createVectors, getOverlappingVectors, pointToTopLeft, type Vector } from '$lib/utils/vector';
+import {
+	createVectors,
+	getOverlappingVectors,
+	vectorToTopLeftVector,
+	type Vector,
+} from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -8,11 +13,8 @@ import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, EntityTemplateId } from '$lib/types';
 
-export type GridType = 'tile' | 'cell';
-
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
-	gridType = $state<GridType>('cell');
 	selectedEntityTemplateId = $state<EntityTemplateId | undefined>(undefined);
 
 	private context: WorldContext;
@@ -39,7 +41,6 @@ export class WorldContextBlueprint {
 	updateCursor(clientX: number, clientY: number) {
 		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
-			this.gridType = 'cell';
 			return;
 		}
 
@@ -48,7 +49,6 @@ export class WorldContextBlueprint {
 
 		if (!worldPos) {
 			this.cursor = undefined;
-			this.gridType = 'cell';
 			return;
 		}
 
@@ -59,42 +59,39 @@ export class WorldContextBlueprint {
 			const building = buildings[id as BuildingId];
 			if (!building) {
 				this.cursor = undefined;
-				this.gridType = 'cell';
 				return;
 			}
 
-			const { x, y } = pointToTopLeft(
-				worldPos.x,
-				worldPos.y,
+			const vector = vectorToTopLeftVector(
+				worldPos,
 				building.cell_cols,
 				building.cell_rows,
 				CELL_SIZE
 			);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
-				x,
-				y,
+				current: vector,
+				start: this.cursor?.start,
+				type: 'cell',
 			};
-			this.gridType = 'cell';
 		} else if (type === 'tile') {
-			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, TILE_SIZE);
+			const vector = vectorToTopLeftVector(worldPos, 1, 1, TILE_SIZE);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
-				x,
-				y,
+				current: vector,
+				start: this.cursor?.start,
+				type: 'tile',
 			};
-			this.gridType = 'tile';
 		} else if (type === 'character' || type === 'item') {
-			const { x, y } = pointToTopLeft(worldPos.x, worldPos.y, 1, 1, CELL_SIZE);
+			const vector = vectorToTopLeftVector(worldPos, 1, 1, CELL_SIZE);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
-				x,
-				y,
+				current: vector,
+				start: this.cursor?.start,
+				type: 'cell',
 			};
-			this.gridType = 'cell';
 		} else {
 			this.cursor = undefined;
-			this.gridType = 'cell';
 		}
 	}
 
@@ -104,7 +101,8 @@ export class WorldContextBlueprint {
 	getOverlappingVectors(): Vector[] {
 		if (!this.cursor || !this.context) return [];
 
-		const { entityTemplateId, x, y } = this.cursor;
+		const { entityTemplateId, current } = this.cursor;
+		const { x, y } = current;
 
 		// 배치하려는 셀 계산
 		let targetVectors: Vector[];
