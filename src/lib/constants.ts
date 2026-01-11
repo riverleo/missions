@@ -2,8 +2,10 @@
 export const WORLD_WIDTH = 800;
 export const WORLD_HEIGHT = 400;
 
-// 타일 설정
-export const TILE_SIZE = 6;
+// 셀 및 타일 설정
+export const CELL_SIZE = 6; // 배치/겹침 계산 최소 단위 (격자 한 칸)
+export const TILE_SIZE = CELL_SIZE * 2; // 타일 렌더링 크기 (12px)
+export const TILE_CELL_RATIO = TILE_SIZE / CELL_SIZE; // 타일이 차지하는 셀 수 (2x2)
 
 // 경로 탐색 타일 설정
 export const PATHFINDING_TILE_SIZE = 4;

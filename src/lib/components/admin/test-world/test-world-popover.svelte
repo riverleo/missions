@@ -9,7 +9,7 @@
 	import TestWorldInspectorPanel from './test-world-inspector-panel';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
-	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/components/app/world/constants';
+	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 	import type { WorldContext } from '$lib/components/app/world/context';
 
 	const { store, setOpen, setModalPosition, init } = useWorldTest();

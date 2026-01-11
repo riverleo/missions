@@ -32,8 +32,8 @@ export class WorldBuildingEntity extends Entity {
 		const height = building.tile_rows * TILE_SIZE;
 
 		// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
-		const leftTopX = worldBuilding.tile_x * TILE_SIZE;
-		const leftTopY = worldBuilding.tile_y * TILE_SIZE;
+		const leftTopX = worldBuilding.cell_x * TILE_SIZE;
+		const leftTopY = worldBuilding.cell_y * TILE_SIZE;
 		const x = leftTopX + width / 2;
 		const y = leftTopY + height / 2;
 
@@ -70,8 +70,8 @@ export class WorldBuildingEntity extends Entity {
 		// 크기가 변경되었으면 바디 재생성
 		if (widthDiff > 0.01 || heightDiff > 0.01) {
 			// 좌상단 타일 인덱스를 픽셀 좌표로 변환 후 건물 전체의 중심 계산
-			const leftTopX = worldBuilding.tile_x * TILE_SIZE;
-			const leftTopY = worldBuilding.tile_y * TILE_SIZE;
+			const leftTopX = worldBuilding.cell_x * TILE_SIZE;
+			const leftTopY = worldBuilding.cell_y * TILE_SIZE;
 			const x = leftTopX + newWidth / 2;
 			const y = leftTopY + newHeight / 2;
 

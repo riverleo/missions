@@ -1,4 +1,4 @@
-import { TILE_SIZE } from './constants';
+import { TILE_SIZE } from '$lib/constants';
 
 /**
  * 픽셀 좌표를 타일 인덱스로 변환
@@ -17,17 +17,17 @@ export function tileToCenterPixel(tile: number): number {
 /**
  * 픽셀 좌표에서 가장 가까운 타일 중심 픽셀 좌표 반환
  */
-export function snapToTileCenter(pixel: number): number {
+export function pixelToTileCenter(pixel: number): number {
 	return tileToCenterPixel(pixelToTile(pixel));
 }
 
 /**
  * 픽셀 좌표를 타일 중심 좌표로 스냅 (x, y 동시 처리)
  */
-export function snapPointToTileCenter(x: number, y: number): { x: number; y: number } {
+export function pointToTileCenter(x: number, y: number): { x: number; y: number } {
 	return {
-		x: snapToTileCenter(x),
-		y: snapToTileCenter(y),
+		x: pixelToTileCenter(x),
+		y: pixelToTileCenter(y),
 	};
 }
 
@@ -36,7 +36,7 @@ export function snapPointToTileCenter(x: number, y: number): { x: number; y: num
  * - 홀수 타일: 타일 중심에 스냅 (건물 중심이 타일 중심과 일치)
  * - 짝수 타일: 타일 경계에 스냅 (건물 중심이 타일 경계와 일치)
  */
-export function snapToBuildingCenter(pixel: number, tileCount: number): number {
+export function pixelToBuildingCenter(pixel: number, tileCount: number): number {
 	const tile = pixelToTile(pixel);
 
 	if (tileCount % 2 === 1) {
@@ -53,23 +53,23 @@ export function snapToBuildingCenter(pixel: number, tileCount: number): number {
 /**
  * 마우스 위치로부터 건물의 좌상단 타일 인덱스 계산
  */
-export function snapToTopLeftTile(pixel: number, tileCount: number): number {
-	const centerPixel = snapToBuildingCenter(pixel, tileCount);
+export function pixelToTopLeftTile(pixel: number, tileCount: number): number {
+	const centerPixel = pixelToBuildingCenter(pixel, tileCount);
 	return pixelToTile(centerPixel) - Math.floor(tileCount / 2);
 }
 
 /**
  * 마우스 위치로부터 건물의 좌상단 타일 인덱스 계산 (x, y 동시 처리)
  */
-export function snapPointToTopLeftTile(
+export function pointToTopLeftTile(
 	x: number,
 	y: number,
 	cols: number,
 	rows: number
 ): { tileX: number; tileY: number } {
 	return {
-		tileX: snapToTopLeftTile(x, cols),
-		tileY: snapToTopLeftTile(y, rows),
+		tileX: pixelToTopLeftTile(x, cols),
+		tileY: pixelToTopLeftTile(y, rows),
 	};
 }
 
@@ -80,14 +80,14 @@ export interface TileCell {
 
 /**
  * 좌상단 타일 인덱스로 건물이 차지하는 셀들 계산
- * @param tileX 건물 좌상단 X 타일 인덱스
- * @param tileY 건물 좌상단 Y 타일 인덱스
+ * @param cellX 건물 좌상단 X 타일 인덱스
+ * @param cellY 건물 좌상단 Y 타일 인덱스
  * @param cols 건물 가로 타일 수
  * @param rows 건물 세로 타일 수
  */
 export function getBuildingOccupiedCells(
-	tileX: number,
-	tileY: number,
+	cellX: number,
+	cellY: number,
 	cols: number,
 	rows: number
 ): TileCell[] {
@@ -95,7 +95,7 @@ export function getBuildingOccupiedCells(
 
 	for (let row = 0; row < rows; row++) {
 		for (let col = 0; col < cols; col++) {
-			cells.push({ col: tileX + col, row: tileY + row });
+			cells.push({ col: cellX + col, row: cellY + row });
 		}
 	}
 

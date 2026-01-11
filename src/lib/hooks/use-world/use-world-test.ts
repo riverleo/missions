@@ -174,8 +174,8 @@ function createTestWorldStore() {
 			scenario_id: TEST_SCENARIO_ID,
 			world_id: TEST_WORLD_ID,
 			building_id: buildingId,
-			tile_x: tileX,
-			tile_y: tileY,
+			cell_x: tileX,
+			cell_y: tileY,
 			created_at: new Date().toISOString(),
 			created_at_tick: 0,
 		} as WorldBuilding;

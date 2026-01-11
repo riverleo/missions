@@ -47,8 +47,8 @@
 	</AccordionTrigger>
 	<AccordionContent class="flex flex-col gap-3 pb-3">
 		<Separator />
-		<AccordionContentItem label="타일 좌표">
-			({worldBuilding?.tile_x ?? 0}, {worldBuilding?.tile_y ?? 0})
+		<AccordionContentItem label="셀 좌표">
+			({worldBuilding?.cell_x ?? 0}, {worldBuilding?.cell_y ?? 0})
 		</AccordionContentItem>
 	</AccordionContent>
 </AccordionItem>

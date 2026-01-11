@@ -8,7 +8,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import BuildingTileGrid from './building-tile-grid.svelte';
-	import { TILE_SIZE } from '$lib/components/app/world/constants';
+	import { TILE_SIZE } from '$lib/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';

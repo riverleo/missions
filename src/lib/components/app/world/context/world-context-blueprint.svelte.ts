@@ -60,8 +60,8 @@ export class WorldContextBlueprint {
 			if (!buildingData) continue;
 
 			const cells = getBuildingOccupiedCells(
-				worldBuilding.tile_x,
-				worldBuilding.tile_y,
+				worldBuilding.cell_x,
+				worldBuilding.cell_y,
 				buildingData.tile_cols,
 				buildingData.tile_rows
 			);

@@ -7,9 +7,9 @@ import {
 	CATEGORY_ITEM,
 	CATEGORY_WALL,
 	TILE_SIZE,
-} from '$lib/components/app/world/constants';
+} from '$lib/constants';
 import type { BeforeUpdateEvent } from '$lib/components/app/world/context';
-import { tileToCenterPixel } from '$lib/components/app/world/tiles';
+import { tileToCenterPixel } from '$lib/utils/tiles';
 import { Entity } from '../entity.svelte';
 
 export class WorldTileEntity extends Entity {

@@ -4,7 +4,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { snapPointToTopLeftTile } from '$lib/components/app/world/tiles';
+	import { pointToTopLeftTile } from '$lib/utils/tiles';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import type { BuildingId, CharacterId, ItemId, TileId } from '$lib/types';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
@@ -65,7 +65,7 @@
 				return;
 			}
 
-			const { tileX, tileY } = snapPointToTopLeftTile(
+			const { tileX, tileY } = pointToTopLeftTile(
 				worldPos.x,
 				worldPos.y,
 				building.tile_cols,
@@ -77,14 +77,14 @@
 				tileY,
 			};
 		} else if (type === 'tile') {
-			const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
 				tileX,
 				tileY,
 			};
 		} else if (type === 'character' || type === 'item') {
-			const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+			const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 			world.blueprint.cursor = {
 				entityTemplateId: $store.selectedEntityTemplateId,
 				tileX,
@@ -108,7 +108,7 @@
 				if (!world.blueprint.placable) return;
 				const building = $buildingStore.data[id as BuildingId];
 				if (!building) return;
-				const { tileX, tileY } = snapPointToTopLeftTile(
+				const { tileX, tileY } = pointToTopLeftTile(
 					worldPos.x,
 					worldPos.y,
 					building.tile_cols,
@@ -118,7 +118,7 @@
 			} else if (type === 'tile') {
 				// 겹치는 셀이 있으면 배치하지 않음
 				if (!world.blueprint.placable) return;
-				const { tileX, tileY } = snapPointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
+				const { tileX, tileY } = pointToTopLeftTile(worldPos.x, worldPos.y, 1, 1);
 				addTileToWorldTileMap(id as TileId, tileX, tileY);
 			} else if (type === 'character') {
 				addWorldCharacter(id as CharacterId, worldPos.x, worldPos.y);

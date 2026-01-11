@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from '$lib/components/app/world/constants';
+	import { TILE_SIZE, PLANNING_TILE_FILL_STYLE } from '$lib/constants';
 
 	interface Props {
 		cols: number;
