@@ -24,15 +24,15 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 엔티티 템플릿 선택 (토글 방식)
+	 * 엔티티 템플릿 선택
 	 */
 	setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
-		// 토글 방식: 같은 것을 선택하면 해제
-		this.selectedEntityTemplateId =
-			this.selectedEntityTemplateId === entityTemplateId ? undefined : entityTemplateId;
+		this.selectedEntityTemplateId = entityTemplateId;
 
-		// useWorld의 selectedEntityIdStore 클리어
-		useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+		// 템플릿을 선택할 때만 엔티티 선택 해제
+		if (entityTemplateId !== undefined) {
+			useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+		}
 	}
 
 	/**

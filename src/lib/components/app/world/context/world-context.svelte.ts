@@ -111,23 +111,21 @@ export class WorldContext {
 		// 엔티티 바디만 필터링 (지형 제외)
 		const entityBody = bodies.find((body) => this.entities[body.label as EntityId]);
 
-		if (!entityBody) {
-			// 빈 공간이나 지형 클릭 시 선택 해제
-			setSelectedEntityId(undefined);
-			return;
-		}
+		// 엔티티를 찾았으면 선택 (빈 공간은 handleClick에서 처리)
+		if (entityBody) {
+			const entity = this.entities[entityBody.label as EntityId];
+			if (entity) {
+				setSelectedEntityId(entity.id);
+				// 엔티티 선택 시 템플릿 선택 해제
+				this.blueprint.setSelectedEntityTemplateId(undefined);
 
-		// 클릭한 바디의 엔티티 찾기
-		const entity = this.entities[entityBody.label as EntityId];
-		if (entity) {
-			setSelectedEntityId(entity.id);
-
-			// 드래그 시작 위치 저장
-			this.draggedEntityPosition = {
-				entityId: entity.id,
-				x: entity.body.position.x,
-				y: entity.body.position.y,
-			};
+				// 드래그 시작 위치 저장
+				this.draggedEntityPosition = {
+					entityId: entity.id,
+					x: entity.body.position.x,
+					y: entity.body.position.y,
+				};
+			}
 		}
 	};
 
@@ -189,7 +187,17 @@ export class WorldContext {
 
 	// 클릭 처리: 엔티티 배치 또는 캐릭터 이동
 	private handleClick(worldX: number, worldY: number) {
-		const { selectedEntityIdStore } = useWorld();
+		const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
+
+		// 캐릭터 이동 우선 처리 (selectedEntityId가 character면)
+		const selectedEntityId = get(selectedEntityIdStore).entityId;
+		if (EntityIdUtils.is('character', selectedEntityId)) {
+			const entity = this.entities[selectedEntityId!];
+			if (entity && entity.type === 'character') {
+				(entity as WorldCharacterEntity).moveTo(worldX, worldY);
+				return;
+			}
+		}
 
 		// 엔티티 배치 (cursor가 있으면)
 		if (this.blueprint.cursor) {
@@ -219,14 +227,8 @@ export class WorldContext {
 			return;
 		}
 
-		// 캐릭터 이동 (selectedEntityId가 character면)
-		const selectedEntityId = get(selectedEntityIdStore).entityId;
-		if (EntityIdUtils.is('character', selectedEntityId)) {
-			const entity = this.entities[selectedEntityId!];
-			if (entity && entity.type === 'character') {
-				(entity as WorldCharacterEntity).moveTo(worldX, worldY);
-			}
-		}
+		// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
+		setSelectedEntityId(undefined);
 	}
 
 	// 엔티티 배치
