@@ -47,6 +47,7 @@ export class WorldContext {
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
 	private respawningEntityIds = new Set<EntityId>();
+	private draggedEntityPosition: { entityId: EntityId; x: number; y: number } | undefined;
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -81,7 +82,7 @@ export class WorldContext {
 	}
 
 	// 마우스 클릭 처리
-	private handleMouseDown(event: Matter.IEvent<Matter.MouseConstraint>) {
+	private handleMouseDown = (event: Matter.IEvent<Matter.MouseConstraint>) => {
 		const { setSelectedEntityId } = useWorld();
 
 		// 마우스 위치에서 모든 body 찾기 (건물 포함)
@@ -102,8 +103,52 @@ export class WorldContext {
 		const entity = this.entities[entityBody.label as EntityId];
 		if (entity) {
 			setSelectedEntityId(entity.id);
+
+			// 드래그 시작 위치 저장
+			this.draggedEntityPosition = {
+				entityId: entity.id,
+				x: entity.body.position.x,
+				y: entity.body.position.y,
+			};
 		}
-	}
+	};
+
+	// 마우스 드래그 종료 처리
+	private handleMouseUp = (event: Matter.IEvent<Matter.MouseConstraint>) => {
+		if (!this.draggedEntityPosition) return;
+
+		const entity = this.entities[this.draggedEntityPosition.entityId];
+		if (!entity) {
+			this.draggedEntityPosition = undefined;
+			return;
+		}
+
+		// 현재 위치에서 충돌 체크 (타일, 벽, 건물과 충돌하는지)
+		const collisions = Matter.Query.collides(entity.body, Composite.allBodies(this.engine.world));
+
+		// static 바디(타일, 벽, 건물)와 충돌하면 이전 위치로 복원
+		const hasStaticCollision = collisions.some((collision) => {
+			const otherBody = collision.bodyA === entity.body ? collision.bodyB : collision.bodyA;
+			return otherBody.isStatic;
+		});
+
+		if (hasStaticCollision) {
+			Body.setPosition(entity.body, {
+				x: this.draggedEntityPosition.x,
+				y: this.draggedEntityPosition.y,
+			});
+		}
+
+		this.draggedEntityPosition = undefined;
+	};
+
+	// 마우스가 월드 바깥으로 나갔을 때 처리
+	private handleMouseLeave = () => {
+		if (!this.mouseConstraint?.mouse) return;
+
+		// 마우스 버튼 상태를 -1로 설정하여 마우스 제약 해제
+		this.mouseConstraint.mouse.button = -1;
+	};
 
 	// 월드 로드, cleanup 함수 반환
 	load({
@@ -136,8 +181,8 @@ export class WorldContext {
 				render: { visible: false },
 			},
 			collisionFilter: {
-				// static 바디(건물)는 선택 안 되도록 CATEGORY_BUILDING 제외
-				mask: 0xffffffff & ~0x0008,
+				// static 바디(벽, 타일, 건물)는 선택 안 되도록 제외
+				mask: 0xffffffff,
 			},
 		});
 
@@ -155,12 +200,14 @@ export class WorldContext {
 			this.updateEntities(event as BeforeUpdateEvent);
 			this.checkEntityBounds();
 		});
-		Matter.Events.on(this.engine, 'afterUpdate', () => this.updateEntityPositions());
+		Matter.Events.on(this.engine, 'afterUpdate', this.updateEntityPositions.bind(this));
 
 		// 마우스 클릭 감지
-		Matter.Events.on(this.mouseConstraint, 'mousedown', (event) => {
-			this.handleMouseDown(event);
-		});
+		Matter.Events.on(this.mouseConstraint, 'mousedown', this.handleMouseDown.bind(this));
+		Matter.Events.on(this.mouseConstraint, 'mouseup', this.handleMouseUp.bind(this));
+
+		// 마우스가 캔버스를 벗어났을 때 처리
+		this.render.canvas.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
 
 		Runner.run(this.runner, this.engine);
 
@@ -171,6 +218,7 @@ export class WorldContext {
 
 			if (this.render) {
 				Render.stop(this.render);
+				this.render.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
 				this.render.canvas.remove();
 			}
 		};
@@ -392,11 +440,11 @@ export class WorldContext {
 	}
 
 	// Matter.js body 위치를 엔티티 state에 동기화
-	private updateEntityPositions() {
+	private updateEntityPositions = () => {
 		for (const entity of Object.values(this.entities)) {
 			entity.updatePosition();
 		}
-	}
+	};
 
 	// 엔티티 업데이트 (경로 따라가기 등)
 	private updateEntities(event: BeforeUpdateEvent) {

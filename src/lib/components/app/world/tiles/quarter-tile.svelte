@@ -19,12 +19,28 @@
 
 	const context = useWorldContext();
 
-	// 타일 좌표에 타일이 있는지 체크
+	// 타일 좌표에 타일이 있는지 체크 (cursor 포함)
 	const checkTile = (tx: number, ty: number): boolean => {
 		if (!context) return false;
+
+		// 실제 엔티티 체크
 		const tileVector: TileVector = `${tx},${ty}`;
 		const tileId = EntityIdUtils.create('tile', worldId, tileVector);
-		return !!context.entities[tileId];
+		if (context.entities[tileId]) return true;
+
+		// Cursor 체크 (타일 cursor가 해당 좌표에 있으면 true)
+		const cursor = context.blueprint.cursor;
+		if (
+			cursor &&
+			EntityIdUtils.template.is('tile', cursor.entityTemplateId) &&
+			context.blueprint.gridType === 'tile' &&
+			cursor.x === tx &&
+			cursor.y === ty
+		) {
+			return true;
+		}
+
+		return false;
 	};
 
 	// 4개 quarter의 bitmask 계산
