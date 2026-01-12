@@ -23,7 +23,7 @@ export class WorldItemEntity extends Entity {
 		const worldItem = get(useWorld().worldItemStore).data[worldItemId];
 		const item = this.item;
 
-		if (!worldItem || !item) {
+		if (!worldItem) {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${worldItemId}`);
 		}
 
@@ -46,11 +46,14 @@ export class WorldItemEntity extends Entity {
 		this.angle = worldItem.rotation;
 	}
 
-	get item(): Item | undefined {
+	get item(): Item {
 		const worldItem = get(useWorld().worldItemStore).data[this.instanceId];
-		if (!worldItem) return undefined;
+		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
 
-		return get(useItem().store).data[worldItem.item_id];
+		const item = get(useItem().store).data[worldItem.item_id];
+		if (!item) throw new Error(`Item not found for id ${worldItem.item_id}`);
+
+		return item;
 	}
 
 	save(): void {

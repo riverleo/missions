@@ -73,6 +73,7 @@ export type Building = Omit<BuildingRow, 'id' | 'scenario_id'> & {
 **Supabase 쿼리**: `.single<Type>()` 사용, `as Type` 캐스팅 금지
 
 **타입 캐스팅 패턴**:
+
 - Record 인덱싱: `$store.data[id as BuildingId]`
 - Route params: `page.params.id as BuildingId`
 - crypto.randomUUID(): `crypto.randomUUID() as WorldId`
@@ -90,6 +91,7 @@ export type Building = Omit<BuildingRow, 'id' | 'scenario_id'> & {
 ## 패키지 매니저
 
 **pnpm 사용** (npm, yarn 금지)
+
 - `pnpm check`: svelte-check (타입 체크)
 - `pnpm lint`: prettier
 
@@ -114,24 +116,27 @@ EntityIdUtils.or([types], entityId)  // 다중 타입 체크
 ## 게임 컨셉
 
 ### 앱 개요
+
 - **기본**: 할일 관리 앱 + 게임화
 - **구조**: Mission → Foundation → Task
 - **게임 루프**: 할일 완료 → 코인 획득 → 건물 건설 → 캐릭터 욕구 충족
 
 ### 핵심 메카닉
+
 - **기도(Prayer)**: 캐릭터들이 플레이어를 "신"처럼 여김
 - **Faith**: 플레이어의 할일 완료로만 상승 (다른 욕구는 게임 내에서 충족 가능)
 
 ### 욕구 시스템 (Utility AI)
 
-| 욕구     | 충족 방법              |
-| -------- | ---------------------- |
-| Hunger   | 음식 건물에서 식사     |
-| Fatigue  | 집에서 수면            |
-| Faith    | **할일 완료 시 상승**  |
-| Happiness| 다른 욕구 충족 시 상승 |
+| 욕구      | 충족 방법              |
+| --------- | ---------------------- |
+| Hunger    | 음식 건물에서 식사     |
+| Fatigue   | 집에서 수면            |
+| Faith     | **할일 완료 시 상승**  |
+| Happiness | 다른 욕구 충족 시 상승 |
 
 **DB 구조**:
+
 ```
 needs (욕구 정의: scenario_id, decay_per_tick, max_value)
 ├── need_fulfillments (충족 방법: fulfillment_type enum)
@@ -142,14 +147,17 @@ needs (욕구 정의: scenario_id, decay_per_tick, max_value)
 ### 행동 시스템
 
 #### 1. 욕구 행동 (Need Behaviors)
+
 - 트리거: 욕구 < 임계점
 - 액션: 건물/아이템 사용
 
 #### 2. 컨디션 행동 (Condition Behaviors)
+
 - 트리거: 건물 컨디션 < 임계점
 - 액션: 건물 철거/수리
 
 #### 3. 아이템 행동 (Item Behaviors)
+
 - 트리거: 아이템 사용
 - 액션: 애니메이션/효과
 
@@ -158,6 +166,7 @@ needs (욕구 정의: scenario_id, decay_per_tick, max_value)
 ### State 시스템
 
 **엔티티별 조건**:
+
 - **Building**: condition 값 (priority 있음)
 - **Character Face**: need 값 (priority 있음)
 - **Item/Tile**: durability (priority 없음)
@@ -167,6 +176,7 @@ needs (욕구 정의: scenario_id, decay_per_tick, max_value)
 ### 타일 시스템
 
 **DB 구조**:
+
 ```
 tiles (타일 타입)
 ├── tile_states (스프라이트 + 조건)
@@ -177,6 +187,7 @@ tiles (타일 타입)
 **world_tile_maps.data**: `{"x,y": {"tile_id": "...", "durability": 100}}`
 
 **Quarter-Tile Autotiling**:
+
 - 1개 타일 = 4개 quarter (top-left, top-right, bottom-left, bottom-right)
 - Wang Tile 패턴: 4-bit bitmask (bit 0=현재, bit 1=인접1, bit 2=인접2, bit 3=대각선)
 - 대각선은 양쪽 인접이 모두 있을 때만 체크
@@ -186,22 +197,20 @@ tiles (타일 타입)
 ## 기술 스택
 
 ### sprite-animator
+
 - **위치**: `$lib/components/app/sprite-animator/`
 - **루프 모드**: `loop`, `once`, `ping-pong`, `ping-pong-once`
 - **Transform 순서**: `translate → scale → rotate`
 
 ### World 컴포넌트 (Matter.js)
+
 - **스타일**: 횡스크롤 2D 사이드뷰 (중력 기반)
 - **Props**: `width`, `height`, `worldId`, `debug`
 - **WorldContext**: `load()`, `reload()`, `blueprint`
 - **SVG → 물리 바디**: fill+stroke 둘 다 있으면 fill은 다각형, stroke는 선
 
-### Pathfinder
-- **라이브러리**: PathFinding.js (A*)
-- `PATHFINDING_TILE_SIZE = 4`
-- `allowDiagonal: false`
-
 ### WorldBlueprint
+
 - **목적**: 엔티티 배치 미리보기 및 선택 상태 관리
 - **WorldBlueprintCursor**: `{ entityTemplateId, current: Vector, start?: Vector, type: 'tile' | 'cell' }`
 - **타일 배치**: 두 번 클릭 방식 (A → B)
@@ -221,11 +230,13 @@ tiles (타일 타입)
 ## Storage & Atlas
 
 ### Storage 유틸리티
+
 - `getGameAssetUrl(supabase, type, target)`
 - `uploadGameAsset(supabase, type, target, file)`
 - **GameAssetType**: `'terrain' | 'item'`
 
 ### Atlas 빌드
+
 - **소스**: `src/lib/assets/atlas/sources/`
 - **출력**: `src/lib/assets/atlas/generated/`
 - **동작**: 폴더별 스프라이트 시트 생성 (ImageMagick montage)
@@ -233,6 +244,7 @@ tiles (타일 타입)
 ## $effect 패턴
 
 **prop 변경 감지**:
+
 ```typescript
 let prevValue = prop?.value;
 $effect(() => {
@@ -245,6 +257,7 @@ $effect(() => {
 ```
 
 **주의**: `$effect` 내 모든 reactive 값은 자동 의존성 추가
+
 - 자주 변경되는 값(마우스 좌표)은 `$derived`로 분리하여 throttle
 
 ## 어드민 페이지

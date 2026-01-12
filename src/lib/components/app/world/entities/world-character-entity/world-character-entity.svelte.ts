@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
+import type { Vector } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
@@ -8,7 +9,6 @@ import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent } from '../../context';
-import type { PathPoint } from '../../pathfinder';
 import type { WorldCharacterEntityDirection } from './index';
 
 const { Body } = Matter;
@@ -16,7 +16,7 @@ const { Body } = Matter;
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
 	body: Matter.Body;
-	path: PathPoint[] = $state([]);
+	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 
 	override get instanceId(): WorldCharacterId {
@@ -30,7 +30,7 @@ export class WorldCharacterEntity extends Entity {
 		const worldCharacter = get(useWorld().worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
-		if (!worldCharacter || !characterBody) {
+		if (!worldCharacter) {
 			throw new Error(
 				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
 			);
@@ -55,15 +55,22 @@ export class WorldCharacterEntity extends Entity {
 		);
 	}
 
-	get characterBody(): CharacterBody | undefined {
+	get characterBody(): CharacterBody {
 		const worldCharacter = get(useWorld().worldCharacterStore).data[this.instanceId];
-		if (!worldCharacter) return undefined;
+		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
 
 		const characterStore = get(useCharacter().store).data;
 		const characterBodyStore = get(useCharacterBody().store).data;
-		const character = characterStore[worldCharacter.character_id];
 
-		return character ? characterBodyStore[character.character_body_id] : undefined;
+		const character = characterStore[worldCharacter.character_id];
+		if (character === undefined)
+			throw new Error(`Character not found for id ${worldCharacter.character_id}`);
+
+		const characterBody = characterBodyStore[character.character_body_id];
+		if (characterBody === undefined)
+			throw new Error(`CharacterBody not found for id ${character.character_body_id}`);
+
+		return characterBody;
 	}
 
 	override save(): void {

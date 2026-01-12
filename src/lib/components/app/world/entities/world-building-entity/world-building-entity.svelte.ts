@@ -23,7 +23,7 @@ export class WorldBuildingEntity extends Entity {
 		const worldBuilding = get(useWorld().worldBuildingStore).data[worldBuildingId];
 		const building = this.building;
 
-		if (!worldBuilding || !building) {
+		if (!worldBuilding) {
 			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${worldBuildingId}`);
 		}
 
@@ -47,11 +47,14 @@ export class WorldBuildingEntity extends Entity {
 		});
 	}
 
-	get building(): Building | undefined {
+	get building(): Building {
 		const worldBuilding = get(useWorld().worldBuildingStore).data[this.instanceId];
-		if (!worldBuilding) return undefined;
+		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
 
-		return get(useBuilding().store).data[worldBuilding.building_id];
+		const building = get(useBuilding().store).data[worldBuilding.building_id];
+		if (!building) throw new Error(`Building not found for id ${worldBuilding.building_id}`);
+
+		return building;
 	}
 
 	save(): void {

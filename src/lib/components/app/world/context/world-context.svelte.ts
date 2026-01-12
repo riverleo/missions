@@ -54,6 +54,7 @@ export class WorldContext {
 	entities = $state<Record<EntityId, Entity>>({});
 	debug = $state(false);
 	initialized = $state(false);
+	pathfinderVersion = $state(0);
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
@@ -324,6 +325,9 @@ export class WorldContext {
 		this.render.mouse = mouse;
 		this.initialized = true;
 
+		// pathfinder에 engine 설정
+		this.pathfinder.setEngine(this.engine);
+
 		// 지형 및 엔티티 로드
 		this.reload();
 
@@ -412,12 +416,6 @@ export class WorldContext {
 		});
 
 		Composite.add(this.engine.world, [topWall, bottomWall, leftWall, rightWall]);
-
-		// pathfinder에도 경계 벽 추가
-		this.pathfinder.blockBody(topWall);
-		this.pathfinder.blockBody(bottomWall);
-		this.pathfinder.blockBody(leftWall);
-		this.pathfinder.blockBody(rightWall);
 	}
 
 	reload() {

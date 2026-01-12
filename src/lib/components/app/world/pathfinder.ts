@@ -1,29 +1,36 @@
 import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
+import Matter from 'matter-js';
+import type { Vector } from '$lib/utils/vector';
 
-export interface PathPoint {
-	x: number;
-	y: number;
-}
+const { Query, Composite } = Matter;
 
 export class Pathfinder {
 	private grid: PF.Grid;
 	private finder: PF.AStarFinder;
+	private engine: Matter.Engine | undefined;
 
 	readonly cols: number;
 	readonly rows: number;
-	readonly tileSize: number;
+	readonly size: number;
 
-	constructor(width: number, height: number, tileSize: number = CELL_SIZE) {
-		this.tileSize = tileSize;
-		this.cols = Math.ceil(width / tileSize);
-		this.rows = Math.ceil(height / tileSize);
+	constructor(width: number, height: number, size: number = CELL_SIZE) {
+		this.size = size;
+		this.cols = Math.ceil(width / size);
+		this.rows = Math.ceil(height / size);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder({
 			allowDiagonal: true,
 		});
 
 		this.reset();
+	}
+
+	/**
+	 * Matter.js engine 설정 (walkable 계산용)
+	 */
+	setEngine(engine: Matter.Engine) {
+		this.engine = engine;
 	}
 
 	/**
@@ -37,8 +44,8 @@ export class Pathfinder {
 	 * x축과 y축 변환 공식이 동일하므로 1차원 헬퍼로 분리.
 	 * 2D 좌표가 필요하면 x, y 각각에 대해 호출하면 됨.
 	 */
-	pixelToTileIndex(pixel: number) {
-		return Math.floor(pixel / this.tileSize);
+	pixelToCellIndex(pixel: number) {
+		return Math.floor(pixel / this.size);
 	}
 
 	/**
@@ -52,8 +59,8 @@ export class Pathfinder {
 	 * x축과 y축 변환 공식이 동일하므로 1차원 헬퍼로 분리.
 	 * 2D 좌표가 필요하면 tileToPixel(tileX, tileY) 사용.
 	 */
-	tileIndexToPixel(tile: number) {
-		return tile * this.tileSize + this.tileSize / 2;
+	cellIndexToPixel(cell: number) {
+		return cell * this.size + this.size / 2;
 	}
 
 	/**
@@ -68,9 +75,9 @@ export class Pathfinder {
 	/**
 	 * 특정 타일이 걸을 수 있는지 확인
 	 */
-	isWalkable(tileX: number, tileY: number) {
-		if (tileX >= 0 && tileX < this.cols && tileY >= 0 && tileY < this.rows) {
-			return this.grid.isWalkableAt(tileX, tileY);
+	isWalkable(cellX: number, cellY: number) {
+		if (cellX >= 0 && cellX < this.cols && cellY >= 0 && cellY < this.rows) {
+			return this.grid.isWalkableAt(cellX, cellY);
 		}
 		return false;
 	}
@@ -78,11 +85,11 @@ export class Pathfinder {
 	/**
 	 * 픽셀 좌표로 경로 탐색 (결과도 픽셀 좌표)
 	 */
-	findPath(fromX: number, fromY: number, toX: number, toY: number): PathPoint[] {
-		const startTileX = this.pixelToTileIndex(fromX);
-		const startTileY = this.pixelToTileIndex(fromY);
-		const endTileX = this.pixelToTileIndex(toX);
-		const endTileY = this.pixelToTileIndex(toY);
+	findPath(fromX: number, fromY: number, toX: number, toY: number): Vector[] {
+		const startTileX = this.pixelToCellIndex(fromX);
+		const startTileY = this.pixelToCellIndex(fromY);
+		const endTileX = this.pixelToCellIndex(toX);
+		const endTileY = this.pixelToCellIndex(toY);
 
 		// 그리드 복사본 사용 (finder가 그리드를 수정하기 때문)
 		const gridClone = this.grid.clone();
@@ -90,22 +97,22 @@ export class Pathfinder {
 
 		// 타일 좌표를 픽셀 좌표(타일 중심)로 변환
 		return path.map((point) => ({
-			x: this.tileIndexToPixel(point[0] as number),
-			y: this.tileIndexToPixel(point[1] as number),
+			x: this.cellIndexToPixel(point[0] as number),
+			y: this.cellIndexToPixel(point[1] as number),
 		}));
 	}
 
 	/**
 	 * 경로 스무딩 (불필요한 중간점 제거)
 	 */
-	smoothPath(path: PathPoint[]): PathPoint[] {
+	smoothPath(path: Vector[]): Vector[] {
 		if (path.length <= 2) return path;
 
 		const first = path[0];
 		const last = path[path.length - 1];
 		if (!first || !last) return path;
 
-		const smoothed: PathPoint[] = [first];
+		const smoothed: Vector[] = [first];
 
 		for (let i = 1; i < path.length - 1; i++) {
 			const prev = smoothed[smoothed.length - 1];
@@ -136,46 +143,6 @@ export class Pathfinder {
 			for (let x = 0; x < this.cols; x++) {
 				this.grid.setWalkableAt(x, y, true);
 			}
-		}
-	}
-
-	/**
-	 * 사각형 영역을 non-walkable로 설정 (건물 등)
-	 */
-	blockRect(tileX: number, tileY: number, tileCols: number, tileRows: number) {
-		for (let dy = 0; dy < tileRows; dy++) {
-			for (let dx = 0; dx < tileCols; dx++) {
-				this.setWalkable(tileX + dx, tileY + dy, false);
-			}
-		}
-	}
-
-	/**
-	 * Matter.js 바디를 기반으로 unwalkable 영역 설정
-	 */
-	blockBody(body: Matter.Body) {
-		const minX = this.pixelToTileIndex(body.bounds.min.x);
-		const minY = this.pixelToTileIndex(body.bounds.min.y);
-		const maxX = this.pixelToTileIndex(body.bounds.max.x);
-		const maxY = this.pixelToTileIndex(body.bounds.max.y);
-
-		for (let y = minY; y <= maxY; y++) {
-			for (let x = minX; x <= maxX; x++) {
-				this.setWalkable(x, y, false);
-			}
-		}
-	}
-
-	/**
-	 * 디버그용: 그리드 상태 출력
-	 */
-	debugPrint() {
-		let output = '';
-		for (let y = 0; y < this.rows; y++) {
-			for (let x = 0; x < this.cols; x++) {
-				output += this.grid.isWalkableAt(x, y) ? '.' : '#';
-			}
-			output += '\n';
 		}
 	}
 }
