@@ -35,23 +35,10 @@
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
-	const terrainId = $derived(world?.terrain_id);
 
 	// oncamerachange prop 변경 시 worldContext 업데이트
 	$effect(() => {
 		worldContext.oncamerachange = oncamerachange;
-	});
-
-	// terrainId 변경 시 reload 호출 (초기 마운트 제외)
-	let prevTerrainId: typeof terrainId | undefined = undefined;
-	$effect(() => {
-		if (terrainId !== prevTerrainId) {
-			// 초기 마운트가 아닐 때만 reload
-			if (prevTerrainId !== undefined && terrainId) {
-				worldContext.reload();
-			}
-			prevTerrainId = terrainId;
-		}
 	});
 
 	// debug prop 변경 시 worldContext 업데이트
