@@ -25,7 +25,6 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { Vector } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
-import { usePlayer } from '$lib/hooks/use-player';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
@@ -42,11 +41,6 @@ import { createWorldBuilding, deleteWorldBuilding } from '../utils/world-buildin
 import { createWorldItem, deleteWorldItem } from '../utils/world-item';
 import { createTileInWorldTileMap, deleteTileFromWorldTileMap } from '../utils/world-tile-map';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
-import {
-	TEST_WORLD_ID,
-	TEST_PLAYER_ID,
-	TEST_SCENARIO_ID,
-} from '$lib/hooks/use-world/use-world-test';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
@@ -529,52 +523,20 @@ export class WorldContext {
 	}
 
 	// 엔티티 생성/삭제 메서드들
-	createWorldCharacter(
-		insert: Omit<WorldCharacterInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
-	) {
-		const isTestWorld = this.worldId === TEST_WORLD_ID;
-		const player = get(usePlayer().current);
-		const world = get(useWorld().worldStore).data[this.worldId];
-
-		createWorldCharacter(this, {
-			...insert,
-			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
-			world_id: this.worldId,
-			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
-			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
-		});
+	createWorldCharacter(insert: Parameters<typeof createWorldCharacter>[1]) {
+		createWorldCharacter(this, insert);
 	}
 
-	createWorldBuilding(
-		insert: Omit<WorldBuildingInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
-	) {
-		const isTestWorld = this.worldId === TEST_WORLD_ID;
-		const player = get(usePlayer().current);
-		const world = get(useWorld().worldStore).data[this.worldId];
-
-		createWorldBuilding(this, {
-			...insert,
-			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
-			world_id: this.worldId,
-			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
-			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
-		});
+	createWorldBuilding(insert: Parameters<typeof createWorldBuilding>[1]) {
+		createWorldBuilding(this, insert);
 	}
 
-	createWorldItem(
-		insert: Omit<WorldItemInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
-	) {
-		const isTestWorld = this.worldId === TEST_WORLD_ID;
-		const player = get(usePlayer().current);
-		const world = get(useWorld().worldStore).data[this.worldId];
+	createWorldItem(insert: Parameters<typeof createWorldItem>[1]) {
+		createWorldItem(this, insert);
+	}
 
-		createWorldItem(this, {
-			...insert,
-			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
-			world_id: this.worldId,
-			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
-			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
-		});
+	createTileInWorldTileMap(tileId: TileId, vector: Vector) {
+		createTileInWorldTileMap(this, tileId, vector);
 	}
 
 	deleteWorldCharacter(worldCharacterId: WorldCharacterId) {
@@ -587,10 +549,6 @@ export class WorldContext {
 
 	deleteWorldItem(worldItemId: WorldItemId) {
 		deleteWorldItem(this, worldItemId);
-	}
-
-	createTileInWorldTileMap(tileId: TileId, vector: Vector) {
-		createTileInWorldTileMap(this, tileId, vector);
 	}
 
 	deleteTileFromWorldTileMap(tileVector: TileVector) {
