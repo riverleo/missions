@@ -70,7 +70,9 @@ export class WorldContext {
 	}
 
 	// debug 변경 시 모든 엔티티 및 바운더리 업데이트
-	setDebugEntities(debug: boolean) {
+	setDebug(debug: boolean) {
+		this.debug = debug;
+
 		for (const entity of Object.values(this.entities)) {
 			entity.setDebug(debug);
 		}

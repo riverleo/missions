@@ -56,10 +56,8 @@
 
 	// debug prop 변경 시 worldContext 업데이트
 	$effect(() => {
-		worldContext.debug = debug;
-		worldContext.setDebugEntities(debug);
+		worldContext.setDebug(debug);
 	});
-
 
 	setWorldContext(worldContext);
 </script>
