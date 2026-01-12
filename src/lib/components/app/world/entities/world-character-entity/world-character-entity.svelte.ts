@@ -11,7 +11,7 @@ import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 
-const { Body } = Matter;
+const { Body, Query, Composite } = Matter;
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -125,6 +125,13 @@ export class WorldCharacterEntity extends Entity {
 			return;
 		}
 
+		// 진행 방향 결정 (dx > 0이면 오른쪽(1), 아니면 왼쪽(-1))
+		const moveDirection = dx > 0 ? 1 : -1;
+
+		// 앞에 장애물이 있고, 지면에 있으면 점프
+		if (this.hasObstacleAhead(moveDirection) && this.isGrounded()) {
+		}
+
 		// 이동 속도 (픽셀/초)
 		const speed = 150;
 
@@ -160,5 +167,71 @@ export class WorldCharacterEntity extends Entity {
 
 		// 경로 스무딩
 		this.path = this.worldContext.pathfinder.smoothPath(rawPath);
+	}
+
+	/**
+	 * 캐릭터가 지면에 닿아있는지 체크
+	 */
+	isGrounded(): boolean {
+		const allBodies = Composite.allBodies(this.worldContext.engine.world);
+
+		// 캐릭터 바디 바로 아래 영역 체크 (약간의 여유 포함)
+		const checkHeight = 5;
+		const checkY = this.body.position.y + this.colliderHeight / 2 + checkHeight / 2;
+
+		const checkBounds = {
+			min: { x: this.body.position.x - this.colliderWidth / 2, y: checkY - checkHeight / 2 },
+			max: { x: this.body.position.x + this.colliderWidth / 2, y: checkY + checkHeight / 2 },
+		};
+
+		// 바운드 영역과 교차하는 static 바디 찾기
+		const collisions = Query.region(allBodies, checkBounds);
+
+		return collisions.some(
+			(body) => body.isStatic && body !== this.body && body.id !== this.body.id
+		);
+	}
+
+	/**
+	 * 진행 방향에 장애물이 있는지 체크
+	 */
+	hasObstacleAhead(direction: number): boolean {
+		const allBodies = Composite.allBodies(this.worldContext.engine.world);
+
+		// 진행 방향으로 약간 앞쪽 영역 체크
+		const checkDistance = 20;
+		const checkWidth = this.colliderWidth;
+		const checkHeight = this.colliderHeight;
+
+		const checkX = this.body.position.x + direction * (this.colliderWidth / 2 + checkDistance / 2);
+		const checkY = this.body.position.y;
+
+		const checkBounds = {
+			min: { x: checkX - checkWidth / 2, y: checkY - checkHeight / 2 },
+			max: { x: checkX + checkWidth / 2, y: checkY + checkHeight / 2 },
+		};
+
+		// 바운드 영역과 교차하는 static 바디 찾기
+		const collisions = Query.region(allBodies, checkBounds);
+
+		return collisions.some(
+			(body) => body.isStatic && body !== this.body && body.id !== this.body.id
+		);
+	}
+
+	/**
+	 * 점프 (지면에 있을 때만 가능)
+	 */
+	jump(): void {
+		if (!this.isGrounded()) {
+			return;
+		}
+
+		// 위쪽으로 속도 적용
+		const jumpForce = -10;
+		Body.setVelocity(this.body, {
+			x: this.body.velocity.x,
+			y: jumpForce,
+		});
 	}
 }

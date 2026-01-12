@@ -59,7 +59,7 @@ export class WorldContext {
 		this.camera = new Camera(this);
 		this.event = new WorldEvent(this, this.camera);
 		this.blueprint = new WorldContextBlueprint(this);
-		this.pathfinder = new Pathfinder(WORLD_WIDTH, WORLD_HEIGHT);
+		this.pathfinder = new Pathfinder(this, WORLD_WIDTH, WORLD_HEIGHT);
 	}
 
 	get terrain(): Terrain | undefined {

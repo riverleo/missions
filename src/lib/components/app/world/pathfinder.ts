@@ -1,16 +1,20 @@
-import { CELL_SIZE } from '$lib/constants';
+import { CELL_SIZE, TILE_SIZE, TILE_CELL_RATIO } from '$lib/constants';
 import PF from 'pathfinding';
 import type { Vector } from '$lib/utils/vector';
+import type { WorldContext } from './context';
+import type { WorldTileEntity } from './entities/world-tile-entity';
 
 export class Pathfinder {
 	private grid: PF.Grid;
 	private finder: PF.AStarFinder;
+	private worldContext: WorldContext;
 
 	readonly cols: number;
 	readonly rows: number;
 	readonly size: number;
 
-	constructor(width: number, height: number, size: number = CELL_SIZE) {
+	constructor(worldContext: WorldContext, width: number, height: number, size: number = CELL_SIZE) {
+		this.worldContext = worldContext;
 		this.size = size;
 		this.cols = Math.ceil(width / size);
 		this.rows = Math.ceil(height / size);
@@ -125,12 +129,78 @@ export class Pathfinder {
 	}
 
 	/**
-	 * 전체 그리드를 walkable로 초기화
+	 * 전체 그리드를 초기화: 바닥 위 4칸을 walkable로 설정
 	 */
 	reset() {
+		// 모든 셀을 unwalkable로 초기화
 		for (let y = 0; y < this.rows; y++) {
 			for (let x = 0; x < this.cols; x++) {
-				this.grid.setWalkableAt(x, y, true);
+				this.grid.setWalkableAt(x, y, false);
+			}
+		}
+
+		// 바닥 위 4칸을 walkable로 설정
+		const walkableHeight = 4;
+		for (let dy = 0; dy < walkableHeight; dy++) {
+			const walkableY = this.rows - 1 - dy;
+			if (walkableY >= 0) {
+				for (let x = 0; x < this.cols; x++) {
+					this.grid.setWalkableAt(x, walkableY, true);
+				}
+			}
+		}
+	}
+
+	/**
+	 * worldContext의 타일들을 기반으로 전체 walkable 영역 재계산
+	 */
+	update() {
+		// 전체 초기화 (바닥 위 4칸 walkable)
+		this.reset();
+
+		// 월드의 모든 타일 엔티티 수집
+		const tileEntities = Object.values(this.worldContext.entities).filter(
+			(entity): entity is WorldTileEntity => entity.type === 'tile'
+		);
+
+		const walkableSize = 4;
+
+		// 타일 외곽 walkable 설정
+		for (const tile of tileEntities) {
+			const cellX = tile.tileX * TILE_CELL_RATIO;
+			const cellY = tile.tileY * TILE_CELL_RATIO;
+
+			// 타일 위쪽 외곽 4칸 (좌우로 4칸씩 확장)
+			for (let dy = 1; dy <= walkableSize; dy++) {
+				for (let dx = -walkableSize; dx < TILE_CELL_RATIO + walkableSize; dx++) {
+					this.setWalkable(cellX + dx, cellY - dy, true);
+				}
+			}
+
+			// 타일 왼쪽 외곽 4칸
+			for (let dx = 1; dx <= walkableSize; dx++) {
+				for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+					this.setWalkable(cellX - dx, cellY + dy, true);
+				}
+			}
+
+			// 타일 오른쪽 외곽 4칸
+			for (let dx = 1; dx <= walkableSize; dx++) {
+				for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+					this.setWalkable(cellX + TILE_CELL_RATIO + dx - 1, cellY + dy, true);
+				}
+			}
+		}
+
+		// 마지막에 모든 타일이 차지하는 영역을 unwalkable로 일괄 설정
+		for (const tile of tileEntities) {
+			const cellX = tile.tileX * TILE_CELL_RATIO;
+			const cellY = tile.tileY * TILE_CELL_RATIO;
+
+			for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+				for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+					this.setWalkable(cellX + dx, cellY + dy, false);
+				}
 			}
 		}
 	}

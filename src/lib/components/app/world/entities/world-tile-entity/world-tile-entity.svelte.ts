@@ -7,7 +7,6 @@ import {
 	CATEGORY_ITEM,
 	CATEGORY_WALL,
 	TILE_SIZE,
-	TILE_CELL_RATIO,
 } from '$lib/constants';
 import type { BeforeUpdateEvent, WorldContext } from '$lib/components/app/world/context';
 import { Entity } from '../entity.svelte';
@@ -61,33 +60,15 @@ export class WorldTileEntity extends Entity {
 	override addToWorld(): void {
 		super.addToWorld();
 
-		// pathfinder 업데이트: 타일이 차지하는 셀을 unwalkable로 설정
-		// 타일 좌표를 직접 셀 좌표로 변환 (타일 좌표 * TILE_CELL_RATIO)
-		const cellX = this.tileX * TILE_CELL_RATIO;
-		const cellY = this.tileY * TILE_CELL_RATIO;
-
-		// 타일이 차지하는 모든 셀을 unwalkable로 설정
-		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
-			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				this.worldContext.pathfinder.setWalkable(cellX + dx, cellY + dy, false);
-			}
-		}
+		// pathfinder 전체 업데이트
+		this.worldContext.pathfinder.update();
 	}
 
 	override removeFromWorld(): void {
-		// pathfinder 업데이트: 타일이 차지했던 셀을 walkable로 복원
-		// 타일 좌표를 직접 셀 좌표로 변환 (타일 좌표 * TILE_CELL_RATIO)
-		const cellX = this.tileX * TILE_CELL_RATIO;
-		const cellY = this.tileY * TILE_CELL_RATIO;
-
-		// 타일이 차지했던 모든 셀을 walkable로 복원
-		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
-			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				this.worldContext.pathfinder.setWalkable(cellX + dx, cellY + dy, true);
-			}
-		}
-
 		super.removeFromWorld();
+
+		// pathfinder 전체 업데이트
+		this.worldContext.pathfinder.update();
 	}
 
 	save(): void {
