@@ -120,48 +120,54 @@ export class WorldCharacterEntity extends Entity {
 			this.direction = 'left';
 		}
 
-		// 도착 판정 거리 (X축 위주)
+		// 도착 판정 거리
 		const arrivalThreshold = 5;
 
-		if (Math.abs(dx) < arrivalThreshold) {
+		if (Math.abs(dx) < arrivalThreshold && Math.abs(dy) < arrivalThreshold) {
 			// 목표 지점에 도착하면 path에서 제거
 			this.path = this.path.slice(1);
 			return;
 		}
 
-		// 이동 속도 (픽셀/초)
-		const speed = 200;
-
 		// delta를 초 단위로 변환 (밀리초 → 초)
 		const deltaSeconds = event.delta / 1000;
 
-		// 이번 프레임에서 이동할 거리
-		const moveDistance = speed * deltaSeconds;
+		// 속도 설정
+		const horizontalSpeed = 200; // 좌우 이동 속도
+		const upSpeed = 100; // 위로 올라가는 속도 (느림)
+		const downSpeed = 300; // 아래로 내려가는 속도 (빠름)
 
-		// Y축 차이가 아주 작으면 무시 (미세한 떨림 방지)
-		const yThreshold = 2;
-		const shouldMoveY = Math.abs(dy) > yThreshold;
+		let newX = currentPos.x;
+		let newY = currentPos.y;
 
-		// X축만 또는 X, Y 모두 이동
-		const distance = shouldMoveY ? Math.sqrt(dx * dx + dy * dy) : Math.abs(dx);
+		// X축 우선 이동
+		if (Math.abs(dx) > arrivalThreshold) {
+			const moveDistance = horizontalSpeed * deltaSeconds;
+			if (Math.abs(dx) <= moveDistance) {
+				newX = targetPoint.x;
+			} else {
+				newX = currentPos.x + Math.sign(dx) * moveDistance;
+			}
+			// X축 이동 중에는 Y축 고정
+			newY = currentPos.y;
+		}
+		// X축 이동이 완료되면 Y축 이동
+		else if (Math.abs(dy) > arrivalThreshold) {
+			// Y축 이동 중에는 X축을 목표 위치로 고정 (떨림 방지)
+			newX = targetPoint.x;
 
-		// 목표 지점까지의 거리보다 이동 거리가 크면 목표 지점으로 바로 이동
-		if (moveDistance >= distance) {
-			Body.setPosition(this.body, {
-				x: targetPoint.x,
-				y: shouldMoveY ? targetPoint.y : currentPos.y,
-			});
-			this.path = this.path.slice(1);
-			return;
+			const speed = dy < 0 ? upSpeed : downSpeed;
+			const moveDistance = speed * deltaSeconds;
+			if (Math.abs(dy) <= moveDistance) {
+				newY = targetPoint.y;
+			} else {
+				newY = currentPos.y + Math.sign(dy) * moveDistance;
+			}
 		}
 
-		// 정규화된 방향 벡터에 이동 거리를 곱해서 새 위치 계산
-		const moveX = (dx / distance) * moveDistance;
-		const moveY = shouldMoveY ? (dy / distance) * moveDistance : 0;
-
 		Body.setPosition(this.body, {
-			x: currentPos.x + moveX,
-			y: currentPos.y + moveY,
+			x: newX,
+			y: newY,
 		});
 	}
 
