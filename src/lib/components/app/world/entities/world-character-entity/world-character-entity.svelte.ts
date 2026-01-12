@@ -11,7 +11,7 @@ import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 
-const { Body, Query, Composite } = Matter;
+const { Body } = Matter;
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -95,8 +95,13 @@ export class WorldCharacterEntity extends Entity {
 
 	override update(event: BeforeUpdateEvent): void {
 		if (this.path.length === 0) {
+			// path가 없으면 dynamic으로 전환 (중력 적용)
+			Body.setStatic(this.body, false);
 			return;
 		}
+
+		// path가 있으면 static으로 전환 (path 기반 이동)
+		Body.setStatic(this.body, true);
 
 		const currentPos = this.body.position;
 		const targetPoint = this.path[0];
@@ -107,7 +112,6 @@ export class WorldCharacterEntity extends Entity {
 		// 목표 지점까지의 거리 계산
 		const dx = targetPoint.x - currentPos.x;
 		const dy = targetPoint.y - currentPos.y;
-		const distance = Math.sqrt(dx * dx + dy * dy);
 
 		// 이동 방향 업데이트
 		if (dx > 0) {
@@ -116,24 +120,17 @@ export class WorldCharacterEntity extends Entity {
 			this.direction = 'left';
 		}
 
-		// 도착 판정 거리
+		// 도착 판정 거리 (X축 위주)
 		const arrivalThreshold = 5;
 
-		if (distance < arrivalThreshold) {
+		if (Math.abs(dx) < arrivalThreshold) {
 			// 목표 지점에 도착하면 path에서 제거
 			this.path = this.path.slice(1);
 			return;
 		}
 
-		// 진행 방향 결정 (dx > 0이면 오른쪽(1), 아니면 왼쪽(-1))
-		const moveDirection = dx > 0 ? 1 : -1;
-
-		// 앞에 장애물이 있고, 지면에 있으면 점프
-		if (this.hasObstacleAhead(moveDirection) && this.isGrounded()) {
-		}
-
 		// 이동 속도 (픽셀/초)
-		const speed = 150;
+		const speed = 200;
 
 		// delta를 초 단위로 변환 (밀리초 → 초)
 		const deltaSeconds = event.delta / 1000;
@@ -141,16 +138,26 @@ export class WorldCharacterEntity extends Entity {
 		// 이번 프레임에서 이동할 거리
 		const moveDistance = speed * deltaSeconds;
 
+		// Y축 차이가 아주 작으면 무시 (미세한 떨림 방지)
+		const yThreshold = 2;
+		const shouldMoveY = Math.abs(dy) > yThreshold;
+
+		// X축만 또는 X, Y 모두 이동
+		const distance = shouldMoveY ? Math.sqrt(dx * dx + dy * dy) : Math.abs(dx);
+
 		// 목표 지점까지의 거리보다 이동 거리가 크면 목표 지점으로 바로 이동
 		if (moveDistance >= distance) {
-			Body.setPosition(this.body, { x: targetPoint.x, y: targetPoint.y });
+			Body.setPosition(this.body, {
+				x: targetPoint.x,
+				y: shouldMoveY ? targetPoint.y : currentPos.y,
+			});
 			this.path = this.path.slice(1);
 			return;
 		}
 
 		// 정규화된 방향 벡터에 이동 거리를 곱해서 새 위치 계산
 		const moveX = (dx / distance) * moveDistance;
-		const moveY = (dy / distance) * moveDistance;
+		const moveY = shouldMoveY ? (dy / distance) * moveDistance : 0;
 
 		Body.setPosition(this.body, {
 			x: currentPos.x + moveX,
@@ -167,71 +174,5 @@ export class WorldCharacterEntity extends Entity {
 
 		// 경로 스무딩
 		this.path = this.worldContext.pathfinder.smoothPath(rawPath);
-	}
-
-	/**
-	 * 캐릭터가 지면에 닿아있는지 체크
-	 */
-	isGrounded(): boolean {
-		const allBodies = Composite.allBodies(this.worldContext.engine.world);
-
-		// 캐릭터 바디 바로 아래 영역 체크 (약간의 여유 포함)
-		const checkHeight = 5;
-		const checkY = this.body.position.y + this.colliderHeight / 2 + checkHeight / 2;
-
-		const checkBounds = {
-			min: { x: this.body.position.x - this.colliderWidth / 2, y: checkY - checkHeight / 2 },
-			max: { x: this.body.position.x + this.colliderWidth / 2, y: checkY + checkHeight / 2 },
-		};
-
-		// 바운드 영역과 교차하는 static 바디 찾기
-		const collisions = Query.region(allBodies, checkBounds);
-
-		return collisions.some(
-			(body) => body.isStatic && body !== this.body && body.id !== this.body.id
-		);
-	}
-
-	/**
-	 * 진행 방향에 장애물이 있는지 체크
-	 */
-	hasObstacleAhead(direction: number): boolean {
-		const allBodies = Composite.allBodies(this.worldContext.engine.world);
-
-		// 진행 방향으로 약간 앞쪽 영역 체크
-		const checkDistance = 20;
-		const checkWidth = this.colliderWidth;
-		const checkHeight = this.colliderHeight;
-
-		const checkX = this.body.position.x + direction * (this.colliderWidth / 2 + checkDistance / 2);
-		const checkY = this.body.position.y;
-
-		const checkBounds = {
-			min: { x: checkX - checkWidth / 2, y: checkY - checkHeight / 2 },
-			max: { x: checkX + checkWidth / 2, y: checkY + checkHeight / 2 },
-		};
-
-		// 바운드 영역과 교차하는 static 바디 찾기
-		const collisions = Query.region(allBodies, checkBounds);
-
-		return collisions.some(
-			(body) => body.isStatic && body !== this.body && body.id !== this.body.id
-		);
-	}
-
-	/**
-	 * 점프 (지면에 있을 때만 가능)
-	 */
-	jump(): void {
-		if (!this.isGrounded()) {
-			return;
-		}
-
-		// 위쪽으로 속도 적용
-		const jumpForce = -10;
-		Body.setVelocity(this.body, {
-			x: this.body.velocity.x,
-			y: jumpForce,
-		});
 	}
 }
