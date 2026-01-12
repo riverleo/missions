@@ -2,24 +2,13 @@ import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type {
 	Terrain,
-	WorldCharacter,
 	WorldCharacterId,
-	WorldCharacterInsert,
-	WorldBuilding,
 	WorldBuildingId,
-	WorldBuildingInsert,
-	WorldItem,
 	WorldItemId,
-	WorldItemInsert,
 	WorldId,
 	EntityId,
-	WorldTileMap,
 	TileVector,
-	CharacterId,
-	ItemId,
 	TileId,
-	BuildingId,
-	UserId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { Vector } from '$lib/utils/vector';

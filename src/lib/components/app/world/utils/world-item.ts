@@ -4,6 +4,7 @@ import type { WorldItem, WorldItemId, WorldItemInsert, UserId } from '$lib/types
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { usePlayer } from '$lib/hooks/use-player';
+import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { WorldItemEntity } from '../entities/world-item-entity';
 import {
 	TEST_WORLD_ID,
@@ -11,9 +12,27 @@ import {
 	TEST_SCENARIO_ID,
 } from '$lib/hooks/use-world/use-world-test';
 
-export function createWorldItem(
+export async function createWorldItem(
 	worldContext: WorldContext,
-	insert: Omit<WorldItemInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
+	insert: Required<
+		Omit<
+			WorldItemInsert,
+			| 'id'
+			| 'world_id'
+			| 'player_id'
+			| 'scenario_id'
+			| 'user_id'
+			| 'created_at'
+			| 'created_at_tick'
+			| 'world_building_id'
+			| 'durability_ticks'
+			| 'rotation'
+		>
+	> &
+		Pick<
+			WorldItemInsert,
+			'id' | 'created_at' | 'created_at_tick' | 'world_building_id' | 'durability_ticks' | 'rotation'
+		>
 ) {
 	const { worldItemStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
@@ -31,16 +50,45 @@ export function createWorldItem(
 		user_id = player!.user_id;
 	}
 
-	const worldItem: WorldItem = {
-		id: crypto.randomUUID() as WorldItemId,
-		...insert,
-		world_id: worldContext.worldId,
-		player_id,
-		scenario_id,
-		user_id,
-		created_at: new Date().toISOString(),
-		created_at_tick: 0,
-	} as WorldItem;
+	let worldItem: WorldItem;
+
+	if (isTestWorld) {
+		// TEST 환경: 클라이언트에서 UUID 생성
+		worldItem = {
+			...insert,
+			id: crypto.randomUUID() as WorldItemId,
+			world_id: worldContext.worldId,
+			player_id,
+			scenario_id,
+			user_id,
+			world_building_id: insert.world_building_id ?? null,
+			durability_ticks: insert.durability_ticks ?? null,
+			rotation: insert.rotation ?? 0,
+			created_at: new Date().toISOString(),
+			created_at_tick: 0,
+		};
+	} else {
+		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
+		const { supabase } = useServerPayload();
+		const { data, error } = await supabase
+			.from('world_items')
+			.insert({
+				...insert,
+				world_id: worldContext.worldId,
+				player_id,
+				scenario_id,
+				user_id,
+			})
+			.select()
+			.single<WorldItem>();
+
+		if (error || !data) {
+			console.error('Failed to create world item:', error);
+			throw error;
+		}
+
+		worldItem = data;
+	}
 
 	// 스토어 업데이트
 	worldItemStore.update((state) => ({
@@ -53,8 +101,20 @@ export function createWorldItem(
 	entity.addToWorld();
 }
 
-export function deleteWorldItem(worldContext: WorldContext, worldItemId: WorldItemId) {
+export async function deleteWorldItem(worldContext: WorldContext, worldItemId: WorldItemId) {
 	const { worldItemStore } = useWorld();
+	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
+
+	// 프로덕션 환경이면 서버에서 삭제
+	if (!isTestWorld) {
+		const { supabase } = useServerPayload();
+		const { error } = await supabase.from('world_items').delete().eq('id', worldItemId);
+
+		if (error) {
+			console.error('Failed to delete world item:', error);
+			throw error;
+		}
+	}
 
 	// 엔티티 제거
 	const entityId = EntityIdUtils.create('item', worldContext.worldId, worldItemId);
