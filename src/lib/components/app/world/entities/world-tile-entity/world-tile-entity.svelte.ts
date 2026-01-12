@@ -7,15 +7,18 @@ import {
 	CATEGORY_ITEM,
 	CATEGORY_WALL,
 	TILE_SIZE,
+	TILE_CELL_RATIO,
 } from '$lib/constants';
 import type { BeforeUpdateEvent, WorldContext } from '$lib/components/app/world/context';
-import { toPixel } from '$lib/utils/vector';
 import { Entity } from '../entity.svelte';
+import { toPixel } from '$lib/utils/vector';
 
 export class WorldTileEntity extends Entity {
 	readonly type = 'tile' as const;
 	readonly body: Matter.Body;
 	readonly tileId: TileId;
+	readonly tileX: number;
+	readonly tileY: number;
 
 	override get instanceId(): TileVector {
 		return EntityIdUtils.instanceId<TileVector>(this.id);
@@ -34,6 +37,9 @@ export class WorldTileEntity extends Entity {
 			throw new Error(`Invalid tile vector: ${vector}`);
 		}
 
+		this.tileX = tileX;
+		this.tileY = tileY;
+
 		// 타일 물리 바디 생성
 		this.body = this.createBody(
 			'rectangle',
@@ -50,6 +56,38 @@ export class WorldTileEntity extends Entity {
 				},
 			}
 		);
+	}
+
+	override addToWorld(): void {
+		super.addToWorld();
+
+		// pathfinder 업데이트: 타일이 차지하는 셀을 unwalkable로 설정
+		// 타일 좌표를 직접 셀 좌표로 변환 (타일 좌표 * TILE_CELL_RATIO)
+		const cellX = this.tileX * TILE_CELL_RATIO;
+		const cellY = this.tileY * TILE_CELL_RATIO;
+
+		// 타일이 차지하는 모든 셀을 unwalkable로 설정
+		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+				this.worldContext.pathfinder.setWalkable(cellX + dx, cellY + dy, false);
+			}
+		}
+	}
+
+	override removeFromWorld(): void {
+		// pathfinder 업데이트: 타일이 차지했던 셀을 walkable로 복원
+		// 타일 좌표를 직접 셀 좌표로 변환 (타일 좌표 * TILE_CELL_RATIO)
+		const cellX = this.tileX * TILE_CELL_RATIO;
+		const cellY = this.tileY * TILE_CELL_RATIO;
+
+		// 타일이 차지했던 모든 셀을 walkable로 복원
+		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+				this.worldContext.pathfinder.setWalkable(cellX + dx, cellY + dy, true);
+			}
+		}
+
+		super.removeFromWorld();
 	}
 
 	save(): void {

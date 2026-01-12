@@ -43,7 +43,6 @@ export class WorldContext {
 	entities = $state<Record<EntityId, Entity>>({});
 	debug = $state(false);
 	initialized = $state(false);
-	pathfinderVersion = $state(0);
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;

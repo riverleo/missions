@@ -51,7 +51,7 @@ export function createTileInWorldTileMap(
 	}
 
 	// 타일 추가
-	const tileVector: TileVector = `${vector.x},${vector.y}` as TileVector;
+	const tileVector = `${vector.x},${vector.y}` as TileVector;
 	worldTileMapStore.update((state) => {
 		const tileMap = state.data[worldContext.worldId];
 		if (tileMap) {
