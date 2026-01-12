@@ -1,18 +1,11 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
-import type {
-	World,
-	WorldTileMap,
-	WorldId,
-	UserId,
-	PlayerId,
-	ScenarioId,
-	TerrainId,
-} from '$lib/types';
+import type { WorldId, PlayerId, ScenarioId, TerrainId } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { useTerrain } from '../use-terrain';
 import { loadFromStorage, saveToStorage, type WorldTestStoreState } from './use-world-test-storage';
+import { createWorld, deleteWorld } from '$lib/components/app/world/utils/world';
 
 export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
@@ -36,20 +29,8 @@ function createTestWorldStore() {
 
 			// 같은 terrain 선택 시 선택 해제 및 world, worldTileMap 제거
 			if (isSameTerrain) {
-				// use-world 스토어 업데이트
-				const world = useWorld();
-				world.worldStore.update((state) =>
-					produce(state, (draft) => {
-						delete draft.data[TEST_WORLD_ID];
-					})
-				);
-
-				// worldTileMap 제거
-				world.worldTileMapStore.update((state) =>
-					produce(state, (draft) => {
-						delete draft.data[TEST_WORLD_ID];
-					})
-				);
+				// world 제거 (worldTileMap도 자동 제거됨)
+				deleteWorld(TEST_WORLD_ID);
 
 				return {
 					...state,
@@ -61,41 +42,12 @@ function createTestWorldStore() {
 			const terrain = get(useTerrain().store).data[terrainId];
 			if (!terrain) return state;
 
-			const newWorld: World = {
+			// world 생성 (worldTileMap 자동 생성됨)
+			createWorld({
 				id: TEST_WORLD_ID,
-				user_id: crypto.randomUUID() as UserId,
-				player_id: TEST_PLAYER_ID,
-				scenario_id: TEST_SCENARIO_ID,
 				terrain_id: terrain.id,
 				name: 'Test World',
-				created_at: new Date().toISOString(),
-			} as World;
-
-			// use-world 스토어 업데이트
-			const world = useWorld();
-			world.worldStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[TEST_WORLD_ID] = newWorld;
-				})
-			);
-
-			// worldTileMap 생성 (world_id를 키로 사용)
-			const newWorldTileMap: WorldTileMap = {
-				id: crypto.randomUUID(),
-				scenario_id: TEST_SCENARIO_ID,
-				user_id: crypto.randomUUID() as UserId,
-				player_id: TEST_PLAYER_ID,
-				world_id: TEST_WORLD_ID,
-				terrain_id: terrain.id,
-				data: {},
-				created_at: new Date().toISOString(),
-			};
-
-			world.worldTileMapStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[TEST_WORLD_ID] = newWorldTileMap;
-				})
-			);
+			});
 
 			return {
 				...state,

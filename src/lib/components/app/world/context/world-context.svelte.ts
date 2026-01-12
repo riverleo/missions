@@ -4,10 +4,13 @@ import type {
 	Terrain,
 	WorldCharacter,
 	WorldCharacterId,
+	WorldCharacterInsert,
 	WorldBuilding,
 	WorldBuildingId,
+	WorldBuildingInsert,
 	WorldItem,
 	WorldItemId,
+	WorldItemInsert,
 	WorldId,
 	EntityId,
 	WorldTileMap,
@@ -21,8 +24,8 @@ import type {
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { Vector } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
-import { TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
+import { usePlayer } from '$lib/hooks/use-player';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
@@ -33,15 +36,19 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
+import { createBoundaryWalls } from '../utils/create-boundary-walls';
+import { createWorldCharacter, deleteWorldCharacter } from '../utils/world-character';
+import { createWorldBuilding, deleteWorldBuilding } from '../utils/world-building';
+import { createWorldItem, deleteWorldItem } from '../utils/world-item';
+import { createTileInWorldTileMap, deleteTileFromWorldTileMap } from '../utils/world-tile-map';
+import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 import {
-	WORLD_WIDTH,
-	WORLD_HEIGHT,
-	WALL_THICKNESS,
-	CATEGORY_WALL,
-	CELL_SIZE,
-} from '$lib/constants';
+	TEST_WORLD_ID,
+	TEST_PLAYER_ID,
+	TEST_SCENARIO_ID,
+} from '$lib/hooks/use-world/use-world-test';
 
-const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body, Bodies } = Matter;
+const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
 export class WorldContext {
 	readonly engine: Matter.Engine;
@@ -146,7 +153,7 @@ export class WorldContext {
 
 		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 또는 캐릭터 이동 처리
 		if (isClick && !wasEntityDragged) {
-			const worldPos = this.camera.screenToWorld(e.clientX, e.clientY);
+			const worldPos = this.camera.screenToWorld({ x: e.clientX, y: e.clientY });
 			if (worldPos) {
 				const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
 
@@ -166,22 +173,16 @@ export class WorldContext {
 					if (EntityIdUtils.template.is('tile', entityTemplateId)) {
 						if (!this.blueprint.cursor.start) {
 							// 첫 번째 클릭: 시작점 저장
-							this.blueprint.cursor = {
-								...this.blueprint.cursor,
-								start: { ...this.blueprint.cursor.current },
-							};
+							this.blueprint.setCursorStart(this.blueprint.cursor.current);
 						} else {
 							// 두 번째 클릭: 타일 일괄 설치
-							this.placeEntity();
+							this.blueprint.cursorToEntities();
 							// start 클리어
-							this.blueprint.cursor = {
-								...this.blueprint.cursor,
-								start: undefined,
-							};
+							this.blueprint.setCursorStart(undefined);
 						}
 					} else {
 						// 타일이 아니면 바로 배치
-						this.placeEntity();
+						this.blueprint.cursorToEntities();
 					}
 				}
 				// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
@@ -194,7 +195,7 @@ export class WorldContext {
 		this.mouseDownScreenPosition = undefined;
 
 		// 커서 업데이트 (마우스를 움직이지 않아도 배치 후 커서가 갱신되도록)
-		this.blueprint.updateCursor(e.clientX, e.clientY);
+		this.blueprint.updateCursor({ x: e.clientX, y: e.clientY });
 	};
 
 	// Matter.js mouseup 처리
@@ -226,39 +227,6 @@ export class WorldContext {
 		}
 	};
 
-
-	// 엔티티 배치
-	private placeEntity() {
-		if (!this.blueprint.cursor) return;
-
-		const { entityTemplateId, current } = this.blueprint.cursor;
-		const { x, y } = current;
-		const { type } = EntityIdUtils.template.parse(entityTemplateId);
-
-		if (type === 'building') {
-			// 겹치는 셀이 있으면 배치하지 않음
-			if (!this.blueprint.placable) return;
-			this.addWorldBuilding(EntityIdUtils.template.id<BuildingId>(entityTemplateId), { x, y });
-		} else if (type === 'tile') {
-			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
-			for (const vector of this.blueprint.getVectorsFromStart()) {
-				this.addTileToWorldTileMap(EntityIdUtils.template.id<TileId>(entityTemplateId), vector);
-			}
-		} else if (type === 'character') {
-			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
-			this.addWorldCharacter(EntityIdUtils.template.id<CharacterId>(entityTemplateId), {
-				x: x * CELL_SIZE + CELL_SIZE / 2,
-				y: y * CELL_SIZE + CELL_SIZE / 2,
-			});
-		} else if (type === 'item') {
-			// item은 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
-			this.addWorldItem(EntityIdUtils.template.id<ItemId>(entityTemplateId), {
-				x: x * CELL_SIZE + CELL_SIZE / 2,
-				y: y * CELL_SIZE + CELL_SIZE / 2,
-			});
-		}
-	}
-
 	// 마우스가 월드 바깥으로 나갔을 때 처리
 	private handleMouseLeave = () => {
 		if (!this.mouseConstraint?.mouse) return;
@@ -272,7 +240,7 @@ export class WorldContext {
 		// 카메라 팬 중에는 cursor 업데이트 안 함
 		if (this.camera.panning) return;
 
-		this.blueprint.updateCursor(e.clientX, e.clientY);
+		this.blueprint.updateCursor({ x: e.clientX, y: e.clientY });
 	};
 
 	// 월드 로드, cleanup 함수 반환
@@ -355,55 +323,6 @@ export class WorldContext {
 		};
 	}
 
-	// 월드 바운더리 생성
-	private createBoundaryWalls() {
-		if (!this.terrain) return;
-
-		const { width, height } = this.terrain;
-		const thickness = WALL_THICKNESS;
-
-		const wallOptions = {
-			isStatic: true,
-			collisionFilter: {
-				category: CATEGORY_WALL,
-				mask: 0xffffffff, // 모든 카테고리와 충돌
-			},
-			render: { visible: this.debug },
-		};
-
-		// 상단 벽 (좌우로 두께만큼 더 넓게)
-		const topWall = Bodies.rectangle(width / 2, -thickness / 2, width + thickness * 2, thickness, {
-			...wallOptions,
-			label: 'boundary-top',
-		});
-
-		// 하단 벽 (좌우로 두께만큼 더 넓게)
-		const bottomWall = Bodies.rectangle(
-			width / 2,
-			height + thickness / 2,
-			width + thickness * 2,
-			thickness,
-			{
-				...wallOptions,
-				label: 'boundary-bottom',
-			}
-		);
-
-		// 좌측 벽
-		const leftWall = Bodies.rectangle(-thickness / 2, height / 2, thickness, height, {
-			...wallOptions,
-			label: 'boundary-left',
-		});
-
-		// 우측 벽
-		const rightWall = Bodies.rectangle(width + thickness / 2, height / 2, thickness, height, {
-			...wallOptions,
-			label: 'boundary-right',
-		});
-
-		Composite.add(this.engine.world, [topWall, bottomWall, leftWall, rightWall]);
-	}
-
 	reload() {
 		if (!this.initialized) {
 			console.warn('Cannot reload terrain: WorldContext not initialized');
@@ -422,7 +341,8 @@ export class WorldContext {
 		this.pathfinder.reset();
 
 		// 바운더리 생성
-		this.createBoundaryWalls();
+		const walls = createBoundaryWalls(this.terrain.width, this.terrain.height, this.debug);
+		Composite.add(this.engine.world, walls);
 
 		// 엔티티 바디 재추가
 		for (const entity of Object.values(this.entities)) {
@@ -435,13 +355,13 @@ export class WorldContext {
 		}
 
 		// 스토어 데이터로부터 엔티티 초기화
-		this.initializeEntitiesFromStore();
+		this.initializeEntities();
 
 		this.updateRenderBounds();
 	}
 
 	// 스토어 데이터로부터 엔티티 생성
-	private initializeEntitiesFromStore() {
+	private initializeEntities() {
 		const { worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } =
 			useWorld();
 
@@ -608,238 +528,72 @@ export class WorldContext {
 		}, 1000);
 	}
 
-	// 엔티티 추가/제거 메서드들
-	addWorldCharacter(characterId: CharacterId, vector: Vector) {
-		const { worldCharacterStore } = useWorld();
+	// 엔티티 생성/삭제 메서드들
+	createWorldCharacter(
+		insert: Omit<WorldCharacterInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
+	) {
+		const isTestWorld = this.worldId === TEST_WORLD_ID;
+		const player = get(usePlayer().current);
+		const world = get(useWorld().worldStore).data[this.worldId];
 
-		const worldCharacter: WorldCharacter = {
-			id: crypto.randomUUID() as WorldCharacterId,
-			user_id: crypto.randomUUID() as UserId,
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
+		createWorldCharacter(this, {
+			...insert,
+			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
 			world_id: this.worldId,
-			character_id: characterId,
-			x: vector.x,
-			y: vector.y,
-			created_at: new Date().toISOString(),
-		} as WorldCharacter;
-
-		// 스토어 업데이트
-		worldCharacterStore.update((state) => ({
-			...state,
-			data: { ...state.data, [worldCharacter.id]: worldCharacter },
-		}));
-
-		// 엔티티 생성
-		const entity = new WorldCharacterEntity(this, this.worldId, worldCharacter.id);
-		entity.addToWorld();
-	}
-
-	removeWorldCharacter(worldCharacterId: WorldCharacterId) {
-		const { worldCharacterStore } = useWorld();
-
-		// 엔티티 제거
-		const entityId = EntityIdUtils.create('character', this.worldId, worldCharacterId);
-		const entity = this.entities[entityId];
-		if (entity) {
-			entity.removeFromWorld();
-		}
-
-		// 스토어 업데이트
-		worldCharacterStore.update((state) => {
-			const newData = { ...state.data };
-			delete newData[worldCharacterId];
-			return { ...state, data: newData };
+			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
+			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
 		});
 	}
 
-	addWorldBuilding(buildingId: BuildingId, vector: Vector) {
-		const { worldBuildingStore } = useWorld();
+	createWorldBuilding(
+		insert: Omit<WorldBuildingInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
+	) {
+		const isTestWorld = this.worldId === TEST_WORLD_ID;
+		const player = get(usePlayer().current);
+		const world = get(useWorld().worldStore).data[this.worldId];
 
-		const worldBuilding: WorldBuilding = {
-			id: crypto.randomUUID() as WorldBuildingId,
-			user_id: crypto.randomUUID() as UserId,
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
+		createWorldBuilding(this, {
+			...insert,
+			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
 			world_id: this.worldId,
-			building_id: buildingId,
-			cell_x: vector.x,
-			cell_y: vector.y,
-			created_at: new Date().toISOString(),
-			created_at_tick: 0,
-		} as WorldBuilding;
-
-		// 스토어 업데이트
-		worldBuildingStore.update((state) => ({
-			...state,
-			data: { ...state.data, [worldBuilding.id]: worldBuilding },
-		}));
-
-		// 엔티티 생성
-		const entity = new WorldBuildingEntity(this, this.worldId, worldBuilding.id);
-		entity.addToWorld();
-	}
-
-	removeWorldBuilding(worldBuildingId: WorldBuildingId) {
-		const { worldBuildingStore } = useWorld();
-
-		// 엔티티 제거
-		const entityId = EntityIdUtils.create('building', this.worldId, worldBuildingId);
-		const entity = this.entities[entityId];
-		if (entity) {
-			entity.removeFromWorld();
-		}
-
-		// 스토어 업데이트
-		worldBuildingStore.update((state) => {
-			const newData = { ...state.data };
-			delete newData[worldBuildingId];
-			return { ...state, data: newData };
+			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
+			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
 		});
 	}
 
-	addWorldItem(itemId: ItemId, vector: Vector, rotation: number = 0) {
-		const { worldItemStore } = useWorld();
+	createWorldItem(
+		insert: Omit<WorldItemInsert, 'world_id' | 'player_id' | 'scenario_id' | 'user_id'>
+	) {
+		const isTestWorld = this.worldId === TEST_WORLD_ID;
+		const player = get(usePlayer().current);
+		const world = get(useWorld().worldStore).data[this.worldId];
 
-		const worldItem: WorldItem = {
-			id: crypto.randomUUID() as WorldItemId,
-			user_id: crypto.randomUUID() as UserId,
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
+		createWorldItem(this, {
+			...insert,
+			user_id: isTestWorld ? (crypto.randomUUID() as UserId) : player!.user_id,
 			world_id: this.worldId,
-			item_id: itemId,
-			x: vector.x,
-			y: vector.y,
-			rotation,
-			created_at: new Date().toISOString(),
-			created_at_tick: 0,
-		} as WorldItem;
-
-		// 스토어 업데이트
-		worldItemStore.update((state) => ({
-			...state,
-			data: { ...state.data, [worldItem.id]: worldItem },
-		}));
-
-		// 엔티티 생성
-		const entity = new WorldItemEntity(this, this.worldId, worldItem.id);
-		entity.addToWorld();
-	}
-
-	removeWorldItem(worldItemId: WorldItemId) {
-		const { worldItemStore } = useWorld();
-
-		// 엔티티 제거
-		const entityId = EntityIdUtils.create('item', this.worldId, worldItemId);
-		const entity = this.entities[entityId];
-		if (entity) {
-			entity.removeFromWorld();
-		}
-
-		// 스토어 업데이트
-		worldItemStore.update((state) => {
-			const newData = { ...state.data };
-			delete newData[worldItemId];
-			return { ...state, data: newData };
+			player_id: isTestWorld ? TEST_PLAYER_ID : player!.id,
+			scenario_id: isTestWorld ? TEST_SCENARIO_ID : world!.scenario_id,
 		});
 	}
 
-	addTileToWorldTileMap(tileId: TileId, vector: Vector) {
-		const { worldTileMapStore } = useWorld();
-
-		let worldTileMap = get(worldTileMapStore).data[this.worldId];
-
-		// WorldTileMap이 없으면 생성
-		if (!worldTileMap) {
-			const testWorld = get(useWorld().worldStore).data[this.worldId];
-			if (!testWorld) {
-				return console.error('Test world not found');
-			}
-
-			const newWorldTileMap: WorldTileMap = {
-				id: crypto.randomUUID(),
-				scenario_id: TEST_SCENARIO_ID,
-				user_id: crypto.randomUUID() as UserId,
-				player_id: TEST_PLAYER_ID,
-				world_id: this.worldId,
-				terrain_id: testWorld.terrain_id!,
-				data: {},
-				created_at: new Date().toISOString(),
-			};
-
-			worldTileMapStore.update((state) => ({
-				...state,
-				data: { ...state.data, [this.worldId]: newWorldTileMap },
-			}));
-
-			worldTileMap = newWorldTileMap;
-		}
-
-		// 타일 추가
-		const tileVector: TileVector = `${vector.x},${vector.y}` as TileVector;
-		worldTileMapStore.update((state) => {
-			const tileMap = state.data[this.worldId];
-			if (tileMap) {
-				return {
-					...state,
-					data: {
-						...state.data,
-						[this.worldId]: {
-							...tileMap,
-							data: {
-								...tileMap.data,
-								[tileVector]: {
-									tile_id: tileId,
-									durability: 100,
-								},
-							},
-						},
-					},
-				};
-			}
-			return state;
-		});
-
-		// 엔티티 생성
-		const entityId = EntityIdUtils.create('tile', this.worldId, tileVector);
-		if (!this.entities[entityId]) {
-			try {
-				const entity = new WorldTileEntity(this, this.worldId, tileVector, tileId);
-				entity.addToWorld();
-			} catch (error) {
-				console.warn('Skipping tile creation:', error);
-			}
-		}
+	deleteWorldCharacter(worldCharacterId: WorldCharacterId) {
+		deleteWorldCharacter(this, worldCharacterId);
 	}
 
-	removeTileFromWorldTileMap(tileVector: TileVector) {
-		const { worldTileMapStore } = useWorld();
+	deleteWorldBuilding(worldBuildingId: WorldBuildingId) {
+		deleteWorldBuilding(this, worldBuildingId);
+	}
 
-		// 엔티티 제거
-		const entityId = EntityIdUtils.create('tile', this.worldId, tileVector);
-		const entity = this.entities[entityId];
-		if (entity) {
-			entity.removeFromWorld();
-		}
+	deleteWorldItem(worldItemId: WorldItemId) {
+		deleteWorldItem(this, worldItemId);
+	}
 
-		// 스토어 업데이트
-		worldTileMapStore.update((state) => {
-			const tileMap = state.data[this.worldId];
-			if (tileMap) {
-				const newData = { ...tileMap.data };
-				delete newData[tileVector];
-				return {
-					...state,
-					data: {
-						...state.data,
-						[this.worldId]: {
-							...tileMap,
-							data: newData,
-						},
-					},
-				};
-			}
-			return state;
-		});
+	createTileInWorldTileMap(tileId: TileId, vector: Vector) {
+		createTileInWorldTileMap(this, tileId, vector);
+	}
+
+	deleteTileFromWorldTileMap(tileVector: TileVector) {
+		deleteTileFromWorldTileMap(this, tileVector);
 	}
 }

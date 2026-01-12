@@ -43,7 +43,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					worldContext?.removeTileFromWorldTileMap(entity.instanceId);
+					worldContext?.deleteTileFromWorldTileMap(entity.instanceId);
 				}}
 			>
 				<IconTrash />

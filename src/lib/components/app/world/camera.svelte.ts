@@ -1,3 +1,4 @@
+import type { Vector } from '$lib/utils/vector';
 import type { WorldContext } from './context';
 
 export class Camera {
@@ -11,10 +12,8 @@ export class Camera {
 	panning = $state(false);
 
 	// 팬 시작 시 저장할 상태
-	private panStartX = 0;
-	private panStartY = 0;
-	private panStartCameraX = 0;
-	private panStartCameraY = 0;
+	private panStartScreen: Vector = { x: 0, y: 0 };
+	private panStartCamera: Vector = { x: 0, y: 0 };
 
 	private world: WorldContext;
 
@@ -23,20 +22,20 @@ export class Camera {
 	}
 
 	// 화면 좌표를 컨테이너 좌표로 변환
-	screenToContainer(screenX: number, screenY: number): { x: number; y: number } | undefined {
+	screenToContainer(screenPosition: Vector): Vector | undefined {
 		const canvas = this.world.render?.canvas;
 		if (!canvas) return undefined;
 
 		const rect = canvas.getBoundingClientRect();
 		return {
-			x: screenX - rect.left,
-			y: screenY - rect.top,
+			x: screenPosition.x - rect.left,
+			y: screenPosition.y - rect.top,
 		};
 	}
 
 	// 화면 좌표를 월드 좌표로 변환
-	screenToWorld(screenX: number, screenY: number): { x: number; y: number } | undefined {
-		const containerPos = this.screenToContainer(screenX, screenY);
+	screenToWorld(screenPosition: Vector): Vector | undefined {
+		const containerPos = this.screenToContainer(screenPosition);
 		if (!containerPos) return undefined;
 
 		return {
@@ -79,8 +78,8 @@ export class Camera {
 	}
 
 	// 줌 (마우스 위치 중심)
-	applyZoom(deltaY: number, screenX: number, screenY: number): void {
-		const mouseWorldPos = this.screenToWorld(screenX, screenY);
+	applyZoom(deltaY: number, screenPosition: Vector) {
+		const mouseWorldPos = this.screenToWorld(screenPosition);
 		if (!mouseWorldPos) return;
 
 		const delta = deltaY > 0 ? -Camera.ZOOM_SPEED : Camera.ZOOM_SPEED;
@@ -97,27 +96,25 @@ export class Camera {
 	}
 
 	// 팬 시작
-	startPan(screenX: number, screenY: number): void {
+	startPan(screenPosition: Vector) {
 		this.panning = true;
-		this.panStartX = screenX;
-		this.panStartY = screenY;
-		this.panStartCameraX = this.x;
-		this.panStartCameraY = this.y;
+		this.panStartScreen = screenPosition;
+		this.panStartCamera = { x: this.x, y: this.y };
 	}
 
 	// 팬 업데이트
-	applyPan(screenX: number, screenY: number): void {
-		const dx = screenX - this.panStartX;
-		const dy = screenY - this.panStartY;
-		this.x = this.panStartCameraX - dx / this.zoom;
-		this.y = this.panStartCameraY - dy / this.zoom;
+	applyPan(screenPosition: Vector) {
+		const dx = screenPosition.x - this.panStartScreen.x;
+		const dy = screenPosition.y - this.panStartScreen.y;
+		this.x = this.panStartCamera.x - dx / this.zoom;
+		this.y = this.panStartCamera.y - dy / this.zoom;
 
 		this.clampPosition();
 		this.world.updateRenderBounds();
 	}
 
 	// 팬 종료
-	stopPan(): void {
+	stopPan() {
 		this.panning = false;
 	}
 }

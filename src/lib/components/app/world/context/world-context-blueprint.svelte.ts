@@ -11,7 +11,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
-import type { BuildingId, EntityTemplateId } from '$lib/types';
+import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
@@ -38,14 +38,14 @@ export class WorldContextBlueprint {
 	/**
 	 * 마우스 위치에 따라 cursor 업데이트
 	 */
-	updateCursor(clientX: number, clientY: number) {
+	updateCursor(cursorPosition: Vector) {
 		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
 			return;
 		}
 
 		const { type, value: id } = EntityIdUtils.template.parse(this.selectedEntityTemplateId);
-		const worldPos = this.context.camera.screenToWorld(clientX, clientY);
+		const worldPos = this.context.camera.screenToWorld(cursorPosition);
 
 		if (!worldPos) {
 			this.cursor = undefined;
@@ -222,5 +222,59 @@ export class WorldContextBlueprint {
 			}
 		}
 		return vectors;
+	}
+
+	/**
+	 * cursor의 start 설정/클리어
+	 */
+	setCursorStart(start: Vector | undefined) {
+		if (!this.cursor) return;
+		this.cursor = {
+			...this.cursor,
+			start,
+		};
+	}
+
+	/**
+	 * 커서 정보를 기반으로 엔티티를 월드에 배치
+	 */
+	cursorToEntities() {
+		if (!this.cursor) return;
+
+		const { entityTemplateId, current } = this.cursor;
+		const { x, y } = current;
+		const { type } = EntityIdUtils.template.parse(entityTemplateId);
+
+		if (type === 'building') {
+			// 겹치는 셀이 있으면 배치하지 않음
+			if (!this.placable) return;
+			this.context.createWorldBuilding({
+				building_id: EntityIdUtils.template.id<BuildingId>(entityTemplateId),
+				cell_x: x,
+				cell_y: y,
+			});
+		} else if (type === 'tile') {
+			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
+			for (const vector of this.getVectorsFromStart()) {
+				this.context.createTileInWorldTileMap(
+					EntityIdUtils.template.id<TileId>(entityTemplateId),
+					vector
+				);
+			}
+		} else if (type === 'character') {
+			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			this.context.createWorldCharacter({
+				character_id: EntityIdUtils.template.id<CharacterId>(entityTemplateId),
+				x: x * CELL_SIZE + CELL_SIZE / 2,
+				y: y * CELL_SIZE + CELL_SIZE / 2,
+			});
+		} else if (type === 'item') {
+			// item은 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			this.context.createWorldItem({
+				item_id: EntityIdUtils.template.id<ItemId>(entityTemplateId),
+				x: x * CELL_SIZE + CELL_SIZE / 2,
+				y: y * CELL_SIZE + CELL_SIZE / 2,
+			});
+		}
 	}
 }

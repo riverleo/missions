@@ -37,7 +37,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					worldContext?.removeWorldItem(entity.instanceId);
+					worldContext?.deleteWorldItem(entity.instanceId);
 				}}
 			>
 				<IconTrash />

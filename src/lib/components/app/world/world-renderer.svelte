@@ -51,7 +51,7 @@
 	// 카메라 줌 핸들러
 	function onwheel(e: WheelEvent) {
 		e.preventDefault();
-		camera.applyZoom(e.deltaY, e.clientX, e.clientY);
+		camera.applyZoom(e.deltaY, { x: e.clientX, y: e.clientY });
 	}
 
 	onMount(() => world.load({ element, width: width, height: height }));

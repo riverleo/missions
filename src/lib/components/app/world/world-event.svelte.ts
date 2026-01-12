@@ -24,7 +24,7 @@ export class WorldEvent {
 		const engine = this.world.engine;
 		if (!engine) return false;
 
-		const worldPos = this.camera.screenToWorld(screenX, screenY);
+		const worldPos = this.camera.screenToWorld({ x: screenX, y: screenY });
 		if (!worldPos) return false;
 
 		const bodies = Query.point(Composite.allBodies(engine.world), worldPos);
@@ -38,7 +38,7 @@ export class WorldEvent {
 			if (this.isOverDraggable) return;
 
 			e.preventDefault();
-			this.camera.startPan(e.clientX, e.clientY);
+			this.camera.startPan({ x: e.clientX, y: e.clientY });
 		}
 	};
 
@@ -52,7 +52,7 @@ export class WorldEvent {
 			return;
 		}
 
-		this.camera.applyPan(e.clientX, e.clientY);
+		this.camera.applyPan({ x: e.clientX, y: e.clientY });
 	};
 
 	onmouseup = () => {
