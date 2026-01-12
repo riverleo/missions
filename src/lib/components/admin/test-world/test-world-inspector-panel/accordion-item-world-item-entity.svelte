@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
-	import { useWorldTest, useWorld } from '$lib/hooks/use-world';
+	import type { WorldContext } from '$lib/components/app/world/context';
+	import { useWorld } from '$lib/hooks/use-world';
 	import { useItem } from '$lib/hooks/use-item';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
@@ -11,11 +12,11 @@
 
 	interface Props {
 		entity: WorldItemEntity;
+		worldContext?: WorldContext;
 	}
 
-	let { entity }: Props = $props();
+	let { entity, worldContext }: Props = $props();
 
-	const { removeWorldItem } = useWorldTest();
 	const { worldItemStore } = useWorld();
 	const { store: itemStore } = useItem();
 
@@ -36,7 +37,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					removeWorldItem(entity.instanceId);
+					worldContext?.removeWorldItem(entity.instanceId);
 				}}
 			>
 				<IconTrash />

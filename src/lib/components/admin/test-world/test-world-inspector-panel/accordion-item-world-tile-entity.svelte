@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WorldTileEntity } from '$lib/components/app/world/entities/world-tile-entity';
-	import { useWorldTest, useWorld } from '$lib/hooks/use-world';
+	import type { WorldContext } from '$lib/components/app/world/context';
+	import { useWorld } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
@@ -11,11 +12,11 @@
 
 	interface Props {
 		entity: WorldTileEntity;
+		worldContext?: WorldContext;
 	}
 
-	let { entity }: Props = $props();
+	let { entity, worldContext }: Props = $props();
 
-	const { removeTileFromWorldTileMap } = useWorldTest();
 	const { worldTileMapStore } = useWorld();
 	const { tileStore } = useTerrain();
 
@@ -42,7 +43,7 @@
 				class="size-3"
 				onclick={(e) => {
 					e.stopPropagation();
-					removeTileFromWorldTileMap(entity.instanceId);
+					worldContext?.removeTileFromWorldTileMap(entity.instanceId);
 				}}
 			>
 				<IconTrash />

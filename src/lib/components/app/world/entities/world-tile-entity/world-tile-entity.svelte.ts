@@ -8,7 +8,7 @@ import {
 	CATEGORY_WALL,
 	TILE_SIZE,
 } from '$lib/constants';
-import type { BeforeUpdateEvent } from '$lib/components/app/world/context';
+import type { BeforeUpdateEvent, WorldContext } from '$lib/components/app/world/context';
 import { toPixel } from '$lib/utils/vector';
 import { Entity } from '../entity.svelte';
 
@@ -21,8 +21,8 @@ export class WorldTileEntity extends Entity {
 		return EntityIdUtils.instanceId<TileVector>(this.id);
 	}
 
-	constructor(worldId: WorldId, vector: TileVector, tileId: TileId) {
-		super('tile', worldId, vector);
+	constructor(worldContext: WorldContext, worldId: WorldId, vector: TileVector, tileId: TileId) {
+		super(worldContext, 'tile', worldId, vector);
 		this.tileId = tileId;
 
 		// 타일 좌표 파싱

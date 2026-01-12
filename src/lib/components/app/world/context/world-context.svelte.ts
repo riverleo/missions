@@ -16,12 +16,13 @@ import type {
 	ItemId,
 	TileId,
 	BuildingId,
+	UserId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import type { Vector } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
-import { useWorldTest } from '$lib/hooks/use-world';
+import { TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
-import { useBuilding } from '$lib/hooks/use-building';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
@@ -147,7 +148,46 @@ export class WorldContext {
 		if (isClick && !wasEntityDragged) {
 			const worldPos = this.camera.screenToWorld(e.clientX, e.clientY);
 			if (worldPos) {
-				this.handleClick(worldPos.x, worldPos.y);
+				const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
+
+				// 캐릭터 이동 우선 처리 (selectedEntityId가 character면)
+				const selectedEntityId = get(selectedEntityIdStore).entityId;
+				if (EntityIdUtils.is('character', selectedEntityId)) {
+					const entity = this.entities[selectedEntityId!];
+					if (entity && entity.type === 'character') {
+						(entity as WorldCharacterEntity).moveTo(worldPos.x, worldPos.y);
+					}
+				}
+				// 엔티티 배치 (cursor가 있으면)
+				else if (this.blueprint.cursor) {
+					const { entityTemplateId } = this.blueprint.cursor;
+
+					// 타일 배치는 두 번의 클릭 필요
+					if (EntityIdUtils.template.is('tile', entityTemplateId)) {
+						if (!this.blueprint.cursor.start) {
+							// 첫 번째 클릭: 시작점 저장
+							this.blueprint.cursor = {
+								...this.blueprint.cursor,
+								start: { ...this.blueprint.cursor.current },
+							};
+						} else {
+							// 두 번째 클릭: 타일 일괄 설치
+							this.placeEntity();
+							// start 클리어
+							this.blueprint.cursor = {
+								...this.blueprint.cursor,
+								start: undefined,
+							};
+						}
+					} else {
+						// 타일이 아니면 바로 배치
+						this.placeEntity();
+					}
+				}
+				// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
+				else {
+					setSelectedEntityId(undefined);
+				}
 			}
 		}
 
@@ -186,87 +226,36 @@ export class WorldContext {
 		}
 	};
 
-	// 클릭 처리: 엔티티 배치 또는 캐릭터 이동
-	private handleClick(worldX: number, worldY: number) {
-		const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
-
-		// 캐릭터 이동 우선 처리 (selectedEntityId가 character면)
-		const selectedEntityId = get(selectedEntityIdStore).entityId;
-		if (EntityIdUtils.is('character', selectedEntityId)) {
-			const entity = this.entities[selectedEntityId!];
-			if (entity && entity.type === 'character') {
-				(entity as WorldCharacterEntity).moveTo(worldX, worldY);
-				return;
-			}
-		}
-
-		// 엔티티 배치 (cursor가 있으면)
-		if (this.blueprint.cursor) {
-			const { entityTemplateId } = this.blueprint.cursor;
-
-			// 타일 배치는 두 번의 클릭 필요
-			if (EntityIdUtils.template.is('tile', entityTemplateId)) {
-				if (!this.blueprint.cursor.start) {
-					// 첫 번째 클릭: 시작점 저장
-					this.blueprint.cursor = {
-						...this.blueprint.cursor,
-						start: { ...this.blueprint.cursor.current },
-					};
-				} else {
-					// 두 번째 클릭: 타일 일괄 설치
-					this.placeEntity();
-					// start 클리어
-					this.blueprint.cursor = {
-						...this.blueprint.cursor,
-						start: undefined,
-					};
-				}
-			} else {
-				// 타일이 아니면 바로 배치
-				this.placeEntity();
-			}
-			return;
-		}
-
-		// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
-		setSelectedEntityId(undefined);
-	}
 
 	// 엔티티 배치
 	private placeEntity() {
 		if (!this.blueprint.cursor) return;
 
-		const { addWorldCharacter, addWorldBuilding, addWorldItem, addTileToWorldTileMap } =
-			useWorldTest();
-		const { store: buildingStore } = useBuilding();
-		const buildings = get(buildingStore).data;
-
 		const { entityTemplateId, current } = this.blueprint.cursor;
 		const { x, y } = current;
-		const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
+		const { type } = EntityIdUtils.template.parse(entityTemplateId);
 
 		if (type === 'building') {
 			// 겹치는 셀이 있으면 배치하지 않음
 			if (!this.blueprint.placable) return;
-			const building = buildings[id as BuildingId];
-			if (!building) return;
-			addWorldBuilding(building.id, x, y);
+			this.addWorldBuilding(EntityIdUtils.template.id<BuildingId>(entityTemplateId), { x, y });
 		} else if (type === 'tile') {
 			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
-			const tileVectors = this.blueprint.getVectorsFromStart();
-			for (const vector of tileVectors) {
-				addTileToWorldTileMap(id as TileId, vector.x, vector.y);
+			for (const vector of this.blueprint.getVectorsFromStart()) {
+				this.addTileToWorldTileMap(EntityIdUtils.template.id<TileId>(entityTemplateId), vector);
 			}
 		} else if (type === 'character') {
 			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
-			const pixelX = x * CELL_SIZE + CELL_SIZE / 2;
-			const pixelY = y * CELL_SIZE + CELL_SIZE / 2;
-			addWorldCharacter(id as CharacterId, pixelX, pixelY);
+			this.addWorldCharacter(EntityIdUtils.template.id<CharacterId>(entityTemplateId), {
+				x: x * CELL_SIZE + CELL_SIZE / 2,
+				y: y * CELL_SIZE + CELL_SIZE / 2,
+			});
 		} else if (type === 'item') {
 			// item은 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
-			const pixelX = x * CELL_SIZE + CELL_SIZE / 2;
-			const pixelY = y * CELL_SIZE + CELL_SIZE / 2;
-			addWorldItem(id as ItemId, pixelX, pixelY);
+			this.addWorldItem(EntityIdUtils.template.id<ItemId>(entityTemplateId), {
+				x: x * CELL_SIZE + CELL_SIZE / 2,
+				y: y * CELL_SIZE + CELL_SIZE / 2,
+			});
 		}
 	}
 
@@ -324,9 +313,6 @@ export class WorldContext {
 
 		this.render.mouse = mouse;
 		this.initialized = true;
-
-		// pathfinder에 engine 설정
-		this.pathfinder.setEngine(this.engine);
 
 		// 지형 및 엔티티 로드
 		this.reload();
@@ -448,7 +434,87 @@ export class WorldContext {
 			Composite.add(this.engine.world, this.mouseConstraint);
 		}
 
+		// 스토어 데이터로부터 엔티티 초기화
+		this.initializeEntitiesFromStore();
+
 		this.updateRenderBounds();
+	}
+
+	// 스토어 데이터로부터 엔티티 생성
+	private initializeEntitiesFromStore() {
+		const { worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } =
+			useWorld();
+
+		// 현재 worldId에 해당하는 데이터만 필터링
+		const characters = Object.values(get(worldCharacterStore).data).filter(
+			(c) => c.world_id === this.worldId
+		);
+		const buildings = Object.values(get(worldBuildingStore).data).filter(
+			(b) => b.world_id === this.worldId
+		);
+		const items = Object.values(get(worldItemStore).data).filter(
+			(i) => i.world_id === this.worldId
+		);
+		const worldTileMap = get(worldTileMapStore).data[this.worldId];
+
+		// 캐릭터 엔티티 생성
+		for (const character of characters) {
+			const entityId = EntityIdUtils.create('character', this.worldId, character.id);
+			if (!this.entities[entityId]) {
+				try {
+					const entity = new WorldCharacterEntity(this, this.worldId, character.id);
+					entity.addToWorld();
+				} catch (error) {
+					console.warn('Skipping character creation:', error);
+				}
+			}
+		}
+
+		// 건물 엔티티 생성
+		for (const building of buildings) {
+			const entityId = EntityIdUtils.create('building', this.worldId, building.id);
+			if (!this.entities[entityId]) {
+				try {
+					const entity = new WorldBuildingEntity(this, this.worldId, building.id);
+					entity.addToWorld();
+				} catch (error) {
+					console.warn('Skipping building creation:', error);
+				}
+			}
+		}
+
+		// 아이템 엔티티 생성
+		for (const item of items) {
+			const entityId = EntityIdUtils.create('item', this.worldId, item.id);
+			if (!this.entities[entityId]) {
+				try {
+					const entity = new WorldItemEntity(this, this.worldId, item.id);
+					entity.addToWorld();
+				} catch (error) {
+					console.warn('Skipping item creation:', error);
+				}
+			}
+		}
+
+		// 타일 엔티티 생성
+		if (worldTileMap) {
+			for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
+				const entityId = EntityIdUtils.create('tile', this.worldId, vector as TileVector);
+				if (!this.entities[entityId]) {
+					try {
+						const entity = new WorldTileEntity(
+							this,
+							this.worldId,
+							vector as TileVector,
+							tileData.tile_id
+						);
+						entity.addToWorld();
+					} catch (error) {
+						console.warn('Skipping tile creation:', error);
+					}
+				}
+			}
+		}
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림
@@ -471,111 +537,6 @@ export class WorldContext {
 		}
 
 		this.oncamerachange?.(camera);
-	}
-
-	// 엔티티 생성 또는 삭제
-	createOrDeleteEntities(
-		worldCharacters: Record<WorldCharacterId, WorldCharacter>,
-		worldBuildings: Record<WorldBuildingId, WorldBuilding>,
-		worldItems: Record<WorldItemId, WorldItem>,
-		worldTileMap: WorldTileMap | undefined
-	) {
-		// 제거될 엔티티들 cleanup
-		for (const entity of Object.values(this.entities)) {
-			const isCharacterRemoved =
-				entity.type === 'character' && !worldCharacters[entity.instanceId as WorldCharacterId];
-			const isBuildingRemoved =
-				entity.type === 'building' && !worldBuildings[entity.instanceId as WorldBuildingId];
-			const isItemRemoved = entity.type === 'item' && !worldItems[entity.instanceId as WorldItemId];
-
-			if (isCharacterRemoved || isBuildingRemoved || isItemRemoved) {
-				// EntityId를 미리 계산 (스토어에서 삭제되기 전)
-				const entityId = EntityIdUtils.create(entity.type, this.worldId, entity.instanceId);
-				entity.removeFromWorld();
-				delete this.entities[entityId];
-			}
-		}
-
-		// 새 캐릭터 엔티티 추가
-		for (const character of Object.values(worldCharacters)) {
-			const entityId = EntityIdUtils.create('character', this.worldId, character.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldCharacterEntity(this.worldId, character.id);
-					entity.addToWorld();
-					this.entities[entity.id] = entity;
-				} catch (error) {
-					console.warn('Skipping character creation:', error);
-				}
-			}
-		}
-
-		// 새 건물 엔티티 추가
-		for (const building of Object.values(worldBuildings)) {
-			const entityId = EntityIdUtils.create('building', this.worldId, building.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldBuildingEntity(this.worldId, building.id);
-					entity.addToWorld();
-					this.entities[entity.id] = entity;
-				} catch (error) {
-					console.warn('Skipping building creation:', error);
-				}
-			}
-		}
-
-		// 새 아이템 엔티티 추가
-		for (const item of Object.values(worldItems)) {
-			const entityId = EntityIdUtils.create('item', this.worldId, item.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldItemEntity(this.worldId, item.id);
-					entity.addToWorld();
-					this.entities[entity.id] = entity;
-				} catch (error) {
-					console.warn('Skipping item creation:', error);
-				}
-			}
-		}
-
-		// WorldTile 엔티티 처리
-		if (worldTileMap) {
-			// 기존 타일 엔티티 중 제거된 것들 삭제
-			for (const entity of Object.values(this.entities)) {
-				if (entity.type === 'tile') {
-					if (!worldTileMap.data[entity.instanceId as TileVector]) {
-						entity.removeFromWorld();
-						delete this.entities[entity.id];
-					}
-				}
-			}
-
-			// 새로운 타일 엔티티 추가
-			for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
-				const entityId = EntityIdUtils.create('tile', this.worldId, vector as TileVector);
-				if (!this.entities[entityId]) {
-					try {
-						const entity = new WorldTileEntity(
-							this.worldId,
-							vector as TileVector,
-							tileData.tile_id
-						);
-						entity.addToWorld();
-						this.entities[entity.id] = entity;
-					} catch (error) {
-						console.warn('Skipping tile creation:', error);
-					}
-				}
-			}
-		} else {
-			// TileMap이 제거되었으면 모든 타일 엔티티 제거
-			for (const entity of Object.values(this.entities)) {
-				if (entity.type === 'tile') {
-					entity.removeFromWorld();
-					delete this.entities[entity.id];
-				}
-			}
-		}
 	}
 
 	// Matter.js body 위치를 엔티티 state에 동기화
@@ -645,5 +606,240 @@ export class WorldContext {
 
 			this.respawningEntityIds.delete(entityId);
 		}, 1000);
+	}
+
+	// 엔티티 추가/제거 메서드들
+	addWorldCharacter(characterId: CharacterId, vector: Vector) {
+		const { worldCharacterStore } = useWorld();
+
+		const worldCharacter: WorldCharacter = {
+			id: crypto.randomUUID() as WorldCharacterId,
+			user_id: crypto.randomUUID() as UserId,
+			player_id: TEST_PLAYER_ID,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: this.worldId,
+			character_id: characterId,
+			x: vector.x,
+			y: vector.y,
+			created_at: new Date().toISOString(),
+		} as WorldCharacter;
+
+		// 스토어 업데이트
+		worldCharacterStore.update((state) => ({
+			...state,
+			data: { ...state.data, [worldCharacter.id]: worldCharacter },
+		}));
+
+		// 엔티티 생성
+		const entity = new WorldCharacterEntity(this, this.worldId, worldCharacter.id);
+		entity.addToWorld();
+	}
+
+	removeWorldCharacter(worldCharacterId: WorldCharacterId) {
+		const { worldCharacterStore } = useWorld();
+
+		// 엔티티 제거
+		const entityId = EntityIdUtils.create('character', this.worldId, worldCharacterId);
+		const entity = this.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
+
+		// 스토어 업데이트
+		worldCharacterStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[worldCharacterId];
+			return { ...state, data: newData };
+		});
+	}
+
+	addWorldBuilding(buildingId: BuildingId, vector: Vector) {
+		const { worldBuildingStore } = useWorld();
+
+		const worldBuilding: WorldBuilding = {
+			id: crypto.randomUUID() as WorldBuildingId,
+			user_id: crypto.randomUUID() as UserId,
+			player_id: TEST_PLAYER_ID,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: this.worldId,
+			building_id: buildingId,
+			cell_x: vector.x,
+			cell_y: vector.y,
+			created_at: new Date().toISOString(),
+			created_at_tick: 0,
+		} as WorldBuilding;
+
+		// 스토어 업데이트
+		worldBuildingStore.update((state) => ({
+			...state,
+			data: { ...state.data, [worldBuilding.id]: worldBuilding },
+		}));
+
+		// 엔티티 생성
+		const entity = new WorldBuildingEntity(this, this.worldId, worldBuilding.id);
+		entity.addToWorld();
+	}
+
+	removeWorldBuilding(worldBuildingId: WorldBuildingId) {
+		const { worldBuildingStore } = useWorld();
+
+		// 엔티티 제거
+		const entityId = EntityIdUtils.create('building', this.worldId, worldBuildingId);
+		const entity = this.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
+
+		// 스토어 업데이트
+		worldBuildingStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[worldBuildingId];
+			return { ...state, data: newData };
+		});
+	}
+
+	addWorldItem(itemId: ItemId, vector: Vector, rotation: number = 0) {
+		const { worldItemStore } = useWorld();
+
+		const worldItem: WorldItem = {
+			id: crypto.randomUUID() as WorldItemId,
+			user_id: crypto.randomUUID() as UserId,
+			player_id: TEST_PLAYER_ID,
+			scenario_id: TEST_SCENARIO_ID,
+			world_id: this.worldId,
+			item_id: itemId,
+			x: vector.x,
+			y: vector.y,
+			rotation,
+			created_at: new Date().toISOString(),
+			created_at_tick: 0,
+		} as WorldItem;
+
+		// 스토어 업데이트
+		worldItemStore.update((state) => ({
+			...state,
+			data: { ...state.data, [worldItem.id]: worldItem },
+		}));
+
+		// 엔티티 생성
+		const entity = new WorldItemEntity(this, this.worldId, worldItem.id);
+		entity.addToWorld();
+	}
+
+	removeWorldItem(worldItemId: WorldItemId) {
+		const { worldItemStore } = useWorld();
+
+		// 엔티티 제거
+		const entityId = EntityIdUtils.create('item', this.worldId, worldItemId);
+		const entity = this.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
+
+		// 스토어 업데이트
+		worldItemStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[worldItemId];
+			return { ...state, data: newData };
+		});
+	}
+
+	addTileToWorldTileMap(tileId: TileId, vector: Vector) {
+		const { worldTileMapStore } = useWorld();
+
+		let worldTileMap = get(worldTileMapStore).data[this.worldId];
+
+		// WorldTileMap이 없으면 생성
+		if (!worldTileMap) {
+			const testWorld = get(useWorld().worldStore).data[this.worldId];
+			if (!testWorld) {
+				return console.error('Test world not found');
+			}
+
+			const newWorldTileMap: WorldTileMap = {
+				id: crypto.randomUUID(),
+				scenario_id: TEST_SCENARIO_ID,
+				user_id: crypto.randomUUID() as UserId,
+				player_id: TEST_PLAYER_ID,
+				world_id: this.worldId,
+				terrain_id: testWorld.terrain_id!,
+				data: {},
+				created_at: new Date().toISOString(),
+			};
+
+			worldTileMapStore.update((state) => ({
+				...state,
+				data: { ...state.data, [this.worldId]: newWorldTileMap },
+			}));
+
+			worldTileMap = newWorldTileMap;
+		}
+
+		// 타일 추가
+		const tileVector: TileVector = `${vector.x},${vector.y}` as TileVector;
+		worldTileMapStore.update((state) => {
+			const tileMap = state.data[this.worldId];
+			if (tileMap) {
+				return {
+					...state,
+					data: {
+						...state.data,
+						[this.worldId]: {
+							...tileMap,
+							data: {
+								...tileMap.data,
+								[tileVector]: {
+									tile_id: tileId,
+									durability: 100,
+								},
+							},
+						},
+					},
+				};
+			}
+			return state;
+		});
+
+		// 엔티티 생성
+		const entityId = EntityIdUtils.create('tile', this.worldId, tileVector);
+		if (!this.entities[entityId]) {
+			try {
+				const entity = new WorldTileEntity(this, this.worldId, tileVector, tileId);
+				entity.addToWorld();
+			} catch (error) {
+				console.warn('Skipping tile creation:', error);
+			}
+		}
+	}
+
+	removeTileFromWorldTileMap(tileVector: TileVector) {
+		const { worldTileMapStore } = useWorld();
+
+		// 엔티티 제거
+		const entityId = EntityIdUtils.create('tile', this.worldId, tileVector);
+		const entity = this.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
+
+		// 스토어 업데이트
+		worldTileMapStore.update((state) => {
+			const tileMap = state.data[this.worldId];
+			if (tileMap) {
+				const newData = { ...tileMap.data };
+				delete newData[tileVector];
+				return {
+					...state,
+					data: {
+						...state.data,
+						[this.worldId]: {
+							...tileMap,
+							data: newData,
+						},
+					},
+				};
+			}
+			return state;
+		});
 	}
 }

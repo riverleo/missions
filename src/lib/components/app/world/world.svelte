@@ -1,15 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
-	import type {
-		WorldId,
-		WorldBuilding,
-		WorldBuildingId,
-		WorldCharacter,
-		WorldCharacterId,
-		WorldItem,
-		WorldItemId,
-	} from '$lib/types';
+	import type { WorldId } from '$lib/types';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldContext } from './context';
@@ -39,8 +31,7 @@
 
 	const worldContext = new WorldContext(worldId, debug);
 	worldContextRef = worldContext;
-	const { worldStore, worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } =
-		useWorld();
+	const { worldStore } = useWorld();
 
 	// worldId로 useWorld에서 world 조회
 	const world = $derived($worldStore.data[worldId]);
@@ -69,48 +60,6 @@
 		worldContext.setDebugEntities(debug);
 	});
 
-	// worldBuildings, worldCharacters, worldItems, worldTileMaps 변경 시 엔티티 동기화
-	$effect(() => {
-		// initialized가 false면 아직 벽이 생성되지 않았으므로 스킵
-		if (!worldContext.initialized) return;
-
-		const buildings = Object.values($worldBuildingStore.data)
-			.filter((b) => b.world_id === worldId)
-			.reduce(
-				(acc, b) => {
-					acc[b.id] = b;
-					return acc;
-				},
-				{} as Record<WorldBuildingId, WorldBuilding>
-			);
-
-		const characters = Object.values($worldCharacterStore.data)
-			.filter((c) => c.world_id === worldId)
-			.reduce(
-				(acc, c) => {
-					acc[c.id] = c;
-					return acc;
-				},
-				{} as Record<WorldCharacterId, WorldCharacter>
-			);
-
-		const items = Object.values($worldItemStore.data)
-			.filter((i) => i.world_id === worldId)
-			.reduce(
-				(acc, i) => {
-					acc[i.id] = i;
-					return acc;
-				},
-				{} as Record<WorldItemId, WorldItem>
-			);
-
-		worldContext.createOrDeleteEntities(
-			characters,
-			buildings,
-			items,
-			$worldTileMapStore.data[worldId]
-		);
-	});
 
 	setWorldContext(worldContext);
 </script>

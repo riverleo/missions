@@ -148,8 +148,10 @@ export const EntityIdUtils = {
 		 * @example
 		 * const { type, value } = EntityIdUtils.template.parse(templateId);
 		 */
-		id<T extends EntityTemplateIdCandidate | string = string>(templateId: EntityTemplateId): T {
-			const parts = templateId.split('_');
+		id<T extends EntityTemplateIdCandidate | string = string>(
+			entityTemplateId: EntityTemplateId
+		): T {
+			const parts = entityTemplateId.split('_');
 			return parts.slice(1).join('_') as T;
 		},
 

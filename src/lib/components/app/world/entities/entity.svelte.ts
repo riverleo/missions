@@ -1,7 +1,6 @@
 import Matter from 'matter-js';
-import type { BeforeUpdateEvent } from '../context';
+import type { BeforeUpdateEvent, WorldContext } from '../context';
 import type { EntityId, EntityInstanceId, ColliderType, WorldId, EntityType } from '$lib/types';
-import { useWorldContext } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 
 const { Composite, Bodies } = Matter;
@@ -11,7 +10,7 @@ export abstract class Entity {
 	abstract readonly type: EntityType;
 	abstract readonly body: any;
 
-	protected readonly world = useWorldContext();
+	protected readonly worldContext: WorldContext;
 
 	x = $state(0);
 	y = $state(0);
@@ -20,12 +19,18 @@ export abstract class Entity {
 	colliderWidth = $state(0);
 	colliderHeight = $state(0);
 
-	constructor(type: EntityType, worldId: WorldId, instanceId: EntityInstanceId) {
+	constructor(
+		worldContext: WorldContext,
+		type: EntityType,
+		worldId: WorldId,
+		instanceId: EntityInstanceId
+	) {
+		this.worldContext = worldContext;
 		this.id = EntityIdUtils.create(type, worldId, instanceId);
 	}
 
 	get debug(): boolean {
-		return this.world.debug;
+		return this.worldContext.debug;
 	}
 
 	get worldId(): WorldId {
@@ -70,7 +75,7 @@ export abstract class Entity {
 		const baseOptions: Matter.IChamferableBodyDefinition = {
 			label: this.id,
 			render: {
-				visible: this.world.debug,
+				visible: this.worldContext.debug,
 			},
 			...bodyDefinition,
 		};
@@ -88,12 +93,14 @@ export abstract class Entity {
 	}
 
 	addToWorld(): void {
-		if (!Composite.get(this.world.engine.world, this.body.id, 'body')) {
-			Composite.add(this.world.engine.world, this.body);
+		if (!Composite.get(this.worldContext.engine.world, this.body.id, 'body')) {
+			Composite.add(this.worldContext.engine.world, this.body);
 		}
+		this.worldContext.entities[this.id] = this;
 	}
 
 	removeFromWorld(): void {
-		Composite.remove(this.world.engine.world, this.body);
+		Composite.remove(this.worldContext.engine.world, this.body);
+		delete this.worldContext.entities[this.id];
 	}
 }

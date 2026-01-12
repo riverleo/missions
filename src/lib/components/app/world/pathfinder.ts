@@ -1,14 +1,10 @@
 import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
-import Matter from 'matter-js';
 import type { Vector } from '$lib/utils/vector';
-
-const { Query, Composite } = Matter;
 
 export class Pathfinder {
 	private grid: PF.Grid;
 	private finder: PF.AStarFinder;
-	private engine: Matter.Engine | undefined;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -24,13 +20,6 @@ export class Pathfinder {
 		});
 
 		this.reset();
-	}
-
-	/**
-	 * Matter.js engine 설정 (walkable 계산용)
-	 */
-	setEngine(engine: Matter.Engine) {
-		this.engine = engine;
 	}
 
 	/**

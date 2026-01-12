@@ -2,35 +2,23 @@ import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	World,
-	WorldCharacter,
-	WorldBuilding,
-	WorldItem,
 	WorldTileMap,
-	TileVector,
-	WorldCharacterId,
-	WorldBuildingId,
-	WorldItemId,
 	WorldId,
 	UserId,
 	PlayerId,
 	ScenarioId,
 	TerrainId,
-	EntityTemplateId,
-	CharacterId,
-	BuildingId,
-	ItemId,
-	TileId,
 } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { useTerrain } from '../use-terrain';
 import { loadFromStorage, saveToStorage, type WorldTestStoreState } from './use-world-test-storage';
 
+export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
-export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 
-let instance: ReturnType<typeof createTestWorldStore> | null = null;
+let instance: ReturnType<typeof createTestWorldStore> | undefined;
 
 function createTestWorldStore() {
 	const stored = loadFromStorage();
@@ -116,7 +104,6 @@ function createTestWorldStore() {
 		});
 	}
 
-
 	function setDebug(debug: boolean) {
 		store.update((state) => ({ ...state, debug }));
 	}
@@ -131,163 +118,6 @@ function createTestWorldStore() {
 
 	function setPanelsOpen(open: boolean) {
 		store.update((state) => ({ ...state, commandPanelOpen: open, inspectorPanelOpen: open }));
-	}
-
-	function addWorldCharacter(characterId: CharacterId, x: number, y: number) {
-		const worldCharacter: WorldCharacter = {
-			id: crypto.randomUUID() as WorldCharacterId,
-			user_id: crypto.randomUUID(),
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
-			world_id: TEST_WORLD_ID,
-			character_id: characterId,
-			x,
-			y,
-			created_at: new Date().toISOString(),
-		} as WorldCharacter;
-
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldCharacterStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[worldCharacter.id] = worldCharacter;
-			})
-		);
-	}
-
-	function addWorldBuilding(buildingId: BuildingId, tileX: number, tileY: number) {
-		const worldBuilding: WorldBuilding = {
-			id: crypto.randomUUID() as WorldBuildingId,
-			user_id: crypto.randomUUID() as UserId,
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
-			world_id: TEST_WORLD_ID,
-			building_id: buildingId,
-			cell_x: tileX,
-			cell_y: tileY,
-			created_at: new Date().toISOString(),
-			created_at_tick: 0,
-		} as WorldBuilding;
-
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldBuildingStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[worldBuilding.id] = worldBuilding;
-			})
-		);
-	}
-
-	function removeWorldCharacter(worldCharacterId: WorldCharacterId) {
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldCharacterStore.update((state) =>
-			produce(state, (draft) => {
-				delete draft.data[worldCharacterId];
-			})
-		);
-	}
-
-	function removeWorldBuilding(worldBuildingId: WorldBuildingId) {
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldBuildingStore.update((state) =>
-			produce(state, (draft) => {
-				delete draft.data[worldBuildingId];
-			})
-		);
-	}
-
-	function addWorldItem(itemId: ItemId, x: number, y: number, rotation: number = 0) {
-		const worldItem: WorldItem = {
-			id: crypto.randomUUID() as WorldItemId,
-			user_id: crypto.randomUUID() as UserId,
-			player_id: TEST_PLAYER_ID,
-			scenario_id: TEST_SCENARIO_ID,
-			world_id: TEST_WORLD_ID,
-			item_id: itemId,
-			x,
-			y,
-			rotation,
-			created_at: new Date().toISOString(),
-			created_at_tick: 0,
-		} as WorldItem;
-
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldItemStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[worldItem.id] = worldItem;
-			})
-		);
-	}
-
-	function removeWorldItem(worldItemId: WorldItemId) {
-		// use-world 스토어 업데이트
-		const world = useWorld();
-		world.worldItemStore.update((state) =>
-			produce(state, (draft) => {
-				delete draft.data[worldItemId];
-			})
-		);
-	}
-
-	function addTileToWorldTileMap(tileId: TileId, tileX: number, tileY: number) {
-		const world = useWorld();
-		let worldTileMap = get(world.worldTileMapStore).data[TEST_WORLD_ID];
-
-		// WorldTileMap이 없으면 생성
-		if (!worldTileMap) {
-			const testWorld = get(world.worldStore).data[TEST_WORLD_ID];
-			if (!testWorld) {
-				return console.error('Test world not found');
-			}
-
-			const newWorldTileMap: WorldTileMap = {
-				id: crypto.randomUUID(),
-				scenario_id: TEST_SCENARIO_ID,
-				user_id: crypto.randomUUID() as UserId,
-				player_id: TEST_PLAYER_ID,
-				world_id: TEST_WORLD_ID,
-				terrain_id: testWorld.terrain_id!,
-				data: {},
-				created_at: new Date().toISOString(),
-			};
-
-			world.worldTileMapStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[TEST_WORLD_ID] = newWorldTileMap;
-				})
-			);
-
-			worldTileMap = newWorldTileMap;
-		}
-
-		// 타일 추가
-		world.worldTileMapStore.update((state) =>
-			produce(state, (draft) => {
-				const tileMap = draft.data[TEST_WORLD_ID];
-				if (tileMap) {
-					const vector: TileVector = `${tileX},${tileY}` as TileVector;
-					tileMap.data[vector] = {
-						tile_id: tileId,
-						durability: 100, // 기본 내구도
-					};
-				}
-			})
-		);
-	}
-
-	function removeTileFromWorldTileMap(tileVector: TileVector) {
-		const world = useWorld();
-		world.worldTileMapStore.update((state) =>
-			produce(state, (draft) => {
-				const tileMap = draft.data[TEST_WORLD_ID];
-				if (tileMap) {
-					delete tileMap.data[tileVector];
-				}
-			})
-		);
 	}
 
 	function init() {
@@ -347,14 +177,6 @@ function createTestWorldStore() {
 		setOpen,
 		setModalPosition,
 		setPanelsOpen,
-		addWorldCharacter,
-		addWorldBuilding,
-		addWorldItem,
-		addTileToWorldTileMap,
-		removeTileFromWorldTileMap,
-		removeWorldCharacter,
-		removeWorldBuilding,
-		removeWorldItem,
 		init,
 	};
 }

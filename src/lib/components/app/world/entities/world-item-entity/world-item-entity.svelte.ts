@@ -6,7 +6,7 @@ import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_ITEM } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
-import type { BeforeUpdateEvent } from '../../context';
+import type { BeforeUpdateEvent, WorldContext } from '../../context';
 
 export class WorldItemEntity extends Entity {
 	readonly type = 'item' as const;
@@ -16,8 +16,8 @@ export class WorldItemEntity extends Entity {
 		return EntityIdUtils.instanceId<WorldItemId>(this.id);
 	}
 
-	constructor(worldId: WorldId, worldItemId: WorldItemId) {
-		super('item', worldId, worldItemId);
+	constructor(worldContext: WorldContext, worldId: WorldId, worldItemId: WorldItemId) {
+		super(worldContext, 'item', worldId, worldItemId);
 
 		// 스토어에서 데이터 조회
 		const worldItem = get(useWorld().worldItemStore).data[worldItemId];

@@ -62,13 +62,13 @@
 
 	{#each entities as entity (entity.id)}
 		{#if entity.type === 'character'}
-			<WorldCharacterEntityAccordionItem entity={entity as WorldCharacterEntity} />
+			<WorldCharacterEntityAccordionItem entity={entity as WorldCharacterEntity} {worldContext} />
 		{:else if entity.type === 'building'}
-			<WorldBuildingEntityAccordionItem entity={entity as WorldBuildingEntity} />
+			<WorldBuildingEntityAccordionItem entity={entity as WorldBuildingEntity} {worldContext} />
 		{:else if entity.type === 'item'}
-			<WorldItemEntityAccordionItem entity={entity as WorldItemEntity} />
+			<WorldItemEntityAccordionItem entity={entity as WorldItemEntity} {worldContext} />
 		{:else if entity.type === 'tile'}
-			<WorldTileEntityAccordionItem entity={entity as WorldTileEntity} />
+			<WorldTileEntityAccordionItem entity={entity as WorldTileEntity} {worldContext} />
 		{/if}
 	{/each}
 </Accordion>

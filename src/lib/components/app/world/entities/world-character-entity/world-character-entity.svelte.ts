@@ -8,7 +8,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
-import type { BeforeUpdateEvent } from '../../context';
+import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 
 const { Body } = Matter;
@@ -23,8 +23,8 @@ export class WorldCharacterEntity extends Entity {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
 	}
 
-	constructor(worldId: WorldId, worldCharacterId: WorldCharacterId) {
-		super('character', worldId, worldCharacterId);
+	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
+		super(worldContext, 'character', worldId, worldCharacterId);
 
 		// 스토어에서 데이터 조회 (초기값만)
 		const worldCharacter = get(useWorld().worldCharacterStore).data[worldCharacterId];
@@ -156,9 +156,9 @@ export class WorldCharacterEntity extends Entity {
 		const currentY = this.body.position.y;
 
 		// pathfinder로 경로 계산
-		const rawPath = this.world.pathfinder.findPath(currentX, currentY, targetX, targetY);
+		const rawPath = this.worldContext.pathfinder.findPath(currentX, currentY, targetX, targetY);
 
 		// 경로 스무딩
-		this.path = this.world.pathfinder.smoothPath(rawPath);
+		this.path = this.worldContext.pathfinder.smoothPath(rawPath);
 	}
 }
