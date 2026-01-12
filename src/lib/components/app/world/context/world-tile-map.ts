@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import type { WorldContext } from '../context';
+import type { WorldContext } from './world-context.svelte';
 import type { TileId, TileVector, WorldId, WorldTileMap, WorldTileMapInsert } from '$lib/types';
 import type { Vector } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';

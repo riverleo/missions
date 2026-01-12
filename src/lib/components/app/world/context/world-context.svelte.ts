@@ -16,19 +16,17 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
-import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
-import { WorldItemEntity } from '../entities/world-item-entity';
-import { WorldTileEntity } from '../entities/world-tile-entity';
 import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { createBoundaryWalls } from '../utils/create-boundary-walls';
-import { createWorldCharacter, deleteWorldCharacter } from '../utils/world-character';
-import { createWorldBuilding, deleteWorldBuilding } from '../utils/world-building';
-import { createWorldItem, deleteWorldItem } from '../utils/world-item';
-import { createTileInWorldTileMap, deleteTileFromWorldTileMap } from '../utils/world-tile-map';
+import { createBoundaryWalls } from './create-boundary-walls';
+import { createWorldCharacter, deleteWorldCharacter } from './world-character';
+import { createWorldBuilding, deleteWorldBuilding } from './world-building';
+import { createWorldItem, deleteWorldItem } from './world-item';
+import { createTileInWorldTileMap, deleteTileFromWorldTileMap } from './world-tile-map';
+import { initializeEntities } from './initialize-entities';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
@@ -338,86 +336,9 @@ export class WorldContext {
 		}
 
 		// 스토어 데이터로부터 엔티티 초기화
-		this.initializeEntities();
+		initializeEntities(this);
 
 		this.updateRenderBounds();
-	}
-
-	// 스토어 데이터로부터 엔티티 생성
-	private initializeEntities() {
-		const { worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } =
-			useWorld();
-
-		// 현재 worldId에 해당하는 데이터만 필터링
-		const characters = Object.values(get(worldCharacterStore).data).filter(
-			(c) => c.world_id === this.worldId
-		);
-		const buildings = Object.values(get(worldBuildingStore).data).filter(
-			(b) => b.world_id === this.worldId
-		);
-		const items = Object.values(get(worldItemStore).data).filter(
-			(i) => i.world_id === this.worldId
-		);
-		const worldTileMap = get(worldTileMapStore).data[this.worldId];
-
-		// 캐릭터 엔티티 생성
-		for (const character of characters) {
-			const entityId = EntityIdUtils.create('character', this.worldId, character.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldCharacterEntity(this, this.worldId, character.id);
-					entity.addToWorld();
-				} catch (error) {
-					console.warn('Skipping character creation:', error);
-				}
-			}
-		}
-
-		// 건물 엔티티 생성
-		for (const building of buildings) {
-			const entityId = EntityIdUtils.create('building', this.worldId, building.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldBuildingEntity(this, this.worldId, building.id);
-					entity.addToWorld();
-				} catch (error) {
-					console.warn('Skipping building creation:', error);
-				}
-			}
-		}
-
-		// 아이템 엔티티 생성
-		for (const item of items) {
-			const entityId = EntityIdUtils.create('item', this.worldId, item.id);
-			if (!this.entities[entityId]) {
-				try {
-					const entity = new WorldItemEntity(this, this.worldId, item.id);
-					entity.addToWorld();
-				} catch (error) {
-					console.warn('Skipping item creation:', error);
-				}
-			}
-		}
-
-		// 타일 엔티티 생성
-		if (worldTileMap) {
-			for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
-				const entityId = EntityIdUtils.create('tile', this.worldId, vector as TileVector);
-				if (!this.entities[entityId]) {
-					try {
-						const entity = new WorldTileEntity(
-							this,
-							this.worldId,
-							vector as TileVector,
-							tileData.tile_id
-						);
-						entity.addToWorld();
-					} catch (error) {
-						console.warn('Skipping tile creation:', error);
-					}
-				}
-			}
-		}
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림

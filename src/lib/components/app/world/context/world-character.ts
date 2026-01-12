@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import type { WorldContext } from '../context';
+import type { WorldContext } from './world-context.svelte';
 import type { WorldCharacter, WorldCharacterId, WorldCharacterInsert, UserId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';

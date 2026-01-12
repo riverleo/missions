@@ -5,7 +5,7 @@ import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { useTerrain } from '../use-terrain';
 import { loadFromStorage, saveToStorage, type WorldTestStoreState } from './use-world-test-storage';
-import { createWorld, deleteWorld } from '$lib/components/app/world/utils/world';
+import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
 
 export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
