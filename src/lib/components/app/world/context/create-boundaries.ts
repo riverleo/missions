@@ -3,7 +3,14 @@ import { BOUNDARY_THICKNESS, CATEGORY_BOUNDARY } from '$lib/constants';
 
 const { Bodies } = Matter;
 
-export function createBoundaries(width: number, height: number, debug: boolean): Matter.Body[] {
+export interface Boundaries {
+	top: Matter.Body;
+	bottom: Matter.Body;
+	left: Matter.Body;
+	right: Matter.Body;
+}
+
+export function createBoundaries(width: number, height: number, debug: boolean): Boundaries {
 	const boundaryOptions = {
 		isStatic: true,
 		collisionFilter: {
@@ -55,5 +62,5 @@ export function createBoundaries(width: number, height: number, debug: boolean):
 		}
 	);
 
-	return [top, bottom, left, right];
+	return { top, bottom, left, right };
 }

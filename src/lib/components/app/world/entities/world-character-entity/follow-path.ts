@@ -63,7 +63,6 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 	}
 	// X축 이동이 완료되면 Y축 이동
 	else if (Math.abs(dy) > arrivalThreshold) {
-		// Y축 이동 중에는 X축을 목표 위치로 고정 (떨림 방지)
 		newX = targetPoint.x;
 
 		const moveDistance = speed * deltaSeconds;

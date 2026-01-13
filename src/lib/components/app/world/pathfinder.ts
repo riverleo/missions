@@ -19,7 +19,7 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / size);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder({
-			allowDiagonal: true,
+			allowDiagonal: false,
 			dontCrossCorners: true, // 모서리를 가로질러 대각선 이동 방지
 		});
 

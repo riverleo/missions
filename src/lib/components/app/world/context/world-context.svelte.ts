@@ -21,7 +21,7 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { createBoundaries } from './create-boundaries';
+import { createBoundaries, type Boundaries } from './create-boundaries';
 import { createWorldCharacter, deleteWorldCharacter } from './world-character';
 import { createWorldBuilding, deleteWorldBuilding } from './world-building';
 import { createWorldItem, deleteWorldItem } from './world-item';
@@ -40,6 +40,7 @@ export class WorldContext {
 	readonly blueprint: WorldContextBlueprint;
 	readonly pathfinder: Pathfinder;
 
+	boundaries: Boundaries | undefined = $state.raw(undefined);
 	entities = $state<Record<EntityId, Entity>>({});
 	debug = $state(false);
 	initialized = $state(false);
@@ -76,11 +77,10 @@ export class WorldContext {
 			entity.setDebug(debug);
 		}
 
-		// 바운더리 벽 visibility 업데이트
-		const bodies = Composite.allBodies(this.engine.world);
-		for (const body of bodies) {
-			if (body.label.startsWith('boundary-')) {
-				body.render.visible = debug;
+		// 바운더리 visibility 업데이트
+		if (this.boundaries) {
+			for (const boundary of Object.values(this.boundaries)) {
+				boundary.render.visible = debug;
 			}
 		}
 	}
@@ -323,8 +323,8 @@ export class WorldContext {
 		this.pathfinder.reset();
 
 		// 바운더리 생성
-		const walls = createBoundaries(this.terrain.width, this.terrain.height, this.debug);
-		Composite.add(this.engine.world, walls);
+		this.boundaries = createBoundaries(this.terrain.width, this.terrain.height, this.debug);
+		Composite.add(this.engine.world, Object.values(this.boundaries));
 
 		// 엔티티 바디 재추가
 		for (const entity of Object.values(this.entities)) {
