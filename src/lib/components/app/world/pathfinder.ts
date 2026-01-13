@@ -174,13 +174,16 @@ export class Pathfinder {
 			const cellX = tile.tileX * TILE_CELL_RATIO;
 			const cellY = tile.tileY * TILE_CELL_RATIO;
 
-			// 좌측/우측 인접 타일 확인
+			// 좌측/우측/상단 인접 타일 확인
 			const hasLeftTile = tilePositions.has(`${tile.tileX - 1},${tile.tileY}`);
 			const hasRightTile = tilePositions.has(`${tile.tileX + 1},${tile.tileY}`);
+			const hasTopTile = tilePositions.has(`${tile.tileX},${tile.tileY - 1}`);
 
 			// 타일 너비만큼 walkable 설정
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				this.setWalkable(cellX + dx, cellY - 2, true);
+				if (!hasTopTile) {
+					this.setWalkable(cellX + dx, cellY - 2, true);
+				}
 
 				// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
 				const isLeftEdge = !hasLeftTile && dx === 0;
@@ -191,7 +194,9 @@ export class Pathfinder {
 					if (isLeftEdge) {
 						// 왼쪽으로 4칸
 						for (let offset = 1; offset <= 4; offset++) {
-							this.setWalkable(cellX + dx - offset, cellY - 2, true);
+							if (!hasTopTile) {
+								this.setWalkable(cellX + dx - offset, cellY - 2, true);
+							}
 
 							if (offset === 4) {
 								this.setWalkable(cellX + dx - offset, cellY - 1, true);
@@ -206,7 +211,9 @@ export class Pathfinder {
 					if (isRightEdge) {
 						// 오른쪽으로 4칸
 						for (let offset = 1; offset <= 4; offset++) {
-							this.setWalkable(cellX + dx + offset, cellY - 2, true);
+							if (!hasTopTile) {
+								this.setWalkable(cellX + dx + offset, cellY - 2, true);
+							}
 
 							if (offset === 4) {
 								this.setWalkable(cellX + dx + offset, cellY - 1, true);
@@ -218,6 +225,18 @@ export class Pathfinder {
 							}
 						}
 					}
+				}
+			}
+		}
+
+		// 3. 모든 타일이 차지하는 영역을 unwalkable로 덮어씌우기
+		for (const tile of tileEntities) {
+			const cellX = tile.tileX * TILE_CELL_RATIO;
+			const cellY = tile.tileY * TILE_CELL_RATIO;
+
+			for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+				for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+					this.setWalkable(cellX + dx, cellY + dy, false);
 				}
 			}
 		}
