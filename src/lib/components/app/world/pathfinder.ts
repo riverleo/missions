@@ -20,8 +20,7 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / size);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder({
-			allowDiagonal: false,
-			dontCrossCorners: true, // 모서리를 가로질러 대각선 이동 방지
+			allowDiagonal: true,
 		});
 
 		this.reset();
@@ -85,9 +84,13 @@ export class Pathfinder {
 		const endTileX = this.pixelToCellIndex(toX);
 		const endTileY = this.pixelToCellIndex(toY);
 
-		// 그리드 복사본 사용 (finder가 그리드를 수정하기 때문)
-		const gridClone = this.grid.clone();
-		const path = this.finder.findPath(startTileX, startTileY, endTileX, endTileY, gridClone);
+		const path = this.finder.findPath(
+			startTileX,
+			startTileY,
+			endTileX,
+			endTileY,
+			this.grid.clone()
+		);
 
 		// 타일 좌표를 픽셀 좌표(타일 중심)로 변환
 		return path.map((point) => ({
@@ -147,20 +150,19 @@ export class Pathfinder {
 	draw() {
 		this.reset();
 
-		// 1. 바닥(boundary bottom) 위로 1, 2번째 노드를 walkable로 설정
+		// 1. 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
 		if (this.worldContext.boundaries) {
 			// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
 			const bottomTopY = this.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
 			const bottomTopCellY = this.pixelToCellIndex(bottomTopY);
 
-			// 바닥 위로 1번째, 2번째 셀
+			// 바닥 위로 2번째 셀
 			for (let x = 0; x < this.cols; x++) {
-				this.setWalkable(x, bottomTopCellY - 1, true);
 				this.setWalkable(x, bottomTopCellY - 2, true);
 			}
 		}
 
-		// 2. 모든 타일 위로 1, 2번째 노드를 walkable로 설정
+		// 2. 모든 타일 위/아래로 walkable 설정
 		const tileEntities = Object.values(this.worldContext.entities).filter(
 			(entity): entity is WorldTileEntity => entity.type === 'tile'
 		);
@@ -169,10 +171,18 @@ export class Pathfinder {
 			const cellX = tile.tileX * TILE_CELL_RATIO;
 			const cellY = tile.tileY * TILE_CELL_RATIO;
 
-			// 타일 위로 1번째, 2번째 셀 (타일 너비만큼)
+			// 타일 너비만큼 walkable 설정
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				this.setWalkable(cellX + dx, cellY - 1, true);
+				this.setWalkable(cellX + dx, cellY, true);
+				// 타일 위로 2번째 셀
 				this.setWalkable(cellX + dx, cellY - 2, true);
+				this.setWalkable(cellX + dx, cellY - 1, true);
+				// 타일 아래로 1번째, 2번째 셀
+				this.setWalkable(cellX + dx, cellY + 1, true);
+				this.setWalkable(cellX + dx, cellY + 2, true);
+				this.setWalkable(cellX + dx, cellY + 3, true);
+				this.setWalkable(cellX + dx, cellY + 4, true);
+				this.setWalkable(cellX + dx, cellY + 5, true);
 			}
 		}
 	}
