@@ -10,7 +10,7 @@ export abstract class Entity {
 	abstract readonly type: EntityType;
 	abstract readonly body: any;
 
-	protected readonly worldContext: WorldContext;
+	readonly worldContext: WorldContext;
 
 	x = $state(0);
 	y = $state(0);

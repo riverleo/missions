@@ -1,11 +1,39 @@
-import { TILE_CELL_RATIO } from '$lib/constants';
+import { BOUNDARY_THICKNESS, TILE_CELL_RATIO } from '$lib/constants';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 import type { Pathfinder } from './pathfinder';
 
 /**
+ * 그리드 초기화 및 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
+ */
+export function initializeWalkable(pathfinder: Pathfinder) {
+	// 모든 셀을 unwalkable로 초기화
+	for (let y = 0; y < pathfinder.rows; y++) {
+		for (let x = 0; x < pathfinder.cols; x++) {
+			pathfinder.grid.setWalkableAt(x, y, false);
+		}
+	}
+
+	// 점프존 초기화
+	pathfinder.jumpZones.clear();
+
+	if (!pathfinder.worldContext.boundaries) {
+		throw new Error('Cannot initialize walkable: boundaries not found');
+	}
+
+	// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
+	const bottomTopY = pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+	const bottomTopCellY = pathfinder.pixelToCellIndex(bottomTopY);
+
+	// 바닥 위로 2번째 셀
+	for (let x = 0; x < pathfinder.cols; x++) {
+		pathfinder.grid.setWalkableAt(x, bottomTopCellY - 2, true);
+	}
+}
+
+/**
  * 모든 타일 위/아래로 walkable 설정
  */
-export function drawTileWalkable(pathfinder: Pathfinder): void {
+export function setWalkable(pathfinder: Pathfinder) {
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
 		(entity): entity is WorldTileEntity => entity.type === 'tile'
 	);
@@ -77,6 +105,26 @@ export function drawTileWalkable(pathfinder: Pathfinder): void {
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+/**
+ * 모든 타일이 차지하는 영역을 unwalkable로 덮어씌우기
+ */
+export function setTileToUnwalkable(pathfinder: Pathfinder) {
+	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
+		(entity): entity is WorldTileEntity => entity.type === 'tile'
+	);
+
+	for (const tile of tileEntities) {
+		const cellX = tile.tileX * TILE_CELL_RATIO;
+		const cellY = tile.tileY * TILE_CELL_RATIO;
+
+		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
+			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+				pathfinder.grid.setWalkableAt(cellX + dx, cellY + dy, false);
 			}
 		}
 	}

@@ -238,7 +238,7 @@ export class WorldContextBlueprint {
 	/**
 	 * 커서 정보를 기반으로 엔티티를 월드에 배치
 	 */
-	cursorToEntities() {
+	async cursorToEntities() {
 		if (!this.cursor) return;
 
 		const { entityTemplateId, current } = this.cursor;
@@ -256,7 +256,7 @@ export class WorldContextBlueprint {
 		} else if (type === 'tile') {
 			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
 			for (const vector of this.getVectorsFromStart()) {
-				this.context.createTileInWorldTileMap(
+				await this.context.createTileInWorldTileMap(
 					EntityIdUtils.template.id<TileId>(entityTemplateId),
 					vector
 				);

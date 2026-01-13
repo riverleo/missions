@@ -1,4 +1,4 @@
-import type { WorldId, TileVector, TileId } from '$lib/types';
+import type { WorldId, VectorKey, TileId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import {
 	CATEGORY_TILE,
@@ -19,11 +19,11 @@ export class WorldTileEntity extends Entity {
 	readonly tileX: number;
 	readonly tileY: number;
 
-	override get instanceId(): TileVector {
-		return EntityIdUtils.instanceId<TileVector>(this.id);
+	override get instanceId(): VectorKey {
+		return EntityIdUtils.instanceId<VectorKey>(this.id);
 	}
 
-	constructor(worldContext: WorldContext, worldId: WorldId, vector: TileVector, tileId: TileId) {
+	constructor(worldContext: WorldContext, worldId: WorldId, vector: VectorKey, tileId: TileId) {
 		super(worldContext, 'tile', worldId, vector);
 		this.tileId = tileId;
 

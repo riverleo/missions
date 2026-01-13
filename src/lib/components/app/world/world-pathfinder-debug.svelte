@@ -24,7 +24,7 @@
 		for (let row = 0; row < pathfinder.rows; row++) {
 			for (let col = 0; col < pathfinder.cols; col++) {
 				if (pathfinder.grid.isWalkableAt(col, row)) {
-					if (pathfinder.isJumpZone(col, row)) {
+					if (pathfinder.isJumpZone({ x: col, y: row })) {
 						jumpZone.push({ x: col, y: row });
 					} else {
 						walkable.push({ x: col, y: row });

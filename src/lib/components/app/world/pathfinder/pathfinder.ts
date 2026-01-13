@@ -2,15 +2,14 @@ import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
 import type { Vector } from '$lib/utils/vector';
 import type { WorldContext } from '../context';
-import { initializeWalkable } from './initialize-walkable';
-import { drawTileWalkable } from './draw-tile-walkable';
-import { drawTileUnwalkable } from './draw-tile-unwalkable';
+import { initializeWalkable, setWalkable, setTileToUnwalkable } from './walkable';
+import type { VectorKey } from '$lib/types';
 
 export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
-	readonly jumpZones: Set<string> = new Set();
+	readonly jumpZones: Set<VectorKey> = new Set();
 
 	readonly cols: number;
 	readonly rows: number;
@@ -38,6 +37,10 @@ export class Pathfinder {
 	 */
 	pixelToCellIndex(pixel: number) {
 		return Math.floor(pixel / this.size);
+	}
+
+	vectorToCell(vector: Vector) {
+		return { x: this.pixelToCellIndex(vector.x), y: this.pixelToCellIndex(vector.y) };
 	}
 
 	/**
@@ -82,8 +85,8 @@ export class Pathfinder {
 	/**
 	 * 해당 셀이 점프존인지 확인
 	 */
-	isJumpZone(x: number, y: number): boolean {
-		return this.jumpZones.has(`${x},${y}`);
+	isJumpZone(vector: Vector): boolean {
+		return this.jumpZones.has(`${vector.x},${vector.y}`);
 	}
 
 	/**
@@ -91,7 +94,7 @@ export class Pathfinder {
 	 */
 	update() {
 		initializeWalkable(this);
-		drawTileWalkable(this);
-		drawTileUnwalkable(this);
+		setWalkable(this);
+		setTileToUnwalkable(this);
 	}
 }

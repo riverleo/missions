@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
-import type { TileVector } from '$lib/types';
+import type { VectorKey } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
@@ -60,7 +60,7 @@ export function initializeEntities(worldContext: WorldContext) {
 				const entity = new WorldTileEntity(
 					worldContext,
 					worldContext.worldId,
-					vector as TileVector,
+					vector as VectorKey,
 					tileData.tile_id
 				);
 				entity.addToWorld();

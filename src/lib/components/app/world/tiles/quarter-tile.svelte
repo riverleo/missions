@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TileVector, WorldId } from '$lib/types';
+	import type { VectorKey, WorldId } from '$lib/types';
 	import { TILE_SIZE } from '$lib/constants';
 	import { calculate } from '$lib/utils/bitmask';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -23,7 +23,7 @@
 		if (!context) return false;
 
 		// 실제 엔티티 체크
-		const tileVector: TileVector = `${tx},${ty}`;
+		const tileVector: VectorKey = `${tx},${ty}`;
 		const tileId = EntityIdUtils.create('tile', worldId, tileVector);
 		if (context.entities[tileId]) return true;
 

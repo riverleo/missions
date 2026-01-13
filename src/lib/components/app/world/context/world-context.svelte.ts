@@ -7,7 +7,7 @@ import type {
 	WorldItemId,
 	WorldId,
 	EntityId,
-	TileVector,
+	VectorKey,
 	TileId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -121,7 +121,7 @@ export class WorldContext {
 	};
 
 	// canvas mouseup 처리
-	private handleCanvasMouseUp = (e: MouseEvent) => {
+	private handleCanvasMouseUp = async (e: MouseEvent) => {
 		if (!this.mouseDownScreenPosition) return;
 
 		// 드래그 거리 계산 (클릭 판정: 5px 이내)
@@ -158,13 +158,13 @@ export class WorldContext {
 							this.blueprint.setCursorStart(this.blueprint.cursor.current);
 						} else {
 							// 두 번째 클릭: 타일 일괄 설치
-							this.blueprint.cursorToEntities();
+							await this.blueprint.cursorToEntities();
 							// start 클리어
 							this.blueprint.setCursorStart(undefined);
 						}
 					} else {
 						// 타일이 아니면 바로 배치
-						this.blueprint.cursorToEntities();
+						await this.blueprint.cursorToEntities();
 					}
 				}
 				// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
@@ -333,6 +333,8 @@ export class WorldContext {
 			Composite.add(this.engine.world, this.mouseConstraint);
 		}
 
+		this.pathfinder.update();
+
 		// 스토어 데이터로부터 엔티티 초기화
 		initializeEntities(this);
 
@@ -443,8 +445,8 @@ export class WorldContext {
 		createWorldItem(this, insert);
 	}
 
-	createTileInWorldTileMap(tileId: TileId, vector: Vector) {
-		createTileInWorldTileMap(this, tileId, vector);
+	async createTileInWorldTileMap(tileId: TileId, vector: Vector) {
+		await createTileInWorldTileMap(this, tileId, vector);
 	}
 
 	deleteWorldCharacter(worldCharacterId: WorldCharacterId) {
@@ -459,7 +461,7 @@ export class WorldContext {
 		deleteWorldItem(this, worldItemId);
 	}
 
-	deleteTileFromWorldTileMap(tileVector: TileVector) {
+	deleteTileFromWorldTileMap(tileVector: VectorKey) {
 		deleteTileFromWorldTileMap(this, tileVector);
 	}
 }

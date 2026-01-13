@@ -32,7 +32,7 @@ export type EntityId =
 	| `character_${WorldId}_${WorldCharacterId}`
 	| `building_${WorldId}_${WorldBuildingId}`
 	| `item_${WorldId}_${WorldItemId}`
-	| `tile_${WorldId}_${TileVector}`;
+	| `tile_${WorldId}_${VectorKey}`;
 export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
 // Entity Template ID (템플릿 선택용, worldId 없음)
@@ -44,7 +44,7 @@ export type EntityTemplateId =
 	| `tile_${TileId}`;
 
 // Instance types for EntityId and EntityTemplateId
-export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileVector;
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | VectorKey;
 export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
 export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
 
@@ -1464,8 +1464,8 @@ export type WorldItemUpdate = Omit<
 };
 
 // WorldTileMap types
-export type TileVector = `${number},${number}`;
-export type WorldTileVector = `${WorldId}_${TileVector}`;
+export type VectorKey = `${number},${number}`;
+export type WorldTileVector = `${WorldId}_${VectorKey}`;
 
 type WorldTileMapRow = Tables<'world_tile_maps'>;
 export type WorldTileMap = Omit<
@@ -1477,7 +1477,7 @@ export type WorldTileMap = Omit<
 	player_id: PlayerId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data: Record<TileVector, { tile_id: TileId; durability: number }>;
+	data: Record<VectorKey, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
 export type WorldTileMapInsert = Omit<
@@ -1489,7 +1489,7 @@ export type WorldTileMapInsert = Omit<
 	player_id: PlayerId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data?: Record<TileVector, { tile_id: TileId; durability: number }>;
+	data?: Record<VectorKey, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
 export type WorldTileMapUpdate = Omit<
@@ -1502,7 +1502,7 @@ export type WorldTileMapUpdate = Omit<
 	player_id?: PlayerId;
 	world_id?: WorldId;
 	terrain_id?: TerrainId;
-	data?: Record<TileVector, { tile_id: TileId; durability: number }>;
+	data?: Record<VectorKey, { tile_id: TileId; durability: number }>;
 };
 
 // ItemBehavior types
