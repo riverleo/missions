@@ -187,14 +187,37 @@ export class Pathfinder {
 				const isRightEdge = !hasRightTile && dx === TILE_CELL_RATIO - 1;
 
 				if (isLeftEdge || isRightEdge) {
-					this.setWalkable(cellX + dx, cellY - 1, true);
-					this.setWalkable(cellX + dx, cellY, true);
-					this.setWalkable(cellX + dx, cellY + 1, true);
-					// 타일 아래로 1~4번째 셀
-					this.setWalkable(cellX + dx, cellY + 2, true);
-					this.setWalkable(cellX + dx, cellY + 3, true);
-					this.setWalkable(cellX + dx, cellY + 4, true);
-					this.setWalkable(cellX + dx, cellY + 5, true);
+					// 좌우로 4칸씩 walkable 설정 (수평 타일 연결)
+					if (isLeftEdge) {
+						// 왼쪽으로 4칸
+						for (let offset = 1; offset <= 4; offset++) {
+							this.setWalkable(cellX + dx - offset, cellY - 2, true);
+
+							if (offset === 4) {
+								this.setWalkable(cellX + dx - offset, cellY - 1, true);
+								this.setWalkable(cellX + dx - offset, cellY, true);
+								this.setWalkable(cellX + dx - offset, cellY + 1, true);
+								this.setWalkable(cellX + dx - offset, cellY + 2, true);
+								this.setWalkable(cellX + dx - offset, cellY + 3, true);
+								this.setWalkable(cellX + dx - offset, cellY + 4, true);
+							}
+						}
+					}
+					if (isRightEdge) {
+						// 오른쪽으로 4칸
+						for (let offset = 1; offset <= 4; offset++) {
+							this.setWalkable(cellX + dx + offset, cellY - 2, true);
+
+							if (offset === 4) {
+								this.setWalkable(cellX + dx + offset, cellY - 1, true);
+								this.setWalkable(cellX + dx + offset, cellY, true);
+								this.setWalkable(cellX + dx + offset, cellY + 1, true);
+								this.setWalkable(cellX + dx + offset, cellY + 2, true);
+								this.setWalkable(cellX + dx + offset, cellY + 3, true);
+								this.setWalkable(cellX + dx + offset, cellY + 4, true);
+							}
+						}
+					}
 				}
 			}
 		}
