@@ -17,7 +17,7 @@
 	import { WorldItemEntityRenderer, type WorldItemEntity } from './entities/world-item-entity';
 	import { WorldTileEntityRenderer, type WorldTileEntity } from './entities/world-tile-entity';
 	import WorldBlueprint from './world-blueprint.svelte';
-	import WorldPathfindingDebug from './world-pathfinding-debug.svelte';
+	import WorldPathfinderDebug from './world-pathfinder-debug.svelte';
 	import { cn } from '$lib/utils';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {
@@ -83,7 +83,7 @@
 		{#if terrainAssetUrl}
 			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
 		{/if}
-		<WorldPathfindingDebug />
+		<WorldPathfinderDebug />
 		<WorldBlueprint />
 		{#each entities as entity (entity.id)}
 			{#if entity.type === 'tile'}

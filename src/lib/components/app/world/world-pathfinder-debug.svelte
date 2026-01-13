@@ -19,8 +19,10 @@
 
 		const walkable: Vector[] = [];
 		const unwalkable: Vector[] = [];
+
 		for (let row = 0; row < pathfinder.rows; row++) {
 			for (let col = 0; col < pathfinder.cols; col++) {
+				const key = `${col},${row}`;
 				if (pathfinder.isWalkable(col, row)) {
 					walkable.push({ x: col, y: row });
 				} else {

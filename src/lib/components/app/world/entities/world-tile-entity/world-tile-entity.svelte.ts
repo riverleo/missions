@@ -61,14 +61,14 @@ export class WorldTileEntity extends Entity {
 		super.addToWorld();
 
 		// pathfinder 전체 업데이트
-		this.worldContext.pathfinder.update();
+		this.worldContext.pathfinder.draw();
 	}
 
 	override removeFromWorld(): void {
 		super.removeFromWorld();
 
 		// pathfinder 전체 업데이트
-		this.worldContext.pathfinder.update();
+		this.worldContext.pathfinder.draw();
 	}
 
 	save(): void {
