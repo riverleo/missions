@@ -23,11 +23,34 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 	}
 
 	const currentPos = entity.body.position;
-	const deltaSeconds = event.delta / 1000;
+	const delta = event.delta;
+	const deltaSeconds = delta / 1000;
+
+	// 현재 위치가 점프존인지 확인
+	const cellX = entity.worldContext.pathfinder.pixelToCellIndex(currentPos.x);
+	const cellY = entity.worldContext.pathfinder.pixelToCellIndex(currentPos.y);
+	const isInJumpZone = entity.worldContext.pathfinder.isJumpZone(cellX, cellY);
+
+	// 점프존에 진입했을 때, 경로의 최종 목표가 위쪽인지 확인
+	if (isInJumpZone && !entity.wasInJumpZone) {
+		// 경로의 마지막 지점과 현재 위치를 비교
+		const finalTarget = entity.path[entity.path.length - 1];
+		if (finalTarget && finalTarget.y < currentPos.y) {
+			// 최종 목표가 위쪽이면 대기
+			entity.jumpDelay = 500; // 500ms 대기
+		}
+	}
+	entity.wasInJumpZone = isInJumpZone;
 
 	// 목표 지점까지의 거리 계산
 	const dx = targetPoint.x - currentPos.x;
 	const dy = targetPoint.y - currentPos.y;
+
+	// 점프 대기 중이면 움직이지 않고 시간만 감소
+	if (entity.jumpDelay > 0) {
+		entity.jumpDelay = Math.max(0, entity.jumpDelay - delta);
+		return;
+	}
 
 	// 이동 방향 업데이트
 	if (dx > 0) {

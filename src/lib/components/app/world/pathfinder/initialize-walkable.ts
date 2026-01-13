@@ -12,6 +12,9 @@ export function initializeWalkable(pathfinder: Pathfinder): void {
 		}
 	}
 
+	// 점프존 초기화
+	pathfinder.jumpZones.clear();
+
 	if (!pathfinder.worldContext.boundaries) {
 		throw new Error('Cannot initialize walkable: boundaries not found');
 	}

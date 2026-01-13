@@ -10,6 +10,7 @@ export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
+	readonly jumpZones: Set<string> = new Set();
 
 	readonly cols: number;
 	readonly rows: number;
@@ -76,6 +77,13 @@ export class Pathfinder {
 			x: this.cellIndexToPixel(point[0] as number),
 			y: this.cellIndexToPixel(point[1] as number),
 		}));
+	}
+
+	/**
+	 * 해당 셀이 점프존인지 확인
+	 */
+	isJumpZone(x: number, y: number): boolean {
+		return this.jumpZones.has(`${x},${y}`);
 	}
 
 	/**

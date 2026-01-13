@@ -17,10 +17,11 @@ export function drawTileWalkable(pathfinder: Pathfinder): void {
 		const cellX = tile.tileX * TILE_CELL_RATIO;
 		const cellY = tile.tileY * TILE_CELL_RATIO;
 
-		// 좌측/우측/상단 인접 타일 확인
+		// 좌측/우측/상단/하단 인접 타일 확인
 		const hasLeftTile = tilePositions.has(`${tile.tileX - 1},${tile.tileY}`);
 		const hasRightTile = tilePositions.has(`${tile.tileX + 1},${tile.tileY}`);
 		const hasTopTile = tilePositions.has(`${tile.tileX},${tile.tileY - 1}`);
+		const hasBottomTile = tilePositions.has(`${tile.tileX},${tile.tileY + 1}`);
 
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
@@ -48,6 +49,10 @@ export function drawTileWalkable(pathfinder: Pathfinder): void {
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 2, true);
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 3, true);
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 4, true);
+							// 점프존 등록 (아래에 타일이 없을 때만)
+							if (!hasBottomTile) {
+								pathfinder.jumpZones.add(`${cellX + dx - offset},${cellY + 4}`);
+							}
 						}
 					}
 				}
@@ -65,6 +70,10 @@ export function drawTileWalkable(pathfinder: Pathfinder): void {
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 2, true);
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 3, true);
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 4, true);
+							// 점프존 등록 (아래에 타일이 없을 때만)
+							if (!hasBottomTile) {
+								pathfinder.jumpZones.add(`${cellX + dx + offset},${cellY + 4}`);
+							}
 						}
 					}
 				}

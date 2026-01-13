@@ -6,7 +6,7 @@
 	const { pathfinder } = world;
 	const { worldTileMapStore } = useWorld();
 
-	// pathfinder grid의 walkable/unwalkable 셀들을 $derived로 계산
+	// pathfinder grid의 walkable/unwalkable/jumpZone 셀들을 $derived로 계산
 	// worldTileMapStore를 구독하여 타일 추가/제거 시 갱신
 	const cells = $derived.by(() => {
 		// 초기화 상태 변경 감지 (reload 시 갱신)
@@ -18,19 +18,23 @@
 		Object.keys(tileMapData ?? {}).length;
 
 		const walkable: Vector[] = [];
+		const jumpZone: Vector[] = [];
 		const unwalkable: Vector[] = [];
 
 		for (let row = 0; row < pathfinder.rows; row++) {
 			for (let col = 0; col < pathfinder.cols; col++) {
-				const key = `${col},${row}`;
 				if (pathfinder.grid.isWalkableAt(col, row)) {
-					walkable.push({ x: col, y: row });
+					if (pathfinder.isJumpZone(col, row)) {
+						jumpZone.push({ x: col, y: row });
+					} else {
+						walkable.push({ x: col, y: row });
+					}
 				} else {
 					unwalkable.push({ x: col, y: row });
 				}
 			}
 		}
-		return { walkable, unwalkable };
+		return { walkable, jumpZone, unwalkable };
 	});
 </script>
 
@@ -39,6 +43,19 @@
 	{#each cells.walkable as cell (cell.x + ',' + cell.y)}
 		<div
 			class="absolute border border-green-500/10 bg-green-500/5"
+			style="
+				top: {cell.y * pathfinder.size}px;
+				left: {cell.x * pathfinder.size}px;
+				width: {pathfinder.size}px;
+				height: {pathfinder.size}px;
+			"
+		></div>
+	{/each}
+
+	<!-- Jump Zone 셀 하이라이트 -->
+	{#each cells.jumpZone as cell (cell.x + ',' + cell.y)}
+		<div
+			class="absolute border border-yellow-500/30 bg-yellow-500/20"
 			style="
 				top: {cell.y * pathfinder.size}px;
 				left: {cell.x * pathfinder.size}px;
