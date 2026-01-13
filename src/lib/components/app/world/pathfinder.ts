@@ -20,7 +20,7 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / size);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder({
-			allowDiagonal: true,
+			allowDiagonal: false,
 		});
 
 		this.reset();
@@ -167,22 +167,36 @@ export class Pathfinder {
 			(entity): entity is WorldTileEntity => entity.type === 'tile'
 		);
 
+		// 타일 위치 맵 생성 (빠른 조회용)
+		const tilePositions = new Set(tileEntities.map((tile) => `${tile.tileX},${tile.tileY}`));
+
 		for (const tile of tileEntities) {
 			const cellX = tile.tileX * TILE_CELL_RATIO;
 			const cellY = tile.tileY * TILE_CELL_RATIO;
+
+			// 좌측/우측 인접 타일 확인
+			const hasLeftTile = tilePositions.has(`${tile.tileX - 1},${tile.tileY}`);
+			const hasRightTile = tilePositions.has(`${tile.tileX + 1},${tile.tileY}`);
 
 			// 타일 너비만큼 walkable 설정
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 				this.setWalkable(cellX + dx, cellY, true);
 				// 타일 위로 2번째 셀
 				this.setWalkable(cellX + dx, cellY - 2, true);
-				this.setWalkable(cellX + dx, cellY - 1, true);
-				// 타일 아래로 1번째, 2번째 셀
-				this.setWalkable(cellX + dx, cellY + 1, true);
-				this.setWalkable(cellX + dx, cellY + 2, true);
-				this.setWalkable(cellX + dx, cellY + 3, true);
-				this.setWalkable(cellX + dx, cellY + 4, true);
-				this.setWalkable(cellX + dx, cellY + 5, true);
+
+				// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
+				const isLeftEdge = !hasLeftTile && dx === 0;
+				const isRightEdge = !hasRightTile && dx === TILE_CELL_RATIO - 1;
+
+				if (isLeftEdge || isRightEdge) {
+					this.setWalkable(cellX + dx, cellY - 1, true);
+					// 타일 아래로 1~5번째 셀
+					this.setWalkable(cellX + dx, cellY + 1, true);
+					this.setWalkable(cellX + dx, cellY + 2, true);
+					this.setWalkable(cellX + dx, cellY + 3, true);
+					this.setWalkable(cellX + dx, cellY + 4, true);
+					this.setWalkable(cellX + dx, cellY + 5, true);
+				}
 			}
 		}
 	}
