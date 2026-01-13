@@ -180,8 +180,6 @@ export class Pathfinder {
 
 			// 타일 너비만큼 walkable 설정
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				this.setWalkable(cellX + dx, cellY, true);
-				// 타일 위로 2번째 셀
 				this.setWalkable(cellX + dx, cellY - 2, true);
 
 				// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -190,8 +188,9 @@ export class Pathfinder {
 
 				if (isLeftEdge || isRightEdge) {
 					this.setWalkable(cellX + dx, cellY - 1, true);
-					// 타일 아래로 1~5번째 셀
+					this.setWalkable(cellX + dx, cellY, true);
 					this.setWalkable(cellX + dx, cellY + 1, true);
+					// 타일 아래로 1~4번째 셀
 					this.setWalkable(cellX + dx, cellY + 2, true);
 					this.setWalkable(cellX + dx, cellY + 3, true);
 					this.setWalkable(cellX + dx, cellY + 4, true);
