@@ -1,7 +1,8 @@
-import { CELL_SIZE } from '$lib/constants';
+import { CELL_SIZE, TILE_CELL_RATIO, BOUNDARY_THICKNESS } from '$lib/constants';
 import PF from 'pathfinding';
 import type { Vector } from '$lib/utils/vector';
 import type { WorldContext } from './context';
+import type { WorldTileEntity } from './entities/world-tile-entity';
 
 export class Pathfinder {
 	private grid: PF.Grid;
@@ -146,6 +147,33 @@ export class Pathfinder {
 	draw() {
 		this.reset();
 
-		// 여기서 노드 설정.
+		// 1. 바닥(boundary bottom) 위로 1, 2번째 노드를 walkable로 설정
+		if (this.worldContext.boundaries) {
+			// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
+			const bottomTopY = this.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+			const bottomTopCellY = this.pixelToCellIndex(bottomTopY);
+
+			// 바닥 위로 1번째, 2번째 셀
+			for (let x = 0; x < this.cols; x++) {
+				this.setWalkable(x, bottomTopCellY - 1, true);
+				this.setWalkable(x, bottomTopCellY - 2, true);
+			}
+		}
+
+		// 2. 모든 타일 위로 1, 2번째 노드를 walkable로 설정
+		const tileEntities = Object.values(this.worldContext.entities).filter(
+			(entity): entity is WorldTileEntity => entity.type === 'tile'
+		);
+
+		for (const tile of tileEntities) {
+			const cellX = tile.tileX * TILE_CELL_RATIO;
+			const cellY = tile.tileY * TILE_CELL_RATIO;
+
+			// 타일 위로 1번째, 2번째 셀 (타일 너비만큼)
+			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
+				this.setWalkable(cellX + dx, cellY - 1, true);
+				this.setWalkable(cellX + dx, cellY - 2, true);
+			}
+		}
 	}
 }
