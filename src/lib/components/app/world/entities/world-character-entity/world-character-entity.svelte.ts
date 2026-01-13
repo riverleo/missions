@@ -99,13 +99,10 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	moveTo(targetX: number, targetY: number): void {
-		const currentX = this.body.position.x;
-		const currentY = this.body.position.y;
-
 		// pathfinder로 경로 계산
-		const rawPath = this.worldContext.pathfinder.findPath(currentX, currentY, targetX, targetY);
-
-		// 경로 스무딩
-		this.path = this.worldContext.pathfinder.smoothPath(rawPath);
+		this.path = this.worldContext.pathfinder.findPath(
+			{ x: this.body.position.x, y: this.body.position.y },
+			{ x: targetX, y: targetY }
+		);
 	}
 }

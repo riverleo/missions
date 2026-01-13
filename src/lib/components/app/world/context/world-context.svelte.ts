@@ -319,9 +319,6 @@ export class WorldContext {
 		// 기존 bodies 제거
 		Composite.clear(this.engine.world, false);
 
-		// pathfinder 초기화 (모든 타일을 walkable로)
-		this.pathfinder.reset();
-
 		// 바운더리 생성
 		this.boundaries = createBoundaries(this.terrain.width, this.terrain.height, this.debug);
 		Composite.add(this.engine.world, Object.values(this.boundaries));
