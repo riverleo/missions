@@ -21,7 +21,7 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { createBoundaryWalls } from './create-boundary-walls';
+import { createBoundaries } from './create-boundaries';
 import { createWorldCharacter, deleteWorldCharacter } from './world-character';
 import { createWorldBuilding, deleteWorldBuilding } from './world-building';
 import { createWorldItem, deleteWorldItem } from './world-item';
@@ -323,7 +323,7 @@ export class WorldContext {
 		this.pathfinder.reset();
 
 		// 바운더리 생성
-		const walls = createBoundaryWalls(this.terrain.width, this.terrain.height, this.debug);
+		const walls = createBoundaries(this.terrain.width, this.terrain.height, this.debug);
 		Composite.add(this.engine.world, walls);
 
 		// 엔티티 바디 재추가

@@ -5,7 +5,7 @@ import {
 	CATEGORY_BUILDING,
 	CATEGORY_CHARACTER,
 	CATEGORY_ITEM,
-	CATEGORY_WALL,
+	CATEGORY_BOUNDARY,
 	TILE_SIZE,
 } from '$lib/constants';
 import type { BeforeUpdateEvent, WorldContext } from '$lib/components/app/world/context';
@@ -51,7 +51,7 @@ export class WorldTileEntity extends Entity {
 				label: this.id,
 				collisionFilter: {
 					category: CATEGORY_TILE,
-					mask: CATEGORY_WALL | CATEGORY_BUILDING | CATEGORY_CHARACTER | CATEGORY_ITEM,
+					mask: CATEGORY_BOUNDARY | CATEGORY_BUILDING | CATEGORY_CHARACTER | CATEGORY_ITEM,
 				},
 			}
 		);

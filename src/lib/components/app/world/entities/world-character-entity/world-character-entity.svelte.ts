@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
 import type { Vector } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { CATEGORY_WALL, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
+import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useCharacterBody } from '$lib/hooks/use-character-body';
@@ -50,7 +50,7 @@ export class WorldCharacterEntity extends Entity {
 				inertia: Infinity,
 				collisionFilter: {
 					category: CATEGORY_CHARACTER,
-					mask: CATEGORY_WALL | CATEGORY_TILE,
+					mask: CATEGORY_BOUNDARY | CATEGORY_TILE,
 				},
 			}
 		);
