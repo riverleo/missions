@@ -27,7 +27,8 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 	const deltaSeconds = delta / 1000;
 
 	// 현재 위치가 점프존인지 확인
-	const isInJumpZone = entity.worldContext.pathfinder.isJumpZone(currentPos);
+	const cell = entity.worldContext.pathfinder.vectorToCell(currentPos);
+	const isInJumpZone = entity.worldContext.pathfinder.isJumpZone({ x: cell.x, y: cell.y });
 
 	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인
 	if (isInJumpZone && !entity.wasInJumpZone) {

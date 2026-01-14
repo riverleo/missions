@@ -31,7 +31,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 }
 
 /**
- * 모든 타일 위/아래로 walkable 설정
+ * 모든 타일 기반으로 walkable 영역 설정 및 점프존 생성
  */
 export function setWalkable(pathfinder: Pathfinder) {
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
