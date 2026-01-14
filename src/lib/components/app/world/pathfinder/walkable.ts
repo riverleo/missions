@@ -1,6 +1,6 @@
 import { BOUNDARY_THICKNESS, TILE_CELL_RATIO } from '$lib/constants';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
-import type { Pathfinder } from './pathfinder';
+import type { Pathfinder } from './pathfinder.svelte';
 
 /**
  * 그리드 초기화 및 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
@@ -13,20 +13,17 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 		}
 	}
 
-	// 점프존 초기화
-	pathfinder.jumpZones.clear();
-
 	if (!pathfinder.worldContext.boundaries) {
 		throw new Error('Cannot initialize walkable: boundaries not found');
 	}
 
 	// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
 	const bottomTopY = pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
-	const bottomTopCellY = pathfinder.pixelToCellIndex(bottomTopY);
+	const bottomTopRow = pathfinder.worldYToRow(bottomTopY);
 
 	// 바닥 위로 2번째 셀
 	for (let x = 0; x < pathfinder.cols; x++) {
-		pathfinder.grid.setWalkableAt(x, bottomTopCellY - 2, true);
+		pathfinder.grid.setWalkableAt(x, bottomTopRow - 2, true);
 	}
 }
 
@@ -77,10 +74,7 @@ export function setWalkable(pathfinder: Pathfinder) {
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 2, true);
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 3, true);
 							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 4, true);
-							// 점프존 등록 (아래에 타일이 없을 때만)
-							if (!hasBottomTile) {
-								pathfinder.jumpZones.add(`${cellX + dx - offset},${cellY + 4}`);
-							}
+							// 점프존 - cells의 jumpable은 updateCells()에서 처리
 						}
 					}
 				}
@@ -98,10 +92,7 @@ export function setWalkable(pathfinder: Pathfinder) {
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 2, true);
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 3, true);
 							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 4, true);
-							// 점프존 등록 (아래에 타일이 없을 때만)
-							if (!hasBottomTile) {
-								pathfinder.jumpZones.add(`${cellX + dx + offset},${cellY + 4}`);
-							}
+							// 점프존 - cells의 jumpable은 updateCells()에서 처리
 						}
 					}
 				}

@@ -108,6 +108,9 @@ export interface BulkChanges<T> {
 	deleted: string[];
 }
 
+export type { Vector } from '../utils/vector';
+export type { Matrix, MatrixKey, PathfinderCell } from './pathfinder';
+
 export type Supabase = SupabaseClient<Database>;
 
 export interface ServerPayload {

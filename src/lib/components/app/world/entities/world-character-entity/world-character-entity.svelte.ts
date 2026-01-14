@@ -20,7 +20,7 @@ export class WorldCharacterEntity extends Entity {
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 	jumpDelay: number = $state(0); // 점프존에서 대기 시간 (ms)
-	wasInJumpZone: boolean = $state(false); // 이전 프레임에 점프존에 있었는지
+	wasJumpable: boolean = $state(false); // 이전 프레임에 점프존에 있었는지
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -108,6 +108,6 @@ export class WorldCharacterEntity extends Entity {
 		);
 		// 새 경로 시작 시 점프 상태 초기화
 		this.jumpDelay = 0;
-		this.wasInJumpZone = false;
+		this.wasJumpable = false;
 	}
 }

@@ -27,11 +27,11 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 	const deltaSeconds = delta / 1000;
 
 	// 현재 위치가 점프존인지 확인
-	const cell = entity.worldContext.pathfinder.vectorToCell(currentPos);
-	const isInJumpZone = entity.worldContext.pathfinder.isJumpZone({ x: cell.x, y: cell.y });
+	const cell = entity.worldContext.pathfinder.getCellFromWorld(currentPos);
+	const isInJumpZone = cell?.jumpable ?? false;
 
 	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인
-	if (isInJumpZone && !entity.wasInJumpZone) {
+	if (isInJumpZone && !entity.wasJumpable) {
 		// 4-5번째 뒤의 waypoint 확인 (없으면 마지막 waypoint)
 		const lookAheadIndex = Math.min(4, entity.path.length - 1);
 		const futureTarget = entity.path[lookAheadIndex];
@@ -40,7 +40,7 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 			entity.jumpDelay = 500; // 500ms 대기
 		}
 	}
-	entity.wasInJumpZone = isInJumpZone;
+	entity.wasJumpable = isInJumpZone;
 
 	// 목표 지점까지의 거리 계산
 	const dx = targetPoint.x - currentPos.x;

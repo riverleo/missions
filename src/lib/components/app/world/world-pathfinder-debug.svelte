@@ -1,51 +1,38 @@
 <script lang="ts">
-	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
+	import { useWorldContext } from '$lib/hooks/use-world';
 	import type { Vector } from '$lib/utils/vector';
+	import type { PathfinderCell } from '$lib/types/pathfinder';
 
 	const world = useWorldContext();
 	const { pathfinder } = world;
-	const { worldTileMapStore } = useWorld();
 
-	// pathfinder grid의 walkable/unwalkable/jumpZone 셀들을 $derived로 계산
-	// worldTileMapStore를 구독하여 타일 추가/제거 시 갱신
-	const cells = $derived.by(() => {
-		// 초기화 상태 변경 감지 (reload 시 갱신)
-		world.initialized;
+	// pathfinder의 cells Record를 사용하여 walkable/unwalkable/jumpable 셀 필터링
+	const walkableCells = $derived.by(() => {
+		world.initialized; // 초기화 상태 변경 감지
+		return Object.values(pathfinder.cells).filter((cell: PathfinderCell) => cell.walkable);
+	});
 
-		// worldTileMapStore의 data 객체 변경 감지
-		const tileMapData = $worldTileMapStore.data[world.worldId]?.data;
-		// 타일 개수로 변경 감지
-		Object.keys(tileMapData ?? {}).length;
+	const jumpableCells = $derived.by(() => {
+		world.initialized; // 초기화 상태 변경 감지
+		return Object.values(pathfinder.cells).filter((cell: PathfinderCell) => cell.jumpable);
+	});
 
-		const walkable: Vector[] = [];
-		const jumpZone: Vector[] = [];
-		const unwalkable: Vector[] = [];
-
-		for (let row = 0; row < pathfinder.rows; row++) {
-			for (let col = 0; col < pathfinder.cols; col++) {
-				if (pathfinder.grid.isWalkableAt(col, row)) {
-					if (pathfinder.isJumpZone({ x: col, y: row })) {
-						jumpZone.push({ x: col, y: row });
-					} else {
-						walkable.push({ x: col, y: row });
-					}
-				} else {
-					unwalkable.push({ x: col, y: row });
-				}
-			}
-		}
-		return { walkable, jumpZone, unwalkable };
+	const unwalkableCells = $derived.by(() => {
+		world.initialized; // 초기화 상태 변경 감지
+		return Object.values(pathfinder.cells).filter(
+			(cell: PathfinderCell) => !cell.walkable && !cell.jumpable
+		);
 	});
 </script>
 
 {#if world.debug}
 	<!-- Walkable 셀 하이라이트 -->
-	{#each cells.walkable as cell (cell.x + ',' + cell.y)}
+	{#each walkableCells as cell (cell.col + ',' + cell.row)}
 		<div
 			class="absolute border border-green-500/10 bg-green-500/5"
 			style="
-				top: {cell.y * pathfinder.size}px;
-				left: {cell.x * pathfinder.size}px;
+				top: {cell.row * pathfinder.size}px;
+				left: {cell.col * pathfinder.size}px;
 				width: {pathfinder.size}px;
 				height: {pathfinder.size}px;
 			"
@@ -53,12 +40,12 @@
 	{/each}
 
 	<!-- Jump Zone 셀 하이라이트 -->
-	{#each cells.jumpZone as cell (cell.x + ',' + cell.y)}
+	{#each jumpableCells as cell (cell.col + ',' + cell.row)}
 		<div
 			class="absolute border border-yellow-500/30 bg-yellow-500/20"
 			style="
-				top: {cell.y * pathfinder.size}px;
-				left: {cell.x * pathfinder.size}px;
+				top: {cell.row * pathfinder.size}px;
+				left: {cell.col * pathfinder.size}px;
 				width: {pathfinder.size}px;
 				height: {pathfinder.size}px;
 			"
@@ -66,12 +53,12 @@
 	{/each}
 
 	<!-- Unwalkable 셀 하이라이트 -->
-	{#each cells.unwalkable as cell (cell.x + ',' + cell.y)}
+	{#each unwalkableCells as cell (cell.col + ',' + cell.row)}
 		<div
 			class="absolute border border-red-500/20 bg-red-500/10"
 			style="
-				top: {cell.y * pathfinder.size}px;
-				left: {cell.x * pathfinder.size}px;
+				top: {cell.row * pathfinder.size}px;
+				left: {cell.col * pathfinder.size}px;
 				width: {pathfinder.size}px;
 				height: {pathfinder.size}px;
 			"
