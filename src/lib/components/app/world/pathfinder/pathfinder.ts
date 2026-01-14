@@ -85,8 +85,9 @@ export class Pathfinder {
 	/**
 	 * 해당 셀이 점프존인지 확인
 	 */
-	isJumpZone(cellX: number, cellY: number): boolean {
-		return this.jumpZones.has(`${cellX},${cellY}`);
+	isJumpZone(vector: Vector): boolean {
+		const cell = this.vectorToCell(vector);
+		return this.jumpZones.has(`${cell.x},${cell.y}`);
 	}
 
 	/**
