@@ -1,15 +1,14 @@
 import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
-import type { Vector } from '$lib/utils/vector';
+import type { Vector, Cell, CellKey, PathfinderCell } from '$lib/types';
 import type { WorldContext } from '../context';
 import { initializeWalkable, setWalkable, setTileToUnwalkable } from './walkable';
-import type { Matrix, MatrixKey, PathfinderCell } from '$lib/types';
 
 export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
-	declare cells: Record<MatrixKey, PathfinderCell>;
+	declare cells: Record<CellKey, PathfinderCell>;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -22,7 +21,7 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / size);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder();
-		this.cells = $state<Record<MatrixKey, PathfinderCell>>({});
+		this.cells = $state<Record<CellKey, PathfinderCell>>({});
 
 		// cells 초기화
 		this.initializeCells();
@@ -34,8 +33,8 @@ export class Pathfinder {
 	private initializeCells() {
 		for (let row = 0; row < this.rows; row++) {
 			for (let col = 0; col < this.cols; col++) {
-				const matrixKey = `${col},${row}` as MatrixKey;
-				this.cells[matrixKey] = {
+				const cellKey = `${col},${row}` as CellKey;
+				this.cells[cellKey] = {
 					col,
 					row,
 					walkable: false,
@@ -48,58 +47,58 @@ export class Pathfinder {
 	/**
 	 * 단일 축 월드 픽셀 좌표를 그리드 열 인덱스로 변환
 	 */
-	worldXToCol(worldX: number) {
-		return Math.floor(worldX / this.size);
+	vectorXToCol(vectorX: number) {
+		return Math.floor(vectorX / this.size);
 	}
 
 	/**
 	 * 단일 축 월드 픽셀 좌표를 그리드 행 인덱스로 변환
 	 */
-	worldYToRow(worldY: number) {
-		return Math.floor(worldY / this.size);
+	vectorYToRow(vectorY: number) {
+		return Math.floor(vectorY / this.size);
 	}
 
 	/**
 	 * 월드 픽셀 좌표를 그리드 좌표(행렬)로 변환
 	 */
-	worldToMatrix(worldPos: Vector): Matrix {
-		return { col: this.worldXToCol(worldPos.x), row: this.worldYToRow(worldPos.y) };
+	vectorToCell(vector: Vector): Cell {
+		return { col: this.vectorXToCol(vector.x), row: this.vectorYToRow(vector.y) };
 	}
 
 	/**
 	 * 그리드 열 인덱스를 월드 픽셀 좌표(타일 중심)로 변환
 	 */
-	colToWorldX(col: number) {
+	colToVectorX(col: number) {
 		return col * this.size + this.size / 2;
 	}
 
 	/**
 	 * 그리드 행 인덱스를 월드 픽셀 좌표(타일 중심)로 변환
 	 */
-	rowToWorldY(row: number) {
+	rowToVectorY(row: number) {
 		return row * this.size + this.size / 2;
 	}
 
 	/**
 	 * 그리드 좌표(행렬)를 월드 픽셀 좌표(타일 중심)로 변환
 	 */
-	matrixToWorld(matrix: Matrix): Vector {
-		return { x: this.colToWorldX(matrix.col), y: this.rowToWorldY(matrix.row) };
+	cellToVector(cell: Cell): Vector {
+		return { x: this.colToVectorX(cell.col), y: this.rowToVectorY(cell.row) };
 	}
 
 	/**
 	 * 그리드 좌표로 셀 정보 가져오기
 	 */
-	getCell(matrix: Matrix): PathfinderCell | undefined {
-		return this.cells[`${matrix.col},${matrix.row}`];
+	getCell(cell: Cell): PathfinderCell | undefined {
+		return this.cells[`${cell.col},${cell.row}` as CellKey];
 	}
 
 	/**
 	 * 월드 픽셀 좌표로 셀 정보 가져오기
 	 */
-	getCellFromWorld(worldPos: Vector): PathfinderCell | undefined {
-		const matrix = this.worldToMatrix(worldPos);
-		return this.getCell(matrix);
+	getCellFromVector(vector: Vector): PathfinderCell | undefined {
+		const cell = this.vectorToCell(vector);
+		return this.getCell(cell);
 	}
 
 	/**
@@ -108,7 +107,7 @@ export class Pathfinder {
 	setWalkableAt(col: number, row: number, walkable: boolean) {
 		this.grid.setWalkableAt(col, row, walkable);
 
-		const matrixKey = `${col},${row}` as MatrixKey;
+		const matrixKey = `${col},${row}` as CellKey;
 		const cell = this.cells[matrixKey];
 		if (cell) {
 			this.cells[matrixKey] = {
@@ -122,7 +121,7 @@ export class Pathfinder {
 	 * jumpable 속성만 업데이트
 	 */
 	setJumpableAt(col: number, row: number, jumpable: boolean) {
-		const matrixKey = `${col},${row}` as MatrixKey;
+		const matrixKey = `${col},${row}` as CellKey;
 		const cell = this.cells[matrixKey];
 		if (cell) {
 			this.cells[matrixKey] = {
@@ -136,21 +135,21 @@ export class Pathfinder {
 	 * 월드 픽셀 좌표로 경로 탐색 (결과도 월드 픽셀 좌표)
 	 */
 	findPath(from: Vector, to: Vector): Vector[] {
-		const startMatrix = this.worldToMatrix(from);
-		const endMatrix = this.worldToMatrix(to);
+		const startCell = this.vectorToCell(from);
+		const endCell = this.vectorToCell(to);
 
 		const path = this.finder.findPath(
-			startMatrix.col,
-			startMatrix.row,
-			endMatrix.col,
-			endMatrix.row,
+			startCell.col,
+			startCell.row,
+			endCell.col,
+			endCell.row,
 			this.grid.clone()
 		);
 
 		// 그리드 좌표를 월드 픽셀 좌표(타일 중심)로 변환
 		return path.map((point) => ({
-			x: this.colToWorldX(point[0] as number),
-			y: this.rowToWorldY(point[1] as number),
+			x: this.colToVectorX(point[0] as number),
+			y: this.rowToVectorY(point[1] as number),
 		}));
 	}
 

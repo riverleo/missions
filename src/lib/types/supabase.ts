@@ -1,3356 +1,1713 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+import type { Database } from './supabase.raw';
+import type { Brand } from './core';
+import type { VectorKey } from './vector';
 
-export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-  public: {
-    Tables: {
-      behavior_priorities: {
-        Row: {
-          condition_behavior_id: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          item_behavior_id: string | null
-          need_behavior_id: string | null
-          priority: number
-          scenario_id: string
-        }
-        Insert: {
-          condition_behavior_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_behavior_id?: string | null
-          need_behavior_id?: string | null
-          priority?: number
-          scenario_id: string
-        }
-        Update: {
-          condition_behavior_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_behavior_id?: string | null
-          need_behavior_id?: string | null
-          priority?: number
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "behavior_priorities_condition_behavior_id_fkey"
-            columns: ["condition_behavior_id"]
-            isOneToOne: true
-            referencedRelation: "condition_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_priorities_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_priorities_item_behavior_id_fkey"
-            columns: ["item_behavior_id"]
-            isOneToOne: true
-            referencedRelation: "item_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_priorities_need_behavior_id_fkey"
-            columns: ["need_behavior_id"]
-            isOneToOne: true
-            referencedRelation: "need_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_priorities_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      building_conditions: {
-        Row: {
-          building_id: string
-          condition_id: string
-          created_at: string
-          created_by: string | null
-          decrease_multiplier: number
-          disabled_when_depleted: boolean
-          id: string
-          scenario_id: string
-        }
-        Insert: {
-          building_id: string
-          condition_id: string
-          created_at?: string
-          created_by?: string | null
-          decrease_multiplier?: number
-          disabled_when_depleted?: boolean
-          id?: string
-          scenario_id: string
-        }
-        Update: {
-          building_id?: string
-          condition_id?: string
-          created_at?: string
-          created_by?: string | null
-          decrease_multiplier?: number
-          disabled_when_depleted?: boolean
-          id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "building_conditions_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_conditions_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_conditions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_conditions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      building_states: {
-        Row: {
-          atlas_name: string
-          building_id: string
-          condition_id: string | null
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
-          max_value: number
-          min_value: number
-          priority: number
-          type: Database["public"]["Enums"]["building_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          building_id: string
-          condition_id?: string | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          priority?: number
-          type: Database["public"]["Enums"]["building_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          building_id?: string
-          condition_id?: string | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          priority?: number
-          type?: Database["public"]["Enums"]["building_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "building_states_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_states_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      buildings: {
-        Row: {
-          cell_cols: number
-          cell_rows: number
-          collider_offset_x: number
-          collider_offset_y: number
-          created_at: string
-          created_by: string | null
-          id: string
-          item_max_capacity: number
-          name: string
-          scale: number
-          scenario_id: string
-        }
-        Insert: {
-          cell_cols?: number
-          cell_rows?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_max_capacity?: number
-          name?: string
-          scale?: number
-          scenario_id: string
-        }
-        Update: {
-          cell_cols?: number
-          cell_rows?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          item_max_capacity?: number
-          name?: string
-          scale?: number
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "buildings_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "buildings_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      chapters: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          display_order_in_scenario: number
-          id: string
-          parent_chapter_id: string | null
-          scenario_id: string
-          status: Database["public"]["Enums"]["publish_status"]
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          display_order_in_scenario?: number
-          id?: string
-          parent_chapter_id?: string | null
-          scenario_id: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          display_order_in_scenario?: number
-          id?: string
-          parent_chapter_id?: string | null
-          scenario_id?: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "chapters_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chapters_parent_chapter_id_fkey"
-            columns: ["parent_chapter_id"]
-            isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chapters_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      character_bodies: {
-        Row: {
-          collider_height: number
-          collider_offset_x: number
-          collider_offset_y: number
-          collider_type: Database["public"]["Enums"]["collider_type"]
-          collider_width: number
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          scenario_id: string
-        }
-        Insert: {
-          collider_height?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          collider_type?: Database["public"]["Enums"]["collider_type"]
-          collider_width?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          scenario_id: string
-        }
-        Update: {
-          collider_height?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          collider_type?: Database["public"]["Enums"]["collider_type"]
-          collider_width?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "character_bodies_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_bodies_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      character_body_states: {
-        Row: {
-          atlas_name: string
-          body_id: string
-          character_face_state:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          in_front: boolean
-          loop: Database["public"]["Enums"]["loop_mode"]
-          type: Database["public"]["Enums"]["character_body_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          body_id: string
-          character_face_state?:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          in_front?: boolean
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          type: Database["public"]["Enums"]["character_body_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          body_id?: string
-          character_face_state?:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          in_front?: boolean
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          type?: Database["public"]["Enums"]["character_body_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "character_body_states_body_id_fkey"
-            columns: ["body_id"]
-            isOneToOne: false
-            referencedRelation: "character_bodies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      character_face_states: {
-        Row: {
-          atlas_name: string
-          character_id: string
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
-          max_value: number
-          min_value: number
-          need_id: string | null
-          offset_x: number
-          offset_y: number
-          priority: number
-          type: Database["public"]["Enums"]["character_face_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          character_id: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          need_id?: string | null
-          offset_x?: number
-          offset_y?: number
-          priority?: number
-          type: Database["public"]["Enums"]["character_face_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          character_id?: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          need_id?: string | null
-          offset_x?: number
-          offset_y?: number
-          priority?: number
-          type?: Database["public"]["Enums"]["character_face_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "character_face_states_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_face_states_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      character_needs: {
-        Row: {
-          character_id: string
-          created_at: string
-          created_by: string | null
-          decay_multiplier: number
-          id: string
-          need_id: string
-          scenario_id: string
-        }
-        Insert: {
-          character_id: string
-          created_at?: string
-          created_by?: string | null
-          decay_multiplier?: number
-          id?: string
-          need_id: string
-          scenario_id: string
-        }
-        Update: {
-          character_id?: string
-          created_at?: string
-          created_by?: string | null
-          decay_multiplier?: number
-          id?: string
-          need_id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "character_needs_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_needs_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_needs_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_needs_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      characters: {
-        Row: {
-          character_body_id: string
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          scale: number
-          scenario_id: string
-        }
-        Insert: {
-          character_body_id: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          scale?: number
-          scenario_id: string
-        }
-        Update: {
-          character_body_id?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          scale?: number
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "characters_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "characters_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_characters_character_body_id"
-            columns: ["character_body_id"]
-            isOneToOne: false
-            referencedRelation: "character_bodies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      condition_behavior_actions: {
-        Row: {
-          building_id: string | null
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x: number
-          character_offset_y: number
-          character_rotation: number
-          character_scale: number
-          condition_behavior_id: string
-          condition_id: string
-          duration_ticks: number
-          failure_condition_behavior_action_id: string | null
-          id: string
-          root: boolean
-          scenario_id: string
-          success_condition_behavior_action_id: string | null
-        }
-        Insert: {
-          building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
-          condition_behavior_id: string
-          condition_id: string
-          duration_ticks?: number
-          failure_condition_behavior_action_id?: string | null
-          id?: string
-          root?: boolean
-          scenario_id: string
-          success_condition_behavior_action_id?: string | null
-        }
-        Update: {
-          building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
-          condition_behavior_id?: string
-          condition_id?: string
-          duration_ticks?: number
-          failure_condition_behavior_action_id?: string | null
-          id?: string
-          root?: boolean
-          scenario_id?: string
-          success_condition_behavior_action_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "condition_behavior_actions_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_condition_behavior_id_fkey"
-            columns: ["condition_behavior_id"]
-            isOneToOne: false
-            referencedRelation: "condition_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_failure_condition_behavior_acti_fkey"
-            columns: ["failure_condition_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "condition_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_success_condition_behavior_acti_fkey"
-            columns: ["success_condition_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "condition_behavior_actions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      condition_behaviors: {
-        Row: {
-          building_id: string | null
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          condition_id: string
-          condition_threshold: number
-          created_at: string
-          created_by: string | null
-          id: string
-          scenario_id: string
-        }
-        Insert: {
-          building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id: string
-          condition_threshold?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          scenario_id: string
-        }
-        Update: {
-          building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id?: string
-          condition_threshold?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "condition_behaviors_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behaviors_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behaviors_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behaviors_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behaviors_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      condition_effects: {
-        Row: {
-          change_per_tick: number
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          condition_id: string
-          created_at: string
-          created_by: string | null
-          id: string
-          max_threshold: number
-          min_threshold: number
-          name: string
-          need_id: string
-          scenario_id: string
-        }
-        Insert: {
-          change_per_tick?: number
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_threshold?: number
-          min_threshold?: number
-          name: string
-          need_id: string
-          scenario_id: string
-        }
-        Update: {
-          change_per_tick?: number
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id?: string
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_threshold?: number
-          min_threshold?: number
-          name?: string
-          need_id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "condition_effects_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_effects_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_effects_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_effects_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_effects_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      condition_fulfillments: {
-        Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          condition_id: string
-          created_at: string
-          created_by: string | null
-          fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
-          id: string
-          increase_per_tick: number
-          item_id: string | null
-          scenario_id: string
-        }
-        Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id: string
-          created_at?: string
-          created_by?: string | null
-          fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
-          id?: string
-          increase_per_tick?: number
-          item_id?: string | null
-          scenario_id: string
-        }
-        Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          condition_id?: string
-          created_at?: string
-          created_by?: string | null
-          fulfillment_type?: Database["public"]["Enums"]["condition_fulfillment_type"]
-          id?: string
-          increase_per_tick?: number
-          item_id?: string | null
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "condition_fulfillments_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_fulfillments_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_fulfillments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_fulfillments_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_fulfillments_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      conditions: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          decrease_per_tick: number
-          id: string
-          initial_value: number
-          max_value: number
-          name: string
-          scenario_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          decrease_per_tick?: number
-          id?: string
-          initial_value?: number
-          max_value?: number
-          name?: string
-          scenario_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          decrease_per_tick?: number
-          id?: string
-          initial_value?: number
-          max_value?: number
-          name?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conditions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conditions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      dices: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          faces: number
-          id: string
-          is_default: boolean
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          faces: number
-          id?: string
-          is_default?: boolean
-          name: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          faces?: number
-          id?: string
-          is_default?: boolean
-          name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "dices_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_behavior_actions: {
-        Row: {
-          behavior_id: string
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks: number
-          failure_item_behavior_action_id: string | null
-          id: string
-          item_offset_x: number
-          item_offset_y: number
-          item_rotation: number
-          item_scale: number
-          root: boolean
-          scenario_id: string
-          success_item_behavior_action_id: string | null
-        }
-        Insert: {
-          behavior_id: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks?: number
-          failure_item_behavior_action_id?: string | null
-          id?: string
-          item_offset_x?: number
-          item_offset_y?: number
-          item_rotation?: number
-          item_scale?: number
-          root?: boolean
-          scenario_id: string
-          success_item_behavior_action_id?: string | null
-        }
-        Update: {
-          behavior_id?: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks?: number
-          failure_item_behavior_action_id?: string | null
-          id?: string
-          item_offset_x?: number
-          item_offset_y?: number
-          item_rotation?: number
-          item_scale?: number
-          root?: boolean
-          scenario_id?: string
-          success_item_behavior_action_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_behavior_actions_behavior_id_fkey"
-            columns: ["behavior_id"]
-            isOneToOne: false
-            referencedRelation: "item_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_failure_item_behavior_action_id_fkey"
-            columns: ["failure_item_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "item_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_success_item_behavior_action_id_fkey"
-            columns: ["success_item_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "item_behavior_actions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_behaviors: {
-        Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          created_at: string
-          created_by: string | null
-          durability_threshold: number | null
-          id: string
-          item_id: string
-          scenario_id: string
-        }
-        Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          durability_threshold?: number | null
-          id?: string
-          item_id: string
-          scenario_id: string
-        }
-        Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          durability_threshold?: number | null
-          id?: string
-          item_id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_behaviors_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_states: {
-        Row: {
-          atlas_name: string
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          item_id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
-          max_durability: number
-          min_durability: number
-          type: Database["public"]["Enums"]["item_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          item_id: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_durability?: number
-          min_durability?: number
-          type: Database["public"]["Enums"]["item_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          item_id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_durability?: number
-          min_durability?: number
-          type?: Database["public"]["Enums"]["item_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_states_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      items: {
-        Row: {
-          collider_height: number
-          collider_offset_x: number
-          collider_offset_y: number
-          collider_type: Database["public"]["Enums"]["collider_type"]
-          collider_width: number
-          created_at: string
-          created_by: string | null
-          id: string
-          max_durability_ticks: number | null
-          name: string
-          scale: number
-          scenario_id: string
-        }
-        Insert: {
-          collider_height?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          collider_type?: Database["public"]["Enums"]["collider_type"]
-          collider_width?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_durability_ticks?: number | null
-          name?: string
-          scale?: number
-          scenario_id: string
-        }
-        Update: {
-          collider_height?: number
-          collider_offset_x?: number
-          collider_offset_y?: number
-          collider_type?: Database["public"]["Enums"]["collider_type"]
-          collider_width?: number
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_durability_ticks?: number | null
-          name?: string
-          scale?: number
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "items_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "items_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      narrative_dice_rolls: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          difficulty_class: number
-          failure_action: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id: string | null
-          id: string
-          narrative_id: string
-          scenario_id: string
-          success_action: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          difficulty_class?: number
-          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id?: string | null
-          id?: string
-          narrative_id: string
-          scenario_id: string
-          success_action?: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          difficulty_class?: number
-          failure_action?: Database["public"]["Enums"]["dice_roll_action"]
-          failure_narrative_node_id?: string | null
-          id?: string
-          narrative_id?: string
-          scenario_id?: string
-          success_action?: Database["public"]["Enums"]["dice_roll_action"]
-          success_narrative_node_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "narrative_dice_rolls_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_dice_rolls_failure_narrative_node_id_fkey"
-            columns: ["failure_narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_dice_rolls_narrative_id_fkey"
-            columns: ["narrative_id"]
-            isOneToOne: false
-            referencedRelation: "narratives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_dice_rolls_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_dice_rolls_success_narrative_node_id_fkey"
-            columns: ["success_narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      narrative_node_choices: {
-        Row: {
-          created_at: string
-          created_user_id: string | null
-          description: string
-          id: string
-          narrative_dice_roll_id: string | null
-          narrative_node_id: string
-          order_in_narrative_node: number
-          scenario_id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_user_id?: string | null
-          description?: string
-          id?: string
-          narrative_dice_roll_id?: string | null
-          narrative_node_id: string
-          order_in_narrative_node?: number
-          scenario_id: string
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          created_user_id?: string | null
-          description?: string
-          id?: string
-          narrative_dice_roll_id?: string | null
-          narrative_node_id?: string
-          order_in_narrative_node?: number
-          scenario_id?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "narrative_node_choices_narrative_dice_roll_id_fkey"
-            columns: ["narrative_dice_roll_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_dice_rolls"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_node_choices_narrative_node_id_fkey"
-            columns: ["narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_node_choices_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      narrative_nodes: {
-        Row: {
-          created_at: string
-          created_user_id: string | null
-          description: string
-          id: string
-          narrative_dice_roll_id: string | null
-          narrative_id: string
-          root: boolean
-          scenario_id: string
-          title: string
-          type: Database["public"]["Enums"]["narrative_node_type"]
-        }
-        Insert: {
-          created_at?: string
-          created_user_id?: string | null
-          description?: string
-          id?: string
-          narrative_dice_roll_id?: string | null
-          narrative_id: string
-          root?: boolean
-          scenario_id: string
-          title?: string
-          type: Database["public"]["Enums"]["narrative_node_type"]
-        }
-        Update: {
-          created_at?: string
-          created_user_id?: string | null
-          description?: string
-          id?: string
-          narrative_dice_roll_id?: string | null
-          narrative_id?: string
-          root?: boolean
-          scenario_id?: string
-          title?: string
-          type?: Database["public"]["Enums"]["narrative_node_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "narrative_nodes_narrative_dice_roll_id_fkey"
-            columns: ["narrative_dice_roll_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_dice_rolls"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_nodes_narrative_id_fkey"
-            columns: ["narrative_id"]
-            isOneToOne: false
-            referencedRelation: "narratives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narrative_nodes_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      narratives: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          scenario_id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          scenario_id: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          scenario_id?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "narratives_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "narratives_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      need_behavior_actions: {
-        Row: {
-          behavior_id: string
-          building_id: string | null
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string | null
-          duration_ticks: number
-          failure_need_behavior_action_id: string | null
-          id: string
-          item_id: string | null
-          need_id: string
-          root: boolean
-          scenario_id: string
-          success_need_behavior_action_id: string | null
-          type: Database["public"]["Enums"]["need_behavior_action_type"]
-        }
-        Insert: {
-          behavior_id: string
-          building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
-          duration_ticks?: number
-          failure_need_behavior_action_id?: string | null
-          id?: string
-          item_id?: string | null
-          need_id: string
-          root?: boolean
-          scenario_id: string
-          success_need_behavior_action_id?: string | null
-          type?: Database["public"]["Enums"]["need_behavior_action_type"]
-        }
-        Update: {
-          behavior_id?: string
-          building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
-          duration_ticks?: number
-          failure_need_behavior_action_id?: string | null
-          id?: string
-          item_id?: string | null
-          need_id?: string
-          root?: boolean
-          scenario_id?: string
-          success_need_behavior_action_id?: string | null
-          type?: Database["public"]["Enums"]["need_behavior_action_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "need_behavior_actions_behavior_id_fkey"
-            columns: ["behavior_id"]
-            isOneToOne: false
-            referencedRelation: "need_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_failure_need_behavior_action_id_fkey"
-            columns: ["failure_need_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "need_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_success_need_behavior_action_id_fkey"
-            columns: ["success_need_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "need_behavior_actions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      need_behaviors: {
-        Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          name: string
-          need_id: string
-          need_threshold: number
-          scenario_id: string
-        }
-        Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name: string
-          need_id: string
-          need_threshold?: number
-          scenario_id: string
-        }
-        Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          name?: string
-          need_id?: string
-          need_threshold?: number
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "need_behaviors_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behaviors_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behaviors_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behaviors_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      need_fulfillments: {
-        Row: {
-          building_id: string | null
-          character_id: string | null
-          created_at: string
-          created_by: string | null
-          fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
-          id: string
-          increase_per_tick: number
-          item_id: string | null
-          need_id: string
-          scenario_id: string
-          task_condition:
-            | Database["public"]["Enums"]["need_fulfillment_task_condition"]
-            | null
-          task_count: number
-          task_duration_ticks: number
-        }
-        Insert: {
-          building_id?: string | null
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
-          id?: string
-          increase_per_tick?: number
-          item_id?: string | null
-          need_id: string
-          scenario_id: string
-          task_condition?:
-            | Database["public"]["Enums"]["need_fulfillment_task_condition"]
-            | null
-          task_count?: number
-          task_duration_ticks?: number
-        }
-        Update: {
-          building_id?: string | null
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          fulfillment_type?: Database["public"]["Enums"]["need_fulfillment_type"]
-          id?: string
-          increase_per_tick?: number
-          item_id?: string | null
-          need_id?: string
-          scenario_id?: string
-          task_condition?:
-            | Database["public"]["Enums"]["need_fulfillment_task_condition"]
-            | null
-          task_count?: number
-          task_duration_ticks?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "need_fulfillments_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_fulfillments_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_fulfillments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_fulfillments_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_fulfillments_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_fulfillments_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      needs: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          decrease_per_tick: number
-          id: string
-          initial_value: number
-          max_value: number
-          name: string
-          scenario_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          decrease_per_tick?: number
-          id?: string
-          initial_value?: number
-          max_value?: number
-          name: string
-          scenario_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          decrease_per_tick?: number
-          id?: string
-          initial_value?: number
-          max_value?: number
-          name?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "needs_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "needs_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_chapters: {
-        Row: {
-          chapter_id: string
-          created_at: string
-          id: string
-          player_id: string
-          scenario_id: string
-          status: Database["public"]["Enums"]["player_chapter_status"]
-          user_id: string
-        }
-        Insert: {
-          chapter_id: string
-          created_at?: string
-          id?: string
-          player_id: string
-          scenario_id: string
-          status?: Database["public"]["Enums"]["player_chapter_status"]
-          user_id?: string
-        }
-        Update: {
-          chapter_id?: string
-          created_at?: string
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          status?: Database["public"]["Enums"]["player_chapter_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_chapters_chapter_id_fkey"
-            columns: ["chapter_id"]
-            isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_chapters_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_chapters_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_quest_branches: {
-        Row: {
-          created_at: string
-          id: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          scenario_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          player_id: string
-          player_quest_id: string
-          quest_branch_id: string
-          quest_id: string
-          scenario_id: string
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          player_id?: string
-          player_quest_id?: string
-          quest_branch_id?: string
-          quest_id?: string
-          scenario_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_quest_branches_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_player_quest_id_fkey"
-            columns: ["player_quest_id"]
-            isOneToOne: false
-            referencedRelation: "player_quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quest_branches_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_quests: {
-        Row: {
-          created_at: string
-          id: string
-          player_id: string
-          quest_id: string
-          scenario_id: string
-          status: Database["public"]["Enums"]["player_quest_status"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          player_id: string
-          quest_id: string
-          scenario_id: string
-          status?: Database["public"]["Enums"]["player_quest_status"]
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          player_id?: string
-          quest_id?: string
-          scenario_id?: string
-          status?: Database["public"]["Enums"]["player_quest_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_quests_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quests_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_quests_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_rolled_dices: {
-        Row: {
-          created_at: string
-          dice_id: string | null
-          id: string
-          narrative_dice_roll_id: string
-          narrative_id: string
-          narrative_node_choice_id: string | null
-          narrative_node_id: string
-          player_id: string
-          player_quest_branch_id: string | null
-          player_quest_id: string | null
-          quest_branch_id: string | null
-          quest_id: string | null
-          scenario_id: string | null
-          user_id: string
-          value: number | null
-        }
-        Insert: {
-          created_at?: string
-          dice_id?: string | null
-          id?: string
-          narrative_dice_roll_id: string
-          narrative_id: string
-          narrative_node_choice_id?: string | null
-          narrative_node_id: string
-          player_id: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
-          scenario_id?: string | null
-          user_id?: string
-          value?: number | null
-        }
-        Update: {
-          created_at?: string
-          dice_id?: string | null
-          id?: string
-          narrative_dice_roll_id?: string
-          narrative_id?: string
-          narrative_node_choice_id?: string | null
-          narrative_node_id?: string
-          player_id?: string
-          player_quest_branch_id?: string | null
-          player_quest_id?: string | null
-          quest_branch_id?: string | null
-          quest_id?: string | null
-          scenario_id?: string | null
-          user_id?: string
-          value?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_rolled_dices_dice_id_fkey"
-            columns: ["dice_id"]
-            isOneToOne: false
-            referencedRelation: "dices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_narrative_dice_roll_id_fkey"
-            columns: ["narrative_dice_roll_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_dice_rolls"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_narrative_id_fkey"
-            columns: ["narrative_id"]
-            isOneToOne: false
-            referencedRelation: "narratives"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_narrative_node_choice_id_fkey"
-            columns: ["narrative_node_choice_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_node_choices"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_narrative_node_id_fkey"
-            columns: ["narrative_node_id"]
-            isOneToOne: false
-            referencedRelation: "narrative_nodes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_player_quest_branch_id_fkey"
-            columns: ["player_quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "player_quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_player_quest_id_fkey"
-            columns: ["player_quest_id"]
-            isOneToOne: false
-            referencedRelation: "player_quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_quest_branch_id_fkey"
-            columns: ["quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_rolled_dices_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      player_scenarios: {
-        Row: {
-          created_at: string
-          current_tick: number
-          id: string
-          player_id: string
-          scenario_id: string
-          status: Database["public"]["Enums"]["player_scenario_status"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_tick?: number
-          id?: string
-          player_id: string
-          scenario_id: string
-          status?: Database["public"]["Enums"]["player_scenario_status"]
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          current_tick?: number
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          status?: Database["public"]["Enums"]["player_scenario_status"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "player_scenarios_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_scenarios_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      players: {
-        Row: {
-          appearance: number
-          avatar: string | null
-          bio: string | null
-          charm: number
-          created_at: string
-          deleted_at: string | null
-          health: number
-          id: string
-          intelligence: number
-          name: string
-          refinement: number
-          stamina: number
-          strength: number
-          stress: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          appearance?: number
-          avatar?: string | null
-          bio?: string | null
-          charm?: number
-          created_at?: string
-          deleted_at?: string | null
-          health?: number
-          id?: string
-          intelligence?: number
-          name: string
-          refinement?: number
-          stamina?: number
-          strength?: number
-          stress?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Update: {
-          appearance?: number
-          avatar?: string | null
-          bio?: string | null
-          charm?: number
-          created_at?: string
-          deleted_at?: string | null
-          health?: number
-          id?: string
-          intelligence?: number
-          name?: string
-          refinement?: number
-          stamina?: number
-          strength?: number
-          stress?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      quest_branches: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          display_order_in_quest: number
-          id: string
-          parent_quest_branch_id: string | null
-          quest_id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          display_order_in_quest?: number
-          id?: string
-          parent_quest_branch_id?: string | null
-          quest_id: string
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          display_order_in_quest?: number
-          id?: string
-          parent_quest_branch_id?: string | null
-          quest_id?: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quest_branches_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quest_branches_parent_quest_branch_id_fkey"
-            columns: ["parent_quest_branch_id"]
-            isOneToOne: false
-            referencedRelation: "quest_branches"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quest_branches_quest_id_fkey"
-            columns: ["quest_id"]
-            isOneToOne: false
-            referencedRelation: "quests"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      quests: {
-        Row: {
-          chapter_id: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          order_in_chapter: number
-          scenario_id: string
-          status: Database["public"]["Enums"]["publish_status"]
-          title: string
-          type: Database["public"]["Enums"]["quest_type"]
-        }
-        Insert: {
-          chapter_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          order_in_chapter?: number
-          scenario_id: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-          type?: Database["public"]["Enums"]["quest_type"]
-        }
-        Update: {
-          chapter_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          order_in_chapter?: number
-          scenario_id?: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-          type?: Database["public"]["Enums"]["quest_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quests_chapter_id_fkey"
-            columns: ["chapter_id"]
-            isOneToOne: false
-            referencedRelation: "chapters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quests_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "quests_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      scenarios: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          display_order: number
-          id: string
-          status: Database["public"]["Enums"]["publish_status"]
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          display_order?: number
-          id?: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          display_order?: number
-          id?: string
-          status?: Database["public"]["Enums"]["publish_status"]
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "scenarios_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      terrains: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          display_order: number
-          game_asset: string | null
-          height: number
-          id: string
-          respawn_x: number | null
-          respawn_y: number | null
-          scenario_id: string
-          title: string
-          width: number
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          display_order?: number
-          game_asset?: string | null
-          height?: number
-          id?: string
-          respawn_x?: number | null
-          respawn_y?: number | null
-          scenario_id: string
-          title?: string
-          width?: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          display_order?: number
-          game_asset?: string | null
-          height?: number
-          id?: string
-          respawn_x?: number | null
-          respawn_y?: number | null
-          scenario_id?: string
-          title?: string
-          width?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "terrains_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "terrains_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      terrains_tiles: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          max_cluster_size: number
-          min_cluster_size: number
-          scenario_id: string
-          spawn_weight: number
-          terrain_id: string
-          tile_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_cluster_size?: number
-          min_cluster_size?: number
-          scenario_id: string
-          spawn_weight?: number
-          terrain_id: string
-          tile_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_cluster_size?: number
-          min_cluster_size?: number
-          scenario_id?: string
-          spawn_weight?: number
-          terrain_id?: string
-          tile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "terrains_tiles_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "terrains_tiles_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "terrains_tiles_terrain_id_fkey"
-            columns: ["terrain_id"]
-            isOneToOne: false
-            referencedRelation: "terrains"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "terrains_tiles_tile_id_fkey"
-            columns: ["tile_id"]
-            isOneToOne: false
-            referencedRelation: "tiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tile_states: {
-        Row: {
-          atlas_name: string
-          created_at: string
-          created_by: string | null
-          fps: number | null
-          frame_from: number | null
-          frame_to: number | null
-          id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
-          max_durability: number
-          min_durability: number
-          scenario_id: string
-          tile_id: string
-          type: Database["public"]["Enums"]["tile_state_type"]
-        }
-        Insert: {
-          atlas_name: string
-          created_at?: string
-          created_by?: string | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_durability?: number
-          min_durability?: number
-          scenario_id: string
-          tile_id: string
-          type?: Database["public"]["Enums"]["tile_state_type"]
-        }
-        Update: {
-          atlas_name?: string
-          created_at?: string
-          created_by?: string | null
-          fps?: number | null
-          frame_from?: number | null
-          frame_to?: number | null
-          id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
-          max_durability?: number
-          min_durability?: number
-          scenario_id?: string
-          tile_id?: string
-          type?: Database["public"]["Enums"]["tile_state_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tile_states_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tile_states_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tile_states_tile_id_fkey"
-            columns: ["tile_id"]
-            isOneToOne: false
-            referencedRelation: "tiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tiles: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          max_durability: number
-          name: string
-          scenario_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_durability?: number
-          name?: string
-          scenario_id: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          max_durability?: number
-          name?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "tiles_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tiles_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_roles: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          deleted_at: string | null
-          deleted_by: string | null
-          display_name: string
-          id: string
-          type: Database["public"]["Enums"]["user_role_type"]
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          display_name?: string
-          id?: string
-          type: Database["public"]["Enums"]["user_role_type"]
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
-          display_name?: string
-          id?: string
-          type?: Database["public"]["Enums"]["user_role_type"]
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_user_roles_created_by"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_user_roles_deleted_by"
-            columns: ["deleted_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_building_conditions: {
-        Row: {
-          building_condition_id: string
-          building_id: string
-          condition_id: string
-          created_at: string
-          id: string
-          player_id: string
-          scenario_id: string
-          user_id: string
-          value: number
-          world_building_id: string
-          world_id: string
-        }
-        Insert: {
-          building_condition_id: string
-          building_id: string
-          condition_id: string
-          created_at?: string
-          id?: string
-          player_id: string
-          scenario_id: string
-          user_id?: string
-          value?: number
-          world_building_id: string
-          world_id: string
-        }
-        Update: {
-          building_condition_id?: string
-          building_id?: string
-          condition_id?: string
-          created_at?: string
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          user_id?: string
-          value?: number
-          world_building_id?: string
-          world_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_building_conditions_building_condition_id_fkey"
-            columns: ["building_condition_id"]
-            isOneToOne: false
-            referencedRelation: "building_conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_condition_id_fkey"
-            columns: ["condition_id"]
-            isOneToOne: false
-            referencedRelation: "conditions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_world_building_id_fkey"
-            columns: ["world_building_id"]
-            isOneToOne: false
-            referencedRelation: "world_buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_building_conditions_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: false
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_buildings: {
-        Row: {
-          building_id: string
-          cell_x: number
-          cell_y: number
-          created_at: string
-          created_at_tick: number
-          id: string
-          player_id: string
-          scenario_id: string
-          user_id: string
-          world_id: string
-        }
-        Insert: {
-          building_id: string
-          cell_x?: number
-          cell_y?: number
-          created_at?: string
-          created_at_tick?: number
-          id?: string
-          player_id: string
-          scenario_id: string
-          user_id?: string
-          world_id: string
-        }
-        Update: {
-          building_id?: string
-          cell_x?: number
-          cell_y?: number
-          created_at?: string
-          created_at_tick?: number
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          user_id?: string
-          world_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_buildings_building_id_fkey"
-            columns: ["building_id"]
-            isOneToOne: false
-            referencedRelation: "buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_buildings_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_buildings_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_buildings_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: false
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_character_needs: {
-        Row: {
-          character_id: string
-          id: string
-          need_id: string
-          player_id: string
-          scenario_id: string
-          user_id: string
-          value: number
-          world_character_id: string
-          world_id: string
-        }
-        Insert: {
-          character_id: string
-          id?: string
-          need_id: string
-          player_id: string
-          scenario_id: string
-          user_id?: string
-          value: number
-          world_character_id: string
-          world_id: string
-        }
-        Update: {
-          character_id?: string
-          id?: string
-          need_id?: string
-          player_id?: string
-          scenario_id?: string
-          user_id?: string
-          value?: number
-          world_character_id?: string
-          world_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_character_needs_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_character_needs_need_id_fkey"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_character_needs_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_character_needs_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_character_needs_world_character_id_fkey"
-            columns: ["world_character_id"]
-            isOneToOne: false
-            referencedRelation: "world_characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_character_needs_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: false
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_characters: {
-        Row: {
-          character_id: string
-          created_at: string
-          created_at_tick: number
-          id: string
-          player_id: string
-          scenario_id: string
-          user_id: string
-          world_id: string
-          x: number
-          y: number
-        }
-        Insert: {
-          character_id: string
-          created_at?: string
-          created_at_tick?: number
-          id?: string
-          player_id: string
-          scenario_id: string
-          user_id?: string
-          world_id: string
-          x?: number
-          y?: number
-        }
-        Update: {
-          character_id?: string
-          created_at?: string
-          created_at_tick?: number
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          user_id?: string
-          world_id?: string
-          x?: number
-          y?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_characters_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_characters_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_characters_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_characters_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: false
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_items: {
-        Row: {
-          created_at: string
-          created_at_tick: number
-          durability_ticks: number | null
-          id: string
-          item_id: string
-          player_id: string
-          rotation: number
-          scenario_id: string
-          user_id: string
-          world_building_id: string | null
-          world_id: string
-          x: number
-          y: number
-        }
-        Insert: {
-          created_at?: string
-          created_at_tick?: number
-          durability_ticks?: number | null
-          id?: string
-          item_id: string
-          player_id: string
-          rotation?: number
-          scenario_id: string
-          user_id?: string
-          world_building_id?: string | null
-          world_id: string
-          x?: number
-          y?: number
-        }
-        Update: {
-          created_at?: string
-          created_at_tick?: number
-          durability_ticks?: number | null
-          id?: string
-          item_id?: string
-          player_id?: string
-          rotation?: number
-          scenario_id?: string
-          user_id?: string
-          world_building_id?: string | null
-          world_id?: string
-          x?: number
-          y?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_items_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_items_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_items_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_items_world_building_id_fkey"
-            columns: ["world_building_id"]
-            isOneToOne: false
-            referencedRelation: "world_buildings"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_items_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: false
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      world_tile_maps: {
-        Row: {
-          created_at: string
-          data: Json
-          id: string
-          player_id: string
-          scenario_id: string
-          terrain_id: string
-          user_id: string
-          world_id: string
-        }
-        Insert: {
-          created_at?: string
-          data?: Json
-          id?: string
-          player_id: string
-          scenario_id: string
-          terrain_id: string
-          user_id: string
-          world_id: string
-        }
-        Update: {
-          created_at?: string
-          data?: Json
-          id?: string
-          player_id?: string
-          scenario_id?: string
-          terrain_id?: string
-          user_id?: string
-          world_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "world_tile_maps_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_tile_maps_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_tile_maps_terrain_id_fkey"
-            columns: ["terrain_id"]
-            isOneToOne: false
-            referencedRelation: "terrains"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "world_tile_maps_world_id_fkey"
-            columns: ["world_id"]
-            isOneToOne: true
-            referencedRelation: "worlds"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      worlds: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          player_id: string
-          scenario_id: string | null
-          terrain_id: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          player_id: string
-          scenario_id?: string | null
-          terrain_id?: string | null
-          user_id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          player_id?: string
-          scenario_id?: string | null
-          terrain_id?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "worlds_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "players"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worlds_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worlds_terrain_id_fkey"
-            columns: ["terrain_id"]
-            isOneToOne: false
-            referencedRelation: "terrains"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      current_user_role_id: { Args: never; Returns: string }
-      is_admin: { Args: never; Returns: boolean }
-      is_me: { Args: { target_user_id: string }; Returns: boolean }
-      is_own_player: {
-        Args: { target_player_id: string; target_user_id: string }
-        Returns: boolean
-      }
-      is_world_owner: { Args: { wid: string }; Returns: boolean }
-    }
-    Enums: {
-      building_state_type: "idle" | "damaged" | "planning"
-      character_behavior_type: "demolish" | "use" | "repair" | "clean"
-      character_body_state_type: "idle" | "walk" | "run" | "jump"
-      character_face_state_type: "idle" | "happy" | "sad" | "angry"
-      collider_type: "circle" | "rectangle"
-      condition_fulfillment_type: "character" | "item" | "idle"
-      dice_roll_action: "narrative_node_next" | "narrative_node_done"
-      item_state_type: "idle" | "broken"
-      loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
-      narrative_node_type: "text" | "choice"
-      need_behavior_action_type: "go" | "interact" | "idle"
-      need_fulfillment_task_condition: "completed" | "created"
-      need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
-      player_chapter_status: "in_progress" | "completed"
-      player_quest_status: "in_progress" | "completed" | "abandoned"
-      player_scenario_status: "in_progress" | "completed"
-      publish_status: "draft" | "published"
-      quest_type: "primary" | "secondary"
-      tile_state_type: "idle" | "damaged_1" | "damaged_2"
-      user_role_type: "admin"
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+// ============================================================
+// Helper Types for Supabase Database Access
+// ============================================================
+export type Tables<T extends keyof Database['public']['Tables']> =
+	Database['public']['Tables'][T]['Row'];
+export type TablesInsert<T extends keyof Database['public']['Tables']> =
+	Database['public']['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof Database['public']['Tables']> =
+	Database['public']['Tables'][T]['Update'];
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+// ============================================================
+// Branded ID Types
+// ============================================================
+export type ScenarioId = Brand<string, 'ScenarioId'>;
+export type ChapterId = Brand<string, 'ChapterId'>;
+export type QuestId = Brand<string, 'QuestId'>;
+export type QuestBranchId = Brand<string, 'QuestBranchId'>;
+export type NarrativeId = Brand<string, 'NarrativeId'>;
+export type NarrativeNodeId = Brand<string, 'NarrativeNodeId'>;
+export type NarrativeNodeChoiceId = Brand<string, 'NarrativeNodeChoiceId'>;
+export type NarrativeDiceRollId = Brand<string, 'NarrativeDiceRollId'>;
+export type DiceId = Brand<string, 'DiceId'>;
+export type UserId = Brand<string, 'UserId'>;
+export type PlayerId = Brand<string, 'PlayerId'>;
+export type PlayerScenarioId = Brand<string, 'PlayerScenarioId'>;
+export type PlayerChapterId = Brand<string, 'PlayerChapterId'>;
+export type PlayerQuestId = Brand<string, 'PlayerQuestId'>;
+export type PlayerQuestBranchId = Brand<string, 'PlayerQuestBranchId'>;
+export type PlayerRolledDiceId = Brand<string, 'PlayerRolledDiceId'>;
+export type UserRoleId = Brand<string, 'UserRoleId'>;
+export type TerrainId = Brand<string, 'TerrainId'>;
+export type CharacterId = Brand<string, 'CharacterId'>;
+export type CharacterBodyId = Brand<string, 'CharacterBodyId'>;
+export type CharacterBodyStateId = Brand<string, 'CharacterBodyStateId'>;
+export type CharacterFaceStateId = Brand<string, 'CharacterFaceStateId'>;
+export type CharacterNeedId = Brand<string, 'CharacterNeedId'>;
+export type WorldId = Brand<string, 'WorldId'>;
+export type WorldCharacterId = Brand<string, 'WorldCharacterId'>;
+export type WorldCharacterNeedId = Brand<string, 'WorldCharacterNeedId'>;
+export type BuildingId = Brand<string, 'BuildingId'>;
+export type BuildingStateId = Brand<string, 'BuildingStateId'>;
+export type ConditionBehaviorId = Brand<string, 'ConditionBehaviorId'>;
+export type ConditionBehaviorActionId = Brand<string, 'ConditionBehaviorActionId'>;
+export type WorldBuildingId = Brand<string, 'WorldBuildingId'>;
+export type ConditionId = Brand<string, 'ConditionId'>;
+export type ConditionFulfillmentId = Brand<string, 'ConditionFulfillmentId'>;
+export type BuildingConditionId = Brand<string, 'BuildingConditionId'>;
+export type ConditionEffectId = Brand<string, 'ConditionEffectId'>;
+export type WorldBuildingConditionId = Brand<string, 'WorldBuildingConditionId'>;
+export type NeedId = Brand<string, 'NeedId'>;
+export type NeedFulfillmentId = Brand<string, 'NeedFulfillmentId'>;
+export type NeedBehaviorId = Brand<string, 'NeedBehaviorId'>;
+export type NeedBehaviorActionId = Brand<string, 'NeedBehaviorActionId'>;
+export type ItemId = Brand<string, 'ItemId'>;
+export type ItemStateId = Brand<string, 'ItemStateId'>;
+export type ItemBehaviorId = Brand<string, 'ItemBehaviorId'>;
+export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
+export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
+export type WorldItemId = Brand<string, 'WorldItemId'>;
+export type TileId = Brand<string, 'TileId'>;
+export type TileStateId = Brand<string, 'TileStateId'>;
+export type TerrainTileId = Brand<string, 'TerrainTileId'>;
+export type WorldTileMapId = Brand<string, 'WorldTileMapId'>;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+// ============================================================
+// Entity Types
+// ============================================================
+// Entity ID with type information (branded string type)
+// Format: type_worldId_worldEntityId
+export type EntityId =
+	| `character_${WorldId}_${WorldCharacterId}`
+	| `building_${WorldId}_${WorldBuildingId}`
+	| `item_${WorldId}_${WorldItemId}`
+	| `tile_${WorldId}_${VectorKey}`;
+export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+// Entity Template ID (템플릿 선택용, worldId 없음)
+// Format: type_templateId
+export type EntityTemplateId =
+	| `character_${CharacterId}`
+	| `building_${BuildingId}`
+	| `item_${ItemId}`
+	| `tile_${TileId}`;
 
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+// Instance types for EntityId and EntityTemplateId
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | VectorKey;
+export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
+export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
 
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+// Re-export Database for hooks.server.ts
+export type { Database };
 
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+// ============================================================
+// Enum Type Exports
+// ============================================================
+export type LoopMode = Enums<'loop_mode'>;
+export type ColliderType = Enums<'collider_type'>;
+export type BuildingStateType = Enums<'building_state_type'>;
+export type CharacterBodyStateType = Enums<'character_body_state_type'>;
+export type CharacterFaceStateType = Enums<'character_face_state_type'>;
+export type ItemStateType = Enums<'item_state_type'>;
 
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+// Additional enum exports
+export type PublishStatus = Enums<'publish_status'>;
+export type QuestType = Enums<'quest_type'>;
+export type PlayerQuestStatus = Enums<'player_quest_status'>;
+export type PlayerChapterStatus = Enums<'player_chapter_status'>;
+export type PlayerScenarioStatus = Enums<'player_scenario_status'>;
+export type DiceRollAction = Enums<'dice_roll_action'>;
+export type CharacterBehaviorType = Enums<'character_behavior_type'>;
+export type ConditionFulfillmentType = Enums<'condition_fulfillment_type'>;
+export type NarrativeNodeType = Enums<'narrative_node_type'>;
+export type NeedBehaviorActionType = Enums<'need_behavior_action_type'>;
+export type NeedFulfillmentTaskCondition = Enums<'need_fulfillment_task_condition'>;
+export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
+export type TileStateType = Enums<'tile_state_type'>;
+export type UserRoleType = Enums<'user_role_type'>;
 
-export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
-  public: {
-    Enums: {
-      building_state_type: ["idle", "damaged", "planning"],
-      character_behavior_type: ["demolish", "use", "repair", "clean"],
-      character_body_state_type: ["idle", "walk", "run", "jump"],
-      character_face_state_type: ["idle", "happy", "sad", "angry"],
-      collider_type: ["circle", "rectangle"],
-      condition_fulfillment_type: ["character", "item", "idle"],
-      dice_roll_action: ["narrative_node_next", "narrative_node_done"],
-      item_state_type: ["idle", "broken"],
-      loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
-      narrative_node_type: ["text", "choice"],
-      need_behavior_action_type: ["go", "interact", "idle"],
-      need_fulfillment_task_condition: ["completed", "created"],
-      need_fulfillment_type: ["building", "character", "task", "item", "idle"],
-      player_chapter_status: ["in_progress", "completed"],
-      player_quest_status: ["in_progress", "completed", "abandoned"],
-      player_scenario_status: ["in_progress", "completed"],
-      publish_status: ["draft", "published"],
-      quest_type: ["primary", "secondary"],
-      tile_state_type: ["idle", "damaged_1", "damaged_2"],
-      user_role_type: ["admin"],
-    },
-  },
-} as const
+// ============================================================
+// Table Type Redefinitions
+// ============================================================
 
+// Scenario types
+type ScenarioRow = Tables<'scenarios'>;
+export type Scenario = Omit<ScenarioRow, 'id'> & { id: ScenarioId };
+type ScenarioInsertRow = TablesInsert<'scenarios'>;
+export type ScenarioInsert = ScenarioInsertRow;
+type ScenarioUpdateRow = TablesUpdate<'scenarios'>;
+export type ScenarioUpdate = Omit<ScenarioUpdateRow, 'id'> & {
+	id?: ScenarioId;
+};
+type PlayerScenarioRow = Tables<'player_scenarios'>;
+export type PlayerScenario = Omit<
+	PlayerScenarioRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id'
+> & {
+	id: PlayerScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type PlayerScenarioInsertRow = TablesInsert<'player_scenarios'>;
+export type PlayerScenarioInsert = Omit<
+	PlayerScenarioInsertRow,
+	'user_id' | 'player_id' | 'scenario_id'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type PlayerScenarioUpdateRow = TablesUpdate<'player_scenarios'>;
+export type PlayerScenarioUpdate = Omit<
+	PlayerScenarioUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id'
+> & {
+	id?: PlayerScenarioId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
+
+// Chapter types
+type ChapterRow = Tables<'chapters'>;
+export type Chapter = Omit<ChapterRow, 'id' | 'scenario_id'> & {
+	id: ChapterId;
+	scenario_id: ScenarioId;
+};
+type ChapterInsertRow = TablesInsert<'chapters'>;
+export type ChapterInsert = Omit<ChapterInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type ChapterUpdateRow = TablesUpdate<'chapters'>;
+export type ChapterUpdate = Omit<ChapterUpdateRow, 'id' | 'scenario_id'> & {
+	id?: ChapterId;
+	scenario_id?: ScenarioId;
+};
+
+// Player Chapter types
+type PlayerChapterRow = Tables<'player_chapters'>;
+export type PlayerChapter = Omit<
+	PlayerChapterRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'chapter_id'
+> & {
+	id: PlayerChapterId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	chapter_id: ChapterId;
+};
+type PlayerChapterInsertRow = TablesInsert<'player_chapters'>;
+export type PlayerChapterInsert = Omit<
+	PlayerChapterInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'chapter_id'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	chapter_id: ChapterId;
+};
+type PlayerChapterUpdateRow = TablesUpdate<'player_chapters'>;
+export type PlayerChapterUpdate = Omit<
+	PlayerChapterUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'chapter_id'
+> & {
+	id?: PlayerChapterId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+	chapter_id?: ChapterId;
+};
+
+// Quest types
+type QuestRow = Tables<'quests'>;
+export type Quest = Omit<QuestRow, 'id' | 'scenario_id' | 'chapter_id' | 'created_by'> & {
+	id: QuestId;
+	scenario_id: ScenarioId;
+	chapter_id: ChapterId | null;
+	created_by: UserRoleId | null;
+};
+type QuestInsertRow = TablesInsert<'quests'>;
+export type QuestInsert = Omit<QuestInsertRow, 'scenario_id' | 'chapter_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	chapter_id: ChapterId | null;
+	created_by?: UserRoleId | null;
+};
+type QuestUpdateRow = TablesUpdate<'quests'>;
+export type QuestUpdate = Omit<
+	QuestUpdateRow,
+	'id' | 'scenario_id' | 'chapter_id' | 'created_by'
+> & {
+	id?: QuestId;
+	scenario_id?: ScenarioId;
+	chapter_id?: ChapterId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Quest Branch types
+type QuestBranchRow = Tables<'quest_branches'>;
+export type QuestBranch = Omit<
+	QuestBranchRow,
+	'id' | 'quest_id' | 'parent_quest_branch_id' | 'created_by'
+> & {
+	id: QuestBranchId;
+	quest_id: QuestId;
+	parent_quest_branch_id: QuestBranchId | null;
+	created_by: UserRoleId | null;
+};
+type QuestBranchInsertRow = TablesInsert<'quest_branches'>;
+export type QuestBranchInsert = Omit<
+	QuestBranchInsertRow,
+	'quest_id' | 'parent_quest_branch_id' | 'created_by'
+> & {
+	quest_id: QuestId;
+	parent_quest_branch_id?: QuestBranchId | null;
+	created_by?: UserRoleId | null;
+};
+type QuestBranchUpdateRow = TablesUpdate<'quest_branches'>;
+export type QuestBranchUpdate = Omit<
+	QuestBranchUpdateRow,
+	'id' | 'quest_id' | 'parent_quest_branch_id' | 'created_by'
+> & {
+	id?: QuestBranchId;
+	quest_id?: QuestId;
+	parent_quest_branch_id?: QuestBranchId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Player Quest types
+type PlayerQuestRow = Tables<'player_quests'>;
+export type PlayerQuest = Omit<
+	PlayerQuestRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id'
+> & {
+	id: PlayerQuestId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+	quest_branch_id?: QuestBranchId;
+};
+type PlayerQuestInsertRow = TablesInsert<'player_quests'>;
+export type PlayerQuestInsert = Omit<
+	PlayerQuestInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+	quest_branch_id?: QuestBranchId;
+};
+type PlayerQuestUpdateRow = TablesUpdate<'player_quests'>;
+export type PlayerQuestUpdate = Omit<
+	PlayerQuestUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id'
+> & {
+	id?: PlayerQuestId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+	quest_id?: QuestId;
+	quest_branch_id?: QuestBranchId;
+};
+
+// Player Quest Branch types
+type PlayerQuestBranchRow = Tables<'player_quest_branches'>;
+export type PlayerQuestBranch = Omit<
+	PlayerQuestBranchRow,
+	| 'id'
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+> & {
+	id: PlayerQuestBranchId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+	quest_branch_id: QuestBranchId;
+	player_quest_id: PlayerQuestId;
+};
+type PlayerQuestBranchInsertRow = TablesInsert<'player_quest_branches'>;
+export type PlayerQuestBranchInsert = Omit<
+	PlayerQuestBranchInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'quest_id' | 'quest_branch_id' | 'player_quest_id'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	quest_id: QuestId;
+	quest_branch_id: QuestBranchId;
+	player_quest_id: PlayerQuestId;
+};
+type PlayerQuestBranchUpdateRow = TablesUpdate<'player_quest_branches'>;
+export type PlayerQuestBranchUpdate = Omit<
+	PlayerQuestBranchUpdateRow,
+	| 'id'
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+> & {
+	id?: PlayerQuestBranchId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+	quest_id?: QuestId;
+	quest_branch_id?: QuestBranchId;
+	player_quest_id?: PlayerQuestId;
+};
+
+// Narrative types
+type NarrativeRow = Tables<'narratives'>;
+export type Narrative = Omit<NarrativeRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: NarrativeId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type NarrativeInsertRow = TablesInsert<'narratives'>;
+export type NarrativeInsert = Omit<NarrativeInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type NarrativeUpdateRow = TablesUpdate<'narratives'>;
+export type NarrativeUpdate = Omit<NarrativeUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Narrative Node types
+type NarrativeNodeRow = Tables<'narrative_nodes'>;
+export type NarrativeNode = Omit<
+	NarrativeNodeRow,
+	'id' | 'narrative_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id: NarrativeNodeId;
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id: NarrativeDiceRollId | null;
+};
+type NarrativeNodeInsertRow = TablesInsert<'narrative_nodes'>;
+export type NarrativeNodeInsert = Omit<
+	NarrativeNodeInsertRow,
+	'narrative_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
+type NarrativeNodeUpdateRow = TablesUpdate<'narrative_nodes'>;
+export type NarrativeNodeUpdate = Omit<
+	NarrativeNodeUpdateRow,
+	'id' | 'narrative_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id?: NarrativeNodeId;
+	narrative_id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
+
+// Narrative Node Choice types
+type NarrativeNodeChoiceRow = Tables<'narrative_node_choices'>;
+export type NarrativeNodeChoice = Omit<
+	NarrativeNodeChoiceRow,
+	'id' | 'narrative_node_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id: NarrativeNodeChoiceId;
+	narrative_node_id: NarrativeNodeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id: NarrativeDiceRollId | null;
+};
+type NarrativeNodeChoiceInsertRow = TablesInsert<'narrative_node_choices'>;
+export type NarrativeNodeChoiceInsert = Omit<
+	NarrativeNodeChoiceInsertRow,
+	'narrative_node_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	narrative_node_id: NarrativeNodeId;
+	scenario_id: ScenarioId;
+	narrative_dice_roll_id: NarrativeDiceRollId | null;
+};
+type NarrativeNodeChoiceUpdateRow = TablesUpdate<'narrative_node_choices'>;
+export type NarrativeNodeChoiceUpdate = Omit<
+	NarrativeNodeChoiceUpdateRow,
+	'id' | 'narrative_node_id' | 'scenario_id' | 'narrative_dice_roll_id'
+> & {
+	id?: NarrativeNodeChoiceId;
+	narrative_node_id?: NarrativeNodeId;
+	scenario_id?: ScenarioId;
+	narrative_dice_roll_id?: NarrativeDiceRollId | null;
+};
+
+// Narrative Dice Roll types
+type NarrativeDiceRollRow = Tables<'narrative_dice_rolls'>;
+export type NarrativeDiceRoll = Omit<
+	NarrativeDiceRollRow,
+	| 'id'
+	| 'narrative_id'
+	| 'scenario_id'
+	| 'success_narrative_node_id'
+	| 'failure_narrative_node_id'
+	| 'created_by'
+> & {
+	id: NarrativeDiceRollId;
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	success_narrative_node_id: NarrativeNodeId | null;
+	failure_narrative_node_id: NarrativeNodeId | null;
+	created_by: UserRoleId | null;
+};
+type NarrativeDiceRollInsertRow = TablesInsert<'narrative_dice_rolls'>;
+export type NarrativeDiceRollInsert = Omit<
+	NarrativeDiceRollInsertRow,
+	| 'narrative_id'
+	| 'scenario_id'
+	| 'success_narrative_node_id'
+	| 'failure_narrative_node_id'
+	| 'created_by'
+> & {
+	narrative_id: NarrativeId;
+	scenario_id: ScenarioId;
+	success_narrative_node_id?: NarrativeNodeId | null;
+	failure_narrative_node_id?: NarrativeNodeId | null;
+	created_by?: UserRoleId | null;
+};
+type NarrativeDiceRollUpdateRow = TablesUpdate<'narrative_dice_rolls'>;
+export type NarrativeDiceRollUpdate = Omit<
+	NarrativeDiceRollUpdateRow,
+	| 'id'
+	| 'narrative_id'
+	| 'scenario_id'
+	| 'success_narrative_node_id'
+	| 'failure_narrative_node_id'
+	| 'created_by'
+> & {
+	id?: NarrativeDiceRollId;
+	narrative_id?: NarrativeId;
+	scenario_id?: ScenarioId;
+	success_narrative_node_id?: NarrativeNodeId | null;
+	failure_narrative_node_id?: NarrativeNodeId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Player Rolled Dice types
+type PlayerRolledDiceRow = Tables<'player_rolled_dices'>;
+export type PlayerRolledDice = Omit<
+	PlayerRolledDiceRow,
+	| 'id'
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'narrative_id'
+	| 'narrative_node_id'
+	| 'narrative_node_choice_id'
+	| 'narrative_dice_roll_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+	| 'player_quest_branch_id'
+	| 'dice_id'
+> & {
+	id: PlayerRolledDiceId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId | null;
+	narrative_id: NarrativeId;
+	narrative_node_id: NarrativeNodeId;
+	narrative_node_choice_id: NarrativeNodeChoiceId | null;
+	narrative_dice_roll_id: NarrativeDiceRollId;
+	quest_id: QuestId | null;
+	quest_branch_id: QuestBranchId | null;
+	player_quest_id: PlayerQuestId | null;
+	player_quest_branch_id: PlayerQuestBranchId | null;
+	dice_id: DiceId | null;
+};
+type PlayerRolledDiceInsertRow = TablesInsert<'player_rolled_dices'>;
+export type PlayerRolledDiceInsert = Omit<
+	PlayerRolledDiceInsertRow,
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'narrative_id'
+	| 'narrative_node_id'
+	| 'narrative_node_choice_id'
+	| 'narrative_dice_roll_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+	| 'player_quest_branch_id'
+	| 'dice_id'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId | null;
+	narrative_id: NarrativeId;
+	narrative_node_id: NarrativeNodeId;
+	narrative_node_choice_id: NarrativeNodeChoiceId | null;
+	narrative_dice_roll_id: NarrativeDiceRollId;
+	quest_id: QuestId | null;
+	quest_branch_id: QuestBranchId | null;
+	player_quest_id: PlayerQuestId | null;
+	player_quest_branch_id: PlayerQuestBranchId | null;
+	dice_id: DiceId | null;
+};
+type PlayerRolledDiceUpdateRow = TablesUpdate<'player_rolled_dices'>;
+export type PlayerRolledDiceUpdate = Omit<
+	PlayerRolledDiceUpdateRow,
+	| 'id'
+	| 'user_id'
+	| 'player_id'
+	| 'scenario_id'
+	| 'narrative_id'
+	| 'narrative_node_id'
+	| 'narrative_node_choice_id'
+	| 'narrative_dice_roll_id'
+	| 'quest_id'
+	| 'quest_branch_id'
+	| 'player_quest_id'
+	| 'player_quest_branch_id'
+	| 'dice_id'
+> & {
+	id?: PlayerRolledDiceId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId | null;
+	narrative_id?: NarrativeId;
+	narrative_node_id?: NarrativeNodeId;
+	narrative_node_choice_id?: NarrativeNodeChoiceId | null;
+	narrative_dice_roll_id?: NarrativeDiceRollId;
+	quest_id?: QuestId | null;
+	quest_branch_id?: QuestBranchId | null;
+	player_quest_id?: PlayerQuestId | null;
+	player_quest_branch_id?: PlayerQuestBranchId | null;
+	dice_id?: DiceId | null;
+};
+
+// Dice types
+type DiceRow = Tables<'dices'>;
+export type Dice = Omit<DiceRow, 'id'> & {
+	id: DiceId;
+};
+type DiceInsertRow = TablesInsert<'dices'>;
+export type DiceInsert = DiceInsertRow;
+type DiceUpdateRow = TablesUpdate<'dices'>;
+export type DiceUpdate = Omit<DiceUpdateRow, 'id'> & {
+	id?: DiceId;
+};
+
+// Player types
+type PlayerRow = Tables<'players'>;
+export type Player = Omit<PlayerRow, 'id' | 'user_id'> & {
+	id: PlayerId;
+	user_id: UserId;
+};
+type PlayerInsertRow = TablesInsert<'players'>;
+export type PlayerInsert = Omit<PlayerInsertRow, 'user_id'> & {
+	user_id: UserId;
+};
+type PlayerUpdateRow = TablesUpdate<'players'>;
+export type PlayerUpdate = Omit<PlayerUpdateRow, 'id' | 'user_id'> & {
+	id?: PlayerId;
+	user_id?: UserId;
+};
+
+// User Role types
+type UserRoleRow = Tables<'user_roles'>;
+export type UserRole = Omit<UserRoleRow, 'id' | 'created_by' | 'deleted_by'> & {
+	id: UserRoleId;
+	created_by: UserRoleId | null;
+	deleted_by: UserRoleId | null;
+};
+type UserRoleInsertRow = TablesInsert<'user_roles'>;
+export type UserRoleInsert = Omit<UserRoleInsertRow, 'created_by' | 'deleted_by'> & {
+	created_by: UserRoleId | null;
+	deleted_by: UserRoleId | null;
+};
+type UserRoleUpdateRow = TablesUpdate<'user_roles'>;
+export type UserRoleUpdate = Omit<UserRoleUpdateRow, 'id' | 'created_by' | 'deleted_by'> & {
+	id?: UserRoleId;
+	created_by?: UserRoleId | null;
+	deleted_by?: UserRoleId | null;
+};
+
+// Terrain types
+type TerrainRow = Tables<'terrains'>;
+export type Terrain = Omit<TerrainRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: TerrainId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type TerrainInsertRow = TablesInsert<'terrains'>;
+export type TerrainInsert = Omit<TerrainInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type TerrainUpdateRow = TablesUpdate<'terrains'>;
+export type TerrainUpdate = Omit<TerrainUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: TerrainId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Character Body types
+type CharacterBodyRow = Tables<'character_bodies'>;
+export type CharacterBody = Omit<CharacterBodyRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: CharacterBodyId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type CharacterBodyInsertRow = TablesInsert<'character_bodies'>;
+export type CharacterBodyInsert = Omit<CharacterBodyInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type CharacterBodyUpdateRow = TablesUpdate<'character_bodies'>;
+export type CharacterBodyUpdate = Omit<
+	CharacterBodyUpdateRow,
+	'id' | 'scenario_id' | 'created_by'
+> & {
+	id?: CharacterBodyId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Character Body State types
+type CharacterBodyStateRow = Tables<'character_body_states'>;
+export type CharacterBodyState = Omit<CharacterBodyStateRow, 'id' | 'character_body_id'> & {
+	id: CharacterBodyStateId;
+	character_body_id: CharacterBodyId;
+};
+type CharacterBodyStateInsertRow = TablesInsert<'character_body_states'>;
+export type CharacterBodyStateInsert = Omit<CharacterBodyStateInsertRow, 'character_body_id'> & {
+	character_body_id?: CharacterBodyId;
+};
+type CharacterBodyStateUpdateRow = TablesUpdate<'character_body_states'>;
+export type CharacterBodyStateUpdate = Omit<
+	CharacterBodyStateUpdateRow,
+	'id' | 'character_body_id'
+> & {
+	id?: CharacterBodyStateId;
+	character_body_id?: CharacterBodyId;
+};
+
+// Character Face State types
+type CharacterFaceStateRow = Tables<'character_face_states'>;
+export type CharacterFaceState = Omit<CharacterFaceStateRow, 'id' | 'character_id' | 'need_id'> & {
+	id: CharacterFaceStateId;
+	character_id: CharacterId;
+	need_id: NeedId | null;
+};
+type CharacterFaceStateInsertRow = TablesInsert<'character_face_states'>;
+export type CharacterFaceStateInsert = Omit<
+	CharacterFaceStateInsertRow,
+	'character_id' | 'need_id'
+> & {
+	character_id: CharacterId;
+	need_id?: NeedId | null;
+};
+type CharacterFaceStateUpdateRow = TablesUpdate<'character_face_states'>;
+export type CharacterFaceStateUpdate = Omit<
+	CharacterFaceStateUpdateRow,
+	'id' | 'character_id' | 'need_id'
+> & {
+	id?: CharacterFaceStateId;
+	character_id?: CharacterId;
+	need_id?: NeedId | null;
+};
+
+// Character types
+type CharacterRow = Tables<'characters'>;
+export type Character = Omit<
+	CharacterRow,
+	'id' | 'scenario_id' | 'character_body_id' | 'created_by'
+> & {
+	id: CharacterId;
+	scenario_id: ScenarioId;
+	character_body_id: CharacterBodyId;
+	created_by: UserRoleId | null;
+};
+type CharacterInsertRow = TablesInsert<'characters'>;
+export type CharacterInsert = Omit<CharacterInsertRow, 'scenario_id' | 'character_body_id'> & {
+	scenario_id: ScenarioId;
+	character_body_id: CharacterBodyId;
+};
+type CharacterUpdateRow = TablesUpdate<'characters'>;
+export type CharacterUpdate = Omit<
+	CharacterUpdateRow,
+	'id' | 'scenario_id' | 'character_body_id'
+> & {
+	id?: CharacterId;
+	scenario_id?: ScenarioId;
+	character_body_id?: CharacterBodyId;
+};
+
+// World types
+type WorldRow = Tables<'worlds'>;
+export type World = Omit<
+	WorldRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
+	id: WorldId;
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId | null;
+};
+type WorldInsertRow = TablesInsert<'worlds'>;
+export type WorldInsert = Omit<
+	WorldInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
+	user_id: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId | null;
+};
+type WorldUpdateRow = TablesUpdate<'worlds'>;
+export type WorldUpdate = Omit<
+	WorldUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+> & {
+	id?: WorldId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+	terrain_id?: TerrainId | null;
+};
+
+// World Character types
+type WorldCharacterRow = Tables<'world_characters'>;
+export type WorldCharacter = Omit<
+	WorldCharacterRow,
+	'id' | 'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
+> & {
+	id: WorldCharacterId;
+	user_id: UserId;
+	world_id: WorldId;
+	character_id: CharacterId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldCharacterInsertRow = TablesInsert<'world_characters'>;
+export type WorldCharacterInsert = Omit<
+	WorldCharacterInsertRow,
+	'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
+> & {
+	user_id: UserId;
+	world_id: WorldId;
+	character_id: CharacterId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldCharacterUpdateRow = TablesUpdate<'world_characters'>;
+export type WorldCharacterUpdate = Omit<
+	WorldCharacterUpdateRow,
+	'id' | 'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
+> & {
+	id?: WorldCharacterId;
+	user_id?: UserId;
+	world_id?: WorldId;
+	character_id?: CharacterId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
+
+// World Building types
+type WorldBuildingRow = Tables<'world_buildings'>;
+export type WorldBuilding = Omit<
+	WorldBuildingRow,
+	'id' | 'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
+> & {
+	id: WorldBuildingId;
+	user_id: UserId;
+	world_id: WorldId;
+	building_id: BuildingId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldBuildingInsertRow = TablesInsert<'world_buildings'>;
+export type WorldBuildingInsert = Omit<
+	WorldBuildingInsertRow,
+	'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
+> & {
+	user_id: UserId;
+	world_id: WorldId;
+	building_id: BuildingId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldBuildingUpdateRow = TablesUpdate<'world_buildings'>;
+export type WorldBuildingUpdate = Omit<
+	WorldBuildingUpdateRow,
+	'id' | 'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
+> & {
+	id?: WorldBuildingId;
+	user_id?: UserId;
+	world_id?: WorldId;
+	building_id?: BuildingId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
+
+// Building types
+type BuildingRow = Tables<'buildings'>;
+export type Building = Omit<BuildingRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: BuildingId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type BuildingInsertRow = TablesInsert<'buildings'>;
+export type BuildingInsert = Omit<BuildingInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type BuildingUpdateRow = TablesUpdate<'buildings'>;
+export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: BuildingId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Building State types
+type BuildingStateRow = Tables<'building_states'>;
+export type BuildingState = Omit<BuildingStateRow, 'id' | 'building_id' | 'condition_id'> & {
+	id: BuildingStateId;
+	building_id: BuildingId;
+	condition_id: ConditionId | null;
+};
+type BuildingStateInsertRow = TablesInsert<'building_states'>;
+export type BuildingStateInsert = Omit<BuildingStateInsertRow, 'building_id' | 'condition_id'> & {
+	building_id: BuildingId;
+	condition_id?: ConditionId | null;
+};
+type BuildingStateUpdateRow = TablesUpdate<'building_states'>;
+export type BuildingStateUpdate = Omit<
+	BuildingStateUpdateRow,
+	'id' | 'building_id' | 'condition_id'
+> & {
+	id?: BuildingStateId;
+	building_id?: BuildingId;
+	condition_id?: ConditionId | null;
+};
+
+// Condition types
+type ConditionRow = Tables<'conditions'>;
+export type Condition = Omit<ConditionRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: ConditionId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type ConditionInsertRow = TablesInsert<'conditions'>;
+export type ConditionInsert = Omit<ConditionInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type ConditionUpdateRow = TablesUpdate<'conditions'>;
+export type ConditionUpdate = Omit<ConditionUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: ConditionId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Condition Behavior types
+type ConditionBehaviorRow = Tables<'condition_behaviors'>;
+export type ConditionBehavior = Omit<
+	ConditionBehaviorRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+> & {
+	id: ConditionBehaviorId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	character_id: CharacterId | null;
+	created_by: UserRoleId | null;
+};
+type ConditionBehaviorInsertRow = TablesInsert<'condition_behaviors'>;
+export type ConditionBehaviorInsert = Omit<
+	ConditionBehaviorInsertRow,
+	'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	character_id?: CharacterId | null;
+	created_by?: UserRoleId | null;
+};
+type ConditionBehaviorUpdateRow = TablesUpdate<'condition_behaviors'>;
+export type ConditionBehaviorUpdate = Omit<
+	ConditionBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+> & {
+	id?: ConditionBehaviorId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	condition_id?: ConditionId;
+	character_id?: CharacterId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Condition Behavior Action types
+type ConditionBehaviorActionRow = Tables<'condition_behavior_actions'>;
+export type ConditionBehaviorAction = Omit<
+	ConditionBehaviorActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
+> & {
+	id: ConditionBehaviorActionId;
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	condition_behavior_id: ConditionBehaviorId;
+	success_condition_behavior_action_id: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id: ConditionBehaviorActionId | null;
+};
+type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
+export type ConditionBehaviorActionInsert = Omit<
+	ConditionBehaviorActionInsertRow,
+	| 'scenario_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	condition_behavior_id: ConditionBehaviorId;
+	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+};
+type ConditionBehaviorActionUpdateRow = TablesUpdate<'condition_behavior_actions'>;
+export type ConditionBehaviorActionUpdate = Omit<
+	ConditionBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'success_condition_behavior_action_id'
+	| 'failure_condition_behavior_action_id'
+> & {
+	id?: ConditionBehaviorActionId;
+	scenario_id?: ScenarioId;
+	condition_id?: ConditionId;
+	condition_behavior_id?: ConditionBehaviorId;
+	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+};
+
+// Condition Effect types
+type ConditionEffectRow = Tables<'condition_effects'>;
+export type ConditionEffect = Omit<
+	ConditionEffectRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id: ConditionEffectId;
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	character_id: CharacterId | null;
+	need_id: NeedId;
+	created_by: UserRoleId | null;
+};
+type ConditionEffectInsertRow = TablesInsert<'condition_effects'>;
+export type ConditionEffectInsert = Omit<
+	ConditionEffectInsertRow,
+	'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	condition_id: ConditionId;
+	character_id?: CharacterId | null;
+	need_id: NeedId;
+	created_by?: UserRoleId | null;
+};
+type ConditionEffectUpdateRow = TablesUpdate<'condition_effects'>;
+export type ConditionEffectUpdate = Omit<
+	ConditionEffectUpdateRow,
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id?: ConditionEffectId;
+	scenario_id?: ScenarioId;
+	condition_id?: ConditionId;
+	character_id?: CharacterId | null;
+	need_id?: NeedId;
+	created_by?: UserRoleId | null;
+};
+
+// Condition Fulfillment types
+type ConditionFulfillmentRow = Tables<'condition_fulfillments'>;
+export type ConditionFulfillment = Omit<
+	ConditionFulfillmentRow,
+	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+> & {
+	id: ConditionFulfillmentId;
+	condition_id: ConditionId;
+	scenario_id: ScenarioId;
+	character_id: CharacterId | null;
+	item_id: ItemId | null;
+	created_by: UserRoleId | null;
+};
+type ConditionFulfillmentInsertRow = TablesInsert<'condition_fulfillments'>;
+export type ConditionFulfillmentInsert = Omit<
+	ConditionFulfillmentInsertRow,
+	'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+> & {
+	condition_id: ConditionId;
+	scenario_id: ScenarioId;
+	character_id?: CharacterId | null;
+	item_id?: ItemId | null;
+	created_by?: UserRoleId | null;
+};
+type ConditionFulfillmentUpdateRow = TablesUpdate<'condition_fulfillments'>;
+export type ConditionFulfillmentUpdate = Omit<
+	ConditionFulfillmentUpdateRow,
+	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+> & {
+	id?: ConditionFulfillmentId;
+	condition_id?: ConditionId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId | null;
+	item_id?: ItemId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Building Condition types
+type BuildingConditionRow = Tables<'building_conditions'>;
+export type BuildingCondition = Omit<
+	BuildingConditionRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	id: BuildingConditionId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	created_by: UserRoleId | null;
+};
+type BuildingConditionInsertRow = TablesInsert<'building_conditions'>;
+export type BuildingConditionInsert = Omit<
+	BuildingConditionInsertRow,
+	'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	condition_id: ConditionId;
+	created_by?: UserRoleId | null;
+};
+type BuildingConditionUpdateRow = TablesUpdate<'building_conditions'>;
+export type BuildingConditionUpdate = Omit<
+	BuildingConditionUpdateRow,
+	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'created_by'
+> & {
+	id?: BuildingConditionId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	condition_id?: ConditionId;
+	created_by?: UserRoleId | null;
+};
+
+// World Building Condition types
+type WorldBuildingConditionRow = Tables<'world_building_conditions'>;
+export type WorldBuildingCondition = Omit<
+	WorldBuildingConditionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'user_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	id: WorldBuildingConditionId;
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	world_building_id: WorldBuildingId;
+	building_id: BuildingId;
+	building_condition_id: BuildingConditionId;
+	condition_id: ConditionId;
+};
+type WorldBuildingConditionInsertRow = TablesInsert<'world_building_conditions'>;
+export type WorldBuildingConditionInsert = Omit<
+	WorldBuildingConditionInsertRow,
+	| 'scenario_id'
+	| 'user_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	world_building_id: WorldBuildingId;
+	building_id: BuildingId;
+	building_condition_id: BuildingConditionId;
+	condition_id: ConditionId;
+};
+type WorldBuildingConditionUpdateRow = TablesUpdate<'world_building_conditions'>;
+export type WorldBuildingConditionUpdate = Omit<
+	WorldBuildingConditionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'user_id'
+	| 'player_id'
+	| 'world_id'
+	| 'world_building_id'
+	| 'building_id'
+	| 'building_condition_id'
+	| 'condition_id'
+> & {
+	id?: WorldBuildingConditionId;
+	scenario_id?: ScenarioId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	world_id?: WorldId;
+	world_building_id?: WorldBuildingId;
+	building_id?: BuildingId;
+	building_condition_id?: BuildingConditionId;
+	condition_id?: ConditionId;
+};
+
+// Need types
+type NeedRow = Tables<'needs'>;
+export type Need = Omit<NeedRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: NeedId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type NeedInsertRow = TablesInsert<'needs'>;
+export type NeedInsert = Omit<NeedInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type NeedUpdateRow = TablesUpdate<'needs'>;
+export type NeedUpdate = Omit<NeedUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: NeedId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Character Need types
+type CharacterNeedRow = Tables<'character_needs'>;
+export type CharacterNeed = Omit<
+	CharacterNeedRow,
+	'id' | 'scenario_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id: CharacterNeedId;
+	scenario_id: ScenarioId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	created_by: UserRoleId | null;
+};
+type CharacterNeedInsertRow = TablesInsert<'character_needs'>;
+export type CharacterNeedInsert = Omit<
+	CharacterNeedInsertRow,
+	'scenario_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	created_by?: UserRoleId | null;
+};
+type CharacterNeedUpdateRow = TablesUpdate<'character_needs'>;
+export type CharacterNeedUpdate = Omit<
+	CharacterNeedUpdateRow,
+	'id' | 'scenario_id' | 'character_id' | 'need_id' | 'created_by'
+> & {
+	id?: CharacterNeedId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId;
+	need_id?: NeedId;
+	created_by?: UserRoleId | null;
+};
+
+// Need Fulfillment types
+type NeedFulfillmentRow = Tables<'need_fulfillments'>;
+export type NeedFulfillment = Omit<
+	NeedFulfillmentRow,
+	'id' | 'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+> & {
+	id: NeedFulfillmentId;
+	need_id: NeedId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId | null;
+	item_id: ItemId | null;
+	character_id: CharacterId | null;
+	created_by: UserRoleId | null;
+};
+type NeedFulfillmentInsertRow = TablesInsert<'need_fulfillments'>;
+export type NeedFulfillmentInsert = Omit<
+	NeedFulfillmentInsertRow,
+	'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+> & {
+	need_id: NeedId;
+	scenario_id: ScenarioId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	created_by?: UserRoleId | null;
+};
+type NeedFulfillmentUpdateRow = TablesUpdate<'need_fulfillments'>;
+export type NeedFulfillmentUpdate = Omit<
+	NeedFulfillmentUpdateRow,
+	'id' | 'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+> & {
+	id?: NeedFulfillmentId;
+	need_id?: NeedId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Need Behavior types
+type NeedBehaviorRow = Tables<'need_behaviors'>;
+export type NeedBehavior = Omit<
+	NeedBehaviorRow,
+	'id' | 'scenario_id' | 'need_id' | 'created_by'
+> & { id: NeedBehaviorId; scenario_id: ScenarioId; need_id: NeedId; created_by: UserRoleId | null };
+type NeedBehaviorInsertRow = TablesInsert<'need_behaviors'>;
+export type NeedBehaviorInsert = Omit<
+	NeedBehaviorInsertRow,
+	'scenario_id' | 'need_id' | 'created_by'
+> & { scenario_id: ScenarioId; need_id: NeedId; created_by?: UserRoleId | null };
+type NeedBehaviorUpdateRow = TablesUpdate<'need_behaviors'>;
+export type NeedBehaviorUpdate = Omit<
+	NeedBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'need_id' | 'created_by'
+> & {
+	id?: NeedBehaviorId;
+	scenario_id?: ScenarioId;
+	need_id?: NeedId;
+	created_by?: UserRoleId | null;
+};
+
+// Need Behavior Action types
+type NeedBehaviorActionRow = Tables<'need_behavior_actions'>;
+export type NeedBehaviorAction = Omit<
+	NeedBehaviorActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_id'
+	| 'behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'success_need_behavior_action_id'
+	| 'failure_need_behavior_action_id'
+> & {
+	id: NeedBehaviorActionId;
+	scenario_id: ScenarioId;
+	need_id: NeedId;
+	behavior_id: NeedBehaviorId;
+	building_id: BuildingId | null;
+	item_id: ItemId | null;
+	character_id: CharacterId | null;
+	success_need_behavior_action_id: NeedBehaviorActionId | null;
+	failure_need_behavior_action_id: NeedBehaviorActionId | null;
+};
+type NeedBehaviorActionInsertRow = TablesInsert<'need_behavior_actions'>;
+export type NeedBehaviorActionInsert = Omit<
+	NeedBehaviorActionInsertRow,
+	| 'scenario_id'
+	| 'need_id'
+	| 'behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'success_need_behavior_action_id'
+	| 'failure_need_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	need_id: NeedId;
+	behavior_id: NeedBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	success_need_behavior_action_id?: NeedBehaviorActionId | null;
+	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+};
+type NeedBehaviorActionUpdateRow = TablesUpdate<'need_behavior_actions'>;
+export type NeedBehaviorActionUpdate = Omit<
+	NeedBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_id'
+	| 'behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'success_need_behavior_action_id'
+	| 'failure_need_behavior_action_id'
+> & {
+	id?: NeedBehaviorActionId;
+	scenario_id?: ScenarioId;
+	need_id?: NeedId;
+	behavior_id?: NeedBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
+	success_need_behavior_action_id?: NeedBehaviorActionId | null;
+	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+};
+
+// Item types
+type ItemRow = Tables<'items'>;
+export type Item = Omit<ItemRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: ItemId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type ItemInsertRow = TablesInsert<'items'>;
+export type ItemInsert = Omit<ItemInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type ItemUpdateRow = TablesUpdate<'items'>;
+export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: ItemId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Item Behavior types
+type ItemBehaviorRow = Tables<'item_behaviors'>;
+export type ItemBehavior = Omit<
+	ItemBehaviorRow,
+	'id' | 'scenario_id' | 'item_id' | 'created_by'
+> & { id: ItemBehaviorId; scenario_id: ScenarioId; item_id: ItemId; created_by: UserRoleId | null };
+type ItemBehaviorInsertRow = TablesInsert<'item_behaviors'>;
+export type ItemBehaviorInsert = Omit<
+	ItemBehaviorInsertRow,
+	'scenario_id' | 'item_id' | 'created_by'
+> & { scenario_id: ScenarioId; item_id: ItemId; created_by?: UserRoleId | null };
+type ItemBehaviorUpdateRow = TablesUpdate<'item_behaviors'>;
+export type ItemBehaviorUpdate = Omit<
+	ItemBehaviorUpdateRow,
+	'id' | 'scenario_id' | 'item_id' | 'created_by'
+> & {
+	id?: ItemBehaviorId;
+	scenario_id?: ScenarioId;
+	item_id?: ItemId;
+	created_by?: UserRoleId | null;
+};
+
+// Item Behavior Action types
+type ItemBehaviorActionRow = Tables<'item_behavior_actions'>;
+export type ItemBehaviorAction = Omit<
+	ItemBehaviorActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_item_behavior_action_id'
+	| 'failure_item_behavior_action_id'
+> & {
+	id: ItemBehaviorActionId;
+	scenario_id: ScenarioId;
+	behavior_id: ItemBehaviorId;
+	success_item_behavior_action_id: ItemBehaviorActionId | null;
+	failure_item_behavior_action_id: ItemBehaviorActionId | null;
+};
+type ItemBehaviorActionInsertRow = TablesInsert<'item_behavior_actions'>;
+export type ItemBehaviorActionInsert = Omit<
+	ItemBehaviorActionInsertRow,
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_item_behavior_action_id'
+	| 'failure_item_behavior_action_id'
+> & {
+	scenario_id: ScenarioId;
+	behavior_id: ItemBehaviorId;
+	success_item_behavior_action_id?: ItemBehaviorActionId | null;
+	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+};
+type ItemBehaviorActionUpdateRow = TablesUpdate<'item_behavior_actions'>;
+export type ItemBehaviorActionUpdate = Omit<
+	ItemBehaviorActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'behavior_id'
+	| 'success_item_behavior_action_id'
+	| 'failure_item_behavior_action_id'
+> & {
+	id?: ItemBehaviorActionId;
+	scenario_id?: ScenarioId;
+	behavior_id?: ItemBehaviorId;
+	success_item_behavior_action_id?: ItemBehaviorActionId | null;
+	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+};
+
+// Behavior Priority types
+type BehaviorPriorityRow = Tables<'behavior_priorities'>;
+export type BehaviorPriority = Omit<
+	BehaviorPriorityRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_behavior_id'
+	| 'condition_behavior_id'
+	| 'item_behavior_id'
+	| 'created_by'
+> & {
+	id: BehaviorPriorityId;
+	scenario_id: ScenarioId;
+	need_behavior_id: NeedBehaviorId | null;
+	condition_behavior_id: ConditionBehaviorId | null;
+	item_behavior_id: ItemBehaviorId | null;
+	created_by: UserRoleId | null;
+};
+type BehaviorPriorityInsertRow = TablesInsert<'behavior_priorities'>;
+export type BehaviorPriorityInsert = Omit<BehaviorPriorityInsertRow, 'scenario_id'> & {
+	scenario_id: ScenarioId;
+};
+type BehaviorPriorityUpdateRow = TablesUpdate<'behavior_priorities'>;
+export type BehaviorPriorityUpdate = Omit<
+	BehaviorPriorityUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'need_behavior_id'
+	| 'condition_behavior_id'
+	| 'item_behavior_id'
+	| 'created_by'
+> & {
+	id?: BehaviorPriorityId;
+	scenario_id?: ScenarioId;
+	need_behavior_id?: NeedBehaviorId | null;
+	condition_behavior_id?: ConditionBehaviorId | null;
+	item_behavior_id?: ItemBehaviorId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Item State types
+type ItemStateRow = Tables<'item_states'>;
+export type ItemState = Omit<ItemStateRow, 'id' | 'item_id'> & {
+	id: ItemStateId;
+	item_id: ItemId;
+};
+type ItemStateInsertRow = TablesInsert<'item_states'>;
+export type ItemStateInsert = Omit<ItemStateInsertRow, 'item_id'> & {
+	item_id: ItemId;
+};
+type ItemStateUpdateRow = TablesUpdate<'item_states'>;
+export type ItemStateUpdate = Omit<ItemStateUpdateRow, 'id' | 'item_id'> & {
+	id?: ItemStateId;
+	item_id?: ItemId;
+};
+
+// World Item types
+type WorldItemRow = Tables<'world_items'>;
+export type WorldItem = Omit<
+	WorldItemRow,
+	'id' | 'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
+> & {
+	id: WorldItemId;
+	user_id: UserId;
+	world_id: WorldId;
+	item_id: ItemId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldItemInsertRow = TablesInsert<'world_items'>;
+export type WorldItemInsert = Omit<
+	WorldItemInsertRow,
+	'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
+> & {
+	user_id: UserId;
+	world_id: WorldId;
+	item_id: ItemId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldItemUpdateRow = TablesUpdate<'world_items'>;
+export type WorldItemUpdate = Omit<
+	WorldItemUpdateRow,
+	'id' | 'user_id' | 'world_id' | 'item_id' | 'player_id' | 'scenario_id'
+> & {
+	id?: WorldItemId;
+	user_id?: UserId;
+	world_id?: WorldId;
+	item_id?: ItemId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
+
+// Tile types
+type TileRow = Tables<'tiles'>;
+export type Tile = Omit<TileRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: TileId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type TileInsertRow = TablesInsert<'tiles'>;
+export type TileInsert = Omit<TileInsertRow, 'scenario_id' | 'created_by'> & {
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type TileUpdateRow = TablesUpdate<'tiles'>;
+export type TileUpdate = Omit<TileUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id?: TileId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Tile State types
+type TileStateRow = Tables<'tile_states'>;
+export type TileState = Omit<TileStateRow, 'id' | 'scenario_id' | 'tile_id'> & {
+	id: TileStateId;
+	scenario_id: ScenarioId;
+	tile_id: TileId;
+};
+type TileStateInsertRow = TablesInsert<'tile_states'>;
+export type TileStateInsert = Omit<TileStateInsertRow, 'scenario_id' | 'tile_id'> & {
+	scenario_id: ScenarioId;
+	tile_id: TileId;
+};
+type TileStateUpdateRow = TablesUpdate<'tile_states'>;
+export type TileStateUpdate = Omit<TileStateUpdateRow, 'id' | 'scenario_id' | 'tile_id'> & {
+	id?: TileStateId;
+	scenario_id?: ScenarioId;
+	tile_id?: TileId;
+};
+
+// Terrain Tile types
+type TerrainTileRow = Tables<'terrains_tiles'>;
+export type TerrainTile = Omit<
+	TerrainTileRow,
+	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
+> & {
+	id: TerrainTileId;
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId;
+	tile_id: TileId;
+	created_by: UserRoleId | null;
+};
+type TerrainTileInsertRow = TablesInsert<'terrains_tiles'>;
+export type TerrainTileInsert = Omit<
+	TerrainTileInsertRow,
+	'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	terrain_id: TerrainId;
+	tile_id: TileId;
+	created_by?: UserRoleId | null;
+};
+type TerrainTileUpdateRow = TablesUpdate<'terrains_tiles'>;
+export type TerrainTileUpdate = Omit<
+	TerrainTileUpdateRow,
+	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
+> & {
+	id?: TerrainTileId;
+	scenario_id?: ScenarioId;
+	terrain_id?: TerrainId;
+	tile_id?: TileId;
+	created_by?: UserRoleId | null;
+};
+
+// World Tile Map types
+type WorldTileMapRow = Tables<'world_tile_maps'>;
+export type WorldTileMap = Omit<
+	WorldTileMapRow,
+	'scenario_id' | 'user_id' | 'player_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	terrain_id: TerrainId;
+	data: Record<VectorKey, { tile_id: TileId; durability: number }>;
+};
+type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
+export type WorldTileMapInsert = Omit<
+	WorldTileMapInsertRow,
+	'user_id' | 'player_id' | 'scenario_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	user_id?: UserId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	world_id: WorldId;
+	terrain_id: TerrainId;
+	data: Record<VectorKey, { tile_id: TileId; durability: number }>;
+};
+type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
+export type WorldTileMapUpdate = Omit<
+	WorldTileMapUpdateRow,
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'world_id' | 'terrain_id' | 'data'
+> & {
+	id?: WorldTileMapId;
+	user_id?: UserId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+	world_id?: WorldId;
+	terrain_id?: TerrainId;
+	data?: Record<VectorKey, { tile_id: TileId; durability: number }>;
+};
+
+// World Character Need types
+type WorldCharacterNeedRow = Tables<'world_character_needs'>;
+export type WorldCharacterNeed = Omit<
+	WorldCharacterNeedRow,
+	| 'id'
+	| 'user_id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
+> & {
+	id: WorldCharacterNeedId;
+	user_id: UserId;
+	world_id: WorldId;
+	world_character_id: WorldCharacterId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldCharacterNeedInsertRow = TablesInsert<'world_character_needs'>;
+export type WorldCharacterNeedInsert = Omit<
+	WorldCharacterNeedInsertRow,
+	| 'user_id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
+> & {
+	user_id: UserId;
+	world_id: WorldId;
+	world_character_id: WorldCharacterId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+};
+type WorldCharacterNeedUpdateRow = TablesUpdate<'world_character_needs'>;
+export type WorldCharacterNeedUpdate = Omit<
+	WorldCharacterNeedUpdateRow,
+	| 'id'
+	| 'user_id'
+	| 'world_id'
+	| 'world_character_id'
+	| 'character_id'
+	| 'need_id'
+	| 'player_id'
+	| 'scenario_id'
+> & {
+	id?: WorldCharacterNeedId;
+	user_id?: UserId;
+	world_id?: WorldId;
+	world_character_id?: WorldCharacterId;
+	character_id?: CharacterId;
+	need_id?: NeedId;
+	player_id?: PlayerId;
+	scenario_id?: ScenarioId;
+};
