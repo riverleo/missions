@@ -20,7 +20,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 
 	// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
 	const bottomTopY = pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
-	const bottomTopRow = pathfinder.worldYToRow(bottomTopY);
+	const bottomTopRow = pathfinder.vectorYToRow(bottomTopY);
 
 	// 바닥 위로 2번째 셀
 	for (let x = 0; x < pathfinder.cols; x++) {

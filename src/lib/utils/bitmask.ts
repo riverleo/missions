@@ -8,11 +8,6 @@
  * @param adj3 인접 셀 3 존재 여부 (bit 3)
  * @returns 0-15 범위의 bitmask (짝수 인덱스는 blank)
  */
-export function calculate(
-	current: boolean,
-	adj1: boolean,
-	adj2: boolean,
-	adj3: boolean
-): number {
+export function calculate(current: boolean, adj1: boolean, adj2: boolean, adj3: boolean): number {
 	return (current ? 1 : 0) | (adj1 ? 2 : 0) | (adj2 ? 4 : 0) | (adj3 ? 8 : 0);
 }

@@ -16,7 +16,9 @@
 	const { store: terrainStore } = useTerrain();
 
 	// terrain을 terrainStore에서 구독
-	const terrainId = $derived(worldContext ? $worldStore.data[worldContext.worldId]?.terrain_id : undefined);
+	const terrainId = $derived(
+		worldContext ? $worldStore.data[worldContext.worldId]?.terrain_id : undefined
+	);
 	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 
 	// 시작지점 좌표 (카메라 변환 적용)

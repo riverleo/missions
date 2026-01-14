@@ -24,10 +24,7 @@ export const atlases = atlasesJson as Record<string, AtlasMetadata>;
 // Convert Wang Tile pattern index (1-16) to tileset frame index
 // Tileset layout (0-based pattern values): [4,3,14,6][10,7,15,13][1,9,11,12][0,2,5,8]
 // Frame index = columns * row + col
-export function wangPatternToTilesetFrame(
-	pattern: TileWang2CornerIndex,
-	columns: number
-): number {
+export function wangPatternToTilesetFrame(pattern: TileWang2CornerIndex, columns: number): number {
 	// Tileset layout: each value is a pattern index (0-based)
 	const layout = [
 		[4, 3, 14, 6], // row 0

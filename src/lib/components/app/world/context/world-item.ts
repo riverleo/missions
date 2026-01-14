@@ -31,7 +31,12 @@ export async function createWorldItem(
 	> &
 		Pick<
 			WorldItemInsert,
-			'id' | 'created_at' | 'created_at_tick' | 'world_building_id' | 'durability_ticks' | 'rotation'
+			| 'id'
+			| 'created_at'
+			| 'created_at_tick'
+			| 'world_building_id'
+			| 'durability_ticks'
+			| 'rotation'
 		>
 ) {
 	const { worldItemStore } = useWorld();

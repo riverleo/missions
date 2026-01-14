@@ -96,10 +96,7 @@ export async function deleteWorldBuilding(
 	// 프로덕션 환경이면 서버에서 삭제
 	if (!isTestWorld) {
 		const { supabase } = useServerPayload();
-		const { error } = await supabase
-			.from('world_buildings')
-			.delete()
-			.eq('id', worldBuildingId);
+		const { error } = await supabase.from('world_buildings').delete().eq('id', worldBuildingId);
 
 		if (error) {
 			console.error('Failed to delete world building:', error);

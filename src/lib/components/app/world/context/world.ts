@@ -3,9 +3,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';
 
-export function createWorld(
-	insert: Omit<WorldInsert, 'user_id' | 'player_id' | 'scenario_id'>
-) {
+export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 'scenario_id'>) {
 	const { worldStore } = useWorld();
 
 	const world: World = {
