@@ -8,8 +8,8 @@ import type {
 	WorldTileMapInsert,
 	UserId,
 	TerrainId,
+	Vector,
 } from '$lib/types';
-import type { Vector } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { usePlayer } from '$lib/hooks/use-player';

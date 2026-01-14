@@ -7,8 +7,7 @@
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
-	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
-	import type { Vector } from '$lib/utils/vector';
+	import type { BuildingId, CharacterId, ItemId, Vector } from '$lib/types';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();

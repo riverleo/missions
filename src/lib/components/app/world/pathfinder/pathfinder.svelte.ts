@@ -102,36 +102,6 @@ export class Pathfinder {
 	}
 
 	/**
-	 * grid.setWalkableAt 래퍼 - grid와 cells를 동시 업데이트
-	 */
-	setWalkableAt(col: number, row: number, walkable: boolean) {
-		this.grid.setWalkableAt(col, row, walkable);
-
-		const matrixKey = `${col},${row}` as CellKey;
-		const cell = this.cells[matrixKey];
-		if (cell) {
-			this.cells[matrixKey] = {
-				...cell,
-				walkable,
-			};
-		}
-	}
-
-	/**
-	 * jumpable 속성만 업데이트
-	 */
-	setJumpableAt(col: number, row: number, jumpable: boolean) {
-		const matrixKey = `${col},${row}` as CellKey;
-		const cell = this.cells[matrixKey];
-		if (cell) {
-			this.cells[matrixKey] = {
-				...cell,
-				jumpable,
-			};
-		}
-	}
-
-	/**
 	 * 월드 픽셀 좌표로 경로 탐색 (결과도 월드 픽셀 좌표)
 	 */
 	findPath(from: Vector, to: Vector): Vector[] {
@@ -158,7 +128,6 @@ export class Pathfinder {
 	 */
 	update() {
 		initializeWalkable(this);
-		setWalkable(this);
 		setTileToUnwalkable(this);
 	}
 }

@@ -1,7 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
-import type { Vector } from '$lib/utils/vector';
+import type { WorldId, WorldCharacterId, CharacterBody, Vector } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
@@ -10,9 +9,7 @@ import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
-import { followPath } from './follow-path';
-
-const { Body } = Matter;
+import { move } from './move';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -97,7 +94,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override update(event: BeforeUpdateEvent): void {
-		followPath(this, event);
+		move(this, event);
 	}
 
 	moveTo(targetX: number, targetY: number): void {

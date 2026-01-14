@@ -9,8 +9,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 	// 모든 셀을 unwalkable로 초기화
 	for (let y = 0; y < pathfinder.rows; y++) {
 		for (let x = 0; x < pathfinder.cols; x++) {
-			pathfinder.setWalkableAt(x, y, false);
-			pathfinder.setJumpableAt(x, y, false);
+			pathfinder.grid.setWalkableAt(x, y, false);
 		}
 	}
 
@@ -24,7 +23,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 
 	// 바닥 위로 2번째 셀
 	for (let x = 0; x < pathfinder.cols; x++) {
-		pathfinder.setWalkableAt(x, bottomTopRow - 2, true);
+		pathfinder.grid.setWalkableAt(x, bottomTopRow - 2, true);
 	}
 }
 
@@ -52,7 +51,7 @@ export function setWalkable(pathfinder: Pathfinder) {
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
-				pathfinder.setWalkableAt(cellX + dx, cellY - 2, true);
+				pathfinder.grid.setWalkableAt(cellX + dx, cellY - 2, true);
 			}
 
 			// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -65,21 +64,16 @@ export function setWalkable(pathfinder: Pathfinder) {
 					// 왼쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY - 2, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY - 2, true);
 						}
 
 						if (offset === 3) {
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY - 1, true);
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY, true);
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY + 1, true);
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY + 2, true);
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY + 3, true);
-							pathfinder.setWalkableAt(cellX + dx - offset, cellY + 4, true);
-
-							// 점프존 설정 복원
-							if (!hasBottomTile) {
-								pathfinder.setJumpableAt(cellX + dx - offset, cellY + 4, true);
-							}
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY - 1, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 1, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 2, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 3, true);
+							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 4, true);
 						}
 					}
 				}
@@ -87,21 +81,16 @@ export function setWalkable(pathfinder: Pathfinder) {
 					// 오른쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY - 2, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY - 2, true);
 						}
 
 						if (offset === 3) {
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY - 1, true);
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY, true);
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY + 1, true);
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY + 2, true);
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY + 3, true);
-							pathfinder.setWalkableAt(cellX + dx + offset, cellY + 4, true);
-
-							// 점프존 설정 복원
-							if (!hasBottomTile) {
-								pathfinder.setJumpableAt(cellX + dx + offset, cellY + 4, true);
-							}
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY - 1, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 1, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 2, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 3, true);
+							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 4, true);
 						}
 					}
 				}
@@ -124,7 +113,7 @@ export function setTileToUnwalkable(pathfinder: Pathfinder) {
 
 		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				pathfinder.setWalkableAt(cellX + dx, cellY + dy, false);
+				pathfinder.grid.setWalkableAt(cellX + dx, cellY + dy, false);
 			}
 		}
 	}

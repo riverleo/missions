@@ -1,5 +1,4 @@
-import type { EntityTemplateId } from '$lib/types';
-import type { Vector } from '$lib/utils/vector';
+import type { Vector, EntityTemplateId } from '$lib/types';
 import type Matter from 'matter-js';
 
 export interface BeforeUpdateEvent {

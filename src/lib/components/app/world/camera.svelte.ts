@@ -1,4 +1,4 @@
-import type { Vector } from '$lib/utils/vector';
+import type { Vector } from '$lib/types';
 import type { WorldContext } from './context';
 
 export class Camera {

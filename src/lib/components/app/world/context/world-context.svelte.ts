@@ -9,9 +9,9 @@ import type {
 	EntityId,
 	VectorKey,
 	TileId,
+	Vector,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import type { Vector } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';

@@ -1,7 +1,4 @@
-export interface Vector {
-	x: number;
-	y: number;
-}
+import type { Vector } from '$lib/types';
 
 /**
  * 픽셀 좌표를 그리드 인덱스로 변환
@@ -22,16 +19,6 @@ export function toPixel(index: number, size: number): number {
  */
 export function pixelToCenter(pixel: number, size: number): number {
 	return toPixel(pixelTo(pixel, size), size);
-}
-
-/**
- * 픽셀 좌표를 그리드 중심 좌표로 스냅 (x, y 동시 처리)
- */
-export function pointToCenter(x: number, y: number, size: number): Vector {
-	return {
-		x: pixelToCenter(x, size),
-		y: pixelToCenter(y, size),
-	};
 }
 
 /**

@@ -1,17 +1,12 @@
 import { get } from 'svelte/store';
-import {
-	createVectors,
-	getOverlappingVectors,
-	vectorToTopLeftVector,
-	type Vector,
-} from '$lib/utils/vector';
+import { createVectors, getOverlappingVectors, vectorToTopLeftVector } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
-import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
+import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId, Vector } from '$lib/types';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);

@@ -7,7 +7,7 @@ const { Body } = Matter;
 /**
  * 경로를 따라 이동
  */
-export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEvent): void {
+export function move(entity: WorldCharacterEntity, event: BeforeUpdateEvent): void {
 	if (entity.path.length === 0) {
 		// path가 없으면 dynamic으로 전환 (중력 적용)
 		Body.setStatic(entity.body, false);
@@ -22,29 +22,29 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 		return;
 	}
 
-	const currentPos = entity.body.position;
+	const currentVector = entity.body.position;
 	const delta = event.delta;
 	const deltaSeconds = delta / 1000;
 
 	// 현재 위치가 점프존인지 확인
-	const cell = entity.worldContext.pathfinder.getCellFromVector(currentPos);
-	const isInJumpZone = cell?.jumpable ?? false;
+	const cell = entity.worldContext.pathfinder.getCellFromVector(currentVector);
+	const jumpable = cell?.jumpable ?? false;
 
 	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인
-	if (isInJumpZone && !entity.wasJumpable) {
+	if (jumpable && !entity.wasJumpable) {
 		// 4-5번째 뒤의 waypoint 확인 (없으면 마지막 waypoint)
 		const lookAheadIndex = Math.min(4, entity.path.length - 1);
 		const futureTarget = entity.path[lookAheadIndex];
-		if (futureTarget && futureTarget.y < currentPos.y) {
+		if (futureTarget && futureTarget.y < currentVector.y) {
 			// 미래 목표가 위쪽이면 대기
 			entity.jumpDelay = 500; // 500ms 대기
 		}
 	}
-	entity.wasJumpable = isInJumpZone;
+	entity.wasJumpable = jumpable;
 
 	// 목표 지점까지의 거리 계산
-	const dx = targetPoint.x - currentPos.x;
-	const dy = targetPoint.y - currentPos.y;
+	const dx = targetPoint.x - currentVector.x;
+	const dy = targetPoint.y - currentVector.y;
 
 	// 점프 대기 중이면 움직이지 않고 시간만 감소
 	if (entity.jumpDelay > 0) {
@@ -70,8 +70,8 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 	// 속도 설정
 	const speed = 200;
 
-	let newX = currentPos.x;
-	let newY = currentPos.y;
+	let newX = currentVector.x;
+	let newY = currentVector.y;
 
 	// X축 우선 이동
 	if (Math.abs(dx) > arrivalThreshold) {
@@ -79,10 +79,10 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 		if (Math.abs(dx) <= moveDistance) {
 			newX = targetPoint.x;
 		} else {
-			newX = currentPos.x + Math.sign(dx) * moveDistance;
+			newX = currentVector.x + Math.sign(dx) * moveDistance;
 		}
 		// X축 이동 중에는 Y축 고정
-		newY = currentPos.y;
+		newY = currentVector.y;
 	}
 	// X축 이동이 완료되면 Y축 이동
 	else if (Math.abs(dy) > arrivalThreshold) {
@@ -92,7 +92,7 @@ export function followPath(entity: WorldCharacterEntity, event: BeforeUpdateEven
 		if (Math.abs(dy) <= moveDistance) {
 			newY = targetPoint.y;
 		} else {
-			newY = currentPos.y + Math.sign(dy) * moveDistance;
+			newY = currentVector.y + Math.sign(dy) * moveDistance;
 		}
 	}
 
