@@ -23,6 +23,26 @@ export class Pathfinder {
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder();
 		this.cells = $state<Record<MatrixKey, PathfinderCell>>({});
+
+		// cells 초기화
+		this.initializeCells();
+	}
+
+	/**
+	 * cells를 grid 기반으로 초기화 (한 번만 실행)
+	 */
+	private initializeCells() {
+		for (let row = 0; row < this.rows; row++) {
+			for (let col = 0; col < this.cols; col++) {
+				const matrixKey = `${col},${row}` as MatrixKey;
+				this.cells[matrixKey] = {
+					col,
+					row,
+					walkable: false,
+					jumpable: false,
+				};
+			}
+		}
 	}
 
 	/**
@@ -83,26 +103,33 @@ export class Pathfinder {
 	}
 
 	/**
-	 * cells Record 업데이트
+	 * grid.setWalkableAt 래퍼 - grid와 cells를 동시 업데이트
 	 */
-	private updateCells() {
-		const newCells: Record<MatrixKey, PathfinderCell> = {};
+	setWalkableAt(col: number, row: number, walkable: boolean) {
+		this.grid.setWalkableAt(col, row, walkable);
 
-		for (let row = 0; row < this.rows; row++) {
-			for (let col = 0; col < this.cols; col++) {
-				const isWalkable = this.grid.isWalkableAt(col, row);
-				const matrixKey = `${col},${row}` as MatrixKey;
-
-				newCells[matrixKey] = {
-					col,
-					row,
-					walkable: isWalkable,
-					jumpable: !isWalkable, // All non-walkable cells are potentially jumpable
-				};
-			}
+		const matrixKey = `${col},${row}` as MatrixKey;
+		const cell = this.cells[matrixKey];
+		if (cell) {
+			this.cells[matrixKey] = {
+				...cell,
+				walkable,
+			};
 		}
+	}
 
-		this.cells = newCells;
+	/**
+	 * jumpable 속성만 업데이트
+	 */
+	setJumpableAt(col: number, row: number, jumpable: boolean) {
+		const matrixKey = `${col},${row}` as MatrixKey;
+		const cell = this.cells[matrixKey];
+		if (cell) {
+			this.cells[matrixKey] = {
+				...cell,
+				jumpable,
+			};
+		}
 	}
 
 	/**
@@ -134,6 +161,5 @@ export class Pathfinder {
 		initializeWalkable(this);
 		setWalkable(this);
 		setTileToUnwalkable(this);
-		this.updateCells();
 	}
 }
