@@ -6,7 +6,8 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
-import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId, Vector } from '$lib/types';
+import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
+import type { Vector } from '$lib/types/vector';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
@@ -57,12 +58,7 @@ export class WorldContextBlueprint {
 				return;
 			}
 
-			const vector = vectorToTopLeftVector(
-				worldPos,
-				building.cell_cols,
-				building.cell_rows,
-				CELL_SIZE
-			);
+			const vector = vectorToTopLeftVector(worldPos, building.cell_cols, building.cell_rows);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -70,7 +66,7 @@ export class WorldContextBlueprint {
 				type: 'cell',
 			};
 		} else if (type === 'tile') {
-			const vector = vectorToTopLeftVector(worldPos, 1, 1, TILE_SIZE);
+			const vector = vectorToTopLeftVector(worldPos, 1, 1);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -78,7 +74,7 @@ export class WorldContextBlueprint {
 				type: 'tile',
 			};
 		} else if (type === 'character' || type === 'item') {
-			const vector = vectorToTopLeftVector(worldPos, 1, 1, CELL_SIZE);
+			const vector = vectorToTopLeftVector(worldPos, 1, 1);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,

@@ -1,24 +1,40 @@
+import { CELL_SIZE } from '$lib/constants';
 import type { Vector } from '$lib/types';
 
-/**
- * 픽셀 좌표를 그리드 인덱스로 변환
- */
 export function pixelTo(pixel: number, size: number): number {
 	return Math.floor(pixel / size);
 }
 
-/**
- * 그리드 인덱스를 중심 픽셀 좌표로 변환
- */
 export function toPixel(index: number, size: number): number {
 	return index * size + size / 2;
 }
 
 /**
- * 픽셀 좌표에서 가장 가까운 그리드 중심 픽셀 좌표 반환
+ * 픽셀 좌표를 그리드 인덱스로 변환
  */
-export function pixelToCenter(pixel: number, size: number): number {
-	return toPixel(pixelTo(pixel, size), size);
+export function vectorXToCol(vectorX: number): number {
+	return pixelTo(vectorX, CELL_SIZE);
+}
+
+/**
+ * 픽셀 좌표를 그리드 인덱스로 변환
+ */
+export function vectorYToRow(vectorY: number): number {
+	return pixelTo(vectorY, CELL_SIZE);
+}
+
+/**
+ * 그리드 열 인덱스를 월드 픽셀 X 좌표(타일 중심)로 변환
+ */
+export function colToVectorX(col: number): number {
+	return toPixel(col, CELL_SIZE);
+}
+
+/**
+ * 그리드 행 인덱스를 월드 픽셀 Y 좌표(타일 중심)로 변환
+ */
+export function rowToVectorY(row: number): number {
+	return toPixel(row, CELL_SIZE);
 }
 
 /**
@@ -26,35 +42,30 @@ export function pixelToCenter(pixel: number, size: number): number {
  * - 홀수 count: 그리드 중심에 스냅
  * - 짝수 count: 그리드 경계에 스냅
  */
-export function pixelToTopLeft(pixel: number, count: number, size: number): number {
-	const index = pixelTo(pixel, size);
+export function pixelToTopLeft(pixel: number, count: number): number {
+	const index = vectorXToCol(pixel);
 	let centerPixel: number;
 
 	if (count % 2 === 1) {
 		// 홀수: 그리드 중심에 스냅
-		centerPixel = toPixel(index, size);
+		centerPixel = colToVectorX(index);
 	} else {
 		// 짝수: 가장 가까운 그리드 경계에 스냅
-		const leftBoundary = index * size;
-		const rightBoundary = (index + 1) * size;
+		const leftBoundary = index * CELL_SIZE;
+		const rightBoundary = (index + 1) * CELL_SIZE;
 		centerPixel = pixel - leftBoundary < rightBoundary - pixel ? leftBoundary : rightBoundary;
 	}
 
-	return pixelTo(centerPixel, size) - Math.floor(count / 2);
+	return colToVectorX(centerPixel) - Math.floor(count / 2);
 }
 
 /**
  * 마우스 위치로부터 좌상단 그리드 인덱스 계산 (x, y 동시 처리)
  */
-export function vectorToTopLeftVector(
-	vector: Vector,
-	cols: number,
-	rows: number,
-	size: number
-): Vector {
+export function vectorToTopLeftVector(vector: Vector, cols: number, rows: number): Vector {
 	return {
-		x: pixelToTopLeft(vector.x, cols, size),
-		y: pixelToTopLeft(vector.y, rows, size),
+		x: pixelToTopLeft(vector.x, cols),
+		y: pixelToTopLeft(vector.y, rows),
 	};
 }
 

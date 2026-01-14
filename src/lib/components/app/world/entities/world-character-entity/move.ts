@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent } from '../../context';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
+import { vectorXToCol, vectorYToRow } from '$lib/utils/vector';
 
 const { Body } = Matter;
 
@@ -27,7 +28,9 @@ export function move(entity: WorldCharacterEntity, event: BeforeUpdateEvent): vo
 	const deltaSeconds = delta / 1000;
 
 	// 현재 위치가 점프존인지 확인
-	const cell = entity.worldContext.pathfinder.getCellFromVector(currentVector);
+	const col = vectorXToCol(currentVector.x);
+	const row = vectorYToRow(currentVector.y);
+	const cell = entity.worldContext.pathfinder.getCell({ col, row });
 	const jumpable = cell?.jumpable ?? false;
 
 	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인

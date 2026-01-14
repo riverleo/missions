@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
-import type { WorldId, WorldCharacterId, CharacterBody, Vector } from '$lib/types';
+import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
+import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
