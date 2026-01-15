@@ -9,7 +9,7 @@ export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
-	jumpableCells: Set<CellKey>;
+	readonly jumpableCells: Set<CellKey>;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -26,7 +26,7 @@ export class Pathfinder {
 	/**
 	 * 셀이 jumpable인지 확인
 	 */
-	isJumpable(cellKey: CellKey): boolean {
+	jumpable(cellKey: CellKey): boolean {
 		return this.jumpableCells.has(cellKey);
 	}
 

@@ -32,7 +32,7 @@ export function move(entity: WorldCharacterEntity, event: BeforeUpdateEvent): vo
 		vectorUtils.createVector(currentVector.x, currentVector.y)
 	);
 	const cellKey = vectorUtils.createCellKey(currentCell.col, currentCell.row);
-	const jumpable = entity.worldContext.pathfinder.isJumpable(cellKey);
+	const jumpable = entity.worldContext.pathfinder.jumpable(cellKey);
 
 	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인
 	if (jumpable && !entity.wasJumpable) {
