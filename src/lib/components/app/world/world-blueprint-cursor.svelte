@@ -27,7 +27,6 @@
 	const isCharacter = $derived(EntityIdUtils.template.is('character', entityTemplateId));
 	const isItem = $derived(EntityIdUtils.template.is('item', entityTemplateId));
 
-
 	const characterId = $derived.by(() => {
 		if (!entityTemplateId || !EntityIdUtils.template.is('character', entityTemplateId))
 			return undefined;

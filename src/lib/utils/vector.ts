@@ -95,32 +95,49 @@ function tileIndexToPixel(index: number): number {
 }
 
 /**
- * 마우스 위치로부터 좌상단 그리드의 픽셀 좌표 계산
- * - 홀수 count: 그리드 중심에 스냅
- * - 짝수 count: 그리드 경계에 스냅
+ * 커서 픽셀 위치를 엔티티 크기(셀 개수)에 맞게 그리드에 스냅
+ *
+ * @param pixel - 커서의 월드 픽셀 좌표
+ * @param size - 엔티티가 차지하는 셀 개수 (1, 2, 3칸 등)
+ * @returns 그리드에 정렬된 기준 픽셀 좌표
+ *
+ * 동작 방식:
+ * - count가 홀수 (1, 3, 5칸): 커서가 있는 셀의 **중앙 픽셀** 반환
+ *   → 엔티티가 커서를 중심으로 배치되는 느낌
+ *   예) pixel=42 (셀5), count=3 → 44 반환 (셀4의 중앙)
+ *
+ * - count가 짝수 (2, 4, 6칸): 커서와 **가까운 셀 경계 픽셀** 반환
+ *   → 엔티티가 그리드 경계에 딱 맞게 배치되는 느낌
+ *   예) pixel=42 (셀5 왼쪽), count=2 → 32 반환 (셀4 시작점)
+ *   예) pixel=45 (셀5 오른쪽), count=2 → 40 반환 (셀5 시작점)
  */
-function pixelToTopLeft(pixel: number, count: number): number {
+function snapPixelByCell(pixel: number, size: number): number {
 	const index = pixelToCellIndex(pixel);
-	let centerPixel: number;
+	let snapTarget: number;
 
-	if (count % 2 === 1) {
-		// 홀수: 그리드 중심에 스냅
-		centerPixel = cellIndexToPixel(index);
+	if (size % 2 === 1) {
+		// 홀수: 커서가 있는 셀의 중앙
+		snapTarget = cellIndexToPixel(index);
 	} else {
-		// 짝수: 가장 가까운 그리드 경계에 스냅
+		// 짝수: 커서와 가까운 셀 경계
 		const leftBoundary = index * CELL_SIZE;
 		const rightBoundary = (index + 1) * CELL_SIZE;
-		centerPixel = pixel - leftBoundary < rightBoundary - pixel ? leftBoundary : rightBoundary;
+		snapTarget = pixel - leftBoundary < rightBoundary - pixel ? leftBoundary : rightBoundary;
 	}
 
-	return centerPixel - Math.floor(count / 2) * CELL_SIZE;
+	return snapTarget - Math.floor(size / 2) * CELL_SIZE;
 }
 
 /**
- * 마우스 위치로부터 좌상단 그리드 인덱스 계산 (x, y 동시 처리)
+ * 커서 벡터를 엔티티 크기에 맞게 그리드에 스냅 (x, y 동시 처리)
+ *
+ * @param vector - 커서의 월드 픽셀 좌표
+ * @param colSize - 엔티티가 차지하는 가로 셀 개수
+ * @param rowSize - 엔티티가 차지하는 세로 셀 개수
+ * @returns 그리드에 정렬된 기준 벡터
  */
-function vectorToTopLeftVector(vector: Vector, cols: number, rows: number): Vector {
-	return createVector(pixelToTopLeft(vector.x, cols), pixelToTopLeft(vector.y, rows));
+function snapVectorByCell(vector: Vector, colSize: number, rowSize: number): Vector {
+	return createVector(snapPixelByCell(vector.x, colSize), snapPixelByCell(vector.y, rowSize));
 }
 
 /**
@@ -193,8 +210,8 @@ export const vectorUtils = {
 	cellIndexToPixel,
 	pixelToTileIndex,
 	tileIndexToPixel,
-	pixelToTopLeft,
-	vectorToTopLeftVector,
+	snapPixelByCell,
+	snapVectorByCell,
 	// 고수준 좌표 변환
 	vectorToCell,
 	cellToVector,

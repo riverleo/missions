@@ -59,11 +59,7 @@ export class WorldContextBlueprint {
 				return;
 			}
 
-			const vector = vectorUtils.vectorToTopLeftVector(
-				worldPos,
-				building.cell_cols,
-				building.cell_rows
-			);
+			const vector = vectorUtils.snapVectorByCell(worldPos, building.cell_cols, building.cell_rows);
 
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
@@ -72,7 +68,7 @@ export class WorldContextBlueprint {
 				type: 'cell',
 			};
 		} else if (type === 'tile') {
-			const vector = vectorUtils.vectorToTopLeftVector(worldPos, 1, 1);
+			const vector = vectorUtils.snapVectorByCell(worldPos, 1, 1);
 
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
@@ -81,7 +77,7 @@ export class WorldContextBlueprint {
 				type: 'tile',
 			};
 		} else if (type === 'character' || type === 'item') {
-			const vector = vectorUtils.vectorToTopLeftVector(worldPos, 1, 1);
+			const vector = vectorUtils.snapVectorByCell(worldPos, 1, 1);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -111,7 +107,12 @@ export class WorldContextBlueprint {
 			if (!building) return [];
 			// 픽셀 좌표를 셀로 변환
 			const cell = vectorUtils.vectorToCell({ x, y } as Vector);
-			targetCells = vectorUtils.createCells(cell.col, cell.row, building.cell_cols, building.cell_rows);
+			targetCells = vectorUtils.createCells(
+				cell.col,
+				cell.row,
+				building.cell_cols,
+				building.cell_rows
+			);
 		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
 			// 픽셀 좌표를 타일 셀로 변환 → 셀 좌표로 변환 (1 tile = 2x2 cells)
 			const tileCell = vectorUtils.vectorToTileCell({ x, y } as Vector);
