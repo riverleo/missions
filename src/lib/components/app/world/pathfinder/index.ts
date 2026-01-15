@@ -1,1 +1,1 @@
-export { Pathfinder } from './pathfinder.svelte';
+export { Pathfinder } from './pathfinder';

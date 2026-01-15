@@ -1,6 +1,6 @@
 import { BOUNDARY_THICKNESS, TILE_CELL_RATIO, CELL_SIZE } from '$lib/constants';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
-import type { Pathfinder } from './pathfinder.svelte';
+import type { Pathfinder } from './pathfinder';
 import { vectorUtils } from '$lib/utils/vector';
 
 /**
