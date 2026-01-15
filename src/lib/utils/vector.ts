@@ -20,8 +20,13 @@ function createVector(x: number, y: number): Vector {
 /**
  * VectorKey 브랜드 타입 생성
  */
-function createVectorKey(x: number, y: number): VectorKey {
-	return `${x},${y}` as VectorKey;
+function createVectorKey(x: number, y: number): VectorKey;
+function createVectorKey(vector: Vector): VectorKey;
+function createVectorKey(xOrVector: number | Vector, y?: number): VectorKey {
+	if (typeof xOrVector === 'number') {
+		return `${xOrVector},${y}` as VectorKey;
+	}
+	return `${xOrVector.x},${xOrVector.y}` as VectorKey;
 }
 
 /**
@@ -32,10 +37,15 @@ function createScreenVector(x: number, y: number): ScreenVector {
 }
 
 /**
- * VectorKey 브랜드 타입 생성
+ * ScreenVectorKey 브랜드 타입 생성
  */
-function createScreenVectorKey(x: number, y: number): ScreenVectorKey {
-	return `${x},${y}` as ScreenVectorKey;
+function createScreenVectorKey(x: number, y: number): ScreenVectorKey;
+function createScreenVectorKey(vector: ScreenVector): ScreenVectorKey;
+function createScreenVectorKey(xOrVector: number | ScreenVector, y?: number): ScreenVectorKey {
+	if (typeof xOrVector === 'number') {
+		return `${xOrVector},${y}` as ScreenVectorKey;
+	}
+	return `${xOrVector.x},${xOrVector.y}` as ScreenVectorKey;
 }
 
 /**
@@ -48,8 +58,13 @@ function createCell(col: number, row: number): Cell {
 /**
  * CellKey 브랜드 타입 생성
  */
-function createCellKey(col: number, row: number): CellKey {
-	return `${col},${row}` as CellKey;
+function createCellKey(col: number, row: number): CellKey;
+function createCellKey(cell: Cell): CellKey;
+function createCellKey(colOrCell: number | Cell, row?: number): CellKey {
+	if (typeof colOrCell === 'number') {
+		return `${colOrCell},${row}` as CellKey;
+	}
+	return `${colOrCell.col},${colOrCell.row}` as CellKey;
 }
 
 /**
@@ -60,10 +75,15 @@ function createTileCell(col: number, row: number): TileCell {
 }
 
 /**
- * TileKey 브랜드 타입 생성
+ * TileCellKey 브랜드 타입 생성
  */
-function createTileCellKey(col: number, row: number): TileCellKey {
-	return `${col},${row}` as TileCellKey;
+function createTileCellKey(col: number, row: number): TileCellKey;
+function createTileCellKey(cell: TileCell): TileCellKey;
+function createTileCellKey(colOrCell: number | TileCell, row?: number): TileCellKey {
+	if (typeof colOrCell === 'number') {
+		return `${colOrCell},${row}` as TileCellKey;
+	}
+	return `${colOrCell.col},${colOrCell.row}` as TileCellKey;
 }
 
 /**
