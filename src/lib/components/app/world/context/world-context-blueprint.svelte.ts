@@ -68,7 +68,7 @@ export class WorldContextBlueprint {
 				type: 'cell',
 			};
 		} else if (type === 'tile') {
-			const vector = vectorUtils.snapVectorByCell(worldPos, 1, 1);
+			const vector = vectorUtils.snapVectorByTile(worldPos);
 
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,

@@ -102,14 +102,14 @@ function tileIndexToPixel(index: number): number {
  * @returns 그리드에 정렬된 기준 픽셀 좌표
  *
  * 동작 방식:
- * - count가 홀수 (1, 3, 5칸): 커서가 있는 셀의 **중앙 픽셀** 반환
+ * - size가 홀수 (1, 3, 5칸): 커서가 있는 셀의 **중앙 픽셀** 반환
  *   → 엔티티가 커서를 중심으로 배치되는 느낌
- *   예) pixel=42 (셀5), count=3 → 44 반환 (셀4의 중앙)
+ *   예) pixel=42 (셀5), size=3 → 44 반환 (셀4의 중앙)
  *
- * - count가 짝수 (2, 4, 6칸): 커서와 **가까운 셀 경계 픽셀** 반환
+ * - size가 짝수 (2, 4, 6칸): 커서와 **가까운 셀 경계 픽셀** 반환
  *   → 엔티티가 그리드 경계에 딱 맞게 배치되는 느낌
- *   예) pixel=42 (셀5 왼쪽), count=2 → 32 반환 (셀4 시작점)
- *   예) pixel=45 (셀5 오른쪽), count=2 → 40 반환 (셀5 시작점)
+ *   예) pixel=42 (셀5 왼쪽), size=2 → 32 반환 (셀4 시작점)
+ *   예) pixel=45 (셀5 오른쪽), size=2 → 40 반환 (셀5 시작점)
  */
 function snapPixelByCell(pixel: number, size: number): number {
 	const index = pixelToCellIndex(pixel);
@@ -138,6 +138,32 @@ function snapPixelByCell(pixel: number, size: number): number {
  */
 function snapVectorByCell(vector: Vector, colSize: number, rowSize: number): Vector {
 	return createVector(snapPixelByCell(vector.x, colSize), snapPixelByCell(vector.y, rowSize));
+}
+
+/**
+ * 커서 픽셀 위치를 타일 그리드에 스냅
+ *
+ * @param pixel - 커서의 월드 픽셀 좌표
+ * @returns 가까운 타일 경계 픽셀 (0, 16, 32, 48...)
+ *
+ * 동작:
+ * - 커서와 가장 가까운 타일 경계(TILE_SIZE = 16px 단위)에 스냅
+ *   예) pixel=10 → 0 반환
+ *   예) pixel=20 → 16 반환
+ *   예) pixel=26 → 32 반환
+ */
+function snapPixelByTile(pixel: number): number {
+	return Math.round(pixel / TILE_SIZE) * TILE_SIZE;
+}
+
+/**
+ * 커서 벡터를 타일 그리드에 스냅 (x, y 동시 처리)
+ *
+ * @param vector - 커서의 월드 픽셀 좌표
+ * @returns 타일 그리드에 정렬된 벡터
+ */
+function snapVectorByTile(vector: Vector): Vector {
+	return createVector(snapPixelByTile(vector.x), snapPixelByTile(vector.y));
 }
 
 /**
@@ -212,6 +238,8 @@ export const vectorUtils = {
 	tileIndexToPixel,
 	snapPixelByCell,
 	snapVectorByCell,
+	snapPixelByTile,
+	snapVectorByTile,
 	// 고수준 좌표 변환
 	vectorToCell,
 	cellToVector,
