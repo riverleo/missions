@@ -144,16 +144,16 @@ function snapVectorByCell(vector: Vector, colSize: number, rowSize: number): Vec
  * 커서 픽셀 위치를 타일 그리드에 스냅
  *
  * @param pixel - 커서의 월드 픽셀 좌표
- * @returns 가까운 타일 경계 픽셀 (0, 16, 32, 48...)
+ * @returns 커서가 속한 타일의 좌상단 픽셀 (0, 16, 32, 48...)
  *
  * 동작:
- * - 커서와 가장 가까운 타일 경계(TILE_SIZE = 16px 단위)에 스냅
- *   예) pixel=10 → 0 반환
- *   예) pixel=20 → 16 반환
- *   예) pixel=26 → 32 반환
+ * - 커서가 속한 타일의 좌상단 경계로 스냅
+ *   예) pixel=10 → 0 반환 (타일 0)
+ *   예) pixel=20 → 16 반환 (타일 1)
+ *   예) pixel=26 → 16 반환 (타일 1)
  */
 function snapPixelByTile(pixel: number): number {
-	return Math.round(pixel / TILE_SIZE) * TILE_SIZE;
+	return Math.floor(pixel / TILE_SIZE) * TILE_SIZE;
 }
 
 /**
