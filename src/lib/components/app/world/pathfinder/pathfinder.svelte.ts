@@ -3,7 +3,7 @@ import PF from 'pathfinding';
 import type { Vector, Cell, CellKey, PathfinderCell } from '$lib/types';
 import type { WorldContext } from '../context';
 import { vectorUtils } from '$lib/utils/vector';
-import { initializeWalkable, setTileToUnwalkable } from './walkable';
+import { initializeWalkable, setWalkable, setTileToUnwalkable, setJumpable } from './walkable';
 
 export class Pathfinder {
 	readonly grid: PF.Grid;
@@ -73,7 +73,30 @@ export class Pathfinder {
 	 * worldContext의 타일들을 기반으로 전체 walkable 영역 업데이트
 	 */
 	update() {
+		// 1. grid 기반 walkable 설정
 		initializeWalkable(this);
+		setWalkable(this);
 		setTileToUnwalkable(this);
+
+		// 2. grid → cells 동기화 (walkable 복사)
+		this.syncGridToCells();
+
+		// 3. cells에 직접 jumpable 설정 (syncGridToCells 이후에 호출)
+		setJumpable(this);
+	}
+
+	/**
+	 * grid의 walkable/jumpable 상태를 cells에 동기화
+	 */
+	private syncGridToCells() {
+		for (let row = 0; row < this.rows; row++) {
+			for (let col = 0; col < this.cols; col++) {
+				const cellKey = vectorUtils.createCellKey(col, row);
+				const cell = this.cells[cellKey];
+				if (cell) {
+					cell.walkable = this.grid.isWalkableAt(col, row);
+				}
+			}
+		}
 	}
 }

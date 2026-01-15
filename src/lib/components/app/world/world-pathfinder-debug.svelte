@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useWorldContext } from '$lib/hooks/use-world';
-	import type { Vector, PathfinderCell } from '$lib/types/vector';
+	import type { PathfinderCell } from '$lib/types/vector';
 	import { CELL_SIZE } from '$lib/constants';
 
 	const world = useWorldContext();
