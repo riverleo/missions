@@ -4,13 +4,22 @@ import type { Pathfinder } from './pathfinder.svelte';
 import { vectorUtils } from '$lib/utils/vector';
 
 /**
+ * 범위 체크 후 안전하게 setWalkableAt 호출
+ */
+function safeSetWalkableAt(pathfinder: Pathfinder, col: number, row: number, walkable: boolean) {
+	if (col >= 0 && col < pathfinder.cols && row >= 0 && row < pathfinder.rows) {
+		pathfinder.grid.setWalkableAt(col, row, walkable);
+	}
+}
+
+/**
  * 그리드 초기화 및 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
  */
 export function initializeWalkable(pathfinder: Pathfinder) {
 	// 모든 셀을 unwalkable로 초기화
 	for (let y = 0; y < pathfinder.rows; y++) {
 		for (let x = 0; x < pathfinder.cols; x++) {
-			pathfinder.grid.setWalkableAt(x, y, false);
+			safeSetWalkableAt(pathfinder, x, y, false);
 		}
 	}
 
@@ -24,7 +33,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 
 	// 바닥 위로 2번째 셀
 	for (let x = 0; x < pathfinder.cols; x++) {
-		pathfinder.grid.setWalkableAt(x, bottomTopRow - 2, true);
+		safeSetWalkableAt(pathfinder, x, bottomTopRow - 2, true);
 	}
 }
 
@@ -52,7 +61,7 @@ export function setWalkable(pathfinder: Pathfinder) {
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
-				pathfinder.grid.setWalkableAt(cellX + dx, cellY - 2, true);
+				safeSetWalkableAt(pathfinder, cellX + dx, cellY - 2, true);
 			}
 
 			// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -65,16 +74,16 @@ export function setWalkable(pathfinder: Pathfinder) {
 					// 왼쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY - 2, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY - 2, true);
 						}
 
 						if (offset === 3) {
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY - 1, true);
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY, true);
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 1, true);
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 2, true);
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 3, true);
-							pathfinder.grid.setWalkableAt(cellX + dx - offset, cellY + 4, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY - 1, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 1, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 2, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 3, true);
+							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 4, true);
 						}
 					}
 				}
@@ -82,16 +91,16 @@ export function setWalkable(pathfinder: Pathfinder) {
 					// 오른쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY - 2, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY - 2, true);
 						}
 
 						if (offset === 3) {
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY - 1, true);
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY, true);
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 1, true);
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 2, true);
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 3, true);
-							pathfinder.grid.setWalkableAt(cellX + dx + offset, cellY + 4, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY - 1, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 1, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 2, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 3, true);
+							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 4, true);
 						}
 					}
 				}
@@ -114,7 +123,7 @@ export function setTileToUnwalkable(pathfinder: Pathfinder) {
 
 		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				pathfinder.grid.setWalkableAt(cellX + dx, cellY + dy, false);
+				safeSetWalkableAt(pathfinder, cellX + dx, cellY + dy, false);
 			}
 		}
 	}

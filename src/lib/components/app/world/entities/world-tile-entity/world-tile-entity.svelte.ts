@@ -62,6 +62,7 @@ export class WorldTileEntity extends Entity {
 
 		// pathfinder 전체 업데이트
 		this.worldContext.pathfinder.update();
+		this.worldContext.pathfinderUpdated++;
 	}
 
 	override removeFromWorld(): void {
@@ -69,6 +70,7 @@ export class WorldTileEntity extends Entity {
 
 		// pathfinder 전체 업데이트
 		this.worldContext.pathfinder.update();
+		this.worldContext.pathfinderUpdated++;
 	}
 
 	save(): void {

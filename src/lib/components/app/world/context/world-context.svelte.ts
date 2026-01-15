@@ -45,6 +45,7 @@ export class WorldContext {
 	entities = $state<Record<EntityId, Entity>>({});
 	debug = $state(false);
 	initialized = $state(false);
+	pathfinderUpdated = $state(0);
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
@@ -337,6 +338,7 @@ export class WorldContext {
 		}
 
 		this.pathfinder.update();
+		this.pathfinderUpdated++;
 
 		// 스토어 데이터로부터 엔티티 초기화
 		initializeEntities(this);

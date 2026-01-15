@@ -6,44 +6,47 @@
 	const world = useWorldContext();
 	const { pathfinder } = world;
 
-	// grid를 순회하며 walkable/jumpable/unwalkable 셀 수집
-	const walkableCells = $derived.by(() => {
-		world.initialized; // 초기화 상태 변경 감지
-		const cells: Array<{ col: number; row: number }> = [];
+	let walkableCells = $state<Array<{ col: number; row: number }>>([]);
+	let jumpableCells = $state<Array<{ col: number; row: number }>>([]);
+	let unwalkableCells = $state<Array<{ col: number; row: number }>>([]);
+
+	// pathfinder 업데이트 시 모든 셀 재계산
+	$effect(() => {
+		console.log('pathfinderUpdated:', world.pathfinderUpdated);
+
+		// walkable 셀 수집
+		const walkable: Array<{ col: number; row: number }> = [];
 		for (let row = 0; row < pathfinder.rows; row++) {
 			for (let col = 0; col < pathfinder.cols; col++) {
 				if (pathfinder.grid.isWalkableAt(col, row)) {
-					cells.push({ col, row });
+					walkable.push({ col, row });
 				}
 			}
 		}
-		return cells;
-	});
+		console.log('walkable cells:', walkable.length);
+		walkableCells = walkable;
 
-	const jumpableCells = $derived.by(() => {
-		world.initialized; // 초기화 상태 변경 감지
-		const cells: Array<{ col: number; row: number }> = [];
+		// jumpable 셀 수집
+		const jumpable: Array<{ col: number; row: number }> = [];
 		for (const cellKey of pathfinder.jumpableCells) {
 			const [colStr, rowStr] = cellKey.split(',');
-			cells.push({ col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) });
+			jumpable.push({ col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) });
 		}
-		return cells;
-	});
+		jumpableCells = jumpable;
 
-	const unwalkableCells = $derived.by(() => {
-		world.initialized; // 초기화 상태 변경 감지
-		const cells: Array<{ col: number; row: number }> = [];
+		// unwalkable 셀 수집
+		const unwalkable: Array<{ col: number; row: number }> = [];
 		for (let row = 0; row < pathfinder.rows; row++) {
 			for (let col = 0; col < pathfinder.cols; col++) {
 				const cellKey = vectorUtils.createCellKey(col, row);
 				const isWalkable = pathfinder.grid.isWalkableAt(col, row);
 				const isJumpable = pathfinder.isJumpable(cellKey);
 				if (!isWalkable && !isJumpable) {
-					cells.push({ col, row });
+					unwalkable.push({ col, row });
 				}
 			}
 		}
-		return cells;
+		unwalkableCells = unwalkable;
 	});
 </script>
 
