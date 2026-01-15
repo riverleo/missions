@@ -3,7 +3,7 @@ import PF from 'pathfinding';
 import type { Vector, Cell, CellKey, PathfinderCell } from '$lib/types';
 import type { WorldContext } from '../context';
 import { vectorXToCol, vectorYToRow, colToVectorX, rowToVectorY } from '$lib/utils/vector';
-import { initializeWalkable, setWalkable, setTileToUnwalkable } from './walkable';
+import { initializeWalkable, setTileToUnwalkable } from './walkable';
 
 export class Pathfinder {
 	readonly grid: PF.Grid;
