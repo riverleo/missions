@@ -9,7 +9,7 @@ export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
-	jumpableCells = $state(new Set<CellKey>());
+	jumpableCells: Set<CellKey>;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -20,6 +20,7 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / CELL_SIZE);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder();
+		this.jumpableCells = new Set();
 	}
 
 	/**
@@ -58,8 +59,8 @@ export class Pathfinder {
 		setWalkable(this);
 		setTileToUnwalkable(this);
 
-		// 2. jumpable 영역 설정 (새로운 Set으로 교체하여 반응성 트리거)
-		this.jumpableCells = new Set();
+		// 2. jumpable 영역 설정
+		this.jumpableCells.clear();
 		setJumpable(this);
 	}
 }
