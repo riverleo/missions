@@ -1,6 +1,6 @@
 import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
-import type { Vector, Cell, CellKey, PathfinderCell } from '$lib/types';
+import type { Vector, CellKey } from '$lib/types';
 import type { WorldContext } from '../context';
 import { vectorUtils } from '$lib/utils/vector';
 import { initializeWalkable, setWalkable, setTileToUnwalkable, setJumpable } from './walkable';
@@ -9,7 +9,7 @@ export class Pathfinder {
 	readonly grid: PF.Grid;
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
-	declare cells: Record<CellKey, PathfinderCell>;
+	readonly jumpableCells: Set<CellKey>;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -20,33 +20,14 @@ export class Pathfinder {
 		this.rows = Math.ceil(height / CELL_SIZE);
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder();
-		this.cells = $state<Record<CellKey, PathfinderCell>>({});
-
-		// cells 초기화
-		this.initializeCells();
+		this.jumpableCells = $state(new Set<CellKey>());
 	}
 
 	/**
-	 * cells를 grid 기반으로 초기화 (한 번만 실행)
+	 * 셀이 jumpable인지 확인
 	 */
-	private initializeCells() {
-		for (let row = 0; row < this.rows; row++) {
-			for (let col = 0; col < this.cols; col++) {
-				const cellKey = vectorUtils.createCellKey(col, row);
-				this.cells[cellKey] = {
-					...vectorUtils.createCell(col, row),
-					walkable: false,
-					jumpable: false,
-				};
-			}
-		}
-	}
-
-	/**
-	 * 그리드 좌표로 셀 정보 가져오기
-	 */
-	getCell(cell: Cell): PathfinderCell | undefined {
-		return this.cells[vectorUtils.createCellKey(cell.col, cell.row)];
+	isJumpable(cellKey: CellKey): boolean {
+		return this.jumpableCells.has(cellKey);
 	}
 
 	/**
@@ -78,25 +59,8 @@ export class Pathfinder {
 		setWalkable(this);
 		setTileToUnwalkable(this);
 
-		// 2. grid → cells 동기화 (walkable 복사)
-		this.syncGridToCells();
-
-		// 3. cells에 직접 jumpable 설정 (syncGridToCells 이후에 호출)
+		// 2. jumpable 영역 설정 (jumpableCells Set 초기화)
+		this.jumpableCells.clear();
 		setJumpable(this);
-	}
-
-	/**
-	 * grid의 walkable/jumpable 상태를 cells에 동기화
-	 */
-	private syncGridToCells() {
-		for (let row = 0; row < this.rows; row++) {
-			for (let col = 0; col < this.cols; col++) {
-				const cellKey = vectorUtils.createCellKey(col, row);
-				const cell = this.cells[cellKey];
-				if (cell) {
-					cell.walkable = this.grid.isWalkableAt(col, row);
-				}
-			}
-		}
 	}
 }

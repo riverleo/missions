@@ -156,10 +156,7 @@ export function setJumpable(pathfinder: Pathfinder) {
 						const jumpCol = cellX + dx - offset;
 						const jumpRow = cellY + 4;
 						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						const cell = pathfinder.cells[cellKey];
-						if (cell) {
-							cell.jumpable = true;
-						}
+						pathfinder.jumpableCells.add(cellKey);
 					}
 
 					if (isRightEdge) {
@@ -167,10 +164,7 @@ export function setJumpable(pathfinder: Pathfinder) {
 						const jumpCol = cellX + dx + offset;
 						const jumpRow = cellY + 4;
 						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						const cell = pathfinder.cells[cellKey];
-						if (cell) {
-							cell.jumpable = true;
-						}
+						pathfinder.jumpableCells.add(cellKey);
 					}
 				}
 			}

@@ -1,40 +1,49 @@
 <script lang="ts">
 	import { useWorldContext } from '$lib/hooks/use-world';
-	import type { PathfinderCell } from '$lib/types/vector';
 	import { CELL_SIZE } from '$lib/constants';
+	import { vectorUtils } from '$lib/utils/vector';
 
 	const world = useWorldContext();
 	const { pathfinder } = world;
 
-	// pathfinder의 cells Record를 사용하여 walkable/unwalkable/jumpable 셀 필터링
+	// grid를 순회하며 walkable/jumpable/unwalkable 셀 수집
 	const walkableCells = $derived.by(() => {
 		world.initialized; // 초기화 상태 변경 감지
-		return Object.values(pathfinder.cells).filter((cell) => {
-			return (
-				cell && typeof cell === 'object' && 'walkable' in cell && (cell as any).walkable === true
-			);
-		}) as PathfinderCell[];
+		const cells: Array<{ col: number; row: number }> = [];
+		for (let row = 0; row < pathfinder.rows; row++) {
+			for (let col = 0; col < pathfinder.cols; col++) {
+				if (pathfinder.grid.isWalkableAt(col, row)) {
+					cells.push({ col, row });
+				}
+			}
+		}
+		return cells;
 	});
 
 	const jumpableCells = $derived.by(() => {
 		world.initialized; // 초기화 상태 변경 감지
-		return Object.values(pathfinder.cells).filter((cell) => {
-			return (
-				cell && typeof cell === 'object' && 'jumpable' in cell && (cell as any).jumpable === true
-			);
-		}) as PathfinderCell[];
+		const cells: Array<{ col: number; row: number }> = [];
+		for (const cellKey of pathfinder.jumpableCells) {
+			const [colStr, rowStr] = cellKey.split(',');
+			cells.push({ col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) });
+		}
+		return cells;
 	});
 
 	const unwalkableCells = $derived.by(() => {
 		world.initialized; // 초기화 상태 변경 감지
-		return Object.values(pathfinder.cells).filter((cell) => {
-			return (
-				cell &&
-				typeof cell === 'object' &&
-				(cell as any).walkable !== true &&
-				(cell as any).jumpable !== true
-			);
-		}) as PathfinderCell[];
+		const cells: Array<{ col: number; row: number }> = [];
+		for (let row = 0; row < pathfinder.rows; row++) {
+			for (let col = 0; col < pathfinder.cols; col++) {
+				const cellKey = vectorUtils.createCellKey(col, row);
+				const isWalkable = pathfinder.grid.isWalkableAt(col, row);
+				const isJumpable = pathfinder.isJumpable(cellKey);
+				if (!isWalkable && !isJumpable) {
+					cells.push({ col, row });
+				}
+			}
+		}
+		return cells;
 	});
 </script>
 
