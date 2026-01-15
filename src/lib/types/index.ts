@@ -236,17 +236,28 @@ export type {
 } from './supabase';
 
 // Re-export vector types
-export type { Vector, VectorKey, Cell, CellKey, PathfinderCell } from './vector';
+export type {
+	Vector,
+	VectorKey,
+	ScreenVector,
+	ScreenVectorKey,
+	Cell,
+	CellKey,
+	PathfinderCell,
+	TileCell,
+	TileCellKey,
+} from './vector';
 
 // Re-export core types
-export type { Brand, FetchStatus, FetchState, RecordFetchState, BulkChanges } from './core';
-
-export type Supabase = SupabaseClient<Database>;
-
-export interface ServerPayload {
-	supabase: Supabase;
-	user?: User;
-}
+export type {
+	Brand,
+	FetchStatus,
+	FetchState,
+	RecordFetchState,
+	BulkChanges,
+	Supabase,
+	ServerPayload,
+} from './core';
 
 // Re-export specific Enums for convenience
 export type {
@@ -257,6 +268,3 @@ export type {
 	PlayerScenarioStatus,
 	DiceRollAction,
 } from './supabase';
-
-// TODO: Define this type properly in the appropriate location
-export type TileWang2CornerIndex = number;

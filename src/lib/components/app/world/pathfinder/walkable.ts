@@ -1,7 +1,7 @@
 import { BOUNDARY_THICKNESS, TILE_CELL_RATIO, CELL_SIZE } from '$lib/constants';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 import type { Pathfinder } from './pathfinder.svelte';
-import { vectorYToRow } from '$lib/utils/vector';
+import { vectorUtils } from '$lib/utils/vector';
 
 /**
  * 그리드 초기화 및 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
@@ -20,7 +20,7 @@ export function initializeWalkable(pathfinder: Pathfinder) {
 
 	// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
 	const bottomTopY = pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
-	const bottomTopRow = vectorYToRow(bottomTopY);
+	const bottomTopRow = vectorUtils.pixelToCellIndex(bottomTopY);
 
 	// 바닥 위로 2번째 셀
 	for (let x = 0; x < pathfinder.cols; x++) {

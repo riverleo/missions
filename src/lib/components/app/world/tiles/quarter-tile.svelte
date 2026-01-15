@@ -3,6 +3,7 @@
 	import { TILE_SIZE } from '$lib/constants';
 	import { calculate } from '$lib/utils/bitmask';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
+	import { vectorUtils } from '$lib/utils/vector';
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import QuarterTileCell from './quarter-tile-cell.svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
@@ -23,15 +24,19 @@
 		if (!context) return false;
 
 		// 실제 엔티티 체크
-		const tileVector: VectorKey = `${tx},${ty}`;
-		const tileId = EntityIdUtils.create('tile', worldId, tileVector);
+		const tileVector: VectorKey = vectorUtils.createVectorKey(tx, ty);
+		const tileId = EntityIdUtils.createId('tile', worldId, tileVector);
 		if (context.entities[tileId]) return true;
 
 		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)
 		const cursor = context.blueprint.cursor;
 		if (cursor && cursor.type === 'tile') {
 			const vectors = context.blueprint.getVectorsFromStart();
-			return vectors.some((v) => v.x === tx && v.y === ty);
+			// vectors는 픽셀 좌표이므로 타일 셀로 변환해서 비교
+			return vectors.some((v) => {
+				const tileCell = vectorUtils.vectorToTileCell(v);
+				return tileCell.col === tx && tileCell.row === ty;
+			});
 		}
 
 		return false;

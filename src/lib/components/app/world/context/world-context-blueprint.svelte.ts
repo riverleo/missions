@@ -1,13 +1,13 @@
 import { get } from 'svelte/store';
-import { createVectors, getOverlappingVectors, vectorToTopLeftVector } from '$lib/utils/vector';
+import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { TILE_SIZE, CELL_SIZE } from '$lib/constants';
+import { CELL_SIZE } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
-import type { Vector } from '$lib/types/vector';
+import type { Vector, Cell, ScreenVector } from '$lib/types/vector';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
@@ -34,14 +34,14 @@ export class WorldContextBlueprint {
 	/**
 	 * 마우스 위치에 따라 cursor 업데이트
 	 */
-	updateCursor(cursorPosition: Vector) {
+	updateCursor(screenVector: ScreenVector) {
 		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
 			return;
 		}
 
 		const { type, value: id } = EntityIdUtils.template.parse(this.selectedEntityTemplateId);
-		const worldPos = this.context.camera.screenToWorld(cursorPosition);
+		const worldPos = this.context.camera.screenToWorld(screenVector);
 
 		if (!worldPos) {
 			this.cursor = undefined;
@@ -53,12 +53,18 @@ export class WorldContextBlueprint {
 
 		if (type === 'building') {
 			const building = buildings[id as BuildingId];
+
 			if (!building) {
 				this.cursor = undefined;
 				return;
 			}
 
-			const vector = vectorToTopLeftVector(worldPos, building.cell_cols, building.cell_rows);
+			const vector = vectorUtils.vectorToTopLeftVector(
+				worldPos,
+				building.cell_cols,
+				building.cell_rows
+			);
+
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -66,7 +72,8 @@ export class WorldContextBlueprint {
 				type: 'cell',
 			};
 		} else if (type === 'tile') {
-			const vector = vectorToTopLeftVector(worldPos, 1, 1);
+			const vector = vectorUtils.vectorToTopLeftVector(worldPos, 1, 1);
+
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -74,7 +81,7 @@ export class WorldContextBlueprint {
 				type: 'tile',
 			};
 		} else if (type === 'character' || type === 'item') {
-			const vector = vectorToTopLeftVector(worldPos, 1, 1);
+			const vector = vectorUtils.vectorToTopLeftVector(worldPos, 1, 1);
 			this.cursor = {
 				entityTemplateId: this.selectedEntityTemplateId,
 				current: vector,
@@ -89,25 +96,28 @@ export class WorldContextBlueprint {
 	/**
 	 * 현재 배치하려는 건물/타일과 기존 건물들의 겹치는 셀들 계산
 	 */
-	getOverlappingVectors(): Vector[] {
+	getOverlappingCells(): Cell[] {
 		if (!this.cursor || !this.context) return [];
 
 		const { entityTemplateId, current } = this.cursor;
 		const { x, y } = current;
 
 		// 배치하려는 셀 계산
-		let targetVectors: Vector[];
+		let targetCells: Cell[];
 		if (EntityIdUtils.template.is('building', entityTemplateId)) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
 			if (!building) return [];
-			targetVectors = createVectors(x, y, building.cell_cols, building.cell_rows);
+			// 픽셀 좌표를 셀로 변환
+			const cell = vectorUtils.vectorToCell({ x, y } as Vector);
+			targetCells = vectorUtils.createCells(cell.col, cell.row, building.cell_cols, building.cell_rows);
 		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
-			// 타일 좌표를 셀 좌표로 변환 (1 tile = 2x2 cells)
-			const cellX = x * 2;
-			const cellY = y * 2;
-			targetVectors = createVectors(cellX, cellY, 2, 2);
+			// 픽셀 좌표를 타일 셀로 변환 → 셀 좌표로 변환 (1 tile = 2x2 cells)
+			const tileCell = vectorUtils.vectorToTileCell({ x, y } as Vector);
+			const cellX = tileCell.col * 2;
+			const cellY = tileCell.row * 2;
+			targetCells = vectorUtils.createCells(cellX, cellY, 2, 2);
 		} else {
 			return [];
 		}
@@ -116,7 +126,7 @@ export class WorldContextBlueprint {
 		const buildingStore = get(useBuilding().store).data;
 		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
 		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
-		const existingVectors: Vector[] = [];
+		const existingCells: Cell[] = [];
 
 		// worldId 필터링
 		const worldBuildings = Object.values(worldBuildingStore).filter(
@@ -127,13 +137,13 @@ export class WorldContextBlueprint {
 			const buildingData = buildingStore[worldBuilding.building_id];
 			if (!buildingData) continue;
 
-			const cells = createVectors(
+			const cells = vectorUtils.createCells(
 				worldBuilding.cell_x,
 				worldBuilding.cell_y,
 				buildingData.cell_cols,
 				buildingData.cell_rows
 			);
-			existingVectors.push(...cells);
+			existingCells.push(...cells);
 		}
 
 		// 기존 타일들이 차지하는 셀 수집 (1 tile = 2x2 cells)
@@ -146,19 +156,19 @@ export class WorldContextBlueprint {
 				// 타일 좌표를 셀 좌표로 변환
 				const cellX = tileX * 2;
 				const cellY = tileY * 2;
-				const cells = createVectors(cellX, cellY, 2, 2);
-				existingVectors.push(...cells);
+				const cells = vectorUtils.createCells(cellX, cellY, 2, 2);
+				existingCells.push(...cells);
 			}
 		}
 
-		return getOverlappingVectors(targetVectors, existingVectors);
+		return vectorUtils.getOverlappingCells(targetCells, existingCells);
 	}
 
 	/**
 	 * 현재 배치가 유효한지 (겹치는 셀이 없는지)
 	 */
 	get placable(): boolean {
-		return this.getOverlappingVectors().length === 0;
+		return this.getOverlappingCells().length === 0;
 	}
 
 	/**
@@ -185,7 +195,7 @@ export class WorldContextBlueprint {
 			const maxX = Math.max(start.x, current.x);
 			const vectors: Vector[] = [];
 			for (let x = minX; x <= maxX; x++) {
-				vectors.push({ x, y: start.y });
+				vectors.push(vectorUtils.createVector(x, start.y));
 			}
 			return vectors;
 		}
@@ -196,7 +206,7 @@ export class WorldContextBlueprint {
 			const maxY = Math.max(start.y, current.y);
 			const vectors: Vector[] = [];
 			for (let y = minY; y <= maxY; y++) {
-				vectors.push({ x: start.x, y });
+				vectors.push(vectorUtils.createVector(start.x, y));
 			}
 			return vectors;
 		}
@@ -209,7 +219,7 @@ export class WorldContextBlueprint {
 		const vectors: Vector[] = [];
 		for (let y = minY; y <= maxY; y++) {
 			for (let x = minX; x <= maxX; x++) {
-				vectors.push({ x, y });
+				vectors.push(vectorUtils.createVector(x, y));
 			}
 		}
 		return vectors;
@@ -239,32 +249,37 @@ export class WorldContextBlueprint {
 		if (type === 'building') {
 			// 겹치는 셀이 있으면 배치하지 않음
 			if (!this.placable) return;
+			// 픽셀 좌표를 셀로 변환
+			const cell = vectorUtils.vectorToCell(current);
 			this.context.createWorldBuilding({
 				building_id: EntityIdUtils.template.id<BuildingId>(entityTemplateId),
-				cell_x: x,
-				cell_y: y,
+				cell_x: cell.col,
+				cell_y: cell.row,
 			});
 		} else if (type === 'tile') {
 			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
-			for (const vector of this.getVectorsFromStart()) {
+			for (const pixelVector of this.getVectorsFromStart()) {
+				// 픽셀 좌표를 타일 셀로 변환 후 Vector로 변환 (createTileInWorldTileMap이 Vector 기대)
+				const tileCell = vectorUtils.vectorToTileCell(pixelVector);
+				const tileVector = vectorUtils.createVector(tileCell.col, tileCell.row);
 				await this.context.createTileInWorldTileMap(
 					EntityIdUtils.template.id<TileId>(entityTemplateId),
-					vector
+					tileVector
 				);
 			}
 		} else if (type === 'character') {
-			// character는 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			// current는 이미 픽셀 좌표
 			this.context.createWorldCharacter({
 				character_id: EntityIdUtils.template.id<CharacterId>(entityTemplateId),
-				x: x * CELL_SIZE + CELL_SIZE / 2,
-				y: y * CELL_SIZE + CELL_SIZE / 2,
+				x: x + CELL_SIZE / 2,
+				y: y + CELL_SIZE / 2,
 			});
 		} else if (type === 'item') {
-			// item은 픽셀 좌표를 사용 (cell 좌표 → 픽셀 변환)
+			// current는 이미 픽셀 좌표
 			this.context.createWorldItem({
 				item_id: EntityIdUtils.template.id<ItemId>(entityTemplateId),
-				x: x * CELL_SIZE + CELL_SIZE / 2,
-				y: y * CELL_SIZE + CELL_SIZE / 2,
+				x: x + CELL_SIZE / 2,
+				y: y + CELL_SIZE / 2,
 			});
 		}
 	}

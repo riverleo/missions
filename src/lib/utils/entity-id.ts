@@ -114,7 +114,7 @@ export const EntityIdUtils = {
 	 * EntityIdUtils.create('building', worldId, buildingId) // "building_{worldId}_{buildingId}"
 	 * EntityIdUtils.create(building) // "building_{building.world_id}_{building.id}"
 	 */
-	create: createEntityId,
+	createId: createEntityId,
 
 	/**
 	 * EntityTemplateId 유틸리티

@@ -1,5 +1,6 @@
-import type { Vector } from '$lib/types';
+import type { ScreenVector, Vector } from '$lib/types';
 import type { WorldContext } from './context';
+import { vectorUtils } from '$lib/utils/vector';
 
 export class Camera {
 	static readonly MIN_ZOOM = 0.25;
@@ -12,8 +13,8 @@ export class Camera {
 	panning = $state(false);
 
 	// 팬 시작 시 저장할 상태
-	private panStartScreen: Vector = { x: 0, y: 0 };
-	private panStartCamera: Vector = { x: 0, y: 0 };
+	private panStartScreen: ScreenVector = vectorUtils.createScreenVector(0, 0);
+	private panStartCamera: ScreenVector = vectorUtils.createScreenVector(0, 0);
 
 	private world: WorldContext;
 
@@ -22,26 +23,23 @@ export class Camera {
 	}
 
 	// 화면 좌표를 컨테이너 좌표로 변환
-	screenToContainer(screenPosition: Vector): Vector | undefined {
+	screenToContainer(screenVector: ScreenVector): Vector | undefined {
 		const canvas = this.world.render?.canvas;
 		if (!canvas) return undefined;
 
 		const rect = canvas.getBoundingClientRect();
-		return {
-			x: screenPosition.x - rect.left,
-			y: screenPosition.y - rect.top,
-		};
+		return vectorUtils.createVector(screenVector.x - rect.left, screenVector.y - rect.top);
 	}
 
 	// 화면 좌표를 월드 좌표로 변환
-	screenToWorld(screenPosition: Vector): Vector | undefined {
-		const containerPos = this.screenToContainer(screenPosition);
+	screenToWorld(screenVector: ScreenVector): Vector | undefined {
+		const containerPos = this.screenToContainer(screenVector);
 		if (!containerPos) return undefined;
 
-		return {
-			x: containerPos.x / this.zoom + this.x,
-			y: containerPos.y / this.zoom + this.y,
-		};
+		return vectorUtils.createVector(
+			containerPos.x / this.zoom + this.x,
+			containerPos.y / this.zoom + this.y
+		);
 	}
 
 	// 맵 크기에 따른 최소 줌 레벨 계산
@@ -78,8 +76,8 @@ export class Camera {
 	}
 
 	// 줌 (마우스 위치 중심)
-	applyZoom(deltaY: number, screenPosition: Vector) {
-		const mouseWorldPos = this.screenToWorld(screenPosition);
+	applyZoom(deltaY: number, screenVector: ScreenVector) {
+		const mouseWorldPos = this.screenToWorld(screenVector);
 		if (!mouseWorldPos) return;
 
 		const delta = deltaY > 0 ? -Camera.ZOOM_SPEED : Camera.ZOOM_SPEED;
@@ -96,16 +94,16 @@ export class Camera {
 	}
 
 	// 팬 시작
-	startPan(screenPosition: Vector) {
+	startPan(screenVector: ScreenVector) {
 		this.panning = true;
-		this.panStartScreen = screenPosition;
-		this.panStartCamera = { x: this.x, y: this.y };
+		this.panStartScreen = screenVector;
+		this.panStartCamera = vectorUtils.createScreenVector(this.x, this.y);
 	}
 
 	// 팬 업데이트
-	applyPan(screenPosition: Vector) {
-		const dx = screenPosition.x - this.panStartScreen.x;
-		const dy = screenPosition.y - this.panStartScreen.y;
+	applyPan(screenVector: ScreenVector) {
+		const dx = screenVector.x - this.panStartScreen.x;
+		const dy = screenVector.y - this.panStartScreen.y;
 		this.x = this.panStartCamera.x - dx / this.zoom;
 		this.y = this.panStartCamera.y - dy / this.zoom;
 

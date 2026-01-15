@@ -1,11 +1,8 @@
-// ============================================================
-// Brand Utility - Type-safe ID branding
-// ============================================================
+import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type { Database } from './supabase.raw';
+
 export type Brand<T, B extends string> = T & { readonly __brand: B };
 
-// ============================================================
-// Fetch State Types
-// ============================================================
 export type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface FetchState<T> {
@@ -20,13 +17,17 @@ export interface RecordFetchState<K extends string, T> {
 	error?: Error;
 }
 
-// ============================================================
-// Bulk Changes Type
-// ============================================================
 export interface BulkChanges<T> {
 	origin: T[];
 	current: T[];
 	created: Omit<T, 'id'>[];
 	updated: T[];
 	deleted: string[];
+}
+
+export type Supabase = SupabaseClient<Database>;
+
+export interface ServerPayload {
+	supabase: Supabase;
+	user?: User;
 }

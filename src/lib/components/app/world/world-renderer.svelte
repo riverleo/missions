@@ -2,6 +2,7 @@
 	import { onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
+	import { vectorUtils } from '$lib/utils/vector';
 	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
@@ -51,7 +52,7 @@
 	// 카메라 줌 핸들러
 	function onwheel(e: WheelEvent) {
 		e.preventDefault();
-		camera.applyZoom(e.deltaY, { x: e.clientX, y: e.clientY });
+		camera.applyZoom(e.deltaY, vectorUtils.createScreenVector(e.clientX, e.clientY));
 	}
 
 	onMount(() => world.load({ element, width: width, height: height }));

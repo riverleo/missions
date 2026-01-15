@@ -3,6 +3,7 @@ import { get } from 'svelte/store';
 import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
@@ -101,8 +102,8 @@ export class WorldCharacterEntity extends Entity {
 	moveTo(targetX: number, targetY: number): void {
 		// pathfinder로 경로 계산
 		this.path = this.worldContext.pathfinder.findPath(
-			{ x: this.body.position.x, y: this.body.position.y },
-			{ x: targetX, y: targetY }
+			vectorUtils.createVector(this.body.position.x, this.body.position.y),
+			vectorUtils.createVector(targetX, targetY)
 		);
 		// 새 경로 시작 시 점프 상태 초기화
 		this.jumpDelay = 0;

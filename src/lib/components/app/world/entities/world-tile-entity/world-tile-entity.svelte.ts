@@ -10,7 +10,7 @@ import {
 } from '$lib/constants';
 import type { BeforeUpdateEvent, WorldContext } from '$lib/components/app/world/context';
 import { Entity } from '../entity.svelte';
-import { toPixel } from '$lib/utils/vector';
+import { vectorUtils } from '$lib/utils/vector';
 
 export class WorldTileEntity extends Entity {
 	readonly type = 'tile' as const;
@@ -44,8 +44,8 @@ export class WorldTileEntity extends Entity {
 			'rectangle',
 			TILE_SIZE,
 			TILE_SIZE,
-			toPixel(tileX, TILE_SIZE),
-			toPixel(tileY, TILE_SIZE),
+			vectorUtils.tileIndexToPixel(tileX),
+			vectorUtils.tileIndexToPixel(tileY),
 			{
 				isStatic: true,
 				label: this.id,

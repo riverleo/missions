@@ -1,54 +1,111 @@
-import { CELL_SIZE } from '$lib/constants';
-import type { Vector } from '$lib/types';
-
-export function pixelTo(pixel: number, size: number): number {
-	return Math.floor(pixel / size);
-}
-
-export function toPixel(index: number, size: number): number {
-	return index * size + size / 2;
-}
+import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
+import type {
+	Vector,
+	Cell,
+	TileCell,
+	VectorKey,
+	CellKey,
+	TileCellKey,
+	ScreenVector,
+	ScreenVectorKey,
+} from '$lib/types';
 
 /**
- * 픽셀 좌표를 그리드 인덱스로 변환
+ * Vector 브랜드 타입 생성
  */
-export function vectorXToCol(vectorX: number): number {
-	return pixelTo(vectorX, CELL_SIZE);
+function createVector(x: number, y: number): Vector {
+	return { x, y } as Vector;
 }
 
 /**
- * 픽셀 좌표를 그리드 인덱스로 변환
+ * VectorKey 브랜드 타입 생성
  */
-export function vectorYToRow(vectorY: number): number {
-	return pixelTo(vectorY, CELL_SIZE);
+function createVectorKey(x: number, y: number): VectorKey {
+	return `${x},${y}` as VectorKey;
 }
 
 /**
- * 그리드 열 인덱스를 월드 픽셀 X 좌표(타일 중심)로 변환
+ * Vector 브랜드 타입 생성
  */
-export function colToVectorX(col: number): number {
-	return toPixel(col, CELL_SIZE);
+function createScreenVector(x: number, y: number): ScreenVector {
+	return { x, y } as ScreenVector;
 }
 
 /**
- * 그리드 행 인덱스를 월드 픽셀 Y 좌표(타일 중심)로 변환
+ * VectorKey 브랜드 타입 생성
  */
-export function rowToVectorY(row: number): number {
-	return toPixel(row, CELL_SIZE);
+function createScreenVectorKey(x: number, y: number): ScreenVectorKey {
+	return `${x},${y}` as ScreenVectorKey;
 }
 
 /**
- * 마우스 위치로부터 좌상단 그리드 인덱스 계산
+ * Cell 브랜드 타입 생성
+ */
+function createCell(col: number, row: number): Cell {
+	return { col, row } as Cell;
+}
+
+/**
+ * CellKey 브랜드 타입 생성
+ */
+function createCellKey(col: number, row: number): CellKey {
+	return `${col},${row}` as CellKey;
+}
+
+/**
+ * Tile 브랜드 타입 생성
+ */
+function createTileCell(col: number, row: number): TileCell {
+	return { col, row } as TileCell;
+}
+
+/**
+ * TileKey 브랜드 타입 생성
+ */
+function createTileCellKey(col: number, row: number): TileCellKey {
+	return `${col},${row}` as TileCellKey;
+}
+
+/**
+ * 픽셀 좌표를 셀 인덱스로 변환
+ */
+function pixelToCellIndex(pixel: number): number {
+	return Math.floor(pixel / CELL_SIZE);
+}
+
+/**
+ * 셀 인덱스를 월드 픽셀 좌표(셀 중심)로 변환
+ */
+function cellIndexToPixel(index: number): number {
+	return index * CELL_SIZE + CELL_SIZE / 2;
+}
+
+/**
+ * 픽셀 좌표를 타일 인덱스로 변환
+ */
+function pixelToTileIndex(pixel: number): number {
+	return Math.floor(pixel / TILE_SIZE);
+}
+
+/**
+ * 타일 인덱스를 월드 픽셀 좌표(타일 중심)로 변환
+ */
+function tileIndexToPixel(index: number): number {
+	return index * TILE_SIZE + TILE_SIZE / 2;
+}
+
+/**
+ * 마우스 위치로부터 좌상단 그리드의 픽셀 좌표 계산
  * - 홀수 count: 그리드 중심에 스냅
  * - 짝수 count: 그리드 경계에 스냅
  */
-export function pixelToTopLeft(pixel: number, count: number): number {
-	const index = vectorXToCol(pixel);
+function pixelToTopLeft(pixel: number, count: number): number {
+	const index = pixelToCellIndex(pixel);
 	let centerPixel: number;
 
 	if (count % 2 === 1) {
 		// 홀수: 그리드 중심에 스냅
-		centerPixel = colToVectorX(index);
+		centerPixel = cellIndexToPixel(index);
 	} else {
 		// 짝수: 가장 가까운 그리드 경계에 스냅
 		const leftBoundary = index * CELL_SIZE;
@@ -56,42 +113,94 @@ export function pixelToTopLeft(pixel: number, count: number): number {
 		centerPixel = pixel - leftBoundary < rightBoundary - pixel ? leftBoundary : rightBoundary;
 	}
 
-	return colToVectorX(centerPixel) - Math.floor(count / 2);
+	return centerPixel - Math.floor(count / 2) * CELL_SIZE;
 }
 
 /**
  * 마우스 위치로부터 좌상단 그리드 인덱스 계산 (x, y 동시 처리)
  */
-export function vectorToTopLeftVector(vector: Vector, cols: number, rows: number): Vector {
-	return {
-		x: pixelToTopLeft(vector.x, cols),
-		y: pixelToTopLeft(vector.y, rows),
-	};
+function vectorToTopLeftVector(vector: Vector, cols: number, rows: number): Vector {
+	return createVector(pixelToTopLeft(vector.x, cols), pixelToTopLeft(vector.y, rows));
 }
 
 /**
- * 좌상단 인덱스로 차지하는 벡터들 생성
- * @param x 좌상단 X 인덱스
- * @param y 좌상단 Y 인덱스
+ * 좌상단 인덱스로 차지하는 셀들 생성
+ * @param col 좌상단 col 인덱스
+ * @param row 좌상단 row 인덱스
  * @param cols 가로 크기
  * @param rows 세로 크기
  */
-export function createVectors(x: number, y: number, cols: number, rows: number): Vector[] {
-	const vectors: Vector[] = [];
+function createCells(col: number, row: number, cols: number, rows: number): Cell[] {
+	const cells: Cell[] = [];
 
-	for (let row = 0; row < rows; row++) {
-		for (let col = 0; col < cols; col++) {
-			vectors.push({ x: x + col, y: y + row });
+	for (let r = 0; r < rows; r++) {
+		for (let c = 0; c < cols; c++) {
+			cells.push(createCell(col + c, row + r));
 		}
 	}
 
-	return vectors;
+	return cells;
 }
 
 /**
- * 두 벡터 배열의 겹치는 벡터들 반환
+ * 두 셀 배열의 겹치는 셀들 반환
  */
-export function getOverlappingVectors(vectorsA: Vector[], vectorsB: Vector[]): Vector[] {
-	const setB = new Set(vectorsB.map((v) => `${v.x},${v.y}`));
-	return vectorsA.filter((v) => setB.has(`${v.x},${v.y}`));
+function getOverlappingCells(cellsA: Cell[], cellsB: Cell[]): Cell[] {
+	const setB = new Set(cellsB.map((c) => `${c.col},${c.row}`));
+	return cellsA.filter((c) => setB.has(`${c.col},${c.row}`));
 }
+
+/**
+ * 픽셀 좌표를 셀로 변환
+ */
+function vectorToCell(vector: Vector): Cell {
+	return createCell(pixelToCellIndex(vector.x), pixelToCellIndex(vector.y));
+}
+
+/**
+ * 셀을 픽셀 좌표(셀 중심)로 변환
+ */
+function cellToVector(cell: Cell): Vector {
+	return createVector(cellIndexToPixel(cell.col), cellIndexToPixel(cell.row));
+}
+
+/**
+ * 픽셀 좌표를 타일 셀로 변환
+ */
+function vectorToTileCell(vector: Vector): TileCell {
+	return createTileCell(pixelToTileIndex(vector.x), pixelToTileIndex(vector.y));
+}
+
+/**
+ * 타일 셀을 픽셀 좌표(타일 중심)로 변환
+ */
+function tileCellToVector(tile: TileCell): Vector {
+	return createVector(tileIndexToPixel(tile.col), tileIndexToPixel(tile.row));
+}
+
+export const vectorUtils = {
+	// 브랜드 타입 생성
+	createVector,
+	createVectorKey,
+	createScreenVector,
+	createScreenVectorKey,
+	createCell,
+	createCellKey,
+	createTileCell,
+	createTileCellKey,
+	// 저수준 좌표 변환
+	pixelToCellIndex,
+	cellIndexToPixel,
+	pixelToTileIndex,
+	tileIndexToPixel,
+	pixelToTopLeft,
+	vectorToTopLeftVector,
+	// 고수준 좌표 변환
+	vectorToCell,
+	cellToVector,
+	vectorToTileCell,
+	tileCellToVector,
+	// 셀 배열 생성
+	createCells,
+	getOverlappingCells,
+};

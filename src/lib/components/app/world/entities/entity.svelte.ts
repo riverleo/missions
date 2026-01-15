@@ -26,7 +26,7 @@ export abstract class Entity {
 		instanceId: EntityInstanceId
 	) {
 		this.worldContext = worldContext;
-		this.id = EntityIdUtils.create(type, worldId, instanceId);
+		this.id = EntityIdUtils.createId(type, worldId, instanceId);
 	}
 
 	get debug(): boolean {

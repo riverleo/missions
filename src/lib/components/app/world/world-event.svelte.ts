@@ -2,6 +2,7 @@ import Matter from 'matter-js';
 import type { WorldContext } from './context';
 import type { Camera } from './camera.svelte';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 
 const { Query, Composite } = Matter;
 
@@ -24,7 +25,7 @@ export class WorldEvent {
 		const engine = this.world.engine;
 		if (!engine) return false;
 
-		const worldPos = this.camera.screenToWorld({ x: screenX, y: screenY });
+		const worldPos = this.camera.screenToWorld(vectorUtils.createScreenVector(screenX, screenY));
 		if (!worldPos) return false;
 
 		const bodies = Query.point(Composite.allBodies(engine.world), worldPos);
@@ -38,7 +39,7 @@ export class WorldEvent {
 			if (this.isOverDraggable) return;
 
 			e.preventDefault();
-			this.camera.startPan({ x: e.clientX, y: e.clientY });
+			this.camera.startPan(vectorUtils.createScreenVector(e.clientX, e.clientY));
 		}
 	};
 
@@ -52,7 +53,7 @@ export class WorldEvent {
 			return;
 		}
 
-		this.camera.applyPan({ x: e.clientX, y: e.clientY });
+		this.camera.applyPan(vectorUtils.createScreenVector(e.clientX, e.clientY));
 	};
 
 	onmouseup = () => {

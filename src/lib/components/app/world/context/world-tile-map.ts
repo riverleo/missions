@@ -151,7 +151,7 @@ export async function createTileInWorldTileMap(
 	});
 
 	// 엔티티 생성
-	const entityId = EntityIdUtils.create('tile', worldContext.worldId, tileVector);
+	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
 	if (!worldContext.entities[entityId]) {
 		try {
 			const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileVector, tileId);
@@ -166,7 +166,7 @@ export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileVecto
 	const { worldTileMapStore } = useWorld();
 
 	// 엔티티 제거
-	const entityId = EntityIdUtils.create('tile', worldContext.worldId, tileVector);
+	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
 	const entity = worldContext.entities[entityId];
 	if (entity) {
 		entity.removeFromWorld();

@@ -2,6 +2,7 @@
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
+	import { vectorUtils } from '$lib/utils/vector';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
@@ -26,6 +27,7 @@
 	const isCharacter = $derived(EntityIdUtils.template.is('character', entityTemplateId));
 	const isItem = $derived(EntityIdUtils.template.is('item', entityTemplateId));
 
+
 	const characterId = $derived.by(() => {
 		if (!entityTemplateId || !EntityIdUtils.template.is('character', entityTemplateId))
 			return undefined;
@@ -47,46 +49,38 @@
 
 	const centerX = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		let { x } = world.blueprint.cursor.current;
+		const { x } = world.blueprint.cursor.current;
 
-		// 캐릭터/아이템은 항상 셀 단위
+		// cursor.current는 이미 픽셀 좌표
 		if (isCharacter || isItem) {
-			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
-			if (world.blueprint.cursor.type === 'tile') {
-				x = x * 2;
-			}
-			return x * CELL_SIZE + CELL_SIZE / 2;
+			return x + CELL_SIZE / 2;
 		}
 
 		// 건물/타일
-		const tileCols = building?.cell_cols ?? 1;
-		const width = tileCols * gridSize;
-		return x * gridSize + width / 2;
+		const cols = building?.cell_cols ?? 1;
+		const width = cols * gridSize;
+		return x + width / 2;
 	});
 
 	const centerY = $derived.by(() => {
 		if (!world.blueprint.cursor) return 0;
-		let { y } = world.blueprint.cursor.current;
+		const { y } = world.blueprint.cursor.current;
 
-		// 캐릭터/아이템은 항상 셀 단위
+		// cursor.current는 이미 픽셀 좌표
 		if (isCharacter || isItem) {
-			// 타일 그리드라면 타일 좌표를 셀 좌표로 변환
-			if (world.blueprint.cursor.type === 'tile') {
-				y = y * 2;
-			}
-			return y * CELL_SIZE + CELL_SIZE / 2;
+			return y + CELL_SIZE / 2;
 		}
 
 		// 건물/타일
-		const tileRows = building?.cell_rows ?? 1;
-		const height = tileRows * gridSize;
-		return y * gridSize + height / 2;
+		const rows = building?.cell_rows ?? 1;
+		const height = rows * gridSize;
+		return y + height / 2;
 	});
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
 	const overlappingVectors = $derived(() => {
-		const vectors = world.blueprint.getOverlappingVectors();
-		return new Set(vectors.map((v) => `${v.x},${v.y}`));
+		const cells = world.blueprint.getOverlappingCells();
+		return new Set(cells.map((c) => `${c.col},${c.row}`));
 	});
 
 	// 셀이 겹치는지 확인 (절대 좌표 기준)
@@ -131,7 +125,7 @@
 			<svg class="overflow-visible" {width} {height}>
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
-						{@const isOverlapping = isVectorOverlapping({ x: col, y: row })}
+						{@const isOverlapping = isVectorOverlapping(vectorUtils.createVector(col, row))}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}
@@ -158,10 +152,11 @@
 	{:else if isTile && world.blueprint.cursor}
 		<!-- 타일 미리보기 -->
 		{#each tileVectors as vector (vector.x + ',' + vector.y)}
+			{@const tileCell = vectorUtils.vectorToTileCell(vector)}
 			<QuarterTile
 				worldId={world.worldId}
-				tileX={vector.x}
-				tileY={vector.y}
+				tileX={tileCell.col}
+				tileY={tileCell.row}
 				style="opacity: 0.5;"
 			/>
 		{/each}

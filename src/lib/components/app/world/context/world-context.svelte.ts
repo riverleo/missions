@@ -12,6 +12,7 @@ import type {
 	Vector,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
 import { Camera } from '../camera.svelte';
@@ -87,7 +88,7 @@ export class WorldContext {
 
 	// 마우스 클릭 처리 (canvas mousedown에서 screen 좌표 저장)
 	private handleCanvasMouseDown = (e: MouseEvent) => {
-		this.mouseDownScreenPosition = { x: e.clientX, y: e.clientY };
+		this.mouseDownScreenPosition = vectorUtils.createVector(e.clientX, e.clientY);
 	};
 
 	// Matter.js mousedown 처리
@@ -135,7 +136,9 @@ export class WorldContext {
 
 		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 또는 캐릭터 이동 처리
 		if (isClick && !wasEntityDragged) {
-			const worldPos = this.camera.screenToWorld({ x: e.clientX, y: e.clientY });
+			const worldPos = this.camera.screenToWorld(
+				vectorUtils.createScreenVector(e.clientX, e.clientY)
+			);
 			if (worldPos) {
 				const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
 
@@ -177,7 +180,7 @@ export class WorldContext {
 		this.mouseDownScreenPosition = undefined;
 
 		// 커서 업데이트 (마우스를 움직이지 않아도 배치 후 커서가 갱신되도록)
-		this.blueprint.updateCursor({ x: e.clientX, y: e.clientY });
+		this.blueprint.updateCursor(vectorUtils.createScreenVector(e.clientX, e.clientY));
 	};
 
 	// Matter.js mouseup 처리
@@ -222,7 +225,7 @@ export class WorldContext {
 		// 카메라 팬 중에는 cursor 업데이트 안 함
 		if (this.camera.panning) return;
 
-		this.blueprint.updateCursor({ x: e.clientX, y: e.clientY });
+		this.blueprint.updateCursor(vectorUtils.createScreenVector(e.clientX, e.clientY));
 	};
 
 	// 월드 로드, cleanup 함수 반환

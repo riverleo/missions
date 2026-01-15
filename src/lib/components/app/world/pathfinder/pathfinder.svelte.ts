@@ -2,7 +2,7 @@ import { CELL_SIZE } from '$lib/constants';
 import PF from 'pathfinding';
 import type { Vector, Cell, CellKey, PathfinderCell } from '$lib/types';
 import type { WorldContext } from '../context';
-import { vectorXToCol, vectorYToRow, colToVectorX, rowToVectorY } from '$lib/utils/vector';
+import { vectorUtils } from '$lib/utils/vector';
 import { initializeWalkable, setTileToUnwalkable } from './walkable';
 
 export class Pathfinder {
@@ -32,10 +32,9 @@ export class Pathfinder {
 	private initializeCells() {
 		for (let row = 0; row < this.rows; row++) {
 			for (let col = 0; col < this.cols; col++) {
-				const cellKey = `${col},${row}` as CellKey;
+				const cellKey = vectorUtils.createCellKey(col, row);
 				this.cells[cellKey] = {
-					col,
-					row,
+					...vectorUtils.createCell(col, row),
 					walkable: false,
 					jumpable: false,
 				};
@@ -47,25 +46,27 @@ export class Pathfinder {
 	 * 그리드 좌표로 셀 정보 가져오기
 	 */
 	getCell(cell: Cell): PathfinderCell | undefined {
-		return this.cells[`${cell.col},${cell.row}` as CellKey];
+		return this.cells[vectorUtils.createCellKey(cell.col, cell.row)];
 	}
 
 	/**
 	 * 월드 픽셀 좌표로 경로 탐색 (결과도 월드 픽셀 좌표)
 	 */
 	findPath(from: Vector, to: Vector): Vector[] {
-		const startCol = vectorXToCol(from.x);
-		const startRow = vectorYToRow(from.y);
-		const endCol = vectorXToCol(to.x);
-		const endRow = vectorYToRow(to.y);
+		const startCol = vectorUtils.pixelToCellIndex(from.x);
+		const startRow = vectorUtils.pixelToCellIndex(from.y);
+		const endCol = vectorUtils.pixelToCellIndex(to.x);
+		const endRow = vectorUtils.pixelToCellIndex(to.y);
 
 		const path = this.finder.findPath(startCol, startRow, endCol, endRow, this.grid.clone());
 
 		// 그리드 좌표를 월드 픽셀 좌표(타일 중심)로 변환
-		return path.map((point) => ({
-			x: colToVectorX(point[0] as number),
-			y: rowToVectorY(point[1] as number),
-		}));
+		return path.map((point) =>
+			vectorUtils.createVector(
+				vectorUtils.cellIndexToPixel(point[0] as number),
+				vectorUtils.cellIndexToPixel(point[1] as number)
+			)
+		);
 	}
 
 	/**
