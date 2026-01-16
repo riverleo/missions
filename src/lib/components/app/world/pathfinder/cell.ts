@@ -1,46 +1,24 @@
 import { BOUNDARY_THICKNESS, TILE_CELL_RATIO } from '$lib/constants';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 import type { Pathfinder } from './pathfinder';
+import type { Cell } from '$lib/types';
 import { vectorUtils } from '$lib/utils/vector';
 
 /**
  * 범위 체크 후 안전하게 setWalkableAt 호출
  */
-function safeSetWalkableAt(pathfinder: Pathfinder, col: number, row: number, walkable: boolean) {
-	if (col >= 0 && col < pathfinder.cols && row >= 0 && row < pathfinder.rows) {
-		pathfinder.grid.setWalkableAt(col, row, walkable);
-	}
-}
-
-/**
- * 그리드 초기화 및 바닥(boundary bottom) 위로 2번째 노드를 walkable로 설정
- */
-function initializeWalkable(pathfinder: Pathfinder) {
-	// 모든 셀을 unwalkable로 초기화
-	for (let y = 0; y < pathfinder.rows; y++) {
-		for (let x = 0; x < pathfinder.cols; x++) {
-			safeSetWalkableAt(pathfinder, x, y, false);
+function safeSetWalkableAt(pathfinder: Pathfinder, walkable: boolean, ...cells: Cell[]) {
+	for (const cell of cells) {
+		if (cell.col >= 0 && cell.col < pathfinder.cols && cell.row >= 0 && cell.row < pathfinder.rows) {
+			pathfinder.grid.setWalkableAt(cell.col, cell.row, walkable);
 		}
-	}
-
-	if (!pathfinder.worldContext.boundaries) {
-		throw new Error('Cannot initialize walkable: boundaries not found');
-	}
-
-	// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
-	const bottomTopY = pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
-	const bottomTopRow = vectorUtils.pixelToCellIndex(bottomTopY);
-
-	// 바닥 위로 2번째 셀
-	for (let x = 0; x < pathfinder.cols; x++) {
-		safeSetWalkableAt(pathfinder, x, bottomTopRow - 2, true);
 	}
 }
 
 /**
  * 모든 타일 기반으로 walkable 영역 설정
  */
-function setWalkable(pathfinder: Pathfinder) {
+function setWalkableAt(pathfinder: Pathfinder) {
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
 		(entity): entity is WorldTileEntity => entity.type === 'tile'
 	);
@@ -56,12 +34,15 @@ function setWalkable(pathfinder: Pathfinder) {
 		const hasLeftTile = tilePositions.has(`${tile.tileX - 1},${tile.tileY}`);
 		const hasRightTile = tilePositions.has(`${tile.tileX + 1},${tile.tileY}`);
 		const hasTopTile = tilePositions.has(`${tile.tileX},${tile.tileY - 1}`);
-		const hasBottomTile = tilePositions.has(`${tile.tileX},${tile.tileY + 1}`);
 
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
-				safeSetWalkableAt(pathfinder, cellX + dx, cellY - 2, true);
+				safeSetWalkableAt(
+					pathfinder,
+					true,
+					vectorUtils.createCell(cellX + dx, cellY - 2)
+				);
 			}
 
 			// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -74,16 +55,24 @@ function setWalkable(pathfinder: Pathfinder) {
 					// 왼쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY - 2, true);
+							safeSetWalkableAt(
+								pathfinder,
+								true,
+								vectorUtils.createCell(cellX + dx - offset, cellY - 2)
+							);
 						}
 
 						if (offset === 3) {
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY - 1, true);
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY, true);
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 1, true);
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 2, true);
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 3, true);
-							safeSetWalkableAt(pathfinder, cellX + dx - offset, cellY + 4, true);
+							safeSetWalkableAt(
+								pathfinder,
+								true,
+								vectorUtils.createCell(cellX + dx - offset, cellY - 1),
+								vectorUtils.createCell(cellX + dx - offset, cellY),
+								vectorUtils.createCell(cellX + dx - offset, cellY + 1),
+								vectorUtils.createCell(cellX + dx - offset, cellY + 2),
+								vectorUtils.createCell(cellX + dx - offset, cellY + 3),
+								vectorUtils.createCell(cellX + dx - offset, cellY + 4)
+							);
 						}
 					}
 				}
@@ -91,16 +80,24 @@ function setWalkable(pathfinder: Pathfinder) {
 					// 오른쪽으로 4칸
 					for (let offset = 1; offset <= 3; offset++) {
 						if (!hasTopTile) {
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY - 2, true);
+							safeSetWalkableAt(
+								pathfinder,
+								true,
+								vectorUtils.createCell(cellX + dx + offset, cellY - 2)
+							);
 						}
 
 						if (offset === 3) {
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY - 1, true);
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY, true);
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 1, true);
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 2, true);
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 3, true);
-							safeSetWalkableAt(pathfinder, cellX + dx + offset, cellY + 4, true);
+							safeSetWalkableAt(
+								pathfinder,
+								true,
+								vectorUtils.createCell(cellX + dx + offset, cellY - 1),
+								vectorUtils.createCell(cellX + dx + offset, cellY),
+								vectorUtils.createCell(cellX + dx + offset, cellY + 1),
+								vectorUtils.createCell(cellX + dx + offset, cellY + 2),
+								vectorUtils.createCell(cellX + dx + offset, cellY + 3),
+								vectorUtils.createCell(cellX + dx + offset, cellY + 4)
+							);
 						}
 					}
 				}
@@ -112,7 +109,7 @@ function setWalkable(pathfinder: Pathfinder) {
 /**
  * 모든 타일이 차지하는 영역을 unwalkable로 덮어씌우기
  */
-function setTileToUnwalkable(pathfinder: Pathfinder) {
+function setUnwalkableAt(pathfinder: Pathfinder) {
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
 		(entity): entity is WorldTileEntity => entity.type === 'tile'
 	);
@@ -121,11 +118,13 @@ function setTileToUnwalkable(pathfinder: Pathfinder) {
 		const cellX = tile.tileX * TILE_CELL_RATIO;
 		const cellY = tile.tileY * TILE_CELL_RATIO;
 
+		const cells: Cell[] = [];
 		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
 			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				safeSetWalkableAt(pathfinder, cellX + dx, cellY + dy, false);
+				cells.push(vectorUtils.createCell(cellX + dx, cellY + dy));
 			}
 		}
+		safeSetWalkableAt(pathfinder, false, ...cells);
 	}
 }
 
@@ -134,7 +133,9 @@ function setTileToUnwalkable(pathfinder: Pathfinder) {
  * - 아래에 타일이 없을 때 (!hasBottomTile), 타일 옆 3칸 떨어진 cellY + 4 위치를 jumpable로 설정
  * - 타일이 세로로 쌓여있으면 마지막(맨 아래) 타일만 jumpable 영역 생성
  */
-function setJumpable(pathfinder: Pathfinder) {
+function setJumpableAt(pathfinder: Pathfinder) {
+	pathfinder.jumpableCells.clear();
+
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
 		(entity): entity is WorldTileEntity => entity.type === 'tile'
 	);
@@ -185,17 +186,39 @@ export const cell = {
 	/**
 	 * 그리드를 초기화하고 기본 walkable 셀 설정
 	 */
-	reset(pathfinder: Pathfinder) {
-		initializeWalkable(pathfinder);
+	reset: (pathfinder: Pathfinder) => {
+		// 모든 셀을 unwalkable로 초기화
+		const cells: Cell[] = [];
+		for (let y = 0; y < pathfinder.rows; y++) {
+			for (let x = 0; x < pathfinder.cols; x++) {
+				cells.push(vectorUtils.createCell(x, y));
+			}
+		}
+		safeSetWalkableAt(pathfinder, false, ...cells);
+
+		if (!pathfinder.worldContext.boundaries) {
+			throw new Error('Cannot initialize walkable: boundaries not found');
+		}
+
+		// 바닥의 상단 y 좌표 (중심 - 높이의 절반)
+		const bottomTopY =
+			pathfinder.worldContext.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+		const bottomTopRow = vectorUtils.pixelToCellIndex(bottomTopY);
+
+		// 바닥 위로 2번째 셀
+		const bottomCells: Cell[] = [];
+		for (let x = 0; x < pathfinder.cols; x++) {
+			bottomCells.push(vectorUtils.createCell(x, bottomTopRow - 2));
+		}
+		safeSetWalkableAt(pathfinder, true, ...bottomCells);
 	},
 
 	/**
 	 * 타일 엔티티들을 기반으로 walkable/unwalkable/jumpable 영역 업데이트
 	 */
 	update(pathfinder: Pathfinder) {
-		setWalkable(pathfinder);
-		setTileToUnwalkable(pathfinder);
-		pathfinder.jumpableCells.clear();
-		setJumpable(pathfinder);
+		setWalkableAt(pathfinder);
+		setJumpableAt(pathfinder);
+		setUnwalkableAt(pathfinder);
 	},
 };
