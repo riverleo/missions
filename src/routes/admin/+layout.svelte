@@ -12,11 +12,16 @@
 	import ScenarioDeleteDialog from '$lib/components/admin/sidebar/scenario-delete-dialog.svelte';
 	import ScenarioPublishDialog from '$lib/components/admin/sidebar/scenario-publish-dialog.svelte';
 	import { SidebarProvider, SidebarInset } from '$lib/components/ui/sidebar';
+	import { useCurrent } from '$lib/hooks/use-current';
+	import { TEST_PLAYER_ID } from '$lib/constants';
 
 	const { children }: { children: Snippet } = $props();
+	const { selectPlayer } = useCurrent();
 
 	onMount(() => {
 		setMode('dark');
+		// 테스트 플레이어 자동 선택 (테스트 월드 사용을 위해)
+		selectPlayer(TEST_PLAYER_ID);
 	});
 
 	onDestroy(() => {

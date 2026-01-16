@@ -22,7 +22,7 @@ import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
-import { Pathfinder } from '../pathfinder/pathfinder';
+import { Pathfinder } from '../pathfinder';
 import { createBoundaries, type Boundaries } from './create-boundaries';
 import { createWorldCharacter, deleteWorldCharacter } from './world-character';
 import { createWorldBuilding, deleteWorldBuilding } from './world-building';
