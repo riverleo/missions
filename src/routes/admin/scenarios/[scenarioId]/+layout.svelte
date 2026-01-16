@@ -6,10 +6,7 @@
 
 	let { children } = $props();
 
-	const { store, init, fetchAll } = useScenario();
-
-	// 모든 훅의 싱글톤을 동기적으로 생성
-	init();
+	const { store, fetchAll } = useScenario();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const isValidScenario = $derived(scenarioId ? !!$store.data?.[scenarioId] : false);

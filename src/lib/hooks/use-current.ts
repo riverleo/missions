@@ -1,4 +1,5 @@
 import { writable, get, derived, type Readable } from 'svelte/store';
+import { browser } from '$app/environment';
 import type { Player, UserRole, PlayerScenario, PlayerId } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
 import { useServerPayload } from './use-server-payload.svelte';
@@ -15,50 +16,56 @@ function createCurrentStore() {
 	const { store: playerStore, playerScenarioStore } = usePlayer();
 
 	// 선택된 플레이어 ID
-	const selectedPlayerIdStore = writable<PlayerId | undefined>(undefined);
+	const playerIdStore = writable<PlayerId | undefined>(undefined);
 
 	// playerStore가 성공 상태가 되면 자동으로 첫 번째 플레이어 선택
 	playerStore.subscribe(($store) => {
 		if ($store.status === 'success') {
 			const players = Object.values($store.data);
-			if (players.length > 0 && get(selectedPlayerIdStore) === undefined) {
-				selectedPlayerIdStore.set(players[0]!.id);
+			if (players.length > 0 && get(playerIdStore) === undefined) {
+				playerIdStore.set(players[0]!.id);
 			}
 		}
 	});
 
 	// 선택된 플레이어
-	const player = derived(
-		[playerStore, selectedPlayerIdStore],
-		([$playerStore, $selectedPlayerId]) => {
-			if (!$selectedPlayerId) return undefined;
-			return $playerStore.data[$selectedPlayerId];
+	const player = derived([playerStore, playerIdStore], ([$playerStore, $selectedPlayerId]) => {
+		if (!$selectedPlayerId) return undefined;
+		return $playerStore.data[$selectedPlayerId];
+	});
+
+	// 현재 활성화된 PlayerScenario (현재 player의 status가 'in_progress'인 것)
+	const playerScenario = derived(
+		[player, playerScenarioStore],
+		([$player, $playerScenarioStore]) => {
+			if (!$player) return undefined;
+			const playerScenarios = Object.values($playerScenarioStore.data);
+			return playerScenarios.find(
+				(ps) => ps.player_id === $player.id && ps.status === 'in_progress'
+			);
 		}
 	);
-
-	// 현재 활성화된 PlayerScenario (status가 'in_progress'인 것)
-	const playerScenario = derived(playerScenarioStore, ($store) => {
-		const playerScenarios = Object.values($store.data);
-		return playerScenarios.find((ps) => ps.status === 'in_progress');
-	});
 
 	// 틱 스토어 (playerScenario의 current_tick으로 초기화)
 	const tickStore = writable<number>(0);
 
 	// playerScenario가 변경되면 tickStore 초기화
-	playerScenario.subscribe((scenario) => {
-		if (scenario) {
-			tickStore.set(scenario.current_tick);
+	playerScenario.subscribe(($playerScenario) => {
+		if ($playerScenario) {
+			tickStore.set($playerScenario.current_tick);
+			startTick();
 		}
 	});
 
 	let initialized = false;
 
-	async function fetchUser() {
+	function init() {
 		if (initialized) return;
-
 		initialized = true;
+		fetchUser();
+	}
 
+	async function fetchUser() {
 		try {
 			let user: User | null = null;
 
@@ -129,11 +136,8 @@ function createCurrentStore() {
 	 * 플레이어 선택
 	 */
 	function selectPlayer(playerId: PlayerId) {
-		selectedPlayerIdStore.set(playerId);
+		playerIdStore.set(playerId);
 	}
-
-	// 초기 fetch 실행
-	fetchUser();
 
 	return {
 		user: userStore as Readable<User | undefined>,
@@ -141,7 +145,7 @@ function createCurrentStore() {
 		player: player as Readable<Player | undefined>,
 		playerScenario: playerScenario as Readable<PlayerScenario | undefined>,
 		tick: tickStore as Readable<number>,
-		startTick,
+		init,
 		stopTick,
 		selectPlayer,
 	};

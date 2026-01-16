@@ -1,26 +1,24 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldId, PlayerId, ScenarioId, TerrainId } from '$lib/types';
+import type { WorldId, PlayerId, ScenarioId, TerrainId, UserId } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
+import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
-import { loadFromStorage, saveToStorage, type WorldTestStoreState } from './use-world-test-storage';
+import { load, save, type WorldTestStoreState } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
-
-export const TEST_WORLD_ID = 'test-world-id' as WorldId;
-export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
-export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
+import { TEST_WORLD_ID } from '$lib/constants';
 
 let instance: ReturnType<typeof createTestWorldStore> | undefined;
 
 function createTestWorldStore() {
-	const stored = loadFromStorage();
+	const stored = load();
 
 	const store = writable<WorldTestStoreState>(stored);
 
 	// 5초마다 localStorage에 저장
 	if (browser) {
-		setInterval(() => saveToStorage(get(store)), 5000);
+		setInterval(() => save(get(store)), 5000);
 	}
 
 	function setSelectedTerrainId(terrainId: TerrainId) {
@@ -75,6 +73,7 @@ function createTestWorldStore() {
 	function init() {
 		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
+		const player = usePlayer();
 
 		if (stored.worlds) {
 			world.worldStore.update((state) =>
@@ -120,6 +119,22 @@ function createTestWorldStore() {
 				})
 			);
 		}
+
+		// Player 로드
+		player.store.update((state) =>
+			produce(state, (draft) => {
+				draft.data[stored.player.id] = stored.player;
+				draft.status = 'success';
+			})
+		);
+
+		// PlayerScenario 로드
+		player.playerScenarioStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[stored.playerScenario.id] = stored.playerScenario;
+				draft.status = 'success';
+			})
+		);
 	}
 
 	return {

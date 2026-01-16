@@ -129,8 +129,8 @@ function createPlayerStore() {
 	}
 
 	return {
-		store: store as Readable<PlayerStoreState>,
-		playerScenarioStore: playerScenarioStore as Readable<PlayerScenarioStoreState>,
+		store,
+		playerScenarioStore,
 		init,
 		fetch,
 		updatePlayerScenarioTick,

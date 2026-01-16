@@ -1,6 +1,6 @@
 import type { UserId, World, WorldId, WorldInsert } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
-import { TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
+import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';
 
 export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 'scenario_id'>) {
@@ -8,7 +8,7 @@ export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 
 
 	const world: World = {
 		id: crypto.randomUUID() as WorldId,
-		user_id: crypto.randomUUID() as UserId,
+		user_id: TEST_USER_ID,
 		player_id: TEST_PLAYER_ID,
 		scenario_id: TEST_SCENARIO_ID,
 		...insert,

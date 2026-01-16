@@ -6,11 +6,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useCurrent } from '$lib/hooks/use-current';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
-import {
-	TEST_WORLD_ID,
-	TEST_PLAYER_ID,
-	TEST_SCENARIO_ID,
-} from '$lib/hooks/use-world/use-world-test';
+import { TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID, TEST_USER_ID } from '$lib/constants';
 
 export async function createWorldBuilding(
 	worldContext: WorldContext,
@@ -29,7 +25,7 @@ export async function createWorldBuilding(
 	if (isTestWorld) {
 		player_id = TEST_PLAYER_ID;
 		scenario_id = TEST_SCENARIO_ID;
-		user_id = crypto.randomUUID() as UserId;
+		user_id = TEST_USER_ID;
 	} else {
 		const player = get(useCurrent().player);
 		const world = get(useWorld().worldStore).data[worldContext.worldId];

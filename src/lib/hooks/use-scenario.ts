@@ -84,25 +84,6 @@ function createScenarioStore() {
 		}
 	}
 
-	function init() {
-		// 모든 훅의 싱글톤 생성 및 초기화
-		usePlayer().init();
-		useQuest().init();
-		useChapter().init();
-		useTerrain().init();
-		useCharacter().init();
-		useCharacterBody().init();
-		useBuilding().init();
-		useNeed().init();
-		useNeedBehavior().init();
-		useConditionBehavior().init();
-		useCondition().init();
-		useItem().init();
-		useItemBehavior().init();
-		useBehaviorPriority().init();
-		useWorld().init();
-	}
-
 	async function fetchAll(scenarioId: ScenarioId) {
 		fetchAllStatus.set('loading');
 
@@ -224,7 +205,6 @@ function createScenarioStore() {
 		dialogStore: dialogStore as Readable<ScenarioDialogState>,
 		fetchAllStatus: fetchAllStatus as Readable<FetchStatus>,
 		fetch,
-		init,
 		fetchAll,
 		openDialog,
 		closeDialog,

@@ -1,7 +1,6 @@
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
 import type { VectorKey } from '$lib/types';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
