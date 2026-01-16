@@ -166,10 +166,44 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 현재 배치가 유효한지 (겹치는 셀이 없는지)
+	 * 건물 배치 셀들이 모두 walkable인지 확인 (타일/바닥 바로 위)
+	 */
+	isOnWalkable(): boolean {
+		if (!this.cursor || !this.context) return false;
+
+		const { entityTemplateId, current } = this.cursor;
+		const { x, y } = current;
+
+		// 타일은 walkable 체크 불필요
+		if (!EntityIdUtils.template.is('building', entityTemplateId)) {
+			return true;
+		}
+
+		// 건물 배치 셀 계산
+		const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
+		const buildingStore = get(useBuilding().store).data;
+		const building = buildingStore[buildingId];
+		if (!building) return false;
+
+		const cell = vectorUtils.vectorToCell({ x, y } as Vector);
+		const targetCells = vectorUtils.createCells(
+			cell.col,
+			cell.row,
+			building.cell_cols,
+			building.cell_rows
+		);
+
+		// 모든 셀이 walkable인지 확인
+		return targetCells.every((c) =>
+			this.context.pathfinder.grid.isWalkableAt(c.col, c.row)
+		);
+	}
+
+	/**
+	 * 현재 배치가 유효한지 (겹치는 셀이 없고 walkable 위)
 	 */
 	get placable(): boolean {
-		return this.getOverlappingCells().length === 0;
+		return this.getOverlappingCells().length === 0 && this.isOnWalkable();
 	}
 
 	/**
