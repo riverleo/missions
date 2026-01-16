@@ -46,8 +46,18 @@
 
 	let element: HTMLDivElement;
 
-	// worldId 필터링된 entities
+	// worldId 필터링된 entities - 타입별로 분리
 	const entities = $derived(Object.values(world.entities));
+	const tileEntities = $derived(
+		entities.filter((e): e is WorldTileEntity => e.type === 'tile')
+	);
+	const buildingEntities = $derived(
+		entities.filter((e): e is WorldBuildingEntity => e.type === 'building')
+	);
+	const itemEntities = $derived(entities.filter((e): e is WorldItemEntity => e.type === 'item'));
+	const characterEntities = $derived(
+		entities.filter((e): e is WorldCharacterEntity => e.type === 'character')
+	);
 
 	// 카메라 줌 핸들러
 	function onwheel(e: WheelEvent) {
@@ -86,16 +96,25 @@
 		{/if}
 		<WorldPathfinderDebug />
 		<WorldBlueprint />
-		{#each entities as entity (entity.id)}
-			{#if entity.type === 'tile'}
-				<WorldTileEntityRenderer entity={entity as WorldTileEntity} />
-			{:else if entity.type === 'building'}
-				<WorldBuildingEntityRenderer entity={entity as WorldBuildingEntity} />
-			{:else if entity.type === 'character'}
-				<WorldCharacterEntityRenderer entity={entity as WorldCharacterEntity} />
-			{:else if entity.type === 'item'}
-				<WorldItemEntityRenderer entity={entity as WorldItemEntity} />
-			{/if}
+
+		<!-- 타일 레이어 -->
+		{#each tileEntities as entity (entity.id)}
+			<WorldTileEntityRenderer {entity} />
+		{/each}
+
+		<!-- 건물 레이어 -->
+		{#each buildingEntities as entity (entity.id)}
+			<WorldBuildingEntityRenderer {entity} />
+		{/each}
+
+		<!-- 아이템 레이어 -->
+		{#each itemEntities as entity (entity.id)}
+			<WorldItemEntityRenderer {entity} />
+		{/each}
+
+		<!-- 캐릭터 레이어 (최상단) -->
+		{#each characterEntities as entity (entity.id)}
+			<WorldCharacterEntityRenderer {entity} />
 		{/each}
 	</div>
 
