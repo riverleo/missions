@@ -164,11 +164,30 @@ export class WorldContextBlueprint {
 			}
 		}
 
-		// 건물인 경우 walkable이 아닌 셀들도 invalid로 추가
+		// 건물인 경우 바닥이 타일/바닥과 맞닿아있는지 확인
 		if (isBuilding) {
-			for (const cell of targetCells) {
-				if (!this.context.pathfinder.grid.isWalkableAt(cell.col, cell.row)) {
-					invalidCells.push(cell);
+			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
+			const buildingStore = get(useBuilding().store).data;
+			const building = buildingStore[buildingId];
+			if (building) {
+				// 건물의 가장 아래 행
+				const bottomRow = targetCells[0]!.row + building.cell_rows - 1;
+
+				// 가장 아래 행의 모든 셀에 대해 바로 아래가 unwalkable(타일/바닥)인지 확인
+				let hasSupport = false;
+				for (const cell of targetCells) {
+					if (cell.row === bottomRow) {
+						const belowIsUnwalkable = !this.context.pathfinder.grid.isWalkableAt(cell.col, cell.row + 1);
+						if (belowIsUnwalkable) {
+							hasSupport = true;
+							break;
+						}
+					}
+				}
+
+				// 지지대가 없으면 모든 셀을 invalid로 추가
+				if (!hasSupport) {
+					invalidCells.push(...targetCells);
 				}
 			}
 		}
