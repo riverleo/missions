@@ -63,16 +63,13 @@ function setWalkableAt(pathfinder: Pathfinder) {
 						}
 
 						if (offset === 3) {
-							safeSetWalkableAt(
-								pathfinder,
-								true,
-								vectorUtils.createCell(cellX + dx - offset, cellY - 1),
-								vectorUtils.createCell(cellX + dx - offset, cellY),
-								vectorUtils.createCell(cellX + dx - offset, cellY + 1),
-								vectorUtils.createCell(cellX + dx - offset, cellY + 2),
-								vectorUtils.createCell(cellX + dx - offset, cellY + 3),
-								vectorUtils.createCell(cellX + dx - offset, cellY + 4)
+							const verticalCells = vectorUtils.createCells(
+								cellX + dx - offset,
+								cellY - 1,
+								1,
+								6
 							);
+							safeSetWalkableAt(pathfinder, true, ...verticalCells);
 						}
 					}
 				}
@@ -88,16 +85,13 @@ function setWalkableAt(pathfinder: Pathfinder) {
 						}
 
 						if (offset === 3) {
-							safeSetWalkableAt(
-								pathfinder,
-								true,
-								vectorUtils.createCell(cellX + dx + offset, cellY - 1),
-								vectorUtils.createCell(cellX + dx + offset, cellY),
-								vectorUtils.createCell(cellX + dx + offset, cellY + 1),
-								vectorUtils.createCell(cellX + dx + offset, cellY + 2),
-								vectorUtils.createCell(cellX + dx + offset, cellY + 3),
-								vectorUtils.createCell(cellX + dx + offset, cellY + 4)
+							const verticalCells = vectorUtils.createCells(
+								cellX + dx + offset,
+								cellY - 1,
+								1,
+								6
 							);
+							safeSetWalkableAt(pathfinder, true, ...verticalCells);
 						}
 					}
 				}
@@ -118,12 +112,7 @@ function setUnwalkableAt(pathfinder: Pathfinder) {
 		const cellX = tile.tileX * TILE_CELL_RATIO;
 		const cellY = tile.tileY * TILE_CELL_RATIO;
 
-		const cells: Cell[] = [];
-		for (let dy = 0; dy < TILE_CELL_RATIO; dy++) {
-			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				cells.push(vectorUtils.createCell(cellX + dx, cellY + dy));
-			}
-		}
+		const cells = vectorUtils.createCells(cellX, cellY, TILE_CELL_RATIO, TILE_CELL_RATIO);
 		safeSetWalkableAt(pathfinder, false, ...cells);
 	}
 }
@@ -188,12 +177,7 @@ export const cell = {
 	 */
 	reset: (pathfinder: Pathfinder) => {
 		// 모든 셀을 unwalkable로 초기화
-		const cells: Cell[] = [];
-		for (let y = 0; y < pathfinder.rows; y++) {
-			for (let x = 0; x < pathfinder.cols; x++) {
-				cells.push(vectorUtils.createCell(x, y));
-			}
-		}
+		const cells = vectorUtils.createCells(0, 0, pathfinder.cols, pathfinder.rows);
 		safeSetWalkableAt(pathfinder, false, ...cells);
 
 		if (!pathfinder.worldContext.boundaries) {
