@@ -196,17 +196,33 @@ export class WorldContext {
 					Composite.allBodies(this.engine.world)
 				);
 
-				// static 바디(타일, 벽, 건물)와 충돌하면 이전 위치로 복원
+				// static 바디(타일, 벽, 건물)와 충돌하면 가장 가까운 walkable 셀로 이동
 				const hasStaticCollision = collisions.some((collision) => {
 					const otherBody = collision.bodyA === entity.body ? collision.bodyB : collision.bodyA;
 					return otherBody.isStatic;
 				});
 
 				if (hasStaticCollision) {
-					Body.setPosition(entity.body, {
-						x: this.draggedEntityPosition.x,
-						y: this.draggedEntityPosition.y,
-					});
+					const nearestWalkable = this.pathfinder.findNearestWalkableCell(
+						vectorUtils.createVector(entity.body.position.x, entity.body.position.y)
+					);
+
+					if (nearestWalkable) {
+						Body.setPosition(entity.body, {
+							x: nearestWalkable.x,
+							y: nearestWalkable.y,
+						});
+					} else {
+						// walkable 셀을 찾지 못하면 이전 위치로 복원
+						Body.setPosition(entity.body, {
+							x: this.draggedEntityPosition.x,
+							y: this.draggedEntityPosition.y,
+						});
+					}
+
+					// velocity와 force 초기화
+					Body.setVelocity(entity.body, { x: 0, y: 0 });
+					entity.body.force = { x: 0, y: 0 };
 				}
 			}
 			this.draggedEntityPosition = undefined;
@@ -410,7 +426,7 @@ export class WorldContext {
 		const entity = this.entities[entityId];
 		if (!entity) return;
 
-		// 1초 후 리스폰 위치로 다시 추가
+		// 리스폰 위치로 다시 추가
 		setTimeout(() => {
 			const x = this.terrain?.respawn_x ?? 0;
 			const y = this.terrain?.respawn_y ?? 0;
@@ -434,7 +450,7 @@ export class WorldContext {
 			entity.addToWorld();
 
 			this.respawningEntityIds.delete(entityId);
-		}, 1000);
+		}, 100);
 	}
 
 	// 엔티티 생성/삭제 메서드들

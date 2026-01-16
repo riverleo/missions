@@ -21,18 +21,11 @@ export async function createWorldBuilding(
 	const { worldBuildingStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	let player_id, scenario_id, user_id;
-	if (isTestWorld) {
-		player_id = TEST_PLAYER_ID;
-		scenario_id = TEST_SCENARIO_ID;
-		user_id = TEST_USER_ID;
-	} else {
-		const player = get(useCurrent().player);
-		const world = get(useWorld().worldStore).data[worldContext.worldId];
-		player_id = player!.id;
-		scenario_id = world!.scenario_id;
-		user_id = player!.user_id;
-	}
+	const player = get(useCurrent().player);
+	const playerScenario = get(useCurrent().playerScenario);
+	const player_id = player!.id;
+	const scenario_id = playerScenario!.scenario_id;
+	const user_id = player!.user_id;
 
 	let worldBuilding: WorldBuilding;
 
