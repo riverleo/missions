@@ -3,7 +3,7 @@ import PF from 'pathfinding';
 import type { Vector, CellKey } from '$lib/types';
 import type { WorldContext } from '../context';
 import { vectorUtils } from '$lib/utils/vector';
-import { initializeWalkable, setWalkable, setTileToUnwalkable, setJumpable } from './walkable';
+import { cell } from './cell';
 
 export class Pathfinder {
 	readonly grid: PF.Grid;
@@ -54,13 +54,7 @@ export class Pathfinder {
 	 * worldContext의 타일들을 기반으로 전체 walkable 영역 업데이트
 	 */
 	update() {
-		// 1. grid 기반 walkable 설정
-		initializeWalkable(this);
-		setWalkable(this);
-		setTileToUnwalkable(this);
-
-		// 2. jumpable 영역 설정
-		this.jumpableCells.clear();
-		setJumpable(this);
+		cell.reset(this);
+		cell.update(this);
 	}
 }
