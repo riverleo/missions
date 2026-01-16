@@ -8,7 +8,7 @@ import type {
 	PlayerScenario,
 	PlayerScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type PlayerStoreState = RecordFetchState<PlayerId, Player>;
 type PlayerScenarioStoreState = RecordFetchState<PlayerScenarioId, PlayerScenario>;
@@ -17,7 +17,7 @@ let instance: ReturnType<typeof createPlayerStore> | null = null;
 let initialized = false;
 
 function createPlayerStore() {
-	const { supabase, user } = useServerPayload();
+	const { supabase, user } = useApp();
 
 	const store = writable<PlayerStoreState>({ status: 'idle', data: {} });
 	const playerScenarioStore = writable<PlayerScenarioStoreState>({ status: 'idle', data: {} });

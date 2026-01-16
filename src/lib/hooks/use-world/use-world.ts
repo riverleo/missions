@@ -13,14 +13,14 @@ import type {
 	WorldItemId,
 	EntityId,
 } from '$lib/types';
-import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
 
 // World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;
 
 function createWorldStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	let initialized = false;
 
 	const worldStore = writable<RecordFetchState<WorldId, World>>({

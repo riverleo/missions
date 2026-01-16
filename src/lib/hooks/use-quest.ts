@@ -12,7 +12,7 @@ import type {
 	QuestBranchId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type QuestDialogState =
 	| { type: 'create' }
@@ -23,7 +23,7 @@ let instance: ReturnType<typeof createQuestStore> | null = null;
 let initialized = false;
 
 function createQuestStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const questStore = writable<RecordFetchState<QuestId, Quest>>({
 		status: 'idle',

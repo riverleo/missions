@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import TerrainActionPanel from '$lib/components/admin/terrain/terrain-action-panel.svelte';
 	import TerrainPreview from '$lib/components/admin/terrain/terrain-preview.svelte';
 	import type { TerrainId } from '$lib/types';
 
 	const { store, admin } = useTerrain();
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const terrainId = $derived(page.params.terrainId as TerrainId);
 	const terrain = $derived(terrainId ? $store.data[terrainId] : undefined);
 	const terrainAssetUrl = $derived(

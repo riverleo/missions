@@ -13,7 +13,7 @@ import type {
 	CharacterFaceStateId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type CharacterDialogState =
 	| { type: 'create' }
@@ -28,7 +28,7 @@ type CharacterFaceStateDialogState =
 let instance: ReturnType<typeof createCharacterStore> | null = null;
 
 function createCharacterStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const store = writable<RecordFetchState<CharacterId, Character>>({
 		status: 'idle',

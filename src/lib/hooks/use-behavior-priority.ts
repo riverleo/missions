@@ -8,7 +8,7 @@ import type {
 	BehaviorPriorityId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -19,7 +19,7 @@ type BehaviorPriorityDialogState =
 let instance: ReturnType<typeof createBehaviorPriorityStore> | null = null;
 
 function createBehaviorPriorityStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const store = writable<RecordFetchState<BehaviorPriorityId, BehaviorPriority>>({
 		status: 'idle',

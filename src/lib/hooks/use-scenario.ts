@@ -8,7 +8,7 @@ import type {
 	ScenarioUpdate,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 import { usePlayer } from './use-player';
 import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
@@ -37,7 +37,7 @@ type ScenarioDialogState =
 let instance: ReturnType<typeof createScenarioStore> | null = null;
 
 function createScenarioStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const store = writable<ScenarioStoreState>({ status: 'idle', data: {} });
 	const fetchAllStatus = writable<FetchStatus>('idle');

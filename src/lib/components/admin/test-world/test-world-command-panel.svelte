@@ -15,7 +15,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useWorldTest } from '$lib/hooks/use-world';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
 	import type { WorldContext } from '$lib/components/app/world/context';
@@ -26,7 +26,7 @@
 
 	let { worldContext }: Props = $props();
 
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const { store: terrainStore, tileStore } = useTerrain();
 	const { store: characterStore } = useCharacter();
 	const { store: buildingStore } = useBuilding();

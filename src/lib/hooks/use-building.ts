@@ -12,7 +12,7 @@ import type {
 	BuildingStateId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type BuildingDialogState =
 	| { type: 'create' }
@@ -25,7 +25,7 @@ type BuildingStateDialogState = { type: 'update'; buildingStateId: BuildingState
 let instance: ReturnType<typeof createBuildingStore> | null = null;
 
 function createBuildingStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const store = writable<RecordFetchState<BuildingId, Building>>({
 		status: 'idle',

@@ -17,13 +17,13 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { page } from '$app/state';
 	import { sort } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const { store, openDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentTerrainId = $derived(page.params.terrainId);

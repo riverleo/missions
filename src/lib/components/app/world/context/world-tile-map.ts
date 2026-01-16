@@ -13,7 +13,7 @@ import type {
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCurrent } from '$lib/hooks/use-current';
-import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+import { useApp } from '$lib/hooks/use-app.svelte';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
@@ -37,7 +37,7 @@ export async function createWorldTileMap(
 		} as WorldTileMap;
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
-		const { supabase } = useServerPayload();
+		const { supabase } = useApp();
 		const { data, error } = await supabase
 			.from('world_tile_maps')
 			.insert(insert)
@@ -67,7 +67,7 @@ export async function deleteWorldTileMap(worldId: WorldId) {
 
 	// 프로덕션 환경이면 서버에서 삭제
 	if (!isTestWorld) {
-		const { supabase } = useServerPayload();
+		const { supabase } = useApp();
 		const { error } = await supabase.from('world_tile_maps').delete().eq('world_id', worldId);
 
 		if (error) {

@@ -8,12 +8,12 @@ import type {
 	ChapterId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 let instance: ReturnType<typeof createChapterStore> | null = null;
 
 function createChapterStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const store = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
 
 	let initialized = false;

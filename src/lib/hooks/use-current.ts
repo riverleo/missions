@@ -2,13 +2,13 @@ import { writable, get, derived, type Readable } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { Player, UserRole, PlayerScenario, PlayerId } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 import { usePlayer } from './use-player';
 
 let instance: ReturnType<typeof createCurrentStore> | undefined = undefined;
 
 function createCurrentStore() {
-	const { supabase, user: serverUser } = useServerPayload();
+	const { supabase, user: serverUser } = useApp();
 
 	const userStore = writable<User | undefined>(undefined);
 	const roleStore = writable<UserRole | undefined>(undefined);

@@ -10,7 +10,7 @@ import type {
 	NarrativeDiceRollId,
 	NarrativeNodeChoiceId,
 } from '$lib/types';
-import { useServerPayload } from '../use-server-payload.svelte';
+import { useApp } from '../use-app.svelte';
 import { fetchNarratives, createNarrative, updateNarrative, removeNarrative } from './narrative';
 import {
 	fetchNarrativeNodes,
@@ -55,7 +55,7 @@ export type PlayStore = Writable<PlayStoreState>;
 let instance: ReturnType<typeof createNarrativeStore> | undefined = undefined;
 
 function createNarrativeStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const narrativeStore = writable<RecordFetchState<NarrativeId, Narrative>>({
 		status: 'idle',

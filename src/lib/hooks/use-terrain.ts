@@ -20,7 +20,7 @@ import type {
 	TerrainTileId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type TerrainDialogState = { type: 'create' } | { type: 'delete'; terrainId: TerrainId } | undefined;
 
@@ -35,7 +35,7 @@ type TileStateDialogState = { type: 'update'; tileStateId: TileStateId } | undef
 let instance: ReturnType<typeof createTerrainStore> | null = null;
 
 function createTerrainStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const store = writable<RecordFetchState<TerrainId, Terrain>>({
 		status: 'idle',

@@ -4,7 +4,7 @@ import type { WorldBuilding, WorldBuildingId, WorldBuildingInsert, UserId } from
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCurrent } from '$lib/hooks/use-current';
-import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+import { useApp } from '$lib/hooks/use-app.svelte';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID, TEST_USER_ID } from '$lib/constants';
 
@@ -50,7 +50,7 @@ export async function createWorldBuilding(
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
-		const { supabase } = useServerPayload();
+		const { supabase } = useApp();
 		const { data, error } = await supabase
 			.from('world_buildings')
 			.insert({
@@ -91,7 +91,7 @@ export async function deleteWorldBuilding(
 
 	// 프로덕션 환경이면 서버에서 삭제
 	if (!isTestWorld) {
-		const { supabase } = useServerPayload();
+		const { supabase } = useApp();
 		const { error } = await supabase.from('world_buildings').delete().eq('id', worldBuildingId);
 
 		if (error) {

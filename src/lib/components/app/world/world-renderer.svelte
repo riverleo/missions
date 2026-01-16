@@ -5,7 +5,7 @@
 	import { vectorUtils } from '$lib/utils/vector';
 	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import {
 		WorldCharacterEntityRenderer,
@@ -33,7 +33,7 @@
 	const { camera, event } = world;
 	const { worldStore } = useWorld();
 	const { store: terrainStore } = useTerrain();
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);

@@ -27,7 +27,7 @@ export interface BulkChanges<T> {
 
 export type Supabase = SupabaseClient<Database>;
 
-export interface ServerPayload {
+export interface AppPayload {
 	supabase: Supabase;
 	user?: User;
 }

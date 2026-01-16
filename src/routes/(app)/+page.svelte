@@ -2,9 +2,9 @@
 	import type { UserId } from '$lib/types';
 	import { useCurrent } from '$lib/hooks/use-current';
 	import { usePlayer } from '$lib/hooks/use-player';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const { user, role } = useCurrent();
 	const player = usePlayer();
 

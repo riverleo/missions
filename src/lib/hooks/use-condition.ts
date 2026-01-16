@@ -20,7 +20,7 @@ import type {
 	ConditionEffectId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type ConditionDialogState =
 	| { type: 'create' }
@@ -31,7 +31,7 @@ type ConditionDialogState =
 let instance: ReturnType<typeof createConditionStore> | null = null;
 
 function createConditionStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const conditionStore = writable<RecordFetchState<ConditionId, Condition>>({
 		status: 'idle',

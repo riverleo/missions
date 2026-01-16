@@ -18,7 +18,7 @@
 		IconMapPinOff,
 	} from '@tabler/icons-svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
+	import { useApp } from '$lib/hooks/use-app.svelte';
 	import { uploadGameAsset } from '$lib/utils/storage.svelte';
 
 	interface Props {
@@ -27,7 +27,7 @@
 
 	let { terrain }: Props = $props();
 
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 	const { admin } = useTerrain();
 	const uiStore = admin.uiStore;
 

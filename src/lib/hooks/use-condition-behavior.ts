@@ -12,7 +12,7 @@ import type {
 	ConditionBehaviorActionId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type ConditionBehaviorDialogState =
 	| { type: 'create' }
@@ -23,7 +23,7 @@ type ConditionBehaviorDialogState =
 let instance: ReturnType<typeof createConditionBehaviorStore> | null = null;
 
 function createConditionBehaviorStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const conditionBehaviorStore = writable<RecordFetchState<ConditionBehaviorId, ConditionBehavior>>(
 		{

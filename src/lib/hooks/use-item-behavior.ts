@@ -12,7 +12,7 @@ import type {
 	ItemBehaviorActionId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type ItemBehaviorDialogState =
 	| { type: 'create' }
@@ -23,7 +23,7 @@ type ItemBehaviorDialogState =
 let instance: ReturnType<typeof createItemBehaviorStore> | null = null;
 
 function createItemBehaviorStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const itemBehaviorStore = writable<RecordFetchState<ItemBehaviorId, ItemBehavior>>({
 		status: 'idle',

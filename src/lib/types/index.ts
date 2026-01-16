@@ -1,8 +1,3 @@
-import type { Database } from './supabase.raw';
-import type { SupabaseClient, User } from '@supabase/supabase-js';
-import type { Brand, FetchStatus, FetchState, RecordFetchState, BulkChanges } from './core';
-import type { Vector, VectorKey, Cell, CellKey, PathfinderCell } from './vector';
-
 // Re-export everything from supabase
 export type {
 	Database,
@@ -256,7 +251,7 @@ export type {
 	RecordFetchState,
 	BulkChanges,
 	Supabase,
-	ServerPayload,
+	AppPayload,
 } from './core';
 
 // Re-export specific Enums for convenience

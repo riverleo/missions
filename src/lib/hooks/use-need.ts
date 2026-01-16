@@ -16,7 +16,7 @@ import type {
 	CharacterNeedId,
 	ScenarioId,
 } from '$lib/types';
-import { useServerPayload } from './use-server-payload.svelte';
+import { useApp } from './use-app.svelte';
 
 type NeedDialogState =
 	| { type: 'create' }
@@ -27,7 +27,7 @@ type NeedDialogState =
 let instance: ReturnType<typeof createNeedStore> | null = null;
 
 function createNeedStore() {
-	const { supabase } = useServerPayload();
+	const { supabase } = useApp();
 
 	const needStore = writable<RecordFetchState<NeedId, Need>>({
 		status: 'idle',
