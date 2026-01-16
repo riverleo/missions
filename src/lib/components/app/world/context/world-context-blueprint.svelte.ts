@@ -173,45 +173,50 @@ export class WorldContextBlueprint {
 			if (building) {
 				// 건물의 가장 아래 행 (픽셀 좌표)
 				const cell = vectorUtils.vectorToCell({ x, y } as Vector);
-				const bottomPixelY = vectorUtils.cellIndexToPixel(cell.row + building.cell_rows);
+				// 건물 바닥의 하단 = (바닥 행 + 1)의 상단
+				const bottomPixelY = vectorUtils.cellIndexToPixel(cell.row + building.cell_rows) - CELL_SIZE / 2;
+				// 모든 바닥 셀에 대해 각각 지지대 확인
+				const bottomCols = [];
+				for (let col = cell.col; col < cell.col + building.cell_cols; col++) {
+					bottomCols.push(col);
+				}
 
-				let hasSupport = false;
+				const allSupported = bottomCols.every((col) => {
+					const cellCenterX = vectorUtils.cellIndexToPixel(col);
 
-				// 1. 타일과 맞닿아있는지 확인
-				const tileEntities = Object.values(this.context.entities).filter(
-					(entity): entity is WorldTileEntity => entity.type === 'tile'
-				);
-				for (const tileEntity of tileEntities) {
-					const tileTopY = vectorUtils.tileIndexToPixel(tileEntity.tileY) - TILE_SIZE / 2;
-					const tileLeftX = vectorUtils.tileIndexToPixel(tileEntity.tileX) - TILE_SIZE / 2;
-					const tileRightX = tileLeftX + TILE_SIZE;
+					// 1. 타일과 맞닿아있는지 확인
+					const tileEntities = Object.values(this.context.entities).filter(
+						(entity): entity is WorldTileEntity => entity.type === 'tile'
+					);
 
-					// 건물 바닥 행의 각 셀이 타일 상단과 맞닿아있는지 확인
-					for (let col = cell.col; col < cell.col + building.cell_cols; col++) {
-						const cellCenterX = vectorUtils.cellIndexToPixel(col);
+					for (const tileEntity of tileEntities) {
+						const tileTopY = vectorUtils.tileIndexToPixel(tileEntity.tileY) - TILE_SIZE / 2;
+						const tileLeftX = vectorUtils.tileIndexToPixel(tileEntity.tileX) - TILE_SIZE / 2;
+						const tileRightX = tileLeftX + TILE_SIZE;
+
 						if (
 							Math.abs(bottomPixelY - tileTopY) < 1 &&
 							cellCenterX >= tileLeftX &&
 							cellCenterX <= tileRightX
 						) {
-							hasSupport = true;
-							break;
+							return true;
 						}
 					}
-					if (hasSupport) break;
-				}
 
-				// 2. 바닥 경계와 맞닿아있는지 확인
-				if (!hasSupport && this.context.boundaries) {
-					const bottomTopY =
-						this.context.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
-					if (Math.abs(bottomPixelY - bottomTopY) < 1) {
-						hasSupport = true;
+					// 2. 바닥 경계와 맞닿아있는지 확인
+					if (this.context.boundaries) {
+						const bottomTopY =
+							this.context.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+						if (Math.abs(bottomPixelY - bottomTopY) < 1) {
+							return true;
+						}
 					}
-				}
 
-				// 지지대가 없으면 설치 불가
-				if (!hasSupport) {
+					return false;
+				});
+
+				// 모든 바닥 셀이 지지대 위에 있지 않으면 설치 불가
+				if (!allSupported) {
 					invalidCells.push(...targetCells);
 				}
 			}
