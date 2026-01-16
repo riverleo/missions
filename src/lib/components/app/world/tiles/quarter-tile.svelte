@@ -13,9 +13,10 @@
 		tileX: number;
 		tileY: number;
 		opacity?: number;
+		overlapping?: boolean;
 	}
 
-	let { worldId, tileX, tileY, style, ...restProps }: Props = $props();
+	let { worldId, tileX, tileY, overlapping, style, ...restProps }: Props = $props();
 
 	const context = useWorldContext();
 
@@ -77,7 +78,9 @@
 <div
 	class="absolute"
 	style="left: {tileX * TILE_SIZE}px; top: {tileY *
-		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {style}"
+		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {overlapping !== undefined
+		? `background-color: ${overlapping ? 'rgba(239, 68, 68, 0.8)' : 'rgba(255, 255, 255, 0.8)'};`
+		: ''} {style}"
 	role="button"
 	tabindex="-1"
 	{...restProps}

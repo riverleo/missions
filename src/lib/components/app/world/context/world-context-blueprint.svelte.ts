@@ -24,14 +24,8 @@ export class WorldContextBlueprint {
 		);
 	});
 
-	// throttle된 updateCursor 함수
-	updateCursor: (screenVector: ScreenVector) => void;
-
 	constructor(context: WorldContext) {
 		this.context = context;
-
-		// updateCursor를 throttle (16ms = ~60fps)
-		this.updateCursor = throttle({ interval: 4 }, this._updateCursor.bind(this));
 	}
 
 	/**
@@ -49,7 +43,7 @@ export class WorldContextBlueprint {
 	/**
 	 * 마우스 위치에 따라 cursor 업데이트 (내부 구현)
 	 */
-	private _updateCursor(screenVector: ScreenVector) {
+	updateCursor(screenVector: ScreenVector) {
 		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
 			return;
@@ -337,6 +331,8 @@ export class WorldContextBlueprint {
 				cell_y: cell.row,
 			});
 		} else if (type === 'tile') {
+			// 겹치는 셀이 있으면 배치하지 않음
+			if (!this.placable) return;
 			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
 			const tileId = EntityIdUtils.template.id<TileId>(entityTemplateId);
 			const tiles: Record<TileCellKey, TileId> = {};
