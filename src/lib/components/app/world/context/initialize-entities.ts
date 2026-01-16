@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
-import type { VectorKey } from '$lib/types';
+import type { TileCellKey } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
@@ -54,12 +54,12 @@ export function initializeEntities(worldContext: WorldContext) {
 
 	// 타일 엔티티 생성
 	if (worldTileMap) {
-		for (const [vector, tileData] of Object.entries(worldTileMap.data)) {
+		for (const [tileCellKey, tileData] of Object.entries(worldTileMap.data)) {
 			try {
 				const entity = new WorldTileEntity(
 					worldContext,
 					worldContext.worldId,
-					vector as VectorKey,
+					tileCellKey as TileCellKey,
 					tileData.tile_id
 				);
 				entity.addToWorld();

@@ -10,7 +10,6 @@ import type {
 	TileCellKey,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { vectorUtils } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { TEST_WORLD_ID } from '$lib/constants';
@@ -85,7 +84,7 @@ export async function deleteWorldTileMap(worldId: WorldId) {
 
 export function createTilesInWorldTileMap(
 	worldContext: WorldContext,
-	tiles: Array<{ tileId: TileId; tileCell: TileCell }>
+	tiles: Record<TileCellKey, TileId>
 ) {
 	const { worldTileMapStore } = useWorld();
 
@@ -101,10 +100,9 @@ export function createTilesInWorldTileMap(
 		produce(state, (draft) => {
 			const tileMap = draft.data[worldContext.worldId];
 			if (tileMap) {
-				for (const { tileId, tileCell } of tiles) {
-					const tileCellKey = vectorUtils.createTileCellKey(tileCell);
+				for (const tileCellKey in tiles) {
 					tileMap.data[tileCellKey] = {
-						tile_id: tileId,
+						tile_id: tiles[tileCellKey],
 						durability: 100,
 					};
 				}
@@ -113,12 +111,11 @@ export function createTilesInWorldTileMap(
 	);
 
 	// 모든 엔티티 생성
-	for (const { tileId, tileCell } of tiles) {
-		const tileCellKey = vectorUtils.createTileCellKey(tileCell);
+	for (const tileCellKey in tiles) {
 		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
 		if (!worldContext.entities[entityId]) {
 			try {
-				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileCellKey, tileId);
+				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileCellKey, tiles[tileCellKey]);
 				entity.addToWorld();
 			} catch (error) {
 				console.warn('Skipping tile creation:', error);
@@ -127,11 +124,11 @@ export function createTilesInWorldTileMap(
 	}
 }
 
-export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileVector: VectorKey) {
+export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileCellKey: TileCellKey) {
 	const { worldTileMapStore } = useWorld();
 
 	// 엔티티 제거
-	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
+	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
 	const entity = worldContext.entities[entityId];
 	if (entity) {
 		entity.removeFromWorld();
@@ -142,7 +139,7 @@ export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileVecto
 		produce(state, (draft) => {
 			const tileMap = draft.data[worldContext.worldId];
 			if (tileMap) {
-				delete tileMap.data[tileVector];
+				delete tileMap.data[tileCellKey];
 			}
 		})
 	);

@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+import { throttle } from 'radash';
 import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
@@ -7,7 +8,7 @@ import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
-import type { Vector, Cell, ScreenVector, TileCell } from '$lib/types/vector';
+import type { Vector, Cell, ScreenVector, TileCell, TileCellKey } from '$lib/types/vector';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 
 export class WorldContextBlueprint {
@@ -26,8 +27,14 @@ export class WorldContextBlueprint {
 	// 겹치는 셀 계산 결과 캐싱
 	private overlappingCells = $derived(this.computeOverlappingCells());
 
+	// throttle된 updateCursor 함수
+	updateCursor: (screenVector: ScreenVector) => void;
+
 	constructor(context: WorldContext) {
 		this.context = context;
+
+		// updateCursor를 throttle (16ms = ~60fps)
+		this.updateCursor = throttle({ interval: 4 }, this._updateCursor.bind(this));
 	}
 
 	/**
@@ -43,9 +50,9 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 마우스 위치에 따라 cursor 업데이트
+	 * 마우스 위치에 따라 cursor 업데이트 (내부 구현)
 	 */
-	updateCursor(screenVector: ScreenVector) {
+	private _updateCursor(screenVector: ScreenVector) {
 		if (!this.selectedEntityTemplateId) {
 			this.cursor = undefined;
 			return;
@@ -332,10 +339,12 @@ export class WorldContextBlueprint {
 			});
 		} else if (type === 'tile') {
 			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
-			const tiles = this.getTileCellsFromStart().map((tileCell) => ({
-				tileId: EntityIdUtils.template.id<TileId>(entityTemplateId),
-				tileCell,
-			}));
+			const tileId = EntityIdUtils.template.id<TileId>(entityTemplateId);
+			const tiles: Record<TileCellKey, TileId> = {};
+			for (const tileCell of this.getTileCellsFromStart()) {
+				const tileCellKey = vectorUtils.createTileCellKey(tileCell);
+				tiles[tileCellKey] = tileId;
+			}
 			// 모든 타일을 한 번에 생성
 			this.context.createTilesInWorldTileMap(tiles);
 		} else if (type === 'character') {

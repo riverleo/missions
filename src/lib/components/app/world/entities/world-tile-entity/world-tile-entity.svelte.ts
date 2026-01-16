@@ -1,4 +1,4 @@
-import type { WorldId, VectorKey, TileId } from '$lib/types';
+import type { WorldId, TileCellKey, TileId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import {
 	CATEGORY_TILE,
@@ -19,21 +19,21 @@ export class WorldTileEntity extends Entity {
 	readonly tileX: number;
 	readonly tileY: number;
 
-	override get instanceId(): VectorKey {
-		return EntityIdUtils.instanceId<VectorKey>(this.id);
+	override get instanceId(): TileCellKey {
+		return EntityIdUtils.instanceId<TileCellKey>(this.id);
 	}
 
-	constructor(worldContext: WorldContext, worldId: WorldId, vector: VectorKey, tileId: TileId) {
-		super(worldContext, 'tile', worldId, vector);
+	constructor(worldContext: WorldContext, worldId: WorldId, tileCellKey: TileCellKey, tileId: TileId) {
+		super(worldContext, 'tile', worldId, tileCellKey);
 		this.tileId = tileId;
 
 		// 타일 좌표 파싱
-		const coords = vector.split(',').map(Number);
+		const coords = tileCellKey.split(',').map(Number);
 		const tileX = coords[0];
 		const tileY = coords[1];
 
 		if (tileX === undefined || tileY === undefined) {
-			throw new Error(`Invalid tile vector: ${vector}`);
+			throw new Error(`Invalid tile cell key: ${tileCellKey}`);
 		}
 
 		this.tileX = tileX;

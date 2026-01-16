@@ -10,7 +10,7 @@ import type {
 	VectorKey,
 	TileId,
 	Vector,
-	TileCell,
+	TileCellKey,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
@@ -467,7 +467,7 @@ export class WorldContext {
 		createWorldItem(this, insert);
 	}
 
-	createTilesInWorldTileMap(tiles: Array<{ tileId: TileId; tileCell: TileCell }>) {
+	createTilesInWorldTileMap(tiles: Record<TileCellKey, TileId>) {
 		createTilesInWorldTileMap(this, tiles);
 	}
 
@@ -483,7 +483,7 @@ export class WorldContext {
 		deleteWorldItem(this, worldItemId);
 	}
 
-	deleteTileFromWorldTileMap(tileVector: VectorKey) {
-		deleteTileFromWorldTileMap(this, tileVector);
+	deleteTileFromWorldTileMap(tileCellKey: TileCellKey) {
+		deleteTileFromWorldTileMap(this, tileCellKey);
 	}
 }
