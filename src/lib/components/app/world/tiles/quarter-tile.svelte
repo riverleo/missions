@@ -22,6 +22,7 @@
 
 	// 타일 좌표에 타일이 있는지 체크 (cursor 포함)
 	const checkTile = (tx: number, ty: number): boolean => {
+		// context가 없으면 (실제 타일 렌더링) 엔티티만 체크
 		if (!context) return false;
 
 		// 실제 엔티티 체크
@@ -29,12 +30,14 @@
 		const tileId = EntityIdUtils.createId('tile', worldId, tileCellKey);
 		if (context.entities[tileId]) return true;
 
-		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)
-		const cursor = context.blueprint.cursor;
-		if (cursor && cursor.type === 'tile') {
-			const tileCells = context.blueprint.getTileCellsFromStart();
-			// tileCells는 이미 타일 셀 좌표
-			return tileCells.some((tileCell) => tileCell.col === tx && tileCell.row === ty);
+		// overlapping이 전달된 경우 (커서 프리뷰)만 cursor 체크
+		if (overlapping !== undefined) {
+			const cursor = context.blueprint.cursor;
+			if (cursor && cursor.type === 'tile') {
+				const tileCells = context.blueprint.getTileCellsFromStart();
+				// tileCells는 이미 타일 셀 좌표
+				return tileCells.some((tileCell) => tileCell.col === tx && tileCell.row === ty);
+			}
 		}
 
 		return false;

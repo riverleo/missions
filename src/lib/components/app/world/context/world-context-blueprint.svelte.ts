@@ -129,11 +129,15 @@ export class WorldContextBlueprint {
 				building.cell_rows
 			);
 		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
-			// 픽셀 좌표를 타일 셀로 변환 → 셀 좌표로 변환 (1 tile = 2x2 cells)
-			const tileCell = vectorUtils.vectorToTileCell({ x, y } as Vector);
-			const cellX = tileCell.col * 2;
-			const cellY = tileCell.row * 2;
-			targetCells = vectorUtils.createCells(cellX, cellY, 2, 2);
+			// 모든 타일 셀을 가져와서 각각의 2x2 셀을 targetCells에 추가
+			const tileCells = this.getTileCellsFromStart();
+			targetCells = [];
+			for (const tileCell of tileCells) {
+				const cellX = tileCell.col * 2;
+				const cellY = tileCell.row * 2;
+				const cells = vectorUtils.createCells(cellX, cellY, 2, 2);
+				targetCells.push(...cells);
+			}
 		} else {
 			return [];
 		}
@@ -238,7 +242,7 @@ export class WorldContextBlueprint {
 		return this.getOverlappingCells().length === 0;
 	}
 
-	count = 0;
+	private count = 0;
 	/**
 	 * 타일 배치용 타일 셀 좌표 계산 (start → current)
 	 * - 수평/수직: 직선
