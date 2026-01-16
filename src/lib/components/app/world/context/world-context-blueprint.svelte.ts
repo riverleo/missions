@@ -3,11 +3,12 @@ import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { CELL_SIZE } from '$lib/constants';
+import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
 import type { Vector, Cell, ScreenVector } from '$lib/types/vector';
+import type { WorldTileEntity } from '../entities/world-tile-entity';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
@@ -164,20 +165,50 @@ export class WorldContextBlueprint {
 			}
 		}
 
-		// 건물인 경우 바닥 행 바로 아래가 타일/바닥과 맞닿아있는지 확인
+		// 건물인 경우 바닥이 타일이나 바닥 경계와 맞닿아있는지 확인
 		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
 			if (building) {
-				// 건물의 가장 아래 행
-				const bottomRow = targetCells[0]!.row + building.cell_rows - 1;
+				// 건물의 가장 아래 행 (픽셀 좌표)
+				const cell = vectorUtils.vectorToCell({ x, y } as Vector);
+				const bottomPixelY = vectorUtils.cellIndexToPixel(cell.row + building.cell_rows);
 
-				// 바닥 행 바로 아래(+1)가 unwalkable(타일/바닥)인지 확인
-				const bottomRowCells = targetCells.filter((c) => c.row === bottomRow);
-				const hasSupport = bottomRowCells.some((c) =>
-					!this.context.pathfinder.grid.isWalkableAt(c.col, c.row + 1)
+				let hasSupport = false;
+
+				// 1. 타일과 맞닿아있는지 확인
+				const tileEntities = Object.values(this.context.entities).filter(
+					(entity): entity is WorldTileEntity => entity.type === 'tile'
 				);
+				for (const tileEntity of tileEntities) {
+					const tileTopY = vectorUtils.tileIndexToPixel(tileEntity.tileY) - TILE_SIZE / 2;
+					const tileLeftX = vectorUtils.tileIndexToPixel(tileEntity.tileX) - TILE_SIZE / 2;
+					const tileRightX = tileLeftX + TILE_SIZE;
+
+					// 건물 바닥 행의 각 셀이 타일 상단과 맞닿아있는지 확인
+					for (let col = cell.col; col < cell.col + building.cell_cols; col++) {
+						const cellCenterX = vectorUtils.cellIndexToPixel(col);
+						if (
+							Math.abs(bottomPixelY - tileTopY) < 1 &&
+							cellCenterX >= tileLeftX &&
+							cellCenterX <= tileRightX
+						) {
+							hasSupport = true;
+							break;
+						}
+					}
+					if (hasSupport) break;
+				}
+
+				// 2. 바닥 경계와 맞닿아있는지 확인
+				if (!hasSupport && this.context.boundaries) {
+					const bottomTopY =
+						this.context.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+					if (Math.abs(bottomPixelY - bottomTopY) < 1) {
+						hasSupport = true;
+					}
+				}
 
 				// 지지대가 없으면 설치 불가
 				if (!hasSupport) {
