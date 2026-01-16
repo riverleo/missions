@@ -9,7 +9,12 @@ import { vectorUtils } from '$lib/utils/vector';
  */
 function safeSetWalkableAt(pathfinder: Pathfinder, walkable: boolean, ...cells: Cell[]) {
 	for (const cell of cells) {
-		if (cell.col >= 0 && cell.col < pathfinder.cols && cell.row >= 0 && cell.row < pathfinder.rows) {
+		if (
+			cell.col >= 0 &&
+			cell.col < pathfinder.cols &&
+			cell.row >= 0 &&
+			cell.row < pathfinder.rows
+		) {
 			pathfinder.grid.setWalkableAt(cell.col, cell.row, walkable);
 		}
 	}
@@ -38,11 +43,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
-				safeSetWalkableAt(
-					pathfinder,
-					true,
-					vectorUtils.createCell(cellX + dx, cellY - 2)
-				);
+				safeSetWalkableAt(pathfinder, true, vectorUtils.createCell(cellX + dx, cellY - 2));
 			}
 
 			// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -63,12 +64,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 						}
 
 						if (offset === 3) {
-							const verticalCells = vectorUtils.createCells(
-								cellX + dx - offset,
-								cellY - 1,
-								1,
-								6
-							);
+							const verticalCells = vectorUtils.createCells(cellX + dx - offset, cellY - 1, 1, 4);
 							safeSetWalkableAt(pathfinder, true, ...verticalCells);
 						}
 					}
@@ -85,12 +81,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 						}
 
 						if (offset === 3) {
-							const verticalCells = vectorUtils.createCells(
-								cellX + dx + offset,
-								cellY - 1,
-								1,
-								6
-							);
+							const verticalCells = vectorUtils.createCells(cellX + dx + offset, cellY - 1, 1, 4);
 							safeSetWalkableAt(pathfinder, true, ...verticalCells);
 						}
 					}
@@ -123,7 +114,7 @@ function setUnwalkableAt(pathfinder: Pathfinder) {
  * - 타일이 세로로 쌓여있으면 마지막(맨 아래) 타일만 jumpable 영역 생성
  */
 function setJumpableAt(pathfinder: Pathfinder) {
-	pathfinder.jumpableCells.clear();
+	pathfinder.jumpables.clear();
 
 	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
 		(entity): entity is WorldTileEntity => entity.type === 'tile'
@@ -153,17 +144,17 @@ function setJumpableAt(pathfinder: Pathfinder) {
 					if (isLeftEdge) {
 						// 왼쪽 3칸 떨어진 cellY + 4 위치
 						const jumpCol = cellX + dx - offset;
-						const jumpRow = cellY + 4;
+						const jumpRow = cellY + 2;
 						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						pathfinder.jumpableCells.add(cellKey);
+						pathfinder.jumpables.add(cellKey);
 					}
 
 					if (isRightEdge) {
 						// 오른쪽 3칸 떨어진 cellY + 4 위치
 						const jumpCol = cellX + dx + offset;
-						const jumpRow = cellY + 4;
+						const jumpRow = cellY + 2;
 						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						pathfinder.jumpableCells.add(cellKey);
+						pathfinder.jumpables.add(cellKey);
 					}
 				}
 			}

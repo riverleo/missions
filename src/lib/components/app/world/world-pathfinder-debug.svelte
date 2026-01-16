@@ -5,8 +5,8 @@
 	const world = useWorldContext();
 	const { pathfinder } = world;
 
-	let walkableCells = $state<Array<{ col: number; row: number }>>([]);
-	let jumpableCells = $state<Array<{ col: number; row: number }>>([]);
+	let walkables = $state<Array<{ col: number; row: number }>>([]);
+	let jumpables = $state<Array<{ col: number; row: number }>>([]);
 
 	// pathfinder 업데이트 시 walkable/jumpable 셀만 재계산
 	$effect(() => {
@@ -21,21 +21,21 @@
 				}
 			}
 		}
-		walkableCells = walkable;
+		walkables = walkable;
 
 		// jumpable 셀 수집
 		const jumpable: Array<{ col: number; row: number }> = [];
-		for (const cellKey of pathfinder.jumpableCells) {
+		for (const cellKey of pathfinder.jumpables) {
 			const [colStr, rowStr] = cellKey.split(',');
 			jumpable.push({ col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) });
 		}
-		jumpableCells = jumpable;
+		jumpables = jumpable;
 	});
 </script>
 
 {#if world.debug}
 	<!-- Walkable 셀 하이라이트 -->
-	{#each walkableCells as cell (cell.col + ',' + cell.row)}
+	{#each walkables as cell (cell.col + ',' + cell.row)}
 		<div
 			class="absolute border border-green-500/10 bg-green-500/5"
 			style="
@@ -48,7 +48,7 @@
 	{/each}
 
 	<!-- Jump Zone 셀 하이라이트 -->
-	{#each jumpableCells as cell (cell.col + ',' + cell.row)}
+	{#each jumpables as cell (cell.col + ',' + cell.row)}
 		<div
 			class="absolute border border-yellow-500/30 bg-yellow-500/20"
 			style="
