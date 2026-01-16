@@ -90,7 +90,7 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 현재 배치하려는 건물/타일과 기존 건물들의 겹치는 셀들 계산
+	 * 현재 배치하려는 건물/타일과 기존 건물들의 겹치는 셀들 + walkable이 아닌 셀들 계산
 	 */
 	getOverlappingCells(): Cell[] {
 		if (!this.cursor || !this.context) return [];
@@ -100,7 +100,9 @@ export class WorldContextBlueprint {
 
 		// 배치하려는 셀 계산
 		let targetCells: Cell[];
-		if (EntityIdUtils.template.is('building', entityTemplateId)) {
+		const isBuilding = EntityIdUtils.template.is('building', entityTemplateId);
+
+		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
 			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
@@ -127,7 +129,7 @@ export class WorldContextBlueprint {
 		const buildingStore = get(useBuilding().store).data;
 		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
 		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
-		const existingCells: Cell[] = [];
+		const invalidCells: Cell[] = [];
 
 		// worldId 필터링
 		const worldBuildings = Object.values(worldBuildingStore).filter(
@@ -144,7 +146,7 @@ export class WorldContextBlueprint {
 				buildingData.cell_cols,
 				buildingData.cell_rows
 			);
-			existingCells.push(...cells);
+			invalidCells.push(...cells);
 		}
 
 		// 기존 타일들이 차지하는 셀 수집 (1 tile = 2x2 cells)
@@ -158,52 +160,27 @@ export class WorldContextBlueprint {
 				const cellX = tileX * 2;
 				const cellY = tileY * 2;
 				const cells = vectorUtils.createCells(cellX, cellY, 2, 2);
-				existingCells.push(...cells);
+				invalidCells.push(...cells);
 			}
 		}
 
-		return vectorUtils.getOverlappingCells(targetCells, existingCells);
-	}
-
-	/**
-	 * 건물 배치 셀들이 모두 walkable인지 확인 (타일/바닥 바로 위)
-	 */
-	isOnWalkable(): boolean {
-		if (!this.cursor || !this.context) return false;
-
-		const { entityTemplateId, current } = this.cursor;
-		const { x, y } = current;
-
-		// 타일은 walkable 체크 불필요
-		if (!EntityIdUtils.template.is('building', entityTemplateId)) {
-			return true;
+		// 건물인 경우 walkable이 아닌 셀들도 invalid로 추가
+		if (isBuilding) {
+			for (const cell of targetCells) {
+				if (!this.context.pathfinder.grid.isWalkableAt(cell.col, cell.row)) {
+					invalidCells.push(cell);
+				}
+			}
 		}
 
-		// 건물 배치 셀 계산
-		const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
-		const buildingStore = get(useBuilding().store).data;
-		const building = buildingStore[buildingId];
-		if (!building) return false;
-
-		const cell = vectorUtils.vectorToCell({ x, y } as Vector);
-		const targetCells = vectorUtils.createCells(
-			cell.col,
-			cell.row,
-			building.cell_cols,
-			building.cell_rows
-		);
-
-		// 모든 셀이 walkable인지 확인
-		return targetCells.every((c) =>
-			this.context.pathfinder.grid.isWalkableAt(c.col, c.row)
-		);
+		return vectorUtils.getOverlappingCells(targetCells, invalidCells);
 	}
 
 	/**
-	 * 현재 배치가 유효한지 (겹치는 셀이 없고 walkable 위)
+	 * 현재 배치가 유효한지 (겹치는 셀이 없는지)
 	 */
 	get placable(): boolean {
-		return this.getOverlappingCells().length === 0 && this.isOnWalkable();
+		return this.getOverlappingCells().length === 0;
 	}
 
 	/**
