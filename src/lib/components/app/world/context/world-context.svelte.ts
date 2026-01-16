@@ -26,7 +26,7 @@ import { createBoundaries, type Boundaries } from './create-boundaries';
 import { createWorldCharacter, deleteWorldCharacter } from './world-character';
 import { createWorldBuilding, deleteWorldBuilding } from './world-building';
 import { createWorldItem, deleteWorldItem } from './world-item';
-import { createTileInWorldTileMap, deleteTileFromWorldTileMap } from './world-tile-map';
+import { createTilesInWorldTileMap, deleteTileFromWorldTileMap } from './world-tile-map';
 import { initializeEntities } from './initialize-entities';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 
@@ -123,7 +123,7 @@ export class WorldContext {
 	};
 
 	// canvas mouseup 처리
-	private handleCanvasMouseUp = async (e: MouseEvent) => {
+	private handleCanvasMouseUp = (e: MouseEvent) => {
 		if (!this.mouseDownScreenPosition) return;
 
 		// 드래그 거리 계산 (클릭 판정: 5px 이내)
@@ -162,13 +162,13 @@ export class WorldContext {
 							this.blueprint.setCursorStart(this.blueprint.cursor.current);
 						} else {
 							// 두 번째 클릭: 타일 일괄 설치
-							await this.blueprint.cursorToEntities();
+							this.blueprint.cursorToEntities();
 							// start 클리어
 							this.blueprint.setCursorStart(undefined);
 						}
 					} else {
 						// 타일이 아니면 바로 배치
-						await this.blueprint.cursorToEntities();
+						this.blueprint.cursorToEntities();
 					}
 				}
 				// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
@@ -450,8 +450,8 @@ export class WorldContext {
 		createWorldItem(this, insert);
 	}
 
-	async createTileInWorldTileMap(tileId: TileId, vector: Vector) {
-		await createTileInWorldTileMap(this, tileId, vector);
+	createTilesInWorldTileMap(tiles: Array<{ tileId: TileId; vector: Vector }>) {
+		createTilesInWorldTileMap(this, tiles);
 	}
 
 	deleteWorldCharacter(worldCharacterId: WorldCharacterId) {

@@ -7,7 +7,7 @@ import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
-import type { Vector, Cell, ScreenVector } from '$lib/types/vector';
+import type { Vector, Cell, ScreenVector, TileCell } from '$lib/types/vector';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 
 export class WorldContextBlueprint {
@@ -15,6 +15,16 @@ export class WorldContextBlueprint {
 	selectedEntityTemplateId = $state<EntityTemplateId | undefined>(undefined);
 
 	private context: WorldContext;
+
+	// 타일 엔티티 캐싱
+	private tileEntities = $derived.by(() => {
+		return Object.values(this.context.entities).filter(
+			(entity): entity is WorldTileEntity => entity.type === 'tile'
+		);
+	});
+
+	// 겹치는 셀 계산 결과 캐싱
+	private overlappingCells = $derived(this.computeOverlappingCells());
 
 	constructor(context: WorldContext) {
 		this.context = context;
@@ -99,13 +109,17 @@ export class WorldContextBlueprint {
 		const { entityTemplateId, current } = this.cursor;
 		const { x, y } = current;
 
+		// 스토어 값들을 한 번만 조회
+		const buildingStore = get(useBuilding().store).data;
+		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
+		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
+
 		// 배치하려는 셀 계산
 		let targetCells: Cell[];
 		const isBuilding = EntityIdUtils.template.is('building', entityTemplateId);
 
 		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
-			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
 			if (!building) return [];
 			// 픽셀 좌표를 셀로 변환
@@ -127,9 +141,6 @@ export class WorldContextBlueprint {
 		}
 
 		// 기존 건물들이 차지하는 모든 셀 수집
-		const buildingStore = get(useBuilding().store).data;
-		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
-		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
 		const invalidCells: Cell[] = [];
 
 		// worldId 필터링
@@ -168,13 +179,13 @@ export class WorldContextBlueprint {
 		// 건물인 경우 바닥이 타일이나 바닥 경계와 맞닿아있는지 확인
 		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
-			const buildingStore = get(useBuilding().store).data;
 			const building = buildingStore[buildingId];
 			if (building) {
 				// 건물의 가장 아래 행 (픽셀 좌표)
 				const cell = vectorUtils.vectorToCell({ x, y } as Vector);
 				// 건물 바닥의 하단 = (바닥 행 + 1)의 상단
-				const bottomPixelY = vectorUtils.cellIndexToPixel(cell.row + building.cell_rows) - CELL_SIZE / 2;
+				const bottomPixelY =
+					vectorUtils.cellIndexToPixel(cell.row + building.cell_rows) - CELL_SIZE / 2;
 				// 모든 바닥 셀에 대해 각각 지지대 확인
 				const bottomCols = [];
 				for (let col = cell.col; col < cell.col + building.cell_cols; col++) {
@@ -185,9 +196,7 @@ export class WorldContextBlueprint {
 					const cellCenterX = vectorUtils.cellIndexToPixel(col);
 
 					// 1. 타일과 맞닿아있는지 확인
-					const tileEntities = Object.values(this.context.entities).filter(
-						(entity): entity is WorldTileEntity => entity.type === 'tile'
-					);
+					const tileEntities = this.tileEntities;
 
 					for (const tileEntity of tileEntities) {
 						const tileTopY = vectorUtils.tileIndexToPixel(tileEntity.tileY) - TILE_SIZE / 2;
@@ -205,8 +214,7 @@ export class WorldContextBlueprint {
 
 					// 2. 바닥 경계와 맞닿아있는지 확인
 					if (this.context.boundaries) {
-						const bottomTopY =
-							this.context.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
+						const bottomTopY = this.context.boundaries.bottom.position.y - BOUNDARY_THICKNESS / 2;
 						if (Math.abs(bottomPixelY - bottomTopY) < 1) {
 							return true;
 						}
@@ -233,57 +241,62 @@ export class WorldContextBlueprint {
 	}
 
 	/**
-	 * 타일 배치용 벡터 계산 (start → current)
+	 * 타일 배치용 타일 셀 좌표 계산 (start → current)
 	 * - 수평/수직: 직선
 	 * - 그 외: 사각형 영역
 	 */
-	getVectorsFromStart(): Vector[] {
+	getTileCellsFromStart(): TileCell[] {
 		if (!this.cursor) return [];
 
 		const { current, start } = this.cursor;
 
+		// 픽셀 좌표를 타일 셀로 변환
+		const currentTileCell = vectorUtils.vectorToTileCell(current);
+
 		// start가 없으면 단일 타일
 		if (!start) {
-			return [current];
+			return [currentTileCell];
 		}
 
-		const dx = current.x - start.x;
-		const dy = current.y - start.y;
+		const startTileCell = vectorUtils.vectorToTileCell(start);
+
+		const dx = currentTileCell.col - startTileCell.col;
+		const dy = currentTileCell.row - startTileCell.row;
 
 		// 수평 직선 (dy === 0)
 		if (dy === 0) {
-			const minX = Math.min(start.x, current.x);
-			const maxX = Math.max(start.x, current.x);
-			const vectors: Vector[] = [];
+			const minX = Math.min(startTileCell.col, currentTileCell.col);
+			const maxX = Math.max(startTileCell.col, currentTileCell.col);
+			const tileCells: TileCell[] = [];
 			for (let x = minX; x <= maxX; x++) {
-				vectors.push(vectorUtils.createVector(x, start.y));
+				tileCells.push(vectorUtils.createTileCell(x, startTileCell.row));
 			}
-			return vectors;
+			return tileCells;
 		}
 
 		// 수직 직선 (dx === 0)
 		if (dx === 0) {
-			const minY = Math.min(start.y, current.y);
-			const maxY = Math.max(start.y, current.y);
-			const vectors: Vector[] = [];
+			const minY = Math.min(startTileCell.row, currentTileCell.row);
+			const maxY = Math.max(startTileCell.row, currentTileCell.row);
+			const tileCells: TileCell[] = [];
 			for (let y = minY; y <= maxY; y++) {
-				vectors.push(vectorUtils.createVector(start.x, y));
+				tileCells.push(vectorUtils.createTileCell(startTileCell.col, y));
 			}
-			return vectors;
+			return tileCells;
 		}
 
 		// 사각형 영역
-		const minX = Math.min(start.x, current.x);
-		const maxX = Math.max(start.x, current.x);
-		const minY = Math.min(start.y, current.y);
-		const maxY = Math.max(start.y, current.y);
-		const vectors: Vector[] = [];
+		const minX = Math.min(startTileCell.col, currentTileCell.col);
+		const maxX = Math.max(startTileCell.col, currentTileCell.col);
+		const minY = Math.min(startTileCell.row, currentTileCell.row);
+		const maxY = Math.max(startTileCell.row, currentTileCell.row);
+		const tileCells: TileCell[] = [];
 		for (let y = minY; y <= maxY; y++) {
 			for (let x = minX; x <= maxX; x++) {
-				vectors.push(vectorUtils.createVector(x, y));
+				tileCells.push(vectorUtils.createTileCell(x, y));
 			}
 		}
-		return vectors;
+		return tileCells;
 	}
 
 	/**
@@ -300,7 +313,7 @@ export class WorldContextBlueprint {
 	/**
 	 * 커서 정보를 기반으로 엔티티를 월드에 배치
 	 */
-	async cursorToEntities() {
+	cursorToEntities() {
 		if (!this.cursor) return;
 
 		const { entityTemplateId, current } = this.cursor;
@@ -318,16 +331,13 @@ export class WorldContextBlueprint {
 				cell_y: cell.row,
 			});
 		} else if (type === 'tile') {
-			// 타일 벡터들 계산 (start가 있으면 범위, 없으면 단일)
-			for (const pixelVector of this.getVectorsFromStart()) {
-				// 픽셀 좌표를 타일 셀로 변환 후 Vector로 변환 (createTileInWorldTileMap이 Vector 기대)
-				const tileCell = vectorUtils.vectorToTileCell(pixelVector);
-				const tileVector = vectorUtils.createVector(tileCell.col, tileCell.row);
-				await this.context.createTileInWorldTileMap(
-					EntityIdUtils.template.id<TileId>(entityTemplateId),
-					tileVector
-				);
-			}
+			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
+			const tiles = this.getTileCellsFromStart().map((tileCell) => ({
+				tileId: EntityIdUtils.template.id<TileId>(entityTemplateId),
+				vector: vectorUtils.createVector(tileCell.col, tileCell.row),
+			}));
+			// 모든 타일을 한 번에 생성
+			this.context.createTilesInWorldTileMap(tiles);
 		} else if (type === 'character') {
 			// current는 이미 픽셀 좌표
 			this.context.createWorldCharacter({

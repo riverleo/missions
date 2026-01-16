@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	TileId,
@@ -6,15 +7,12 @@ import type {
 	WorldId,
 	WorldTileMap,
 	WorldTileMapInsert,
-	UserId,
-	TerrainId,
 	Vector,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
-import { useCurrent } from '$lib/hooks/use-current';
 import { useApp } from '$lib/hooks/use-app.svelte';
-import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
+import { TEST_WORLD_ID } from '$lib/constants';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export async function createWorldTileMap(
@@ -84,76 +82,46 @@ export async function deleteWorldTileMap(worldId: WorldId) {
 	});
 }
 
-export async function createTileInWorldTileMap(
+export function createTilesInWorldTileMap(
 	worldContext: WorldContext,
-	tileId: TileId,
-	vector: Vector
+	tiles: Array<{ tileId: TileId; vector: Vector }>
 ) {
 	const { worldTileMapStore } = useWorld();
 
-	let worldTileMap = get(worldTileMapStore).data[worldContext.worldId];
+	const worldTileMap = get(worldTileMapStore).data[worldContext.worldId];
 
-	// WorldTileMap이 없으면 생성
+	// WorldTileMap이 없으면 에러
 	if (!worldTileMap) {
-		const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
-
-		let player_id, scenario_id, user_id, terrain_id;
-		if (isTestWorld) {
-			player_id = TEST_PLAYER_ID;
-			scenario_id = TEST_SCENARIO_ID;
-			user_id = TEST_USER_ID;
-			terrain_id = 'test-terrain-id' as TerrainId;
-		} else {
-			const player = get(useCurrent().player);
-			const world = get(useWorld().worldStore).data[worldContext.worldId];
-			player_id = player!.id;
-			scenario_id = world!.scenario_id;
-			user_id = player!.user_id;
-			terrain_id = world!.terrain_id!;
-		}
-
-		worldTileMap = await createWorldTileMap({
-			world_id: worldContext.worldId,
-			player_id,
-			scenario_id,
-			user_id,
-			terrain_id,
-		});
+		throw new Error(`WorldTileMap not found for world ${worldContext.worldId}`);
 	}
 
-	// 타일 추가
-	const tileVector = `${vector.x},${vector.y}` as VectorKey;
-	worldTileMapStore.update((state) => {
-		const tileMap = state.data[worldContext.worldId];
-		if (tileMap) {
-			return {
-				...state,
-				data: {
-					...state.data,
-					[worldContext.worldId]: {
-						...tileMap,
-						data: {
-							...tileMap.data,
-							[tileVector]: {
-								tile_id: tileId,
-								durability: 100,
-							},
-						},
-					},
-				},
-			};
-		}
-		return state;
-	});
+	// 모든 타일을 한 번에 스토어에 추가
+	worldTileMapStore.update((state) =>
+		produce(state, (draft) => {
+			const tileMap = draft.data[worldContext.worldId];
+			if (tileMap) {
+				for (const { tileId, vector } of tiles) {
+					const tileVector = `${vector.x},${vector.y}` as VectorKey;
+					tileMap.data[tileVector] = {
+						tile_id: tileId,
+						durability: 100,
+					};
+				}
+			}
+		})
+	);
 
-	// 엔티티 생성
-	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
-	if (!worldContext.entities[entityId]) {
-		try {
-			const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileVector, tileId);
-			entity.addToWorld();
-		} catch (error) {
-			console.warn('Skipping tile creation:', error);
+	// 모든 엔티티 생성
+	for (const { tileId, vector } of tiles) {
+		const tileVector = `${vector.x},${vector.y}` as VectorKey;
+		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
+		if (!worldContext.entities[entityId]) {
+			try {
+				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileVector, tileId);
+				entity.addToWorld();
+			} catch (error) {
+				console.warn('Skipping tile creation:', error);
+			}
 		}
 	}
 }
@@ -169,22 +137,12 @@ export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileVecto
 	}
 
 	// 스토어 업데이트
-	worldTileMapStore.update((state) => {
-		const tileMap = state.data[worldContext.worldId];
-		if (tileMap) {
-			const newData = { ...tileMap.data };
-			delete newData[tileVector];
-			return {
-				...state,
-				data: {
-					...state.data,
-					[worldContext.worldId]: {
-						...tileMap,
-						data: newData,
-					},
-				},
-			};
-		}
-		return state;
-	});
+	worldTileMapStore.update((state) =>
+		produce(state, (draft) => {
+			const tileMap = draft.data[worldContext.worldId];
+			if (tileMap) {
+				delete tileMap.data[tileVector];
+			}
+		})
+	);
 }

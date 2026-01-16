@@ -31,12 +31,9 @@
 		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)
 		const cursor = context.blueprint.cursor;
 		if (cursor && cursor.type === 'tile') {
-			const vectors = context.blueprint.getVectorsFromStart();
-			// vectors는 픽셀 좌표이므로 타일 셀로 변환해서 비교
-			return vectors.some((v) => {
-				const tileCell = vectorUtils.vectorToTileCell(v);
-				return tileCell.col === tx && tileCell.row === ty;
-			});
+			const tileCells = context.blueprint.getTileCellsFromStart();
+			// tileCells는 이미 타일 셀 좌표
+			return tileCells.some((tileCell) => tileCell.col === tx && tileCell.row === ty);
 		}
 
 		return false;
