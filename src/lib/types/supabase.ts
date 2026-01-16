@@ -88,7 +88,7 @@ export type EntityTemplateId =
 	| `tile_${TileId}`;
 
 // Instance types for EntityId and EntityTemplateId
-export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | VectorKey;
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
 export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
 export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
 

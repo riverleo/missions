@@ -24,9 +24,6 @@ export class WorldContextBlueprint {
 		);
 	});
 
-	// 겹치는 셀 계산 결과 캐싱
-	private overlappingCells = $derived(this.computeOverlappingCells());
-
 	// throttle된 updateCursor 함수
 	updateCursor: (screenVector: ScreenVector) => void;
 
@@ -247,6 +244,7 @@ export class WorldContextBlueprint {
 		return this.getOverlappingCells().length === 0;
 	}
 
+	count = 0;
 	/**
 	 * 타일 배치용 타일 셀 좌표 계산 (start → current)
 	 * - 수평/수직: 직선
@@ -254,6 +252,7 @@ export class WorldContextBlueprint {
 	 */
 	getTileCellsFromStart(): TileCell[] {
 		if (!this.cursor) return [];
+		console.log('getTileCellsFromStart', this.count++);
 
 		const { current, start } = this.cursor;
 

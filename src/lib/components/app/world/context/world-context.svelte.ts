@@ -29,7 +29,7 @@ import { createWorldBuilding, deleteWorldBuilding } from './world-building';
 import { createWorldItem, deleteWorldItem } from './world-item';
 import { createTilesInWorldTileMap, deleteTileFromWorldTileMap } from './world-tile-map';
 import { initializeEntities } from './initialize-entities';
-import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
+import { WORLD_WIDTH, WORLD_HEIGHT, CATEGORY_CHARACTER, CATEGORY_ITEM } from '$lib/constants';
 
 const { Engine, Runner, Render, Mouse, MouseConstraint, Composite, Body } = Matter;
 
@@ -52,8 +52,9 @@ export class WorldContext {
 	oncamerachange: ((camera: Camera) => void) | undefined;
 
 	private respawningEntityIds = new Set<EntityId>();
-	private draggedEntityPosition: { entityId: EntityId; x: number; y: number } | undefined;
 	private mouseDownScreenPosition: { x: number; y: number } | undefined;
+	private entityClickedInMouseDown = false;
+	private draggedEntityId: EntityId | undefined;
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -113,13 +114,17 @@ export class WorldContext {
 				// 엔티티 선택 시 템플릿 선택 해제
 				this.blueprint.setSelectedEntityTemplateId(undefined);
 
-				// 드래그 시작 위치 저장
-				this.draggedEntityPosition = {
-					entityId: entity.id,
-					x: entity.body.position.x,
-					y: entity.body.position.y,
-				};
+				// 엔티티를 클릭했다는 플래그 설정
+				this.entityClickedInMouseDown = true;
+
+				// 드래그 가능한 엔티티면 ID 저장
+				if (entity.type === 'character' || entity.type === 'item') {
+					this.draggedEntityId = entity.id;
+				}
 			}
+		} else {
+			// 엔티티를 클릭하지 않았으면 플래그 클리어
+			this.entityClickedInMouseDown = false;
 		}
 	};
 
@@ -133,8 +138,8 @@ export class WorldContext {
 		const distance = Math.sqrt(dx * dx + dy * dy);
 		const isClick = distance < 5;
 
-		// 엔티티를 드래그했으면 클릭 처리 안 함
-		const wasEntityDragged = this.draggedEntityPosition !== undefined;
+		// 드래그 가능한 엔티티를 드래그했으면 클릭 처리 안 함
+		const wasEntityDragged = this.draggedEntityId !== undefined;
 
 		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 또는 캐릭터 이동 처리
 		if (isClick && !wasEntityDragged) {
@@ -172,14 +177,15 @@ export class WorldContext {
 						this.blueprint.cursorToEntities();
 					}
 				}
-				// 빈 공간 클릭: 엔티티 선택 해제 (템플릿 선택은 유지)
-				else {
+				// 빈 공간 클릭: 엔티티 선택 해제 (엔티티를 클릭하지 않았을 때만)
+				else if (!this.entityClickedInMouseDown) {
 					setSelectedEntityId(undefined);
 				}
 			}
 		}
 
 		this.mouseDownScreenPosition = undefined;
+		this.entityClickedInMouseDown = false;
 
 		// 커서 업데이트 (마우스를 움직이지 않아도 배치 후 커서가 갱신되도록)
 		this.blueprint.updateCursor(vectorUtils.createScreenVector(e.clientX, e.clientY));
@@ -187,9 +193,9 @@ export class WorldContext {
 
 	// Matter.js mouseup 처리
 	private handleMouseUp = (event: Matter.IEvent<Matter.MouseConstraint>) => {
-		// 엔티티 드래그 처리
-		if (this.draggedEntityPosition) {
-			const entity = this.entities[this.draggedEntityPosition.entityId];
+		// 드래그했던 엔티티가 있으면 충돌 체크
+		if (this.draggedEntityId) {
+			const entity = this.entities[this.draggedEntityId];
 			if (entity) {
 				// 현재 위치에서 충돌 체크 (타일, 벽, 건물과 충돌하는지)
 				const collisions = Matter.Query.collides(
@@ -213,12 +219,6 @@ export class WorldContext {
 							x: nearestWalkable.x,
 							y: nearestWalkable.y,
 						});
-					} else {
-						// walkable 셀을 찾지 못하면 이전 위치로 복원
-						Body.setPosition(entity.body, {
-							x: this.draggedEntityPosition.x,
-							y: this.draggedEntityPosition.y,
-						});
 					}
 
 					// velocity와 force 초기화
@@ -226,7 +226,7 @@ export class WorldContext {
 					entity.body.force = { x: 0, y: 0 };
 				}
 			}
-			this.draggedEntityPosition = undefined;
+			this.draggedEntityId = undefined;
 		}
 	};
 
@@ -277,8 +277,8 @@ export class WorldContext {
 				render: { visible: false },
 			},
 			collisionFilter: {
-				// static 바디(벽, 타일, 건물)는 선택 안 되도록 제외
-				mask: 0xffffffff,
+				// static 바디(벽, 타일, 건물)는 드래그 불가, 캐릭터와 아이템만 드래그 가능
+				mask: CATEGORY_CHARACTER | CATEGORY_ITEM,
 			},
 		});
 

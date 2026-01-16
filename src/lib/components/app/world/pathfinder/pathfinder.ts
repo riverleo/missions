@@ -72,7 +72,7 @@ export class Pathfinder {
 		queue.push({ col: startCol, row: startRow, distance: 0 });
 		visited.add(`${startCol},${startRow}`);
 
-		const directions = [
+		const directions: Array<[number, number]> = [
 			[0, -1],
 			[1, 0],
 			[0, 1],

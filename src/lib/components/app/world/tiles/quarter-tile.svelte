@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { VectorKey, WorldId } from '$lib/types';
+	import type { TileCellKey, WorldId } from '$lib/types';
 	import { TILE_SIZE } from '$lib/constants';
 	import { calculate } from '$lib/utils/bitmask';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -24,8 +24,8 @@
 		if (!context) return false;
 
 		// 실제 엔티티 체크
-		const tileVector: VectorKey = vectorUtils.createVectorKey(tx, ty);
-		const tileId = EntityIdUtils.createId('tile', worldId, tileVector);
+		const tileCellKey: TileCellKey = vectorUtils.createTileCellKey(tx, ty);
+		const tileId = EntityIdUtils.createId('tile', worldId, tileCellKey);
 		if (context.entities[tileId]) return true;
 
 		// Cursor 체크 (타일 cursor의 범위 내에 있으면 true)

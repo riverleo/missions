@@ -1,14 +1,7 @@
 import { get } from 'svelte/store';
 import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
-import type {
-	TileId,
-	WorldId,
-	WorldTileMap,
-	WorldTileMapInsert,
-	TileCell,
-	TileCellKey,
-} from '$lib/types';
+import type { TileId, WorldId, WorldTileMap, WorldTileMapInsert, TileCellKey } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useApp } from '$lib/hooks/use-app.svelte';
@@ -100,9 +93,9 @@ export function createTilesInWorldTileMap(
 		produce(state, (draft) => {
 			const tileMap = draft.data[worldContext.worldId];
 			if (tileMap) {
-				for (const tileCellKey in tiles) {
+				for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
 					tileMap.data[tileCellKey] = {
-						tile_id: tiles[tileCellKey],
+						tile_id: tiles[tileCellKey]!,
 						durability: 100,
 					};
 				}
@@ -111,11 +104,16 @@ export function createTilesInWorldTileMap(
 	);
 
 	// 모든 엔티티 생성
-	for (const tileCellKey in tiles) {
+	for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
 		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
 		if (!worldContext.entities[entityId]) {
 			try {
-				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileCellKey, tiles[tileCellKey]);
+				const entity = new WorldTileEntity(
+					worldContext,
+					worldContext.worldId,
+					tileCellKey,
+					tiles[tileCellKey]!
+				);
 				entity.addToWorld();
 			} catch (error) {
 				console.warn('Skipping tile creation:', error);
