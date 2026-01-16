@@ -3,7 +3,7 @@ import type { WorldContext } from './world-context.svelte';
 import type { WorldItem, WorldItemId, WorldItemInsert, UserId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
-import { usePlayer } from '$lib/hooks/use-player';
+import { useCurrent } from '$lib/hooks/use-current';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import { WorldItemEntity } from '../entities/world-item-entity';
 import {
@@ -48,7 +48,7 @@ export async function createWorldItem(
 		scenario_id = TEST_SCENARIO_ID;
 		user_id = crypto.randomUUID() as UserId;
 	} else {
-		const player = get(usePlayer().current);
+		const player = get(useCurrent().player);
 		const world = get(useWorld().worldStore).data[worldContext.worldId];
 		player_id = player!.id;
 		scenario_id = world!.scenario_id;

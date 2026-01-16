@@ -14,7 +14,7 @@ import type {
 	EntityId,
 } from '$lib/types';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
-import { usePlayer } from '../use-player';
+import { useCurrent } from '../use-current';
 
 // World Store (Singleton hook)
 let instance: ReturnType<typeof createWorldStore> | null = null;
@@ -69,7 +69,7 @@ function createWorldStore() {
 
 		try {
 			// Player 조회
-			const player = get(usePlayer().current);
+			const player = get(useCurrent().player);
 			if (!player) return;
 
 			// World 조회 (player_id로 필터링)

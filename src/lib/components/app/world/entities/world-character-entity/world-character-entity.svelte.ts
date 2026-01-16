@@ -18,8 +18,9 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-	jumpDelay: number = $state(0); // 점프존에서 대기 시간 (ms)
 	wasJumpable: boolean = $state(false); // 이전 프레임에 점프존에 있었는지
+
+	jumpDelay: number = $state(0); // 점프존에서 대기 시간 (ms)
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);

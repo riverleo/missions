@@ -12,7 +12,7 @@ import type {
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
-import { usePlayer } from '$lib/hooks/use-player';
+import { useCurrent } from '$lib/hooks/use-current';
 import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 import {
 	TEST_WORLD_ID,
@@ -108,7 +108,7 @@ export async function createTileInWorldTileMap(
 			user_id = crypto.randomUUID() as UserId;
 			terrain_id = 'test-terrain-id' as TerrainId;
 		} else {
-			const player = get(usePlayer().current);
+			const player = get(useCurrent().player);
 			const world = get(useWorld().worldStore).data[worldContext.worldId];
 			player_id = player!.id;
 			scenario_id = world!.scenario_id;

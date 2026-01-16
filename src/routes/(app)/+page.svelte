@@ -1,10 +1,12 @@
 <script lang="ts">
 	import type { UserId } from '$lib/types';
-	import { useCurrentUser } from '$lib/hooks/use-current-user';
+	import { useCurrent } from '$lib/hooks/use-current';
+	import { usePlayer } from '$lib/hooks/use-player';
 	import { useServerPayload } from '$lib/hooks/use-server-payload.svelte';
 
 	const { supabase } = useServerPayload();
-	const { store: currentUser, createPlayer } = useCurrentUser();
+	const { user, role } = useCurrent();
+	const player = usePlayer();
 
 	let isCreatingAnonymousUser = $state(false);
 
@@ -16,7 +18,7 @@
 
 			if (data.user) {
 				// 플레이어 생성
-				await createPlayer({ user_id: data.user.id as UserId, name: '모험가' });
+				await player.create({ user_id: data.user.id as UserId, name: '모험가' });
 			}
 
 			// 페이지 새로고침하여 새 유저 정보 로드
@@ -33,32 +35,28 @@
 <div class="container mx-auto p-8">
 	<h1 class="mb-4 text-2xl font-bold">Current User Test</h1>
 
-	{#if $currentUser.status === 'loading'}
-		<p>Loading user...</p>
-	{:else if $currentUser.error}
-		<p class="text-red-500">Error: {$currentUser.error.message}</p>
-	{:else if $currentUser.data?.user}
+	{#if $user}
 		<div class="space-y-2">
 			<p>
 				<strong>User ID:</strong>
-				{$currentUser.data.user.id}
+				{$user.id}
 			</p>
 			<p>
 				<strong>Email:</strong>
-				{$currentUser.data.user.email ?? 'N/A'}
+				{$user.email ?? 'N/A'}
 			</p>
 			<p>
 				<strong>Is Anonymous:</strong>
-				{$currentUser.data.user.is_anonymous ? 'Yes' : 'No'}
+				{$user.is_anonymous ? 'Yes' : 'No'}
 			</p>
 			<p>
 				<strong>Role Type:</strong>
-				{$currentUser.data.role?.type ?? 'No role (regular user)'}
+				{$role?.type ?? 'No role (regular user)'}
 			</p>
-			{#if $currentUser.data.role}
+			{#if $role}
 				<p>
 					<strong>Role Created At:</strong>
-					{new Date($currentUser.data.role.created_at).toLocaleString()}
+					{new Date($role.created_at).toLocaleString()}
 				</p>
 			{/if}
 		</div>

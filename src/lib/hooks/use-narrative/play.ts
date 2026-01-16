@@ -14,7 +14,7 @@ import type {
 	NarrativeNodeChoiceStore,
 	PlayStore,
 } from '.';
-import { useCurrentUser } from '../use-current-user';
+import { useCurrent } from '../use-current';
 import { useServerPayload } from '../use-server-payload.svelte';
 import { useAdmin } from '../use-admin';
 
@@ -60,22 +60,22 @@ export const run = (params: Params) => (narrativeNodeId: string) => {
 export const roll = (params: Params) => {
 	const { playStore } = params;
 
-	// `useServerPayload`, `useCurrentUser`, `useAdmin`은 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
+	// `useServerPayload`, `useCurrent`, `useAdmin`은 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
 	// async 함수 내부에서 호출하면 `lifecycle_outside_component` 에러 발생
 	const { supabase } = useServerPayload();
-	const { store: currentUserStore } = useCurrentUser();
+	const current = useCurrent();
 	const { store: adminStore, mock } = useAdmin();
 
 	return async (): Promise<PlayerRolledDice | undefined> => {
-		const { data } = get(currentUserStore);
-		const { user, currentPlayer } = data;
+		const user = get(current.user);
+		const player = get(current.player);
 		const { narrativeNode, narrativeDiceRoll } = get(playStore);
 		const { mode } = get(adminStore);
 
-		if (!user?.id || !currentPlayer?.id || !narrativeNode || !narrativeDiceRoll) {
+		if (!user?.id || !player?.id || !narrativeNode || !narrativeDiceRoll) {
 			console.warn('Missing required data:', {
 				user,
-				currentPlayer,
+				player,
 				narrativeNode,
 				narrativeDiceRoll,
 			});
@@ -92,7 +92,7 @@ export const roll = (params: Params) => {
 				.from('player_rolled_dices')
 				.insert({
 					user_id: user.id,
-					player_id: currentPlayer.id,
+					player_id: player.id,
 					narrative_id: narrativeNode.narrative_id,
 					narrative_node_id: narrativeNode.id,
 					narrative_dice_roll_id: narrativeDiceRoll.id,

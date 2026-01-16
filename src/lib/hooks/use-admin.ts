@@ -5,7 +5,7 @@ import type {
 	NarrativeDiceRoll,
 	PlayerRolledDiceId,
 } from '$lib/types';
-import { useCurrentUser } from './use-current-user';
+import { useCurrent } from './use-current';
 
 export type AdminMode = 'admin' | 'player';
 
@@ -16,7 +16,7 @@ export interface AdminStoreState {
 export const adminStore = writable<AdminStoreState>({ mode: 'player' });
 
 export function useAdmin() {
-	const { store: currentUserStore } = useCurrentUser();
+	const current = useCurrent();
 
 	const setMode = (mode: AdminMode) => {
 		adminStore.set({ mode });
@@ -30,18 +30,18 @@ export function useAdmin() {
 			narrativeNode: NarrativeNode;
 			narrativeDiceRoll: NarrativeDiceRoll;
 		}): PlayerRolledDice => {
-			const { data } = get(currentUserStore);
-			const { user, currentPlayer } = data;
+			const user = get(current.user);
+			const player = get(current.player);
 
-			if (!user?.id || !currentPlayer?.id) {
-				throw new Error('user 또는 currentPlayer가 없습니다');
+			if (!user?.id || !player?.id) {
+				throw new Error('user 또는 player가 없습니다');
 			}
 
 			return {
 				id: crypto.randomUUID() as PlayerRolledDiceId,
 				created_at: new Date().toISOString(),
 				user_id: user.id,
-				player_id: currentPlayer.id,
+				player_id: player.id,
 				narrative_id: narrativeNode.narrative_id,
 				narrative_node_id: narrativeNode.id,
 				narrative_dice_roll_id: narrativeDiceRoll.id,
