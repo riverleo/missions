@@ -1,6 +1,6 @@
 import type { Database } from './supabase.raw';
 import type { Brand } from './core';
-import type { VectorKey } from './vector';
+import type { VectorKey, TileCellKey } from './vector';
 
 // ============================================================
 // Helper Types for Supabase Database Access
@@ -1621,7 +1621,7 @@ export type WorldTileMap = Omit<
 	player_id: PlayerId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data: Record<VectorKey, { tile_id: TileId; durability: number }>;
+	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
 export type WorldTileMapInsert = Omit<
@@ -1633,7 +1633,7 @@ export type WorldTileMapInsert = Omit<
 	scenario_id: ScenarioId;
 	world_id: WorldId;
 	terrain_id: TerrainId;
-	data: Record<VectorKey, { tile_id: TileId; durability: number }>;
+	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
 };
 type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
 export type WorldTileMapUpdate = Omit<
@@ -1646,7 +1646,7 @@ export type WorldTileMapUpdate = Omit<
 	scenario_id?: ScenarioId;
 	world_id?: WorldId;
 	terrain_id?: TerrainId;
-	data?: Record<VectorKey, { tile_id: TileId; durability: number }>;
+	data?: Record<TileCellKey, { tile_id: TileId; durability: number }>;
 };
 
 // World Character Need types

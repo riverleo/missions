@@ -334,7 +334,7 @@ export class WorldContextBlueprint {
 			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
 			const tiles = this.getTileCellsFromStart().map((tileCell) => ({
 				tileId: EntityIdUtils.template.id<TileId>(entityTemplateId),
-				vector: vectorUtils.createVector(tileCell.col, tileCell.row),
+				tileCell,
 			}));
 			// 모든 타일을 한 번에 생성
 			this.context.createTilesInWorldTileMap(tiles);

@@ -10,6 +10,7 @@ import type {
 	VectorKey,
 	TileId,
 	Vector,
+	TileCell,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
@@ -466,7 +467,7 @@ export class WorldContext {
 		createWorldItem(this, insert);
 	}
 
-	createTilesInWorldTileMap(tiles: Array<{ tileId: TileId; vector: Vector }>) {
+	createTilesInWorldTileMap(tiles: Array<{ tileId: TileId; tileCell: TileCell }>) {
 		createTilesInWorldTileMap(this, tiles);
 	}
 

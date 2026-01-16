@@ -3,13 +3,14 @@ import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	TileId,
-	VectorKey,
 	WorldId,
 	WorldTileMap,
 	WorldTileMapInsert,
-	Vector,
+	TileCell,
+	TileCellKey,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { TEST_WORLD_ID } from '$lib/constants';
@@ -84,7 +85,7 @@ export async function deleteWorldTileMap(worldId: WorldId) {
 
 export function createTilesInWorldTileMap(
 	worldContext: WorldContext,
-	tiles: Array<{ tileId: TileId; vector: Vector }>
+	tiles: Array<{ tileId: TileId; tileCell: TileCell }>
 ) {
 	const { worldTileMapStore } = useWorld();
 
@@ -100,9 +101,9 @@ export function createTilesInWorldTileMap(
 		produce(state, (draft) => {
 			const tileMap = draft.data[worldContext.worldId];
 			if (tileMap) {
-				for (const { tileId, vector } of tiles) {
-					const tileVector = `${vector.x},${vector.y}` as VectorKey;
-					tileMap.data[tileVector] = {
+				for (const { tileId, tileCell } of tiles) {
+					const tileCellKey = vectorUtils.createTileCellKey(tileCell);
+					tileMap.data[tileCellKey] = {
 						tile_id: tileId,
 						durability: 100,
 					};
@@ -112,12 +113,12 @@ export function createTilesInWorldTileMap(
 	);
 
 	// 모든 엔티티 생성
-	for (const { tileId, vector } of tiles) {
-		const tileVector = `${vector.x},${vector.y}` as VectorKey;
-		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileVector);
+	for (const { tileId, tileCell } of tiles) {
+		const tileCellKey = vectorUtils.createTileCellKey(tileCell);
+		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
 		if (!worldContext.entities[entityId]) {
 			try {
-				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileVector, tileId);
+				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileCellKey, tileId);
 				entity.addToWorld();
 			} catch (error) {
 				console.warn('Skipping tile creation:', error);
