@@ -103,9 +103,10 @@
 			return false;
 		}
 
-		// 셀인 경우 그대로 사용
-		const absoluteCol = x + vector.x;
-		const absoluteRow = y + vector.y;
+		// 건물인 경우: 픽셀 좌표를 셀 좌표로 변환 후 상대 인덱스 더하기
+		const baseCell = vectorUtils.vectorToCell({ x, y } as Vector);
+		const absoluteCol = baseCell.col + vector.x;
+		const absoluteRow = baseCell.row + vector.y;
 
 		return overlappingVectors().has(`${absoluteCol},${absoluteRow}`);
 	}
