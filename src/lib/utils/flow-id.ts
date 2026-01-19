@@ -235,28 +235,16 @@ export function isActionNodeId(nodeId: string): boolean {
 	return nodeId.startsWith('action-');
 }
 
-// Action Success Edge
-export function createActionSuccessEdgeId(
+// Action Next Edge
+export function createActionNextEdgeId(
 	sourceAction: NeedBehaviorAction,
 	targetAction: NeedBehaviorAction
 ): string {
-	return `action-${sourceAction.id}-success-action-${targetAction.id}`;
+	return `action-${sourceAction.id}-next-action-${targetAction.id}`;
 }
 
-export function isActionSuccessEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-success-action-');
-}
-
-// Action Failure Edge
-export function createActionFailureEdgeId(
-	sourceAction: NeedBehaviorAction,
-	targetAction: NeedBehaviorAction
-): string {
-	return `action-${sourceAction.id}-failure-action-${targetAction.id}`;
-}
-
-export function isActionFailureEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-failure-action-');
+export function isActionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-action-');
 }
 
 // ============================================
@@ -276,28 +264,16 @@ export function isConditionBehaviorActionNodeId(nodeId: string): boolean {
 	return nodeId.startsWith('condition-behavior-action-');
 }
 
-// Building Behavior Action Success Edge
-export function createConditionBehaviorActionSuccessEdgeId(
+// Building Behavior Action Next Edge
+export function createConditionBehaviorActionNextEdgeId(
 	sourceAction: ConditionBehaviorAction,
 	targetAction: ConditionBehaviorAction
 ): string {
-	return `condition-behavior-action-${sourceAction.id}-success-condition-behavior-action-${targetAction.id}`;
+	return `condition-behavior-action-${sourceAction.id}-next-condition-behavior-action-${targetAction.id}`;
 }
 
-export function isConditionBehaviorActionSuccessEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-success-');
-}
-
-// Building Behavior Action Failure Edge
-export function createConditionBehaviorActionFailureEdgeId(
-	sourceAction: ConditionBehaviorAction,
-	targetAction: ConditionBehaviorAction
-): string {
-	return `condition-behavior-action-${sourceAction.id}-failure-condition-behavior-action-${targetAction.id}`;
-}
-
-export function isConditionBehaviorActionFailureEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-failure-');
+export function isConditionBehaviorActionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-');
 }
 
 // ============================================
@@ -317,28 +293,16 @@ export function isItemBehaviorActionNodeId(nodeId: string): boolean {
 	return nodeId.startsWith('item-behavior-action-');
 }
 
-// Item Behavior Action Success Edge
-export function createItemBehaviorActionSuccessEdgeId(
+// Item Behavior Action Next Edge
+export function createItemBehaviorActionNextEdgeId(
 	sourceAction: ItemBehaviorAction,
 	targetAction: ItemBehaviorAction
 ): string {
-	return `item-behavior-action-${sourceAction.id}-success-item-behavior-action-${targetAction.id}`;
+	return `item-behavior-action-${sourceAction.id}-next-item-behavior-action-${targetAction.id}`;
 }
 
-export function isItemBehaviorActionSuccessEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-success-');
-}
-
-// Item Behavior Action Failure Edge
-export function createItemBehaviorActionFailureEdgeId(
-	sourceAction: ItemBehaviorAction,
-	targetAction: ItemBehaviorAction
-): string {
-	return `item-behavior-action-${sourceAction.id}-failure-item-behavior-action-${targetAction.id}`;
-}
-
-export function isItemBehaviorActionFailureEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-failure-');
+export function isItemBehaviorActionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-');
 }
 
 // Condition Flow Node/Edge IDs

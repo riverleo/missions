@@ -633,11 +633,10 @@ export type Database = {
           condition_behavior_id: string
           condition_id: string
           duration_ticks: number
-          failure_condition_behavior_action_id: string | null
           id: string
+          next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          success_condition_behavior_action_id: string | null
         }
         Insert: {
           building_id?: string | null
@@ -650,11 +649,10 @@ export type Database = {
           condition_behavior_id: string
           condition_id: string
           duration_ticks?: number
-          failure_condition_behavior_action_id?: string | null
           id?: string
+          next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          success_condition_behavior_action_id?: string | null
         }
         Update: {
           building_id?: string | null
@@ -667,11 +665,10 @@ export type Database = {
           condition_behavior_id?: string
           condition_id?: string
           duration_ticks?: number
-          failure_condition_behavior_action_id?: string | null
           id?: string
+          next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          success_condition_behavior_action_id?: string | null
         }
         Relationships: [
           {
@@ -696,13 +693,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "condition_behavior_actions_failure_condition_behavior_acti_fkey"
-            columns: ["failure_condition_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "condition_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "condition_behavior_actions_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
@@ -711,7 +701,7 @@ export type Database = {
           },
           {
             foreignKeyName: "condition_behavior_actions_success_condition_behavior_acti_fkey"
-            columns: ["success_condition_behavior_action_id"]
+            columns: ["next_condition_behavior_action_id"]
             isOneToOne: false
             referencedRelation: "condition_behavior_actions"
             referencedColumns: ["id"]
@@ -1035,45 +1025,42 @@ export type Database = {
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks: number
-          failure_item_behavior_action_id: string | null
           id: string
           item_offset_x: number
           item_offset_y: number
           item_rotation: number
           item_scale: number
+          next_item_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          success_item_behavior_action_id: string | null
         }
         Insert: {
           behavior_id: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks?: number
-          failure_item_behavior_action_id?: string | null
           id?: string
           item_offset_x?: number
           item_offset_y?: number
           item_rotation?: number
           item_scale?: number
+          next_item_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          success_item_behavior_action_id?: string | null
         }
         Update: {
           behavior_id?: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           duration_ticks?: number
-          failure_item_behavior_action_id?: string | null
           id?: string
           item_offset_x?: number
           item_offset_y?: number
           item_rotation?: number
           item_scale?: number
+          next_item_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          success_item_behavior_action_id?: string | null
         }
         Relationships: [
           {
@@ -1081,13 +1068,6 @@ export type Database = {
             columns: ["behavior_id"]
             isOneToOne: false
             referencedRelation: "item_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_failure_item_behavior_action_id_fkey"
-            columns: ["failure_item_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "item_behavior_actions"
             referencedColumns: ["id"]
           },
           {
@@ -1099,7 +1079,7 @@ export type Database = {
           },
           {
             foreignKeyName: "item_behavior_actions_success_item_behavior_action_id_fkey"
-            columns: ["success_item_behavior_action_id"]
+            columns: ["next_item_behavior_action_id"]
             isOneToOne: false
             referencedRelation: "item_behavior_actions"
             referencedColumns: ["id"]
@@ -1516,13 +1496,12 @@ export type Database = {
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           character_id: string | null
           duration_ticks: number
-          failure_need_behavior_action_id: string | null
           id: string
           item_id: string | null
           need_id: string
+          next_need_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          success_need_behavior_action_id: string | null
           type: Database["public"]["Enums"]["need_behavior_action_type"]
         }
         Insert: {
@@ -1532,13 +1511,12 @@ export type Database = {
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           duration_ticks?: number
-          failure_need_behavior_action_id?: string | null
           id?: string
           item_id?: string | null
           need_id: string
+          next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]
         }
         Update: {
@@ -1548,13 +1526,12 @@ export type Database = {
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           duration_ticks?: number
-          failure_need_behavior_action_id?: string | null
           id?: string
           item_id?: string | null
           need_id?: string
+          next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          success_need_behavior_action_id?: string | null
           type?: Database["public"]["Enums"]["need_behavior_action_type"]
         }
         Relationships: [
@@ -1580,13 +1557,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_behavior_actions_failure_need_behavior_action_id_fkey"
-            columns: ["failure_need_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "need_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "need_behavior_actions_item_id_fkey"
             columns: ["item_id"]
             isOneToOne: false
@@ -1609,7 +1579,7 @@ export type Database = {
           },
           {
             foreignKeyName: "need_behavior_actions_success_need_behavior_action_id_fkey"
-            columns: ["success_need_behavior_action_id"]
+            columns: ["next_need_behavior_action_id"]
             isOneToOne: false
             referencedRelation: "need_behavior_actions"
             referencedColumns: ["id"]

@@ -67,8 +67,7 @@ create table condition_behavior_actions (
   duration_ticks float not null default 0,
 
   -- 다음 액션
-  success_condition_behavior_action_id uuid references condition_behavior_actions(id) on delete set null,
-  failure_condition_behavior_action_id uuid references condition_behavior_actions(id) on delete set null
+  next_condition_behavior_action_id uuid references condition_behavior_actions(id) on delete set null
 );
 
 alter table condition_behavior_actions enable row level security;

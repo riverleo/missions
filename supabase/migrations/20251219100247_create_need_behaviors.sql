@@ -68,9 +68,8 @@ create table need_behavior_actions (
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 0,
 
-  -- 노드 구조: 성공/실패 시 다음 액션
-  success_need_behavior_action_id uuid references need_behavior_actions(id) on delete set null,
-  failure_need_behavior_action_id uuid references need_behavior_actions(id) on delete set null
+  -- 다음 액션
+  next_need_behavior_action_id uuid references need_behavior_actions(id) on delete set null
 );
 
 alter table need_behavior_actions enable row level security;

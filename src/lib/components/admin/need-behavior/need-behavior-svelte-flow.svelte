@@ -15,7 +15,7 @@
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
-	import { createActionNodeId, parseActionNodeId, isActionSuccessEdgeId } from '$lib/utils/flow-id';
+	import { createActionNodeId, parseActionNodeId, isActionNextEdgeId } from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
@@ -49,11 +49,7 @@
 	);
 	const selectedActionHasParent = $derived(
 		selectedAction
-			? actions.some(
-					(a) =>
-						a.success_need_behavior_action_id === selectedAction.id ||
-						a.failure_need_behavior_action_id === selectedAction.id
-				)
+			? actions.some((a) => a.next_need_behavior_action_id === selectedAction.id)
 			: false
 	);
 
@@ -79,12 +75,8 @@
 			// 이미 연결된 핸들에는 새로운 연결 불가
 			const sourceActionId = parseActionNodeId(connection.source);
 			const sourceAction = actions.find((a) => a.id === sourceActionId);
-			if (sourceAction) {
-				const isSuccess = connection.sourceHandle === 'success';
-				const existingConnection = isSuccess
-					? sourceAction.success_need_behavior_action_id
-					: sourceAction.failure_need_behavior_action_id;
-				if (existingConnection) return false;
+			if (sourceAction && sourceAction.next_need_behavior_action_id) {
+				return false;
 			}
 
 			return true;
@@ -98,23 +90,19 @@
 			const sourceId = parseActionNodeId(connection.source);
 			const targetId = parseActionNodeId(connection.target);
 
-			// sourceHandle에 따라 success 또는 failure로 연결
-			const isSuccess = connection.sourceHandle === 'success';
-
 			await admin.updateNeedBehaviorAction(sourceId as NeedBehaviorActionId, {
-				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
-					targetId,
+				next_need_behavior_action_id: targetId as NeedBehaviorActionId,
 			});
 
 			edges = [
 				...edges,
 				{
-					id: `${connection.source}-${connection.sourceHandle}-${connection.target}`,
+					id: `${connection.source}-next-${connection.target}`,
 					source: connection.source,
-					sourceHandle: connection.sourceHandle,
+					sourceHandle: 'next',
 					target: connection.target,
 					targetHandle: 'target',
-					style: isSuccess ? 'stroke: var(--color-green-500)' : 'stroke: var(--color-red-500)',
+					
 					deletable: true,
 				},
 			];
@@ -139,11 +127,7 @@
 		if (fromHandleId === 'target') return;
 
 		// 이미 연결된 핸들에서는 새 액션 생성 불가
-		if (fromHandleId === 'success') {
-			if (fromAction.success_need_behavior_action_id) return;
-		} else if (fromHandleId === 'failure') {
-			if (fromAction.failure_need_behavior_action_id) return;
-		}
+		if (fromHandleId === 'next' && fromAction.next_need_behavior_action_id) return;
 
 		// 마우스/터치 위치를 플로우 좌표로 변환
 		const clientX =
@@ -162,11 +146,9 @@
 				type: 'idle',
 			});
 
-			// 우측 핸들(success/failure)에서 드래그: 기존 액션이 새 액션을 가리킴
-			const isSuccess = fromHandleId === 'success';
+			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
 			await admin.updateNeedBehaviorAction(fromActionId as NeedBehaviorActionId, {
-				[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']:
-					newAction.id,
+				next_need_behavior_action_id: newAction.id,
 			});
 
 			skipConvertEffect = false;
@@ -194,10 +176,9 @@
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
 				const sourceId = parseActionNodeId(edge.source);
-				const isSuccess = isActionSuccessEdgeId(edge.id);
 
 				await admin.updateNeedBehaviorAction(sourceId as NeedBehaviorActionId, {
-					[isSuccess ? 'success_need_behavior_action_id' : 'failure_need_behavior_action_id']: null,
+					next_need_behavior_action_id: null,
 				});
 			}
 
@@ -234,49 +215,29 @@
 			const col = index % 3;
 
 			// 이 액션을 가리키는 부모 액션 찾기
-			const parentAction = actions.find(
-				(a) =>
-					a.success_need_behavior_action_id === action.id ||
-					a.failure_need_behavior_action_id === action.id
-			);
-			const isSuccessTarget = parentAction?.success_need_behavior_action_id === action.id;
+			const parentAction = actions.find((a) => a.next_need_behavior_action_id === action.id);
 
 			newNodes.push({
 				id: createActionNodeId(action),
 				type: 'action',
-				data: { action, parentAction, isSuccessTarget },
+				data: { action, parentAction },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
 				deletable: true,
 			});
 		});
 
-		// 성공/실패 엣지
+		// 다음 액션 엣지
 		actions.forEach((action) => {
-			if (action.success_need_behavior_action_id) {
-				const targetAction = actions.find((a) => a.id === action.success_need_behavior_action_id);
+			if (action.next_need_behavior_action_id) {
+				const targetAction = actions.find((a) => a.id === action.next_need_behavior_action_id);
 				if (targetAction) {
 					newEdges.push({
-						id: `${createActionNodeId(action)}-success-${createActionNodeId(targetAction)}`,
+						id: `${createActionNodeId(action)}-next-${createActionNodeId(targetAction)}`,
 						source: createActionNodeId(action),
-						sourceHandle: 'success',
+						sourceHandle: 'next',
 						target: createActionNodeId(targetAction),
 						targetHandle: 'target',
-						style: 'stroke: var(--color-green-500)',
-						deletable: true,
-					});
-				}
-			}
-
-			if (action.failure_need_behavior_action_id) {
-				const targetAction = actions.find((a) => a.id === action.failure_need_behavior_action_id);
-				if (targetAction) {
-					newEdges.push({
-						id: `${createActionNodeId(action)}-failure-${createActionNodeId(targetAction)}`,
-						source: createActionNodeId(action),
-						sourceHandle: 'failure',
-						target: createActionNodeId(targetAction),
-						targetHandle: 'target',
-						style: 'stroke: var(--color-red-500)',
+						
 						deletable: true,
 					});
 				}
@@ -295,14 +256,7 @@
 			// flowNodes.current에서 측정된 크기를 가져옴
 			const nodesWithMeasured = flowNodes.current;
 
-			// success 엣지를 먼저 배치하여 위쪽에 오도록 정렬
-			const sortedEdges = [...edges].sort((a, b) => {
-				if (a.sourceHandle === 'success' && b.sourceHandle === 'failure') return -1;
-				if (a.sourceHandle === 'failure' && b.sourceHandle === 'success') return 1;
-				return 0;
-			});
-
-			const layoutedNodes = await applyElkLayout(nodesWithMeasured, sortedEdges);
+			const layoutedNodes = await applyElkLayout(nodesWithMeasured, edges);
 			nodes = layoutedNodes;
 		} catch (error) {
 			console.error('Failed to layout:', error);

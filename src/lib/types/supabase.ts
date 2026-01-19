@@ -955,15 +955,13 @@ export type ConditionBehaviorAction = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
-	| 'success_condition_behavior_action_id'
-	| 'failure_condition_behavior_action_id'
+	| 'next_condition_behavior_action_id'
 > & {
 	id: ConditionBehaviorActionId;
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
 	condition_behavior_id: ConditionBehaviorId;
-	success_condition_behavior_action_id: ConditionBehaviorActionId | null;
-	failure_condition_behavior_action_id: ConditionBehaviorActionId | null;
+	next_condition_behavior_action_id: ConditionBehaviorActionId | null;
 };
 type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
 export type ConditionBehaviorActionInsert = Omit<
@@ -971,14 +969,12 @@ export type ConditionBehaviorActionInsert = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
-	| 'success_condition_behavior_action_id'
-	| 'failure_condition_behavior_action_id'
+	| 'next_condition_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
 	condition_behavior_id: ConditionBehaviorId;
-	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
-	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 type ConditionBehaviorActionUpdateRow = TablesUpdate<'condition_behavior_actions'>;
 export type ConditionBehaviorActionUpdate = Omit<
@@ -987,15 +983,13 @@ export type ConditionBehaviorActionUpdate = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
-	| 'success_condition_behavior_action_id'
-	| 'failure_condition_behavior_action_id'
+	| 'next_condition_behavior_action_id'
 > & {
 	id?: ConditionBehaviorActionId;
 	scenario_id?: ScenarioId;
 	condition_id?: ConditionId;
 	condition_behavior_id?: ConditionBehaviorId;
-	success_condition_behavior_action_id?: ConditionBehaviorActionId | null;
-	failure_condition_behavior_action_id?: ConditionBehaviorActionId | null;
+	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 
 // Condition Effect types
@@ -1311,8 +1305,7 @@ export type NeedBehaviorAction = Omit<
 	building_id: BuildingId | null;
 	item_id: ItemId | null;
 	character_id: CharacterId | null;
-	success_need_behavior_action_id: NeedBehaviorActionId | null;
-	failure_need_behavior_action_id: NeedBehaviorActionId | null;
+	next_need_behavior_action_id: NeedBehaviorActionId | null;
 };
 type NeedBehaviorActionInsertRow = TablesInsert<'need_behavior_actions'>;
 export type NeedBehaviorActionInsert = Omit<
@@ -1323,8 +1316,7 @@ export type NeedBehaviorActionInsert = Omit<
 	| 'building_id'
 	| 'item_id'
 	| 'character_id'
-	| 'success_need_behavior_action_id'
-	| 'failure_need_behavior_action_id'
+	| 'next_need_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	need_id: NeedId;
@@ -1332,8 +1324,7 @@ export type NeedBehaviorActionInsert = Omit<
 	building_id?: BuildingId | null;
 	item_id?: ItemId | null;
 	character_id?: CharacterId | null;
-	success_need_behavior_action_id?: NeedBehaviorActionId | null;
-	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+	next_need_behavior_action_id?: NeedBehaviorActionId | null;
 };
 type NeedBehaviorActionUpdateRow = TablesUpdate<'need_behavior_actions'>;
 export type NeedBehaviorActionUpdate = Omit<
@@ -1345,8 +1336,7 @@ export type NeedBehaviorActionUpdate = Omit<
 	| 'building_id'
 	| 'item_id'
 	| 'character_id'
-	| 'success_need_behavior_action_id'
-	| 'failure_need_behavior_action_id'
+	| 'next_need_behavior_action_id'
 > & {
 	id?: NeedBehaviorActionId;
 	scenario_id?: ScenarioId;
@@ -1355,8 +1345,7 @@ export type NeedBehaviorActionUpdate = Omit<
 	building_id?: BuildingId | null;
 	item_id?: ItemId | null;
 	character_id?: CharacterId | null;
-	success_need_behavior_action_id?: NeedBehaviorActionId | null;
-	failure_need_behavior_action_id?: NeedBehaviorActionId | null;
+	next_need_behavior_action_id?: NeedBehaviorActionId | null;
 };
 
 // Item types
@@ -1407,27 +1396,23 @@ export type ItemBehaviorAction = Omit<
 	| 'id'
 	| 'scenario_id'
 	| 'behavior_id'
-	| 'success_item_behavior_action_id'
-	| 'failure_item_behavior_action_id'
+	| 'next_item_behavior_action_id'
 > & {
 	id: ItemBehaviorActionId;
 	scenario_id: ScenarioId;
 	behavior_id: ItemBehaviorId;
-	success_item_behavior_action_id: ItemBehaviorActionId | null;
-	failure_item_behavior_action_id: ItemBehaviorActionId | null;
+	next_item_behavior_action_id: ItemBehaviorActionId | null;
 };
 type ItemBehaviorActionInsertRow = TablesInsert<'item_behavior_actions'>;
 export type ItemBehaviorActionInsert = Omit<
 	ItemBehaviorActionInsertRow,
 	| 'scenario_id'
 	| 'behavior_id'
-	| 'success_item_behavior_action_id'
-	| 'failure_item_behavior_action_id'
+	| 'next_item_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	behavior_id: ItemBehaviorId;
-	success_item_behavior_action_id?: ItemBehaviorActionId | null;
-	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+	next_item_behavior_action_id?: ItemBehaviorActionId | null;
 };
 type ItemBehaviorActionUpdateRow = TablesUpdate<'item_behavior_actions'>;
 export type ItemBehaviorActionUpdate = Omit<
@@ -1435,14 +1420,12 @@ export type ItemBehaviorActionUpdate = Omit<
 	| 'id'
 	| 'scenario_id'
 	| 'behavior_id'
-	| 'success_item_behavior_action_id'
-	| 'failure_item_behavior_action_id'
+	| 'next_item_behavior_action_id'
 > & {
 	id?: ItemBehaviorActionId;
 	scenario_id?: ScenarioId;
 	behavior_id?: ItemBehaviorId;
-	success_item_behavior_action_id?: ItemBehaviorActionId | null;
-	failure_item_behavior_action_id?: ItemBehaviorActionId | null;
+	next_item_behavior_action_id?: ItemBehaviorActionId | null;
 };
 
 // Behavior Priority types

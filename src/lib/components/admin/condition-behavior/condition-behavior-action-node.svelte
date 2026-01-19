@@ -8,7 +8,6 @@
 		data: {
 			action: ConditionBehaviorAction;
 			parentAction?: ConditionBehaviorAction;
-			isSuccessTarget?: boolean;
 		};
 		id: string;
 		selected?: boolean;
@@ -57,16 +56,5 @@
 		{/if}
 	</div>
 
-	<Handle
-		type="source"
-		position={Position.Right}
-		id="success"
-		style="background-color: var(--color-green-500); top: 30%"
-	/>
-	<Handle
-		type="source"
-		position={Position.Right}
-		id="failure"
-		style="background-color: var(--color-red-500); top: 70%"
-	/>
+	<Handle type="source" position={Position.Right} id="next" />
 </div>
