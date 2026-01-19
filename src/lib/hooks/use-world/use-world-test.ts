@@ -128,7 +128,7 @@ function createTestWorldStore() {
 			})
 		);
 
-		// PlayerScenario 로드
+		// PlayerScenario 로드 (current_tick이 저장된 tick 값으로 업데이트되어 있음)
 		player.playerScenarioStore.update((state) =>
 			produce(state, (draft) => {
 				draft.data[stored.playerScenario.id] = stored.playerScenario;

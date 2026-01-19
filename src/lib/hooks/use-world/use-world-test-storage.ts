@@ -18,6 +18,7 @@ import type {
 } from '$lib/types';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
+import { useCurrent } from '../use-current';
 import { vectorUtils } from '$lib/utils/vector';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 
@@ -111,6 +112,10 @@ export function save(state: StoredState) {
 		const players = get(player.store).data;
 		const playerScenarios = get(player.playerScenarioStore).data;
 
+		// useCurrent에서 tick 값 가져오기
+		const current = useCurrent();
+		const currentTick = get(current.tick);
+
 		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
 		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
@@ -151,6 +156,11 @@ export function save(state: StoredState) {
 			}
 		}
 
+		// playerScenario의 current_tick을 현재 tick으로 업데이트
+		const finalPlayerScenario = testPlayerScenario
+			? { ...testPlayerScenario, current_tick: currentTick }
+			: { ...defaultState.playerScenario, current_tick: currentTick };
+
 		const stored: StoredState = {
 			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
@@ -159,7 +169,7 @@ export function save(state: StoredState) {
 			worldItems: testWorldItems,
 			worldTileMaps: testWorldTileMaps,
 			player: testPlayer ?? defaultState.player,
-			playerScenario: testPlayerScenario ?? defaultState.playerScenario,
+			playerScenario: finalPlayerScenario,
 		};
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
 	} catch (e) {

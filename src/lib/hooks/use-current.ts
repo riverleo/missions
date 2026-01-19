@@ -139,6 +139,13 @@ function createCurrentStore() {
 		playerIdStore.set(playerId);
 	}
 
+	/**
+	 * 틱 값 설정 (테스트 또는 복원용)
+	 */
+	function setTick(tick: number) {
+		tickStore.set(tick);
+	}
+
 	return {
 		user: userStore as Readable<User | undefined>,
 		role: roleStore as Readable<UserRole | undefined>,
@@ -148,6 +155,7 @@ function createCurrentStore() {
 		init,
 		stopTick,
 		selectPlayer,
+		setTick,
 	};
 }
 
