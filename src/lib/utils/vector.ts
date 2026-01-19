@@ -131,33 +131,32 @@ function tileIndexToPixel(index: number): number {
  *
  * @param pixel - 커서의 월드 픽셀 좌표
  * @param size - 엔티티가 차지하는 셀 개수 (1, 2, 3칸 등)
- * @returns 그리드에 정렬된 기준 픽셀 좌표
+ * @returns 그리드에 정렬된 기준 픽셀 좌표 (항상 셀 경계)
  *
  * 동작 방식:
- * - size가 홀수 (1, 3, 5칸): 커서가 있는 셀의 **중앙 픽셀** 반환
+ * - size가 홀수 (1, 3, 5칸): 커서가 있는 셀을 중심으로 배치
  *   → 엔티티가 커서를 중심으로 배치되는 느낌
- *   예) pixel=42 (셀5), size=3 → 44 반환 (셀4의 중앙)
+ *   예) pixel=44 (셀5), size=3 → 32 반환 (셀4의 시작점, 셀4,5,6 차지)
  *
- * - size가 짝수 (2, 4, 6칸): 커서와 **가까운 셀 경계 픽셀** 반환
+ * - size가 짝수 (2, 4, 6칸): 커서와 가까운 셀 경계 기준으로 배치
  *   → 엔티티가 그리드 경계에 딱 맞게 배치되는 느낌
- *   예) pixel=42 (셀5 왼쪽), size=2 → 32 반환 (셀4 시작점)
- *   예) pixel=45 (셀5 오른쪽), size=2 → 40 반환 (셀5 시작점)
+ *   예) pixel=42 (셀5 왼쪽), size=2 → 32 반환 (셀4,5 차지)
+ *   예) pixel=45 (셀5 오른쪽), size=2 → 32 반환 (셀4,5 차지)
  */
 function snapPixelByCell(pixel: number, size: number): number {
 	const index = pixelToCellIndex(pixel);
-	let snapTarget: number;
 
 	if (size % 2 === 1) {
-		// 홀수: 커서가 있는 셀의 중앙
-		snapTarget = cellIndexToPixel(index);
+		// 홀수: 커서가 있는 셀을 중심으로 배치 (시작 셀의 왼쪽 경계 반환)
+		return (index - Math.floor(size / 2)) * CELL_SIZE;
 	} else {
-		// 짝수: 커서와 가까운 셀 경계
+		// 짝수: 커서와 가까운 셀 경계를 기준으로 배치
 		const leftBoundary = index * CELL_SIZE;
 		const rightBoundary = (index + 1) * CELL_SIZE;
-		snapTarget = pixel - leftBoundary < rightBoundary - pixel ? leftBoundary : rightBoundary;
+		const closerBoundaryIndex =
+			pixel - leftBoundary < rightBoundary - pixel ? index : index + 1;
+		return (closerBoundaryIndex - size / 2) * CELL_SIZE;
 	}
-
-	return snapTarget - Math.floor(size / 2) * CELL_SIZE;
 }
 
 /**
