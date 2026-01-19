@@ -13,7 +13,6 @@ import type {
 	TerrainId,
 	Player,
 	PlayerScenario,
-	UserId,
 	PlayerScenarioId,
 	ScreenVector,
 } from '$lib/types';
@@ -24,16 +23,12 @@ import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$
 
 const STORAGE_KEY = 'test-world-state';
 
-export interface WorldTestStoreState {
+export interface StoredState {
 	open: boolean;
 	openPanel: boolean;
 	selectedTerrainId?: TerrainId;
 	modalScreenVector: ScreenVector;
 	debug: boolean;
-}
-
-// localStorage 저장 포맷 (WorldTestStoreState + world 데이터)
-export interface StoredState extends WorldTestStoreState {
 	worlds?: Record<WorldId, World>;
 	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
 	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
@@ -100,7 +95,7 @@ export function load(): StoredState {
 	return defaultState;
 }
 
-export function save(state: WorldTestStoreState) {
+export function save(state: StoredState) {
 	if (!browser) return;
 	try {
 		// useWorld 스토어에서 TEST_WORLD_ID와 관련된 데이터만 필터링

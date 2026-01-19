@@ -13,17 +13,14 @@
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
 	import {
 		DropdownMenu,
 		DropdownMenuTrigger,
 		DropdownMenuContent,
-		DropdownMenuCheckboxItem,
 		DropdownMenuRadioGroup,
 		DropdownMenuRadioItem,
-		DropdownMenuSeparator,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconChevronDown } from '@tabler/icons-svelte';

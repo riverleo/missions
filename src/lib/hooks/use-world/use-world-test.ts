@@ -1,12 +1,11 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldId, PlayerId, ScenarioId, TerrainId, UserId, ScreenVector } from '$lib/types';
+import type { TerrainId, ScreenVector } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
-import { vectorUtils } from '$lib/utils/vector';
-import { load, save, type WorldTestStoreState } from './use-world-test-storage';
+import { load, save, type StoredState } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
 import { TEST_WORLD_ID } from '$lib/constants';
 
@@ -15,7 +14,7 @@ let instance: ReturnType<typeof createTestWorldStore> | undefined;
 function createTestWorldStore() {
 	const stored = load();
 
-	const store = writable<WorldTestStoreState>(stored);
+	const store = writable<StoredState>(stored);
 
 	// 5초마다 localStorage에 저장
 	if (browser) {
