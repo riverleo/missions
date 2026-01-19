@@ -256,6 +256,8 @@ export class WorldContext {
 		width?: number;
 		height?: number;
 	}) {
+		console.time('World Load');
+
 		this.render = Render.create({
 			element,
 			engine: this.engine,
@@ -310,6 +312,8 @@ export class WorldContext {
 
 		Runner.run(this.runner, this.engine);
 
+		console.timeEnd('World Load');
+
 		return () => {
 			this.initialized = false;
 			Runner.stop(this.runner);
@@ -327,6 +331,8 @@ export class WorldContext {
 	}
 
 	reload() {
+		console.time('World Reload');
+
 		if (!this.initialized) {
 			console.warn('Cannot reload terrain: WorldContext not initialized');
 			return;
@@ -341,8 +347,10 @@ export class WorldContext {
 		Composite.clear(this.engine.world, false);
 
 		// 바운더리 생성
+		console.time('Create Boundaries');
 		this.boundaries = createBoundaries(this.terrain.width, this.terrain.height, this.debug);
 		Composite.add(this.engine.world, Object.values(this.boundaries));
+		console.timeEnd('Create Boundaries');
 
 		// 엔티티 바디 재추가
 		for (const entity of Object.values(this.entities)) {
@@ -354,13 +362,17 @@ export class WorldContext {
 			Composite.add(this.engine.world, this.mouseConstraint);
 		}
 
+		console.time('Pathfinder Update');
 		this.pathfinder.update();
 		this.pathfinderUpdated++;
+		console.timeEnd('Pathfinder Update');
 
 		// 스토어 데이터로부터 엔티티 초기화
 		initializeEntities(this);
 
 		this.updateRenderBounds();
+
+		console.timeEnd('World Reload');
 	}
 
 	// Matter.js render bounds 업데이트 및 카메라 변경 알림

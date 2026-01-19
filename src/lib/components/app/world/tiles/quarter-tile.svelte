@@ -34,9 +34,9 @@
 		if (overlapping !== undefined) {
 			const cursor = context.blueprint.cursor;
 			if (cursor && cursor.type === 'tile') {
-				const tileCells = context.blueprint.getTileCellsFromStart();
-				// tileCells는 이미 타일 셀 좌표
-				return tileCells.some((tileCell) => tileCell.col === tx && tileCell.row === ty);
+				// Set에서 직접 키 존재 여부 확인 (O(1) lookup)
+				const key = vectorUtils.createTileCellKey(tx, ty);
+				return context.blueprint.cursorTileCellKeys.has(key);
 			}
 		}
 
@@ -82,7 +82,7 @@
 	class="absolute"
 	style="left: {tileX * TILE_SIZE}px; top: {tileY *
 		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {overlapping !== undefined
-		? `background-color: ${overlapping ? 'rgba(239, 68, 68, 0.8)' : 'rgba(255, 255, 255, 0.8)'};`
+		? `background-color: ${overlapping ? 'rgba(239, 68, 68, 1)' : 'rgba(255, 255, 255, 0.8)'};`
 		: ''} {style}"
 	role="button"
 	tabindex="-1"

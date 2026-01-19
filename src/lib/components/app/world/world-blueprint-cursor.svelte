@@ -9,12 +9,15 @@
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
 	import type { BuildingId, CharacterId, ItemId, Cell } from '$lib/types';
+	import type { TileCell } from '$lib/types/vector';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
 
 	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
-	const tileCells = $derived(world.blueprint.getTileCellsFromStart());
+	const tileCells = $derived(
+		Array.from(world.blueprint.cursorTileCellKeys).map((key) => vectorUtils.createTileCell(key))
+	);
 
 	const building = $derived.by(() => {
 		if (!entityTemplateId || !EntityIdUtils.template.is('building', entityTemplateId))
@@ -77,9 +80,9 @@
 	});
 
 	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
+	// getOverlappingCells() 대신 캐시된 overlappingCells 사용
 	const overlappingCells = $derived.by(() => {
-		const cells = world.blueprint.getOverlappingCells();
-		return new Set(cells.map((c) => vectorUtils.createCellKey(c)));
+		return new Set(world.blueprint.overlappingCells.map((c) => vectorUtils.createCellKey(c)));
 	});
 
 	// 셀이 겹치는지 확인 (절대 좌표 기준)

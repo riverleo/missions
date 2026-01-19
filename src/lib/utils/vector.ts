@@ -51,8 +51,14 @@ function createScreenVectorKey(xOrVector: number | ScreenVector, y?: number): Sc
 /**
  * Cell 브랜드 타입 생성
  */
-function createCell(col: number, row: number): Cell {
-	return { col, row } as Cell;
+function createCell(col: number, row: number): Cell;
+function createCell(key: CellKey): Cell;
+function createCell(colOrKey: number | CellKey, row?: number): Cell {
+	if (typeof colOrKey === 'number') {
+		return { col: colOrKey, row: row! } as Cell;
+	}
+	const [colStr, rowStr] = colOrKey.split(',');
+	return { col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) } as Cell;
 }
 
 /**
@@ -70,8 +76,14 @@ function createCellKey(colOrCell: number | Cell, row?: number): CellKey {
 /**
  * Tile 브랜드 타입 생성
  */
-function createTileCell(col: number, row: number): TileCell {
-	return { col, row } as TileCell;
+function createTileCell(col: number, row: number): TileCell;
+function createTileCell(key: TileCellKey): TileCell;
+function createTileCell(colOrKey: number | TileCellKey, row?: number): TileCell {
+	if (typeof colOrKey === 'number') {
+		return { col: colOrKey, row: row! } as TileCell;
+	}
+	const [colStr, rowStr] = colOrKey.split(',');
+	return { col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) } as TileCell;
 }
 
 /**

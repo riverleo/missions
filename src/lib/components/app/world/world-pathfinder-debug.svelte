@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { useWorldContext } from '$lib/hooks/use-world';
 	import { CELL_SIZE } from '$lib/constants';
+	import { vectorUtils } from '$lib/utils/vector';
 
 	const world = useWorldContext();
 	const { pathfinder } = world;
@@ -8,36 +9,24 @@
 	let walkables = $state<Array<{ col: number; row: number }>>([]);
 	let jumpables = $state<Array<{ col: number; row: number }>>([]);
 
-	// pathfinder 업데이트 시 walkable/jumpable 셀만 재계산
+	// pathfinder 업데이트 시 walkable/jumpable 셀만 재계산 (디버그 모드일 때만)
 	$effect(() => {
-		world.pathfinderUpdated;
+		if (!world.debug) return;
 
+		world.pathfinderUpdated;
 		// walkable 셀 수집
-		const walkable: Array<{ col: number; row: number }> = [];
-		for (let row = 0; row < pathfinder.rows; row++) {
-			for (let col = 0; col < pathfinder.cols; col++) {
-				if (pathfinder.grid.isWalkableAt(col, row)) {
-					walkable.push({ col, row });
-				}
-			}
-		}
-		walkables = walkable;
+		walkables = Array.from(pathfinder.walkables).map((cellKey) => vectorUtils.createCell(cellKey));
 
 		// jumpable 셀 수집
-		const jumpable: Array<{ col: number; row: number }> = [];
-		for (const cellKey of pathfinder.jumpables) {
-			const [colStr, rowStr] = cellKey.split(',');
-			jumpable.push({ col: parseInt(colStr!, 10), row: parseInt(rowStr!, 10) });
-		}
-		jumpables = jumpable;
+		jumpables = Array.from(pathfinder.jumpables).map((cellKey) => vectorUtils.createCell(cellKey));
 	});
 </script>
 
 {#if world.debug}
-	<!-- Walkable 셀 하이라이트 -->
-	{#each walkables as cell (cell.col + ',' + cell.row)}
+	<!-- Walkable 영역 하이라이트 -->
+	{#each walkables as cell (vectorUtils.createCellKey(cell.col, cell.row))}
 		<div
-			class="absolute border border-green-500/10 bg-green-500/5"
+			class="absolute border border-green-500/30 bg-green-500/10"
 			style="
 				top: {cell.row * CELL_SIZE}px;
 				left: {cell.col * CELL_SIZE}px;
@@ -48,7 +37,7 @@
 	{/each}
 
 	<!-- Jump Zone 셀 하이라이트 -->
-	{#each jumpables as cell (cell.col + ',' + cell.row)}
+	{#each jumpables as cell (vectorUtils.createCellKey(cell.col, cell.row))}
 		<div
 			class="absolute border border-yellow-500/30 bg-yellow-500/20"
 			style="

@@ -16,6 +16,13 @@ function safeSetWalkableAt(pathfinder: Pathfinder, walkable: boolean, ...cells: 
 			cell.row < pathfinder.rows
 		) {
 			pathfinder.grid.setWalkableAt(cell.col, cell.row, walkable);
+			// walkables Set 업데이트
+			const cellKey = vectorUtils.createCellKey(cell.col, cell.row);
+			if (walkable) {
+				pathfinder.walkables.add(cellKey);
+			} else {
+				pathfinder.walkables.delete(cellKey);
+			}
 		}
 	}
 }

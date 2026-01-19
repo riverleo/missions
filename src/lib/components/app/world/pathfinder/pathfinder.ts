@@ -10,6 +10,7 @@ export class Pathfinder {
 	readonly finder: PF.AStarFinder;
 	readonly worldContext: WorldContext;
 	readonly jumpables: Set<CellKey>;
+	readonly walkables: Set<CellKey>;
 
 	readonly cols: number;
 	readonly rows: number;
@@ -21,6 +22,7 @@ export class Pathfinder {
 		this.grid = new PF.Grid(this.cols, this.rows);
 		this.finder = new PF.AStarFinder();
 		this.jumpables = new Set();
+		this.walkables = new Set();
 	}
 
 	/**
