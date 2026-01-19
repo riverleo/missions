@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useWorld } from '$lib/hooks/use-world';
+	import { useCurrent } from '$lib/hooks/use-current';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
@@ -25,9 +26,7 @@
 	let { worldContext }: Props = $props();
 
 	const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
-
-	// TODO: 틱 시스템 구현 후 실제 틱 데이터 연결
-	const currentTick = $derived(0);
+	const { tick } = useCurrent();
 
 	// WorldContext에서 실시간 엔티티 정보 가져오기
 	const entities = $derived(worldContext ? Object.values(worldContext.entities) : []);
@@ -55,7 +54,7 @@
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
 			<AccordionContentItem label="현재 틱">
-				{currentTick} 틱
+				{$tick} 틱
 			</AccordionContentItem>
 		</AccordionContent>
 	</AccordionItem>
