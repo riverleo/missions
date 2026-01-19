@@ -130,7 +130,7 @@
 									pressed={bodyState.in_front}
 									onPressedChange={onInFrontChange}
 								>
-									<IconLayersSubtract />
+									맨 앞으로
 								</Toggle>
 							{/snippet}
 						</TooltipTrigger>
@@ -153,22 +153,6 @@
 							{/each}
 						</SelectContent>
 					</Select>
-				</ButtonGroup>
-				<ButtonGroup>
-					<Tooltip>
-						<TooltipTrigger>
-							{#snippet child({ props })}
-								<Button {...props} variant="ghost">
-									<IconInfoCircle />
-								</Button>
-							{/snippet}
-						</TooltipTrigger>
-						<TooltipContent>
-							현재 바디 상태에서 나타나는 얼굴 상태를 강제합니다.
-							<br />
-							'시스템'은 게임 컨텍스트에 따른 캐릭터 감정 상태를 따릅니다.
-						</TooltipContent>
-					</Tooltip>
 				</ButtonGroup>
 			</ButtonGroup>
 		{/if}

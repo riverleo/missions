@@ -17,11 +17,14 @@
 	// priority 순으로 정렬된 우선도 리스트
 	type DndItem = BehaviorPriority & { id: string };
 	let current = $state<DndItem[]>([]);
+	let hasLocalChanges = $state(false);
 
-	// store가 업데이트될 때마다 current 동기화
+	// store가 업데이트될 때마다 current 동기화 (로컬 변경사항이 없을 때만)
 	$effect(() => {
-		const priorities = Object.values($behaviorPriorityStore.data);
-		current = sort(clone(priorities), (p) => p.priority).map((p) => ({ ...p, id: p.id }));
+		if (!hasLocalChanges) {
+			const priorities = Object.values($behaviorPriorityStore.data);
+			current = sort(clone(priorities), (p) => p.priority).map((p) => ({ ...p, id: p.id }));
+		}
 	});
 
 	const flipDurationMs = 200;
@@ -48,7 +51,21 @@
 			updated,
 			deleted,
 		});
+
+		// 변경사항이 있으면 로컬 변경 플래그 설정
+		hasLocalChanges = updated.length > 0 || deleted.length > 0;
 	}
+
+	// store 데이터가 실제로 변경되면 (저장 후) hasLocalChanges 리셋
+	let prevStoreData = Object.values($behaviorPriorityStore.data);
+	$effect(() => {
+		const currentStoreData = Object.values($behaviorPriorityStore.data);
+		// store 데이터가 변경되고 로컬 변경사항이 있었다면 리셋
+		if (hasLocalChanges && !isEqual(prevStoreData, currentStoreData)) {
+			hasLocalChanges = false;
+		}
+		prevStoreData = clone(currentStoreData);
+	});
 
 	function handleDndConsider(e: CustomEvent<{ items: DndItem[] }>) {
 		current = e.detail.items;

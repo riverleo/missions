@@ -121,7 +121,7 @@
 					],
 				},
 				{
-					title: '행동 우선도',
+					title: '행동 우선순위',
 					href: scenarioId ? `/admin/scenarios/${scenarioId}/behavior-priorities` : undefined,
 				},
 			],

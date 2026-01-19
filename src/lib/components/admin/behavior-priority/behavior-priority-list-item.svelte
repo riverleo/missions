@@ -44,15 +44,15 @@
 	const { conditionStore } = useCondition();
 
 	// behavior 타입 구분
-	const behaviorType = $derived(() => {
+	const behaviorType = $derived.by(() => {
 		if (priority.need_behavior_id) return 'need';
 		if (priority.condition_behavior_id) return 'condition';
 		if (priority.item_behavior_id) return 'item';
 		return null;
 	});
 
-	const behaviorTypeLabel = $derived(() => {
-		const type = behaviorType();
+	const behaviorTypeLabel = $derived.by(() => {
+		const type = behaviorType;
 		if (type === 'need') return '욕구';
 		if (type === 'condition') return '컨디션';
 		if (type === 'item') return '아이템';
@@ -60,7 +60,7 @@
 	});
 
 	// behavior 정보 가져오기
-	const behaviorInfo = $derived(() => {
+	const behaviorInfo = $derived.by(() => {
 		if (priority.need_behavior_id) {
 			const behavior = $needBehaviorStore.data[priority.need_behavior_id];
 			if (!behavior) return null;
@@ -115,23 +115,23 @@
 	});
 </script>
 
-{#if behaviorInfo()}
+{#if behaviorInfo}
 	<div
 		class="group relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none"
 	>
 		<Badge variant="secondary" class="shrink-0 font-mono">
 			{priority.priority}
 		</Badge>
-		{#if behaviorTypeLabel()}
+		{#if behaviorTypeLabel}
 			<Badge variant="outline" class="shrink-0">
-				{behaviorTypeLabel()}
+				{behaviorTypeLabel}
 			</Badge>
 		{/if}
 		<span class="truncate">
-			{behaviorInfo()?.title}
+			{behaviorInfo?.title}
 		</span>
 		<span class="truncate text-xs text-muted-foreground">
-			{behaviorInfo()?.description}
+			{behaviorInfo?.description}
 		</span>
 		<div class="ml-auto flex items-center gap-1">
 			<Button variant="ghost" size="icon" class="size-6" onclick={onmoveup} disabled={isFirst}>

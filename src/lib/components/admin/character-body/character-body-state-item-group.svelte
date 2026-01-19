@@ -9,7 +9,7 @@
 
 	let { bodyId }: Props = $props();
 
-	const stateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
+	const stateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
 </script>
 
 <SpriteStateItemGroup types={stateTypes}>

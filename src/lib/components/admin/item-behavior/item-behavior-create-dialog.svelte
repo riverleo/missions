@@ -33,7 +33,7 @@
 	const items = $derived(alphabetical(Object.values($itemStore.data), (i) => i.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	const behaviorTypes: CharacterBehaviorType[] = ['use', 'clean'];
+	const behaviorTypes: CharacterBehaviorType[] = ['use', 'clean', 'pick'];
 
 	let itemId = $state<string | undefined>(undefined);
 	let durabilityThreshold = $state<number | undefined>(undefined);

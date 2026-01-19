@@ -3127,8 +3127,8 @@ export type Database = {
     }
     Enums: {
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
-      character_behavior_type: "demolish" | "use" | "repair" | "clean"
-      character_body_state_type: "idle" | "walk" | "run" | "jump"
+      character_behavior_type: "demolish" | "use" | "repair" | "clean" | "pick"
+      character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
       collider_type: "circle" | "rectangle"
       condition_fulfillment_type: "character" | "item" | "idle"
@@ -3277,8 +3277,8 @@ export const Constants = {
   public: {
     Enums: {
       building_state_type: ["idle", "damaged", "planning", "constructing"],
-      character_behavior_type: ["demolish", "use", "repair", "clean"],
-      character_body_state_type: ["idle", "walk", "run", "jump"],
+      character_behavior_type: ["demolish", "use", "repair", "clean", "pick"],
+      character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
       collider_type: ["circle", "rectangle"],
       condition_fulfillment_type: ["character", "item", "idle"],

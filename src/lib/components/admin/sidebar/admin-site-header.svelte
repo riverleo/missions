@@ -147,7 +147,7 @@
 			else if (segment === 'item-behaviors') label = '아이템 행동';
 			else if (segment === 'needs') label = '욕구';
 			else if (segment === 'need-behaviors') label = '욕구 행동';
-			else if (segment === 'behavior-priorities') label = '행동 우선도';
+			else if (segment === 'behavior-priorities') label = '행동 우선순위';
 			// UUID 형태의 ID는 title로 표시
 			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
 				const prevSegment = segments[i - 1];

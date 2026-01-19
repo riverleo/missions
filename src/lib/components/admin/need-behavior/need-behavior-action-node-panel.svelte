@@ -80,7 +80,7 @@
 		{ value: 'idle', label: '대기' },
 	];
 
-	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);

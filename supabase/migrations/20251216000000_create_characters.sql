@@ -1,5 +1,5 @@
 -- character_body_state_type enum
-create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump');
+create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump', 'pick');
 
 -- character_face_state_type enum
 create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
@@ -9,7 +9,8 @@ create type character_behavior_type as enum (
   'demolish',  -- 철거
   'use',       -- 사용
   'repair',    -- 수리
-  'clean'      -- 청소
+  'clean',     -- 청소
+  'pick'       -- 줍기
 );
 
 -- loop_mode enum

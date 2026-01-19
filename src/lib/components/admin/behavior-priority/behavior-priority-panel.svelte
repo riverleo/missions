@@ -44,7 +44,7 @@
 
 <div class="ml-84 flex flex-col gap-2 rounded-lg bg-background p-4 shadow-md">
 	<div class="flex items-center justify-between">
-		<h3 class="text-sm font-medium">행동 우선도</h3>
+		<h3 class="text-sm font-medium">행동 우선순위</h3>
 		<Button size="sm" variant="secondary" onclick={onsave} disabled={!hasChanges || isSaving}>
 			{isSaving ? '저장 중...' : '변경사항 저장'}
 		</Button>

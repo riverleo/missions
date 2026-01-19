@@ -20,7 +20,7 @@
 
 	const { admin } = useCharacter();
 
-	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump'];
+	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
 
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);

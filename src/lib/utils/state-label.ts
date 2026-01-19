@@ -21,6 +21,7 @@ const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
 	walk: '걷기',
 	run: '달리기',
 	jump: '점프',
+	pick: '줍기',
 };
 
 const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
@@ -42,6 +43,7 @@ const characterBehaviorTypeLabels: Record<CharacterBehaviorType, string> = {
 	use: '사용',
 	repair: '수리',
 	clean: '청소',
+	pick: '줍기',
 };
 
 export function getColliderTypeLabel(type: ColliderType): string {
@@ -104,7 +106,7 @@ export function getConditionBehaviorLabel(params: {
 }): { title: string; description: string } {
 	const { behavior, buildingName, conditionName, characterName } = params;
 	return {
-		title: `${buildingName ?? '건물'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
+		title: `${buildingName ?? '건물'} ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
 		description: `${characterName ?? '모든 캐릭터'} (${conditionName ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
 	};
 }
@@ -116,7 +118,7 @@ export function getItemBehaviorLabel(params: {
 }): { title: string; description: string } {
 	const { behavior, itemName, characterName } = params;
 	return {
-		title: `${itemName ?? '아이템'} - ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
+		title: `${itemName ?? '아이템'} ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
 		description: `${characterName ?? '모든 캐릭터'}${behavior.durability_threshold !== null ? ` (내구도 ${behavior.durability_threshold} 이하)` : ''}`,
 	};
 }
