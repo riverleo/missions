@@ -3,12 +3,7 @@ import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import {
-	CELL_SIZE,
-	TILE_SIZE,
-	BOUNDARY_THICKNESS,
-	MAX_TILE_PLACEMENT_COUNT,
-} from '$lib/constants';
+import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS, MAX_TILE_PLACABLE_COUNT } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
@@ -354,8 +349,8 @@ export class WorldContextBlueprint {
 			const tileCount = maxX - minX + 1;
 
 			// 최대 갯수 초과 시 200개까지만 표시
-			if (tileCount > MAX_TILE_PLACEMENT_COUNT) {
-				maxX = minX + MAX_TILE_PLACEMENT_COUNT - 1;
+			if (tileCount > MAX_TILE_PLACABLE_COUNT) {
+				maxX = minX + MAX_TILE_PLACABLE_COUNT - 1;
 			}
 
 			this.cursorTileBounds = {
@@ -378,8 +373,8 @@ export class WorldContextBlueprint {
 			const tileCount = maxY - minY + 1;
 
 			// 최대 갯수 초과 시 200개까지만 표시
-			if (tileCount > MAX_TILE_PLACEMENT_COUNT) {
-				maxY = minY + MAX_TILE_PLACEMENT_COUNT - 1;
+			if (tileCount > MAX_TILE_PLACABLE_COUNT) {
+				maxY = minY + MAX_TILE_PLACABLE_COUNT - 1;
 			}
 
 			this.cursorTileBounds = {
@@ -403,13 +398,13 @@ export class WorldContextBlueprint {
 
 		// X 방향 폭 계산 및 제한
 		let width = maxX - minX + 1;
-		if (width > MAX_TILE_PLACEMENT_COUNT) {
-			width = MAX_TILE_PLACEMENT_COUNT;
+		if (width > MAX_TILE_PLACABLE_COUNT) {
+			width = MAX_TILE_PLACABLE_COUNT;
 			maxX = minX + width - 1;
 		}
 
 		// Y 방향 높이 제한 (X 방향 폭에 맞춰서)
-		const maxRows = Math.floor(MAX_TILE_PLACEMENT_COUNT / width);
+		const maxRows = Math.floor(MAX_TILE_PLACABLE_COUNT / width);
 		const height = maxY - minY + 1;
 		if (height > maxRows) {
 			maxY = minY + maxRows - 1;
