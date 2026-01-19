@@ -59,7 +59,7 @@
 			return target ? `${target}과 상호작용` : '자동 상호작용';
 		}
 		if (action.type === 'idle') {
-			return action.duration_ticks === 0 ? '캐릭터 바디 애니메이션' : `${action.duration_ticks}틱 대기`;
+			return action.duration_ticks === 0 ? '바디 애니메이션' : `${action.duration_ticks}틱 대기`;
 		}
 		return action.type;
 	});

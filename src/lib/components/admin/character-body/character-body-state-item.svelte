@@ -15,12 +15,18 @@
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
-	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { Toggle } from '$lib/components/ui/toggle';
-	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
+	import {
+		DropdownMenu,
+		DropdownMenuTrigger,
+		DropdownMenuContent,
+		DropdownMenuCheckboxItem,
+		DropdownMenuRadioGroup,
+		DropdownMenuRadioItem,
+		DropdownMenuSeparator,
+	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { Button } from '$lib/components/ui/button';
-	import { IconInfoCircle, IconLayersSubtract, IconQuestionMark } from '@tabler/icons-svelte';
+	import { IconChevronDown } from '@tabler/icons-svelte';
 
 	interface Props {
 		bodyId: CharacterBodyId;
@@ -119,42 +125,51 @@
 >
 	{#snippet action()}
 		{#if bodyState}
-			<ButtonGroup>
-				<ButtonGroup>
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
 					<Tooltip>
 						<TooltipTrigger>
 							{#snippet child({ props })}
-								<Toggle
-									variant="outline"
+								<InputGroupButton
 									{...props}
-									pressed={bodyState.in_front}
-									onPressedChange={onInFrontChange}
+									variant={bodyState.in_front ? 'secondary' : 'ghost'}
+									onclick={() => onInFrontChange(!bodyState.in_front)}
 								>
 									맨 앞으로
-								</Toggle>
+								</InputGroupButton>
 							{/snippet}
 						</TooltipTrigger>
 						<TooltipContent>활성화 시 바디가 얼굴 앞에 렌더링됩니다.</TooltipContent>
 					</Tooltip>
-					<Select
-						type="single"
-						value={bodyState.character_face_state ?? ''}
-						onValueChange={onFaceStateChange}
-					>
-						<SelectTrigger>
-							{bodyState.character_face_state
-								? getCharacterFaceStateLabel(bodyState.character_face_state)
-								: '시스템'}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">시스템</SelectItem>
-							{#each faceStateOptions as faceType (faceType)}
-								<SelectItem value={faceType}>{getCharacterFaceStateLabel(faceType)}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
-			</ButtonGroup>
+				</InputGroupAddon>
+				<InputGroupAddon align="inline-end">
+					<DropdownMenu>
+						<DropdownMenuTrigger>
+							{#snippet child({ props })}
+								<InputGroupButton {...props} variant="ghost">
+									{bodyState.character_face_state
+										? getCharacterFaceStateLabel(bodyState.character_face_state)
+										: '시스템'}
+									<IconChevronDown class="ml-1 size-3" />
+								</InputGroupButton>
+							{/snippet}
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="start">
+							<DropdownMenuRadioGroup
+								value={bodyState.character_face_state ?? ''}
+								onValueChange={onFaceStateChange}
+							>
+								<DropdownMenuRadioItem value="">시스템</DropdownMenuRadioItem>
+								{#each faceStateOptions as faceType (faceType)}
+									<DropdownMenuRadioItem value={faceType}>
+										{getCharacterFaceStateLabel(faceType)}
+									</DropdownMenuRadioItem>
+								{/each}
+							</DropdownMenuRadioGroup>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</InputGroupAddon>
+			</InputGroup>
 		{/if}
 	{/snippet}
 	{#snippet preview()}
