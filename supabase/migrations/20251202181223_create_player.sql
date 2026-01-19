@@ -6,16 +6,6 @@ create table players (
   bio text,                                       -- 자기소개
   avatar text,                                    -- 프로필 이미지 파일명
 
-  -- 스탯
-  health integer not null default 100,        -- 건강
-  stress integer not null default 0,          -- 스트레스
-  strength integer not null default 0,        -- 근력
-  stamina integer not null default 0,         -- 지구력
-  intelligence integer not null default 0,    -- 지능
-  charm integer not null default 0,           -- 매력
-  refinement integer not null default 0,      -- 교양
-  appearance integer not null default 0,      -- 외모
-
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   deleted_at timestamptz

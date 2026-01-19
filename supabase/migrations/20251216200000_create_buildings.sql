@@ -46,7 +46,7 @@ create policy "admins can delete buildings"
   using (is_admin());
 
 -- building_state_type enum
-create type building_state_type as enum ('idle', 'damaged', 'planning');
+create type building_state_type as enum ('idle', 'damaged', 'planning', 'constructing');
 
 -- building_states 테이블
 create table building_states (
