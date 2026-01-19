@@ -1,10 +1,11 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldId, PlayerId, ScenarioId, TerrainId, UserId } from '$lib/types';
+import type { WorldId, PlayerId, ScenarioId, TerrainId, UserId, ScreenVector } from '$lib/types';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
+import { vectorUtils } from '$lib/utils/vector';
 import { load, save, type WorldTestStoreState } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
 import { TEST_WORLD_ID } from '$lib/constants';
@@ -62,8 +63,8 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, open }));
 	}
 
-	function setModalPosition(x: number, y: number) {
-		store.update((state) => ({ ...state, modalX: x, modalY: y }));
+	function setModalScreenVector(screenVector: ScreenVector) {
+		store.update((state) => ({ ...state, modalScreenVector: screenVector }));
 	}
 
 	function setOpenPanel(open: boolean) {
@@ -142,7 +143,7 @@ function createTestWorldStore() {
 		setSelectedTerrainId,
 		setDebug,
 		setOpen,
-		setModalPosition,
+		setModalScreenVector,
 		setOpenPanel,
 		init,
 	};

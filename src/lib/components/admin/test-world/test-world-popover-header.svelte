@@ -10,7 +10,9 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
-	const { store, setOpen, setModalPosition, setDebug, setOpenPanel } = useWorldTest();
+	import { vectorUtils } from '$lib/utils/vector';
+
+	const { store, setOpen, setModalScreenVector, setDebug, setOpenPanel } = useWorldTest();
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -22,8 +24,8 @@
 		isDragging = true;
 		dragStartX = e.clientX;
 		dragStartY = e.clientY;
-		modalStartX = $store.modalX;
-		modalStartY = $store.modalY;
+		modalStartX = $store.modalScreenVector.x;
+		modalStartY = $store.modalScreenVector.y;
 	}
 
 	function onclick() {
@@ -39,7 +41,7 @@
 		const newX = Math.max(0, modalStartX + deltaX);
 		const newY = Math.max(0, modalStartY + deltaY);
 
-		setModalPosition(newX, newY);
+		setModalScreenVector(vectorUtils.createScreenVector(newX, newY));
 	}
 
 	function onmouseup() {

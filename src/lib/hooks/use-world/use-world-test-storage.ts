@@ -15,9 +15,11 @@ import type {
 	PlayerScenario,
 	UserId,
 	PlayerScenarioId,
+	ScreenVector,
 } from '$lib/types';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
+import { vectorUtils } from '$lib/utils/vector';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 
 const STORAGE_KEY = 'test-world-state';
@@ -26,9 +28,7 @@ export interface WorldTestStoreState {
 	open: boolean;
 	openPanel: boolean;
 	selectedTerrainId?: TerrainId;
-	// 모달 위치 (픽셀 단위)
-	modalX: number;
-	modalY: number;
+	modalScreenVector: ScreenVector;
 	debug: boolean;
 }
 
@@ -47,8 +47,7 @@ const defaultState: StoredState = {
 	open: false,
 	openPanel: true,
 	selectedTerrainId: undefined,
-	modalX: 0,
-	modalY: 0,
+	modalScreenVector: vectorUtils.createScreenVector(0, 0),
 	debug: false,
 	player: {
 		id: TEST_PLAYER_ID,
@@ -92,8 +91,7 @@ export function load(): StoredState {
 				open: stored.open ?? defaultState.open,
 				openPanel: stored.openPanel ?? defaultState.openPanel,
 				selectedTerrainId: world?.terrain_id ?? undefined,
-				modalX: stored.modalX ?? defaultState.modalX,
-				modalY: stored.modalY ?? defaultState.modalY,
+				modalScreenVector: stored.modalScreenVector ?? defaultState.modalScreenVector,
 				debug: stored.debug ?? defaultState.debug,
 				worlds: stored.worlds,
 				worldCharacters: stored.worldCharacters,

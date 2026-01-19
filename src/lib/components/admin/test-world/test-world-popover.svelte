@@ -9,10 +9,11 @@
 	import TestWorldInspectorPanel from './test-world-inspector-panel';
 	import { useWorldTest, TEST_WORLD_ID } from '$lib/hooks/use-world';
 	import { useScenario } from '$lib/hooks/use-scenario';
+	import { vectorUtils } from '$lib/utils/vector';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
 	import type { WorldContext } from '$lib/components/app/world/context';
 
-	const { store, setOpen, setModalPosition, init } = useWorldTest();
+	const { store, setOpen, setModalScreenVector, init } = useWorldTest();
 	const { fetchAllStatus } = useScenario();
 
 	let worldContext = $state<WorldContext | undefined>(undefined);
@@ -43,11 +44,15 @@
 
 	// 초기 마운트 시 모달이 중앙에 위치하도록 설정
 	$effect(() => {
-		if (modalRef && $store.modalX === 0 && $store.modalY === 0) {
+		if (
+			modalRef &&
+			$store.modalScreenVector.x === 0 &&
+			$store.modalScreenVector.y === 0
+		) {
 			const modalRect = modalRef.getBoundingClientRect();
 			const centerX = (window.innerWidth - modalRect.width) / 2;
 			const centerY = (window.innerHeight - modalRect.height) / 2;
-			setModalPosition(centerX, centerY);
+			setModalScreenVector(vectorUtils.createScreenVector(centerX, centerY));
 		}
 	});
 </script>
@@ -62,7 +67,7 @@
 <div
 	bind:this={modalRef}
 	class="fixed z-50 flex-col gap-0 rounded-lg border bg-background shadow-lg"
-	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalX}px; top: {$store.modalY}px;"
+	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalScreenVector.x}px; top: {$store.modalScreenVector.y}px;"
 >
 	<!-- Header -->
 	<TestWorldPopoverHeader />
