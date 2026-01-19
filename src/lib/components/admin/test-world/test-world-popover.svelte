@@ -70,7 +70,7 @@
 	<!-- Content -->
 	<div class="flex flex-1 gap-0">
 		<!-- 좌측: 커맨드 목록 -->
-		{#if $store.commandPanelOpen}
+		{#if $store.openPanel}
 			<ScrollArea class="w-80 shrink-0 border-r" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldCommandPanel {worldContext} />
 			</ScrollArea>
@@ -93,7 +93,7 @@
 		</div>
 
 		<!-- 우측: 인스펙터 패널 -->
-		{#if $store.inspectorPanelOpen}
+		{#if $store.openPanel}
 			<ScrollArea class="w-80 shrink-0 border-l" style="height: {WORLD_HEIGHT + 32}px;">
 				<TestWorldInspectorPanel {worldContext} />
 			</ScrollArea>

@@ -66,8 +66,8 @@ function createTestWorldStore() {
 		store.update((state) => ({ ...state, modalX: x, modalY: y }));
 	}
 
-	function setPanelsOpen(open: boolean) {
-		store.update((state) => ({ ...state, commandPanelOpen: open, inspectorPanelOpen: open }));
+	function setOpenPanel(open: boolean) {
+		store.update((state) => ({ ...state, openPanel: open }));
 	}
 
 	function init() {
@@ -143,7 +143,7 @@ function createTestWorldStore() {
 		setDebug,
 		setOpen,
 		setModalPosition,
-		setPanelsOpen,
+		setOpenPanel,
 		init,
 	};
 }

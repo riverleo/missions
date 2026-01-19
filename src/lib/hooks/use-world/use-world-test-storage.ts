@@ -18,24 +18,18 @@ import type {
 } from '$lib/types';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
-import {
-	TEST_USER_ID,
-	TEST_WORLD_ID,
-	TEST_PLAYER_ID,
-	TEST_SCENARIO_ID,
-} from '$lib/constants';
+import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 
 const STORAGE_KEY = 'test-world-state';
 
 export interface WorldTestStoreState {
 	open: boolean;
+	openPanel: boolean;
 	selectedTerrainId?: TerrainId;
 	// 모달 위치 (픽셀 단위)
 	modalX: number;
 	modalY: number;
 	debug: boolean;
-	commandPanelOpen: boolean;
-	inspectorPanelOpen: boolean;
 }
 
 // localStorage 저장 포맷 (WorldTestStoreState + world 데이터)
@@ -51,12 +45,11 @@ export interface StoredState extends WorldTestStoreState {
 
 const defaultState: StoredState = {
 	open: false,
+	openPanel: true,
 	selectedTerrainId: undefined,
 	modalX: 0,
 	modalY: 0,
 	debug: false,
-	commandPanelOpen: true,
-	inspectorPanelOpen: true,
 	player: {
 		id: TEST_PLAYER_ID,
 		user_id: TEST_USER_ID,
@@ -97,12 +90,11 @@ export function load(): StoredState {
 			const world = stored.worlds?.[TEST_WORLD_ID];
 			return {
 				open: stored.open ?? defaultState.open,
+				openPanel: stored.openPanel ?? defaultState.openPanel,
 				selectedTerrainId: world?.terrain_id ?? undefined,
 				modalX: stored.modalX ?? defaultState.modalX,
 				modalY: stored.modalY ?? defaultState.modalY,
 				debug: stored.debug ?? defaultState.debug,
-				commandPanelOpen: stored.commandPanelOpen ?? defaultState.commandPanelOpen,
-				inspectorPanelOpen: stored.inspectorPanelOpen ?? defaultState.inspectorPanelOpen,
 				worlds: stored.worlds,
 				worldCharacters: stored.worldCharacters,
 				worldBuildings: stored.worldBuildings,

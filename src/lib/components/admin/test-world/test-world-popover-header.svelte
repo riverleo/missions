@@ -10,9 +10,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 
-	const { store, setOpen, setModalPosition, setDebug, setPanelsOpen } = useWorldTest();
-
-	const panelsOpen = $derived($store.commandPanelOpen && $store.inspectorPanelOpen);
+	const { store, setOpen, setModalPosition, setDebug, setOpenPanel } = useWorldTest();
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -60,8 +58,8 @@
 
 <div class="relative flex shrink-0 items-center justify-between border-b p-2">
 	<div class="flex items-center gap-2">
-		<Button variant="ghost" size="icon-sm" onclick={() => setPanelsOpen(!panelsOpen)}>
-			{#if panelsOpen}
+		<Button variant="ghost" size="icon-sm" onclick={() => setOpenPanel(!$store.openPanel)}>
+			{#if $store.openPanel}
 				<IconLayoutSidebarLeftCollapse />
 			{:else}
 				<IconLayoutSidebarLeftExpand />
