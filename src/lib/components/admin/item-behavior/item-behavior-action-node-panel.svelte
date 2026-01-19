@@ -13,6 +13,7 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { IconCircleDashedNumber1, IconX } from '@tabler/icons-svelte';
 	import { Separator } from '$lib/components/ui/separator';
@@ -188,7 +189,14 @@
 					<div class="space-y-2">
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
-								<InputGroupText>지속 시간(틱)</InputGroupText>
+								<Tooltip>
+									<TooltipTrigger>
+										<InputGroupButton>지속 시간(틱)</InputGroupButton>
+									</TooltipTrigger>
+									<TooltipContent>
+										지속 시간이 없는 경우 캐릭터 바디 애니메이션 종료 후 다음으로 넘어갑니다.
+									</TooltipContent>
+								</Tooltip>
 							</InputGroupAddon>
 							<InputGroupInput type="number" step="1" min="0" bind:value={changes.duration_ticks} />
 						</InputGroup>

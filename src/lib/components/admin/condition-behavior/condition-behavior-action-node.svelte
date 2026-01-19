@@ -28,7 +28,7 @@
 	});
 
 	const typeLabel = $derived(() => {
-		return `${action.duration_ticks}틱 대기`;
+		return action.duration_ticks === 0 ? '캐릭터 바디 애니메이션' : `${action.duration_ticks}틱 대기`;
 	});
 </script>
 
