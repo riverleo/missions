@@ -33,7 +33,8 @@ const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
 const buildingStateLabels: Record<BuildingStateType, string> = {
 	idle: '기본',
 	damaged: '손상됨',
-	planning: '건설 중',
+	planning: '계획 중',
+	constructing: '건설 중',
 };
 
 const characterBehaviorTypeLabels: Record<CharacterBehaviorType, string> = {
