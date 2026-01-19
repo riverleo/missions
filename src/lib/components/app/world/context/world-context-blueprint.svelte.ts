@@ -3,7 +3,12 @@ import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS } from '$lib/constants';
+import {
+	CELL_SIZE,
+	TILE_SIZE,
+	BOUNDARY_THICKNESS,
+	MAX_TILE_PLACEMENT_COUNT,
+} from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
 import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
@@ -345,7 +350,14 @@ export class WorldContextBlueprint {
 		// 수평 직선 (dy === 0)
 		if (dy === 0) {
 			const minX = Math.min(startTileCell.col, currentTileCell.col);
-			const maxX = Math.max(startTileCell.col, currentTileCell.col);
+			let maxX = Math.max(startTileCell.col, currentTileCell.col);
+			const tileCount = maxX - minX + 1;
+
+			// 최대 갯수 초과 시 200개까지만 표시
+			if (tileCount > MAX_TILE_PLACEMENT_COUNT) {
+				maxX = minX + MAX_TILE_PLACEMENT_COUNT - 1;
+			}
+
 			this.cursorTileBounds = {
 				minCol: minX,
 				maxCol: maxX,
@@ -362,7 +374,14 @@ export class WorldContextBlueprint {
 		// 수직 직선 (dx === 0)
 		if (dx === 0) {
 			const minY = Math.min(startTileCell.row, currentTileCell.row);
-			const maxY = Math.max(startTileCell.row, currentTileCell.row);
+			let maxY = Math.max(startTileCell.row, currentTileCell.row);
+			const tileCount = maxY - minY + 1;
+
+			// 최대 갯수 초과 시 200개까지만 표시
+			if (tileCount > MAX_TILE_PLACEMENT_COUNT) {
+				maxY = minY + MAX_TILE_PLACEMENT_COUNT - 1;
+			}
+
 			this.cursorTileBounds = {
 				minCol: startTileCell.col,
 				maxCol: startTileCell.col,
@@ -378,9 +397,24 @@ export class WorldContextBlueprint {
 
 		// 사각형 영역
 		const minX = Math.min(startTileCell.col, currentTileCell.col);
-		const maxX = Math.max(startTileCell.col, currentTileCell.col);
+		let maxX = Math.max(startTileCell.col, currentTileCell.col);
 		const minY = Math.min(startTileCell.row, currentTileCell.row);
-		const maxY = Math.max(startTileCell.row, currentTileCell.row);
+		let maxY = Math.max(startTileCell.row, currentTileCell.row);
+
+		// X 방향 폭 계산 및 제한
+		let width = maxX - minX + 1;
+		if (width > MAX_TILE_PLACEMENT_COUNT) {
+			width = MAX_TILE_PLACEMENT_COUNT;
+			maxX = minX + width - 1;
+		}
+
+		// Y 방향 높이 제한 (X 방향 폭에 맞춰서)
+		const maxRows = Math.floor(MAX_TILE_PLACEMENT_COUNT / width);
+		const height = maxY - minY + 1;
+		if (height > maxRows) {
+			maxY = minY + maxRows - 1;
+		}
+
 		this.cursorTileBounds = {
 			minCol: minX,
 			maxCol: maxX,

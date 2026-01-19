@@ -167,9 +167,11 @@ export class WorldContext {
 							// 첫 번째 클릭: 시작점 저장
 							this.blueprint.setCursorStart(this.blueprint.cursor.current);
 						} else {
-							// 두 번째 클릭: 타일 일괄 설치
-							this.blueprint.cursorToEntities();
-							// start 클리어
+							// 두 번째 클릭: 타일 일괄 설치 (placable이면)
+							if (this.blueprint.placable) {
+								this.blueprint.cursorToEntities();
+							}
+							// placable 여부와 관계없이 start 클리어 (다시 선택할 수 있도록)
 							this.blueprint.setCursorStart(undefined);
 						}
 					} else {

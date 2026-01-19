@@ -113,6 +113,9 @@
 
 	const OVERLAP_TILE_FILL_STYLE = 'rgba(239, 68, 68, 0.8)';
 	const PLANNING_TILE_FILL_STYLE = 'rgba(255, 255, 255, 0.8)';
+	const DISABLED_TILE_FILL_STYLE = 'rgba(156, 163, 175, 0.8)'; // gray-400
+
+	const isPlacable = $derived(world.blueprint.placable);
 </script>
 
 {#if world.blueprint.cursor}
@@ -126,12 +129,17 @@
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
 						{@const isOverlapping = isCellOverlapping(vectorUtils.createCell(col, row))}
+						{@const fillStyle = isOverlapping
+							? OVERLAP_TILE_FILL_STYLE
+							: isPlacable
+								? PLANNING_TILE_FILL_STYLE
+								: DISABLED_TILE_FILL_STYLE}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}
 							width={gridSize - 1}
 							height={gridSize - 1}
-							fill={isOverlapping ? OVERLAP_TILE_FILL_STYLE : PLANNING_TILE_FILL_STYLE}
+							fill={fillStyle}
 						/>
 					{/each}
 				{/each}
@@ -142,9 +150,9 @@
 	<!-- 스프라이트 미리보기 -->
 	{#if building}
 		<BuildingSpriteAnimator
-			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
+			class="absolute -translate-x-1/2 -translate-y-1/2"
 			style="left: {centerX + building.collider_offset_x}px; top: {centerY +
-				building.collider_offset_y}px;"
+				building.collider_offset_y}px; opacity: {isPlacable ? 0.5 : 0.3};"
 			buildingId={building.id}
 			stateType="idle"
 			resolution={2}
@@ -164,14 +172,14 @@
 				tileX={tileCell.col}
 				tileY={tileCell.row}
 				overlapping={isOverlapping}
-				style="opacity: 0.5;"
+				style="opacity: {isPlacable ? 0.5 : 0.3};"
 			/>
 		{/each}
 	{:else if characterId}
 		<!-- 캐릭터 미리보기 -->
 		<CharacterSpriteAnimator
-			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
-			style="left: {centerX}px; top: {centerY}px;"
+			class="absolute -translate-x-1/2 -translate-y-1/2"
+			style="left: {centerX}px; top: {centerY}px; opacity: {isPlacable ? 0.5 : 0.3};"
 			{characterId}
 			bodyStateType="idle"
 			faceStateType="idle"
@@ -180,8 +188,8 @@
 	{:else if itemId}
 		<!-- 아이템 미리보기 -->
 		<ItemSpriteAnimator
-			class="absolute -translate-x-1/2 -translate-y-1/2 opacity-50"
-			style="left: {centerX}px; top: {centerY}px;"
+			class="absolute -translate-x-1/2 -translate-y-1/2"
+			style="left: {centerX}px; top: {centerY}px; opacity: {isPlacable ? 0.5 : 0.3};"
 			{itemId}
 			stateType="idle"
 			resolution={2}
