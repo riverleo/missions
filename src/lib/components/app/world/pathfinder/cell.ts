@@ -115,60 +115,6 @@ function setUnwalkableAt(pathfinder: Pathfinder) {
 	}
 }
 
-/**
- * 점프존(jumpable) 영역 설정
- * - 아래에 타일이 없을 때 (!hasBottomTile), 타일 옆 3칸 떨어진 cellY + 4 위치를 jumpable로 설정
- * - 타일이 세로로 쌓여있으면 마지막(맨 아래) 타일만 jumpable 영역 생성
- */
-function setJumpableAt(pathfinder: Pathfinder) {
-	pathfinder.jumpables.clear();
-
-	const tileEntities = Object.values(pathfinder.worldContext.entities).filter(
-		(entity): entity is WorldTileEntity => entity.type === 'tile'
-	);
-
-	// 타일 위치 맵 생성 (빠른 조회용)
-	const tilePositions = new Set(tileEntities.map((tile) => `${tile.tileX},${tile.tileY}`));
-
-	for (const tile of tileEntities) {
-		const cellX = tile.tileX * TILE_CELL_RATIO;
-		const cellY = tile.tileY * TILE_CELL_RATIO;
-
-		// 인접 타일 확인
-		const hasLeftTile = tilePositions.has(`${tile.tileX - 1},${tile.tileY}`);
-		const hasRightTile = tilePositions.has(`${tile.tileX + 1},${tile.tileY}`);
-		const hasBottomTile = tilePositions.has(`${tile.tileX},${tile.tileY + 1}`);
-
-		// 아래에 타일이 없을 때만 jumpable 설정 (마지막 타일)
-		if (!hasBottomTile) {
-			for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
-				const isLeftEdge = !hasLeftTile && dx === 0;
-				const isRightEdge = !hasRightTile && dx === TILE_CELL_RATIO - 1;
-
-				if (isLeftEdge || isRightEdge) {
-					const offset = 3;
-
-					if (isLeftEdge) {
-						// 왼쪽 3칸 떨어진 cellY + 4 위치
-						const jumpCol = cellX + dx - offset;
-						const jumpRow = cellY + 2;
-						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						pathfinder.jumpables.add(cellKey);
-					}
-
-					if (isRightEdge) {
-						// 오른쪽 3칸 떨어진 cellY + 4 위치
-						const jumpCol = cellX + dx + offset;
-						const jumpRow = cellY + 2;
-						const cellKey = vectorUtils.createCellKey(jumpCol, jumpRow);
-						pathfinder.jumpables.add(cellKey);
-					}
-				}
-			}
-		}
-	}
-}
-
 export const cell = {
 	/**
 	 * 그리드를 초기화하고 기본 walkable 셀 설정
@@ -196,11 +142,10 @@ export const cell = {
 	},
 
 	/**
-	 * 타일 엔티티들을 기반으로 walkable/unwalkable/jumpable 영역 업데이트
+	 * 타일 엔티티들을 기반으로 walkable/unwalkable 영역 업데이트
 	 */
 	update(pathfinder: Pathfinder) {
 		setWalkableAt(pathfinder);
-		setJumpableAt(pathfinder);
 		setUnwalkableAt(pathfinder);
 	},
 };

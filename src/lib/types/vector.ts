@@ -15,5 +15,4 @@ export type TileCellKey = Brand<`${number},${number}`, 'TileCellKey'>;
 
 export interface PathfinderCell extends Cell {
 	walkable: boolean;
-	jumpable: boolean;
 }

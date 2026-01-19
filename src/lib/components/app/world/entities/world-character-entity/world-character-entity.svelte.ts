@@ -18,9 +18,6 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-	wasJumpable: boolean = $state(false); // 이전 프레임에 점프존에 있었는지
-
-	jumpDelay: number = $state(0); // 점프존에서 대기 시간 (ms)
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -106,8 +103,5 @@ export class WorldCharacterEntity extends Entity {
 			vectorUtils.createVector(this.body.position.x, this.body.position.y),
 			vectorUtils.createVector(targetX, targetY)
 		);
-		// 새 경로 시작 시 점프 상태 초기화
-		this.jumpDelay = 0;
-		this.wasJumpable = false;
 	}
 }

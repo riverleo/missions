@@ -27,34 +27,9 @@ export function move(entity: WorldCharacterEntity, event: BeforeUpdateEvent): vo
 	const delta = event.delta;
 	const deltaSeconds = delta / 1000;
 
-	// 현재 위치가 점프존인지 확인
-	const currentCell = vectorUtils.vectorToCell(
-		vectorUtils.createVector(currentVector.x, currentVector.y)
-	);
-	const cellKey = vectorUtils.createCellKey(currentCell);
-	const jumpable = entity.worldContext.pathfinder.jumpable(cellKey);
-
-	// 점프존에 진입했을 때, 4-5번째 뒤의 목표가 위쪽인지 확인
-	if (jumpable && !entity.wasJumpable) {
-		// 4-5번째 뒤의 waypoint 확인 (없으면 마지막 waypoint)
-		const lookAheadIndex = Math.min(4, entity.path.length - 1);
-		const futureTarget = entity.path[lookAheadIndex];
-		if (futureTarget && futureTarget.y < currentVector.y) {
-			// 미래 목표가 위쪽이면 대기
-			entity.jumpDelay = 500; // 500ms 대기
-		}
-	}
-	entity.wasJumpable = jumpable;
-
 	// 목표 지점까지의 거리 계산
 	const dx = targetPoint.x - currentVector.x;
 	const dy = targetPoint.y - currentVector.y;
-
-	// 점프 대기 중이면 움직이지 않고 시간만 감소
-	if (entity.jumpDelay > 0) {
-		entity.jumpDelay = Math.max(0, entity.jumpDelay - delta);
-		return;
-	}
 
 	// 이동 방향 업데이트
 	if (dx > 0) {
