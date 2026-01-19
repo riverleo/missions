@@ -13,10 +13,9 @@
 		tileX: number;
 		tileY: number;
 		opacity?: number;
-		overlapping?: boolean;
 	}
 
-	let { worldId, tileX, tileY, overlapping, style, ...restProps }: Props = $props();
+	let { worldId, tileX, tileY, style, ...restProps }: Props = $props();
 
 	const context = useWorldContext();
 
@@ -30,14 +29,12 @@
 		const tileId = EntityIdUtils.createId('tile', worldId, tileCellKey);
 		if (context.entities[tileId]) return true;
 
-		// overlapping이 전달된 경우 (커서 프리뷰)만 cursor 체크
-		if (overlapping !== undefined) {
-			const cursor = context.blueprint.cursor;
-			if (cursor && cursor.type === 'tile') {
-				// Set에서 직접 키 존재 여부 확인 (O(1) lookup)
-				const key = vectorUtils.createTileCellKey(tx, ty);
-				return context.blueprint.cursorTileCellKeys.has(key);
-			}
+		// cursor 체크
+		const cursor = context.blueprint.cursor;
+		if (cursor && cursor.type === 'tile') {
+			// Set에서 직접 키 존재 여부 확인 (O(1) lookup)
+			const key = vectorUtils.createTileCellKey(tx, ty);
+			return context.blueprint.cursorTileCellKeys.has(key);
 		}
 
 		return false;
@@ -81,9 +78,7 @@
 <div
 	class="absolute"
 	style="left: {tileX * TILE_SIZE}px; top: {tileY *
-		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {overlapping !== undefined
-		? `background-color: ${overlapping ? 'rgba(239, 68, 68, 1)' : 'rgba(255, 255, 255, 0.8)'};`
-		: ''} {style}"
+		TILE_SIZE}px; width: {TILE_SIZE}px; height: {TILE_SIZE}px; {style}"
 	role="button"
 	tabindex="-1"
 	{...restProps}

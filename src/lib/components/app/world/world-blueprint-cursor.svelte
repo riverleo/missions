@@ -8,7 +8,7 @@
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
-	import type { BuildingId, CharacterId, ItemId, Cell } from '$lib/types';
+	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
 	import type { TileCell } from '$lib/types/vector';
 
 	const world = useWorldContext();
@@ -79,44 +79,29 @@
 		return y + height / 2;
 	});
 
-	// 겹치는 셀들을 Set으로 변환 (빠른 조회용)
-	// getOverlappingCells() 대신 캐시된 overlappingCells 사용
-	const overlappingCells = $derived.by(() => {
-		return new Set(world.blueprint.overlappingCells.map((c) => vectorUtils.createCellKey(c)));
-	});
-
-	// 셀이 겹치는지 확인 (절대 좌표 기준)
-	function isCellOverlapping(cell: Cell): boolean {
-		if (!world.blueprint.cursor) return false;
-
-		const { x, y } = world.blueprint.cursor.current;
-
-		// 타일인 경우: 픽셀 좌표를 타일 좌표로 변환 후 셀 좌표로 변환
-		if (world.blueprint.cursor.type === 'tile') {
-			const tileCell = vectorUtils.vectorToTileCell(vectorUtils.createVector(x, y));
-			// 타일 좌표를 셀 좌표로 변환 (1 tile = 2x2 cells)
-			const baseCellX = tileCell.col * 2;
-			const baseCellY = tileCell.row * 2;
-			// 상대 인덱스 더하기
-			const absoluteCol = baseCellX + cell.col;
-			const absoluteRow = baseCellY + cell.row;
-			return overlappingCells.has(vectorUtils.createCellKey(absoluteCol, absoluteRow));
-		}
-
-		// 건물인 경우: 픽셀 좌표를 셀 좌표로 변환 후 상대 인덱스 더하기
-		const baseCell = vectorUtils.vectorToCell(vectorUtils.createVector(x, y));
-		const absoluteCol = baseCell.col + cell.col;
-		const absoluteRow = baseCell.row + cell.row;
-
-		return overlappingCells.has(vectorUtils.createCellKey(absoluteCol, absoluteRow));
-	}
-
-	const OVERLAP_TILE_FILL_STYLE = 'rgba(239, 68, 68, 0.8)';
 	const PLANNING_TILE_FILL_STYLE = 'rgba(255, 255, 255, 0.8)';
 	const DISABLED_TILE_FILL_STYLE = 'rgba(156, 163, 175, 0.8)'; // gray-400
 
 	const isPlacable = $derived(world.blueprint.placable);
+
+	// 겹치는 기존 셀들을 렌더링하기 위한 배열
+	const overlappingExistingCells = $derived(world.blueprint.overlappingCells);
 </script>
+
+<!-- 기존 엔티티의 겹치는 셀 하이라이트 (커서보다 먼저 렌더링) -->
+{#each overlappingExistingCells as cell (vectorUtils.createCellKey(cell.col, cell.row))}
+	<div
+		class="absolute border border-red-600"
+		style="
+			top: {cell.row * CELL_SIZE}px;
+			left: {cell.col * CELL_SIZE}px;
+			width: {CELL_SIZE}px;
+			height: {CELL_SIZE}px;
+			background-color: rgba(220, 38, 38, 0.4);
+			pointer-events: none;
+		"
+	></div>
+{/each}
 
 {#if world.blueprint.cursor}
 	{#if building}
@@ -128,12 +113,9 @@
 			<svg class="overflow-visible" {width} {height}>
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
-						{@const isOverlapping = isCellOverlapping(vectorUtils.createCell(col, row))}
-						{@const fillStyle = isOverlapping
-							? OVERLAP_TILE_FILL_STYLE
-							: isPlacable
-								? PLANNING_TILE_FILL_STYLE
-								: DISABLED_TILE_FILL_STYLE}
+						{@const fillStyle = isPlacable
+							? PLANNING_TILE_FILL_STYLE
+							: DISABLED_TILE_FILL_STYLE}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}
@@ -160,18 +142,10 @@
 	{:else if isTile && world.blueprint.cursor}
 		<!-- 타일 미리보기 -->
 		{#each tileCells as tileCell (vectorUtils.createTileCellKey(tileCell))}
-			{@const baseCellX = tileCell.col * 2}
-			{@const baseCellY = tileCell.row * 2}
-			{@const isOverlapping =
-				overlappingCells.has(vectorUtils.createCellKey(baseCellX, baseCellY)) ||
-				overlappingCells.has(vectorUtils.createCellKey(baseCellX + 1, baseCellY)) ||
-				overlappingCells.has(vectorUtils.createCellKey(baseCellX, baseCellY + 1)) ||
-				overlappingCells.has(vectorUtils.createCellKey(baseCellX + 1, baseCellY + 1))}
 			<QuarterTile
 				worldId={world.worldId}
 				tileX={tileCell.col}
 				tileY={tileCell.row}
-				overlapping={isOverlapping}
 				style="opacity: {isPlacable ? 0.5 : 0.3};"
 			/>
 		{/each}
