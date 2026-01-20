@@ -8,6 +8,8 @@ import type {
 	BuildingInteractionAction,
 	CharacterInteraction,
 	CharacterInteractionAction,
+	ItemInteraction,
+	ItemInteractionAction,
 	ConditionBehaviorAction,
 	BuildingCondition,
 	Character,
@@ -507,4 +509,35 @@ export function createCharacterInteractionActionNextEdgeId(
 
 export function isCharacterInteractionActionNextEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-next-character-interaction-action-');
+}
+
+// ============================================
+// Item Interaction Action Flow Node/Edge IDs
+// ============================================
+
+// Item Interaction Action Node
+export function createItemInteractionActionNodeId(
+	action: ItemInteractionAction
+): string {
+	return `item-interaction-action-${action.id}`;
+}
+
+export function parseItemInteractionActionNodeId(nodeId: string): string {
+	return nodeId.replace('item-interaction-action-', '');
+}
+
+export function isItemInteractionActionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('item-interaction-action-');
+}
+
+// Item Interaction Action Next Edge
+export function createItemInteractionActionNextEdgeId(
+	sourceAction: ItemInteractionAction,
+	targetAction: ItemInteractionAction
+): string {
+	return `item-interaction-action-${sourceAction.id}-next-item-interaction-action-${targetAction.id}`;
+}
+
+export function isItemInteractionActionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-item-interaction-action-');
 }

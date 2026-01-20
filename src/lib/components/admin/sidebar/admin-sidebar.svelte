@@ -73,16 +73,18 @@
 					title: '캐릭터',
 					subItems: [
 						{
+							title: '바디',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
+						},
+						{
 							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
 							title: '상호작용',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-interactions` : undefined,
-						},
-						{
-							title: '바디',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
+							href: scenarioId
+								? `/admin/scenarios/${scenarioId}/character-interactions`
+								: undefined,
 						},
 						{
 							title: '욕구',
@@ -121,6 +123,10 @@
 						{
 							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
+						},
+						{
+							title: '상호작용',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/item-interactions` : undefined,
 						},
 					],
 				},

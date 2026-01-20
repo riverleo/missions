@@ -33,6 +33,10 @@ This document provides essential guidelines for AI coding agents working in this
 - `pnpm storybook` - Start Storybook dev server (port 6006)
 - `pnpm build-storybook` - Build static Storybook
 
+**Supabase:**
+
+- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.raw.ts` - Generate TypeScript types from local Supabase schema (IMPORTANT: Output file is `supabase.raw.ts`, NOT `database.types.ts`)
+
 ### Package Manager
 
 **CRITICAL: Use `pnpm` ONLY. Never use `npm` or `yarn`.**

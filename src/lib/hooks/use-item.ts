@@ -1,4 +1,4 @@
-import { writable, type Readable } from 'svelte/store';
+import { writable, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
@@ -8,8 +8,17 @@ import type {
 	ItemState,
 	ItemStateInsert,
 	ItemStateUpdate,
+	ItemInteraction,
+	ItemInteractionInsert,
+	ItemInteractionUpdate,
+	ItemInteractionAction,
+	ItemInteractionActionInsert,
+	ItemInteractionActionUpdate,
 	ItemId,
 	ItemStateId,
+	ItemInteractionId,
+	ItemInteractionActionId,
+	CharacterId,
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
@@ -21,6 +30,12 @@ type ItemDialogState =
 	| undefined;
 
 type ItemStateDialogState = { type: 'update'; itemStateId: ItemStateId } | undefined;
+
+type ItemInteractionDialogState =
+	| { type: 'create' }
+	| { type: 'update'; interactionId: ItemInteractionId }
+	| { type: 'delete'; interactionId: ItemInteractionId }
+	| undefined;
 
 let instance: ReturnType<typeof createItemStore> | null = null;
 
@@ -38,8 +53,23 @@ function createItemStore() {
 		data: {},
 	});
 
+	// item_interaction_id를 키로 관리
+	const itemInteractionStore = writable<RecordFetchState<ItemInteractionId, ItemInteraction>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// item_interaction_id를 키로, 해당 interaction의 actions 배열을 값으로
+	const itemInteractionActionStore = writable<
+		RecordFetchState<ItemInteractionId, ItemInteractionAction[]>
+	>({
+		status: 'idle',
+		data: {},
+	});
+
 	const dialogStore = writable<ItemDialogState>(undefined);
 	const stateDialogStore = writable<ItemStateDialogState>(undefined);
+	const interactionDialogStore = writable<ItemInteractionDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -59,6 +89,7 @@ function createItemStore() {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
+		itemInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
@@ -78,6 +109,25 @@ function createItemStore() {
 				stateRecord[item.id as ItemId] = (item_states ?? []) as ItemState[];
 			}
 
+			// Item interactions and actions
+			const { data: interactionsData, error: interactionsError } = await supabase
+				.from('item_interactions')
+				.select('*, item_interaction_actions(*)')
+				.eq('scenario_id', scenarioId)
+				.order('created_at');
+
+			if (interactionsError) throw interactionsError;
+
+			const interactionRecord: Record<ItemInteractionId, ItemInteraction> = {};
+			const actionRecord: Record<ItemInteractionId, ItemInteractionAction[]> = {};
+
+			for (const item of interactionsData ?? []) {
+				const { item_interaction_actions, ...interaction } = item;
+				interactionRecord[item.id as ItemInteractionId] = interaction as ItemInteraction;
+				actionRecord[item.id as ItemInteractionId] = (item_interaction_actions ??
+					[]) as ItemInteractionAction[];
+			}
+
 			store.set({
 				status: 'success',
 				data: itemRecord,
@@ -89,6 +139,18 @@ function createItemStore() {
 				data: stateRecord,
 				error: undefined,
 			});
+
+			itemInteractionStore.set({
+				status: 'success',
+				data: interactionRecord,
+				error: undefined,
+			});
+
+			itemInteractionActionStore.set({
+				status: 'success',
+				data: actionRecord,
+				error: undefined,
+			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
@@ -97,6 +159,16 @@ function createItemStore() {
 				error: err,
 			});
 			stateStore.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			itemInteractionStore.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			itemInteractionActionStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -118,6 +190,14 @@ function createItemStore() {
 
 	function closeStateDialog() {
 		stateDialogStore.set(undefined);
+	}
+
+	function openItemInteractionDialog(state: NonNullable<ItemInteractionDialogState>) {
+		interactionDialogStore.set(state);
+	}
+
+	function closeItemInteractionDialog() {
+		interactionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -251,19 +331,187 @@ function createItemStore() {
 				})
 			);
 		},
+
+		async createInteraction(interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
+			if (!currentScenarioId) {
+				throw new Error('useItem: currentScenarioId is not set.');
+			}
+
+			const { data, error } = await supabase
+				.from('item_interactions')
+				.insert({
+					...interaction,
+					scenario_id: currentScenarioId,
+				})
+				.select('*')
+				.single<ItemInteraction>();
+
+			if (error) throw error;
+
+			itemInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ItemInteractionId] = data;
+				})
+			);
+
+			itemInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ItemInteractionId] = [];
+				})
+			);
+
+			return data;
+		},
+
+		async updateInteraction(id: ItemInteractionId, updates: ItemInteractionUpdate) {
+			const { error } = await supabase
+				.from('item_interactions')
+				.update(updates)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			itemInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], updates);
+					}
+				})
+			);
+		},
+
+		async removeInteraction(id: ItemInteractionId) {
+			const { error } = await supabase.from('item_interactions').delete().eq('id', id);
+
+			if (error) throw error;
+
+			itemInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+
+			itemInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
+
+		async createInteractionAction(
+			interactionId: ItemInteractionId,
+			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
+		) {
+			if (!currentScenarioId) {
+				throw new Error('useItem: currentScenarioId is not set.');
+			}
+
+			// Get item_id from interaction
+			const itemInteractionStoreValue = get(itemInteractionStore);
+			const interaction = itemInteractionStoreValue.data[interactionId];
+			const itemId = interaction?.item_id;
+
+			if (!itemId) {
+				throw new Error('Cannot find item_id for this interaction');
+			}
+
+			const { data, error } = await supabase
+				.from('item_interaction_actions')
+				.insert({
+					...action,
+					scenario_id: currentScenarioId,
+					item_id: itemId,
+					item_interaction_id: interactionId,
+				})
+				.select()
+				.single<ItemInteractionAction>();
+
+			if (error) throw error;
+
+			itemInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					if (draft.data[interactionId]) {
+						draft.data[interactionId].push(data);
+					} else {
+						draft.data[interactionId] = [data];
+					}
+				})
+			);
+
+			return data;
+		},
+
+		async updateInteractionAction(
+			actionId: ItemInteractionActionId,
+			interactionId: ItemInteractionId,
+			updates: ItemInteractionActionUpdate
+		) {
+			const { error } = await supabase
+				.from('item_interaction_actions')
+				.update(updates)
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			itemInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[interactionId];
+					if (actions) {
+						const action = actions.find((a) => a.id === actionId);
+						if (action) {
+							Object.assign(action, updates);
+						}
+					}
+				})
+			);
+		},
+
+		async removeInteractionAction(
+			actionId: ItemInteractionActionId,
+			interactionId: ItemInteractionId
+		) {
+			const { error } = await supabase
+				.from('item_interaction_actions')
+				.delete()
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			itemInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[interactionId];
+					if (actions) {
+						draft.data[interactionId] = actions.filter((a) => a.id !== actionId);
+					}
+				})
+			);
+		},
 	};
 
 	return {
 		store: store as Readable<RecordFetchState<ItemId, Item>>,
 		stateStore: stateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
+		itemInteractionStore: itemInteractionStore as Readable<
+			RecordFetchState<ItemInteractionId, ItemInteraction>
+		>,
+		itemInteractionActionStore: itemInteractionActionStore as Readable<
+			RecordFetchState<ItemInteractionId, ItemInteractionAction[]>
+		>,
 		dialogStore: dialogStore as Readable<ItemDialogState>,
 		stateDialogStore: stateDialogStore as Readable<ItemStateDialogState>,
+		interactionDialogStore: interactionDialogStore as Readable<ItemInteractionDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
 		openStateDialog,
 		closeStateDialog,
+		openItemInteractionDialog,
+		closeItemInteractionDialog,
 		admin,
 	};
 }
