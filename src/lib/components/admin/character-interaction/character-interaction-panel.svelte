@@ -16,13 +16,13 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type {
-		BuildingInteraction,
-		BuildingInteractionId,
-		BuildingInteractionAction,
-		BuildingInteractionActionId,
+		Character,
+		CharacterInteraction,
+		CharacterInteractionId,
+		CharacterInteractionAction,
+		CharacterInteractionActionId,
 		CharacterId,
 		CharacterBehaviorType,
 		CharacterBodyStateType,
@@ -30,20 +30,20 @@
 	} from '$lib/types';
 
 	interface Props {
-		interaction: BuildingInteraction;
-		interactionId: BuildingInteractionId;
+		interaction: CharacterInteraction;
+		interactionId: CharacterInteractionId;
 	}
 
 	let { interaction, interactionId }: Props = $props();
 
-	const { store, buildingInteractionActionStore, openBuildingInteractionDialog, admin } = useBuilding();
+	const { store, characterInteractionActionStore, openCharacterInteractionDialog, admin } = useCharacter();
 	const { store: characterStore } = useCharacter();
 
-	const building = $derived($store.data[interaction.building_id]);
-	const actions = $derived($buildingInteractionActionStore.data[interactionId] ?? []);
+	const targetCharacter = $derived($store.data[interaction.target_character_id]);
+	const actions = $derived($characterInteractionActionStore.data[interactionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
-	const rootAction = $derived(actions.find((a) => a.root));
+	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
 
 	let characterBehaviorType = $state<CharacterBehaviorType>(
 		interaction.character_behavior_type
@@ -52,7 +52,7 @@
 
 	const selectedCharacter = $derived.by(() => {
 		if (!characterId) return null;
-		return characters.find((c) => c.id === characterId);
+		return characters.find((c: Character) => c.id === characterId);
 	});
 
 	async function updateInteraction() {
@@ -69,13 +69,13 @@
 	}
 
 	async function updateAction(
-		actionId: BuildingInteractionActionId,
-		updates: Partial<BuildingInteractionAction>
+		actionId: CharacterInteractionActionId,
+		updates: Partial<CharacterInteractionAction>
 	) {
 		await admin.updateInteractionAction(actionId, interactionId, updates);
 	}
 
-	async function removeAction(actionId: BuildingInteractionActionId) {
+	async function removeAction(actionId: CharacterInteractionActionId) {
 		await admin.removeInteractionAction(actionId, interactionId);
 	}
 
@@ -114,11 +114,11 @@
 
 <div class="flex h-full flex-col gap-4 p-4">
 	<div class="flex items-center justify-between">
-		<h2 class="text-lg font-semibold">{building?.name} 상호작용</h2>
+		<h2 class="text-lg font-semibold">{targetCharacter?.name} 상호작용</h2>
 		<Button
 			variant="destructive"
 			size="sm"
-			onclick={() => openBuildingInteractionDialog({ type: 'delete', interactionId })}
+			onclick={() => openCharacterInteractionDialog({ type: 'delete', interactionId })}
 		>
 			<IconTrash class="mr-2 size-4" />
 			삭제
@@ -178,7 +178,7 @@
 								}}
 							>
 								<DropdownMenuRadioItem value="">모든 캐릭터</DropdownMenuRadioItem>
-								{#each characters as character (character.id)}
+								{#each characters as character: Character (character.id)}
 									<DropdownMenuRadioItem value={character.id}>
 										{character.name}
 									</DropdownMenuRadioItem>
@@ -294,10 +294,10 @@
 							</InputGroupAddon>
 							<InputGroupInput
 								type="number"
-								value={action.character_offset_x}
+								value={action.target_character_offset_x}
 								onchange={(e) => {
 									const value = parseInt(e.currentTarget.value) || 0;
-									updateAction(action.id, { character_offset_x: value });
+									updateAction(action.id, { target_character_offset_x: value });
 								}}
 								placeholder="x"
 							/>
@@ -306,10 +306,10 @@
 							</InputGroupText>
 							<InputGroupInput
 								type="number"
-								value={action.character_offset_y}
+								value={action.target_character_offset_y}
 								onchange={(e) => {
 									const value = parseInt(e.currentTarget.value) || 0;
-									updateAction(action.id, { character_offset_y: value });
+									updateAction(action.id, { target_character_offset_y: value });
 								}}
 								placeholder="y"
 							/>
@@ -323,10 +323,10 @@
 								<InputGroupInput
 									type="number"
 									step="0.1"
-									value={action.character_scale}
+									value={action.target_character_scale}
 									onchange={(e) => {
 										const value = parseFloat(e.currentTarget.value) || 1.0;
-										updateAction(action.id, { character_scale: value });
+										updateAction(action.id, { target_character_scale: value });
 									}}
 								/>
 							</InputGroup>
@@ -337,10 +337,10 @@
 								</InputGroupAddon>
 								<InputGroupInput
 									type="number"
-									value={action.character_rotation}
+									value={action.target_character_rotation}
 									onchange={(e) => {
 										const value = parseFloat(e.currentTarget.value) || 0;
-										updateAction(action.id, { character_rotation: value });
+										updateAction(action.id, { target_character_rotation: value });
 									}}
 								/>
 							</InputGroup>

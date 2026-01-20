@@ -617,10 +617,6 @@ export type Database = {
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           character_id: string
           character_interaction_id: string
-          character_offset_x: number
-          character_offset_y: number
-          character_rotation: number
-          character_scale: number
           created_at: string
           created_by: string | null
           duration_ticks: number
@@ -628,17 +624,19 @@ export type Database = {
           next_character_interaction_action_id: string | null
           root: boolean
           scenario_id: string
+          target_character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          target_character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           target_character_id: string
+          target_character_offset_x: number
+          target_character_offset_y: number
+          target_character_rotation: number
+          target_character_scale: number
         }
         Insert: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id: string
           character_interaction_id: string
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
           created_at?: string
           created_by?: string | null
           duration_ticks?: number
@@ -646,17 +644,19 @@ export type Database = {
           next_character_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
+          target_character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          target_character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           target_character_id: string
+          target_character_offset_x?: number
+          target_character_offset_y?: number
+          target_character_rotation?: number
+          target_character_scale?: number
         }
         Update: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string
           character_interaction_id?: string
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
           created_at?: string
           created_by?: string | null
           duration_ticks?: number
@@ -664,7 +664,13 @@ export type Database = {
           next_character_interaction_action_id?: string | null
           root?: boolean
           scenario_id?: string
+          target_character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          target_character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           target_character_id?: string
+          target_character_offset_x?: number
+          target_character_offset_y?: number
+          target_character_rotation?: number
+          target_character_scale?: number
         }
         Relationships: [
           {

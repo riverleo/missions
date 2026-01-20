@@ -36,10 +36,6 @@ type BuildingInteractionDialogState =
 	| { type: 'delete'; interactionId: BuildingInteractionId }
 	| undefined;
 
-type BuildingInteractionActionDialogState =
-	| { type: 'update'; actionId: BuildingInteractionActionId }
-	| undefined;
-
 let instance: ReturnType<typeof createBuildingStore> | null = null;
 
 function createBuildingStore() {
@@ -73,7 +69,6 @@ function createBuildingStore() {
 	const dialogStore = writable<BuildingDialogState>(undefined);
 	const stateDialogStore = writable<BuildingStateDialogState>(undefined);
 	const interactionDialogStore = writable<BuildingInteractionDialogState>(undefined);
-	const interactionActionDialogStore = writable<BuildingInteractionActionDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -197,20 +192,12 @@ function createBuildingStore() {
 		stateDialogStore.set(undefined);
 	}
 
-	function openInteractionDialog(state: NonNullable<BuildingInteractionDialogState>) {
+	function openBuildingInteractionDialog(state: NonNullable<BuildingInteractionDialogState>) {
 		interactionDialogStore.set(state);
 	}
 
-	function closeInteractionDialog() {
+	function closeBuildingInteractionDialog() {
 		interactionDialogStore.set(undefined);
-	}
-
-	function openInteractionActionDialog(state: NonNullable<BuildingInteractionActionDialogState>) {
-		interactionActionDialogStore.set(state);
-	}
-
-	function closeInteractionActionDialog() {
-		interactionActionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -523,17 +510,14 @@ function createBuildingStore() {
 		dialogStore: dialogStore as Readable<BuildingDialogState>,
 		stateDialogStore: stateDialogStore as Readable<BuildingStateDialogState>,
 		interactionDialogStore: interactionDialogStore as Readable<BuildingInteractionDialogState>,
-		interactionActionDialogStore: interactionActionDialogStore as Readable<BuildingInteractionActionDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
 		openStateDialog,
 		closeStateDialog,
-		openInteractionDialog,
-		closeInteractionDialog,
-		openInteractionActionDialog,
-		closeInteractionActionDialog,
+		openBuildingInteractionDialog,
+		closeBuildingInteractionDialog,
 		admin,
 	};
 }

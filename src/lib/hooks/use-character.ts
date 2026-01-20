@@ -1,4 +1,4 @@
-import { writable, type Readable } from 'svelte/store';
+import { writable, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
@@ -8,9 +8,17 @@ import type {
 	CharacterFaceState,
 	CharacterFaceStateInsert,
 	CharacterFaceStateUpdate,
+	CharacterInteraction,
+	CharacterInteractionInsert,
+	CharacterInteractionUpdate,
+	CharacterInteractionAction,
+	CharacterInteractionActionInsert,
+	CharacterInteractionActionUpdate,
 	CharacterBodyStateType,
 	CharacterId,
 	CharacterFaceStateId,
+	CharacterInteractionId,
+	CharacterInteractionActionId,
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
@@ -23,6 +31,12 @@ type CharacterDialogState =
 
 type CharacterFaceStateDialogState =
 	| { type: 'update'; characterFaceStateId: CharacterFaceStateId }
+	| undefined;
+
+type CharacterInteractionDialogState =
+	| { type: 'create' }
+	| { type: 'update'; interactionId: CharacterInteractionId }
+	| { type: 'delete'; interactionId: CharacterInteractionId }
 	| undefined;
 
 let instance: ReturnType<typeof createCharacterStore> | null = null;
@@ -41,8 +55,23 @@ function createCharacterStore() {
 		data: {},
 	});
 
+	// character_interaction_id를 키로 관리
+	const characterInteractionStore = writable<RecordFetchState<CharacterInteractionId, CharacterInteraction>>({
+		status: 'idle',
+		data: {},
+	});
+
+	// character_interaction_id를 키로, 해당 interaction의 actions 배열을 값으로
+	const characterInteractionActionStore = writable<
+		RecordFetchState<CharacterInteractionId, CharacterInteractionAction[]>
+	>({
+		status: 'idle',
+		data: {},
+	});
+
 	const dialogStore = writable<CharacterDialogState>(undefined);
 	const faceStateDialogStore = writable<CharacterFaceStateDialogState>(undefined);
+	const interactionDialogStore = writable<CharacterInteractionDialogState>(undefined);
 
 	const uiStore = writable<{
 		previewBodyStateType: CharacterBodyStateType;
@@ -64,6 +93,7 @@ function createCharacterStore() {
 		currentScenarioId = scenarioId;
 
 		store.update((state) => ({ ...state, status: 'loading' }));
+		characterInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
@@ -89,6 +119,25 @@ function createCharacterStore() {
 					[]) as CharacterFaceState[];
 			}
 
+			// Character interactions and actions
+			const { data: interactionsData, error: interactionsError } = await supabase
+				.from('character_interactions')
+				.select('*, character_interaction_actions(*)')
+				.eq('scenario_id', scenarioId)
+				.order('created_at');
+
+			if (interactionsError) throw interactionsError;
+
+			const interactionRecord: Record<CharacterInteractionId, CharacterInteraction> = {};
+			const actionRecord: Record<CharacterInteractionId, CharacterInteractionAction[]> = {};
+
+			for (const item of interactionsData ?? []) {
+				const { character_interaction_actions, ...interaction } = item;
+				interactionRecord[item.id as CharacterInteractionId] = interaction as CharacterInteraction;
+				actionRecord[item.id as CharacterInteractionId] = (character_interaction_actions ??
+					[]) as CharacterInteractionAction[];
+			}
+
 			store.set({
 				status: 'success',
 				data: characterRecord,
@@ -100,6 +149,18 @@ function createCharacterStore() {
 				data: faceStateRecord,
 				error: undefined,
 			});
+
+			characterInteractionStore.set({
+				status: 'success',
+				data: interactionRecord,
+				error: undefined,
+			});
+
+			characterInteractionActionStore.set({
+				status: 'success',
+				data: actionRecord,
+				error: undefined,
+			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			store.set({
@@ -108,6 +169,16 @@ function createCharacterStore() {
 				error: err,
 			});
 			faceStateStore.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			characterInteractionStore.set({
+				status: 'error',
+				data: {},
+				error: err,
+			});
+			characterInteractionActionStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -129,6 +200,14 @@ function createCharacterStore() {
 
 	function closeFaceStateDialog() {
 		faceStateDialogStore.set(undefined);
+	}
+
+	function openCharacterInteractionDialog(state: NonNullable<CharacterInteractionDialogState>) {
+		interactionDialogStore.set(state);
+	}
+
+	function closeCharacterInteractionDialog() {
+		interactionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -274,19 +353,189 @@ function createCharacterStore() {
 				})
 			);
 		},
+
+		async createInteraction(interaction: Omit<CharacterInteractionInsert, 'scenario_id'>) {
+			if (!currentScenarioId) {
+				throw new Error('useCharacter: currentScenarioId is not set.');
+			}
+
+			const { data, error } = await supabase
+				.from('character_interactions')
+				.insert({
+					...interaction,
+					scenario_id: currentScenarioId,
+				})
+				.select('*')
+				.single<CharacterInteraction>();
+
+			if (error) throw error;
+
+			characterInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as CharacterInteractionId] = data;
+				})
+			);
+
+			characterInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as CharacterInteractionId] = [];
+				})
+			);
+
+			return data;
+		},
+
+		async updateInteraction(id: CharacterInteractionId, updates: CharacterInteractionUpdate) {
+			const { error } = await supabase
+				.from('character_interactions')
+				.update(updates)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			characterInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], updates);
+					}
+				})
+			);
+		},
+
+		async removeInteraction(id: CharacterInteractionId) {
+			const { error } = await supabase.from('character_interactions').delete().eq('id', id);
+
+			if (error) throw error;
+
+			characterInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+
+			characterInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
+
+		async createInteractionAction(
+			interactionId: CharacterInteractionId,
+			action: Omit<CharacterInteractionActionInsert, 'scenario_id' | 'character_id' | 'target_character_id' | 'character_interaction_id'>
+		) {
+			if (!currentScenarioId) {
+				throw new Error('useCharacter: currentScenarioId is not set.');
+			}
+
+			// Get character_id and target_character_id from interaction
+			const characterInteractionStoreValue = get(characterInteractionStore);
+			const interaction = characterInteractionStoreValue.data[interactionId];
+			const characterId = interaction?.character_id;
+			const targetCharacterId = interaction?.target_character_id;
+
+			if (!targetCharacterId) {
+				throw new Error('Cannot find target_character_id for this interaction');
+			}
+
+			const { data, error } = await supabase
+				.from('character_interaction_actions')
+				.insert({
+					...action,
+					scenario_id: currentScenarioId,
+					character_id: characterId || targetCharacterId, // Use targetCharacterId as fallback if character_id is null
+					target_character_id: targetCharacterId,
+					character_interaction_id: interactionId,
+				})
+				.select()
+				.single<CharacterInteractionAction>();
+
+			if (error) throw error;
+
+			characterInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					if (draft.data[interactionId]) {
+						draft.data[interactionId].push(data);
+					} else {
+						draft.data[interactionId] = [data];
+					}
+				})
+			);
+
+			return data;
+		},
+
+		async updateInteractionAction(
+			actionId: CharacterInteractionActionId,
+			interactionId: CharacterInteractionId,
+			updates: CharacterInteractionActionUpdate
+		) {
+			const { error } = await supabase
+				.from('character_interaction_actions')
+				.update(updates)
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			characterInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[interactionId];
+					if (actions) {
+						const action = actions.find((a) => a.id === actionId);
+						if (action) {
+							Object.assign(action, updates);
+						}
+					}
+				})
+			);
+		},
+
+		async removeInteractionAction(
+			actionId: CharacterInteractionActionId,
+			interactionId: CharacterInteractionId
+		) {
+			const { error } = await supabase
+				.from('character_interaction_actions')
+				.delete()
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			characterInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[interactionId];
+					if (actions) {
+						draft.data[interactionId] = actions.filter((a) => a.id !== actionId);
+					}
+				})
+			);
+		},
 	};
 
 	return {
 		store: store as Readable<RecordFetchState<CharacterId, Character>>,
 		faceStateStore: faceStateStore as Readable<RecordFetchState<CharacterId, CharacterFaceState[]>>,
+		characterInteractionStore: characterInteractionStore as Readable<
+			RecordFetchState<CharacterInteractionId, CharacterInteraction>
+		>,
+		characterInteractionActionStore: characterInteractionActionStore as Readable<
+			RecordFetchState<CharacterInteractionId, CharacterInteractionAction[]>
+		>,
 		dialogStore: dialogStore as Readable<CharacterDialogState>,
 		faceStateDialogStore: faceStateDialogStore as Readable<CharacterFaceStateDialogState>,
+		interactionDialogStore: interactionDialogStore as Readable<CharacterInteractionDialogState>,
 		init,
 		fetch,
 		openDialog,
 		closeDialog,
 		openFaceStateDialog,
 		closeFaceStateDialog,
+		openCharacterInteractionDialog,
+		closeCharacterInteractionDialog,
 		admin,
 	};
 }

@@ -10,10 +10,10 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
-	const { interactionDialogStore, closeBuildingInteractionDialog, admin } = useBuilding();
+	const { interactionDialogStore, closeCharacterInteractionDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($interactionDialogStore?.type === 'delete');
@@ -25,7 +25,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeBuildingInteractionDialog();
+			closeCharacterInteractionDialog();
 		}
 	}
 
@@ -37,8 +37,8 @@
 
 		try {
 			await admin.removeInteraction(interactionId);
-			closeBuildingInteractionDialog();
-			goto(`/admin/scenarios/${scenarioId}/building-interactions`);
+			closeCharacterInteractionDialog();
+			goto(`/admin/scenarios/${scenarioId}/character-interactions`);
 		} catch (error) {
 			console.error('Failed to delete interaction:', error);
 		} finally {
@@ -50,12 +50,12 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>건물 상호작용 삭제</DialogTitle>
-			<DialogDescription>이 건물 상호작용을 삭제하시겠습니까?</DialogDescription>
+			<DialogTitle>캐릭터 상호작용 삭제</DialogTitle>
+			<DialogDescription>이 캐릭터 상호작용을 삭제하시겠습니까?</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeBuildingInteractionDialog()}>
+				<Button type="button" variant="outline" onclick={() => closeCharacterInteractionDialog()}>
 					취소
 				</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>

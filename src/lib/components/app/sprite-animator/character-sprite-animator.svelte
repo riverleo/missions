@@ -9,6 +9,7 @@
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
+	import Self from './character-sprite-animator.svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { cn } from '$lib/utils';
@@ -23,6 +24,12 @@
 		heldItemOffset?: { x: number; y: number };
 		heldItemScale?: number;
 		heldItemRotation?: number;
+		interactCharacterId?: CharacterId;
+		interactCharacterBodyStateType?: CharacterBodyStateType;
+		interactCharacterFaceStateType?: CharacterFaceStateType;
+		interactCharacterOffset?: { x: number; y: number };
+		interactCharacterScale?: number;
+		interactCharacterRotation?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
 		selected?: boolean;
@@ -36,6 +43,12 @@
 		heldItemOffset,
 		heldItemScale = 1,
 		heldItemRotation = 0,
+		interactCharacterId,
+		interactCharacterBodyStateType,
+		interactCharacterFaceStateType,
+		interactCharacterOffset = { x: 0, y: 0 },
+		interactCharacterScale = 1,
+		interactCharacterRotation = 0,
 		resolution = 2,
 		flip = false,
 		selected = false,
@@ -252,6 +265,21 @@
 	{#if heldItemAnimator}
 		<div class="absolute" style:transform={handTransform}>
 			<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
+		</div>
+	{/if}
+	{#if interactCharacterId && interactCharacterBodyStateType}
+		<div
+			class="absolute bottom-0 left-1/2"
+			style:transform="translate(calc(-50% + {interactCharacterOffset.x / resolution}px), {-interactCharacterOffset.y /
+				resolution}px) scale({interactCharacterScale}) rotate({interactCharacterRotation}deg)"
+		>
+			<Self
+				characterId={interactCharacterId}
+				bodyStateType={interactCharacterBodyStateType}
+				faceStateType={interactCharacterFaceStateType}
+				{resolution}
+				flip={interactCharacterOffset.x < 0}
+			/>
 		</div>
 	{/if}
 </div>

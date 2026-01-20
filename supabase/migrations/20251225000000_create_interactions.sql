@@ -255,19 +255,23 @@ create table character_interaction_actions (
   character_interaction_id uuid not null references character_interactions(id) on delete cascade,
   root boolean not null default false,
 
-  -- 캐릭터 상태 (대상 캐릭터)
+  -- 캐릭터 상태 (현재 캐릭터)
   character_body_state_type character_body_state_type not null default 'idle',
   character_face_state_type character_face_state_type not null default 'idle',
 
+  -- 캐릭터 상태 (대상 캐릭터)
+  target_character_body_state_type character_body_state_type not null default 'idle',
+  target_character_face_state_type character_face_state_type not null default 'idle',
+
   -- 캐릭터 오프셋 (상호작용 캐릭터 중심 기준)
-  character_offset_x integer not null default 0,
-  character_offset_y integer not null default 0,
+  target_character_offset_x integer not null default 0,
+  target_character_offset_y integer not null default 0,
 
   -- 캐릭터 스케일
-  character_scale float not null default 1.0,
+  target_character_scale float not null default 1.0,
 
   -- 캐릭터 회전 (도)
-  character_rotation float not null default 0,
+  target_character_rotation float not null default 0,
 
   -- 지속 시간 (틱 단위, 0이면 애니메이션 끝까지)
   duration_ticks float not null default 0,

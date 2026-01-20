@@ -5,15 +5,15 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import type { BuildingInteractionId } from '$lib/types';
-	import BuildingInteractionCommand from './building-interaction-command.svelte';
-	import BuildingInteractionCreateDialog from './building-interaction-create-dialog.svelte';
-	import BuildingInteractionUpdateDialog from './building-interaction-update-dialog.svelte';
-	import BuildingInteractionDeleteDialog from './building-interaction-delete-dialog.svelte';
+	import { useCharacter } from '$lib/hooks/use-character';
+	import type { CharacterInteractionId } from '$lib/types';
+	import CharacterInteractionCommand from './character-interaction-command.svelte';
+	import CharacterInteractionCreateDialog from './character-interaction-create-dialog.svelte';
+	import CharacterInteractionUpdateDialog from './character-interaction-update-dialog.svelte';
+	import CharacterInteractionDeleteDialog from './character-interaction-delete-dialog.svelte';
 
-	const { openBuildingInteractionDialog } = useBuilding();
-	const currentInteractionId = $derived(page.params.buildingInteractionId);
+	const { openCharacterInteractionDialog } = useCharacter();
+	const currentInteractionId = $derived(page.params.characterInteractionId);
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -41,13 +41,13 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openBuildingInteractionDialog({ type: 'create' })}
+								onclick={() => openCharacterInteractionDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 건물 상호작용</TooltipContent>
+					<TooltipContent>새로운 캐릭터 상호작용</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger>
@@ -59,16 +59,16 @@
 								disabled={!currentInteractionId}
 								onclick={() =>
 									currentInteractionId &&
-									openBuildingInteractionDialog({
+									openCharacterInteractionDialog({
 										type: 'update',
-										interactionId: currentInteractionId as BuildingInteractionId,
+										interactionId: currentInteractionId as CharacterInteractionId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>건물 상호작용 수정</TooltipContent>
+					<TooltipContent>캐릭터 상호작용 수정</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
@@ -83,25 +83,25 @@
 							disabled={!currentInteractionId}
 							onclick={() =>
 								currentInteractionId &&
-								openBuildingInteractionDialog({
+								openCharacterInteractionDialog({
 									type: 'delete',
-									interactionId: currentInteractionId as BuildingInteractionId,
+									interactionId: currentInteractionId as CharacterInteractionId,
 								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>건물 상호작용 삭제</TooltipContent>
+				<TooltipContent>캐릭터 상호작용 삭제</TooltipContent>
 			</Tooltip>
 		</ButtonGroup>
 	</ButtonGroup>
 
 	{#if toggleValue.includes('list')}
-		<BuildingInteractionCommand />
+		<CharacterInteractionCommand />
 	{/if}
 </aside>
 
-<BuildingInteractionCreateDialog />
-<BuildingInteractionUpdateDialog />
-<BuildingInteractionDeleteDialog />
+<CharacterInteractionCreateDialog />
+<CharacterInteractionUpdateDialog />
+<CharacterInteractionDeleteDialog />

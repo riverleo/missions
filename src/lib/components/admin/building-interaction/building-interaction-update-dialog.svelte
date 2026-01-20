@@ -14,7 +14,7 @@
 	import { alphabetical } from 'radash';
 	import type { BuildingId, CharacterId, CharacterBehaviorType } from '$lib/types';
 
-	const { store, buildingInteractionStore, interactionDialogStore, closeInteractionDialog, admin } =
+	const { store, buildingInteractionStore, interactionDialogStore, closeBuildingInteractionDialog, admin } =
 		useBuilding();
 	const { store: characterStore } = useCharacter();
 
@@ -75,7 +75,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeInteractionDialog();
+			closeBuildingInteractionDialog();
 		}
 	}
 
@@ -92,7 +92,7 @@
 				character_id: characterId ? (characterId as CharacterId) : null,
 			});
 
-			closeInteractionDialog();
+			closeBuildingInteractionDialog();
 		} catch (error) {
 			console.error('Failed to update interaction:', error);
 		} finally {

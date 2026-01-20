@@ -77,6 +77,10 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
+							title: '상호작용',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-interactions` : undefined,
+						},
+						{
 							title: '바디',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
 						},

@@ -16,32 +16,29 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type {
 		ScenarioId,
-		BuildingId,
 		CharacterId,
-		BuildingInteraction,
+		CharacterInteraction,
 	} from '$lib/types';
 
-	const { store, buildingInteractionStore, openBuildingInteractionDialog } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { store: characterStore, characterInteractionStore, openCharacterInteractionDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const currentInteractionId = $derived(page.params.buildingInteractionId);
+	const currentInteractionId = $derived(page.params.characterInteractionId);
 
-	const interactionsGroupedByBuilding = $derived(() => {
-		const interactions = Object.values($buildingInteractionStore.data);
-		const grouped = group(interactions, (i) => i.building_id);
-		const buildings = Object.values($store.data);
-		const sortedBuildings = alphabetical(buildings, (b) => b.name);
+	const interactionsGroupedByTargetCharacter = $derived(() => {
+		const interactions = Object.values($characterInteractionStore.data);
+		const grouped = group(interactions, (i) => i.target_character_id);
+		const characters = Object.values($characterStore.data);
+		const sortedCharacters = alphabetical(characters, (c) => c.name);
 
-		return sortedBuildings
-			.map((building) => ({
-				building,
-				interactions: grouped[building.id] ?? [],
+		return sortedCharacters
+			.map((character) => ({
+				targetCharacter: character,
+				interactions: grouped[character.id] ?? [],
 			}))
 			.filter((g) => g.interactions.length > 0);
 	});
@@ -57,7 +54,7 @@
 		return labels[type] ?? type;
 	}
 
-	function getInteractionLabel(interaction: BuildingInteraction) {
+	function getInteractionLabel(interaction: CharacterInteraction) {
 		const character = interaction.character_id
 			? $characterStore.data[interaction.character_id as CharacterId]
 			: undefined;
@@ -70,16 +67,16 @@
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
-	<CommandInput placeholder="건물 상호작용 검색..." />
-	{#if interactionsGroupedByBuilding().length > 0}
+	<CommandInput placeholder="캐릭터 상호작용 검색..." />
+	{#if interactionsGroupedByTargetCharacter().length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
-			{#each interactionsGroupedByBuilding() as { building, interactions } (building.id)}
-				<CommandGroup heading={building.name}>
+			{#each interactionsGroupedByTargetCharacter() as { targetCharacter, interactions } (targetCharacter.id)}
+				<CommandGroup heading={targetCharacter.name}>
 					{#each interactions as interaction (interaction.id)}
 						{@const label = getInteractionLabel(interaction)}
 						<CommandLinkItem
-							href={`/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
+							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
 							class="group pr-1"
 						>
 							<IconCheck
@@ -106,13 +103,13 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openBuildingInteractionDialog({ type: 'update', interactionId: interaction.id })}
+											openCharacterInteractionDialog({ type: 'update', interactionId: interaction.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openBuildingInteractionDialog({ type: 'delete', interactionId: interaction.id })}
+											openCharacterInteractionDialog({ type: 'delete', interactionId: interaction.id })}
 									>
 										삭제
 									</DropdownMenuItem>
