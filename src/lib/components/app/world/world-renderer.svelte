@@ -48,9 +48,7 @@
 
 	// worldId 필터링된 entities - 타입별로 분리
 	const entities = $derived(Object.values(world.entities));
-	const tileEntities = $derived(
-		entities.filter((e): e is WorldTileEntity => e.type === 'tile')
-	);
+	const tileEntities = $derived(entities.filter((e): e is WorldTileEntity => e.type === 'tile'));
 	const buildingEntities = $derived(
 		entities.filter((e): e is WorldBuildingEntity => e.type === 'building')
 	);
@@ -95,7 +93,6 @@
 			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
 		{/if}
 		<WorldPathfinderDebug />
-		<WorldBlueprint />
 
 		<!-- 타일 레이어 -->
 		{#each tileEntities as entity (entity.id)}
@@ -116,6 +113,8 @@
 		{#each characterEntities as entity (entity.id)}
 			<WorldCharacterEntityRenderer {entity} />
 		{/each}
+
+		<WorldBlueprint />
 	</div>
 
 	<!-- 오버레이 레이어: pointer-events를 받을 수 있는 별도 레이어 -->

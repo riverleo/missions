@@ -9,7 +9,6 @@
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
 	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
-	import type { TileCell } from '$lib/types/vector';
 
 	const world = useWorldContext();
 	const { store: buildingStore } = useBuilding();
@@ -163,7 +162,6 @@
 				width: {CELL_SIZE}px;
 				height: {CELL_SIZE}px;
 				background-color: rgba(220, 38, 38, 0.4);
-				z-index: 9999;
 			"
 		></div>
 	{/each}
