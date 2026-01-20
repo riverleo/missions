@@ -584,6 +584,99 @@ export type Database = {
           },
         ]
       }
+      character_interactions: {
+        Row: {
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
+          character_id: string | null
+          character_offset_x: number
+          character_offset_y: number
+          character_rotation: number
+          character_scale: number
+          created_at: string
+          created_by: string | null
+          duration_ticks: number
+          id: string
+          next_character_interaction_id: string | null
+          root: boolean
+          scenario_id: string
+          target_character_id: string
+        }
+        Insert: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          next_character_interaction_id?: string | null
+          root?: boolean
+          scenario_id: string
+          target_character_id: string
+        }
+        Update: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          next_character_interaction_id?: string | null
+          root?: boolean
+          scenario_id?: string
+          target_character_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_interactions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interactions_next_character_interaction_id_fkey"
+            columns: ["next_character_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "character_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interactions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interactions_target_character_id_fkey"
+            columns: ["target_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       character_needs: {
         Row: {
           character_id: string
