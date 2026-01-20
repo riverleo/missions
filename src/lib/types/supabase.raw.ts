@@ -165,6 +165,99 @@ export type Database = {
           },
         ]
       }
+      building_interactions: {
+        Row: {
+          building_id: string
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
+          character_id: string | null
+          character_offset_x: number
+          character_offset_y: number
+          character_rotation: number
+          character_scale: number
+          created_at: string
+          created_by: string | null
+          duration_ticks: number
+          id: string
+          next_building_interaction_id: string | null
+          root: boolean
+          scenario_id: string
+        }
+        Insert: {
+          building_id: string
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          next_building_interaction_id?: string | null
+          root?: boolean
+          scenario_id: string
+        }
+        Update: {
+          building_id?: string
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          character_offset_x?: number
+          character_offset_y?: number
+          character_rotation?: number
+          character_scale?: number
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          next_building_interaction_id?: string | null
+          root?: boolean
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_interactions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interactions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interactions_next_building_interaction_id_fkey"
+            columns: ["next_building_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "building_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interactions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       building_states: {
         Row: {
           atlas_name: string
@@ -192,7 +285,7 @@ export type Database = {
           max_value?: number
           min_value?: number
           priority?: number
-          type: Database["public"]["Enums"]["building_state_type"]
+          type?: Database["public"]["Enums"]["building_state_type"]
         }
         Update: {
           atlas_name?: string
@@ -217,7 +310,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "building_states_condition_id_fkey"
+            foreignKeyName: "fk_building_states_condition_id"
             columns: ["condition_id"]
             isOneToOne: false
             referencedRelation: "conditions"
@@ -418,7 +511,7 @@ export type Database = {
           id?: string
           in_front?: boolean
           loop?: Database["public"]["Enums"]["loop_mode"]
-          type: Database["public"]["Enums"]["character_body_state_type"]
+          type?: Database["public"]["Enums"]["character_body_state_type"]
         }
         Update: {
           atlas_name?: string
@@ -475,7 +568,7 @@ export type Database = {
           offset_x?: number
           offset_y?: number
           priority?: number
-          type: Database["public"]["Enums"]["character_face_state_type"]
+          type?: Database["public"]["Enums"]["character_face_state_type"]
         }
         Update: {
           atlas_name?: string
@@ -502,7 +595,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "character_face_states_need_id_fkey"
+            foreignKeyName: "fk_character_face_states_need_id"
             columns: ["need_id"]
             isOneToOne: false
             referencedRelation: "needs"
@@ -599,6 +692,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "characters_character_body_id_fkey"
+            columns: ["character_body_id"]
+            isOneToOne: false
+            referencedRelation: "character_bodies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "characters_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -612,18 +712,11 @@ export type Database = {
             referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_characters_character_body_id"
-            columns: ["character_body_id"]
-            isOneToOne: false
-            referencedRelation: "character_bodies"
-            referencedColumns: ["id"]
-          },
         ]
       }
       condition_behavior_actions: {
         Row: {
-          building_id: string | null
+          building_id: string
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           character_offset_x: number
@@ -640,7 +733,7 @@ export type Database = {
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
-          building_id?: string | null
+          building_id: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_offset_x?: number
@@ -657,7 +750,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
-          building_id?: string | null
+          building_id?: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_offset_x?: number
@@ -696,24 +789,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "condition_behavior_actions_next_condition_behavior_action__fkey"
+            columns: ["next_condition_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "condition_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "condition_behavior_actions_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "condition_behavior_actions_success_condition_behavior_acti_fkey"
-            columns: ["next_condition_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "condition_behavior_actions"
-            referencedColumns: ["id"]
-          },
         ]
       }
       condition_behaviors: {
         Row: {
-          building_id: string | null
+          building_id: string
           character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           condition_id: string
@@ -724,7 +817,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          building_id?: string | null
+          building_id: string
           character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id: string
@@ -735,7 +828,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          building_id?: string | null
+          building_id?: string
           character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id?: string
@@ -1074,17 +1167,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "item_behavior_actions_next_item_behavior_action_id_fkey"
+            columns: ["next_item_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "item_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "item_behavior_actions_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_success_item_behavior_action_id_fkey"
-            columns: ["next_item_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "item_behavior_actions"
             referencedColumns: ["id"]
           },
         ]
@@ -1151,6 +1244,99 @@ export type Database = {
           },
         ]
       }
+      item_interactions: {
+        Row: {
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
+          character_id: string | null
+          created_at: string
+          created_by: string | null
+          duration_ticks: number
+          id: string
+          item_id: string
+          item_offset_x: number
+          item_offset_y: number
+          item_rotation: number
+          item_scale: number
+          next_item_interaction_id: string | null
+          root: boolean
+          scenario_id: string
+        }
+        Insert: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          item_id: string
+          item_offset_x?: number
+          item_offset_y?: number
+          item_rotation?: number
+          item_scale?: number
+          next_item_interaction_id?: string | null
+          root?: boolean
+          scenario_id: string
+        }
+        Update: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_ticks?: number
+          id?: string
+          item_id?: string
+          item_offset_x?: number
+          item_offset_y?: number
+          item_rotation?: number
+          item_scale?: number
+          next_item_interaction_id?: string | null
+          root?: boolean
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_interactions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interactions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interactions_next_item_interaction_id_fkey"
+            columns: ["next_item_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "item_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interactions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_states: {
         Row: {
           atlas_name: string
@@ -1174,7 +1360,7 @@ export type Database = {
           loop?: Database["public"]["Enums"]["loop_mode"]
           max_durability?: number
           min_durability?: number
-          type: Database["public"]["Enums"]["item_state_type"]
+          type?: Database["public"]["Enums"]["item_state_type"]
         }
         Update: {
           atlas_name?: string
@@ -1574,17 +1760,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "need_behavior_actions_next_need_behavior_action_id_fkey"
+            columns: ["next_need_behavior_action_id"]
+            isOneToOne: false
+            referencedRelation: "need_behavior_actions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "need_behavior_actions_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_success_need_behavior_action_id_fkey"
-            columns: ["next_need_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "need_behavior_actions"
             referencedColumns: ["id"]
           },
         ]
@@ -3068,7 +3254,7 @@ export type Database = {
           id: string
           name: string
           player_id: string
-          scenario_id: string | null
+          scenario_id: string
           terrain_id: string | null
           user_id: string
         }
@@ -3077,7 +3263,7 @@ export type Database = {
           id?: string
           name: string
           player_id: string
-          scenario_id?: string | null
+          scenario_id: string
           terrain_id?: string | null
           user_id?: string
         }
@@ -3086,7 +3272,7 @@ export type Database = {
           id?: string
           name?: string
           player_id?: string
-          scenario_id?: string | null
+          scenario_id?: string
           terrain_id?: string | null
           user_id?: string
         }

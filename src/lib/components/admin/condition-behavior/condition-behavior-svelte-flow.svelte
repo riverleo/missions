@@ -147,6 +147,7 @@
 		try {
 			// 새 액션 생성
 			const newAction = await admin.createConditionBehaviorAction({
+				building_id: behavior.building_id,
 				condition_id: behavior.condition_id,
 				condition_behavior_id: behavior.id,
 			});

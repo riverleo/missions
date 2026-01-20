@@ -132,7 +132,7 @@
 									variant={bodyState.in_front ? 'secondary' : 'ghost'}
 									onclick={() => onInFrontChange(!bodyState.in_front)}
 								>
-									맨 앞으로
+									프론트 바디
 								</InputGroupButton>
 							{/snippet}
 						</TooltipTrigger>
