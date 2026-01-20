@@ -40,7 +40,6 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
-          item_behavior_id: string | null
           need_behavior_id: string | null
           priority: number
           scenario_id: string
@@ -50,7 +49,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_behavior_id?: string | null
           need_behavior_id?: string | null
           priority?: number
           scenario_id: string
@@ -60,7 +58,6 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_behavior_id?: string | null
           need_behavior_id?: string | null
           priority?: number
           scenario_id?: string
@@ -78,13 +75,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "behavior_priorities_item_behavior_id_fkey"
-            columns: ["item_behavior_id"]
-            isOneToOne: true
-            referencedRelation: "item_behaviors"
             referencedColumns: ["id"]
           },
           {
@@ -1262,135 +1252,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_behavior_actions: {
-        Row: {
-          behavior_id: string
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks: number
-          id: string
-          item_offset_x: number
-          item_offset_y: number
-          item_rotation: number
-          item_scale: number
-          next_item_behavior_action_id: string | null
-          root: boolean
-          scenario_id: string
-        }
-        Insert: {
-          behavior_id: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks?: number
-          id?: string
-          item_offset_x?: number
-          item_offset_y?: number
-          item_rotation?: number
-          item_scale?: number
-          next_item_behavior_action_id?: string | null
-          root?: boolean
-          scenario_id: string
-        }
-        Update: {
-          behavior_id?: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          duration_ticks?: number
-          id?: string
-          item_offset_x?: number
-          item_offset_y?: number
-          item_rotation?: number
-          item_scale?: number
-          next_item_behavior_action_id?: string | null
-          root?: boolean
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_behavior_actions_behavior_id_fkey"
-            columns: ["behavior_id"]
-            isOneToOne: false
-            referencedRelation: "item_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_next_item_behavior_action_id_fkey"
-            columns: ["next_item_behavior_action_id"]
-            isOneToOne: false
-            referencedRelation: "item_behavior_actions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behavior_actions_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      item_behaviors: {
-        Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
-          character_id: string | null
-          created_at: string
-          created_by: string | null
-          durability_threshold: number | null
-          id: string
-          item_id: string
-          scenario_id: string
-        }
-        Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          durability_threshold?: number | null
-          id?: string
-          item_id: string
-          scenario_id: string
-        }
-        Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
-          character_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          durability_threshold?: number | null
-          id?: string
-          item_id?: string
-          scenario_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "item_behaviors_character_id_fkey"
-            columns: ["character_id"]
-            isOneToOne: false
-            referencedRelation: "characters"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_item_id_fkey"
-            columns: ["item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_behaviors_scenario_id_fkey"
-            columns: ["scenario_id"]
-            isOneToOne: false
-            referencedRelation: "scenarios"
             referencedColumns: ["id"]
           },
         ]

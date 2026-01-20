@@ -6,7 +6,6 @@ create table behavior_priorities (
   -- behavior 참조 (정확히 하나만 not null이어야 함)
   need_behavior_id uuid references need_behaviors(id) on delete cascade,
   condition_behavior_id uuid references condition_behaviors(id) on delete cascade,
-  item_behavior_id uuid references item_behaviors(id) on delete cascade,
 
   priority integer not null default 0,
 
@@ -15,13 +14,12 @@ create table behavior_priorities (
 
   -- 정확히 하나의 behavior만 참조해야 함
   constraint chk_behavior_priorities_one_behavior check (
-    num_nonnulls(need_behavior_id, condition_behavior_id, item_behavior_id) = 1
+    num_nonnulls(need_behavior_id, condition_behavior_id) = 1
   ),
 
   -- 각 behavior당 하나의 priority만 존재
   constraint uq_behavior_priorities_need unique (need_behavior_id),
-  constraint uq_behavior_priorities_condition unique (condition_behavior_id),
-  constraint uq_behavior_priorities_item unique (item_behavior_id)
+  constraint uq_behavior_priorities_condition unique (condition_behavior_id)
 );
 
 -- RLS 정책

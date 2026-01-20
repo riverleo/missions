@@ -10,13 +10,11 @@
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
-	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
-	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import type { BehaviorPriority, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel, getItemBehaviorLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		priority: BehaviorPriority;
@@ -31,9 +29,7 @@
 
 	const { needBehaviorStore } = useNeedBehavior();
 	const { conditionBehaviorStore } = useConditionBehavior();
-	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
-	const { store: itemStore } = useItem();
 	const { store: characterStore } = useCharacter();
 	const { conditionStore } = useCondition();
 
@@ -41,7 +37,6 @@
 	const behaviorType = $derived.by(() => {
 		if (priority.need_behavior_id) return 'need';
 		if (priority.condition_behavior_id) return 'condition';
-		if (priority.item_behavior_id) return 'item';
 		return null;
 	});
 
@@ -49,7 +44,6 @@
 		const type = behaviorType;
 		if (type === 'need') return '욕구';
 		if (type === 'condition') return '컨디션';
-		if (type === 'item') return '아이템';
 		return null;
 	});
 
@@ -88,20 +82,6 @@
 				title: behavior.name,
 				description: parts.join(' · '),
 			};
-		} else if (priority.item_behavior_id) {
-			const behavior = $itemBehaviorStore.data[priority.item_behavior_id];
-			if (!behavior) return null;
-
-			const item = behavior.item_id ? $itemStore.data[behavior.item_id] : undefined;
-			const character = behavior.character_id
-				? $characterStore.data[behavior.character_id as CharacterId]
-				: undefined;
-
-			return getItemBehaviorLabel({
-				behavior,
-				itemName: item?.name,
-				characterName: character?.name,
-			});
 		}
 
 		return null;

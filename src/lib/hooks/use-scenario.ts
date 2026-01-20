@@ -21,7 +21,6 @@ import { useNeedBehavior } from './use-need-behavior';
 import { useConditionBehavior } from './use-condition-behavior';
 import { useCondition } from './use-condition';
 import { useItem } from './use-item';
-import { useItemBehavior } from './use-item-behavior';
 import { useBehaviorPriority } from './use-behavior-priority';
 import { useWorld } from './use-world';
 
@@ -106,7 +105,6 @@ function createScenarioStore() {
 				useConditionBehavior().fetch(scenarioId),
 				useCondition().fetch(scenarioId),
 				useItem().fetch(scenarioId),
-				useItemBehavior().fetch(scenarioId),
 				useBehaviorPriority().fetch(scenarioId),
 				useWorld().fetch(),
 			]);

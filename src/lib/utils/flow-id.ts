@@ -13,7 +13,6 @@ import type {
 	Condition,
 	ConditionEffect,
 	ConditionFulfillment,
-	ItemBehaviorAction,
 	NarrativeDiceRoll,
 	NarrativeNode,
 	NarrativeNodeChoice,
@@ -278,36 +277,6 @@ export function isConditionBehaviorActionNextEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-next-');
 }
 
-// ============================================
-// Item Behavior Flow Node/Edge IDs
-// ============================================
-
-// Item Behavior Action Node
-export function createItemBehaviorActionNodeId(action: ItemBehaviorAction): string {
-	return `item-behavior-action-${action.id}`;
-}
-
-export function parseItemBehaviorActionNodeId(nodeId: string): string {
-	return nodeId.replace('item-behavior-action-', '');
-}
-
-export function isItemBehaviorActionNodeId(nodeId: string): boolean {
-	return nodeId.startsWith('item-behavior-action-');
-}
-
-// Item Behavior Action Next Edge
-export function createItemBehaviorActionNextEdgeId(
-	sourceAction: ItemBehaviorAction,
-	targetAction: ItemBehaviorAction
-): string {
-	return `item-behavior-action-${sourceAction.id}-next-item-behavior-action-${targetAction.id}`;
-}
-
-export function isItemBehaviorActionNextEdgeId(edgeId: string): boolean {
-	return edgeId.includes('-next-');
-}
-
-// Condition Flow Node/Edge IDs
 
 // Building Node
 export function createBuildingNodeId(building: Building): string {

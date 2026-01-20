@@ -8,7 +8,6 @@ import type {
 	ColliderType,
 	NeedBehavior,
 	ConditionBehavior,
-	ItemBehavior,
 } from '$lib/types';
 
 const colliderTypeLabels: Record<ColliderType, string> = {
@@ -111,14 +110,3 @@ export function getConditionBehaviorLabel(params: {
 	};
 }
 
-export function getItemBehaviorLabel(params: {
-	behavior: ItemBehavior;
-	itemName?: string;
-	characterName?: string;
-}): { title: string; description: string } {
-	const { behavior, itemName, characterName } = params;
-	return {
-		title: `${itemName ?? '아이템'} ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
-		description: `${characterName ?? '모든 캐릭터'}${behavior.durability_threshold !== null ? ` (내구도 ${behavior.durability_threshold} 이하)` : ''}`,
-	};
-}

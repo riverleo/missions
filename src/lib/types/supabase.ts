@@ -58,8 +58,6 @@ export type NeedBehaviorId = Brand<string, 'NeedBehaviorId'>;
 export type NeedBehaviorActionId = Brand<string, 'NeedBehaviorActionId'>;
 export type ItemId = Brand<string, 'ItemId'>;
 export type ItemStateId = Brand<string, 'ItemStateId'>;
-export type ItemBehaviorId = Brand<string, 'ItemBehaviorId'>;
-export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
 export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
 export type WorldItemId = Brand<string, 'WorldItemId'>;
 export type BuildingInteractionId = Brand<string, 'BuildingInteractionId'>;
@@ -1370,67 +1368,6 @@ export type ItemUpdate = Omit<ItemUpdateRow, 'id' | 'scenario_id' | 'created_by'
 	created_by?: UserRoleId | null;
 };
 
-// Item Behavior types
-type ItemBehaviorRow = Tables<'item_behaviors'>;
-export type ItemBehavior = Omit<
-	ItemBehaviorRow,
-	'id' | 'scenario_id' | 'item_id' | 'created_by'
-> & { id: ItemBehaviorId; scenario_id: ScenarioId; item_id: ItemId; created_by: UserRoleId | null };
-type ItemBehaviorInsertRow = TablesInsert<'item_behaviors'>;
-export type ItemBehaviorInsert = Omit<
-	ItemBehaviorInsertRow,
-	'scenario_id' | 'item_id' | 'created_by'
-> & { scenario_id: ScenarioId; item_id: ItemId; created_by?: UserRoleId | null };
-type ItemBehaviorUpdateRow = TablesUpdate<'item_behaviors'>;
-export type ItemBehaviorUpdate = Omit<
-	ItemBehaviorUpdateRow,
-	'id' | 'scenario_id' | 'item_id' | 'created_by'
-> & {
-	id?: ItemBehaviorId;
-	scenario_id?: ScenarioId;
-	item_id?: ItemId;
-	created_by?: UserRoleId | null;
-};
-
-// Item Behavior Action types
-type ItemBehaviorActionRow = Tables<'item_behavior_actions'>;
-export type ItemBehaviorAction = Omit<
-	ItemBehaviorActionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'behavior_id'
-	| 'next_item_behavior_action_id'
-> & {
-	id: ItemBehaviorActionId;
-	scenario_id: ScenarioId;
-	behavior_id: ItemBehaviorId;
-	next_item_behavior_action_id: ItemBehaviorActionId | null;
-};
-type ItemBehaviorActionInsertRow = TablesInsert<'item_behavior_actions'>;
-export type ItemBehaviorActionInsert = Omit<
-	ItemBehaviorActionInsertRow,
-	| 'scenario_id'
-	| 'behavior_id'
-	| 'next_item_behavior_action_id'
-> & {
-	scenario_id: ScenarioId;
-	behavior_id: ItemBehaviorId;
-	next_item_behavior_action_id?: ItemBehaviorActionId | null;
-};
-type ItemBehaviorActionUpdateRow = TablesUpdate<'item_behavior_actions'>;
-export type ItemBehaviorActionUpdate = Omit<
-	ItemBehaviorActionUpdateRow,
-	| 'id'
-	| 'scenario_id'
-	| 'behavior_id'
-	| 'next_item_behavior_action_id'
-> & {
-	id?: ItemBehaviorActionId;
-	scenario_id?: ScenarioId;
-	behavior_id?: ItemBehaviorId;
-	next_item_behavior_action_id?: ItemBehaviorActionId | null;
-};
-
 // Building Interaction types
 type BuildingInteractionRow = Tables<'building_interactions'>;
 export type BuildingInteraction = Omit<
@@ -1736,14 +1673,12 @@ export type BehaviorPriority = Omit<
 	| 'scenario_id'
 	| 'need_behavior_id'
 	| 'condition_behavior_id'
-	| 'item_behavior_id'
 	| 'created_by'
 > & {
 	id: BehaviorPriorityId;
 	scenario_id: ScenarioId;
 	need_behavior_id: NeedBehaviorId | null;
 	condition_behavior_id: ConditionBehaviorId | null;
-	item_behavior_id: ItemBehaviorId | null;
 	created_by: UserRoleId | null;
 };
 type BehaviorPriorityInsertRow = TablesInsert<'behavior_priorities'>;
@@ -1757,15 +1692,12 @@ export type BehaviorPriorityUpdate = Omit<
 	| 'scenario_id'
 	| 'need_behavior_id'
 	| 'condition_behavior_id'
-	| 'item_behavior_id'
 	| 'created_by'
 > & {
 	id?: BehaviorPriorityId;
 	scenario_id?: ScenarioId;
 	need_behavior_id?: NeedBehaviorId | null;
 	condition_behavior_id?: ConditionBehaviorId | null;
-	item_behavior_id?: ItemBehaviorId | null;
-	created_by?: UserRoleId | null;
 };
 
 // Item State types

@@ -10,17 +10,14 @@
 	import { useBehaviorPriority } from '$lib/hooks/use-behavior-priority';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
-	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { page } from '$app/state';
-	import type { ScenarioId, NeedBehavior, ConditionBehavior, ItemBehavior } from '$lib/types';
+	import type { ScenarioId, NeedBehavior, ConditionBehavior } from '$lib/types';
 	import NeedBehaviorCommandItem from '../need-behavior/need-behavior-command-item.svelte';
 	import ConditionBehaviorCommandItem from '../condition-behavior/condition-behavior-command-item.svelte';
-	import ItemBehaviorCommandItem from '../item-behavior/item-behavior-command-item.svelte';
 
 	const { store: behaviorPriorityStore, admin } = useBehaviorPriority();
 	const { needBehaviorStore } = useNeedBehavior();
 	const { conditionBehaviorStore } = useConditionBehavior();
-	const { itemBehaviorStore } = useItemBehavior();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
@@ -52,20 +49,6 @@
 		}
 	}
 
-	async function addItemBehaviorToPriority(behavior: ItemBehavior) {
-		const priorities = Object.values($behaviorPriorityStore.data);
-		const maxPriority = Math.max(0, ...priorities.map((p) => p.priority));
-
-		try {
-			await admin.create({
-				item_behavior_id: behavior.id,
-				priority: maxPriority + 1,
-			});
-		} catch (error) {
-			console.error('Failed to add behavior to priority:', error);
-		}
-	}
-
 	// 우선도가 설정되지 않은 행동들만 표시
 	const behaviorsWithoutPriority = $derived(() => {
 		const priorities = Object.values($behaviorPriorityStore.data);
@@ -74,9 +57,6 @@
 		);
 		const priorityConditionBehaviorIds = new Set(
 			priorities.map((p) => p.condition_behavior_id).filter(Boolean)
-		);
-		const priorityItemBehaviorIds = new Set(
-			priorities.map((p) => p.item_behavior_id).filter(Boolean)
 		);
 
 		const needBehaviors = Object.values($needBehaviorStore.data).filter(
@@ -87,21 +67,15 @@
 			(behavior) => !priorityConditionBehaviorIds.has(behavior.id)
 		);
 
-		const itemBehaviors = Object.values($itemBehaviorStore.data).filter(
-			(behavior) => !priorityItemBehaviorIds.has(behavior.id)
-		);
-
 		return {
 			need: needBehaviors,
 			condition: conditionBehaviors,
-			item: itemBehaviors,
 		};
 	});
 
 	const hasAnyBehaviors = $derived(
 		behaviorsWithoutPriority().need.length > 0 ||
-			behaviorsWithoutPriority().condition.length > 0 ||
-			behaviorsWithoutPriority().item.length > 0
+			behaviorsWithoutPriority().condition.length > 0
 	);
 
 	let searchValue = $state('');
@@ -136,19 +110,6 @@
 							{behavior}
 							showActions={false}
 							onclick={() => addConditionBehaviorToPriority(behavior)}
-						/>
-					{/each}
-				</CommandGroup>
-			{/if}
-
-			<!-- 아이템 행동 그룹 -->
-			{#if behaviorsWithoutPriority().item.length > 0}
-				<CommandGroup heading="아이템 행동">
-					{#each behaviorsWithoutPriority().item as behavior (behavior.id)}
-						<ItemBehaviorCommandItem
-							{behavior}
-							showActions={false}
-							onclick={() => addItemBehaviorToPriority(behavior)}
 						/>
 					{/each}
 				</CommandGroup>

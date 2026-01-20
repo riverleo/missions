@@ -19,7 +19,6 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useItem } from '$lib/hooks/use-item';
-	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
@@ -35,7 +34,6 @@
 		ConditionId,
 		ConditionBehaviorId,
 		ItemId,
-		ItemBehaviorId,
 		NeedId,
 		NeedBehaviorId,
 	} from '$lib/types';
@@ -51,7 +49,6 @@
 	const { store: buildingStore } = useBuilding();
 	const { conditionBehaviorStore } = useConditionBehavior();
 	const { store: itemStore } = useItem();
-	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
 	const { needBehaviorStore } = useNeedBehavior();
 	const { conditionStore } = useCondition();
@@ -90,13 +87,6 @@
 		}
 		if (prevSegment === 'items') {
 			return $itemStore.data?.[id as ItemId]?.name;
-		}
-		if (prevSegment === 'item-behaviors') {
-			const behavior = $itemBehaviorStore.data?.[id as ItemBehaviorId];
-			if (behavior) {
-				return $itemStore.data?.[behavior.item_id]?.name;
-			}
-			return undefined;
 		}
 		if (prevSegment === 'needs') {
 			return $needStore.data?.[id as NeedId]?.name;
@@ -148,7 +138,6 @@
 			else if (segment === 'conditions') label = '컨디션';
 			else if (segment === 'condition-behaviors') label = '컨디션 행동';
 			else if (segment === 'items') label = '아이템';
-			else if (segment === 'item-behaviors') label = '아이템 행동';
 			else if (segment === 'needs') label = '욕구';
 			else if (segment === 'need-behaviors') label = '욕구 행동';
 			else if (segment === 'behavior-priorities') label = '행동 우선순위';

@@ -118,10 +118,6 @@
 							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
 						},
-						{
-							title: '아이템 행동',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/item-behaviors` : undefined,
-						},
 					],
 				},
 				{

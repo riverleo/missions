@@ -11,7 +11,6 @@ import { useNeedBehavior } from './use-need-behavior';
 import { useConditionBehavior } from './use-condition-behavior';
 import { useCondition } from './use-condition';
 import { useItem } from './use-item';
-import { useItemBehavior } from './use-item-behavior';
 import { useBehaviorPriority } from './use-behavior-priority';
 import { useWorld } from './use-world';
 
@@ -32,7 +31,6 @@ export function init() {
 	useConditionBehavior().init();
 	useCondition().init();
 	useItem().init();
-	useItemBehavior().init();
 	useBehaviorPriority().init();
 	useWorld().init();
 }
