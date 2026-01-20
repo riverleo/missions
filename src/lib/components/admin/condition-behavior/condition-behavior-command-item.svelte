@@ -11,10 +11,8 @@
 	import { cn } from '$lib/utils';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { getConditionBehaviorLabel } from '$lib/utils/state-label';
-	import type { ConditionBehavior, BuildingId, CharacterId } from '$lib/types';
+	import type { ConditionBehavior, CharacterId } from '$lib/types';
 
 	interface Props {
 		behavior: ConditionBehavior;
@@ -28,11 +26,9 @@
 
 	const { openDialog } = useConditionBehavior();
 	const { conditionStore } = useCondition();
-	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
 
-	const label = $derived(() => {
-		const building = $buildingStore.data[behavior.building_id as BuildingId];
+	const description = $derived(() => {
 		const condition = behavior.condition_id
 			? $conditionStore.data[behavior.condition_id]
 			: undefined;
@@ -40,23 +36,22 @@
 			? $characterStore.data[behavior.character_id as CharacterId]
 			: undefined;
 
-		return getConditionBehaviorLabel({
-			behavior,
-			buildingName: building?.name,
-			conditionName: condition?.name,
-			characterName: character?.name,
-		});
+		const parts = [];
+		if (character) parts.push(character.name);
+		if (condition) parts.push(`${condition.name} ${behavior.condition_threshold} 이하`);
+
+		return parts.join(' · ');
 	});
 
-	const searchValue = $derived(`${label().title} ${label().description}`);
+	const searchValue = $derived(`${behavior.name} ${description()}`);
 </script>
 
 {#if href}
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">{label().title}</span>
-			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
+			<span class="truncate">{behavior.name}</span>
+			<span class="truncate text-xs text-muted-foreground">{description()}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
@@ -92,8 +87,8 @@
 	<CommandItem value={searchValue} {onclick} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">{label().title}</span>
-			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
+			<span class="truncate">{behavior.name}</span>
+			<span class="truncate text-xs text-muted-foreground">{description()}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>

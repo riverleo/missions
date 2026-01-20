@@ -38,7 +38,6 @@
 
 		try {
 			await admin.createConditionBehaviorAction({
-				building_id: behavior.building_id,
 				condition_id: behavior.condition_id,
 				condition_behavior_id: behavior.id,
 			});

@@ -6,12 +6,11 @@
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { CELL_SIZE } from '$lib/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
 		buildingId: BuildingId;
@@ -22,23 +21,31 @@
 
 	const { store, stateStore, admin, openStateDialog } = useBuilding();
 	const { uiStore } = admin;
-	const { conditionStore } = useCondition();
+	const { conditionBehaviorStore } = useConditionBehavior();
 
 	const building = $derived($store.data[buildingId]);
 	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
-	const condition = $derived(
-		buildingState?.condition_id ? $conditionStore.data[buildingState.condition_id] : undefined
+
+	// Find condition behaviors that use this building state
+	const relatedBehaviors = $derived(
+		Object.values($conditionBehaviorStore.data).filter(
+			(b) => b.building_state_type === type
+		)
 	);
 
 	const conditionPreview = $derived.by(() => {
 		if (type === 'idle') return undefined;
 
-		if (!condition) {
-			return '건물 상태 수정';
+		if (relatedBehaviors.length === 0) {
+			return '연결된 컨디션 행동 없음';
 		}
 
-		return `${condition.name} (${buildingState?.min_value}~${buildingState?.max_value})`;
+		if (relatedBehaviors.length === 1) {
+			return relatedBehaviors[0]?.name;
+		}
+
+		return `${relatedBehaviors.length}개 컨디션 행동`;
 	});
 
 	async function onchange(change: SpriteStateChange) {
@@ -99,14 +106,11 @@
 	{#snippet action()}
 		{#if conditionPreview !== undefined}
 			<Button
-				variant={condition ? 'ghost' : 'outline'}
+				variant={relatedBehaviors.length > 0 ? 'ghost' : 'outline'}
 				size="sm"
 				disabled={!buildingState || type === 'idle'}
 				onclick={onConditionClick}
 			>
-				{#if condition}
-					<Badge variant="secondary">{buildingState?.priority}</Badge>
-				{/if}
 				{conditionPreview}
 			</Button>
 		{/if}

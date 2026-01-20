@@ -5,7 +5,6 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -22,13 +21,6 @@
 	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
 	const { store: itemStore } = useItem();
-
-	// 표정 상태 라벨 생성
-	const faceLabel = $derived(() => {
-		return action.character_face_state_type
-			? getCharacterFaceStateLabel(action.character_face_state_type)
-			: undefined;
-	});
 
 	const targetLabel = $derived(() => {
 		if (action.building_id) {
@@ -78,11 +70,6 @@
 			{/if}
 			{typeLabel()}
 		</div>
-		{#if faceLabel()}
-			<div class="text-xs text-neutral-500">
-				{faceLabel()}
-			</div>
-		{/if}
 	</div>
 
 	<Handle type="source" position={Position.Right} id="next" />

@@ -2,7 +2,6 @@
 	import type { ConditionBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
-	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -15,13 +14,6 @@
 
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
-
-	// 표정 상태 라벨 생성
-	const faceLabel = $derived(() => {
-		return action.character_face_state_type
-			? getCharacterFaceStateLabel(action.character_face_state_type)
-			: undefined;
-	});
 
 	const typeLabel = $derived(() => {
 		if (action.type === 'go') {
@@ -54,11 +46,6 @@
 			{/if}
 			{typeLabel()}
 		</div>
-		{#if faceLabel()}
-			<div class="text-xs text-neutral-500">
-				{faceLabel()}
-			</div>
-		{/if}
 	</div>
 
 	<Handle type="source" position={Position.Right} id="next" />

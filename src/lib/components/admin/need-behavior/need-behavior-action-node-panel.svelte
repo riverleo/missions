@@ -4,7 +4,6 @@
 		NeedBehaviorAction,
 		BehaviorActionType,
 		CharacterBehaviorType,
-		CharacterFaceStateType,
 		CharacterId,
 		BuildingId,
 		ItemId,
@@ -37,7 +36,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getCharacterBehaviorTypeLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -71,8 +70,6 @@
 		{ value: 'pick', label: '줍기' },
 	];
 
-	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
-
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
@@ -84,11 +81,6 @@
 		changes?.character_behavior_type
 			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
 			: '행동 타입'
-	);
-	const selectedFaceStateLabel = $derived(
-		changes?.character_face_state_type
-			? getCharacterFaceStateLabel(changes.character_face_state_type)
-			: '표정 선택'
 	);
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.building_id) {
@@ -122,12 +114,6 @@
 	function onBehaviorTypeChange(value: string | undefined) {
 		if (changes) {
 			changes.character_behavior_type = (value as CharacterBehaviorType) || null;
-		}
-	}
-
-	function onFaceStateChange(value: string | undefined) {
-		if (changes) {
-			changes.character_face_state_type = (value as CharacterFaceStateType) || null;
 		}
 	}
 
@@ -187,7 +173,6 @@
 				type: changes.type,
 				character_behavior_type: changes.character_behavior_type,
 				duration_ticks: changes.duration_ticks,
-				character_face_state_type: changes.character_face_state_type,
 				building_id: changes.building_id,
 				character_id: changes.character_id,
 				item_id: changes.item_id,
@@ -337,25 +322,6 @@
 								/>
 							</InputGroup>
 						{/if}
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>캐릭터 표정</ButtonGroupText>
-							<Select
-								type="single"
-								value={changes.character_face_state_type ?? ''}
-								onValueChange={onFaceStateChange}
-							>
-								<SelectTrigger class="flex-1">
-									{selectedFaceStateLabel}
-								</SelectTrigger>
-								<SelectContent>
-									{#each faceStateTypes as stateType (stateType)}
-										<SelectItem value={stateType}>
-											{getCharacterFaceStateLabel(stateType)}
-										</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
 					</div>
 					<div class="flex justify-between">
 						<Tooltip>

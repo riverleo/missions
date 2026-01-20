@@ -12,16 +12,11 @@
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCondition } from '$lib/hooks/use-condition';
-	import type { BehaviorPriority, CharacterId, BuildingId } from '$lib/types';
-	import {
-		getNeedBehaviorLabel,
-		getConditionBehaviorLabel,
-		getItemBehaviorLabel,
-	} from '$lib/utils/state-label';
+	import type { BehaviorPriority, CharacterId } from '$lib/types';
+	import { getNeedBehaviorLabel, getItemBehaviorLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		priority: BehaviorPriority;
@@ -38,7 +33,6 @@
 	const { conditionBehaviorStore } = useConditionBehavior();
 	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
-	const { store: buildingStore } = useBuilding();
 	const { store: itemStore } = useItem();
 	const { store: characterStore } = useCharacter();
 	const { conditionStore } = useCondition();
@@ -79,9 +73,6 @@
 			const behavior = $conditionBehaviorStore.data[priority.condition_behavior_id];
 			if (!behavior) return null;
 
-			const building = behavior.building_id
-				? $buildingStore.data[behavior.building_id as BuildingId]
-				: undefined;
 			const condition = behavior.condition_id
 				? $conditionStore.data[behavior.condition_id]
 				: undefined;
@@ -89,12 +80,14 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return getConditionBehaviorLabel({
-				behavior,
-				buildingName: building?.name,
-				conditionName: condition?.name,
-				characterName: character?.name,
-			});
+			const parts = [];
+			if (character) parts.push(character.name);
+			if (condition) parts.push(`${condition.name} ${behavior.condition_threshold} 이하`);
+
+			return {
+				title: behavior.name,
+				description: parts.join(' · '),
+			};
 		} else if (priority.item_behavior_id) {
 			const behavior = $itemBehaviorStore.data[priority.item_behavior_id];
 			if (!behavior) return null;
