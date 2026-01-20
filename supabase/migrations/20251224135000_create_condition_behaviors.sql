@@ -2,11 +2,13 @@
 create table condition_behaviors (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
-  building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_threshold float not null default 0,
   character_id uuid references characters(id) on delete set null,
   name text not null,
+
+  -- 건물 상태
+  building_state_type building_state_type not null default 'idle',
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
@@ -44,15 +46,11 @@ create policy "admins can delete condition_behaviors"
 create table condition_behavior_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
-  building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_behavior_id uuid not null references condition_behaviors(id) on delete cascade,
   type behavior_action_type not null default 'idle'::behavior_action_type,
   character_behavior_type character_behavior_type, -- nullable: interact 타입에만 사용
   root boolean not null default false,
-
-  -- 캐릭터 얼굴 표정
-  character_face_state_type character_face_state_type not null default 'idle',
 
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,

@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { ConditionBehaviorAction, BuildingId } from '$lib/types';
+	import type { ConditionBehaviorAction } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
@@ -17,8 +16,6 @@
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
 
-	const { store: buildingStore } = useBuilding();
-
 	// 표정 상태 라벨 생성
 	const faceLabel = $derived(() => {
 		return action.character_face_state_type
@@ -26,24 +23,15 @@
 			: undefined;
 	});
 
-	const targetLabel = $derived(() => {
-		if (action.building_id) {
-			const building = $buildingStore.data[action.building_id as BuildingId];
-			return `"${building?.name ?? '건물'}" 건물`;
-		}
-		return undefined;
-	});
-
 	const typeLabel = $derived(() => {
-		const target = targetLabel();
 		if (action.type === 'go') {
-			return target ? `${target}으로 이동` : '자동 이동';
+			return '자동 이동';
 		}
 		if (action.type === 'interact') {
-			return target ? `${target}과 상호작용` : '자동 상호작용';
+			return '자동 상호작용';
 		}
 		if (action.type === 'idle') {
-			return action.duration_ticks === 0 ? '바디 애니메이션' : `${action.duration_ticks}틱 대기`;
+			return action.duration_ticks === 0 ? '즉시 다음' : `${action.duration_ticks}틱 대기`;
 		}
 		return action.type;
 	});

@@ -46,7 +46,7 @@
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
-	<CommandInput placeholder="행동 검색..." />
+	<CommandInput placeholder="욕구 행동 검색..." />
 	{#if behaviorsGroupedByNeed().length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />

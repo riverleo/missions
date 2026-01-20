@@ -44,7 +44,13 @@
 		{ value: 'idle', label: '대기' },
 	];
 
-	const behaviorTypeOptions: CharacterBehaviorType[] = ['demolish', 'use', 'repair', 'clean'];
+	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
+		{ value: 'use', label: '사용' },
+		{ value: 'repair', label: '수리' },
+		{ value: 'demolish', label: '철거' },
+		{ value: 'clean', label: '청소' },
+		{ value: 'pick', label: '줍기' },
+	];
 
 	function getTypeLabel(type: ConditionFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
@@ -53,6 +59,12 @@
 	let isUpdating = $state(false);
 	let changes = $state<ConditionFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
+
+	const selectedBehaviorTypeLabel = $derived(
+		changes?.character_behavior_type
+			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
+			: '행동 타입'
+	);
 
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.fulfillment_type === 'character') {
@@ -186,29 +198,9 @@
 							</Select>
 						</ButtonGroup>
 
-						<ButtonGroup class="w-full">
-							<ButtonGroupText>행동</ButtonGroupText>
-							<Select
-								type="single"
-								value={changes.character_behavior_type}
-								onValueChange={onBehaviorTypeChange}
-							>
-								<SelectTrigger class="flex-1">
-									{getCharacterBehaviorTypeLabel(changes.character_behavior_type)}
-								</SelectTrigger>
-								<SelectContent>
-									{#each behaviorTypeOptions as type (type)}
-										<SelectItem value={type}>
-											{getCharacterBehaviorTypeLabel(type)}
-										</SelectItem>
-									{/each}
-								</SelectContent>
-							</Select>
-						</ButtonGroup>
-
 						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>캐릭터</ButtonGroupText>
+								<ButtonGroupText>대상</ButtonGroupText>
 								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
 										{selectedTargetLabel}
@@ -217,6 +209,24 @@
 										<SelectItem value="">전체</SelectItem>
 										{#each targetOptions as option (option.id)}
 											<SelectItem value={option.id}>{option.name}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>상호작용</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_behavior_type}
+									onValueChange={onBehaviorTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedBehaviorTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each behaviorTypes as behaviorType (behaviorType.value)}
+											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>

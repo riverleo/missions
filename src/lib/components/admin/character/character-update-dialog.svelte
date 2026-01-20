@@ -13,7 +13,7 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -83,11 +83,18 @@
 			<DialogTitle>캐릭터 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
-			<ButtonGroup class="w-full">
-				<ButtonGroup>
-					<ButtonGroupText>바디</ButtonGroupText>
+			<div class="flex flex-col gap-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
+				</InputGroup>
+				<ButtonGroup class="w-full">
 					<Select type="single" value={characterBodyId} onValueChange={onBodyChange}>
-						<SelectTrigger>
+						<SelectTrigger class="w-full">
 							{selectedBodyLabel}
 						</SelectTrigger>
 						<SelectContent>
@@ -97,17 +104,10 @@
 						</SelectContent>
 					</Select>
 				</ButtonGroup>
-				<ButtonGroup class="flex-1">
-					<InputGroup>
-						<InputGroupAddon align="inline-start">
-							<InputGroupText>
-								<IconHeading />
-							</InputGroupText>
-						</InputGroupAddon>
-						<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
-					</InputGroup>
-				</ButtonGroup>
-			</ButtonGroup>
+			</div>
+			{#if bodies.length === 0}
+				<p class="mt-4 text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
+			{/if}
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting || !characterBodyId || !name.trim()}>
 					{isSubmitting ? '저장 중...' : '저장'}

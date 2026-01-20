@@ -47,7 +47,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 건물 행동 생성</TooltipContent>
+					<TooltipContent>새로운 컨디션 행동 생성</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger>
@@ -68,7 +68,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>건물 행동 수정</TooltipContent>
+					<TooltipContent>컨디션 행동 수정</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
@@ -92,7 +92,7 @@
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>건물 행동 삭제</TooltipContent>
+				<TooltipContent>컨디션 행동 삭제</TooltipContent>
 			</Tooltip>
 		</ButtonGroup>
 	</ButtonGroup>

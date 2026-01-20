@@ -83,10 +83,18 @@
 			<DialogTitle>새로운 캐릭터 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit}>
-			<ButtonGroup class="flex w-full gap-2">
-				<ButtonGroup>
+			<div class="flex flex-col gap-2">
+				<InputGroup>
+					<InputGroupAddon align="inline-start">
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
+					</InputGroupAddon>
+					<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
+				</InputGroup>
+				<ButtonGroup class="w-full">
 					<Select type="single" value={characterBodyId} onValueChange={onBodyChange}>
-						<SelectTrigger>
+						<SelectTrigger class="w-full">
 							{selectedBodyLabel}
 						</SelectTrigger>
 						<SelectContent>
@@ -96,17 +104,7 @@
 						</SelectContent>
 					</Select>
 				</ButtonGroup>
-				<ButtonGroup class="flex-1">
-					<InputGroup>
-						<InputGroupAddon align="inline-start">
-							<InputGroupText>
-								<IconHeading />
-							</InputGroupText>
-						</InputGroupAddon>
-						<InputGroupInput placeholder="캐릭터 이름" bind:value={name} />
-					</InputGroup>
-				</ButtonGroup>
-			</ButtonGroup>
+			</div>
 			{#if bodies.length === 0}
 				<p class="mt-4 text-sm text-muted-foreground">먼저 바디를 생성해주세요.</p>
 			{/if}

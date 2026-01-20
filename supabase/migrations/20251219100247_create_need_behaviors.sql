@@ -14,6 +14,9 @@ create table need_behaviors (
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   name text not null,
 
+  -- 캐릭터 얼굴 표정
+  character_face_state_type character_face_state_type not null default 'idle',
+
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
@@ -60,9 +63,6 @@ create table need_behavior_actions (
   building_id uuid references buildings(id) on delete set null,
   character_id uuid references characters(id) on delete set null,
   item_id uuid references items(id) on delete set null,
-
-  -- 캐릭터 얼굴 표정
-  character_face_state_type character_face_state_type not null default 'idle',
 
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,

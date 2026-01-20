@@ -4,6 +4,7 @@
 		NeedFulfillment,
 		NeedFulfillmentType,
 		NeedFulfillmentTaskCondition,
+		CharacterBehaviorType,
 		BuildingId,
 		CharacterId,
 		ItemId,
@@ -31,6 +32,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
+	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -62,6 +64,14 @@
 		{ value: 'created', label: '생성' },
 	];
 
+	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
+		{ value: 'use', label: '사용' },
+		{ value: 'repair', label: '수리' },
+		{ value: 'demolish', label: '철거' },
+		{ value: 'clean', label: '청소' },
+		{ value: 'pick', label: '줍기' },
+	];
+
 	function getTypeLabel(type: NeedFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
 	}
@@ -74,6 +84,12 @@
 	let isUpdating = $state(false);
 	let changes = $state<NeedFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
+
+	const selectedBehaviorTypeLabel = $derived(
+		changes?.character_behavior_type
+			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
+			: '행동 타입'
+	);
 
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.fulfillment_type === 'building') {
@@ -117,6 +133,7 @@
 		admin
 			.updateNeedFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
+				character_behavior_type: changes.character_behavior_type,
 				building_id: changes.fulfillment_type === 'building' ? changes.building_id : null,
 				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
@@ -161,6 +178,12 @@
 	function onTaskConditionChange(value: string | undefined) {
 		if (changes) {
 			changes.task_condition = (value as NeedFulfillmentTaskCondition) || null;
+		}
+	}
+
+	function onBehaviorTypeChange(value: string | undefined) {
+		if (changes) {
+			changes.character_behavior_type = value as CharacterBehaviorType;
 		}
 	}
 
@@ -210,6 +233,7 @@
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
 						<ButtonGroup class="w-full">
+							<ButtonGroupText>타입</ButtonGroupText>
 							<Select type="single" value={changes.fulfillment_type} onValueChange={onTypeChange}>
 								<SelectTrigger class="flex-1">
 									{getTypeLabel(changes.fulfillment_type)}
@@ -224,6 +248,7 @@
 
 						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
+								<ButtonGroupText>대상</ButtonGroupText>
 								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
 										{selectedTargetLabel}
@@ -232,6 +257,24 @@
 										<SelectItem value="">전체</SelectItem>
 										{#each targetOptions as option (option.id)}
 											<SelectItem value={option.id}>{option.name}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>상호작용</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_behavior_type}
+									onValueChange={onBehaviorTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedBehaviorTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each behaviorTypes as behaviorType (behaviorType.value)}
+											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>

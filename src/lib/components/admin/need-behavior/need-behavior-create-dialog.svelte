@@ -21,14 +21,16 @@
 		DropdownMenuRadioGroup,
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
-	import { IconChevronDown } from '@tabler/icons-svelte';
+	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { NeedId, ScenarioId, CharacterId } from '$lib/types';
+	import type { NeedId, ScenarioId, CharacterId, CharacterFaceStateType } from '$lib/types';
+	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 
 	const { dialogStore, closeDialog, admin } = useNeedBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -43,7 +45,15 @@
 	let needId = $state<string | undefined>(undefined);
 	let needThreshold = $state(0);
 	let characterId = $state<string | undefined>(undefined);
+	let characterFaceStateType = $state<CharacterFaceStateType>('idle');
 	let isSubmitting = $state(false);
+
+	const faceStateOptions: { value: CharacterFaceStateType; label: string }[] = [
+		{ value: 'idle', label: '기본' },
+		{ value: 'happy', label: '기쁨' },
+		{ value: 'sad', label: '슬픔' },
+		{ value: 'angry', label: '화남' },
+	];
 
 	const selectedNeed = $derived(needs.find((n) => n.id === needId));
 	const selectedNeedName = $derived(selectedNeed?.name ?? '욕구 선택');
@@ -56,6 +66,7 @@
 			needId = undefined;
 			needThreshold = 0;
 			characterId = undefined;
+			characterFaceStateType = 'idle';
 		}
 	});
 
@@ -65,6 +76,12 @@
 
 	function onCharacterChange(value: string | undefined) {
 		characterId = value || undefined;
+	}
+
+	function onFaceStateChange(value: string | undefined) {
+		if (value) {
+			characterFaceStateType = value as CharacterFaceStateType;
+		}
 	}
 
 	function onOpenChange(value: boolean) {
@@ -85,6 +102,7 @@
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,
 				character_id: characterId as CharacterId | undefined,
+				character_face_state_type: characterFaceStateType,
 			})
 			.then((behavior) => {
 				closeDialog();
@@ -108,29 +126,37 @@
 			<div class="flex flex-col gap-2">
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<DropdownMenu>
-							<DropdownMenuTrigger>
-								{#snippet child({ props })}
-									<InputGroupButton {...props} variant="ghost">
-										{selectedCharacterName}
-										<IconChevronDown class="size-4" />
-									</InputGroupButton>
-								{/snippet}
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="start">
-								<DropdownMenuRadioGroup value={characterId ?? ''} onValueChange={onCharacterChange}>
-									<DropdownMenuRadioItem value="">모두</DropdownMenuRadioItem>
-									{#each characters as character (character.id)}
-										<DropdownMenuRadioItem value={character.id}>
-											{character.name}
-										</DropdownMenuRadioItem>
-									{/each}
-								</DropdownMenuRadioGroup>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<InputGroupText>
+							<IconHeading />
+						</InputGroupText>
 					</InputGroupAddon>
 					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
+				<ButtonGroup class="w-full">
+					<ButtonGroupText>캐릭터</ButtonGroupText>
+					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+						<SelectTrigger class="flex-1">
+							{selectedCharacterName}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="">모두</SelectItem>
+							{#each characters as character (character.id)}
+								<SelectItem value={character.id}>{character.name}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+					<ButtonGroupText>얼굴 표정</ButtonGroupText>
+					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
+						<SelectTrigger class="flex-1">
+							{faceStateOptions.find((o) => o.value === characterFaceStateType)?.label ?? '기본'}
+						</SelectTrigger>
+						<SelectContent>
+							{#each faceStateOptions as option (option.value)}
+								<SelectItem value={option.value}>{option.label}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+				</ButtonGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
 						<DropdownMenu>

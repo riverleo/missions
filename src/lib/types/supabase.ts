@@ -916,11 +916,10 @@ export type ConditionUpdate = Omit<ConditionUpdateRow, 'id' | 'scenario_id' | 'c
 type ConditionBehaviorRow = Tables<'condition_behaviors'>;
 export type ConditionBehavior = Omit<
 	ConditionBehaviorRow,
-	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
 	id: ConditionBehaviorId;
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
 	condition_id: ConditionId;
 	character_id: CharacterId | null;
 	created_by: UserRoleId | null;
@@ -928,10 +927,9 @@ export type ConditionBehavior = Omit<
 type ConditionBehaviorInsertRow = TablesInsert<'condition_behaviors'>;
 export type ConditionBehaviorInsert = Omit<
 	ConditionBehaviorInsertRow,
-	'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+	'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
 	condition_id: ConditionId;
 	character_id?: CharacterId | null;
 	created_by?: UserRoleId | null;
@@ -939,11 +937,10 @@ export type ConditionBehaviorInsert = Omit<
 type ConditionBehaviorUpdateRow = TablesUpdate<'condition_behaviors'>;
 export type ConditionBehaviorUpdate = Omit<
 	ConditionBehaviorUpdateRow,
-	'id' | 'scenario_id' | 'building_id' | 'condition_id' | 'character_id' | 'created_by'
+	'id' | 'scenario_id' | 'condition_id' | 'character_id' | 'created_by'
 > & {
 	id?: ConditionBehaviorId;
 	scenario_id?: ScenarioId;
-	building_id?: BuildingId;
 	condition_id?: ConditionId;
 	character_id?: CharacterId | null;
 	created_by?: UserRoleId | null;

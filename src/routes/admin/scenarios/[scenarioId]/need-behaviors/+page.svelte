@@ -5,9 +5,9 @@
 <div class="flex h-full items-center justify-center">
 	<Empty>
 		<EmptyContent>
-			<EmptyTitle>행동을 선택하세요</EmptyTitle>
+			<EmptyTitle>욕구 행동을 선택하세요</EmptyTitle>
 			<EmptyDescription>
-				왼쪽 목록에서 행동을 선택하거나 새로운 행동을 만들어주세요.
+				왼쪽 목록에서 욕구 행동을 선택하거나 새로운 행동을 만들어주세요.
 			</EmptyDescription>
 		</EmptyContent>
 	</Empty>

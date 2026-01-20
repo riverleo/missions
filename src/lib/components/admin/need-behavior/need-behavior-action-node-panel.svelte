@@ -3,7 +3,7 @@
 	import type {
 		NeedBehaviorAction,
 		BehaviorActionType,
-		CharacterBodyStateType,
+		CharacterBehaviorType,
 		CharacterFaceStateType,
 		CharacterId,
 		BuildingId,
@@ -35,11 +35,9 @@
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useItem } from '$lib/hooks/use-item';
-	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import { getCharacterBehaviorTypeLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -51,8 +49,7 @@
 
 	const { needBehaviorStore, needBehaviorActionStore, admin } = useNeedBehavior();
 	const { store: buildingStore } = useBuilding();
-	const { store: characterStore, faceStateStore } = useCharacter();
-	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+	const { store: characterStore } = useCharacter();
 	const { store: itemStore } = useItem();
 	const flowNodes = useNodes();
 
@@ -60,27 +57,20 @@
 	const characters = $derived(Object.values($characterStore.data));
 	const items = $derived(Object.values($itemStore.data));
 
-	// 미리보기용 캐릭터 선택
-	const parentBehavior = $derived(action ? $needBehaviorStore.data[action.behavior_id] : undefined);
-	const behaviorHasSpecificCharacter = $derived(parentBehavior?.character_id != null);
-
-	let previewCharacterId = $state<string | undefined>(undefined);
-	const previewCharacter = $derived(
-		behaviorHasSpecificCharacter && parentBehavior?.character_id
-			? $characterStore.data[parentBehavior.character_id as CharacterId]
-			: previewCharacterId
-				? $characterStore.data[previewCharacterId as CharacterId]
-				: characters[0]
-	);
-	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
-
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
 		{ value: 'go', label: '이동' },
 		{ value: 'interact', label: '상호작용' },
 		{ value: 'idle', label: '대기' },
 	];
 
-	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
+	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
+		{ value: 'use', label: '사용' },
+		{ value: 'repair', label: '수리' },
+		{ value: 'demolish', label: '철거' },
+		{ value: 'clean', label: '청소' },
+		{ value: 'pick', label: '줍기' },
+	];
+
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let isUpdating = $state(false);
@@ -90,10 +80,10 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
-	const selectedBodyStateLabel = $derived(
-		changes?.character_body_state_type
-			? getCharacterBodyStateLabel(changes.character_body_state_type)
-			: '바디 선택'
+	const selectedBehaviorTypeLabel = $derived(
+		changes?.character_behavior_type
+			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
+			: '행동 타입'
 	);
 	const selectedFaceStateLabel = $derived(
 		changes?.character_face_state_type
@@ -116,29 +106,6 @@
 		return '자동 선택';
 	});
 
-	// 선택된 바디/얼굴 상태로 미리보기
-	const previewCharacterBody = $derived(
-		previewCharacter ? $characterBodyStore.data[previewCharacter.character_body_id] : undefined
-	);
-	const previewBodyStates = $derived(
-		previewCharacterBody ? ($bodyStateStore.data[previewCharacterBody.id] ?? []) : []
-	);
-	const previewBodyState = $derived(
-		changes?.character_body_state_type
-			? previewBodyStates.find((s) => s.type === changes!.character_body_state_type)
-			: undefined
-	);
-	const previewFaceStates = $derived(
-		previewCharacter ? ($faceStateStore.data[previewCharacter.id] ?? []) : []
-	);
-	const previewFaceState = $derived(
-		previewFaceStates.find((s) => s.type === changes?.character_face_state_type)
-	);
-
-	function onPreviewCharacterChange(value: string | undefined) {
-		previewCharacterId = value || undefined;
-	}
-
 	$effect(() => {
 		if (action && action.id !== currentActionId) {
 			currentActionId = action.id;
@@ -152,9 +119,9 @@
 		}
 	}
 
-	function onBodyStateChange(value: string | undefined) {
+	function onBehaviorTypeChange(value: string | undefined) {
 		if (changes) {
-			changes.character_body_state_type = (value as CharacterBodyStateType) || null;
+			changes.character_behavior_type = (value as CharacterBehaviorType) || null;
 		}
 	}
 
@@ -218,8 +185,8 @@
 
 			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
+				character_behavior_type: changes.character_behavior_type,
 				duration_ticks: changes.duration_ticks,
-				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				building_id: changes.building_id,
 				character_id: changes.character_id,
@@ -327,7 +294,29 @@
 									</Tooltip>
 								</ButtonGroup>
 							</ButtonGroup>
-						{:else if changes.type === 'idle'}
+						{/if}
+
+						{#if changes.type === 'interact'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>상호작용</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_behavior_type ?? ''}
+									onValueChange={onBehaviorTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedBehaviorTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each behaviorTypes as behaviorType (behaviorType.value)}
+											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if changes.type === 'idle'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
@@ -335,7 +324,7 @@
 											<InputGroupButton>지속 시간(틱)</InputGroupButton>
 										</TooltipTrigger>
 										<TooltipContent>
-											지속 시간이 없는 경우 캐릭터 바디 애니메이션 종료 후 다음으로 넘어갑니다.
+											idle 타입에서만 사용됩니다. 0이면 즉시 다음 액션으로 넘어갑니다.
 										</TooltipContent>
 									</Tooltip>
 								</InputGroupAddon>
@@ -343,34 +332,10 @@
 									type="number"
 									step="1"
 									min="0"
-									bind:value={changes.duration_ticks}
 									placeholder="숫자 입력"
+									bind:value={changes.duration_ticks}
 								/>
 							</InputGroup>
-						{/if}
-
-						<Separator />
-
-						{#if changes.type === 'idle'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>캐릭터 바디</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.character_body_state_type ?? ''}
-									onValueChange={onBodyStateChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedBodyStateLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each bodyStateTypes as stateType (stateType)}
-											<SelectItem value={stateType}>
-												{getCharacterBodyStateLabel(stateType)}
-											</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
 						{/if}
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>캐릭터 표정</ButtonGroupText>
@@ -391,46 +356,6 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
-
-						{#if previewBodyState}
-							<Separator />
-
-							<div class="flex flex-col gap-2">
-								<div
-									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
-									style:height="120px"
-								>
-									{#if previewCharacter && changes?.character_body_state_type}
-										<CharacterSpriteAnimator
-											characterId={previewCharacter.id}
-											bodyStateType={changes.character_body_state_type}
-											faceStateType={changes.character_face_state_type ?? undefined}
-											resolution={2}
-										/>
-									{/if}
-								</div>
-
-								{#if !behaviorHasSpecificCharacter}
-									<ButtonGroup class="w-full">
-										<ButtonGroupText>캐릭터</ButtonGroupText>
-										<Select
-											type="single"
-											value={previewCharacterId ?? previewCharacter?.id ?? ''}
-											onValueChange={onPreviewCharacterChange}
-										>
-											<SelectTrigger class="flex-1">
-												{selectedPreviewCharacterLabel}
-											</SelectTrigger>
-											<SelectContent>
-												{#each characters as character (character.id)}
-													<SelectItem value={character.id}>{character.name}</SelectItem>
-												{/each}
-											</SelectContent>
-										</Select>
-									</ButtonGroup>
-								{/if}
-							</div>
-						{/if}
 					</div>
 					<div class="flex justify-between">
 						<Tooltip>

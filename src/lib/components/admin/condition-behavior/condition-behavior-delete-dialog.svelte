@@ -12,7 +12,6 @@
 	import { page } from '$app/state';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import type { ScenarioId } from '$lib/types';
 
 	const { conditionBehaviorStore, dialogStore, closeDialog, admin } = useConditionBehavior();
@@ -60,11 +59,9 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>건물 행동 삭제</DialogTitle>
+			<DialogTitle>컨디션 행동 삭제</DialogTitle>
 			<DialogDescription>
-				정말로 "{condition?.name}" 건물의 "{behavior
-					? getCharacterBehaviorTypeLabel(behavior.character_behavior_type)
-					: ''}" 행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+				정말로 "{behavior?.name ?? ''}" 행동을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
 			</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit}>

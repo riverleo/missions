@@ -142,7 +142,7 @@
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
-			else if (segment === 'condition-behaviors') label = '건물 행동';
+			else if (segment === 'condition-behaviors') label = '컨디션 행동';
 			else if (segment === 'items') label = '아이템';
 			else if (segment === 'item-behaviors') label = '아이템 행동';
 			else if (segment === 'needs') label = '욕구';

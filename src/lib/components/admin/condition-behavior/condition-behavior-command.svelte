@@ -18,16 +18,13 @@
 	import { cn } from '$lib/utils';
 	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
-	import type { ScenarioId, BuildingId, CharacterId } from '$lib/types';
+	import type { ScenarioId, CharacterId } from '$lib/types';
 
 	const { conditionBehaviorStore, openDialog } = useConditionBehavior();
 	const { conditionStore } = useCondition();
-	const { store: buildingStore } = useBuilding();
 	const { store: characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
@@ -48,14 +45,13 @@
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
-	<CommandInput placeholder="건물 행동 검색..." />
+	<CommandInput placeholder="컨디션 행동 검색..." />
 	{#if behaviorsGroupedByCondition().length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
 			{#each behaviorsGroupedByCondition() as { condition, behaviors } (condition.id)}
 				<CommandGroup heading={condition.name}>
 					{#each behaviors as behavior (behavior.id)}
-						{@const building = $buildingStore.data[behavior.building_id as BuildingId]}
 						{@const character = behavior.character_id
 							? $characterStore.data[behavior.character_id as CharacterId]
 							: undefined}
@@ -74,7 +70,7 @@
 									{behavior.name}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{building?.name ?? '건물'} - {character?.name ?? '모든 캐릭터'} ({condition.name}
+									{character?.name ?? '모든 캐릭터'} ({condition.name}
 									{behavior.condition_threshold} 이하)
 								</span>
 							</div>

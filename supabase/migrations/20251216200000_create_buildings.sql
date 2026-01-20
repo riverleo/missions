@@ -59,12 +59,6 @@ create table building_states (
   fps integer,
   loop loop_mode not null default 'loop',
 
-  -- 상태 활성화 조건 (FK는 별도 마이그레이션에서 추가)
-  condition_id uuid,
-  min_value real not null default 0,
-  max_value real not null default 100,
-  priority int not null default 0,
-
   constraint uq_building_states_building_id_type unique (building_id, type)
 );
 

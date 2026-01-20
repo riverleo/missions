@@ -5,7 +5,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -23,15 +23,11 @@
 	const { store: characterStore } = useCharacter();
 	const { store: itemStore } = useItem();
 
-	// 바디/표정 상태 라벨 생성
-	const stateLabel = $derived(() => {
-		const bodyLabel = action.character_body_state_type
-			? getCharacterBodyStateLabel(action.character_body_state_type)
-			: undefined;
-		const faceLabel = action.character_face_state_type
+	// 표정 상태 라벨 생성
+	const faceLabel = $derived(() => {
+		return action.character_face_state_type
 			? getCharacterFaceStateLabel(action.character_face_state_type)
 			: undefined;
-		return [bodyLabel, faceLabel].filter(Boolean).join(' + ');
 	});
 
 	const targetLabel = $derived(() => {
@@ -82,9 +78,9 @@
 			{/if}
 			{typeLabel()}
 		</div>
-		{#if stateLabel()}
+		{#if faceLabel()}
 			<div class="text-xs text-neutral-500">
-				{stateLabel()}
+				{faceLabel()}
 			</div>
 		{/if}
 	</div>
