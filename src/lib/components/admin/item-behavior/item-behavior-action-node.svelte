@@ -17,7 +17,7 @@
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
 
-	// 바디/표정 상태 라벨 생성
+	// 바디/얼굴 라벨 생성
 	const stateLabel = $derived(() => {
 		const bodyLabel = action.character_body_state_type
 			? getCharacterBodyStateLabel(action.character_body_state_type)

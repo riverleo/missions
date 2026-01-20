@@ -4,6 +4,8 @@
 
 import type {
 	Building,
+	BuildingInteraction,
+	BuildingInteractionAction,
 	ConditionBehaviorAction,
 	BuildingCondition,
 	Character,
@@ -443,4 +445,64 @@ export function parseTerrainTileEdgeId(edgeId: string): {
 
 export function isTerrainTileEdgeId(edgeId: string): boolean {
 	return edgeId.startsWith('terrain-tile-');
+}
+
+// ============================================
+// Building Interaction Flow Node/Edge IDs
+// ============================================
+
+// Building Interaction Node
+export function createInteractionNodeId(interaction: BuildingInteraction): string {
+	return `interaction-${interaction.id}`;
+}
+
+export function parseInteractionNodeId(nodeId: string): string {
+	return nodeId.replace('interaction-', '');
+}
+
+export function isInteractionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('interaction-');
+}
+
+// Building Interaction Next Edge
+export function createInteractionNextEdgeId(
+	sourceInteraction: BuildingInteraction,
+	targetInteraction: BuildingInteraction
+): string {
+	return `interaction-${sourceInteraction.id}-next-interaction-${targetInteraction.id}`;
+}
+
+export function isInteractionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-interaction-');
+}
+
+// ============================================
+// Building Interaction Action Flow Node/Edge IDs
+// ============================================
+
+// Building Interaction Action Node
+export function createBuildingInteractionActionNodeId(
+	action: BuildingInteractionAction
+): string {
+	return `building-interaction-action-${action.id}`;
+}
+
+export function parseBuildingInteractionActionNodeId(nodeId: string): string {
+	return nodeId.replace('building-interaction-action-', '');
+}
+
+export function isBuildingInteractionActionNodeId(nodeId: string): boolean {
+	return nodeId.startsWith('building-interaction-action-');
+}
+
+// Building Interaction Action Next Edge
+export function createBuildingInteractionActionNextEdgeId(
+	sourceAction: BuildingInteractionAction,
+	targetAction: BuildingInteractionAction
+): string {
+	return `building-interaction-action-${sourceAction.id}-next-building-interaction-action-${targetAction.id}`;
+}
+
+export function isBuildingInteractionActionNextEdgeId(edgeId: string): boolean {
+	return edgeId.includes('-next-building-interaction-action-');
 }

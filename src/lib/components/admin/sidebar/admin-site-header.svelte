@@ -144,6 +144,7 @@
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
+			else if (segment === 'interactions') label = '상호작용';
 			else if (segment === 'conditions') label = '컨디션';
 			else if (segment === 'condition-behaviors') label = '컨디션 행동';
 			else if (segment === 'items') label = '아이템';

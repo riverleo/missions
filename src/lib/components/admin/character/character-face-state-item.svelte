@@ -1,19 +1,12 @@
 <script lang="ts">
-	import type {
-		CharacterFaceStateType,
-		CharacterId,
-		CharacterBodyId,
-		CharacterFaceState,
-	} from '$lib/types';
+	import type { CharacterFaceStateType, CharacterId, CharacterFaceState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
-	import { Badge } from '$lib/components/ui/badge';
 
 	interface Props {
 		characterId: CharacterId;
@@ -23,26 +16,14 @@
 	let { characterId, type }: Props = $props();
 
 	const { store, faceStateStore, admin, openFaceStateDialog } = useCharacter();
-	const { needStore } = useNeed();
 
 	const character = $derived($store.data[characterId]);
 	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
 	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
-	const need = $derived(faceState?.need_id ? $needStore.data[faceState.need_id] : undefined);
 
 	// 선택된 바디 상태 가져오기
 	const uiStore = admin.uiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-
-	const needPreview = $derived.by(() => {
-		if (type === 'idle') return undefined;
-
-		if (!need) {
-			return '페이스 상태 수정';
-		}
-
-		return `${need.name} (${faceState?.min_value}~${faceState?.max_value})`;
-	});
 
 	async function onchange(change: SpriteStateChange) {
 		if (faceState) {
@@ -61,7 +42,7 @@
 		}
 	}
 
-	function onNeedClick() {
+	function onOffsetClick() {
 		if (faceState) {
 			openFaceStateDialog({ type: 'update', characterFaceStateId: faceState.id });
 		}
@@ -76,18 +57,8 @@
 	{ondelete}
 >
 	{#snippet action()}
-		{#if needPreview !== undefined}
-			<Button
-				variant={need ? 'ghost' : 'outline'}
-				size="sm"
-				disabled={!faceState || type === 'idle'}
-				onclick={onNeedClick}
-			>
-				{#if need}
-					<Badge variant="secondary">{faceState?.priority}</Badge>
-				{/if}
-				{needPreview}
-			</Button>
+		{#if faceState}
+			<Button variant="outline" size="sm" onclick={onOffsetClick}> 오프셋 수정 </Button>
 		{/if}
 	{/snippet}
 	{#snippet preview()}

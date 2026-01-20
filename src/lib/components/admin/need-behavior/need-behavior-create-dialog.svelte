@@ -120,7 +120,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>새로운 행동 생성</DialogTitle>
+			<DialogTitle>새로운 욕구 행동 생성</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">

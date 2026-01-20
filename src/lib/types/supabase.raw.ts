@@ -165,13 +165,12 @@ export type Database = {
           },
         ]
       }
-      building_interactions: {
+      building_interaction_actions: {
         Row: {
           building_id: string
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          building_interaction_id: string
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string | null
           character_offset_x: number
           character_offset_y: number
           character_rotation: number
@@ -180,16 +179,15 @@ export type Database = {
           created_by: string | null
           duration_ticks: number
           id: string
-          next_building_interaction_id: string | null
+          next_building_interaction_action_id: string | null
           root: boolean
           scenario_id: string
         }
         Insert: {
           building_id: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          building_interaction_id: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
           character_offset_x?: number
           character_offset_y?: number
           character_rotation?: number
@@ -198,16 +196,15 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          next_building_interaction_id?: string | null
+          next_building_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
         }
         Update: {
           building_id?: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          building_interaction_id?: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
           character_offset_x?: number
           character_offset_y?: number
           character_rotation?: number
@@ -216,8 +213,74 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          next_building_interaction_id?: string | null
+          next_building_interaction_action_id?: string | null
           root?: boolean
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "building_interaction_actions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interaction_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interaction_actions_interaction_id_fkey"
+            columns: ["building_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "building_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interaction_actions_next_building_interaction_act_fkey"
+            columns: ["next_building_interaction_action_id"]
+            isOneToOne: false
+            referencedRelation: "building_interaction_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "building_interaction_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      building_interactions: {
+        Row: {
+          building_id: string
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          scenario_id: string
+        }
+        Insert: {
+          building_id: string
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scenario_id: string
+        }
+        Update: {
+          building_id?: string
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
           scenario_id?: string
         }
         Relationships: [
@@ -240,13 +303,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_interactions_next_building_interaction_id_fkey"
-            columns: ["next_building_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "building_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -527,12 +583,8 @@ export type Database = {
           frame_to: number | null
           id: string
           loop: Database["public"]["Enums"]["loop_mode"]
-          max_value: number
-          min_value: number
-          need_id: string | null
           offset_x: number
           offset_y: number
-          priority: number
           type: Database["public"]["Enums"]["character_face_state_type"]
         }
         Insert: {
@@ -543,12 +595,8 @@ export type Database = {
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          need_id?: string | null
           offset_x?: number
           offset_y?: number
-          priority?: number
           type?: Database["public"]["Enums"]["character_face_state_type"]
         }
         Update: {
@@ -559,12 +607,8 @@ export type Database = {
           frame_to?: number | null
           id?: string
           loop?: Database["public"]["Enums"]["loop_mode"]
-          max_value?: number
-          min_value?: number
-          need_id?: string | null
           offset_x?: number
           offset_y?: number
-          priority?: number
           type?: Database["public"]["Enums"]["character_face_state_type"]
         }
         Relationships: [
@@ -575,21 +619,14 @@ export type Database = {
             referencedRelation: "characters"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_character_face_states_need_id"
-            columns: ["need_id"]
-            isOneToOne: false
-            referencedRelation: "needs"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      character_interactions: {
+      character_interaction_actions: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string | null
+          character_id: string
+          character_interaction_id: string
           character_offset_x: number
           character_offset_y: number
           character_rotation: number
@@ -598,16 +635,16 @@ export type Database = {
           created_by: string | null
           duration_ticks: number
           id: string
-          next_character_interaction_id: string | null
+          next_character_interaction_action_id: string | null
           root: boolean
           scenario_id: string
           target_character_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
+          character_id: string
+          character_interaction_id: string
           character_offset_x?: number
           character_offset_y?: number
           character_rotation?: number
@@ -616,16 +653,16 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          next_character_interaction_id?: string | null
+          next_character_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
           target_character_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
+          character_id?: string
+          character_interaction_id?: string
           character_offset_x?: number
           character_offset_y?: number
           character_rotation?: number
@@ -634,8 +671,81 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          next_character_interaction_id?: string | null
+          next_character_interaction_action_id?: string | null
           root?: boolean
+          scenario_id?: string
+          target_character_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "character_interaction_actions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interaction_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interaction_actions_interaction_id_fkey"
+            columns: ["character_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "character_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interaction_actions_next_character_interaction_a_fkey"
+            columns: ["next_character_interaction_action_id"]
+            isOneToOne: false
+            referencedRelation: "character_interaction_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interaction_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "character_interaction_actions_target_character_id_fkey"
+            columns: ["target_character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      character_interactions: {
+        Row: {
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          scenario_id: string
+          target_character_id: string
+        }
+        Insert: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          scenario_id: string
+          target_character_id: string
+        }
+        Update: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
           scenario_id?: string
           target_character_id?: string
         }
@@ -652,13 +762,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_interactions_next_character_interaction_id_fkey"
-            columns: ["next_character_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1292,59 +1395,122 @@ export type Database = {
           },
         ]
       }
-      item_interactions: {
+      item_interaction_actions: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string | null
           created_at: string
           created_by: string | null
           duration_ticks: number
           id: string
           item_id: string
+          item_interaction_id: string
           item_offset_x: number
           item_offset_y: number
           item_rotation: number
           item_scale: number
-          next_item_interaction_id: string | null
+          next_item_interaction_action_id: string | null
           root: boolean
           scenario_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
           created_at?: string
           created_by?: string | null
           duration_ticks?: number
           id?: string
           item_id: string
+          item_interaction_id: string
           item_offset_x?: number
           item_offset_y?: number
           item_rotation?: number
           item_scale?: number
-          next_item_interaction_id?: string | null
+          next_item_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string | null
           created_at?: string
           created_by?: string | null
           duration_ticks?: number
           id?: string
           item_id?: string
+          item_interaction_id?: string
           item_offset_x?: number
           item_offset_y?: number
           item_rotation?: number
           item_scale?: number
-          next_item_interaction_id?: string | null
+          next_item_interaction_action_id?: string | null
           root?: boolean
+          scenario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_interaction_actions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interaction_actions_interaction_id_fkey"
+            columns: ["item_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "item_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interaction_actions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interaction_actions_next_item_interaction_action_id_fkey"
+            columns: ["next_item_interaction_action_id"]
+            isOneToOne: false
+            referencedRelation: "item_interaction_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interaction_actions_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_interactions: {
+        Row: {
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          character_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          item_id: string
+          scenario_id: string
+        }
+        Insert: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id: string
+          scenario_id: string
+        }
+        Update: {
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          character_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id?: string
           scenario_id?: string
         }
         Relationships: [
@@ -1367,13 +1533,6 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "item_interactions_next_item_interaction_id_fkey"
-            columns: ["next_item_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "item_interactions"
             referencedColumns: ["id"]
           },
           {

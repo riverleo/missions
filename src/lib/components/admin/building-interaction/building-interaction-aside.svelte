@@ -1,22 +1,18 @@
 <script lang="ts">
-	import type { BuildingId, ScenarioId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
+	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import BuildingCommand from './building-command.svelte';
-	import BuildingCreateDialog from './building-create-dialog.svelte';
-	import BuildingUpdateDialog from './building-update-dialog.svelte';
-	import BuildingDeleteDialog from './building-delete-dialog.svelte';
-	import BuildingStateUpdateDialog from './building-state-update-dialog.svelte';
+	import type { BuildingInteractionId } from '$lib/types';
+	import BuildingInteractionCommand from './building-interaction-command.svelte';
+	import BuildingInteractionCreateDialog from './building-interaction-create-dialog.svelte';
+	import BuildingInteractionDeleteDialog from './building-interaction-delete-dialog.svelte';
 
-	const { openDialog } = useBuilding();
-	const currentBuildingId = $derived(page.params.buildingId);
-	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+	const { openInteractionDialog } = useBuilding();
+	const currentInteractionId = $derived(page.params.buildingInteractionId);
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -44,31 +40,13 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openInteractionDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 건물</TooltipContent>
-				</Tooltip>
-				<Tooltip>
-					<TooltipTrigger>
-						{#snippet child({ props })}
-							<Button
-								{...props}
-								variant="outline"
-								size="icon"
-								disabled={!currentBuildingId}
-								onclick={() =>
-									currentBuildingId &&
-									openDialog({ type: 'update', buildingId: currentBuildingId as BuildingId })}
-							>
-								<IconEditCircle class="size-4" />
-							</Button>
-						{/snippet}
-					</TooltipTrigger>
-					<TooltipContent>건물 수정</TooltipContent>
+					<TooltipContent>새로운 건물 상호작용 생성</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>
@@ -80,26 +58,27 @@
 							{...props}
 							variant="outline"
 							size="icon"
-							disabled={!currentBuildingId}
+							disabled={!currentInteractionId}
 							onclick={() =>
-								currentBuildingId &&
-								openDialog({ type: 'delete', buildingId: currentBuildingId as BuildingId })}
+								currentInteractionId &&
+								openInteractionDialog({
+									type: 'delete',
+									interactionId: currentInteractionId as BuildingInteractionId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>
 					{/snippet}
 				</TooltipTrigger>
-				<TooltipContent>건물 삭제</TooltipContent>
+				<TooltipContent>건물 상호작용 삭제</TooltipContent>
 			</Tooltip>
 		</ButtonGroup>
 	</ButtonGroup>
 
 	{#if toggleValue.includes('list')}
-		<BuildingCommand />
+		<BuildingInteractionCommand />
 	{/if}
 </aside>
 
-<BuildingCreateDialog />
-<BuildingUpdateDialog />
-<BuildingDeleteDialog />
-<BuildingStateUpdateDialog />
+<BuildingInteractionCreateDialog />
+<BuildingInteractionDeleteDialog />

@@ -98,6 +98,10 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
 						},
 						{
+							title: '상호작용',
+							href: scenarioId ? `/admin/scenarios/${scenarioId}/building-interactions` : undefined,
+						},
+						{
 							title: '컨디션',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/conditions` : undefined,
 						},

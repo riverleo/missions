@@ -14,7 +14,7 @@ create table need_behaviors (
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   name text not null,
 
-  -- 캐릭터 얼굴 표정
+  -- 캐릭터 표정
   character_face_state_type character_face_state_type not null default 'idle',
 
   created_at timestamptz not null default now(),

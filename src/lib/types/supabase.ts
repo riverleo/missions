@@ -63,7 +63,11 @@ export type ItemBehaviorActionId = Brand<string, 'ItemBehaviorActionId'>;
 export type BehaviorPriorityId = Brand<string, 'BehaviorPriorityId'>;
 export type WorldItemId = Brand<string, 'WorldItemId'>;
 export type BuildingInteractionId = Brand<string, 'BuildingInteractionId'>;
+export type BuildingInteractionActionId = Brand<string, 'BuildingInteractionActionId'>;
 export type ItemInteractionId = Brand<string, 'ItemInteractionId'>;
+export type ItemInteractionActionId = Brand<string, 'ItemInteractionActionId'>;
+export type CharacterInteractionId = Brand<string, 'CharacterInteractionId'>;
+export type CharacterInteractionActionId = Brand<string, 'CharacterInteractionActionId'>;
 export type TileId = Brand<string, 'TileId'>;
 export type TileStateId = Brand<string, 'TileStateId'>;
 export type TerrainTileId = Brand<string, 'TerrainTileId'>;
@@ -1478,6 +1482,57 @@ export type BuildingInteractionUpdate = Omit<
 	created_by?: UserRoleId | null;
 };
 
+// Building Interaction Action types
+type BuildingInteractionActionRow = Tables<'building_interaction_actions'>;
+export type BuildingInteractionAction = Omit<
+	BuildingInteractionActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'building_id'
+	| 'building_interaction_id'
+	| 'next_building_interaction_action_id'
+	| 'created_by'
+> & {
+	id: BuildingInteractionActionId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	building_interaction_id: BuildingInteractionId;
+	next_building_interaction_action_id: BuildingInteractionActionId | null;
+	created_by: UserRoleId | null;
+};
+type BuildingInteractionActionInsertRow = TablesInsert<'building_interaction_actions'>;
+export type BuildingInteractionActionInsert = Omit<
+	BuildingInteractionActionInsertRow,
+	| 'scenario_id'
+	| 'building_id'
+	| 'building_interaction_id'
+	| 'next_building_interaction_action_id'
+	| 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	building_interaction_id: BuildingInteractionId;
+	next_building_interaction_action_id?: BuildingInteractionActionId | null;
+	created_by?: UserRoleId | null;
+};
+type BuildingInteractionActionUpdateRow = TablesUpdate<'building_interaction_actions'>;
+export type BuildingInteractionActionUpdate = Omit<
+	BuildingInteractionActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'building_id'
+	| 'building_interaction_id'
+	| 'next_building_interaction_action_id'
+	| 'created_by'
+> & {
+	id?: BuildingInteractionActionId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	building_interaction_id?: BuildingInteractionId;
+	next_building_interaction_action_id?: BuildingInteractionActionId | null;
+	created_by?: UserRoleId | null;
+};
+
 // Item Interaction types
 type ItemInteractionRow = Tables<'item_interactions'>;
 export type ItemInteraction = Omit<
@@ -1517,6 +1572,159 @@ export type ItemInteractionUpdate = Omit<
 	item_id?: ItemId;
 	character_id?: CharacterId | null;
 	next_item_interaction_id?: ItemInteractionId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Item Interaction Action types
+type ItemInteractionActionRow = Tables<'item_interaction_actions'>;
+export type ItemInteractionAction = Omit<
+	ItemInteractionActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'item_id'
+	| 'item_interaction_id'
+	| 'next_item_interaction_action_id'
+	| 'created_by'
+> & {
+	id: ItemInteractionActionId;
+	scenario_id: ScenarioId;
+	item_id: ItemId;
+	item_interaction_id: ItemInteractionId;
+	next_item_interaction_action_id: ItemInteractionActionId | null;
+	created_by: UserRoleId | null;
+};
+type ItemInteractionActionInsertRow = TablesInsert<'item_interaction_actions'>;
+export type ItemInteractionActionInsert = Omit<
+	ItemInteractionActionInsertRow,
+	| 'scenario_id'
+	| 'item_id'
+	| 'item_interaction_id'
+	| 'next_item_interaction_action_id'
+	| 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	item_id: ItemId;
+	item_interaction_id: ItemInteractionId;
+	next_item_interaction_action_id?: ItemInteractionActionId | null;
+	created_by?: UserRoleId | null;
+};
+type ItemInteractionActionUpdateRow = TablesUpdate<'item_interaction_actions'>;
+export type ItemInteractionActionUpdate = Omit<
+	ItemInteractionActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'item_id'
+	| 'item_interaction_id'
+	| 'next_item_interaction_action_id'
+	| 'created_by'
+> & {
+	id?: ItemInteractionActionId;
+	scenario_id?: ScenarioId;
+	item_id?: ItemId;
+	item_interaction_id?: ItemInteractionId;
+	next_item_interaction_action_id?: ItemInteractionActionId | null;
+	created_by?: UserRoleId | null;
+};
+
+// Character Interaction types
+type CharacterInteractionRow = Tables<'character_interactions'>;
+export type CharacterInteraction = Omit<
+	CharacterInteractionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'created_by'
+> & {
+	id: CharacterInteractionId;
+	scenario_id: ScenarioId;
+	character_id: CharacterId | null;
+	target_character_id: CharacterId;
+	created_by: UserRoleId | null;
+};
+type CharacterInteractionInsertRow = TablesInsert<'character_interactions'>;
+export type CharacterInteractionInsert = Omit<
+	CharacterInteractionInsertRow,
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	character_id?: CharacterId | null;
+	target_character_id: CharacterId;
+	created_by?: UserRoleId | null;
+};
+type CharacterInteractionUpdateRow = TablesUpdate<'character_interactions'>;
+export type CharacterInteractionUpdate = Omit<
+	CharacterInteractionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'created_by'
+> & {
+	id?: CharacterInteractionId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId | null;
+	target_character_id?: CharacterId;
+	created_by?: UserRoleId | null;
+};
+
+// Character Interaction Action types
+type CharacterInteractionActionRow = Tables<'character_interaction_actions'>;
+export type CharacterInteractionAction = Omit<
+	CharacterInteractionActionRow,
+	| 'id'
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'character_interaction_id'
+	| 'next_character_interaction_action_id'
+	| 'created_by'
+> & {
+	id: CharacterInteractionActionId;
+	scenario_id: ScenarioId;
+	character_id: CharacterId;
+	target_character_id: CharacterId;
+	character_interaction_id: CharacterInteractionId;
+	next_character_interaction_action_id: CharacterInteractionActionId | null;
+	created_by: UserRoleId | null;
+};
+type CharacterInteractionActionInsertRow = TablesInsert<'character_interaction_actions'>;
+export type CharacterInteractionActionInsert = Omit<
+	CharacterInteractionActionInsertRow,
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'character_interaction_id'
+	| 'next_character_interaction_action_id'
+	| 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	character_id: CharacterId;
+	target_character_id: CharacterId;
+	character_interaction_id: CharacterInteractionId;
+	next_character_interaction_action_id?: CharacterInteractionActionId | null;
+	created_by?: UserRoleId | null;
+};
+type CharacterInteractionActionUpdateRow = TablesUpdate<'character_interaction_actions'>;
+export type CharacterInteractionActionUpdate = Omit<
+	CharacterInteractionActionUpdateRow,
+	| 'id'
+	| 'scenario_id'
+	| 'character_id'
+	| 'target_character_id'
+	| 'character_interaction_id'
+	| 'next_character_interaction_action_id'
+	| 'created_by'
+> & {
+	id?: CharacterInteractionActionId;
+	scenario_id?: ScenarioId;
+	character_id?: CharacterId;
+	target_character_id?: CharacterId;
+	character_interaction_id?: CharacterInteractionId;
+	next_character_interaction_action_id?: CharacterInteractionActionId | null;
 	created_by?: UserRoleId | null;
 };
 

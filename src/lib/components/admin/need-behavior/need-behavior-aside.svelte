@@ -47,7 +47,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>새로운 행동 생성</TooltipContent>
+					<TooltipContent>새로운 욕구 행동 생성</TooltipContent>
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger>
