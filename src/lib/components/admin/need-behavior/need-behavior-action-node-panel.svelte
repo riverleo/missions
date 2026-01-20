@@ -309,7 +309,7 @@
 											<InputGroupButton>지속 시간(틱)</InputGroupButton>
 										</TooltipTrigger>
 										<TooltipContent>
-											idle 타입에서만 사용됩니다. 0이면 즉시 다음 액션으로 넘어갑니다.
+											대기에서만 사용할 수 있습니다. 0이면 즉시 다음 액션으로 넘어갑니다.
 										</TooltipContent>
 									</Tooltip>
 								</InputGroupAddon>

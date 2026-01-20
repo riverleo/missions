@@ -22,6 +22,7 @@
 	import { useItemBehavior } from '$lib/hooks/use-item-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useCondition } from '$lib/hooks/use-condition';
 	import type {
 		ScenarioId,
 		ChapterId,
@@ -31,6 +32,7 @@
 		CharacterId,
 		CharacterBodyId,
 		BuildingId,
+		ConditionId,
 		ConditionBehaviorId,
 		ItemId,
 		ItemBehaviorId,
@@ -52,6 +54,7 @@
 	const { itemBehaviorStore } = useItemBehavior();
 	const { needStore } = useNeed();
 	const { needBehaviorStore } = useNeedBehavior();
+	const { conditionStore } = useCondition();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
@@ -78,6 +81,9 @@
 		}
 		if (prevSegment === 'buildings') {
 			return $buildingStore.data?.[id as BuildingId]?.name;
+		}
+		if (prevSegment === 'conditions') {
+			return $conditionStore.data?.[id as ConditionId]?.name;
 		}
 		if (prevSegment === 'condition-behaviors') {
 			return undefined;
@@ -138,6 +144,7 @@
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
+			else if (segment === 'conditions') label = '컨디션';
 			else if (segment === 'condition-behaviors') label = '컨디션 행동';
 			else if (segment === 'items') label = '아이템';
 			else if (segment === 'item-behaviors') label = '아이템 행동';
