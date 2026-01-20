@@ -28,7 +28,7 @@
 	const { conditionStore } = useCondition();
 	const { store: characterStore } = useCharacter();
 
-	const description = $derived(() => {
+	const description = $derived.by(() => {
 		const condition = behavior.condition_id
 			? $conditionStore.data[behavior.condition_id]
 			: undefined;
@@ -43,7 +43,7 @@
 		return parts.join(' · ');
 	});
 
-	const searchValue = $derived(`${behavior.name} ${description()}`);
+	const searchValue = $derived(`${behavior.name} ${description}`);
 </script>
 
 {#if href}
@@ -51,7 +51,7 @@
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
 			<span class="truncate">{behavior.name}</span>
-			<span class="truncate text-xs text-muted-foreground">{description()}</span>
+			<span class="truncate text-xs text-muted-foreground">{description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>
@@ -88,7 +88,7 @@
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<div class="flex flex-1 flex-col truncate">
 			<span class="truncate">{behavior.name}</span>
-			<span class="truncate text-xs text-muted-foreground">{description()}</span>
+			<span class="truncate text-xs text-muted-foreground">{description}</span>
 		</div>
 		{#if showActions}
 			<DropdownMenu>

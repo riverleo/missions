@@ -119,3 +119,64 @@ create policy "admins can delete item_interactions"
   for delete
   to authenticated
   using (is_admin());
+
+-- character_interactions 테이블 (캐릭터 간 상호작용: 대상 캐릭터 애니메이션)
+create table character_interactions (
+  id uuid primary key default gen_random_uuid(),
+  scenario_id uuid not null references scenarios(id) on delete cascade,
+  character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
+  target_character_id uuid not null references characters(id) on delete cascade,
+  character_behavior_type character_behavior_type not null default 'use',
+  root boolean not null default false,
+
+  -- 캐릭터 상태 (대상 캐릭터)
+  character_body_state_type character_body_state_type not null default 'idle',
+  character_face_state_type character_face_state_type not null default 'idle',
+
+  -- 캐릭터 오프셋 (상호작용 캐릭터 중심 기준)
+  character_offset_x integer not null default 0,
+  character_offset_y integer not null default 0,
+
+  -- 캐릭터 스케일
+  character_scale float not null default 1.0,
+
+  -- 캐릭터 회전 (도)
+  character_rotation float not null default 0,
+
+  -- 지속 시간 (틱 단위, 0이면 애니메이션 끝까지)
+  duration_ticks float not null default 0,
+
+  -- 다음 상호작용
+  next_character_interaction_id uuid references character_interactions(id) on delete set null,
+
+  created_at timestamptz not null default now(),
+  created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
+
+  constraint uq_character_interactions_character_target_behavior unique nulls not distinct (character_id, target_character_id, character_behavior_type)
+);
+
+alter table character_interactions enable row level security;
+
+create policy "anyone can view character_interactions"
+  on character_interactions
+  for select
+  to public
+  using (true);
+
+create policy "admins can insert character_interactions"
+  on character_interactions
+  for insert
+  to authenticated
+  with check (is_admin());
+
+create policy "admins can update character_interactions"
+  on character_interactions
+  for update
+  to authenticated
+  using (is_admin());
+
+create policy "admins can delete character_interactions"
+  on character_interactions
+  for delete
+  to authenticated
+  using (is_admin());
