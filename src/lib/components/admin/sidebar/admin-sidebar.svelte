@@ -73,7 +73,7 @@
 					title: '캐릭터',
 					subItems: [
 						{
-							title: '생성 및 상태 관리',
+							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
 						},
 						{
@@ -81,7 +81,7 @@
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
 						},
 						{
-							title: '욕구와 충족',
+							title: '욕구',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
 						},
 						{
@@ -94,11 +94,11 @@
 					title: '건물',
 					subItems: [
 						{
-							title: '생성 및 상태 관리',
+							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
 						},
 						{
-							title: '컨디션과 충족',
+							title: '컨디션',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/conditions` : undefined,
 						},
 						{
@@ -111,7 +111,7 @@
 					title: '아이템',
 					subItems: [
 						{
-							title: '생성 및 상태 관리',
+							title: '생성 및 관리',
 							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
 						},
 						{

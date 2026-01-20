@@ -41,7 +41,7 @@
 		return sortedConditions
 			.map((condition) => ({
 				condition,
-				behaviors: alphabetical(grouped[condition.id] ?? [], (b) => b.character_behavior_type),
+				behaviors: alphabetical(grouped[condition.id] ?? [], (b) => b.name),
 			}))
 			.filter((g) => g.behaviors.length > 0);
 	});
@@ -71,12 +71,10 @@
 							/>
 							<div class="flex flex-1 flex-col truncate">
 								<span class="truncate">
-									{building?.name ?? '건물'} - {getCharacterBehaviorTypeLabel(
-										behavior.character_behavior_type
-									)}
+									{behavior.name}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{character?.name ?? '모든 캐릭터'} ({condition.name}
+									{building?.name ?? '건물'} - {character?.name ?? '모든 캐릭터'} ({condition.name}
 									{behavior.condition_threshold} 이하)
 								</span>
 							</div>
