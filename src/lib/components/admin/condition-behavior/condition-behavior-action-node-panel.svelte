@@ -2,6 +2,7 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		ConditionBehaviorAction,
+		BehaviorActionType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 		CharacterId,
@@ -54,6 +55,12 @@
 	const characters = $derived(Object.values($characterStore.data));
 	const buildings = $derived(Object.values($buildingStore.data));
 
+	const actionTypes: { value: BehaviorActionType; label: string }[] = [
+		{ value: 'go', label: '이동' },
+		{ value: 'interact', label: '상호작용' },
+		{ value: 'idle', label: '대기' },
+	];
+
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
 	const faceStateTypes: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
@@ -87,6 +94,9 @@
 
 	// 미리보기용 건물은 previewBuilding 그대로 사용
 
+	const selectedTypeLabel = $derived(
+		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
+	);
 	const selectedBodyStateLabel = $derived(
 		changes?.character_body_state_type
 			? getCharacterBodyStateLabel(changes.character_body_state_type)
@@ -140,6 +150,12 @@
 		}
 	}
 
+	function onTypeChange(value: string | undefined) {
+		if (changes && value) {
+			changes.type = value as BehaviorActionType;
+		}
+	}
+
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!changes || isUpdating) return;
@@ -161,6 +177,7 @@
 			}
 
 			await admin.updateConditionBehaviorAction(actionId, {
+				type: changes.type,
 				duration_ticks: changes.duration_ticks,
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
@@ -198,6 +215,20 @@
 			{#if changes}
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
+						<ButtonGroup class="w-full">
+							<ButtonGroupText>행동</ButtonGroupText>
+							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
+								<SelectTrigger class="flex-1">
+									{selectedTypeLabel}
+								</SelectTrigger>
+								<SelectContent>
+									{#each actionTypes as actionType (actionType.value)}
+										<SelectItem value={actionType.value}>{actionType.label}</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
+						</ButtonGroup>
+
 						<InputGroup>
 							<InputGroupAddon align="inline-start">
 								<Tooltip>

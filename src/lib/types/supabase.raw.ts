@@ -637,6 +637,7 @@ export type Database = {
           next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
+          type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
           building_id?: string | null
@@ -653,6 +654,7 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
+          type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
           building_id?: string | null
@@ -669,6 +671,7 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
+          type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
           {
@@ -1502,7 +1505,7 @@ export type Database = {
           next_need_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          type: Database["public"]["Enums"]["need_behavior_action_type"]
+          type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
           behavior_id: string
@@ -1517,7 +1520,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          type?: Database["public"]["Enums"]["need_behavior_action_type"]
+          type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
           behavior_id?: string
@@ -1532,7 +1535,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          type?: Database["public"]["Enums"]["need_behavior_action_type"]
+          type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
           {
@@ -3126,6 +3129,7 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
+      behavior_action_type: "go" | "interact" | "idle"
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
       character_behavior_type: "demolish" | "use" | "repair" | "clean" | "pick"
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
@@ -3136,7 +3140,6 @@ export type Database = {
       item_state_type: "idle" | "broken"
       loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
-      need_behavior_action_type: "go" | "interact" | "idle"
       need_fulfillment_task_condition: "completed" | "created"
       need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
       player_chapter_status: "in_progress" | "completed"
@@ -3276,6 +3279,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      behavior_action_type: ["go", "interact", "idle"],
       building_state_type: ["idle", "damaged", "planning", "constructing"],
       character_behavior_type: ["demolish", "use", "repair", "clean", "pick"],
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
@@ -3286,7 +3290,6 @@ export const Constants = {
       item_state_type: ["idle", "broken"],
       loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
-      need_behavior_action_type: ["go", "interact", "idle"],
       need_fulfillment_task_condition: ["completed", "created"],
       need_fulfillment_type: ["building", "character", "task", "item", "idle"],
       player_chapter_status: ["in_progress", "completed"],

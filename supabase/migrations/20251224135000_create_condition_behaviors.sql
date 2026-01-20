@@ -47,6 +47,7 @@ create table condition_behavior_actions (
   building_id uuid not null references buildings(id) on delete cascade,
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_behavior_id uuid not null references condition_behaviors(id) on delete cascade,
+  type behavior_action_type not null default 'idle'::behavior_action_type,
   root boolean not null default false,
 
   -- 캐릭터 상태

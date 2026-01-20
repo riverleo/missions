@@ -88,21 +88,6 @@
 	const overlappingExistingCells = $derived(world.blueprint.overlappingCells);
 </script>
 
-<!-- 기존 엔티티의 겹치는 셀 하이라이트 (커서보다 먼저 렌더링) -->
-{#each overlappingExistingCells as cell (vectorUtils.createCellKey(cell.col, cell.row))}
-	<div
-		class="absolute border border-red-600"
-		style="
-			top: {cell.row * CELL_SIZE}px;
-			left: {cell.col * CELL_SIZE}px;
-			width: {CELL_SIZE}px;
-			height: {CELL_SIZE}px;
-			background-color: rgba(220, 38, 38, 0.4);
-			pointer-events: none;
-		"
-	></div>
-{/each}
-
 {#if world.blueprint.cursor}
 	{#if building}
 		<!-- 배치 셀 하이라이트 (건물만) -->
@@ -113,9 +98,7 @@
 			<svg class="overflow-visible" {width} {height}>
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
-						{@const fillStyle = isPlacable
-							? PLANNING_TILE_FILL_STYLE
-							: DISABLED_TILE_FILL_STYLE}
+						{@const fillStyle = isPlacable ? PLANNING_TILE_FILL_STYLE : DISABLED_TILE_FILL_STYLE}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}
@@ -169,4 +152,19 @@
 			resolution={2}
 		/>
 	{/if}
+
+	<!-- 기존 엔티티의 겹치는 셀 하이라이트 (맨 앞에 렌더링) -->
+	{#each overlappingExistingCells as cell (vectorUtils.createCellKey(cell.col, cell.row))}
+		<div
+			class="absolute border border-red-600"
+			style="
+				top: {cell.row * CELL_SIZE}px;
+				left: {cell.col * CELL_SIZE}px;
+				width: {CELL_SIZE}px;
+				height: {CELL_SIZE}px;
+				background-color: rgba(220, 38, 38, 0.4);
+				z-index: 9999;
+			"
+		></div>
+	{/each}
 {/if}

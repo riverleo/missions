@@ -2,7 +2,7 @@
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		NeedBehaviorAction,
-		NeedBehaviorActionType,
+		BehaviorActionType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 		CharacterId,
@@ -74,7 +74,7 @@
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
 
-	const actionTypes: { value: NeedBehaviorActionType; label: string }[] = [
+	const actionTypes: { value: BehaviorActionType; label: string }[] = [
 		{ value: 'go', label: '이동' },
 		{ value: 'interact', label: '상호작용' },
 		{ value: 'idle', label: '대기' },
@@ -148,7 +148,7 @@
 
 	function onTypeChange(value: string | undefined) {
 		if (changes && value) {
-			changes.type = value as NeedBehaviorActionType;
+			changes.type = value as BehaviorActionType;
 		}
 	}
 

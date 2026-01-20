@@ -1,5 +1,5 @@
--- need_behavior_action_type enum (액션의 종류)
-create type need_behavior_action_type as enum (
+-- behavior_action_type enum (액션의 종류)
+create type behavior_action_type as enum (
   'go',         -- 건물/아이템/캐릭터로 이동
   'interact',   -- 건물/아이템/캐릭터와 상호작용
   'idle'        -- 대기
@@ -53,7 +53,7 @@ create table need_behavior_actions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
-  type need_behavior_action_type not null default 'idle'::need_behavior_action_type,
+  type behavior_action_type not null default 'idle'::behavior_action_type,
   root boolean not null default false,
 
   -- go/interact 타입용: 대상 지정
