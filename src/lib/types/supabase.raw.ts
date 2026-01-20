@@ -717,12 +717,10 @@ export type Database = {
       condition_behavior_actions: {
         Row: {
           building_id: string
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x: number
-          character_offset_y: number
-          character_rotation: number
-          character_scale: number
           condition_behavior_id: string
           condition_id: string
           duration_ticks: number
@@ -734,12 +732,10 @@ export type Database = {
         }
         Insert: {
           building_id: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type?:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
           condition_behavior_id: string
           condition_id: string
           duration_ticks?: number
@@ -751,12 +747,10 @@ export type Database = {
         }
         Update: {
           building_id?: string
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type?:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_offset_x?: number
-          character_offset_y?: number
-          character_rotation?: number
-          character_scale?: number
           condition_behavior_id?: string
           condition_id?: string
           duration_ticks?: number
@@ -807,35 +801,35 @@ export type Database = {
       condition_behaviors: {
         Row: {
           building_id: string
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           condition_id: string
           condition_threshold: number
           created_at: string
           created_by: string | null
           id: string
+          name: string
           scenario_id: string
         }
         Insert: {
           building_id: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id: string
           condition_threshold?: number
           created_at?: string
           created_by?: string | null
           id?: string
+          name: string
           scenario_id: string
         }
         Update: {
           building_id?: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id?: string
           condition_threshold?: number
           created_at?: string
           created_by?: string | null
           id?: string
+          name?: string
           scenario_id?: string
         }
         Relationships: [
@@ -1681,7 +1675,9 @@ export type Database = {
         Row: {
           behavior_id: string
           building_id: string | null
-          character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           character_id: string | null
           duration_ticks: number
@@ -1696,7 +1692,9 @@ export type Database = {
         Insert: {
           behavior_id: string
           building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type?:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           duration_ticks?: number
@@ -1711,7 +1709,9 @@ export type Database = {
         Update: {
           behavior_id?: string
           building_id?: string | null
-          character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
+          character_behavior_type?:
+            | Database["public"]["Enums"]["character_behavior_type"]
+            | null
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           duration_ticks?: number
@@ -1777,7 +1777,6 @@ export type Database = {
       }
       need_behaviors: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -1788,7 +1787,6 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1799,7 +1797,6 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1843,6 +1840,7 @@ export type Database = {
       need_fulfillments: {
         Row: {
           building_id: string | null
+          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -1860,6 +1858,7 @@ export type Database = {
         }
         Insert: {
           building_id?: string | null
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1877,6 +1876,7 @@ export type Database = {
         }
         Update: {
           building_id?: string | null
+          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null

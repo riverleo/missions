@@ -106,7 +106,7 @@ export function getConditionBehaviorLabel(params: {
 }): { title: string; description: string } {
 	const { behavior, buildingName, conditionName, characterName } = params;
 	return {
-		title: `${buildingName ?? '건물'} ${getCharacterBehaviorTypeLabel(behavior.character_behavior_type)}`,
+		title: `${buildingName ?? '건물'} 행동`,
 		description: `${characterName ?? '모든 캐릭터'} (${conditionName ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
 	};
 }
