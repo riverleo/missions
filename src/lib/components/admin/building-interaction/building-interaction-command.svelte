@@ -63,12 +63,9 @@
 			: undefined;
 
 		const behaviorLabel = getBehaviorLabel(interaction.character_behavior_type);
-		const characterLabel = character ? ` (${character.name})` : '';
+		const characterName = character ? character.name : '모든 캐릭터';
 
-		return {
-			title: `${behaviorLabel}${characterLabel}`,
-			description: character ? `특정 캐릭터용` : `모든 캐릭터용`,
-		};
+		return `${characterName} ${behaviorLabel}`;
 	}
 </script>
 
@@ -91,10 +88,7 @@
 									interaction.id === currentInteractionId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
-							<div class="flex flex-1 flex-col truncate">
-								<span class="truncate">{label.title}</span>
-								<span class="truncate text-xs text-muted-foreground">{label.description}</span>
-							</div>
+							<span class="flex-1 truncate">{label}</span>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
@@ -110,6 +104,12 @@
 									{/snippet}
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
+									<DropdownMenuItem
+										onclick={() =>
+											openInteractionDialog({ type: 'update', interactionId: interaction.id })}
+									>
+										수정
+									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
 											openInteractionDialog({ type: 'delete', interactionId: interaction.id })}

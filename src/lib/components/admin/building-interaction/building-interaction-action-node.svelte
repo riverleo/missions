@@ -37,19 +37,11 @@
 	});
 
 	const summary = $derived(() => {
-		const parts: string[] = [];
+		const duration = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
+		const face = `"${faceStateLabel()}" 표정으로 `;
+		const body = `"${bodyStateLabel()}"`;
 
-		parts.push(`${bodyStateLabel()} / ${faceStateLabel()}`);
-
-		if (action.duration_ticks > 0) {
-			parts.push(`${action.duration_ticks}틱`);
-		}
-
-		if (action.character_offset_x !== 0 || action.character_offset_y !== 0) {
-			parts.push(`(${action.character_offset_x}, ${action.character_offset_y})`);
-		}
-
-		return parts.join(' · ');
+		return `${duration}${face}${body}`;
 	});
 </script>
 

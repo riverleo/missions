@@ -4,6 +4,7 @@
 		BuildingInteractionAction,
 		BuildingInteractionActionId,
 		BuildingInteractionId,
+		CharacterId,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -19,8 +20,11 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
+	import { Separator } from '$lib/components/ui/separator';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { createBuildingInteractionActionNodeId } from '$lib/utils/flow-id';
+	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { clone } from 'radash';
 	import InputGroupText from '$lib/components/ui/input-group/input-group-text.svelte';
 
@@ -32,8 +36,28 @@
 
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
-	const { buildingInteractionActionStore, admin } = useBuilding();
+	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useBuilding();
+	const { store: characterStore } = useCharacter();
 	const flowNodes = useNodes();
+
+	const interaction = $derived($buildingInteractionStore.data[buildingInteractionId]);
+	const characters = $derived(Object.values($characterStore.data));
+
+	// 미리보기용 캐릭터 선택
+	const behaviorHasSpecificCharacter = $derived(interaction?.character_id != null);
+	let previewCharacterId = $state<string | undefined>(undefined);
+	const previewCharacter = $derived(
+		behaviorHasSpecificCharacter && interaction?.character_id
+			? $characterStore.data[interaction.character_id as CharacterId]
+			: previewCharacterId
+				? $characterStore.data[previewCharacterId as CharacterId]
+				: characters[0]
+	);
+	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
+
+	function onPreviewCharacterChange(value: string | undefined) {
+		previewCharacterId = value || undefined;
+	}
 
 	const bodyStateTypes: { value: CharacterBodyStateType; label: string }[] = [
 		{ value: 'idle', label: '대기' },
@@ -182,7 +206,8 @@
 										<InputGroupButton>지속 시간(틱)</InputGroupButton>
 									</TooltipTrigger>
 									<TooltipContent>
-										이 액션이 지속되는 시간입니다. 0이면 즉시 다음 액션으로 넘어갑니다.
+										액션이 지속되는 시간입니다. 0인 경우 캐릭터 바디 애니메이션이 종료될 때까지
+										실행됩니다.
 									</TooltipContent>
 								</Tooltip>
 							</InputGroupAddon>
@@ -214,31 +239,82 @@
 							/>
 						</InputGroup>
 
-						<InputGroup>
-							<InputGroupAddon align="inline-start">
-								<InputGroupButton>스케일</InputGroupButton>
-							</InputGroupAddon>
-							<InputGroupInput
-								type="number"
-								step="0.01"
-								min="0.01"
-								max="5"
-								placeholder="1.0"
-								bind:value={changes.character_scale}
-							/>
-						</InputGroup>
+						<div class="flex gap-2">
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupButton>스케일</InputGroupButton>
+								</InputGroupAddon>
+								<InputGroupInput
+									type="number"
+									step="0.01"
+									min="0.01"
+									max="5"
+									placeholder="1.0"
+									bind:value={changes.character_scale}
+								/>
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>배</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
 
-						<InputGroup>
-							<InputGroupAddon align="inline-start">
-								<InputGroupButton>회전</InputGroupButton>
-							</InputGroupAddon>
-							<InputGroupInput
-								type="number"
-								step="0.1"
-								placeholder="0"
-								bind:value={changes.character_rotation}
-							/>
-						</InputGroup>
+							<InputGroup>
+								<InputGroupAddon align="inline-start">
+									<InputGroupButton>회전</InputGroupButton>
+								</InputGroupAddon>
+								<InputGroupInput
+									type="number"
+									step="0.1"
+									placeholder="0"
+									bind:value={changes.character_rotation}
+								/>
+								<InputGroupAddon align="inline-end">
+									<InputGroupText>도</InputGroupText>
+								</InputGroupAddon>
+							</InputGroup>
+						</div>
+
+						{#if previewCharacter && changes && interaction}
+							<Separator />
+
+							<div class="flex flex-col gap-2">
+								<div
+									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
+									style:height="120px"
+								>
+									<BuildingSpriteAnimator
+										buildingId={interaction.building_id}
+										stateType="idle"
+										characterId={previewCharacter.id}
+										characterBodyStateType={changes.character_body_state_type}
+										characterFaceStateType={changes.character_face_state_type}
+										characterOffset={{ x: changes.character_offset_x, y: changes.character_offset_y }}
+										characterScale={changes.character_scale}
+										characterRotation={changes.character_rotation}
+										resolution={2}
+									/>
+								</div>
+
+								{#if !behaviorHasSpecificCharacter && characters.length > 0}
+									<ButtonGroup class="w-full">
+										<ButtonGroupText>캐릭터</ButtonGroupText>
+										<Select
+											type="single"
+											value={previewCharacterId ?? previewCharacter?.id ?? ''}
+											onValueChange={onPreviewCharacterChange}
+										>
+											<SelectTrigger class="flex-1">
+												{selectedPreviewCharacterLabel}
+											</SelectTrigger>
+											<SelectContent>
+												{#each characters as character (character.id)}
+													<SelectItem value={character.id}>{character.name}</SelectItem>
+												{/each}
+											</SelectContent>
+										</Select>
+									</ButtonGroup>
+								{/if}
+							</div>
+						{/if}
 					</div>
 					<div class="flex justify-between">
 						<Tooltip>

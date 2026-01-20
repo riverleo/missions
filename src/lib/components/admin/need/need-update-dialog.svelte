@@ -76,39 +76,41 @@
 			<DialogTitle>욕구 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<IconHeading class="size-4" />
-				</InputGroupAddon>
-				<InputGroupInput placeholder="이름" bind:value={name} />
-			</InputGroup>
-			<div class="flex gap-1">
+			<div class="flex flex-col gap-2">
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>최대</InputGroupText>
+						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput type="number" bind:value={maxValue} />
+					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
+				<div class="flex gap-2">
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>기본</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" bind:value={initialValue} />
+					</InputGroup>
+					<InputGroup>
+						<InputGroupAddon align="inline-start">
+							<InputGroupText>최대</InputGroupText>
+						</InputGroupAddon>
+						<InputGroupInput type="number" bind:value={maxValue} />
+					</InputGroup>
+				</div>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>기본</InputGroupText>
+						<Tooltip>
+							<TooltipTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props} variant="ghost">틱당 감소</InputGroupButton>
+								{/snippet}
+							</TooltipTrigger>
+							<TooltipContent>게임 틱(tick)당 감소하는 욕구 수치입니다</TooltipContent>
+						</Tooltip>
 					</InputGroupAddon>
-					<InputGroupInput type="number" bind:value={initialValue} />
+					<InputGroupInput type="number" step="0.01" bind:value={decreasePerTick} />
 				</InputGroup>
 			</div>
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<Tooltip>
-						<TooltipTrigger>
-							{#snippet child({ props })}
-								<InputGroupButton {...props} variant="ghost">틱당 감소</InputGroupButton>
-							{/snippet}
-						</TooltipTrigger>
-						<TooltipContent>게임 틱(tick)당 감소하는 욕구 수치입니다</TooltipContent>
-					</Tooltip>
-				</InputGroupAddon>
-				<InputGroupInput type="number" step="0.01" bind:value={decreasePerTick} />
-			</InputGroup>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '수정 중...' : '수정하기'}

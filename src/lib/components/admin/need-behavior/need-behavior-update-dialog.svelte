@@ -147,7 +147,7 @@
 							{/each}
 						</SelectContent>
 					</Select>
-					<ButtonGroupText>얼굴 표정</ButtonGroupText>
+					<ButtonGroupText>표정</ButtonGroupText>
 					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
 						<SelectTrigger class="flex-1">
 							{faceStateOptions.find((o) => o.value === characterFaceStateType)?.label ?? '기본'}
