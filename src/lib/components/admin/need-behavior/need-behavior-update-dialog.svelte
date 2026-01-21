@@ -122,7 +122,7 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>행동 수정</DialogTitle>
+			<DialogTitle>욕구 행동 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
@@ -134,31 +134,6 @@
 					</InputGroupAddon>
 					<InputGroupInput placeholder="이름" bind:value={name} />
 				</InputGroup>
-				<ButtonGroup class="w-full">
-					<ButtonGroupText>캐릭터</ButtonGroupText>
-					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
-						<SelectTrigger class="flex-1">
-							{selectedCharacterName}
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="">모두</SelectItem>
-							{#each characters as character (character.id)}
-								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-					<ButtonGroupText>표정</ButtonGroupText>
-					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
-						<SelectTrigger class="flex-1">
-							{faceStateOptions.find((o) => o.value === characterFaceStateType)?.label ?? '기본'}
-						</SelectTrigger>
-						<SelectContent>
-							{#each faceStateOptions as option (option.value)}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-				</ButtonGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
 						<DropdownMenu>
@@ -191,6 +166,31 @@
 						<InputGroupText>/ {selectedNeed?.max_value ?? 100} 이하</InputGroupText>
 					</InputGroupAddon>
 				</InputGroup>
+				<ButtonGroup class="w-full">
+					<ButtonGroupText>캐릭터</ButtonGroupText>
+					<Select type="single" value={characterId ?? ''} onValueChange={onCharacterChange}>
+						<SelectTrigger class="flex-1">
+							{selectedCharacterName}
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="">모두</SelectItem>
+							{#each characters as character (character.id)}
+								<SelectItem value={character.id}>{character.name}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+					<ButtonGroupText>표정</ButtonGroupText>
+					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
+						<SelectTrigger class="flex-1">
+							{faceStateOptions.find((o) => o.value === characterFaceStateType)?.label ?? '기본'}
+						</SelectTrigger>
+						<SelectContent>
+							{#each faceStateOptions as option (option.value)}
+								<SelectItem value={option.value}>{option.label}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+				</ButtonGroup>
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !needId || !name.trim()}>

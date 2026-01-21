@@ -41,12 +41,9 @@
 		{
 			label: '시나리오',
 			items: [
-				{ title: '챕터', href: scenarioId ? `/admin/scenarios/${scenarioId}/chapters` : undefined },
-				{ title: '퀘스트', href: scenarioId ? `/admin/scenarios/${scenarioId}/quests` : undefined },
-				{
-					title: '대화 또는 효과',
-					href: scenarioId ? `/admin/scenarios/${scenarioId}/narratives` : undefined,
-				},
+				{ title: '챕터', href: `/admin/scenarios/${scenarioId}/chapters` },
+				{ title: '퀘스트', href: `/admin/scenarios/${scenarioId}/quests` },
+				{ title: '대화 또는 효과', href: `/admin/scenarios/${scenarioId}/narratives` },
 			],
 		},
 		{
@@ -55,84 +52,42 @@
 				{
 					title: '지형',
 					subItems: [
-						{
-							title: '생성 및 관리',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains` : undefined,
-						},
-						{
-							title: '타일',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/tiles` : undefined,
-						},
-						{
-							title: '지형과 타일 연결',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/terrains-tiles` : undefined,
-						},
+						{ title: '생성 및 관리', href: `/admin/scenarios/${scenarioId}/terrains` },
+						{ title: '타일', href: `/admin/scenarios/${scenarioId}/tiles` },
+						{ title: '지형과 타일 연결', href: `/admin/scenarios/${scenarioId}/terrains-tiles` },
 					],
 				},
 				{
 					title: '캐릭터',
 					subItems: [
-						{
-							title: '바디',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/character-bodies` : undefined,
-						},
-						{
-							title: '생성 및 관리',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/characters` : undefined,
-						},
-						{
-							title: '상호작용',
-							href: scenarioId
-								? `/admin/scenarios/${scenarioId}/character-interactions`
-								: undefined,
-						},
-						{
-							title: '욕구',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/needs` : undefined,
-						},
-						{
-							title: '욕구 행동',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/need-behaviors` : undefined,
-						},
+						{ title: '바디', href: `/admin/scenarios/${scenarioId}/character-bodies` },
+						{ title: '생성 및 관리', href: `/admin/scenarios/${scenarioId}/characters` },
+						{ title: '상호작용', href: `/admin/scenarios/${scenarioId}/character-interactions` },
+						{ title: '욕구', href: `/admin/scenarios/${scenarioId}/needs` },
 					],
 				},
 				{
 					title: '건물',
 					subItems: [
-						{
-							title: '생성 및 관리',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/buildings` : undefined,
-						},
-						{
-							title: '상호작용',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/building-interactions` : undefined,
-						},
-						{
-							title: '컨디션',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/conditions` : undefined,
-						},
-						{
-							title: '컨디션 행동',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/condition-behaviors` : undefined,
-						},
+						{ title: '생성 및 관리', href: `/admin/scenarios/${scenarioId}/buildings` },
+						{ title: '상호작용', href: `/admin/scenarios/${scenarioId}/building-interactions` },
+						{ title: '컨디션', href: `/admin/scenarios/${scenarioId}/conditions` },
 					],
 				},
 				{
 					title: '아이템',
 					subItems: [
-						{
-							title: '생성 및 관리',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/items` : undefined,
-						},
-						{
-							title: '상호작용',
-							href: scenarioId ? `/admin/scenarios/${scenarioId}/item-interactions` : undefined,
-						},
+						{ title: '생성 및 관리', href: `/admin/scenarios/${scenarioId}/items` },
+						{ title: '상호작용', href: `/admin/scenarios/${scenarioId}/item-interactions` },
 					],
 				},
 				{
-					title: '행동 우선순위',
-					href: scenarioId ? `/admin/scenarios/${scenarioId}/behavior-priorities` : undefined,
+					title: '행동',
+					subItems: [
+						{ title: '우선도', href: `/admin/scenarios/${scenarioId}/behavior-priorities` },
+						{ title: '욕구 행동', href: `/admin/scenarios/${scenarioId}/need-behaviors` },
+						{ title: '컨디션 행동', href: `/admin/scenarios/${scenarioId}/condition-behaviors` },
+					],
 				},
 			],
 		},

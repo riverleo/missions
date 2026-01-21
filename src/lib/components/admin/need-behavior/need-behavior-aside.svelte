@@ -68,7 +68,7 @@
 							</Button>
 						{/snippet}
 					</TooltipTrigger>
-					<TooltipContent>행동 수정</TooltipContent>
+					<TooltipContent>욕구 행동 수정</TooltipContent>
 				</Tooltip>
 			</ButtonGroup>
 		</ButtonGroup>

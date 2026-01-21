@@ -1,22 +1,19 @@
 <script lang="ts">
-	import type { BuildingId, ScenarioId } from '$lib/types';
+	import type { BuildingId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingCommand from './building-command.svelte';
 	import BuildingCreateDialog from './building-create-dialog.svelte';
 	import BuildingUpdateDialog from './building-update-dialog.svelte';
 	import BuildingDeleteDialog from './building-delete-dialog.svelte';
-	import BuildingStateUpdateDialog from './building-state-update-dialog.svelte';
 
 	const { openDialog } = useBuilding();
 	const currentBuildingId = $derived(page.params.buildingId);
-	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -102,4 +99,3 @@
 <BuildingCreateDialog />
 <BuildingUpdateDialog />
 <BuildingDeleteDialog />
-<BuildingStateUpdateDialog />
