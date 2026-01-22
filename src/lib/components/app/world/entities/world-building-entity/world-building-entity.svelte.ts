@@ -99,9 +99,18 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 모든 conditions를 1씩 감소
-		for (const condition of Object.values(this.worldBuildingConditions)) {
-			condition.value = Math.max(0, condition.value - 1);
+		// 모든 conditions를 decrease_per_tick * multiplier만큼 감소
+		const { conditionStore, buildingConditionStore } = useBuilding();
+		const conditions = get(conditionStore).data;
+		const buildingConditions = get(buildingConditionStore).data;
+
+		for (const worldBuildingCondition of Object.values(this.worldBuildingConditions)) {
+			const condition = conditions[worldBuildingCondition.condition_id];
+			const buildingCondition = buildingConditions[worldBuildingCondition.building_condition_id];
+			if (!condition || !buildingCondition) continue;
+
+			const decreaseAmount = condition.decrease_per_tick * buildingCondition.multiplier;
+			worldBuildingCondition.value = Math.max(0, worldBuildingCondition.value - decreaseAmount);
 		}
 	}
 }
