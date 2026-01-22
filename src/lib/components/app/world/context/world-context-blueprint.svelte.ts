@@ -39,10 +39,6 @@ export class WorldContextBlueprint {
 		// 템플릿을 선택할 때만 엔티티 선택 해제
 		if (entityTemplateId !== undefined) {
 			selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
-		} else {
-			// 템플릿 해제 시 캐시 클리어
-			this.cursorTileBounds = undefined;
-			this.overlappingCells = [];
 		}
 	}
 

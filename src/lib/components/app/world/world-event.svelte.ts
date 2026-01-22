@@ -44,6 +44,11 @@ export class WorldEvent {
 	};
 
 	onmousemove = (e: MouseEvent) => {
+		const screenVector = vectorUtils.createScreenVector(e.clientX, e.clientY);
+
+		// 블루프린트 커서 업데이트
+		this.world.blueprint.updateCursor(screenVector);
+
 		// 호버 상태 업데이트
 		if (!this.camera.panning) {
 			const newValue = this.checkDraggableAtPosition(e.clientX, e.clientY);
@@ -53,7 +58,7 @@ export class WorldEvent {
 			return;
 		}
 
-		this.camera.applyPan(vectorUtils.createScreenVector(e.clientX, e.clientY));
+		this.camera.applyPan(screenVector);
 	};
 
 	onmouseup = () => {

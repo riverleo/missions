@@ -72,7 +72,12 @@
 				{#each characters as character (character.id)}
 					{@const templateId = EntityIdUtils.template.create('character', character.id)}
 					<CommandItem
-						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+						onSelect={() =>
+							worldContext?.blueprint.setSelectedEntityTemplateId(
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
+									? undefined
+									: templateId
+							)}
 					>
 						<IconCheck
 							class={cn(
@@ -94,7 +99,12 @@
 				{#each buildings as building (building.id)}
 					{@const templateId = EntityIdUtils.template.create('building', building.id)}
 					<CommandItem
-						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+						onSelect={() =>
+							worldContext?.blueprint.setSelectedEntityTemplateId(
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
+									? undefined
+									: templateId
+							)}
 					>
 						<IconCheck
 							class={cn(
@@ -116,7 +126,12 @@
 				{#each items as item (item.id)}
 					{@const templateId = EntityIdUtils.template.create('item', item.id)}
 					<CommandItem
-						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+						onSelect={() =>
+							worldContext?.blueprint.setSelectedEntityTemplateId(
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
+									? undefined
+									: templateId
+							)}
 					>
 						<IconCheck
 							class={cn(
@@ -138,7 +153,12 @@
 				{#each tiles as tile (tile.id)}
 					{@const templateId = EntityIdUtils.template.create('tile', tile.id)}
 					<CommandItem
-						onSelect={() => worldContext?.blueprint.setSelectedEntityTemplateId(templateId)}
+						onSelect={() =>
+							worldContext?.blueprint.setSelectedEntityTemplateId(
+								templateId === worldContext?.blueprint.selectedEntityTemplateId
+									? undefined
+									: templateId
+							)}
 					>
 						<IconCheck
 							class={cn(
