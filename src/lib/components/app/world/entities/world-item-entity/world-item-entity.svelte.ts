@@ -7,7 +7,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
-import { decreaseDurability } from './decrease-durability';
+import { decreaseDurabilityTicks } from './decrease-durability-ticks';
 
 export class WorldItemEntity extends Entity {
 	readonly type = 'item' as const;
@@ -95,6 +95,6 @@ export class WorldItemEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		decreaseDurability(this);
+		decreaseDurabilityTicks(this);
 	}
 }
