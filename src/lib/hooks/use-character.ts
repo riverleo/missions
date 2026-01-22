@@ -21,12 +21,24 @@ import type {
 	CharacterBodyStateInsert,
 	CharacterBodyStateUpdate,
 	CharacterBodyStateType,
+	Need,
+	NeedInsert,
+	NeedUpdate,
+	NeedFulfillment,
+	NeedFulfillmentInsert,
+	NeedFulfillmentUpdate,
+	CharacterNeed,
+	CharacterNeedInsert,
+	CharacterNeedUpdate,
 	CharacterId,
 	CharacterFaceStateId,
 	CharacterInteractionId,
 	CharacterInteractionActionId,
 	CharacterBodyId,
 	CharacterBodyStateId,
+	NeedId,
+	NeedFulfillmentId,
+	CharacterNeedId,
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
@@ -50,6 +62,12 @@ type CharacterInteractionDialogState =
 type CharacterBodyDialogState =
 	| { type: 'create' }
 	| { type: 'delete'; bodyId: CharacterBodyId }
+	| undefined;
+
+type NeedDialogState =
+	| { type: 'create' }
+	| { type: 'update'; needId: NeedId }
+	| { type: 'delete'; needId: NeedId }
 	| undefined;
 
 let instance: ReturnType<typeof createCharacterStore> | null = null;
@@ -103,6 +121,23 @@ function createCharacterStore() {
 
 	const characterBodyDialogStore = writable<CharacterBodyDialogState>(undefined);
 
+	const needStore = writable<RecordFetchState<NeedId, Need>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const needFulfillmentStore = writable<RecordFetchState<NeedFulfillmentId, NeedFulfillment>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const characterNeedStore = writable<RecordFetchState<CharacterNeedId, CharacterNeed>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const needDialogStore = writable<NeedDialogState>(undefined);
+
 	const characterUiStore = writable<{
 		previewBodyStateType: CharacterBodyStateType;
 		showBodyPreview: boolean;
@@ -125,24 +160,39 @@ function createCharacterStore() {
 		characterStore.update((state) => ({ ...state, status: 'loading' }));
 		characterInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 		characterBodyStore.update((state) => ({ ...state, status: 'loading' }));
+		needStore.update((state) => ({ ...state, status: 'loading' }));
+		needFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
+		characterNeedStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('characters')
-				.select(
-					`
-					*,
-					character_face_states(*)
-				`
-				)
-				.order('name');
+			const [
+				charactersResult,
+				interactionsResult,
+				bodiesResult,
+				needsResult,
+				fulfillmentsResult,
+				characterNeedsResult,
+			] = await Promise.all([
+				supabase.from('characters').select('*, character_face_states(*)').order('name'),
+				supabase.from('character_interactions').select('*, character_interaction_actions(*)').order('created_at'),
+				supabase.from('character_bodies').select('*, character_body_states(*)').order('name'),
+				supabase.from('needs').select('*').order('name'),
+				supabase.from('need_fulfillments').select('*'),
+				supabase.from('character_needs').select('*'),
+			]);
 
-			if (error) throw error;
+			if (charactersResult.error) throw charactersResult.error;
+			if (interactionsResult.error) throw interactionsResult.error;
+			if (bodiesResult.error) throw bodiesResult.error;
+			if (needsResult.error) throw needsResult.error;
+			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
+			if (characterNeedsResult.error) throw characterNeedsResult.error;
 
+			// Characters
 			const characterRecord: Record<CharacterId, Character> = {};
 			const faceStateRecord: Record<CharacterId, CharacterFaceState[]> = {};
 
-			for (const item of data ?? []) {
+			for (const item of charactersResult.data ?? []) {
 				const { character_face_states, ...character } = item;
 				characterRecord[item.id as CharacterId] = character as Character;
 				faceStateRecord[item.id as CharacterId] = (character_face_states ??
@@ -150,17 +200,10 @@ function createCharacterStore() {
 			}
 
 			// Character interactions and actions
-			const { data: interactionsData, error: interactionsError } = await supabase
-				.from('character_interactions')
-				.select('*, character_interaction_actions(*)')
-				.order('created_at');
-
-			if (interactionsError) throw interactionsError;
-
 			const interactionRecord: Record<CharacterInteractionId, CharacterInteraction> = {};
 			const actionRecord: Record<CharacterInteractionId, CharacterInteractionAction[]> = {};
 
-			for (const item of interactionsData ?? []) {
+			for (const item of interactionsResult.data ?? []) {
 				const { character_interaction_actions, ...interaction } = item;
 				interactionRecord[item.id as CharacterInteractionId] = interaction as CharacterInteraction;
 				actionRecord[item.id as CharacterInteractionId] = (character_interaction_actions ??
@@ -168,90 +211,54 @@ function createCharacterStore() {
 			}
 
 			// Character bodies and states
-			const { data: bodiesData, error: bodiesError } = await supabase
-				.from('character_bodies')
-				.select('*, character_body_states(*)')
-				.order('name');
-
-			if (bodiesError) throw bodiesError;
-
 			const bodyRecord: Record<CharacterBodyId, CharacterBody> = {};
 			const bodyStateRecord: Record<CharacterBodyId, CharacterBodyState[]> = {};
 
-			for (const item of bodiesData ?? []) {
+			for (const item of bodiesResult.data ?? []) {
 				const { character_body_states, ...body } = item;
 				bodyRecord[item.id as CharacterBodyId] = body as CharacterBody;
 				bodyStateRecord[item.id as CharacterBodyId] = (character_body_states ??
 					[]) as CharacterBodyState[];
 			}
 
-			characterStore.set({
-				status: 'success',
-				data: characterRecord,
-				error: undefined,
-			});
+			// Needs
+			const needRecord: Record<NeedId, Need> = {};
+			for (const item of needsResult.data ?? []) {
+				needRecord[item.id as NeedId] = item as Need;
+			}
 
-			characterFaceStateStore.set({
-				status: 'success',
-				data: faceStateRecord,
-				error: undefined,
-			});
+			// Need fulfillments
+			const fulfillmentRecord: Record<NeedFulfillmentId, NeedFulfillment> = {};
+			for (const item of fulfillmentsResult.data ?? []) {
+				fulfillmentRecord[item.id as NeedFulfillmentId] = item as NeedFulfillment;
+			}
 
-			characterInteractionStore.set({
-				status: 'success',
-				data: interactionRecord,
-				error: undefined,
-			});
+			// Character needs
+			const characterNeedRecord: Record<CharacterNeedId, CharacterNeed> = {};
+			for (const item of characterNeedsResult.data ?? []) {
+				characterNeedRecord[item.id as CharacterNeedId] = item as CharacterNeed;
+			}
 
-			characterInteractionActionStore.set({
-				status: 'success',
-				data: actionRecord,
-				error: undefined,
-			});
-
-			characterBodyStore.set({
-				status: 'success',
-				data: bodyRecord,
-				error: undefined,
-			});
-
-			characterBodyStateStore.set({
-				status: 'success',
-				data: bodyStateRecord,
-				error: undefined,
-			});
+			characterStore.set({ status: 'success', data: characterRecord, error: undefined });
+			characterFaceStateStore.set({ status: 'success', data: faceStateRecord, error: undefined });
+			characterInteractionStore.set({ status: 'success', data: interactionRecord, error: undefined });
+			characterInteractionActionStore.set({ status: 'success', data: actionRecord, error: undefined });
+			characterBodyStore.set({ status: 'success', data: bodyRecord, error: undefined });
+			characterBodyStateStore.set({ status: 'success', data: bodyStateRecord, error: undefined });
+			needStore.set({ status: 'success', data: needRecord });
+			needFulfillmentStore.set({ status: 'success', data: fulfillmentRecord });
+			characterNeedStore.set({ status: 'success', data: characterNeedRecord });
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
-			characterStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			characterFaceStateStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			characterInteractionStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			characterInteractionActionStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			characterBodyStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			characterBodyStateStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
+			characterStore.set({ status: 'error', data: {}, error: err });
+			characterFaceStateStore.set({ status: 'error', data: {}, error: err });
+			characterInteractionStore.set({ status: 'error', data: {}, error: err });
+			characterInteractionActionStore.set({ status: 'error', data: {}, error: err });
+			characterBodyStore.set({ status: 'error', data: {}, error: err });
+			characterBodyStateStore.set({ status: 'error', data: {}, error: err });
+			needStore.set({ status: 'error', data: {}, error: err });
+			needFulfillmentStore.set({ status: 'error', data: {}, error: err });
+			characterNeedStore.set({ status: 'error', data: {}, error: err });
 		}
 	}
 
@@ -285,6 +292,14 @@ function createCharacterStore() {
 
 	function closeCharacterBodyDialog() {
 		characterBodyDialogStore.set(undefined);
+	}
+
+	function openNeedDialog(state: NonNullable<NeedDialogState>) {
+		needDialogStore.set(state);
+	}
+
+	function closeNeedDialog() {
+		needDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -719,6 +734,147 @@ function createCharacterStore() {
 				})
 			);
 		},
+
+		// Need CRUD
+		async createNeed(scenarioId: ScenarioId, need: Omit<NeedInsert, 'scenario_id'>) {
+			const { data, error } = await supabase
+				.from('needs')
+				.insert({ ...need, scenario_id: scenarioId })
+				.select()
+				.single<Need>();
+
+			if (error) throw error;
+
+			needStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as NeedId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateNeed(id: NeedId, need: NeedUpdate) {
+			const { error } = await supabase.from('needs').update(need).eq('id', id);
+
+			if (error) throw error;
+
+			needStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], need);
+					}
+				})
+			);
+		},
+
+		async removeNeed(id: NeedId) {
+			const { error } = await supabase.from('needs').delete().eq('id', id);
+
+			if (error) throw error;
+
+			needStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
+
+		// NeedFulfillment CRUD
+		async createNeedFulfillment(
+			scenarioId: ScenarioId,
+			fulfillment: Omit<NeedFulfillmentInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('need_fulfillments')
+				.insert({ ...fulfillment, scenario_id: scenarioId })
+				.select()
+				.single<NeedFulfillment>();
+
+			if (error) throw error;
+
+			needFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as NeedFulfillmentId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateNeedFulfillment(id: NeedFulfillmentId, fulfillment: NeedFulfillmentUpdate) {
+			const { error } = await supabase.from('need_fulfillments').update(fulfillment).eq('id', id);
+
+			if (error) throw error;
+
+			needFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], fulfillment);
+					}
+				})
+			);
+		},
+
+		async removeNeedFulfillment(id: NeedFulfillmentId) {
+			const { error } = await supabase.from('need_fulfillments').delete().eq('id', id);
+
+			if (error) throw error;
+
+			needFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
+
+		// CharacterNeed CRUD
+		async createCharacterNeed(
+			scenarioId: ScenarioId,
+			characterNeed: Omit<CharacterNeedInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('character_needs')
+				.insert({ ...characterNeed, scenario_id: scenarioId })
+				.select()
+				.single<CharacterNeed>();
+
+			if (error) throw error;
+
+			characterNeedStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as CharacterNeedId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateCharacterNeed(id: CharacterNeedId, characterNeed: CharacterNeedUpdate) {
+			const { error } = await supabase.from('character_needs').update(characterNeed).eq('id', id);
+
+			if (error) throw error;
+
+			characterNeedStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], characterNeed);
+					}
+				})
+			);
+		},
+
+		async removeCharacterNeed(id: CharacterNeedId) {
+			const { error } = await supabase.from('character_needs').delete().eq('id', id);
+
+			if (error) throw error;
+
+			characterNeedStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
 	};
 
 	return {
@@ -744,6 +900,14 @@ function createCharacterStore() {
 		characterInteractionDialogStore:
 			characterInteractionDialogStore as Readable<CharacterInteractionDialogState>,
 		characterBodyDialogStore: characterBodyDialogStore as Readable<CharacterBodyDialogState>,
+		needStore: needStore as Readable<RecordFetchState<NeedId, Need>>,
+		needFulfillmentStore: needFulfillmentStore as Readable<
+			RecordFetchState<NeedFulfillmentId, NeedFulfillment>
+		>,
+		characterNeedStore: characterNeedStore as Readable<
+			RecordFetchState<CharacterNeedId, CharacterNeed>
+		>,
+		needDialogStore: needDialogStore as Readable<NeedDialogState>,
 		init,
 		fetch,
 		openCharacterDialog,
@@ -754,6 +918,8 @@ function createCharacterStore() {
 		closeCharacterInteractionDialog,
 		openCharacterBodyDialog,
 		closeCharacterBodyDialog,
+		openNeedDialog,
+		closeNeedDialog,
 		admin,
 	};
 }
