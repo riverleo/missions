@@ -18,7 +18,6 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -36,9 +35,6 @@ export class WorldCharacterEntity extends Entity {
 				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
 			);
 		}
-
-		// held_world_item_id 초기화
-		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -60,8 +56,8 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	get characterBody(): CharacterBody {
-		const { worldCharacterStore } = this.worldHook;
-		const { characterStore, characterBodyStore } = this.characterHook;
+		const { worldCharacterStore } = useWorld();
+		const { characterStore, characterBodyStore } = useCharacter();
 
 		const worldCharacter = get(worldCharacterStore).data[this.instanceId];
 		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
@@ -81,7 +77,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore } = this.worldHook;
+		const { worldCharacterStore } = useWorld();
 		const store = get(worldCharacterStore);
 		const worldCharacter = store.data[this.instanceId];
 
@@ -94,7 +90,6 @@ export class WorldCharacterEntity extends Entity {
 						...worldCharacter,
 						x: this.x,
 						y: this.y,
-						held_world_item_id: this.heldWorldItemId ?? null,
 					},
 				},
 			});
@@ -107,7 +102,7 @@ export class WorldCharacterEntity extends Entity {
 
 	tick(tick: number): void {
 		// 모든 needs를 1씩 감소
-		const { worldCharacterNeedStore } = this.worldHook;
+		const { worldCharacterNeedStore } = useWorld();
 
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {

@@ -70,4 +70,14 @@ export const BehaviorIdUtils = {
 	is(type: BehaviorType, behaviorId: BehaviorId | undefined): boolean {
 		return behaviorId?.startsWith(`${type}_`) ?? false;
 	},
+
+	/**
+	 * BehaviorId에서 instance id 추출 (타입 캐스팅 지원)
+	 * @example
+	 * BehaviorIdUtils.instanceId<NeedBehaviorId>(behaviorId)
+	 */
+	instanceId<T extends NeedBehaviorId | ConditionBehaviorId>(behaviorId: BehaviorId): T {
+		const parts = behaviorId.split('_');
+		return parts.slice(1).join('_') as T;
+	},
 };
