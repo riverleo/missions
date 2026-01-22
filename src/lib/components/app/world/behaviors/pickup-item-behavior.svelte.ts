@@ -1,10 +1,8 @@
 import { get } from 'svelte/store';
 import { Behavior } from './behavior.svelte';
-import { vectorUtils } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import type { BehaviorId, WorldCharacterId, WorldItemId } from '$lib/types';
 import type { BeforeUpdateEvent } from '../context';
-import type { WorldItemEntity } from '../entities/world-item-entity';
 
 export class PickupItemBehavior extends Behavior {
 	readonly type = 'pickup-item';

@@ -1,7 +1,7 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
+import type { WorldId, WorldCharacterId, CharacterBody, WorldItemId } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
@@ -18,10 +18,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-	heldWorldItemId = $state<string | undefined>(undefined);
-
-	private worldHook = useWorld();
-	private characterHook = useCharacter();
+	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -30,8 +27,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		// 스토어에서 데이터 조회 (초기값만)
-		const { worldCharacterStore } = this.worldHook;
+		const { worldCharacterStore } = useWorld();
 		const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
