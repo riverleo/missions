@@ -3,7 +3,11 @@ import { browser } from '$app/environment';
 import type {
 	World,
 	WorldCharacter,
+	WorldCharacterNeed,
+	WorldCharacterNeedId,
 	WorldBuilding,
+	WorldBuildingCondition,
+	WorldBuildingConditionId,
 	WorldItem,
 	WorldTileMap,
 	WorldId,
@@ -74,7 +78,9 @@ export function load(): StoredState {
 				debug: stored.debug ?? defaultState.debug,
 				worlds: stored.worlds,
 				worldCharacters: stored.worldCharacters,
+				worldCharacterNeeds: stored.worldCharacterNeeds,
 				worldBuildings: stored.worldBuildings,
+				worldBuildingConditions: stored.worldBuildingConditions,
 				worldItems: stored.worldItems,
 				worldTileMaps: stored.worldTileMaps,
 				player: stored.player ?? defaultState.player,
@@ -94,7 +100,9 @@ export function save(state: StoredState) {
 		const world = useWorld();
 		const worlds = get(world.worldStore).data;
 		const worldCharacters = get(world.worldCharacterStore).data;
+		const worldCharacterNeeds = get(world.worldCharacterNeedStore).data;
 		const worldBuildings = get(world.worldBuildingStore).data;
+		const worldBuildingConditions = get(world.worldBuildingConditionStore).data;
 		const worldItems = get(world.worldItemStore).data;
 		const worldTileMaps = get(world.worldTileMapStore).data;
 
@@ -109,7 +117,10 @@ export function save(state: StoredState) {
 
 		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};
+		const testWorldCharacterNeeds: Record<WorldCharacterNeedId, WorldCharacterNeed> = {};
 		const testWorldBuildings: Record<WorldBuildingId, WorldBuilding> = {};
+		const testWorldBuildingConditions: Record<WorldBuildingConditionId, WorldBuildingCondition> =
+			{};
 		const testWorldItems: Record<WorldItemId, WorldItem> = {};
 		const testWorldTileMaps: Record<WorldId, WorldTileMap> = {};
 
@@ -119,9 +130,21 @@ export function save(state: StoredState) {
 			}
 		}
 
+		for (const [id, need] of Object.entries(worldCharacterNeeds)) {
+			if (need.world_id === TEST_WORLD_ID) {
+				testWorldCharacterNeeds[id as WorldCharacterNeedId] = need;
+			}
+		}
+
 		for (const [id, building] of Object.entries(worldBuildings)) {
 			if (building.world_id === TEST_WORLD_ID) {
 				testWorldBuildings[id as WorldBuildingId] = building;
+			}
+		}
+
+		for (const [id, condition] of Object.entries(worldBuildingConditions)) {
+			if (condition.world_id === TEST_WORLD_ID) {
+				testWorldBuildingConditions[id as WorldBuildingConditionId] = condition;
 			}
 		}
 
@@ -156,7 +179,9 @@ export function save(state: StoredState) {
 			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
 			worldCharacters: testWorldCharacters,
+			worldCharacterNeeds: testWorldCharacterNeeds,
 			worldBuildings: testWorldBuildings,
+			worldBuildingConditions: testWorldBuildingConditions,
 			worldItems: testWorldItems,
 			worldTileMaps: testWorldTileMaps,
 			player: testPlayer ?? defaultState.player,

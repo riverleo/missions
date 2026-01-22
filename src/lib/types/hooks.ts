@@ -11,7 +11,11 @@ import type {
 	RecordFetchState,
 	World,
 	WorldCharacter,
+	WorldCharacterNeed,
+	WorldCharacterNeedId,
 	WorldBuilding,
+	WorldBuildingCondition,
+	WorldBuildingConditionId,
 	WorldItem,
 	WorldTileMap,
 	WorldId,
@@ -67,7 +71,9 @@ export interface StoredState {
 	debug: boolean;
 	worlds?: Record<WorldId, World>;
 	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
+	worldCharacterNeeds?: Record<WorldCharacterNeedId, WorldCharacterNeed>;
 	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
+	worldBuildingConditions?: Record<WorldBuildingConditionId, WorldBuildingCondition>;
 	worldItems?: Record<WorldItemId, WorldItem>;
 	worldTileMaps?: Record<WorldId, WorldTileMap>;
 	player: Player;

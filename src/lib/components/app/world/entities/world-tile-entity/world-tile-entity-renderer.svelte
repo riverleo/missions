@@ -18,9 +18,6 @@
 	const tileY = $derived(coords[1] ?? 0);
 
 	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
-
-	// 디버그 모드일 때 opacity 낮춤
-	const opacity = $derived(entity.debug ? 0.3 : 1);
 </script>
 
 <!-- 선택 시 외곽선 -->
@@ -32,4 +29,4 @@
 	></div>
 {/if}
 
-<QuarterTile worldId={entity.worldId} {tileX} {tileY} {opacity} />
+<QuarterTile worldId={entity.worldId} {tileX} {tileY} />

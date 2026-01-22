@@ -101,10 +101,28 @@ function createTestWorldStore() {
 			);
 		}
 
+		if (stored.worldCharacterNeeds) {
+			world.worldCharacterNeedStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldCharacterNeeds);
+					draft.status = 'success';
+				})
+			);
+		}
+
 		if (stored.worldBuildings) {
 			world.worldBuildingStore.update((state) =>
 				produce(state, (draft) => {
 					Object.assign(draft.data, stored.worldBuildings);
+					draft.status = 'success';
+				})
+			);
+		}
+
+		if (stored.worldBuildingConditions) {
+			world.worldBuildingConditionStore.update((state) =>
+				produce(state, (draft) => {
+					Object.assign(draft.data, stored.worldBuildingConditions);
 					draft.status = 'success';
 				})
 			);
