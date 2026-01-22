@@ -1,5 +1,5 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
-import type { Database } from './supabase.raw';
+import type { Database } from './supabase.generated';
 
 export type Brand<T, B extends string> = T & { readonly __brand: B };
 

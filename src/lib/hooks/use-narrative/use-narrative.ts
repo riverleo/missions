@@ -9,10 +9,8 @@ import type {
 	NarrativeNodeId,
 	NarrativeDiceRollId,
 	NarrativeNodeChoiceId,
-	AdminStoreState,
-	DialogState,
-	PlayStoreState,
 } from '$lib/types';
+import type { NarrativeAdminStoreState, DialogState, PlayStoreState } from '$lib/types/hooks';
 import { useApp } from '../use-app.svelte';
 import { fetchNarratives, createNarrative, updateNarrative, removeNarrative } from './narrative';
 import {
@@ -61,7 +59,7 @@ function createNarrativeStore() {
 		data: {},
 	});
 
-	const adminStore = writable<AdminStoreState>({ dialog: undefined });
+	const adminStore = writable<NarrativeAdminStoreState>({ dialog: undefined });
 	const playStore = writable<PlayStoreState>({});
 
 	// Admin dialog functions
@@ -97,7 +95,7 @@ function createNarrativeStore() {
 			RecordFetchState<NarrativeNodeChoiceId, NarrativeNodeChoice>
 		>,
 		admin: {
-			store: adminStore as Readable<AdminStoreState>,
+			store: adminStore as Readable<NarrativeAdminStoreState>,
 			openDialog,
 			closeDialog,
 			create: createNarrative(supabase, narrativeStore),

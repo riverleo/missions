@@ -21,8 +21,9 @@ export async function createWorldBuilding(
 	const { worldBuildingStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	const player = get(useCurrent().player);
-	const playerScenario = get(useCurrent().playerScenario);
+	const { player: playerStore, playerScenario: playerScenarioStore, tick } = useCurrent();
+	const player = get(playerStore);
+	const playerScenario = get(playerScenarioStore);
 	const player_id = player!.id;
 	const scenario_id = playerScenario!.scenario_id;
 	const user_id = player!.user_id;
@@ -39,7 +40,7 @@ export async function createWorldBuilding(
 			scenario_id,
 			user_id,
 			created_at: new Date().toISOString(),
-			created_at_tick: 0,
+			created_at_tick: get(tick),
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용

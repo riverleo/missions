@@ -10,12 +10,11 @@ import type {
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldItemId,
-	TerrainId,
 	Player,
 	PlayerScenario,
 	PlayerScenarioId,
-	ScreenVector,
 } from '$lib/types';
+import type { StoredState } from '$lib/types/hooks';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useCurrent } from '../use-current';
@@ -23,21 +22,6 @@ import { vectorUtils } from '$lib/utils/vector';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 
 const STORAGE_KEY = 'test-world-state';
-
-export interface StoredState {
-	open: boolean;
-	openPanel: boolean;
-	selectedTerrainId?: TerrainId;
-	modalScreenVector: ScreenVector;
-	debug: boolean;
-	worlds?: Record<WorldId, World>;
-	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
-	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
-	worldItems?: Record<WorldItemId, WorldItem>;
-	worldTileMaps?: Record<WorldId, WorldTileMap>;
-	player: Player;
-	playerScenario: PlayerScenario;
-}
 
 const defaultState: StoredState = {
 	open: false,

@@ -5,13 +5,8 @@ import type {
 	NarrativeDiceRoll,
 	PlayerRolledDiceId,
 } from '$lib/types';
+import type { AdminMode, AdminStoreState } from '$lib/types/hooks';
 import { useCurrent } from './use-current';
-
-export type AdminMode = 'admin' | 'player';
-
-export interface AdminStoreState {
-	mode: AdminMode;
-}
 
 export const adminStore = writable<AdminStoreState>({ mode: 'player' });
 

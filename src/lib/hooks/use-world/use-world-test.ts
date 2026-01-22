@@ -1,11 +1,12 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import type { TerrainId, ScreenVector } from '$lib/types';
+import type { StoredState } from '$lib/types/hooks';
 import { browser } from '$app/environment';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
-import { load, save, type StoredState } from './use-world-test-storage';
+import { load, save } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
 import { TEST_WORLD_ID } from '$lib/constants';
 
