@@ -1,7 +1,13 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldId, WorldCharacterId, CharacterBody, WorldItemId } from '$lib/types';
+import type {
+	WorldId,
+	WorldCharacterId,
+	CharacterBody,
+	WorldItemId,
+	WorldCharacterNeed,
+} from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
@@ -19,6 +25,7 @@ export class WorldCharacterEntity extends Entity {
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
+	needs: WorldCharacterNeed[] = $state([]);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -27,7 +34,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		const { worldCharacterStore } = useWorld();
+		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
 		const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
@@ -39,6 +46,11 @@ export class WorldCharacterEntity extends Entity {
 
 		// held_world_item_id 초기화
 		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
+
+		// needs 초기화
+		this.needs = Object.values(get(worldCharacterNeedStore).data).filter(
+			(need) => need.world_character_id === worldCharacterId
+		);
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -119,6 +131,11 @@ export class WorldCharacterEntity extends Entity {
 					need.value = Math.max(0, need.value - 1);
 				}
 			})
+		);
+
+		// 엔티티의 needs 배열도 업데이트
+		this.needs = Object.values(get(worldCharacterNeedStore).data).filter(
+			(need) => need.world_character_id === this.instanceId
 		);
 	}
 
