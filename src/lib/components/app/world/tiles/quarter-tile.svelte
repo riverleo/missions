@@ -12,7 +12,6 @@
 		worldId: WorldId;
 		tileX: number;
 		tileY: number;
-		opacity?: number;
 	}
 
 	let { worldId, tileX, tileY, style, ...restProps }: Props = $props();

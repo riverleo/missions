@@ -48,12 +48,16 @@
 
 	// worldId 필터링된 entities - 타입별로 분리
 	const entities = $derived(Object.values(world.entities));
-	const tileEntities = $derived(entities.filter((e): e is WorldTileEntity => e.type === 'tile'));
-	const buildingEntities = $derived(
+	const worldTileEntities = $derived(
+		entities.filter((e): e is WorldTileEntity => e.type === 'tile')
+	);
+	const worldBuildingEntities = $derived(
 		entities.filter((e): e is WorldBuildingEntity => e.type === 'building')
 	);
-	const itemEntities = $derived(entities.filter((e): e is WorldItemEntity => e.type === 'item'));
-	const characterEntities = $derived(
+	const worldItemEntities = $derived(
+		entities.filter((e): e is WorldItemEntity => e.type === 'item')
+	);
+	const worldCharacterEntities = $derived(
 		entities.filter((e): e is WorldCharacterEntity => e.type === 'character')
 	);
 
@@ -95,22 +99,22 @@
 		<WorldPathfinderDebug />
 
 		<!-- 타일 레이어 -->
-		{#each tileEntities as entity (entity.id)}
+		{#each worldTileEntities as entity (entity.id)}
 			<WorldTileEntityRenderer {entity} />
 		{/each}
 
 		<!-- 건물 레이어 -->
-		{#each buildingEntities as entity (entity.id)}
+		{#each worldBuildingEntities as entity (entity.id)}
 			<WorldBuildingEntityRenderer {entity} />
 		{/each}
 
 		<!-- 아이템 레이어 -->
-		{#each itemEntities as entity (entity.id)}
+		{#each worldItemEntities as entity (entity.id)}
 			<WorldItemEntityRenderer {entity} />
 		{/each}
 
 		<!-- 캐릭터 레이어 (최상단) -->
-		{#each characterEntities as entity (entity.id)}
+		{#each worldCharacterEntities as entity (entity.id)}
 			<WorldCharacterEntityRenderer {entity} />
 		{/each}
 

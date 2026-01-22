@@ -15,7 +15,9 @@
 
 	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
 	const tileCells = $derived(
-		Array.from(world.blueprint.cursor?.tileCellKeys ?? []).map((key) => vectorUtils.createTileCell(key))
+		Array.from(world.blueprint.cursor?.tileCellKeys ?? []).map((key) =>
+			vectorUtils.createTileCell(key)
+		)
 	);
 
 	const building = $derived.by(() => {
@@ -81,7 +83,7 @@
 	const PLANNING_TILE_FILL_STYLE = 'rgba(255, 255, 255, 0.8)';
 	const DISABLED_TILE_FILL_STYLE = 'rgba(156, 163, 175, 0.8)'; // gray-400
 
-	const isPlacable = $derived(world.blueprint.placable);
+	const placable = $derived(world.blueprint.placable);
 
 	// 겹치는 기존 셀들을 렌더링하기 위한 배열
 	const overlappingExistingCells = $derived(world.blueprint.cursor?.overlappingCells ?? []);
@@ -97,7 +99,7 @@
 			<svg class="overflow-visible" {width} {height}>
 				{#each Array(rows) as _, row}
 					{#each Array(cols) as _, col}
-						{@const fillStyle = isPlacable ? PLANNING_TILE_FILL_STYLE : DISABLED_TILE_FILL_STYLE}
+						{@const fillStyle = placable ? PLANNING_TILE_FILL_STYLE : DISABLED_TILE_FILL_STYLE}
 						<rect
 							x={col * gridSize + 0.5}
 							y={row * gridSize + 0.5}
@@ -116,7 +118,7 @@
 		<BuildingSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2"
 			style="left: {centerX + building.collider_offset_x}px; top: {centerY +
-				building.collider_offset_y}px; opacity: {isPlacable ? 0.5 : 0.3};"
+				building.collider_offset_y}px; opacity: {placable ? 0.5 : 0.3};"
 			buildingId={building.id}
 			stateType="idle"
 			resolution={2}
@@ -128,26 +130,26 @@
 				worldId={world.worldId}
 				tileX={tileCell.col}
 				tileY={tileCell.row}
-				style="opacity: {isPlacable ? 0.5 : 0.3};"
+				style="opacity: {placable ? 0.5 : 0.3};"
 			/>
 		{/each}
-	{:else if characterId}
-		<!-- 캐릭터 미리보기 -->
-		<CharacterSpriteAnimator
-			class="absolute -translate-x-1/2 -translate-y-1/2"
-			style="left: {centerX}px; top: {centerY}px; opacity: {isPlacable ? 0.5 : 0.3};"
-			{characterId}
-			bodyStateType="idle"
-			faceStateType="idle"
-			resolution={2}
-		/>
 	{:else if itemId}
 		<!-- 아이템 미리보기 -->
 		<ItemSpriteAnimator
 			class="absolute -translate-x-1/2 -translate-y-1/2"
-			style="left: {centerX}px; top: {centerY}px; opacity: {isPlacable ? 0.5 : 0.3};"
+			style="left: {centerX}px; top: {centerY}px; opacity: {placable ? 0.5 : 0.3};"
 			{itemId}
 			stateType="idle"
+			resolution={2}
+		/>
+	{:else if characterId}
+		<!-- 캐릭터 미리보기 (최상단) -->
+		<CharacterSpriteAnimator
+			class="absolute -translate-x-1/2 -translate-y-1/2"
+			style="left: {centerX}px; top: {centerY}px; opacity: {placable ? 0.5 : 0.3};"
+			{characterId}
+			bodyStateType="idle"
+			faceStateType="idle"
 			resolution={2}
 		/>
 	{/if}
