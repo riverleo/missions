@@ -10,11 +10,11 @@ create table scenario_snapshots (
 
 alter table scenario_snapshots enable row level security;
 
-create policy "admins can view scenario_snapshots"
+create policy "anyone can view scenario_snapshots"
   on scenario_snapshots
   for select
-  to authenticated
-  using (is_admin());
+  to public
+  using (true);
 
 create policy "admins can insert scenario_snapshots"
   on scenario_snapshots
