@@ -18,11 +18,11 @@ create table building_interactions (
 
 alter table building_interactions enable row level security;
 
-create policy "anyone can view building_interactions"
+create policy "admins can view building_interactions"
   on building_interactions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert building_interactions"
   on building_interactions
@@ -76,11 +76,11 @@ create table building_interaction_actions (
 
 alter table building_interaction_actions enable row level security;
 
-create policy "anyone can view building_interaction_actions"
+create policy "admins can view building_interaction_actions"
   on building_interaction_actions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert building_interaction_actions"
   on building_interaction_actions
@@ -120,11 +120,11 @@ create table item_interactions (
 
 alter table item_interactions enable row level security;
 
-create policy "anyone can view item_interactions"
+create policy "admins can view item_interactions"
   on item_interactions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert item_interactions"
   on item_interactions
@@ -178,11 +178,11 @@ create table item_interaction_actions (
 
 alter table item_interaction_actions enable row level security;
 
-create policy "anyone can view item_interaction_actions"
+create policy "admins can view item_interaction_actions"
   on item_interaction_actions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert item_interaction_actions"
   on item_interaction_actions
@@ -222,11 +222,11 @@ create table character_interactions (
 
 alter table character_interactions enable row level security;
 
-create policy "anyone can view character_interactions"
+create policy "admins can view character_interactions"
   on character_interactions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_interactions"
   on character_interactions
@@ -285,11 +285,11 @@ create table character_interaction_actions (
 
 alter table character_interaction_actions enable row level security;
 
-create policy "anyone can view character_interaction_actions"
+create policy "admins can view character_interaction_actions"
   on character_interaction_actions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_interaction_actions"
   on character_interaction_actions

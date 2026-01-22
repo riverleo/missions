@@ -18,11 +18,11 @@ create table condition_effects (
 alter table condition_effects enable row level security;
 
 -- 모든 사람이 조회 가능
-create policy "anyone can view condition_effects"
+create policy "admins can view condition_effects"
   on condition_effects
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- admin만 CUD 가능
 create policy "admin can insert condition_effects"

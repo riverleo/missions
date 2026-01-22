@@ -18,11 +18,11 @@ create table items (
 
 alter table items enable row level security;
 
-create policy "anyone can view items"
+create policy "admins can view items"
   on items
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert items"
   on items
@@ -65,11 +65,11 @@ create table item_states (
 
 alter table item_states enable row level security;
 
-create policy "anyone can view item_states"
+create policy "admins can view item_states"
   on item_states
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert item_states"
   on item_states

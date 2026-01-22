@@ -15,11 +15,11 @@ create table building_conditions (
 alter table building_conditions enable row level security;
 
 -- 모든 사람이 조회 가능
-create policy "anyone can view building_conditions"
+create policy "admins can view building_conditions"
   on building_conditions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- admin만 CUD 가능
 create policy "admin can insert building_conditions"

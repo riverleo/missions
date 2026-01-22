@@ -17,12 +17,12 @@ create index idx_terrains_scenario_id on terrains(scenario_id);
 
 alter table terrains enable row level security;
 
--- 모든 사람이 지형을 조회할 수 있음
-create policy "anyone can view terrains"
+-- 어드민만 지형을 조회할 수 있음
+create policy "admins can view terrains"
   on terrains
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- 어드민만 지형을 추가할 수 있음
 create policy "admins can insert terrains"

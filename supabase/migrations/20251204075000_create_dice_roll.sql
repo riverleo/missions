@@ -15,11 +15,11 @@ create table narrative_dice_rolls (
 
 alter table narrative_dice_rolls enable row level security;
 
-create policy "authenticated can view narrative_dice_rolls"
+create policy "admins can view narrative_dice_rolls"
   on narrative_dice_rolls
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert narrative_dice_rolls"
   on narrative_dice_rolls

@@ -25,11 +25,11 @@ create table behavior_priorities (
 -- RLS 정책
 alter table behavior_priorities enable row level security;
 
-create policy "anyone can view behavior_priorities"
+create policy "admins can view behavior_priorities"
   on behavior_priorities
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert behavior_priorities"
   on behavior_priorities

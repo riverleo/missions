@@ -29,11 +29,11 @@ alter table quests add column order_in_chapter integer not null default 0;
 alter table chapters enable row level security;
 alter table player_chapters enable row level security;
 
-create policy "authenticated can view published chapters"
+create policy "admins can view chapters"
   on chapters
   for select
   to authenticated
-  using (status = 'published' or is_admin());
+  using (is_admin());
 
 create policy "admins can insert chapters"
   on chapters

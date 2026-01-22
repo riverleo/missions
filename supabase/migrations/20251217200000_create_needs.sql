@@ -31,11 +31,11 @@ create table needs (
 
 alter table needs enable row level security;
 
-create policy "anyone can view needs"
+create policy "admins can view needs"
   on needs
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert needs"
   on needs
@@ -77,11 +77,11 @@ create table need_fulfillments (
 
 alter table need_fulfillments enable row level security;
 
-create policy "anyone can view need_fulfillments"
+create policy "admins can view need_fulfillments"
   on need_fulfillments
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert need_fulfillments"
   on need_fulfillments
@@ -118,11 +118,11 @@ create table character_needs (
 
 alter table character_needs enable row level security;
 
-create policy "anyone can view character_needs"
+create policy "admins can view character_needs"
   on character_needs
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_needs"
   on character_needs

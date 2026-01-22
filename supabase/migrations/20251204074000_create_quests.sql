@@ -51,11 +51,11 @@ alter table quest_branches enable row level security;
 alter table player_quests enable row level security;
 alter table player_quest_branches enable row level security;
 
-create policy "authenticated can view published quests"
+create policy "admins can view quests"
   on quests
   for select
   to authenticated
-  using (status = 'published' or is_admin());
+  using (is_admin());
 
 create policy "admins can insert quests"
   on quests
@@ -75,11 +75,11 @@ create policy "admins can delete quests"
   to authenticated
   using (is_admin());
 
-create policy "authenticated can view quest_branches"
+create policy "admins can view quest_branches"
   on quest_branches
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert quest_branches"
   on quest_branches

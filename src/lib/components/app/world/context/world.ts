@@ -1,4 +1,4 @@
-import type { UserId, World, WorldId, WorldInsert } from '$lib/types';
+import type { World, WorldId, WorldInsert } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
 import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';

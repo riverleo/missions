@@ -37,11 +37,11 @@ alter table narratives enable row level security;
 alter table narrative_nodes enable row level security;
 alter table narrative_node_choices enable row level security;
 
-create policy "authenticated can view narratives"
+create policy "admins can view narratives"
   on narratives
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert narratives"
   on narratives
@@ -61,11 +61,11 @@ create policy "admins can delete narratives"
   to authenticated
   using (is_admin());
 
-create policy "authenticated can view narrative_nodes"
+create policy "admins can view narrative_nodes"
   on narrative_nodes
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert narrative_nodes"
   on narrative_nodes
@@ -85,11 +85,11 @@ create policy "admins can delete narrative_nodes"
   to authenticated
   using (is_admin());
 
-create policy "authenticated can view narrative_node_choices"
+create policy "admins can view narrative_node_choices"
   on narrative_node_choices
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert narrative_node_choices"
   on narrative_node_choices

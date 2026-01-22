@@ -17,12 +17,12 @@ create table buildings (
 
 alter table buildings enable row level security;
 
--- 모든 사람이 건물을 조회할 수 있음
-create policy "anyone can view buildings"
+-- 어드민만 건물을 조회할 수 있음
+create policy "admins can view buildings"
   on buildings
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- 어드민만 건물을 추가할 수 있음
 create policy "admins can insert buildings"
@@ -64,12 +64,12 @@ create table building_states (
 
 alter table building_states enable row level security;
 
--- 모든 사람이 건물 상태를 조회할 수 있음
-create policy "anyone can view building_states"
+-- 어드민만 건물 상태를 조회할 수 있음
+create policy "admins can view building_states"
   on building_states
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- 어드민만 건물 상태를 추가할 수 있음
 create policy "admins can insert building_states"

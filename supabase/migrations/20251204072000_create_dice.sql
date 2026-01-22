@@ -13,11 +13,11 @@ insert into dices (name, faces, is_default) values ('d20', 20, true);
 
 alter table dices enable row level security;
 
-create policy "authenticated can view dices"
+create policy "admins can view dices"
   on dices
   for select
   to authenticated
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert dices"
   on dices

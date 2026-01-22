@@ -57,18 +57,18 @@ export async function createWorldBuilding(
 		worldBuilding = {
 			...insert,
 			id: worldBuildingId,
+			user_id,
 			world_id: worldContext.worldId,
 			player_id,
 			scenario_id,
-			user_id,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
 			conditions: buildingConditions.map((bc) => ({
 				id: crypto.randomUUID() as WorldBuildingConditionId,
-				scenario_id,
 				user_id,
-				player_id,
 				world_id: worldContext.worldId,
+				player_id,
+				scenario_id,
 				building_id: insert.building_id,
 				world_building_id: worldBuildingId,
 				building_condition_id: bc.id,
@@ -155,7 +155,7 @@ export async function createWorldBuilding(
 	worldBuildingStore.update((state) => ({
 		...state,
 		data: { ...state.data, [worldBuilding.id]: worldBuilding },
-	}))
+	}));
 
 	// 엔티티 생성
 	const entity = new WorldBuildingEntity(worldContext, worldContext.worldId, worldBuilding.id);

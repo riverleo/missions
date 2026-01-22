@@ -18,11 +18,11 @@ create table condition_behaviors (
 
 alter table condition_behaviors enable row level security;
 
-create policy "anyone can view condition_behaviors"
+create policy "admins can view condition_behaviors"
   on condition_behaviors
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert condition_behaviors"
   on condition_behaviors
@@ -61,11 +61,11 @@ create table condition_behavior_actions (
 
 alter table condition_behavior_actions enable row level security;
 
-create policy "anyone can view condition_behavior_actions"
+create policy "admins can view condition_behavior_actions"
   on condition_behavior_actions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert condition_behavior_actions"
   on condition_behavior_actions

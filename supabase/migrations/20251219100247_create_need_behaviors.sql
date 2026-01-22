@@ -25,11 +25,11 @@ create table need_behaviors (
 
 alter table need_behaviors enable row level security;
 
-create policy "anyone can view need_behaviors"
+create policy "admins can view need_behaviors"
   on need_behaviors
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert need_behaviors"
   on need_behaviors
@@ -73,11 +73,11 @@ create table need_behavior_actions (
 
 alter table need_behavior_actions enable row level security;
 
-create policy "anyone can view need_behavior_actions"
+create policy "admins can view need_behavior_actions"
   on need_behavior_actions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert need_behavior_actions"
   on need_behavior_actions

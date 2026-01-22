@@ -17,9 +17,9 @@ create table tiles (
 
 alter table tiles enable row level security;
 
-create policy "anyone can view tiles"
+create policy "admins can view tiles"
   on tiles for select
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert tiles"
   on tiles for insert
@@ -63,9 +63,9 @@ create table tile_states (
 
 alter table tile_states enable row level security;
 
-create policy "anyone can view tile_states"
+create policy "admins can view tile_states"
   on tile_states for select
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert tile_states"
   on tile_states for insert
@@ -103,9 +103,9 @@ create table terrains_tiles (
 
 alter table terrains_tiles enable row level security;
 
-create policy "anyone can view terrains_tiles"
+create policy "admins can view terrains_tiles"
   on terrains_tiles for select
-  using (true);
+  using (is_admin());
 
 create policy "admins can insert terrains_tiles"
   on terrains_tiles for insert

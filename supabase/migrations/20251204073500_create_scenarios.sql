@@ -26,11 +26,11 @@ create table player_scenarios (
 alter table scenarios enable row level security;
 alter table player_scenarios enable row level security;
 
-create policy "authenticated can view published scenarios"
+create policy "admins can view scenarios"
   on scenarios
   for select
   to authenticated
-  using (status = 'published' or is_admin());
+  using (is_admin());
 
 create policy "admins can insert scenarios"
   on scenarios

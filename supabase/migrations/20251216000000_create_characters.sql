@@ -37,11 +37,11 @@ create table character_bodies (
 
 alter table character_bodies enable row level security;
 
-create policy "anyone can view character_bodies"
+create policy "admins can view character_bodies"
   on character_bodies
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_bodies"
   on character_bodies
@@ -80,11 +80,11 @@ create table character_body_states (
 
 alter table character_body_states enable row level security;
 
-create policy "anyone can view character_body_states"
+create policy "admins can view character_body_states"
   on character_body_states
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_body_states"
   on character_body_states
@@ -119,11 +119,11 @@ create table characters (
 
 alter table characters enable row level security;
 
-create policy "anyone can view characters"
+create policy "admins can view characters"
   on characters
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert characters"
   on characters
@@ -162,11 +162,11 @@ create table character_face_states (
 
 alter table character_face_states enable row level security;
 
-create policy "anyone can view character_face_states"
+create policy "admins can view character_face_states"
   on character_face_states
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert character_face_states"
   on character_face_states

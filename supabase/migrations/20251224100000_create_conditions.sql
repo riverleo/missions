@@ -22,11 +22,11 @@ create table conditions (
 alter table conditions enable row level security;
 
 -- 모든 사람이 조회 가능
-create policy "anyone can view conditions"
+create policy "admins can view conditions"
   on conditions
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 -- admin만 CUD 가능
 create policy "admin can insert conditions"
@@ -65,11 +65,11 @@ create table condition_fulfillments (
 
 alter table condition_fulfillments enable row level security;
 
-create policy "anyone can view condition_fulfillments"
+create policy "admins can view condition_fulfillments"
   on condition_fulfillments
   for select
-  to public
-  using (true);
+  to authenticated
+  using (is_admin());
 
 create policy "admins can insert condition_fulfillments"
   on condition_fulfillments
