@@ -93,7 +93,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore } = useWorld();
+		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
 		const store = get(worldCharacterStore);
 		const worldCharacter = store.data[this.instanceId];
 
@@ -111,6 +111,17 @@ export class WorldCharacterEntity extends Entity {
 				},
 			});
 		}
+
+		// needs 저장
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				for (const need of this.needs) {
+					if (draft.data[need.id]) {
+						draft.data[need.id].value = need.value;
+					}
+				}
+			})
+		);
 	}
 
 	override update(event: BeforeUpdateEvent): void {
@@ -119,24 +130,9 @@ export class WorldCharacterEntity extends Entity {
 
 	tick(tick: number): void {
 		// 모든 needs를 1씩 감소
-		const { worldCharacterNeedStore } = useWorld();
-
-		worldCharacterNeedStore.update((state) =>
-			produce(state, (draft) => {
-				const needs = Object.values(draft.data).filter(
-					(need) => need.world_character_id === this.instanceId
-				);
-
-				for (const need of needs) {
-					need.value = Math.max(0, need.value - 1);
-				}
-			})
-		);
-
-		// 엔티티의 needs 배열도 업데이트
-		this.needs = Object.values(get(worldCharacterNeedStore).data).filter(
-			(need) => need.world_character_id === this.instanceId
-		);
+		for (const need of this.needs) {
+			need.value = Math.max(0, need.value - 1);
+		}
 	}
 
 	moveTo(targetX: number, targetY: number): void {
