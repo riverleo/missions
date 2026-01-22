@@ -1,4 +1,4 @@
-import type { Database } from './supabase.raw';
+import type { Database } from './supabase.generated';
 import type { Brand } from './core';
 import type { VectorKey, TileCellKey } from './vector';
 
@@ -967,10 +967,7 @@ export type ConditionBehaviorAction = Omit<
 type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
 export type ConditionBehaviorActionInsert = Omit<
 	ConditionBehaviorActionInsertRow,
-	| 'scenario_id'
-	| 'condition_id'
-	| 'condition_behavior_id'
-	| 'next_condition_behavior_action_id'
+	'scenario_id' | 'condition_id' | 'condition_behavior_id' | 'next_condition_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
@@ -1389,11 +1386,7 @@ export type BuildingInteraction = Omit<
 type BuildingInteractionInsertRow = TablesInsert<'building_interactions'>;
 export type BuildingInteractionInsert = Omit<
 	BuildingInteractionInsertRow,
-	| 'scenario_id'
-	| 'building_id'
-	| 'character_id'
-	| 'next_building_interaction_id'
-	| 'created_by'
+	'scenario_id' | 'building_id' | 'character_id' | 'next_building_interaction_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
 	building_id: BuildingId;
@@ -1474,12 +1467,7 @@ export type BuildingInteractionActionUpdate = Omit<
 type ItemInteractionRow = Tables<'item_interactions'>;
 export type ItemInteraction = Omit<
 	ItemInteractionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'item_id'
-	| 'character_id'
-	| 'next_item_interaction_id'
-	| 'created_by'
+	'id' | 'scenario_id' | 'item_id' | 'character_id' | 'next_item_interaction_id' | 'created_by'
 > & {
 	id: ItemInteractionId;
 	scenario_id: ScenarioId;
@@ -1567,11 +1555,7 @@ export type ItemInteractionActionUpdate = Omit<
 type CharacterInteractionRow = Tables<'character_interactions'>;
 export type CharacterInteraction = Omit<
 	CharacterInteractionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'character_id'
-	| 'target_character_id'
-	| 'created_by'
+	'id' | 'scenario_id' | 'character_id' | 'target_character_id' | 'created_by'
 > & {
 	id: CharacterInteractionId;
 	scenario_id: ScenarioId;
@@ -1582,10 +1566,7 @@ export type CharacterInteraction = Omit<
 type CharacterInteractionInsertRow = TablesInsert<'character_interactions'>;
 export type CharacterInteractionInsert = Omit<
 	CharacterInteractionInsertRow,
-	| 'scenario_id'
-	| 'character_id'
-	| 'target_character_id'
-	| 'created_by'
+	'scenario_id' | 'character_id' | 'target_character_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
 	character_id?: CharacterId | null;
@@ -1595,11 +1576,7 @@ export type CharacterInteractionInsert = Omit<
 type CharacterInteractionUpdateRow = TablesUpdate<'character_interactions'>;
 export type CharacterInteractionUpdate = Omit<
 	CharacterInteractionUpdateRow,
-	| 'id'
-	| 'scenario_id'
-	| 'character_id'
-	| 'target_character_id'
-	| 'created_by'
+	'id' | 'scenario_id' | 'character_id' | 'target_character_id' | 'created_by'
 > & {
 	id?: CharacterInteractionId;
 	scenario_id?: ScenarioId;
@@ -1669,11 +1646,7 @@ export type CharacterInteractionActionUpdate = Omit<
 type BehaviorPriorityRow = Tables<'behavior_priorities'>;
 export type BehaviorPriority = Omit<
 	BehaviorPriorityRow,
-	| 'id'
-	| 'scenario_id'
-	| 'need_behavior_id'
-	| 'condition_behavior_id'
-	| 'created_by'
+	'id' | 'scenario_id' | 'need_behavior_id' | 'condition_behavior_id' | 'created_by'
 > & {
 	id: BehaviorPriorityId;
 	scenario_id: ScenarioId;
@@ -1688,11 +1661,7 @@ export type BehaviorPriorityInsert = Omit<BehaviorPriorityInsertRow, 'scenario_i
 type BehaviorPriorityUpdateRow = TablesUpdate<'behavior_priorities'>;
 export type BehaviorPriorityUpdate = Omit<
 	BehaviorPriorityUpdateRow,
-	| 'id'
-	| 'scenario_id'
-	| 'need_behavior_id'
-	| 'condition_behavior_id'
-	| 'created_by'
+	'id' | 'scenario_id' | 'need_behavior_id' | 'condition_behavior_id' | 'created_by'
 > & {
 	id?: BehaviorPriorityId;
 	scenario_id?: ScenarioId;

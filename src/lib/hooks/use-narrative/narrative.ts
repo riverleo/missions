@@ -4,8 +4,8 @@ import type {
 	Supabase,
 	NarrativeId,
 	Narrative,
+	NarrativeStore,
 } from '$lib/types';
-import type { NarrativeStore } from '.';
 import { produce } from 'immer';
 
 export const fetchNarratives = async (supabase: Supabase, store: NarrativeStore) => {

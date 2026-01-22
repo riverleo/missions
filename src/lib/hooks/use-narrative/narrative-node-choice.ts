@@ -4,8 +4,8 @@ import type {
 	Supabase,
 	NarrativeNodeChoiceId,
 	NarrativeNodeChoice,
+	NarrativeNodeChoiceStore,
 } from '$lib/types';
-import type { NarrativeNodeChoiceStore } from '.';
 import { produce } from 'immer';
 
 export const fetchNarrativeNodeChoices = async (

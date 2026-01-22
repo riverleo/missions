@@ -4,8 +4,8 @@ import type {
 	Supabase,
 	NarrativeDiceRollId,
 	NarrativeDiceRoll,
+	NarrativeDiceRollStore,
 } from '$lib/types';
-import type { NarrativeDiceRollStore } from '.';
 import { produce } from 'immer';
 
 export const fetchNarrativeDiceRolls = async (

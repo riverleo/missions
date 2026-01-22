@@ -35,7 +35,7 @@ This document provides essential guidelines for AI coding agents working in this
 
 **Supabase:**
 
-- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.raw.ts` - Generate TypeScript types from local Supabase schema (IMPORTANT: Output file is `supabase.raw.ts`, NOT `database.types.ts`)
+- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts` - Generate TypeScript types from local Supabase schema (IMPORTANT: Output file is `supabase.generated.ts`, NOT `database.types.ts`)
 
 ### Package Manager
 

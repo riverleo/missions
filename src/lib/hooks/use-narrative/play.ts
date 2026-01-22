@@ -1,19 +1,15 @@
 import { get } from 'svelte/store';
 import type {
-	NarrativeDiceRoll,
-	NarrativeNode,
 	PlayerRolledDice,
 	NarrativeNodeId,
 	NarrativeNodeChoiceId,
 	NarrativeDiceRollId,
-} from '$lib/types';
-import type {
 	NarrativeStore,
 	NarrativeNodeStore,
 	NarrativeDiceRollStore,
 	NarrativeNodeChoiceStore,
 	PlayStore,
-} from '.';
+} from '$lib/types';
 import { useCurrent } from '../use-current';
 import { useApp } from '../use-app.svelte';
 import { useAdmin } from '../use-admin';
@@ -24,12 +20,6 @@ interface Params {
 	narrativeNodeChoiceStore: NarrativeNodeChoiceStore;
 	narrativeDiceRollStore: NarrativeDiceRollStore;
 	playStore: PlayStore;
-}
-
-export interface PlayStoreState {
-	narrativeNode?: NarrativeNode; // 값이 있을 경우 대화 화면(`NarrativeNodePlay`) 표시
-	narrativeDiceRoll?: NarrativeDiceRoll; // 값이 있을 경우 주사위 굴림 화면(`NarrativeDiceRollPlay`) 표시
-	playerRolledDice?: PlayerRolledDice; // 값이 있을 경우 주사위 굴림 화면(`NarrativeDiceRollPlay`)에 결과 표시
 }
 
 /**
