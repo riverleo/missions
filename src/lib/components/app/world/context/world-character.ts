@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	WorldCharacter,
@@ -21,7 +22,14 @@ export async function createWorldCharacter(
 	insert: Required<
 		Omit<
 			WorldCharacterInsert,
-			'id' | 'world_id' | 'player_id' | 'scenario_id' | 'user_id' | 'created_at' | 'created_at_tick' | 'deleted_at'
+			| 'id'
+			| 'world_id'
+			| 'player_id'
+			| 'scenario_id'
+			| 'user_id'
+			| 'created_at'
+			| 'created_at_tick'
+			| 'deleted_at'
 		>
 	> &
 		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
@@ -75,16 +83,13 @@ export async function createWorldCharacter(
 			deleted_at: null,
 		}));
 
-		worldCharacterNeedStore.update((state) => {
-			const newData = { ...state.data };
-			for (const need of worldCharacterNeeds) {
-				newData[need.id] = need;
-			}
-			return { ...state, data: newData };
-		});
-
-		// TEST 환경에서는 needs 데이터를 직접 전달
-		(worldCharacter as any).__worldCharacterNeeds = worldCharacterNeeds;
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				for (const worldCharacterNeed of worldCharacterNeeds) {
+					draft.data[worldCharacterNeed.id] = worldCharacterNeed;
+				}
+			})
+		);
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
 		const { supabase } = useApp();
@@ -157,22 +162,25 @@ export async function createWorldCharacter(
 	}
 
 	// 스토어 업데이트
-	worldCharacterStore.update((state) => ({
-		...state,
-		data: { ...state.data, [worldCharacter.id]: worldCharacter },
-	}))
+	worldCharacterStore.update((state) =>
+		produce(state, (draft) => {
+			draft.data[worldCharacter.id] = worldCharacter;
+		})
+	);
 
 	// 엔티티 생성
 	const entity = new WorldCharacterEntity(worldContext, worldContext.worldId, worldCharacter.id);
 
-	// TEST 환경에서 needs 직접 설정
-	const tempNeeds = (worldCharacter as any).__worldCharacterNeeds;
-	if (tempNeeds) {
+	// TEST 환경에서는 스토어에서 needs를 다시 불러와서 설정
+	if (isTestWorld) {
+		const { worldCharacterNeedStore } = useWorld();
+		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
+			(need) => need.world_character_id === worldCharacter.id
+		);
 		entity.worldCharacterNeeds = {};
-		for (const need of tempNeeds) {
+		for (const need of characterNeeds) {
 			entity.worldCharacterNeeds[need.need_id] = need;
 		}
-		delete (worldCharacter as any).__worldCharacterNeeds;
 	}
 
 	entity.addToWorld();
