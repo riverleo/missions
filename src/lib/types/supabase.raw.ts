@@ -3194,6 +3194,7 @@ export type Database = {
           created_at: string
           created_at_tick: number
           deleted_at: string | null
+          held_world_item_id: string | null
           id: string
           player_id: string
           scenario_id: string
@@ -3207,6 +3208,7 @@ export type Database = {
           created_at?: string
           created_at_tick?: number
           deleted_at?: string | null
+          held_world_item_id?: string | null
           id?: string
           player_id: string
           scenario_id: string
@@ -3220,6 +3222,7 @@ export type Database = {
           created_at?: string
           created_at_tick?: number
           deleted_at?: string | null
+          held_world_item_id?: string | null
           id?: string
           player_id?: string
           scenario_id?: string
@@ -3234,6 +3237,13 @@ export type Database = {
             columns: ["character_id"]
             isOneToOne: false
             referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "world_characters_held_world_item_id_fkey"
+            columns: ["held_world_item_id"]
+            isOneToOne: false
+            referencedRelation: "world_items"
             referencedColumns: ["id"]
           },
           {

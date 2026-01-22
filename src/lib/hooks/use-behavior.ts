@@ -23,8 +23,10 @@ import type {
 	ConditionBehaviorId,
 	ConditionBehaviorActionId,
 	ScenarioId,
+	WorldCharacterId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
+import type { Behavior } from '$lib/components/app/world/behaviors';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -43,6 +45,9 @@ type ConditionBehaviorDialogState =
 	| { type: 'update'; conditionBehaviorId: ConditionBehaviorId }
 	| { type: 'delete'; conditionBehaviorId: ConditionBehaviorId }
 	| undefined;
+
+// Runtime behavior instance management
+const behaviorInstanceMap = new Map<WorldCharacterId, Behavior[]>();
 
 let instance: ReturnType<typeof createBehaviorStore> | null = null;
 
@@ -463,6 +468,37 @@ function createBehaviorStore() {
 		},
 	};
 
+	// Runtime behavior instance management
+	function getBehavior(worldCharacterId: WorldCharacterId): Behavior | undefined {
+		const behaviors = behaviorInstanceMap.get(worldCharacterId);
+		if (!behaviors || behaviors.length === 0) {
+			return undefined;
+		}
+
+		// 우선도가 가장 높은 행동 반환
+		return behaviors.reduce((prev, current) =>
+			current.getPriority() > prev.getPriority() ? current : prev
+		);
+	}
+
+	function addBehavior(worldCharacterId: WorldCharacterId, behavior: Behavior): void {
+		const behaviors = behaviorInstanceMap.get(worldCharacterId) ?? [];
+		behaviors.push(behavior);
+		behaviorInstanceMap.set(worldCharacterId, behaviors);
+	}
+
+	function removeBehavior(worldCharacterId: WorldCharacterId, behaviorId: string): void {
+		const behaviors = behaviorInstanceMap.get(worldCharacterId);
+		if (!behaviors) return;
+
+		const filtered = behaviors.filter((b) => b.id !== behaviorId);
+		behaviorInstanceMap.set(worldCharacterId, filtered);
+	}
+
+	function clearBehaviors(worldCharacterId: WorldCharacterId): void {
+		behaviorInstanceMap.delete(worldCharacterId);
+	}
+
 	return {
 		behaviorPriorityStore,
 		needBehaviorStore: needBehaviorStore as Readable<
@@ -488,6 +524,10 @@ function createBehaviorStore() {
 		closeNeedBehaviorDialog,
 		openConditionBehaviorDialog,
 		closeConditionBehaviorDialog,
+		getBehavior,
+		addBehavior,
+		removeBehavior,
+		clearBehaviors,
 		admin,
 	};
 }

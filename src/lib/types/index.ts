@@ -272,6 +272,7 @@ export type {
 	BulkChanges,
 	Supabase,
 	AppPayload,
+	BehaviorId,
 } from './core';
 
 // Re-export specific Enums for convenience

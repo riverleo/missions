@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
+import { produce } from 'immer';
 import type { WorldId, WorldCharacterId, CharacterBody } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -17,6 +18,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
+	heldWorldItemId = $state<string | undefined>(undefined);
 
 	private worldHook = useWorld();
 	private characterHook = useCharacter();
@@ -38,6 +40,9 @@ export class WorldCharacterEntity extends Entity {
 				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
 			);
 		}
+
+		// held_world_item_id 초기화
+		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -93,6 +98,7 @@ export class WorldCharacterEntity extends Entity {
 						...worldCharacter,
 						x: this.x,
 						y: this.y,
+						held_world_item_id: this.heldWorldItemId ?? null,
 					},
 				},
 			});
@@ -104,7 +110,20 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 캐릭터 틱 로직 (필요 시 구현)
+		// 모든 needs를 1씩 감소
+		const { worldCharacterNeedStore } = this.worldHook;
+
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				const needs = Object.values(draft.data).filter(
+					(need) => need.world_character_id === this.instanceId
+				);
+
+				for (const need of needs) {
+					need.value = Math.max(0, need.value - 1);
+				}
+			})
+		);
 	}
 
 	moveTo(targetX: number, targetY: number): void {

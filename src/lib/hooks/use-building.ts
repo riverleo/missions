@@ -14,10 +14,26 @@ import type {
 	BuildingInteractionAction,
 	BuildingInteractionActionInsert,
 	BuildingInteractionActionUpdate,
+	Condition,
+	ConditionInsert,
+	ConditionUpdate,
+	ConditionFulfillment,
+	ConditionFulfillmentInsert,
+	ConditionFulfillmentUpdate,
+	BuildingCondition,
+	BuildingConditionInsert,
+	BuildingConditionUpdate,
+	ConditionEffect,
+	ConditionEffectInsert,
+	ConditionEffectUpdate,
 	BuildingId,
 	BuildingStateId,
 	BuildingInteractionId,
 	BuildingInteractionActionId,
+	ConditionId,
+	ConditionFulfillmentId,
+	BuildingConditionId,
+	ConditionEffectId,
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
@@ -32,6 +48,12 @@ type BuildingInteractionDialogState =
 	| { type: 'create' }
 	| { type: 'update'; interactionId: BuildingInteractionId }
 	| { type: 'delete'; interactionId: BuildingInteractionId }
+	| undefined;
+
+type ConditionDialogState =
+	| { type: 'create' }
+	| { type: 'update'; conditionId: ConditionId }
+	| { type: 'delete'; conditionId: ConditionId }
 	| undefined;
 
 let instance: ReturnType<typeof createBuildingStore> | null = null;
@@ -69,6 +91,32 @@ function createBuildingStore() {
 	const buildingDialogStore = writable<BuildingDialogState>(undefined);
 	const buildingInteractionDialogStore = writable<BuildingInteractionDialogState>(undefined);
 
+	const conditionStore = writable<RecordFetchState<ConditionId, Condition>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const conditionFulfillmentStore = writable<
+		RecordFetchState<ConditionFulfillmentId, ConditionFulfillment>
+	>({
+		status: 'idle',
+		data: {},
+	});
+
+	const buildingConditionStore = writable<RecordFetchState<BuildingConditionId, BuildingCondition>>(
+		{
+			status: 'idle',
+			data: {},
+		}
+	);
+
+	const conditionEffectStore = writable<RecordFetchState<ConditionEffectId, ConditionEffect>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const conditionDialogStore = writable<ConditionDialogState>(undefined);
+
 	const uiStore = writable({
 		showBodyPreview: false,
 	});
@@ -86,88 +134,98 @@ function createBuildingStore() {
 
 		buildingStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingInteractionStore.update((state) => ({ ...state, status: 'loading' }));
+		conditionStore.update((state) => ({ ...state, status: 'loading' }));
+		conditionFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
+		buildingConditionStore.update((state) => ({ ...state, status: 'loading' }));
+		conditionEffectStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
+			const [
+				buildingsResult,
+				interactionsResult,
+				conditionsResult,
+				fulfillmentsResult,
+				buildingConditionsResult,
+				effectsResult,
+			] = await Promise.all([
+				supabase.from('buildings').select('*, building_states(*)').order('name'),
+				supabase.from('building_interactions').select('*, building_interaction_actions(*)').order('created_at'),
+				supabase.from('conditions').select('*').order('name'),
+				supabase.from('condition_fulfillments').select('*'),
+				supabase.from('building_conditions').select('*'),
+				supabase.from('condition_effects').select('*'),
+			]);
+
+			if (buildingsResult.error) throw buildingsResult.error;
+			if (interactionsResult.error) throw interactionsResult.error;
+			if (conditionsResult.error) throw conditionsResult.error;
+			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
+			if (buildingConditionsResult.error) throw buildingConditionsResult.error;
+			if (effectsResult.error) throw effectsResult.error;
+
 			// Buildings and states
-			const { data: buildingsData, error: buildingsError } = await supabase
-				.from('buildings')
-				.select('*, building_states(*)')
-				.order('name');
-
-			if (buildingsError) throw buildingsError;
-
 			const buildingRecord: Record<BuildingId, Building> = {};
 			const stateRecord: Record<BuildingId, BuildingState[]> = {};
 
-			for (const item of buildingsData ?? []) {
+			for (const item of buildingsResult.data ?? []) {
 				const { building_states, ...building } = item;
 				buildingRecord[item.id as BuildingId] = building as Building;
 				stateRecord[item.id as BuildingId] = (building_states ?? []) as BuildingState[];
 			}
 
 			// Building interactions and actions
-			const { data: interactionsData, error: interactionsError } = await supabase
-				.from('building_interactions')
-				.select('*, building_interaction_actions(*)')
-				.order('created_at');
-
-			if (interactionsError) throw interactionsError;
-
 			const interactionRecord: Record<BuildingInteractionId, BuildingInteraction> = {};
 			const actionRecord: Record<BuildingInteractionId, BuildingInteractionAction[]> = {};
 
-			for (const item of interactionsData ?? []) {
+			for (const item of interactionsResult.data ?? []) {
 				const { building_interaction_actions, ...interaction } = item;
 				interactionRecord[item.id as BuildingInteractionId] = interaction as BuildingInteraction;
 				actionRecord[item.id as BuildingInteractionId] = (building_interaction_actions ??
 					[]) as BuildingInteractionAction[];
 			}
 
-			buildingStore.set({
-				status: 'success',
-				data: buildingRecord,
-				error: undefined,
-			});
+			// Conditions
+			const conditionRecord: Record<ConditionId, Condition> = {};
+			for (const item of conditionsResult.data ?? []) {
+				conditionRecord[item.id as ConditionId] = item as Condition;
+			}
 
-			buildingStateStore.set({
-				status: 'success',
-				data: stateRecord,
-				error: undefined,
-			});
+			// Condition fulfillments
+			const fulfillmentRecord: Record<ConditionFulfillmentId, ConditionFulfillment> = {};
+			for (const item of fulfillmentsResult.data ?? []) {
+				fulfillmentRecord[item.id as ConditionFulfillmentId] = item as ConditionFulfillment;
+			}
 
-			buildingInteractionStore.set({
-				status: 'success',
-				data: interactionRecord,
-				error: undefined,
-			});
+			// Building conditions
+			const buildingConditionRecord: Record<BuildingConditionId, BuildingCondition> = {};
+			for (const item of buildingConditionsResult.data ?? []) {
+				buildingConditionRecord[item.id as BuildingConditionId] = item as BuildingCondition;
+			}
 
-			buildingInteractionActionStore.set({
-				status: 'success',
-				data: actionRecord,
-				error: undefined,
-			});
+			// Condition effects
+			const effectRecord: Record<ConditionEffectId, ConditionEffect> = {};
+			for (const item of effectsResult.data ?? []) {
+				effectRecord[item.id as ConditionEffectId] = item as ConditionEffect;
+			}
+
+			buildingStore.set({ status: 'success', data: buildingRecord, error: undefined });
+			buildingStateStore.set({ status: 'success', data: stateRecord, error: undefined });
+			buildingInteractionStore.set({ status: 'success', data: interactionRecord, error: undefined });
+			buildingInteractionActionStore.set({ status: 'success', data: actionRecord, error: undefined });
+			conditionStore.set({ status: 'success', data: conditionRecord });
+			conditionFulfillmentStore.set({ status: 'success', data: fulfillmentRecord });
+			buildingConditionStore.set({ status: 'success', data: buildingConditionRecord });
+			conditionEffectStore.set({ status: 'success', data: effectRecord });
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
-			buildingStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			buildingStateStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			buildingInteractionStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			buildingInteractionActionStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
+			buildingStore.set({ status: 'error', data: {}, error: err });
+			buildingStateStore.set({ status: 'error', data: {}, error: err });
+			buildingInteractionStore.set({ status: 'error', data: {}, error: err });
+			buildingInteractionActionStore.set({ status: 'error', data: {}, error: err });
+			conditionStore.set({ status: 'error', data: {}, error: err });
+			conditionFulfillmentStore.set({ status: 'error', data: {}, error: err });
+			buildingConditionStore.set({ status: 'error', data: {}, error: err });
+			conditionEffectStore.set({ status: 'error', data: {}, error: err });
 		}
 	}
 
@@ -185,6 +243,14 @@ function createBuildingStore() {
 
 	function closeBuildingInteractionDialog() {
 		buildingInteractionDialogStore.set(undefined);
+	}
+
+	function openConditionDialog(state: NonNullable<ConditionDialogState>) {
+		conditionDialogStore.set(state);
+	}
+
+	function closeConditionDialog() {
+		conditionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -472,6 +538,212 @@ function createBuildingStore() {
 				})
 			);
 		},
+
+		// Condition CRUD
+		async createCondition(scenarioId: ScenarioId, condition: Omit<ConditionInsert, 'scenario_id'>) {
+			const { data, error } = await supabase
+				.from('conditions')
+				.insert({ ...condition, scenario_id: scenarioId })
+				.select()
+				.single<Condition>();
+
+			if (error) throw error;
+
+			conditionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ConditionId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateCondition(id: ConditionId, condition: ConditionUpdate) {
+			const { error } = await supabase.from('conditions').update(condition).eq('id', id);
+
+			if (error) throw error;
+
+			conditionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], condition);
+					}
+				})
+			);
+		},
+
+		async removeCondition(id: ConditionId) {
+			const { error } = await supabase.from('conditions').delete().eq('id', id);
+
+			if (error) throw error;
+
+			conditionStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
+
+		// ConditionFulfillment CRUD
+		async createConditionFulfillment(
+			scenarioId: ScenarioId,
+			fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('condition_fulfillments')
+				.insert({ ...fulfillment, scenario_id: scenarioId })
+				.select()
+				.single<ConditionFulfillment>();
+
+			if (error) throw error;
+
+			conditionFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ConditionFulfillmentId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateConditionFulfillment(
+			id: ConditionFulfillmentId,
+			fulfillment: ConditionFulfillmentUpdate
+		) {
+			const { error } = await supabase
+				.from('condition_fulfillments')
+				.update(fulfillment)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			conditionFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], fulfillment);
+					}
+				})
+			);
+		},
+
+		async removeConditionFulfillment(id: ConditionFulfillmentId) {
+			const { error } = await supabase.from('condition_fulfillments').delete().eq('id', id);
+
+			if (error) throw error;
+
+			conditionFulfillmentStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
+
+		// BuildingCondition CRUD
+		async createBuildingCondition(
+			scenarioId: ScenarioId,
+			buildingCondition: Omit<BuildingConditionInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('building_conditions')
+				.insert({ ...buildingCondition, scenario_id: scenarioId })
+				.select()
+				.single<BuildingCondition>();
+
+			if (error) throw error;
+
+			buildingConditionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as BuildingConditionId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateBuildingCondition(
+			id: BuildingConditionId,
+			buildingCondition: BuildingConditionUpdate
+		) {
+			const { error } = await supabase
+				.from('building_conditions')
+				.update(buildingCondition)
+				.eq('id', id);
+
+			if (error) throw error;
+
+			buildingConditionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], buildingCondition);
+					}
+				})
+			);
+		},
+
+		async removeBuildingCondition(id: BuildingConditionId) {
+			const { error } = await supabase.from('building_conditions').delete().eq('id', id);
+
+			if (error) throw error;
+
+			buildingConditionStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
+
+		// ConditionEffect CRUD
+		async createConditionEffect(
+			scenarioId: ScenarioId,
+			effect: Omit<ConditionEffectInsert, 'scenario_id' | 'condition_id'> & {
+				condition_id: ConditionId;
+			}
+		) {
+			const { data, error } = await supabase
+				.from('condition_effects')
+				.insert({
+					...effect,
+					scenario_id: scenarioId,
+				})
+				.select()
+				.single<ConditionEffect>();
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as ConditionEffectId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateConditionEffect(id: ConditionEffectId, effect: ConditionEffectUpdate) {
+			const { error } = await supabase.from('condition_effects').update(effect).eq('id', id);
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data[id]) {
+						Object.assign(draft.data[id], effect);
+					}
+				})
+			);
+		},
+
+		async removeConditionEffect(id: ConditionEffectId) {
+			const { error } = await supabase.from('condition_effects').delete().eq('id', id);
+
+			if (error) throw error;
+
+			conditionEffectStore.update((state) =>
+				produce(state, (draft) => {
+					delete draft.data[id];
+				})
+			);
+		},
 	};
 
 	return {
@@ -488,12 +760,25 @@ function createBuildingStore() {
 		buildingDialogStore: buildingDialogStore as Readable<BuildingDialogState>,
 		buildingInteractionDialogStore:
 			buildingInteractionDialogStore as Readable<BuildingInteractionDialogState>,
+		conditionStore: conditionStore as Readable<RecordFetchState<ConditionId, Condition>>,
+		conditionFulfillmentStore: conditionFulfillmentStore as Readable<
+			RecordFetchState<ConditionFulfillmentId, ConditionFulfillment>
+		>,
+		buildingConditionStore: buildingConditionStore as Readable<
+			RecordFetchState<BuildingConditionId, BuildingCondition>
+		>,
+		conditionEffectStore: conditionEffectStore as Readable<
+			RecordFetchState<ConditionEffectId, ConditionEffect>
+		>,
+		conditionDialogStore: conditionDialogStore as Readable<ConditionDialogState>,
 		init,
 		fetch,
 		openBuildingDialog,
 		closeBuildingDialog,
 		openBuildingInteractionDialog,
 		closeBuildingInteractionDialog,
+		openConditionDialog,
+		closeConditionDialog,
 		admin,
 	};
 }

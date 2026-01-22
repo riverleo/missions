@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
+import { produce } from 'immer';
 import type { WorldBuildingId, Building, WorldId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BUILDING, CATEGORY_TILE, CELL_SIZE } from '$lib/constants';
@@ -73,6 +74,19 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 건물 틱 로직 (필요 시 구현)
+		// 모든 conditions를 1씩 감소
+		const { worldBuildingConditionStore } = this.worldHook;
+
+		worldBuildingConditionStore.update((state) =>
+			produce(state, (draft) => {
+				const conditions = Object.values(draft.data).filter(
+					(condition) => condition.world_building_id === this.instanceId
+				);
+
+				for (const condition of conditions) {
+					condition.value = Math.max(0, condition.value - 1);
+				}
+			})
+		);
 	}
 }
