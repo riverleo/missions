@@ -49,7 +49,7 @@
 			class="absolute -translate-x-1/2 -translate-y-1/2 animate-spin text-red-400"
 			style="left: {startLeft}; top: {startTop};"
 		>
-			<IconNorthStar />
+			<IconNorthStar class="size-4" />
 		</TooltipTrigger>
 		<TooltipContent>리스폰 위치</TooltipContent>
 	</Tooltip>
