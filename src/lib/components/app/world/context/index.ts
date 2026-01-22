@@ -1,5 +1,5 @@
 import type { Vector, EntityTemplateId } from '$lib/types';
-import type { Cell, TileCellKey } from '$lib/types/vector';
+import type { Cell, TileCell, TileCellKey } from '$lib/types/vector';
 import type Matter from 'matter-js';
 
 export interface BeforeUpdateEvent {
@@ -16,7 +16,7 @@ export interface WorldBlueprintCursor {
 	type: 'tile' | 'cell';
 	tileCellKeys: Set<TileCellKey>;
 	overlappingCells: Cell[];
-	tileBounds?: { minCol: number; maxCol: number; minRow: number; maxRow: number };
+	tileBounds?: { start: TileCell; end: TileCell };
 }
 
 export { WorldContext } from './world-context.svelte';

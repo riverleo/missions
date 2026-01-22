@@ -150,13 +150,13 @@ export class WorldContextBlueprint {
 			// 타일은 직사각형 영역이므로 캐시된 bounds 사용 (calculateTileCells에서 이미 계산됨)
 			if (!this.cursor.tileBounds) return [];
 
-			const { minCol, maxCol, minRow, maxRow } = this.cursor.tileBounds;
+			const { start, end } = this.cursor.tileBounds;
 
 			// 타일 좌표를 셀 좌표로 변환 (1 tile = 2x2 cells)
-			targetMinCol = minCol * 2;
-			targetMaxCol = (maxCol + 1) * 2 - 1;
-			targetMinRow = minRow * 2;
-			targetMaxRow = (maxRow + 1) * 2 - 1;
+			targetMinCol = start.col * 2;
+			targetMaxCol = (end.col + 1) * 2 - 1;
+			targetMinRow = start.row * 2;
+			targetMaxRow = (end.row + 1) * 2 - 1;
 		} else {
 			return [];
 		}
@@ -300,10 +300,8 @@ export class WorldContextBlueprint {
 		if (!start) {
 			const key = vectorUtils.createTileCellKey(currentTileCell);
 			cursor.tileBounds = {
-				minCol: currentTileCell.col,
-				maxCol: currentTileCell.col,
-				minRow: currentTileCell.row,
-				maxRow: currentTileCell.row,
+				start: { col: currentTileCell.col, row: currentTileCell.row } as TileCell,
+				end: { col: currentTileCell.col, row: currentTileCell.row } as TileCell,
 			};
 			newSet.add(key);
 			cursor.tileCellKeys = newSet;
@@ -327,10 +325,8 @@ export class WorldContextBlueprint {
 			}
 
 			cursor.tileBounds = {
-				minCol: minX,
-				maxCol: maxX,
-				minRow: startTileCell.row,
-				maxRow: startTileCell.row,
+				start: { col: minX, row: startTileCell.row } as TileCell,
+				end: { col: maxX, row: startTileCell.row } as TileCell,
 			};
 			for (let x = minX; x <= maxX; x++) {
 				newSet.add(vectorUtils.createTileCellKey(x, startTileCell.row));
@@ -351,10 +347,8 @@ export class WorldContextBlueprint {
 			}
 
 			cursor.tileBounds = {
-				minCol: startTileCell.col,
-				maxCol: startTileCell.col,
-				minRow: minY,
-				maxRow: maxY,
+				start: { col: startTileCell.col, row: minY } as TileCell,
+				end: { col: startTileCell.col, row: maxY } as TileCell,
 			};
 			for (let y = minY; y <= maxY; y++) {
 				newSet.add(vectorUtils.createTileCellKey(startTileCell.col, y));
@@ -384,10 +378,8 @@ export class WorldContextBlueprint {
 		}
 
 		cursor.tileBounds = {
-			minCol: minX,
-			maxCol: maxX,
-			minRow: minY,
-			maxRow: maxY,
+			start: { col: minX, row: minY } as TileCell,
+			end: { col: maxX, row: maxY } as TileCell,
 		};
 		for (let y = minY; y <= maxY; y++) {
 			for (let x = minX; x <= maxX; x++) {
