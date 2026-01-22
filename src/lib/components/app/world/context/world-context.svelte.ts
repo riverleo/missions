@@ -118,7 +118,7 @@ export class WorldContext {
 			if (entity) {
 				setSelectedEntityId(entity.id);
 				// 엔티티 선택 시 템플릿 선택 해제
-				this.blueprint.setSelectedEntityTemplateId(undefined);
+				this.blueprint.setCursor(undefined);
 
 				// 엔티티를 클릭했다는 플래그 설정
 				this.entityClickedInMouseDown = true;

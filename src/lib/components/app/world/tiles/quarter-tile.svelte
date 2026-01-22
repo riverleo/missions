@@ -34,7 +34,7 @@
 		if (cursor && cursor.type === 'tile') {
 			// Set에서 직접 키 존재 여부 확인 (O(1) lookup)
 			const key = vectorUtils.createTileCellKey(tx, ty);
-			return context.blueprint.cursorTileCellKeys.has(key);
+			return cursor.tileCellKeys.has(key);
 		}
 
 		return false;

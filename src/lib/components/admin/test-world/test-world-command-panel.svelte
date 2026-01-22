@@ -73,8 +73,8 @@
 					{@const templateId = EntityIdUtils.template.create('character', character.id)}
 					<CommandItem
 						onSelect={() =>
-							worldContext?.blueprint.setSelectedEntityTemplateId(
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+							worldContext?.blueprint.setCursor(
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? undefined
 									: templateId
 							)}
@@ -82,7 +82,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -100,8 +100,8 @@
 					{@const templateId = EntityIdUtils.template.create('building', building.id)}
 					<CommandItem
 						onSelect={() =>
-							worldContext?.blueprint.setSelectedEntityTemplateId(
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+							worldContext?.blueprint.setCursor(
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? undefined
 									: templateId
 							)}
@@ -109,7 +109,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -127,8 +127,8 @@
 					{@const templateId = EntityIdUtils.template.create('item', item.id)}
 					<CommandItem
 						onSelect={() =>
-							worldContext?.blueprint.setSelectedEntityTemplateId(
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+							worldContext?.blueprint.setCursor(
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? undefined
 									: templateId
 							)}
@@ -136,7 +136,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -154,8 +154,8 @@
 					{@const templateId = EntityIdUtils.template.create('tile', tile.id)}
 					<CommandItem
 						onSelect={() =>
-							worldContext?.blueprint.setSelectedEntityTemplateId(
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+							worldContext?.blueprint.setCursor(
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? undefined
 									: templateId
 							)}
@@ -163,7 +163,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.selectedEntityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entityTemplateId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}

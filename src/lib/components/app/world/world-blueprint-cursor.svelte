@@ -15,7 +15,7 @@
 
 	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
 	const tileCells = $derived(
-		Array.from(world.blueprint.cursorTileCellKeys).map((key) => vectorUtils.createTileCell(key))
+		Array.from(world.blueprint.cursor?.tileCellKeys ?? []).map((key) => vectorUtils.createTileCell(key))
 	);
 
 	const building = $derived.by(() => {
@@ -84,7 +84,7 @@
 	const isPlacable = $derived(world.blueprint.placable);
 
 	// 겹치는 기존 셀들을 렌더링하기 위한 배열
-	const overlappingExistingCells = $derived(world.blueprint.overlappingCells);
+	const overlappingExistingCells = $derived(world.blueprint.cursor?.overlappingCells ?? []);
 </script>
 
 {#if world.blueprint.cursor}

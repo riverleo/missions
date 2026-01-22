@@ -35,7 +35,7 @@
 
 	function onkeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') {
-			worldContext?.blueprint.setSelectedEntityTemplateId(undefined);
+			worldContext?.blueprint.setCursor(undefined);
 		}
 	}
 </script>

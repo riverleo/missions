@@ -12,15 +12,6 @@ import type { WorldTileEntity } from '../entities/world-tile-entity';
 
 export class WorldContextBlueprint {
 	cursor = $state<WorldBlueprintCursor | undefined>(undefined);
-	selectedEntityTemplateId = $state<EntityTemplateId | undefined>(undefined);
-	// OPTIMIZATION: Set을 새로 생성해서 할당 (반응성 유지)
-	cursorTileCellKeys = $state<Set<TileCellKey>>(new Set());
-	// 겹치는 셀 캐시 (getOverlappingCells 결과를 캐시)
-	overlappingCells = $state<Cell[]>([]);
-	// 타일 범위 캐시 (calculateTileCells에서 계산, getOverlappingCells에서 재사용)
-	private cursorTileBounds:
-		| { minCol: number; maxCol: number; minRow: number; maxRow: number }
-		| undefined = undefined;
 
 	private context: WorldContext;
 
@@ -31,40 +22,46 @@ export class WorldContextBlueprint {
 	/**
 	 * 엔티티 템플릿 선택
 	 */
-	setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
+	setCursor(entityTemplateId: EntityTemplateId | undefined) {
 		const { selectedEntityIdStore } = useWorld();
 
-		this.selectedEntityTemplateId = entityTemplateId;
+		if (entityTemplateId === undefined) {
+			this.cursor = undefined;
+			return;
+		}
 
 		// 템플릿을 선택할 때만 엔티티 선택 해제
-		if (entityTemplateId !== undefined) {
-			selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
-		}
+		selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+
+		// cursor 초기화 (type은 updateCursor에서 설정)
+		const { type } = EntityIdUtils.template.parse(entityTemplateId);
+		this.cursor = {
+			entityTemplateId,
+			current: { x: 0, y: 0 } as Vector,
+			start: undefined,
+			type: type === 'tile' ? 'tile' : 'cell',
+			tileCellKeys: new Set(),
+			overlappingCells: [],
+			tileBounds: undefined,
+		};
 	}
 
 	/**
 	 * 마우스 위치에 따라 cursor 업데이트 (내부 구현)
 	 */
 	updateCursor(screenVector: ScreenVector) {
-		if (!this.selectedEntityTemplateId) {
-			this.cursor = undefined;
-			this.cursorTileCellKeys = new Set();
-			this.cursorTileBounds = undefined;
-			this.overlappingCells = [];
+		if (!this.cursor) {
 			return;
 		}
 
 		const worldPos = this.context.camera.screenToWorld(screenVector);
 
 		if (!worldPos) {
-			this.cursor = undefined;
-			this.cursorTileCellKeys = new Set();
-			this.cursorTileBounds = undefined;
-			this.overlappingCells = [];
 			return;
 		}
 
-		const { type, value: id } = EntityIdUtils.template.parse(this.selectedEntityTemplateId);
+		const { entityTemplateId } = this.cursor;
+		const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
 
 		// type별로 스냅 위치 계산 (중복 체크를 위해)
 		let vector: Vector;
@@ -75,10 +72,6 @@ export class WorldContextBlueprint {
 			const building = get(buildingStore).data[id as BuildingId];
 
 			if (!building) {
-				this.cursor = undefined;
-				this.cursorTileCellKeys = new Set();
-				this.cursorTileBounds = undefined;
-				this.overlappingCells = [];
 				return;
 			}
 
@@ -91,51 +84,30 @@ export class WorldContextBlueprint {
 			vector = vectorUtils.snapVectorByCell(worldPos, 1, 1);
 			cursorType = 'cell';
 		} else {
-			this.cursor = undefined;
-			this.cursorTileCellKeys = new Set();
-			this.cursorTileBounds = undefined;
-			this.overlappingCells = [];
 			return;
 		}
 
-		// 위치가 같고 entityTemplateId가 같으면 중복 실행 방지 (반응성 트리거 방지)
-		if (
-			this.cursor &&
-			this.cursor.current.x === vector.x &&
-			this.cursor.current.y === vector.y &&
-			this.cursor.entityTemplateId === this.selectedEntityTemplateId
-		) {
+		// 위치가 같으면 중복 실행 방지 (반응성 트리거 방지)
+		if (this.cursor.current.x === vector.x && this.cursor.current.y === vector.y) {
 			return;
 		}
 
-		// cursor 업데이트 (객체 재생성 대신 속성 업데이트)
-		if (!this.cursor) {
-			this.cursor = {
-				entityTemplateId: this.selectedEntityTemplateId,
-				current: vector,
-				start: undefined,
-				type: cursorType,
-			};
-		} else {
-			// 기존 객체의 속성만 업데이트 (Proxy 오버헤드 감소)
-			this.cursor.entityTemplateId = this.selectedEntityTemplateId;
-			// Vector도 재사용 (객체 생성 최소화)
-			this.cursor.current.x = vector.x;
-			this.cursor.current.y = vector.y;
-			this.cursor.type = cursorType;
-			// start는 유지
-		}
+		// cursor 업데이트 (Vector만 재사용, 객체 생성 최소화)
+		this.cursor.current.x = vector.x;
+		this.cursor.current.y = vector.y;
+		this.cursor.type = cursorType;
+		// start는 유지
 
-		// 타일이면 cursorTileCellKeys 계산
+		// 타일이면 tileCellKeys 계산
 		if (type === 'tile') {
 			this.calculateTileCells(this.cursor);
 		} else {
-			this.cursorTileCellKeys = new Set();
-			this.cursorTileBounds = undefined;
+			this.cursor.tileCellKeys = new Set();
+			this.cursor.tileBounds = undefined;
 		}
 
 		// overlappingCells 갱신
-		this.overlappingCells = this.getOverlappingCells();
+		this.cursor.overlappingCells = this.getOverlappingCells();
 	}
 
 	/**
@@ -176,9 +148,9 @@ export class WorldContextBlueprint {
 			targetMaxRow = cell.row + building.cell_rows - 1;
 		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
 			// 타일은 직사각형 영역이므로 캐시된 bounds 사용 (calculateTileCells에서 이미 계산됨)
-			if (!this.cursorTileBounds) return [];
+			if (!this.cursor.tileBounds) return [];
 
-			const { minCol, maxCol, minRow, maxRow } = this.cursorTileBounds;
+			const { minCol, maxCol, minRow, maxRow } = this.cursor.tileBounds;
 
 			// 타일 좌표를 셀 좌표로 변환 (1 tile = 2x2 cells)
 			targetMinCol = minCol * 2;
@@ -327,14 +299,14 @@ export class WorldContextBlueprint {
 		// start가 없으면 단일 타일
 		if (!start) {
 			const key = vectorUtils.createTileCellKey(currentTileCell);
-			this.cursorTileBounds = {
+			cursor.tileBounds = {
 				minCol: currentTileCell.col,
 				maxCol: currentTileCell.col,
 				minRow: currentTileCell.row,
 				maxRow: currentTileCell.row,
 			};
 			newSet.add(key);
-			this.cursorTileCellKeys = newSet;
+			cursor.tileCellKeys = newSet;
 			return;
 		}
 
@@ -354,7 +326,7 @@ export class WorldContextBlueprint {
 				maxX = minX + MAX_TILE_PLACABLE_COUNT - 1;
 			}
 
-			this.cursorTileBounds = {
+			cursor.tileBounds = {
 				minCol: minX,
 				maxCol: maxX,
 				minRow: startTileCell.row,
@@ -363,7 +335,7 @@ export class WorldContextBlueprint {
 			for (let x = minX; x <= maxX; x++) {
 				newSet.add(vectorUtils.createTileCellKey(x, startTileCell.row));
 			}
-			this.cursorTileCellKeys = newSet;
+			cursor.tileCellKeys = newSet;
 			return;
 		}
 
@@ -378,7 +350,7 @@ export class WorldContextBlueprint {
 				maxY = minY + MAX_TILE_PLACABLE_COUNT - 1;
 			}
 
-			this.cursorTileBounds = {
+			cursor.tileBounds = {
 				minCol: startTileCell.col,
 				maxCol: startTileCell.col,
 				minRow: minY,
@@ -387,7 +359,7 @@ export class WorldContextBlueprint {
 			for (let y = minY; y <= maxY; y++) {
 				newSet.add(vectorUtils.createTileCellKey(startTileCell.col, y));
 			}
-			this.cursorTileCellKeys = newSet;
+			cursor.tileCellKeys = newSet;
 			return;
 		}
 
@@ -411,7 +383,7 @@ export class WorldContextBlueprint {
 			maxY = minY + maxRows - 1;
 		}
 
-		this.cursorTileBounds = {
+		cursor.tileBounds = {
 			minCol: minX,
 			maxCol: maxX,
 			minRow: minY,
@@ -422,7 +394,7 @@ export class WorldContextBlueprint {
 				newSet.add(vectorUtils.createTileCellKey(x, y));
 			}
 		}
-		this.cursorTileCellKeys = newSet;
+		cursor.tileCellKeys = newSet;
 	}
 
 	/**
@@ -434,11 +406,11 @@ export class WorldContextBlueprint {
 		// CRITICAL: Vector를 복사해야 함 (cursor.current와 같은 객체를 참조하면 안됨)
 		this.cursor.start = start ? ({ x: start.x, y: start.y } as Vector) : undefined;
 
-		// 타일이면 cursorTileCellKeys 재계산
+		// 타일이면 tileCellKeys 재계산
 		if (this.cursor.type === 'tile') {
 			this.calculateTileCells(this.cursor);
 			// overlappingCells도 업데이트
-			this.overlappingCells = this.getOverlappingCells();
+			this.cursor.overlappingCells = this.getOverlappingCells();
 		}
 	}
 
@@ -468,7 +440,7 @@ export class WorldContextBlueprint {
 			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
 			const tileId = EntityIdUtils.template.id<TileId>(entityTemplateId);
 			const tiles: Record<TileCellKey, TileId> = {};
-			for (const tileCellKey of this.cursorTileCellKeys) {
+			for (const tileCellKey of this.cursor.tileCellKeys) {
 				tiles[tileCellKey] = tileId;
 			}
 			// 모든 타일을 한 번에 생성
