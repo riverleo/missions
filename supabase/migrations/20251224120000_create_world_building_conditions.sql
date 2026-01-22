@@ -11,18 +11,19 @@ create table world_building_conditions (
   condition_id uuid not null references conditions(id) on delete cascade,
   value float not null default 100,
   created_at timestamptz not null default now(),
+  deleted_at timestamptz,
 
   constraint uq_world_building_conditions_world_building_id_condition_id unique (world_building_id, condition_id)
 );
 
 alter table world_building_conditions enable row level security;
 
--- 월드 소유자만 조회/수정 가능
+-- 월드 소유자만 조회/수정 가능 (soft delete된 것 제외)
 create policy "world owner can view world_building_conditions"
   on world_building_conditions
   for select
   to public
-  using (is_world_owner(world_id));
+  using (is_world_owner(world_id) and deleted_at is null);
 
 create policy "world owner can insert world_building_conditions"
   on world_building_conditions
@@ -34,10 +35,13 @@ create policy "world owner can update world_building_conditions"
   on world_building_conditions
   for update
   to public
-  using (is_world_owner(world_id));
+  using (
+    is_world_owner(world_id)
+    and (deleted_at is null or is_admin())
+  );
 
-create policy "world owner can delete world_building_conditions"
+create policy "admin can delete world_building_conditions"
   on world_building_conditions
   for delete
   to public
-  using (is_world_owner(world_id));
+  using (is_admin());

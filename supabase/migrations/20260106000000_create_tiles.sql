@@ -137,6 +137,7 @@ create table world_tile_maps (
 
   -- Audit
   created_at timestamptz not null default now(),
+  deleted_at timestamptz,
 
   constraint uq_world_tile_maps_world_id unique (world_id)
 );
@@ -145,7 +146,7 @@ alter table world_tile_maps enable row level security;
 
 create policy "anyone can view world_tile_maps"
   on world_tile_maps for select
-  using (true);
+  using (deleted_at is null);
 
 create policy "owner or admin can insert world_tile_maps"
   on world_tile_maps for insert
@@ -155,9 +156,12 @@ create policy "owner or admin can insert world_tile_maps"
 create policy "owner or admin can update world_tile_maps"
   on world_tile_maps for update
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (
+    (is_world_owner(world_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
-create policy "owner or admin can delete world_tile_maps"
+create policy "admin can delete world_tile_maps"
   on world_tile_maps for delete
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (is_admin());

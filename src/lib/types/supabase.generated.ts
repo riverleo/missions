@@ -2881,6 +2881,7 @@ export type Database = {
           building_id: string
           condition_id: string
           created_at: string
+          deleted_at: string | null
           id: string
           player_id: string
           scenario_id: string
@@ -2894,6 +2895,7 @@ export type Database = {
           building_id: string
           condition_id: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           player_id: string
           scenario_id: string
@@ -2907,6 +2909,7 @@ export type Database = {
           building_id?: string
           condition_id?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           player_id?: string
           scenario_id?: string
@@ -2974,6 +2977,7 @@ export type Database = {
           cell_y: number
           created_at: string
           created_at_tick: number
+          deleted_at: string | null
           id: string
           player_id: string
           scenario_id: string
@@ -2986,6 +2990,7 @@ export type Database = {
           cell_y?: number
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           id?: string
           player_id: string
           scenario_id: string
@@ -2998,6 +3003,7 @@ export type Database = {
           cell_y?: number
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           id?: string
           player_id?: string
           scenario_id?: string
@@ -3038,6 +3044,7 @@ export type Database = {
       world_character_needs: {
         Row: {
           character_id: string
+          deleted_at: string | null
           id: string
           need_id: string
           player_id: string
@@ -3049,6 +3056,7 @@ export type Database = {
         }
         Insert: {
           character_id: string
+          deleted_at?: string | null
           id?: string
           need_id: string
           player_id: string
@@ -3060,6 +3068,7 @@ export type Database = {
         }
         Update: {
           character_id?: string
+          deleted_at?: string | null
           id?: string
           need_id?: string
           player_id?: string
@@ -3119,6 +3128,7 @@ export type Database = {
           character_id: string
           created_at: string
           created_at_tick: number
+          deleted_at: string | null
           id: string
           player_id: string
           scenario_id: string
@@ -3131,6 +3141,7 @@ export type Database = {
           character_id: string
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           id?: string
           player_id: string
           scenario_id: string
@@ -3143,6 +3154,7 @@ export type Database = {
           character_id?: string
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           id?: string
           player_id?: string
           scenario_id?: string
@@ -3186,6 +3198,7 @@ export type Database = {
         Row: {
           created_at: string
           created_at_tick: number
+          deleted_at: string | null
           durability_ticks: number | null
           id: string
           item_id: string
@@ -3201,6 +3214,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           durability_ticks?: number | null
           id?: string
           item_id: string
@@ -3216,6 +3230,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_at_tick?: number
+          deleted_at?: string | null
           durability_ticks?: number | null
           id?: string
           item_id?: string
@@ -3270,6 +3285,7 @@ export type Database = {
         Row: {
           created_at: string
           data: Json
+          deleted_at: string | null
           id: string
           player_id: string
           scenario_id: string
@@ -3280,6 +3296,7 @@ export type Database = {
         Insert: {
           created_at?: string
           data?: Json
+          deleted_at?: string | null
           id?: string
           player_id: string
           scenario_id: string
@@ -3290,6 +3307,7 @@ export type Database = {
         Update: {
           created_at?: string
           data?: Json
+          deleted_at?: string | null
           id?: string
           player_id?: string
           scenario_id?: string
@@ -3331,6 +3349,7 @@ export type Database = {
       worlds: {
         Row: {
           created_at: string
+          deleted_at: string | null
           id: string
           name: string
           player_id: string
@@ -3340,6 +3359,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           name: string
           player_id: string
@@ -3349,6 +3369,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           name?: string
           player_id?: string

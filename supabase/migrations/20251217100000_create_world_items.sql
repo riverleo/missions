@@ -12,7 +12,8 @@ create table world_items (
   y float not null default 0,
   rotation float not null default 0,
   created_at_tick bigint not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
 
 alter table world_items enable row level security;
@@ -21,7 +22,7 @@ create policy "anyone can view world_items"
   on world_items
   for select
   to public
-  using (true);
+  using (deleted_at is null);
 
 create policy "owner or admin can insert world_items"
   on world_items
@@ -33,10 +34,13 @@ create policy "owner or admin can update world_items"
   on world_items
   for update
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (
+    (is_world_owner(world_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
-create policy "owner or admin can delete world_items"
+create policy "admin can delete world_items"
   on world_items
   for delete
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (is_admin());

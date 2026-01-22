@@ -9,17 +9,18 @@ create table world_buildings (
   cell_x integer not null default 0,
   cell_y integer not null default 0,
   created_at_tick bigint not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
 
 alter table world_buildings enable row level security;
 
--- 모든 사람이 월드 건물을 조회할 수 있음
+-- 모든 사람이 월드 건물을 조회할 수 있음 (soft delete된 것 제외)
 create policy "anyone can view world_buildings"
   on world_buildings
   for select
   to public
-  using (true);
+  using (deleted_at is null);
 
 -- 월드 소유자 또는 어드민만 월드 건물을 추가할 수 있음
 create policy "owner or admin can insert world_buildings"
@@ -28,16 +29,19 @@ create policy "owner or admin can insert world_buildings"
   to authenticated
   with check (is_world_owner(world_id) or is_admin());
 
--- 월드 소유자 또는 어드민만 월드 건물을 수정할 수 있음
+-- 월드 소유자 또는 어드민만 월드 건물을 수정할 수 있음 (soft delete는 어드민만)
 create policy "owner or admin can update world_buildings"
   on world_buildings
   for update
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (
+    (is_world_owner(world_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
--- 월드 소유자 또는 어드민만 월드 건물을 삭제할 수 있음
-create policy "owner or admin can delete world_buildings"
+-- 어드민만 월드 건물을 삭제할 수 있음
+create policy "admin can delete world_buildings"
   on world_buildings
   for delete
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (is_admin());

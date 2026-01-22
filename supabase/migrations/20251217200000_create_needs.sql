@@ -154,6 +154,7 @@ create table world_character_needs (
   need_id uuid not null references needs(id) on delete cascade,
 
   value float not null,
+  deleted_at timestamptz,
 
   constraint uq_world_character_needs_world_character_id_need_id unique (world_character_id, need_id)
 );
@@ -164,7 +165,7 @@ create policy "anyone can view world_character_needs"
   on world_character_needs
   for select
   to public
-  using (true);
+  using (deleted_at is null);
 
 create policy "owner or admin can insert world_character_needs"
   on world_character_needs
@@ -176,10 +177,13 @@ create policy "owner or admin can update world_character_needs"
   on world_character_needs
   for update
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (
+    (is_world_owner(world_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
-create policy "owner or admin can delete world_character_needs"
+create policy "admin can delete world_character_needs"
   on world_character_needs
   for delete
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (is_admin());

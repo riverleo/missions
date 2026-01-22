@@ -9,7 +9,8 @@ create table world_characters (
   x real not null default 0,
   y real not null default 0,
   created_at_tick bigint not null default 0,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
 
 alter table world_characters enable row level security;
@@ -23,12 +24,12 @@ returns boolean as $$
 $$ language sql security definer
 set search_path = '';
 
--- 모든 사람이 월드 캐릭터를 조회할 수 있음
+-- 모든 사람이 월드 캐릭터를 조회할 수 있음 (soft delete된 것 제외)
 create policy "anyone can view world_characters"
   on world_characters
   for select
   to public
-  using (true);
+  using (deleted_at is null);
 
 -- 월드 소유자 또는 어드민만 월드 캐릭터를 추가할 수 있음
 create policy "owner or admin can insert world_characters"
@@ -37,16 +38,19 @@ create policy "owner or admin can insert world_characters"
   to authenticated
   with check (is_world_owner(world_id) or is_admin());
 
--- 월드 소유자 또는 어드민만 월드 캐릭터를 수정할 수 있음
+-- 월드 소유자 또는 어드민만 월드 캐릭터를 수정할 수 있음 (soft delete는 어드민만)
 create policy "owner or admin can update world_characters"
   on world_characters
   for update
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (
+    (is_world_owner(world_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
--- 월드 소유자 또는 어드민만 월드 캐릭터를 삭제할 수 있음
-create policy "owner or admin can delete world_characters"
+-- 어드민만 월드 캐릭터를 삭제할 수 있음
+create policy "admin can delete world_characters"
   on world_characters
   for delete
   to authenticated
-  using (is_world_owner(world_id) or is_admin());
+  using (is_admin());

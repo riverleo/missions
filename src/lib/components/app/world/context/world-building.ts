@@ -13,7 +13,7 @@ export async function createWorldBuilding(
 	insert: Required<
 		Omit<
 			WorldBuildingInsert,
-			'id' | 'world_id' | 'player_id' | 'scenario_id' | 'user_id' | 'created_at' | 'created_at_tick'
+			'id' | 'world_id' | 'player_id' | 'scenario_id' | 'user_id' | 'created_at' | 'created_at_tick' | 'deleted_at'
 		>
 	> &
 		Pick<WorldBuildingInsert, 'id' | 'created_at' | 'created_at_tick'>
@@ -42,6 +42,7 @@ export async function createWorldBuilding(
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
 			conditions: [],
+			deleted_at: null,
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
@@ -84,10 +85,13 @@ export async function deleteWorldBuilding(
 	const { worldBuildingStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	// 프로덕션 환경이면 서버에서 삭제
+	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase.from('world_buildings').delete().eq('id', worldBuildingId);
+		const { error } = await supabase
+			.from('world_buildings')
+			.update({ deleted_at: new Date().toISOString() })
+			.eq('id', worldBuildingId);
 
 		if (error) {
 			console.error('Failed to delete world building:', error);

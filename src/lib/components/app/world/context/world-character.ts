@@ -13,7 +13,7 @@ export async function createWorldCharacter(
 	insert: Required<
 		Omit<
 			WorldCharacterInsert,
-			'id' | 'world_id' | 'player_id' | 'scenario_id' | 'user_id' | 'created_at' | 'created_at_tick'
+			'id' | 'world_id' | 'player_id' | 'scenario_id' | 'user_id' | 'created_at' | 'created_at_tick' | 'deleted_at'
 		>
 	> &
 		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
@@ -42,6 +42,7 @@ export async function createWorldCharacter(
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
 			needs: [],
+			deleted_at: null,
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
@@ -85,10 +86,13 @@ export async function deleteWorldCharacter(
 	const { worldCharacterStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	// 프로덕션 환경이면 서버에서 삭제
+	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase.from('world_characters').delete().eq('id', worldCharacterId);
+		const { error } = await supabase
+			.from('world_characters')
+			.update({ deleted_at: new Date().toISOString() })
+			.eq('id', worldCharacterId);
 
 		if (error) {
 			console.error('Failed to delete world character:', error);

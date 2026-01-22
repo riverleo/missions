@@ -9,7 +9,7 @@ import { TEST_WORLD_ID } from '$lib/constants';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export async function createWorldTileMap(
-	insert: Required<Omit<WorldTileMapInsert, 'id' | 'created_at' | 'data'>> & {
+	insert: Required<Omit<WorldTileMapInsert, 'id' | 'created_at' | 'data' | 'deleted_at'>> & {
 		data?: WorldTileMapInsert['data'];
 	}
 ) {
@@ -25,6 +25,7 @@ export async function createWorldTileMap(
 			...insert,
 			data: insert.data ?? {},
 			created_at: new Date().toISOString(),
+			deleted_at: null,
 		} as WorldTileMap;
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
@@ -56,10 +57,13 @@ export async function deleteWorldTileMap(worldId: WorldId) {
 	const { worldTileMapStore } = useWorld();
 	const isTestWorld = worldId === TEST_WORLD_ID;
 
-	// 프로덕션 환경이면 서버에서 삭제
+	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase.from('world_tile_maps').delete().eq('world_id', worldId);
+		const { error } = await supabase
+			.from('world_tile_maps')
+			.update({ deleted_at: new Date().toISOString() })
+			.eq('world_id', worldId);
 
 		if (error) {
 			console.error('Failed to delete world tile map:', error);

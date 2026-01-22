@@ -6,17 +6,18 @@ create table worlds (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   terrain_id uuid references terrains(id) on delete set null,
   name text not null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  deleted_at timestamptz
 );
 
 alter table worlds enable row level security;
 
--- 모든 사람이 월드를 조회할 수 있음
+-- 모든 사람이 월드를 조회할 수 있음 (soft delete된 것 제외)
 create policy "anyone can view worlds"
   on worlds
   for select
   to public
-  using (true);
+  using (deleted_at is null);
 
 -- 자기 자신 또는 어드민만 월드를 추가할 수 있음
 create policy "owner or admin can insert worlds"
@@ -25,16 +26,19 @@ create policy "owner or admin can insert worlds"
   to authenticated
   with check (is_me(user_id) or is_admin());
 
--- 자기 자신 또는 어드민만 월드를 수정할 수 있음
+-- 자기 자신 또는 어드민만 월드를 수정할 수 있음 (soft delete는 어드민만)
 create policy "owner or admin can update worlds"
   on worlds
   for update
   to authenticated
-  using (is_me(user_id) or is_admin());
+  using (
+    (is_me(user_id) or is_admin())
+    and (deleted_at is null or is_admin())
+  );
 
--- 자기 자신 또는 어드민만 월드를 삭제할 수 있음
-create policy "owner or admin can delete worlds"
+-- 어드민만 월드를 삭제할 수 있음
+create policy "admin can delete worlds"
   on worlds
   for delete
   to authenticated
-  using (is_me(user_id) or is_admin());
+  using (is_admin());

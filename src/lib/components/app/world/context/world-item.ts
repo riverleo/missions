@@ -23,6 +23,7 @@ export async function createWorldItem(
 			| 'world_building_id'
 			| 'durability_ticks'
 			| 'rotation'
+			| 'deleted_at'
 		>
 	> &
 		Pick<
@@ -61,6 +62,7 @@ export async function createWorldItem(
 			rotation: insert.rotation ?? 0,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
+			deleted_at: null,
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
@@ -101,10 +103,13 @@ export async function deleteWorldItem(worldContext: WorldContext, worldItemId: W
 	const { worldItemStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	// 프로덕션 환경이면 서버에서 삭제
+	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase.from('world_items').delete().eq('id', worldItemId);
+		const { error } = await supabase
+			.from('world_items')
+			.update({ deleted_at: new Date().toISOString() })
+			.eq('id', worldItemId);
 
 		if (error) {
 			console.error('Failed to delete world item:', error);
