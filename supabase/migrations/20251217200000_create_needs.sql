@@ -113,7 +113,7 @@ create table character_needs (
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_character_needs unique (character_id, need_id)
+  constraint uq_character_needs_character_id_need_id unique (character_id, need_id)
 );
 
 alter table character_needs enable row level security;
@@ -155,7 +155,7 @@ create table world_character_needs (
 
   value float not null,
 
-  constraint uq_world_character_needs unique (world_character_id, need_id)
+  constraint uq_world_character_needs_world_character_id_need_id unique (world_character_id, need_id)
 );
 
 alter table world_character_needs enable row level security;

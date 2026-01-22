@@ -12,7 +12,7 @@ create table tiles (
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_tiles_scenario_name unique (scenario_id, name)
+  constraint uq_tiles_scenario_id_name unique (scenario_id, name)
 );
 
 alter table tiles enable row level security;
@@ -58,7 +58,7 @@ create table tile_states (
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_tile_states_tile_type unique (tile_id, type)
+  constraint uq_tile_states_tile_id_type unique (tile_id, type)
 );
 
 alter table tile_states enable row level security;
@@ -98,7 +98,7 @@ create table terrains_tiles (
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_terrains_tiles unique (terrain_id, tile_id)
+  constraint uq_terrains_tiles_terrain_id_tile_id unique (terrain_id, tile_id)
 );
 
 alter table terrains_tiles enable row level security;

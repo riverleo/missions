@@ -41,6 +41,7 @@ export async function createWorldBuilding(
 			user_id,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tick),
+			conditions: [],
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용

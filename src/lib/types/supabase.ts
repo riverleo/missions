@@ -792,6 +792,7 @@ export type WorldCharacter = Omit<
 	character_id: CharacterId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
+	needs: WorldCharacterNeed[];
 };
 type WorldCharacterInsertRow = TablesInsert<'world_characters'>;
 export type WorldCharacterInsert = Omit<
@@ -829,6 +830,7 @@ export type WorldBuilding = Omit<
 	building_id: BuildingId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
+	conditions: WorldBuildingCondition[];
 };
 type WorldBuildingInsertRow = TablesInsert<'world_buildings'>;
 export type WorldBuildingInsert = Omit<
