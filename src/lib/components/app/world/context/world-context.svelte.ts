@@ -12,6 +12,7 @@ import type {
 	TileId,
 	Vector,
 	TileCellKey,
+	Boundaries,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
@@ -25,7 +26,7 @@ import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
 import { Pathfinder } from '../pathfinder';
-import { createBoundaries, type Boundaries } from './create-boundaries';
+import { createBoundaries } from './create-boundaries';
 import { createWorldCharacter, deleteWorldCharacter } from './world-character';
 import { createWorldBuilding, deleteWorldBuilding } from './world-building';
 import { createWorldItem, deleteWorldItem } from './world-item';

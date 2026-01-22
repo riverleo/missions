@@ -18,12 +18,10 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { worldBuildingStore } = useWorld();
-	const { buildingStore, conditionStore } = useBuilding();
+	const { conditionStore } = useBuilding();
 
 	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
-	const building = $derived(
-		worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined
-	);
+	const building = $derived(entity.building);
 	const conditions = $derived(Object.values(entity.worldBuildingConditions));
 </script>
 

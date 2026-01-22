@@ -1,6 +1,22 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type Matter from 'matter-js';
 import type { Database } from './supabase.generated';
-import type { ConditionBehaviorId, NeedBehaviorId } from './supabase';
+import type {
+	ConditionBehaviorId,
+	NeedBehaviorId,
+	WorldId,
+	WorldBuildingId,
+	WorldCharacterId,
+	WorldItemId,
+	BuildingId,
+	CharacterId,
+	ItemId,
+	TileId,
+	WorldBuilding,
+	WorldCharacter,
+	WorldItem,
+} from './supabase';
+import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
 export type Brand<T, B extends string> = T & { readonly __brand: B };
 
@@ -36,3 +52,57 @@ export interface AppPayload {
 // Runtime-only behavior ID: "{behaviorType}_{behaviorId}"
 export type BehaviorId = `need_${NeedBehaviorId}` | `condition_${ConditionBehaviorId}`;
 export type BehaviorType = 'need' | 'condition';
+
+// ============================================================
+// Entity Types
+// ============================================================
+// Entity ID with type information (branded string type)
+// Format: type_worldId_worldEntityId
+export type EntityId =
+	| `character_${WorldId}_${WorldCharacterId}`
+	| `building_${WorldId}_${WorldBuildingId}`
+	| `item_${WorldId}_${WorldItemId}`
+	| `tile_${WorldId}_${VectorKey}`;
+export type EntityType = 'character' | 'building' | 'item' | 'tile';
+
+// Entity Template ID (템플릿 선택용, worldId 없음)
+// Format: type_templateId
+export type EntityTemplateId =
+	| `character_${CharacterId}`
+	| `building_${BuildingId}`
+	| `item_${ItemId}`
+	| `tile_${TileId}`;
+
+// Instance types for EntityId and EntityTemplateId
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
+export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
+export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
+
+// ============================================================
+// World entity types
+// ============================================================
+export type WorldCharacterEntityDirection = 'left' | 'right';
+
+export interface BeforeUpdateEvent {
+	timestamp: number;
+	delta: number;
+	source: Matter.Engine;
+	name: string;
+}
+
+export interface WorldBlueprintCursor {
+	entityTemplateId: EntityTemplateId;
+	current: Vector;
+	start?: Vector;
+	type: 'tile' | 'cell';
+	tileCellKeys: Set<TileCellKey>;
+	overlappingCells: Cell[];
+	tileBounds?: { start: TileCell; end: TileCell };
+}
+
+export interface Boundaries {
+	top: Matter.Body;
+	bottom: Matter.Body;
+	left: Matter.Body;
+	right: Matter.Body;
+}

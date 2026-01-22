@@ -14,6 +14,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
+import { decreaseConditions } from './decrease-conditions';
 
 export class WorldBuildingEntity extends Entity {
 	readonly type = 'building' as const;
@@ -99,18 +100,6 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 모든 conditions를 decrease_per_tick * multiplier만큼 감소
-		const { conditionStore, buildingConditionStore } = useBuilding();
-		const conditions = get(conditionStore).data;
-		const buildingConditions = get(buildingConditionStore).data;
-
-		for (const worldBuildingCondition of Object.values(this.worldBuildingConditions)) {
-			const condition = conditions[worldBuildingCondition.condition_id];
-			const buildingCondition = buildingConditions[worldBuildingCondition.building_condition_id];
-			if (!condition || !buildingCondition) continue;
-
-			const decreaseAmount = condition.decrease_per_tick * buildingCondition.multiplier;
-			worldBuildingCondition.value = Math.max(0, worldBuildingCondition.value - decreaseAmount);
-		}
+		decreaseConditions(this);
 	}
 }

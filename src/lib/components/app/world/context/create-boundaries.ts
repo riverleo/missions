@@ -1,14 +1,8 @@
 import Matter from 'matter-js';
+import type { Boundaries } from '$lib/types/core';
 import { BOUNDARY_THICKNESS, CATEGORY_BOUNDARY } from '$lib/constants';
 
 const { Bodies } = Matter;
-
-export interface Boundaries {
-	top: Matter.Body;
-	bottom: Matter.Body;
-	left: Matter.Body;
-	right: Matter.Body;
-}
 
 export function createBoundaries(width: number, height: number, debug: boolean): Boundaries {
 	const boundaryOptions = {

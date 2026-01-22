@@ -73,29 +73,16 @@ export type WorldTileMapId = Brand<string, 'WorldTileMapId'>;
 export type ScenarioSnapshotId = Brand<string, 'ScenarioSnapshotId'>;
 
 // ============================================================
-// Entity Types
+// Entity Types (re-exported from core.ts)
 // ============================================================
-// Entity ID with type information (branded string type)
-// Format: type_worldId_worldEntityId
-export type EntityId =
-	| `character_${WorldId}_${WorldCharacterId}`
-	| `building_${WorldId}_${WorldBuildingId}`
-	| `item_${WorldId}_${WorldItemId}`
-	| `tile_${WorldId}_${VectorKey}`;
-export type EntityType = 'character' | 'building' | 'item' | 'tile';
-
-// Entity Template ID (템플릿 선택용, worldId 없음)
-// Format: type_templateId
-export type EntityTemplateId =
-	| `character_${CharacterId}`
-	| `building_${BuildingId}`
-	| `item_${ItemId}`
-	| `tile_${TileId}`;
-
-// Instance types for EntityId and EntityTemplateId
-export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
-export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
-export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
+export type {
+	EntityId,
+	EntityType,
+	EntityTemplateId,
+	EntityInstanceId,
+	EntityTemplateIdCandidate,
+	EntityInstance,
+} from './core';
 
 // Re-export Database for hooks.server.ts
 export type { Database };

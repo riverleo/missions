@@ -19,6 +19,7 @@ import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 import { move } from './move';
+import { decreaseNeeds } from './decrease-needs';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -135,24 +136,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 모든 needs를 decrease_per_tick * multiplier만큼 감소
-		const { needStore, characterNeedStore } = useCharacter();
-		const needs = get(needStore).data;
-		const characterNeeds = get(characterNeedStore).data;
-
-		for (const worldCharacterNeed of Object.values(this.worldCharacterNeeds)) {
-			const need = needs[worldCharacterNeed.need_id];
-			if (!need) continue;
-
-			// character_needs에서 multiplier 찾기 (character_id + need_id로 조회)
-			const characterNeed = Object.values(characterNeeds).find(
-				(cn) => cn.character_id === worldCharacterNeed.character_id && cn.need_id === worldCharacterNeed.need_id
-			);
-			if (!characterNeed) continue;
-
-			const decreaseAmount = need.decrease_per_tick * characterNeed.multiplier;
-			worldCharacterNeed.value = Math.max(0, worldCharacterNeed.value - decreaseAmount);
-		}
+		decreaseNeeds(this);
 	}
 
 	moveTo(targetX: number, targetY: number): void {

@@ -61,13 +61,6 @@ export type {
 	TileStateId,
 	TerrainTileId,
 	WorldTileMapId,
-	// Entity Types
-	EntityId,
-	EntityType,
-	EntityTemplateId,
-	EntityInstanceId,
-	EntityTemplateIdCandidate,
-	EntityInstance,
 	// Table Types
 	Scenario,
 	ScenarioSnapshot,
@@ -274,6 +267,16 @@ export type {
 	AppPayload,
 	BehaviorId,
 	BehaviorType,
+	EntityId,
+	EntityType,
+	EntityTemplateId,
+	EntityInstanceId,
+	EntityTemplateIdCandidate,
+	EntityInstance,
+	WorldCharacterEntityDirection,
+	BeforeUpdateEvent,
+	WorldBlueprintCursor,
+	Boundaries,
 } from './core';
 
 // Re-export specific Enums for convenience

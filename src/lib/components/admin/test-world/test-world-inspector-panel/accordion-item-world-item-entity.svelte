@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import { useWorld } from '$lib/hooks/use-world';
-	import { useItem } from '$lib/hooks/use-item';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -17,11 +15,7 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { worldItemStore } = useWorld();
-	const { itemStore } = useItem();
-
-	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
-	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
+	const item = $derived(entity.item);
 </script>
 
 <AccordionItem value={entity.id}>
@@ -50,6 +44,13 @@
 			({Math.round(entity.x)}, {Math.round(entity.y)}), {Math.round(
 				(entity.angle * 180) / Math.PI
 			)}°
+		</AccordionContentItem>
+		<AccordionContentItem label="내구도">
+			{#if entity.durabilityTicks !== undefined}
+				{entity.durabilityTicks} / {item?.max_durability_ticks ?? 0}
+			{:else}
+				영구적
+			{/if}
 		</AccordionContentItem>
 	</AccordionContent>
 </AccordionItem>

@@ -7,10 +7,12 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
+import { decreaseDurability } from './decrease-durability';
 
 export class WorldItemEntity extends Entity {
 	readonly type = 'item' as const;
 	body: Matter.Body;
+	durabilityTicks = $state<number | undefined>(undefined);
 
 	private worldHook = useWorld();
 	private itemHook = useItem();
@@ -30,6 +32,9 @@ export class WorldItemEntity extends Entity {
 		if (!worldItem) {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${worldItemId}`);
 		}
+
+		// durability_ticks 초기화
+		this.durabilityTicks = worldItem.durability_ticks ?? undefined;
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -78,6 +83,7 @@ export class WorldItemEntity extends Entity {
 						x: this.x,
 						y: this.y,
 						rotation: this.angle,
+						durability_ticks: this.durabilityTicks ?? null,
 					},
 				},
 			});
@@ -89,6 +95,6 @@ export class WorldItemEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 아이템 틱 로직 (필요 시 구현)
+		decreaseDurability(this);
 	}
 }

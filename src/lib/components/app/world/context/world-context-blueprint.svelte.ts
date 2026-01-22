@@ -2,6 +2,7 @@ import { get } from 'svelte/store';
 import { vectorUtils } from '$lib/utils/vector';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useWorld } from '$lib/hooks/use-world';
+import { useItem } from '$lib/hooks/use-item';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS, MAX_TILE_PLACABLE_COUNT } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
@@ -447,10 +448,15 @@ export class WorldContextBlueprint {
 			});
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
+			const itemId = EntityIdUtils.template.id<ItemId>(entityTemplateId);
+			const { itemStore } = useItem();
+			const item = get(itemStore).data[itemId];
+
 			this.context.createWorldItem({
-				item_id: EntityIdUtils.template.id<ItemId>(entityTemplateId),
+				item_id: itemId,
 				x: x + CELL_SIZE / 2,
 				y: y + CELL_SIZE / 2,
+				durability_ticks: item?.max_durability_ticks ?? null,
 			});
 		}
 	}
