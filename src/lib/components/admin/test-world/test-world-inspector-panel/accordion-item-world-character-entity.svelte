@@ -18,12 +18,13 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { worldCharacterStore } = useWorld();
-	const { characterStore } = useCharacter();
+	const { characterStore, needStore } = useCharacter();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
+	const needs = $derived(Object.values(entity.worldCharacterNeeds));
 </script>
 
 <AccordionItem value={entity.id}>
@@ -51,5 +52,17 @@
 		<AccordionContentItem label="좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
+		{#if needs.length > 0}
+			<Separator />
+			<div class="flex flex-col gap-2">
+				<div class="text-xs font-medium">욕구</div>
+				{#each needs as need}
+					{@const needData = $needStore.data[need.need_id]}
+					<AccordionContentItem label={needData?.name ?? need.need_id}>
+						{need.value} / {needData?.max_value ?? 100}
+					</AccordionContentItem>
+				{/each}
+			</div>
+		{/if}
 	</AccordionContent>
 </AccordionItem>
