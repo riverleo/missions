@@ -13,9 +13,8 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { clone } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
 
@@ -25,9 +24,9 @@
 
 	let { effect: conditionEffect }: Props = $props();
 
-	const { admin } = useCondition();
+	const { admin } = useBuilding();
 	const { characterStore } = useCharacter();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));

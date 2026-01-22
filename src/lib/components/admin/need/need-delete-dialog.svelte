@@ -10,10 +10,10 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needStore, needDialogStore, closeNeedDialog, admin } = useNeed();
+	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needId = $derived($needDialogStore?.type === 'delete' ? $needDialogStore.needId : undefined);

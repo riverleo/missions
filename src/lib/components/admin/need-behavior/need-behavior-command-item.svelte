@@ -10,7 +10,6 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
 	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
@@ -26,7 +25,7 @@
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
 	const { openNeedBehaviorDialog } = useBehavior();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
 
 	const label = $derived(() => {

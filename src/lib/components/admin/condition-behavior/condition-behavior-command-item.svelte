@@ -10,7 +10,7 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ConditionBehavior, CharacterId } from '$lib/types';
 
@@ -25,7 +25,7 @@
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
 	const { openConditionBehaviorDialog } = useBehavior();
-	const { conditionStore } = useCondition();
+	const { conditionStore } = useBuilding();
 	const { characterStore } = useCharacter();
 
 	const description = $derived.by(() => {

@@ -23,7 +23,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
 	import type { NeedId, CharacterId, CharacterFaceStateType } from '$lib/types';
@@ -31,7 +30,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 
 	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
 
 	const open = $derived($needBehaviorDialogStore?.type === 'update');

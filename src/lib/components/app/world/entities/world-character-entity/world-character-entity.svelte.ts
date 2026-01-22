@@ -26,7 +26,7 @@ export class WorldCharacterEntity extends Entity {
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
-	needs: Record<NeedId, WorldCharacterNeed> = $state({});
+	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -52,9 +52,9 @@ export class WorldCharacterEntity extends Entity {
 		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
-		this.needs = {};
+		this.worldCharacterNeeds = {};
 		for (const need of characterNeeds) {
-			this.needs[need.need_id] = need;
+			this.worldCharacterNeeds[need.need_id] = need;
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
@@ -120,9 +120,10 @@ export class WorldCharacterEntity extends Entity {
 		// needs 저장
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
-				for (const need of Object.values(this.needs)) {
-					if (draft.data[need.id]) {
-						draft.data[need.id].value = need.value;
+				for (const need of Object.values(this.worldCharacterNeeds)) {
+					const storeNeed = draft.data[need.id];
+					if (storeNeed) {
+						storeNeed.value = need.value;
 					}
 				}
 			})
@@ -135,7 +136,7 @@ export class WorldCharacterEntity extends Entity {
 
 	tick(tick: number): void {
 		// 모든 needs를 1씩 감소
-		for (const need of Object.values(this.needs)) {
+		for (const need of Object.values(this.worldCharacterNeeds)) {
 			need.value = Math.max(0, need.value - 1);
 		}
 	}

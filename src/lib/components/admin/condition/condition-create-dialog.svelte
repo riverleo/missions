@@ -9,12 +9,12 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionDialogStore, closeConditionDialog, admin } = useCondition();
+	const { conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($conditionDialogStore?.type === 'create');

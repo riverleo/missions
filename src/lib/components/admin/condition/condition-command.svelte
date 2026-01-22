@@ -16,12 +16,12 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionStore, openConditionDialog } = useCondition();
+	const { conditionStore, openConditionDialog } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentConditionId = $derived(page.params.conditionId);
 

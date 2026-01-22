@@ -11,11 +11,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 
 	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
-	const { conditionStore } = useCondition();
+	const { conditionStore } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(

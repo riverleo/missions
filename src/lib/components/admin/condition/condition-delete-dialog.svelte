@@ -10,10 +10,10 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useCondition();
+	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const conditionId = $derived(

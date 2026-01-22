@@ -12,7 +12,6 @@
 	} from '$lib/components/ui/input-group';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useCondition } from '$lib/hooks/use-condition';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { clone } from 'radash';
 
@@ -22,7 +21,7 @@
 
 	let { buildingCondition }: Props = $props();
 
-	const { admin } = useCondition();
+	const { admin } = useBuilding();
 	const { buildingStore: buildingStore } = useBuilding();
 	const flowEdges = useEdges();
 

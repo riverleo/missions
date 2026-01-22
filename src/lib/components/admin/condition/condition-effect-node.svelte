@@ -2,7 +2,6 @@
 	import type { ConditionEffect } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { Separator } from '$lib/components/ui/separator';
 
 	interface Props {
@@ -17,7 +16,7 @@
 	const effect = $derived(data.effect);
 
 	const { characterStore } = useCharacter();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 
 	const character = $derived(
 		effect.character_id ? $characterStore.data[effect.character_id] : undefined

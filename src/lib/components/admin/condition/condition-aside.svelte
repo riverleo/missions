@@ -6,13 +6,13 @@
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import type { ConditionId } from '$lib/types';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import ConditionCommand from './condition-command.svelte';
 	import ConditionCreateDialog from './condition-create-dialog.svelte';
 	import ConditionUpdateDialog from './condition-update-dialog.svelte';
 	import ConditionDeleteDialog from './condition-delete-dialog.svelte';
 
-	const { openConditionDialog } = useCondition();
+	const { openConditionDialog } = useBuilding();
 	const currentConditionId = $derived(page.params.conditionId);
 
 	let toggleValue = $state<string[]>(['list']);

@@ -16,9 +16,9 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 
-	const { needStore, needDialogStore, closeNeedDialog, admin } = useNeed();
+	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 
 	const open = $derived($needDialogStore?.type === 'update');
 	const needId = $derived($needDialogStore?.type === 'update' ? $needDialogStore.needId : undefined);

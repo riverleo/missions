@@ -28,9 +28,8 @@
 		DropdownMenuRadioItem,
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
-	import { useNeed } from '$lib/hooks/use-need';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
@@ -41,7 +40,7 @@
 
 	let { fulfillment }: Props = $props();
 
-	const { admin } = useNeed();
+	const { admin } = useCharacter();
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
 	const { itemStore } = useItem();

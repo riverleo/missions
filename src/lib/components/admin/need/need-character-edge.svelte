@@ -2,7 +2,7 @@
 	import { getBezierPath, BaseEdge, EdgeLabel, useEdges } from '@xyflow/svelte';
 	import type { Position } from '@xyflow/svelte';
 	import type { CharacterNeed } from '$lib/types';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 
 	interface Props {
 		id: string;
@@ -29,7 +29,7 @@
 	}: Props = $props();
 
 	const edges = useEdges();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 
 	const [edgePath, labelX, labelY] = $derived(
 		getBezierPath({

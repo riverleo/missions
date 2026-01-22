@@ -11,7 +11,7 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
@@ -22,7 +22,7 @@
 
 	let { need }: Props = $props();
 
-	const { admin } = useNeed();
+	const { admin } = useCharacter();
 	const flowNodes = useNodes();
 
 	let isUpdating = $state(false);

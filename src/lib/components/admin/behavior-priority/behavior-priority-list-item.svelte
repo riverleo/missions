@@ -9,9 +9,8 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import type { BehaviorPriority, CharacterId } from '$lib/types';
 	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 
@@ -27,9 +26,9 @@
 	let { priority, isFirst, isLast, onmoveup, onmovedown, onremove }: Props = $props();
 
 	const { needBehaviorStore, conditionBehaviorStore } = useBehavior();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
-	const { conditionStore } = useCondition();
+	const { conditionStore } = useBuilding();
 
 	// behavior 타입 구분
 	const behaviorType = $derived.by(() => {

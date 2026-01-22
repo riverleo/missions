@@ -23,7 +23,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -34,7 +33,7 @@
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
 
 	const open = $derived($needBehaviorDialogStore?.type === 'create');

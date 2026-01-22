@@ -16,9 +16,9 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 
-	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useCondition();
+	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 
 	const open = $derived($conditionDialogStore?.type === 'update');
 	const conditionId = $derived(

@@ -13,9 +13,8 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
-	import { useCondition } from '$lib/hooks/use-condition';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		createBuildingNodeId,
 		parseBuildingNodeId,
@@ -54,11 +53,11 @@
 		buildingConditionStore,
 		conditionEffectStore,
 		admin,
-	} = useCondition();
+	} = useBuilding();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { buildingStore: buildingStore } = useBuilding();
-	const { needStore } = useNeed();
+	const { needStore } = useCharacter();
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();

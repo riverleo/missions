@@ -18,7 +18,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
@@ -30,7 +30,7 @@
 
 	let { fulfillment }: Props = $props();
 
-	const { admin } = useCondition();
+	const { admin } = useBuilding();
 	const { characterStore } = useCharacter();
 	const { itemStore } = useItem();
 	const flowNodes = useNodes();

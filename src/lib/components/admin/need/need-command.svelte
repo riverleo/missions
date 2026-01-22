@@ -16,12 +16,12 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needStore, openNeedDialog } = useNeed();
+	const { needStore, openNeedDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentNeedId = $derived(page.params.needId);
 

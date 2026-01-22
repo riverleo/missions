@@ -16,12 +16,12 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needDialogStore, closeNeedDialog, admin } = useNeed();
+	const { needDialogStore, closeNeedDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($needDialogStore?.type === 'create');

@@ -25,7 +25,7 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCondition } from '$lib/hooks/use-condition';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
 	import type {
@@ -36,7 +36,7 @@
 	} from '$lib/types';
 
 	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
-	const { conditionStore } = useCondition();
+	const { conditionStore } = useBuilding();
 	const { characterStore } = useCharacter();
 
 	const open = $derived($conditionBehaviorDialogStore?.type === 'update');

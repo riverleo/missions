@@ -6,13 +6,13 @@
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import type { NeedId } from '$lib/types';
-	import { useNeed } from '$lib/hooks/use-need';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import NeedCommand from './need-command.svelte';
 	import NeedCreateDialog from './need-create-dialog.svelte';
 	import NeedUpdateDialog from './need-update-dialog.svelte';
 	import NeedDeleteDialog from './need-delete-dialog.svelte';
 
-	const { openNeedDialog } = useNeed();
+	const { openNeedDialog } = useCharacter();
 	const currentNeedId = $derived(page.params.needId);
 
 	let toggleValue = $state<string[]>(['list']);
