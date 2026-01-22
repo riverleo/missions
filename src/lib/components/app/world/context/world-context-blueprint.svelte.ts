@@ -113,7 +113,7 @@ export class WorldContextBlueprint {
 	/**
 	 * 현재 배치하려는 건물/타일과 기존 건물들의 겹치는 셀들 + walkable이 아닌 셀들 계산
 	 */
-	getOverlappingCells(): Cell[] {
+	private getOverlappingCells(): Cell[] {
 		if (!this.cursor || !this.context) {
 			return [];
 		}
