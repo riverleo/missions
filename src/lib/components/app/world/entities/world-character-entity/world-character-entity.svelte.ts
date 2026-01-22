@@ -135,10 +135,15 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 모든 needs를 1씩 감소
-		for (const need of Object.values(this.worldCharacterNeeds)) {
-			need.value = Math.max(0, need.value - 1);
+		// 모든 needs를 1씩 감소 (새 객체를 생성하여 $state 프록시 문제 회피)
+		const updatedNeeds: Record<NeedId, WorldCharacterNeed> = {};
+		for (const [needId, need] of Object.entries(this.worldCharacterNeeds)) {
+			updatedNeeds[needId as NeedId] = {
+				...need,
+				value: Math.max(0, need.value - 1),
+			};
 		}
+		this.worldCharacterNeeds = updatedNeeds;
 	}
 
 	moveTo(targetX: number, targetY: number): void {
