@@ -48,13 +48,13 @@ export class WorldCharacterEntity extends Entity {
 		// held_world_item_id 초기화
 		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
 
-		// needs 초기화
+		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
 		this.worldCharacterNeeds = {};
 		for (const need of characterNeeds) {
-			this.worldCharacterNeeds[need.need_id] = need;
+			this.worldCharacterNeeds[need.need_id] = { ...need };
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
@@ -135,15 +135,10 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		// 모든 needs를 1씩 감소 (새 객체를 생성하여 $state 프록시 문제 회피)
-		const updatedNeeds: Record<NeedId, WorldCharacterNeed> = {};
-		for (const [needId, need] of Object.entries(this.worldCharacterNeeds)) {
-			updatedNeeds[needId as NeedId] = {
-				...need,
-				value: Math.max(0, need.value - 1),
-			};
+		// 모든 needs를 1씩 감소
+		for (const need of Object.values(this.worldCharacterNeeds)) {
+			need.value = Math.max(0, need.value - 1);
 		}
-		this.worldCharacterNeeds = updatedNeeds;
 	}
 
 	moveTo(targetX: number, targetY: number): void {

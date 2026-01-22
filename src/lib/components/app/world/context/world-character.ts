@@ -171,7 +171,7 @@ export async function createWorldCharacter(
 	// 엔티티 생성
 	const entity = new WorldCharacterEntity(worldContext, worldContext.worldId, worldCharacter.id);
 
-	// TEST 환경에서는 스토어에서 needs를 다시 불러와서 설정
+	// TEST 환경에서는 스토어에서 needs를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
 	if (isTestWorld) {
 		const { worldCharacterNeedStore } = useWorld();
 		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
@@ -179,7 +179,7 @@ export async function createWorldCharacter(
 		);
 		entity.worldCharacterNeeds = {};
 		for (const need of characterNeeds) {
-			entity.worldCharacterNeeds[need.need_id] = need;
+			entity.worldCharacterNeeds[need.need_id] = { ...need };
 		}
 	}
 
