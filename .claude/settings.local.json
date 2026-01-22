@@ -1,8 +1,0 @@
-{
-	"permissions": {
-		"allow": ["Bash(git add:*)", "Bash(git commit:*)", "Bash(pnpm check:*)"]
-	},
-	"model": "claude-sonnet-4-5-20250929",
-	"enableAllProjectMcpServers": true,
-	"enabledMcpjsonServers": ["svelte"]
-}
