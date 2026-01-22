@@ -28,8 +28,6 @@ type BuildingDialogState =
 	| { type: 'delete'; buildingId: BuildingId }
 	| undefined;
 
-type BuildingStateDialogState = { type: 'update'; buildingStateId: BuildingStateId } | undefined;
-
 type BuildingInteractionDialogState =
 	| { type: 'create' }
 	| { type: 'update'; interactionId: BuildingInteractionId }
@@ -41,19 +39,21 @@ let instance: ReturnType<typeof createBuildingStore> | null = null;
 function createBuildingStore() {
 	const { supabase } = useApp();
 
-	const store = writable<RecordFetchState<BuildingId, Building>>({
+	const buildingStore = writable<RecordFetchState<BuildingId, Building>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// building_id를 키로, 해당 빌딩의 states 배열을 값으로
-	const stateStore = writable<RecordFetchState<BuildingId, BuildingState[]>>({
+	const buildingStateStore = writable<RecordFetchState<BuildingId, BuildingState[]>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// building_interaction_id를 키로 관리
-	const buildingInteractionStore = writable<RecordFetchState<BuildingInteractionId, BuildingInteraction>>({
+	const buildingInteractionStore = writable<
+		RecordFetchState<BuildingInteractionId, BuildingInteraction>
+	>({
 		status: 'idle',
 		data: {},
 	});
@@ -66,9 +66,8 @@ function createBuildingStore() {
 		data: {},
 	});
 
-	const dialogStore = writable<BuildingDialogState>(undefined);
-	const stateDialogStore = writable<BuildingStateDialogState>(undefined);
-	const interactionDialogStore = writable<BuildingInteractionDialogState>(undefined);
+	const buildingDialogStore = writable<BuildingDialogState>(undefined);
+	const buildingInteractionDialogStore = writable<BuildingInteractionDialogState>(undefined);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -87,7 +86,7 @@ function createBuildingStore() {
 		}
 		currentScenarioId = scenarioId;
 
-		store.update((state) => ({ ...state, status: 'loading' }));
+		buildingStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
@@ -128,13 +127,13 @@ function createBuildingStore() {
 					[]) as BuildingInteractionAction[];
 			}
 
-			store.set({
+			buildingStore.set({
 				status: 'success',
 				data: buildingRecord,
 				error: undefined,
 			});
 
-			stateStore.set({
+			buildingStateStore.set({
 				status: 'success',
 				data: stateRecord,
 				error: undefined,
@@ -153,12 +152,12 @@ function createBuildingStore() {
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
-			store.set({
+			buildingStore.set({
 				status: 'error',
 				data: {},
 				error: err,
 			});
-			stateStore.set({
+			buildingStateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -176,28 +175,20 @@ function createBuildingStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<BuildingDialogState>) {
-		dialogStore.set(state);
+	function openBuildingDialog(state: NonNullable<BuildingDialogState>) {
+		buildingDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
-	}
-
-	function openStateDialog(state: NonNullable<BuildingStateDialogState>) {
-		stateDialogStore.set(state);
-	}
-
-	function closeStateDialog() {
-		stateDialogStore.set(undefined);
+	function closeBuildingDialog() {
+		buildingDialogStore.set(undefined);
 	}
 
 	function openBuildingInteractionDialog(state: NonNullable<BuildingInteractionDialogState>) {
-		interactionDialogStore.set(state);
+		buildingInteractionDialogStore.set(state);
 	}
 
 	function closeBuildingInteractionDialog() {
-		interactionDialogStore.set(undefined);
+		buildingInteractionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -207,7 +198,7 @@ function createBuildingStore() {
 			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async create(building: Omit<BuildingInsert, 'scenario_id'>) {
+		async createBuilding(building: Omit<BuildingInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useBuilding: currentScenarioId is not set.');
 			}
@@ -223,13 +214,13 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			store.update((state) =>
+			buildingStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id as BuildingId] = data;
 				})
 			);
 
-			stateStore.update((state) =>
+			buildingStateStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id as BuildingId] = [];
 				})
@@ -238,12 +229,12 @@ function createBuildingStore() {
 			return data;
 		},
 
-		async update(id: BuildingId, building: BuildingUpdate) {
+		async updateBuilding(id: BuildingId, building: BuildingUpdate) {
 			const { error } = await supabase.from('buildings').update(building).eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			buildingStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data?.[id]) {
 						Object.assign(draft.data[id], building);
@@ -252,12 +243,12 @@ function createBuildingStore() {
 			);
 		},
 
-		async remove(id: BuildingId) {
+		async removeBuilding(id: BuildingId) {
 			const { error } = await supabase.from('buildings').delete().eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			buildingStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -265,7 +256,7 @@ function createBuildingStore() {
 				})
 			);
 
-			stateStore.update((state) =>
+			buildingStateStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -289,7 +280,7 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			buildingStateStore.update((s) =>
 				produce(s, (draft) => {
 					if (draft.data[buildingId]) {
 						draft.data[buildingId].push(data);
@@ -311,7 +302,7 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			buildingStateStore.update((s) =>
 				produce(s, (draft) => {
 					const states = draft.data[buildingId];
 					if (states) {
@@ -329,7 +320,7 @@ function createBuildingStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			buildingStateStore.update((s) =>
 				produce(s, (draft) => {
 					const states = draft.data[buildingId];
 					if (states) {
@@ -339,7 +330,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async createInteraction(interaction: Omit<BuildingInteractionInsert, 'scenario_id'>) {
+		async createBuildingInteraction(interaction: Omit<BuildingInteractionInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useBuilding: currentScenarioId is not set.');
 			}
@@ -370,11 +361,8 @@ function createBuildingStore() {
 			return data;
 		},
 
-		async updateInteraction(id: BuildingInteractionId, updates: BuildingInteractionUpdate) {
-			const { error } = await supabase
-				.from('building_interactions')
-				.update(updates)
-				.eq('id', id);
+		async updateBuildingInteraction(id: BuildingInteractionId, updates: BuildingInteractionUpdate) {
+			const { error } = await supabase.from('building_interactions').update(updates).eq('id', id);
 
 			if (error) throw error;
 
@@ -387,7 +375,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async removeInteraction(id: BuildingInteractionId) {
+		async removeBuildingInteraction(id: BuildingInteractionId) {
 			const { error } = await supabase.from('building_interactions').delete().eq('id', id);
 
 			if (error) throw error;
@@ -409,9 +397,12 @@ function createBuildingStore() {
 			);
 		},
 
-		async createInteractionAction(
+		async createBuildingInteractionAction(
 			interactionId: BuildingInteractionId,
-			action: Omit<BuildingInteractionActionInsert, 'scenario_id' | 'building_id' | 'building_interaction_id'>
+			action: Omit<
+				BuildingInteractionActionInsert,
+				'scenario_id' | 'building_id' | 'building_interaction_id'
+			>
 		) {
 			if (!currentScenarioId) {
 				throw new Error('useBuilding: currentScenarioId is not set.');
@@ -451,7 +442,7 @@ function createBuildingStore() {
 			return data;
 		},
 
-		async updateInteractionAction(
+		async updateBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
 			interactionId: BuildingInteractionId,
 			updates: BuildingInteractionActionUpdate
@@ -476,7 +467,7 @@ function createBuildingStore() {
 			);
 		},
 
-		async removeInteractionAction(
+		async removeBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
 			interactionId: BuildingInteractionId
 		) {
@@ -499,23 +490,23 @@ function createBuildingStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<BuildingId, Building>>,
-		stateStore: stateStore as Readable<RecordFetchState<BuildingId, BuildingState[]>>,
+		buildingStore: buildingStore as Readable<RecordFetchState<BuildingId, Building>>,
+		buildingStateStore: buildingStateStore as Readable<
+			RecordFetchState<BuildingId, BuildingState[]>
+		>,
 		buildingInteractionStore: buildingInteractionStore as Readable<
 			RecordFetchState<BuildingInteractionId, BuildingInteraction>
 		>,
 		buildingInteractionActionStore: buildingInteractionActionStore as Readable<
 			RecordFetchState<BuildingInteractionId, BuildingInteractionAction[]>
 		>,
-		dialogStore: dialogStore as Readable<BuildingDialogState>,
-		stateDialogStore: stateDialogStore as Readable<BuildingStateDialogState>,
-		interactionDialogStore: interactionDialogStore as Readable<BuildingInteractionDialogState>,
+		buildingDialogStore: buildingDialogStore as Readable<BuildingDialogState>,
+		buildingInteractionDialogStore:
+			buildingInteractionDialogStore as Readable<BuildingInteractionDialogState>,
 		init,
 		fetch,
-		openDialog,
-		closeDialog,
-		openStateDialog,
-		closeStateDialog,
+		openBuildingDialog,
+		closeBuildingDialog,
 		openBuildingInteractionDialog,
 		closeBuildingInteractionDialog,
 		admin,

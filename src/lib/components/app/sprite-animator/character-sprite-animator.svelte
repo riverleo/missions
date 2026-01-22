@@ -11,7 +11,6 @@
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import Self from './character-sprite-animator.svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { cn } from '$lib/utils';
 
 	const OUTLINE_WIDTH = 10;
@@ -56,19 +55,18 @@
 		...restProps
 	}: Props = $props();
 
-	const { store, faceStateStore } = useCharacter();
-	const { store: characterBodyStore, bodyStateStore } = useCharacterBody();
+	const { characterStore, characterFaceStateStore, characterBodyStore, characterBodyStateStore } = useCharacter();
 
-	const character = $derived($store.data[characterId]);
+	const character = $derived($characterStore.data[characterId]);
 	const scale = $derived(character?.scale ?? 1);
 
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
-	const bodyStates = $derived(characterBody ? ($bodyStateStore.data[characterBody.id] ?? []) : []);
+	const bodyStates = $derived(characterBody ? ($characterBodyStateStore.data[characterBody.id] ?? []) : []);
 	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
 
-	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
+	const faceStates = $derived($characterFaceStateStore.data[characterId] ?? []);
 	const faceState = $derived(
 		faceStateType ? faceStates.find((s) => s.type === faceStateType) : undefined
 	);

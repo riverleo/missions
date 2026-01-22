@@ -25,7 +25,7 @@
 	import TerrainTileEdgePanel from './terrain-tile-edge-panel.svelte';
 	import type { TerrainId, TileId } from '$lib/types';
 
-	const { store: terrainStore, tileStore, terrainTileStore, admin } = useTerrain();
+	const { terrainStore, tileStore, terrainTileStore, admin } = useTerrain();
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();

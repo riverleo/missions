@@ -1,9 +1,5 @@
 <script lang="ts">
-	import type {
-		CharacterInteraction,
-		CharacterInteractionId,
-		CharacterId,
-	} from '$lib/types';
+	import type { CharacterInteraction, CharacterInteractionId, CharacterId } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
@@ -22,8 +18,7 @@
 
 	let { interaction, characterInteractionId, onlayout }: Props = $props();
 
-	const { characterInteractionActionStore, admin } = useCharacter();
-	const { store: characterStore } = useCharacter();
+	const { characterStore, characterInteractionActionStore, admin } = useCharacter();
 
 	const actions = $derived($characterInteractionActionStore.data[characterInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
@@ -68,7 +63,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createInteractionAction(characterInteractionId, {
+			await admin.createCharacterInteractionAction(characterInteractionId, {
 				root: false,
 			});
 		} catch (error) {
@@ -131,7 +126,10 @@
 								interactCharacterId={interaction.target_character_id}
 								interactCharacterBodyStateType={rootAction.target_character_body_state_type}
 								interactCharacterFaceStateType={rootAction.target_character_face_state_type}
-								interactCharacterOffset={{ x: rootAction.target_character_offset_x, y: rootAction.target_character_offset_y }}
+								interactCharacterOffset={{
+									x: rootAction.target_character_offset_x,
+									y: rootAction.target_character_offset_y,
+								}}
 								interactCharacterScale={rootAction.target_character_scale}
 								interactCharacterRotation={rootAction.target_character_rotation}
 								resolution={2}

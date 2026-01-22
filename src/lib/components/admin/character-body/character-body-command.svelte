@@ -16,16 +16,16 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { store, openDialog } = useCharacterBody();
+	const { characterBodyStore, openCharacterBodyDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBodyId = $derived(page.params.bodyId);
 
-	const bodies = $derived(alphabetical(Object.values($store.data), (b) => b.name));
+	const bodies = $derived(alphabetical(Object.values($characterBodyStore.data), (b) => b.name));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -60,7 +60,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openDialog({ type: 'delete', bodyId: body.id })}>
+								<DropdownMenuItem onclick={() => openCharacterBodyDialog({ type: 'delete', bodyId: body.id })}>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

@@ -57,7 +57,7 @@
 		)
 			return;
 
-		await admin.update(building.id, {
+		await admin.updateBuilding(building.id, {
 			cell_cols: newTileCols,
 			cell_rows: newTileRows,
 			collider_offset_x: newColliderOffsetX,
@@ -75,7 +75,7 @@
 	async function updateScale() {
 		const newScale = parseFloat(scale) || 1.0;
 		if (newScale === building.scale) return;
-		await admin.update(building.id, { scale: newScale });
+		await admin.updateBuilding(building.id, { scale: newScale });
 	}
 
 	function onkeydownScale(e: KeyboardEvent) {

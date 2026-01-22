@@ -12,7 +12,7 @@
 	import ConditionUpdateDialog from './condition-update-dialog.svelte';
 	import ConditionDeleteDialog from './condition-delete-dialog.svelte';
 
-	const { openDialog } = useCondition();
+	const { openConditionDialog } = useCondition();
 	const currentConditionId = $derived(page.params.conditionId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openConditionDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								disabled={!currentConditionId}
 								onclick={() =>
 									currentConditionId &&
-									openDialog({ type: 'update', conditionId: currentConditionId as ConditionId })}
+									openConditionDialog({ type: 'update', conditionId: currentConditionId as ConditionId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +80,7 @@
 							disabled={!currentConditionId}
 							onclick={() =>
 								currentConditionId &&
-								openDialog({ type: 'delete', conditionId: currentConditionId as ConditionId })}
+								openConditionDialog({ type: 'delete', conditionId: currentConditionId as ConditionId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

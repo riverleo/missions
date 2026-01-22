@@ -16,7 +16,7 @@
 	const { data, id, selected = false }: Props = $props();
 	const effect = $derived(data.effect);
 
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const { needStore } = useNeed();
 
 	const character = $derived(

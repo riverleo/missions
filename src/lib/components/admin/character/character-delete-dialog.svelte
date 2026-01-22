@@ -14,17 +14,17 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useCharacter();
+	const { admin, characterDialogStore, closeCharacterDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($characterDialogStore?.type === 'delete');
 	const characterId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.characterId : undefined
+		$characterDialogStore?.type === 'delete' ? $characterDialogStore.characterId : undefined
 	);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeCharacterDialog();
 		}
 	}
 
@@ -32,9 +32,9 @@
 		if (!characterId || !scenarioId) return;
 
 		admin
-			.remove(characterId)
+			.removeCharacter(characterId)
 			.then(() => {
-				closeDialog();
+				closeCharacterDialog();
 				goto(`/admin/scenarios/${scenarioId}/characters`);
 			})
 			.catch((error) => {

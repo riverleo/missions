@@ -24,7 +24,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
@@ -38,12 +38,12 @@
 		BuildingStateType,
 	} from '$lib/types';
 
-	const { dialogStore, closeDialog, admin } = useConditionBehavior();
+	const { conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { conditionStore } = useCondition();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($conditionBehaviorDialogStore?.type === 'create');
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (c) => c.name));
 
@@ -92,7 +92,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionBehaviorDialog();
 		}
 	}
 
@@ -103,7 +103,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({
+			.createConditionBehavior({
 				name: name.trim(),
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,
@@ -111,7 +111,7 @@
 				building_state_type: buildingStateType,
 			} as Omit<ConditionBehaviorInsert, 'scenario_id'>)
 			.then((behavior) => {
-				closeDialog();
+				closeConditionBehaviorDialog();
 				goto(`/admin/scenarios/${scenarioId}/condition-behaviors/${behavior.id}`);
 			})
 			.catch((error) => {

@@ -6,16 +6,16 @@
 
 	let { children } = $props();
 
-	const { store, fetchAll } = useScenario();
+	const { scenarioStore, fetchAll } = useScenario();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const isValidScenario = $derived(scenarioId ? !!$store.data?.[scenarioId] : false);
+	const isValidScenario = $derived(scenarioId ? !!$scenarioStore.data?.[scenarioId] : false);
 
 	// scenarioId 변경 시 fetchAll 호출 추적
 	let lastFetchedScenarioId: string | undefined;
 
 	$effect(() => {
-		if ($store.status === 'success' && scenarioId) {
+		if ($scenarioStore.status === 'success' && scenarioId) {
 			if (isValidScenario) {
 				// URL의 scenarioId가 유효하고 아직 fetch 안했으면 fetchAll 호출
 				if (lastFetchedScenarioId !== scenarioId) {

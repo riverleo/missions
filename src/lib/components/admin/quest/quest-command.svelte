@@ -24,8 +24,8 @@
 
 	const NO_CHAPTER = 'no-chapter';
 
-	const { questStore, openDialog } = useQuest();
-	const { store: chapterStore } = useChapter();
+	const { questStore, openQuestDialog } = useQuest();
+	const { chapterStore } = useChapter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentQuestId = $derived(page.params.questId);
 
@@ -100,17 +100,17 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'update', questId: quest.id })}
+										onclick={() => openQuestDialog({ type: 'update', questId: quest.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'publish', questId: quest.id })}
+										onclick={() => openQuestDialog({ type: 'publish', questId: quest.id })}
 									>
 										{quest.status === 'published' ? '작업중으로 전환' : '공개로 전환'}
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'delete', questId: quest.id })}
+										onclick={() => openQuestDialog({ type: 'delete', questId: quest.id })}
 									>
 										삭제
 									</DropdownMenuItem>

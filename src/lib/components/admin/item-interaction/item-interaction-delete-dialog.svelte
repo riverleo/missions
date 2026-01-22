@@ -13,12 +13,12 @@
 	import { useItem } from '$lib/hooks/use-item';
 	import type { ScenarioId } from '$lib/types';
 
-	const { interactionDialogStore, closeItemInteractionDialog, admin } = useItem();
+	const { itemInteractionDialogStore, closeItemInteractionDialog, admin } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($interactionDialogStore?.type === 'delete');
+	const open = $derived($itemInteractionDialogStore?.type === 'delete');
 	const interactionId = $derived(
-		$interactionDialogStore?.type === 'delete' ? $interactionDialogStore.interactionId : undefined
+		$itemInteractionDialogStore?.type === 'delete' ? $itemInteractionDialogStore.interactionId : undefined
 	);
 
 	let isSubmitting = $state(false);
@@ -36,7 +36,7 @@
 		isSubmitting = true;
 
 		try {
-			await admin.removeInteraction(interactionId);
+			await admin.removeItemInteraction(interactionId);
 			closeItemInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/item-interactions`);
 		} catch (error) {

@@ -23,6 +23,8 @@ function createTestWorldStore() {
 	}
 
 	function setSelectedTerrainId(terrainId: TerrainId) {
+		const { terrainStore } = useTerrain();
+
 		store.update((state) => {
 			const isSameTerrain = state.selectedTerrainId === terrainId;
 
@@ -38,7 +40,7 @@ function createTestWorldStore() {
 			}
 
 			// 새 terrain 선택 시 world 생성 또는 업데이트
-			const terrain = get(useTerrain().store).data[terrainId];
+			const terrain = get(terrainStore).data[terrainId];
 			if (!terrain) return state;
 
 			// world 생성 (worldTileMap 자동 생성됨)
@@ -122,7 +124,7 @@ function createTestWorldStore() {
 		}
 
 		// Player 로드
-		player.store.update((state) =>
+		player.playerStore.update((state) =>
 			produce(state, (draft) => {
 				draft.data[stored.player.id] = stored.player;
 				draft.status = 'success';

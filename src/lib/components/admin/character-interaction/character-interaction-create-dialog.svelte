@@ -15,10 +15,15 @@
 	import { alphabetical } from 'radash';
 	import type { CharacterId, CharacterBehaviorType, ScenarioId } from '$lib/types';
 
-	const { store: characterStore, interactionDialogStore, closeCharacterInteractionDialog, admin } = useCharacter();
+	const {
+		characterStore,
+		characterInteractionDialogStore,
+		closeCharacterInteractionDialog,
+		admin,
+	} = useCharacter();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const open = $derived($interactionDialogStore?.type === 'create');
+	const open = $derived($characterInteractionDialogStore?.type === 'create');
 
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
@@ -70,7 +75,7 @@
 		isSubmitting = true;
 
 		try {
-			const interaction = await admin.createInteraction({
+			const interaction = await admin.createCharacterInteraction({
 				target_character_id: targetCharacterId as CharacterId,
 				character_behavior_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,

@@ -5,9 +5,9 @@
 	import ItemActionPanel from '$lib/components/admin/item/item-action-panel.svelte';
 	import type { ItemId } from '$lib/types';
 
-	const { store } = useItem();
+	const { itemStore } = useItem();
 	const itemId = $derived(page.params.itemId as ItemId);
-	const item = $derived(itemId ? $store.data[itemId] : undefined);
+	const item = $derived(itemId ? $itemStore.data[itemId] : undefined);
 </script>
 
 {#if item && itemId}

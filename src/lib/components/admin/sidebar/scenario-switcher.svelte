@@ -18,11 +18,11 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
-	const { store, fetch, openDialog } = useScenario();
+	const { scenarioStore, fetch, openScenarioDialog } = useScenario();
 
-	const scenarios = $derived(Object.values($store.data));
+	const scenarios = $derived(Object.values($scenarioStore.data));
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const currentScenario = $derived(scenarioId ? $store.data[scenarioId] : undefined);
+	const currentScenario = $derived(scenarioId ? $scenarioStore.data[scenarioId] : undefined);
 
 	onMount(() => {
 		fetch();
@@ -35,19 +35,19 @@
 	}
 
 	function onclickCreate() {
-		openDialog({ type: 'create' });
+		openScenarioDialog({ type: 'create' });
 	}
 
 	function onclickUpdate(scenarioId: ScenarioId) {
-		openDialog({ type: 'update', scenarioId });
+		openScenarioDialog({ type: 'update', scenarioId });
 	}
 
 	function onclickDelete(scenarioId: ScenarioId) {
-		openDialog({ type: 'delete', scenarioId });
+		openScenarioDialog({ type: 'delete', scenarioId });
 	}
 
 	function onclickPublish(scenarioId: ScenarioId) {
-		openDialog({ type: 'publish', scenarioId });
+		openScenarioDialog({ type: 'publish', scenarioId });
 	}
 </script>
 

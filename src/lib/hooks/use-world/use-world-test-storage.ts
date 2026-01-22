@@ -93,12 +93,12 @@ export function save(state: StoredState) {
 
 		// usePlayer 스토어에서 TEST_PLAYER_ID와 관련된 데이터만 가져오기
 		const player = usePlayer();
-		const players = get(player.store).data;
+		const players = get(player.playerStore).data;
 		const playerScenarios = get(player.playerScenarioStore).data;
 
 		// useCurrent에서 tick 값 가져오기
 		const current = useCurrent();
-		const currentTick = get(current.tick);
+		const currentTick = get(current.tickStore);
 
 		const testWorld = worlds[TEST_WORLD_ID];
 		const testWorldCharacters: Record<WorldCharacterId, WorldCharacter> = {};

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 
-	const { store } = useCharacterBody();
-	const bodies = $derived(Object.values($store.data));
+	const { characterBodyStore } = useCharacter();
+	const bodies = $derived(Object.values($characterBodyStore.data));
 </script>
 
 <div class="flex h-full items-center justify-center">

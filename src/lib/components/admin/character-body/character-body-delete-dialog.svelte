@@ -10,23 +10,28 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
-	const { store, dialogStore, closeDialog, admin } = useCharacterBody();
+	const { characterBodyStore, characterBodyDialogStore, closeCharacterBodyDialog, admin } =
+		useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBodyId = $derived(page.params.bodyId);
 
 	const deleteState = $derived(
-		$dialogStore?.type === 'delete' ? { open: true, bodyId: $dialogStore.bodyId } : undefined
+		$characterBodyDialogStore?.type === 'delete'
+			? { open: true, bodyId: $characterBodyDialogStore.bodyId }
+			: undefined
 	);
 	const open = $derived(deleteState?.open ?? false);
-	const bodyToDelete = $derived(deleteState ? $store.data[deleteState.bodyId] : undefined);
+	const bodyToDelete = $derived(
+		deleteState ? $characterBodyStore.data[deleteState.bodyId] : undefined
+	);
 
 	let isDeleting = $state(false);
 
 	function onOpenChange(value: boolean) {
-		if (!value) closeDialog();
+		if (!value) closeCharacterBodyDialog();
 	}
 
 	async function onclickDelete() {
@@ -34,8 +39,8 @@
 
 		isDeleting = true;
 		try {
-			await admin.remove(deleteState.bodyId);
-			closeDialog();
+			await admin.removeCharacterBody(deleteState.bodyId);
+			closeCharacterBodyDialog();
 			if (currentBodyId === deleteState.bodyId) {
 				goto(`/admin/scenarios/${scenarioId}/character-bodies`);
 			}

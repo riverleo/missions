@@ -18,10 +18,10 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useNeed } from '$lib/hooks/use-need';
 
-	const { needStore, dialogStore, closeDialog, admin } = useNeed();
+	const { needStore, needDialogStore, closeNeedDialog, admin } = useNeed();
 
-	const open = $derived($dialogStore?.type === 'update');
-	const needId = $derived($dialogStore?.type === 'update' ? $dialogStore.needId : undefined);
+	const open = $derived($needDialogStore?.type === 'update');
+	const needId = $derived($needDialogStore?.type === 'update' ? $needDialogStore.needId : undefined);
 	const currentNeed = $derived(needId ? $needStore.data[needId] : undefined);
 
 	let name = $state('');
@@ -41,7 +41,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedDialog();
 		}
 	}
 
@@ -59,7 +59,7 @@
 				decrease_per_tick: decreasePerTick,
 			})
 			.then(() => {
-				closeDialog();
+				closeNeedDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update need:', error);

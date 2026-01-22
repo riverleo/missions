@@ -36,18 +36,16 @@
 
 	let { interaction, interactionId }: Props = $props();
 
-	const { store, characterInteractionActionStore, openCharacterInteractionDialog, admin } = useCharacter();
-	const { store: characterStore } = useCharacter();
+	const { characterStore, characterInteractionActionStore, openCharacterInteractionDialog, admin } =
+		useCharacter();
 
-	const targetCharacter = $derived($store.data[interaction.target_character_id]);
+	const targetCharacter = $derived($characterStore.data[interaction.target_character_id]);
 	const actions = $derived($characterInteractionActionStore.data[interactionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
 
-	let characterBehaviorType = $state<CharacterBehaviorType>(
-		interaction.character_behavior_type
-	);
+	let characterBehaviorType = $state<CharacterBehaviorType>(interaction.character_behavior_type);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
 	const selectedCharacter = $derived.by(() => {
@@ -56,14 +54,14 @@
 	});
 
 	async function updateInteraction() {
-		await admin.updateInteraction(interactionId, {
+		await admin.updateCharacterInteraction(interactionId, {
 			character_behavior_type: characterBehaviorType,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
 
 	async function createAction() {
-		await admin.createInteractionAction(interactionId, {
+		await admin.createCharacterInteractionAction(interactionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -72,11 +70,11 @@
 		actionId: CharacterInteractionActionId,
 		updates: Partial<CharacterInteractionAction>
 	) {
-		await admin.updateInteractionAction(actionId, interactionId, updates);
+		await admin.updateCharacterInteractionAction(actionId, interactionId, updates);
 	}
 
 	async function removeAction(actionId: CharacterInteractionActionId) {
-		await admin.removeInteractionAction(actionId, interactionId);
+		await admin.removeCharacterInteractionAction(actionId, interactionId);
 	}
 
 	function getBehaviorLabel(type: string) {
@@ -178,7 +176,7 @@
 								}}
 							>
 								<DropdownMenuRadioItem value="">모든 캐릭터</DropdownMenuRadioItem>
-								{#each characters as character: Character (character.id)}
+								{#each characters as character (character.id)}
 									<DropdownMenuRadioItem value={character.id}>
 										{character.name}
 									</DropdownMenuRadioItem>
@@ -218,11 +216,7 @@
 								/>
 								<span class="text-sm font-medium">Root</span>
 							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								onclick={() => removeAction(action.id)}
-							>
+							<Button variant="ghost" size="sm" onclick={() => removeAction(action.id)}>
 								<IconTrash class="size-4" />
 							</Button>
 						</div>

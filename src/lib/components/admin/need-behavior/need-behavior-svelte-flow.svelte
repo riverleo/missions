@@ -14,7 +14,7 @@
 	import { mode } from 'mode-watcher';
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { createActionNodeId, parseActionNodeId, isActionNextEdgeId } from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
@@ -22,7 +22,7 @@
 	import NeedBehaviorActionNodePanel from './need-behavior-action-node-panel.svelte';
 	import type { NeedBehaviorId, NeedBehaviorActionId } from '$lib/types';
 
-	const { needBehaviorStore, needBehaviorActionStore, admin } = useNeedBehavior();
+	const { needBehaviorStore, needBehaviorActionStore, admin } = useBehavior();
 
 	const needBehaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);

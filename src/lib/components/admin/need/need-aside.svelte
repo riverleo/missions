@@ -12,7 +12,7 @@
 	import NeedUpdateDialog from './need-update-dialog.svelte';
 	import NeedDeleteDialog from './need-delete-dialog.svelte';
 
-	const { openDialog } = useNeed();
+	const { openNeedDialog } = useNeed();
 	const currentNeedId = $derived(page.params.needId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openNeedDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -58,7 +58,7 @@
 								size="icon"
 								disabled={!currentNeedId}
 								onclick={() =>
-									currentNeedId && openDialog({ type: 'update', needId: currentNeedId as NeedId })}
+									currentNeedId && openNeedDialog({ type: 'update', needId: currentNeedId as NeedId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -78,7 +78,7 @@
 							size="icon"
 							disabled={!currentNeedId}
 							onclick={() =>
-								currentNeedId && openDialog({ type: 'delete', needId: currentNeedId as NeedId })}
+								currentNeedId && openNeedDialog({ type: 'delete', needId: currentNeedId as NeedId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

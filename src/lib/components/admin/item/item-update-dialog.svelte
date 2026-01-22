@@ -16,11 +16,11 @@
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { useItem } from '$lib/hooks/use-item';
 
-	const { store, admin, dialogStore, closeDialog } = useItem();
+	const { itemStore, admin, itemDialogStore, closeItemDialog } = useItem();
 
-	const open = $derived($dialogStore?.type === 'update');
-	const itemId = $derived($dialogStore?.type === 'update' ? $dialogStore.itemId : undefined);
-	const item = $derived(itemId ? $store.data[itemId] : undefined);
+	const open = $derived($itemDialogStore?.type === 'update');
+	const itemId = $derived($itemDialogStore?.type === 'update' ? $itemDialogStore.itemId : undefined);
+	const item = $derived(itemId ? $itemStore.data[itemId] : undefined);
 
 	let name = $state('');
 	let maxDurabilityTicks = $state<number | undefined>(undefined);
@@ -35,7 +35,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeItemDialog();
 		}
 	}
 
@@ -46,12 +46,12 @@
 		isSubmitting = true;
 
 		admin
-			.update(itemId, {
+			.updateItem(itemId, {
 				name: name.trim(),
 				max_durability_ticks: maxDurabilityTicks ?? null,
 			})
 			.then(() => {
-				closeDialog();
+				closeItemDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update item:', error);

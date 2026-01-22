@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => admin.openDialog({ type: 'create' })}
+								onclick={() => admin.openNarrativeDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								disabled={!currentNarrativeId}
 								onclick={() =>
 									currentNarrativeId &&
-									admin.openDialog({
+									admin.openNarrativeDialog({
 										type: 'update',
 										narrativeId: currentNarrativeId as NarrativeId,
 									})}
@@ -83,7 +83,7 @@
 							disabled={!currentNarrativeId}
 							onclick={() =>
 								currentNarrativeId &&
-								admin.openDialog({
+								admin.openNarrativeDialog({
 									type: 'delete',
 									narrativeId: currentNarrativeId as NarrativeId,
 								})}

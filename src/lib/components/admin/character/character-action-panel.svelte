@@ -22,7 +22,7 @@
 
 	const bodyStateTypes: CharacterBodyStateType[] = ['idle', 'walk', 'run', 'jump', 'pick'];
 
-	const uiStore = admin.uiStore;
+	const uiStore = admin.characterUiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
 	const selectedBodyStateLabel = $derived(getCharacterBodyStateLabel(previewBodyStateType));
 
@@ -36,7 +36,7 @@
 	async function updateScale() {
 		const newScale = parseFloat(scale) || 1.0;
 		if (newScale === character.scale) return;
-		await admin.update(character.id, { scale: newScale });
+		await admin.updateCharacter(character.id, { scale: newScale });
 	}
 
 	function onkeydownScale(e: KeyboardEvent) {

@@ -103,7 +103,7 @@
 			const sourceId = parseBuildingInteractionActionNodeId(connection.source);
 			const targetId = parseBuildingInteractionActionNodeId(connection.target);
 
-			await admin.updateInteractionAction(
+			await admin.updateBuildingInteractionAction(
 				sourceId as BuildingInteractionActionId,
 				buildingInteractionId,
 				{
@@ -157,12 +157,12 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createInteractionAction(buildingInteractionId, {
+			const newAction = await admin.createBuildingInteractionAction(buildingInteractionId, {
 				root: false,
 			});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
-			await admin.updateInteractionAction(
+			await admin.updateBuildingInteractionAction(
 				fromActionId as BuildingInteractionActionId,
 				buildingInteractionId,
 				{
@@ -198,7 +198,7 @@
 			for (const edge of edgesToDelete) {
 				const sourceId = parseBuildingInteractionActionNodeId(edge.source);
 
-				await admin.updateInteractionAction(
+				await admin.updateBuildingInteractionAction(
 					sourceId as BuildingInteractionActionId,
 					buildingInteractionId,
 					{
@@ -211,7 +211,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseBuildingInteractionActionNodeId(node.id);
-					await admin.removeInteractionAction(
+					await admin.removeBuildingInteractionAction(
 						actionId as BuildingInteractionActionId,
 						buildingInteractionId
 					);

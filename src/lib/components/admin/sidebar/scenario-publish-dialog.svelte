@@ -11,29 +11,31 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { useScenario } from '$lib/hooks/use-scenario';
 
-	const { store, admin, dialogStore, closeDialog } = useScenario();
+	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 
-	const open = $derived($dialogStore?.type === 'publish');
+	const open = $derived($scenarioDialogStore?.type === 'publish');
 	const scenarioId = $derived(
-		$dialogStore?.type === 'publish' ? $dialogStore.scenarioId : undefined
+		$scenarioDialogStore?.type === 'publish' ? $scenarioDialogStore.scenarioId : undefined
 	);
-	const currentScenario = $derived(scenarioId ? $store.data?.[scenarioId] : undefined);
+	const currentScenario = $derived(scenarioId ? $scenarioStore.data?.[scenarioId] : undefined);
 	const isPublished = $derived(currentScenario?.status === 'published');
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeScenarioDialog();
 		}
 	}
 
 	function onclick() {
 		if (!scenarioId) return;
 
-		const action = isPublished ? admin.unpublish(scenarioId) : admin.publish(scenarioId);
+		const action = isPublished
+			? admin.unpublishScenario(scenarioId)
+			: admin.publishScenario(scenarioId);
 
 		action
 			.then(() => {
-				closeDialog();
+				closeScenarioDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to toggle publish:', error);

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useTerrain } from '$lib/hooks/use-terrain';
 
-	const { store } = useTerrain();
-	const terrains = $derived(Object.values($store.data));
+	const { terrainStore } = useTerrain();
+	const terrains = $derived(Object.values($terrainStore.data));
 </script>
 
 <div class="flex h-full items-center justify-center">

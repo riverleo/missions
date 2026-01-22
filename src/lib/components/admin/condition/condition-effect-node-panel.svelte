@@ -26,7 +26,7 @@
 	let { effect: conditionEffect }: Props = $props();
 
 	const { admin } = useCondition();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const { needStore } = useNeed();
 	const flowNodes = useNodes();
 

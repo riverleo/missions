@@ -12,7 +12,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
 	import {
@@ -32,11 +32,11 @@
 
 	let { bodyId, type }: Props = $props();
 
-	const { store, bodyStateStore, admin } = useCharacterBody();
-	const { uiStore } = admin;
+	const { characterBodyStore, characterBodyStateStore, admin } = useCharacter();
+	const { characterUiStore } = admin;
 
-	const body = $derived($store.data[bodyId]);
-	const bodyStates = $derived($bodyStateStore.data[bodyId] ?? []);
+	const body = $derived($characterBodyStore.data[bodyId]);
+	const bodyStates = $derived($characterBodyStateStore.data[bodyId] ?? []);
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
 	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
@@ -81,7 +81,7 @@
 		if (change.atlas_name && body && body.collider_width === 0 && body.collider_height === 0) {
 			const metadata = atlases[change.atlas_name];
 			if (metadata) {
-				await admin.update(bodyId, {
+				await admin.updateCharacterBody(bodyId, {
 					collider_width: metadata.frameWidth / 2,
 					collider_height: metadata.frameHeight / 2,
 				});
@@ -175,7 +175,7 @@
 		{/if}
 	{/snippet}
 	{#snippet collider()}
-		{#if $uiStore.showBodyPreview && body && (body.collider_width > 0 || body.collider_height > 0)}
+		{#if $characterUiStore.showBodyPreview && body && (body.collider_width > 0 || body.collider_height > 0)}
 			<svg
 				width={body.collider_width}
 				height={body.collider_height}

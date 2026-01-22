@@ -14,10 +14,10 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { dialogStore, closeDialog, admin } = useCondition();
+	const { conditionDialogStore, closeConditionDialog, admin } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($conditionDialogStore?.type === 'create');
 
 	let name = $state('');
 	let isSubmitting = $state(false);
@@ -30,7 +30,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionDialog();
 		}
 	}
 
@@ -43,7 +43,7 @@
 		admin
 			.createCondition({ name: name.trim() })
 			.then((condition) => {
-				closeDialog();
+				closeConditionDialog();
 				goto(`/admin/scenarios/${scenarioId}/conditions/${condition.id}`);
 			})
 			.catch((error) => {

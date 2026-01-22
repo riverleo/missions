@@ -4,14 +4,11 @@ import { useQuest } from './use-quest';
 import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
-import { useCharacterBody } from './use-character-body';
 import { useBuilding } from './use-building';
 import { useNeed } from './use-need';
-import { useNeedBehavior } from './use-need-behavior';
-import { useConditionBehavior } from './use-condition-behavior';
+import { useBehavior } from './use-behavior';
 import { useCondition } from './use-condition';
 import { useItem } from './use-item';
-import { useBehaviorPriority } from './use-behavior-priority';
 import { useWorld } from './use-world';
 
 /**
@@ -24,13 +21,10 @@ export function init() {
 	useChapter().init();
 	useTerrain().init();
 	useCharacter().init();
-	useCharacterBody().init();
 	useBuilding().init();
 	useNeed().init();
-	useNeedBehavior().init();
-	useConditionBehavior().init();
+	useBehavior().init();
 	useCondition().init();
 	useItem().init();
-	useBehaviorPriority().init();
 	useWorld().init();
 }

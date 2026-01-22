@@ -16,13 +16,13 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 
-	const { store, admin, dialogStore, closeDialog } = useBuilding();
+	const { buildingStore, admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($buildingDialogStore?.type === 'update');
 	const buildingId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.buildingId : undefined
+		$buildingDialogStore?.type === 'update' ? $buildingDialogStore.buildingId : undefined
 	);
-	const building = $derived(buildingId ? $store.data[buildingId] : undefined);
+	const building = $derived(buildingId ? $buildingStore.data[buildingId] : undefined);
 
 	let name = $state('');
 	let itemMaxCapacity = $state('');
@@ -38,7 +38,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeBuildingDialog();
 		}
 	}
 
@@ -51,12 +51,12 @@
 		const capacity = parseInt(itemMaxCapacity) || 0;
 
 		admin
-			.update(buildingId, {
+			.updateBuilding(buildingId, {
 				name: name.trim(),
 				item_max_capacity: capacity,
 			})
 			.then(() => {
-				closeDialog();
+				closeBuildingDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update building:', error);

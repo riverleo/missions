@@ -13,18 +13,18 @@
 	import { useNeed } from '$lib/hooks/use-need';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needStore, dialogStore, closeDialog, admin } = useNeed();
+	const { needStore, needDialogStore, closeNeedDialog, admin } = useNeed();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const needId = $derived($dialogStore?.type === 'delete' ? $dialogStore.needId : undefined);
+	const needId = $derived($needDialogStore?.type === 'delete' ? $needDialogStore.needId : undefined);
 	const need = $derived(needId ? $needStore.data[needId] : undefined);
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($needDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedDialog();
 		}
 	}
 
@@ -37,7 +37,7 @@
 		admin
 			.removeNeed(needId)
 			.then(() => {
-				closeDialog();
+				closeNeedDialog();
 				goto(`/admin/scenarios/${scenarioId}/needs`);
 			})
 			.catch((error) => {
@@ -59,7 +59,7 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeNeedDialog()}>취소</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

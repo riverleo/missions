@@ -5,9 +5,9 @@
 	import CharacterFaceStateItemGroup from '$lib/components/admin/character/character-face-state-item-group.svelte';
 	import type { CharacterId } from '$lib/types';
 
-	const { store } = useCharacter();
+	const { characterStore } = useCharacter();
 	const characterId = $derived(page.params.characterId as CharacterId);
-	const character = $derived(characterId ? $store.data[characterId] : undefined);
+	const character = $derived(characterId ? $characterStore.data[characterId] : undefined);
 </script>
 
 {#if character && characterId}

@@ -17,7 +17,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
@@ -29,7 +29,7 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { conditionBehaviorActionStore, admin } = useConditionBehavior();
+	const { conditionBehaviorActionStore, admin } = useBehavior();
 	const flowNodes = useNodes();
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [

@@ -36,18 +36,17 @@
 
 	let { interaction, interactionId }: Props = $props();
 
-	const { store, buildingInteractionActionStore, openBuildingInteractionDialog, admin } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { buildingStore, buildingInteractionActionStore, openBuildingInteractionDialog, admin } =
+		useBuilding();
+	const { characterStore } = useCharacter();
 
-	const building = $derived($store.data[interaction.building_id]);
+	const building = $derived($buildingStore.data[interaction.building_id]);
 	const actions = $derived($buildingInteractionActionStore.data[interactionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a) => a.root));
 
-	let characterBehaviorType = $state<CharacterBehaviorType>(
-		interaction.character_behavior_type
-	);
+	let characterBehaviorType = $state<CharacterBehaviorType>(interaction.character_behavior_type);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
 	const selectedCharacter = $derived.by(() => {
@@ -56,14 +55,14 @@
 	});
 
 	async function updateInteraction() {
-		await admin.updateInteraction(interactionId, {
+		await admin.updateBuildingInteraction(interactionId, {
 			character_behavior_type: characterBehaviorType,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
 
 	async function createAction() {
-		await admin.createInteractionAction(interactionId, {
+		await admin.createBuildingInteractionAction(interactionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -72,11 +71,11 @@
 		actionId: BuildingInteractionActionId,
 		updates: Partial<BuildingInteractionAction>
 	) {
-		await admin.updateInteractionAction(actionId, interactionId, updates);
+		await admin.updateBuildingInteractionAction(actionId, interactionId, updates);
 	}
 
 	async function removeAction(actionId: BuildingInteractionActionId) {
-		await admin.removeInteractionAction(actionId, interactionId);
+		await admin.removeBuildingInteractionAction(actionId, interactionId);
 	}
 
 	function getBehaviorLabel(type: string) {
@@ -218,11 +217,7 @@
 								/>
 								<span class="text-sm font-medium">Root</span>
 							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								onclick={() => removeAction(action.id)}
-							>
+							<Button variant="ghost" size="sm" onclick={() => removeAction(action.id)}>
 								<IconTrash class="size-4" />
 							</Button>
 						</div>

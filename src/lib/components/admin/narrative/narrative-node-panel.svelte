@@ -82,11 +82,13 @@
 					(n) => n.narrative_id === narrativeId && n.id !== nodeId && n.root
 				);
 				// 다른 root 노드들을 먼저 해제
-				await Promise.all(otherRootNodes.map((n) => admin.updateNode(n.id, { root: false })));
+				await Promise.all(
+					otherRootNodes.map((n) => admin.updateNarrativeNode(n.id, { root: false }))
+				);
 			}
 
 			// 2. 기본 정보 업데이트
-			await admin.updateNode(nodeId, {
+			await admin.updateNarrativeNode(nodeId, {
 				title: changes.title,
 				description: changes.description,
 				type: changes.type,
@@ -101,12 +103,14 @@
 			// 4. 선택지가 choice 타입이고 변경사항이 있으면 벌크 업데이트
 			if (changes.type === 'choice' && narrativeNodeChoicesChanges) {
 				await Promise.all([
-					...narrativeNodeChoicesChanges.created.map((choice) => admin.createChoice(choice)),
+					...narrativeNodeChoicesChanges.created.map((choice) =>
+						admin.createNarrativeNodeChoice(choice)
+					),
 					...narrativeNodeChoicesChanges.updated.map((choice) =>
-						admin.updateChoice(choice.id as NarrativeNodeChoiceId, choice)
+						admin.updateNarrativeNodeChoice(choice.id as NarrativeNodeChoiceId, choice)
 					),
 					...narrativeNodeChoicesChanges.deleted.map((id) =>
-						admin.removeChoice(id as NarrativeNodeChoiceId)
+						admin.removeNarrativeNodeChoice(id as NarrativeNodeChoiceId)
 					),
 				]);
 			}

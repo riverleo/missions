@@ -59,12 +59,18 @@
 	const selectedNode = $derived(flowNodes.current.find((n) => n.selected));
 	const selectedAction = $derived(
 		selectedNode?.type === 'action'
-			? actions.find((a: CharacterInteractionAction) => a.id === parseCharacterInteractionActionNodeId(selectedNode.id))
+			? actions.find(
+					(a: CharacterInteractionAction) =>
+						a.id === parseCharacterInteractionActionNodeId(selectedNode.id)
+				)
 			: undefined
 	);
 	const selectedActionHasParent = $derived(
 		selectedAction
-			? actions.some((a: CharacterInteractionAction) => a.next_character_interaction_action_id === selectedAction.id)
+			? actions.some(
+					(a: CharacterInteractionAction) =>
+						a.next_character_interaction_action_id === selectedAction.id
+				)
 			: false
 	);
 
@@ -105,7 +111,7 @@
 			const sourceId = parseCharacterInteractionActionNodeId(connection.source);
 			const targetId = parseCharacterInteractionActionNodeId(connection.target);
 
-			await admin.updateInteractionAction(
+			await admin.updateCharacterInteractionAction(
 				sourceId as CharacterInteractionActionId,
 				characterInteractionId,
 				{
@@ -159,12 +165,12 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createInteractionAction(characterInteractionId, {
+			const newAction = await admin.createCharacterInteractionAction(characterInteractionId, {
 				root: false,
 			});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
-			await admin.updateInteractionAction(
+			await admin.updateCharacterInteractionAction(
 				fromActionId as CharacterInteractionActionId,
 				characterInteractionId,
 				{
@@ -200,7 +206,7 @@
 			for (const edge of edgesToDelete) {
 				const sourceId = parseCharacterInteractionActionNodeId(edge.source);
 
-				await admin.updateInteractionAction(
+				await admin.updateCharacterInteractionAction(
 					sourceId as CharacterInteractionActionId,
 					characterInteractionId,
 					{
@@ -213,7 +219,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseCharacterInteractionActionNodeId(node.id);
-					await admin.removeInteractionAction(
+					await admin.removeCharacterInteractionAction(
 						actionId as CharacterInteractionActionId,
 						characterInteractionId
 					);
@@ -245,7 +251,9 @@
 			const col = index % 3;
 
 			// 이 액션을 가리키는 부모 액션 찾기
-			const parentAction = actions.find((a: CharacterInteractionAction) => a.next_character_interaction_action_id === action.id);
+			const parentAction = actions.find(
+				(a: CharacterInteractionAction) => a.next_character_interaction_action_id === action.id
+			);
 
 			newNodes.push({
 				id: createCharacterInteractionActionNodeId(action),
@@ -259,7 +267,9 @@
 		// 다음 액션 엣지
 		actions.forEach((action: CharacterInteractionAction) => {
 			if (action.next_character_interaction_action_id) {
-				const targetAction = actions.find((a: CharacterInteractionAction) => a.id === action.next_character_interaction_action_id);
+				const targetAction = actions.find(
+					(a: CharacterInteractionAction) => a.id === action.next_character_interaction_action_id
+				);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createCharacterInteractionActionNodeId(action)}-next-${createCharacterInteractionActionNodeId(targetAction)}`,

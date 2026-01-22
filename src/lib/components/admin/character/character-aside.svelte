@@ -12,7 +12,7 @@
 	import CharacterUpdateDialog from './character-update-dialog.svelte';
 	import CharacterDeleteDialog from './character-delete-dialog.svelte';
 
-	const { openDialog } = useCharacter();
+	const { openCharacterDialog } = useCharacter();
 	const currentCharacterId = $derived(page.params.characterId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openCharacterDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								disabled={!currentCharacterId}
 								onclick={() =>
 									currentCharacterId &&
-									openDialog({ type: 'update', characterId: currentCharacterId as CharacterId })}
+									openCharacterDialog({ type: 'update', characterId: currentCharacterId as CharacterId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +80,7 @@
 							disabled={!currentCharacterId}
 							onclick={() =>
 								currentCharacterId &&
-								openDialog({ type: 'delete', characterId: currentCharacterId as CharacterId })}
+								openCharacterDialog({ type: 'delete', characterId: currentCharacterId as CharacterId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

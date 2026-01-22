@@ -32,7 +32,7 @@
 	const world = useWorldContext();
 	const { camera, event } = world;
 	const { worldStore } = useWorld();
-	const { store: terrainStore } = useTerrain();
+	const { terrainStore } = useTerrain();
 	const { supabase } = useApp();
 
 	// terrain을 terrainStore에서 구독

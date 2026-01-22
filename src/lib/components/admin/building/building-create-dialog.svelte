@@ -19,10 +19,10 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useBuilding();
+	const { admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($buildingDialogStore?.type === 'create');
 
 	let name = $state('');
 	let itemMaxCapacity = $state('');
@@ -37,7 +37,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeBuildingDialog();
 		}
 	}
 
@@ -50,12 +50,12 @@
 		const capacity = parseInt(itemMaxCapacity) || 0;
 
 		admin
-			.create({
+			.createBuilding({
 				name: name.trim(),
 				item_max_capacity: capacity,
 			})
 			.then((building) => {
-				closeDialog();
+				closeBuildingDialog();
 				goto(`/admin/scenarios/${scenarioId}/buildings/${building.id}`);
 			})
 			.catch((error) => {

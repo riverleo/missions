@@ -1,6 +1,7 @@
 import { get } from 'svelte/store';
 import type {
 	PlayerRolledDice,
+	PlayerRolledDiceId,
 	NarrativeNodeId,
 	NarrativeNodeChoiceId,
 	NarrativeDiceRollId,
@@ -12,7 +13,7 @@ import type {
 } from '$lib/types';
 import { useCurrent } from '../use-current';
 import { useApp } from '../use-app.svelte';
-import { useAdmin } from '../use-admin';
+import { TEST_PLAYER_ID } from '$lib/constants';
 
 interface Params {
 	narrativeStore: NarrativeStore;
@@ -45,22 +46,20 @@ export const run = (params: Params) => (narrativeNodeId: string) => {
  * - DB에 `player_rolled_dices` 레코드 생성 (`value`는 DB 트리거가 자동 생성)
  * - 결과를 `playStore.playerRolledDice`에 저장
  * - `narrativeDiceRoll`이 설정되어 있어야 호출 가능
- * - 어드민 모드에서는 DB 저장 없이 로컬에서 랜덤 값 생성
+ * - 어드민 role에서는 DB 저장 없이 로컬에서 랜덤 값 생성
  */
 export const roll = (params: Params) => {
 	const { playStore } = params;
 
-	// `useApp`, `useCurrent`, `useAdmin`은 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
+	// `useApp`, `useCurrent`은 `getContext`를 사용하므로 컴포넌트 초기화 시점에만 호출 가능
 	// async 함수 내부에서 호출하면 `lifecycle_outside_component` 에러 발생
 	const { supabase } = useApp();
 	const current = useCurrent();
-	const { store: adminStore, mock } = useAdmin();
 
 	return async (): Promise<PlayerRolledDice | undefined> => {
-		const user = get(current.user);
-		const player = get(current.player);
+		const user = get(current.userStore);
+		const player = get(current.playerStore);
 		const { narrativeNode, narrativeDiceRoll } = get(playStore);
-		const { mode } = get(adminStore);
 
 		if (!user?.id || !player?.id || !narrativeNode || !narrativeDiceRoll) {
 			console.warn('Missing required data:', {
@@ -74,9 +73,25 @@ export const roll = (params: Params) => {
 
 		let playerRolledDice: PlayerRolledDice | undefined;
 
-		// 어드민 모드: DB 저장 없이 로컬에서 랜덤 값 생성
-		if (mode === 'admin') {
-			playerRolledDice = mock.playerRolledDice({ narrativeNode, narrativeDiceRoll });
+		// 어드민 role: DB 저장 없이 로컬에서 랜덤 값 생성
+		if (player.id === TEST_PLAYER_ID) {
+			playerRolledDice = {
+				id: crypto.randomUUID() as PlayerRolledDiceId,
+				created_at: new Date().toISOString(),
+				user_id: user.id,
+				player_id: player.id,
+				narrative_id: narrativeNode.narrative_id,
+				narrative_node_id: narrativeNode.id,
+				narrative_dice_roll_id: narrativeDiceRoll.id,
+				dice_id: null,
+				narrative_node_choice_id: null,
+				player_quest_branch_id: null,
+				player_quest_id: null,
+				scenario_id: null,
+				quest_branch_id: null,
+				quest_id: null,
+				value: Math.floor(Math.random() * 20) + 1, // 1-20 (d20)
+			} as PlayerRolledDice;
 		} else {
 			const { data, error } = await supabase
 				.from('player_rolled_dices')

@@ -69,7 +69,8 @@ function createWorldStore() {
 
 		try {
 			// Player 조회
-			const player = get(useCurrent().player);
+			const { playerStore } = useCurrent();
+			const player = get(playerStore);
 			if (!player) return;
 
 			// World 조회 (player_id로 필터링)
@@ -96,7 +97,10 @@ function createWorldStore() {
 			// WorldCharacter 조회 (player_id로 필터링, needs와 함께)
 			const { data: characterData, error: characterError } = await supabase
 				.from('world_characters')
-				.select<'*, needs:world_character_needs(*)', WorldCharacter>('*, needs:world_character_needs(*)')
+				.select<
+					'*, needs:world_character_needs(*)',
+					WorldCharacter
+				>('*, needs:world_character_needs(*)')
 				.eq('player_id', player.id);
 
 			if (characterError) throw characterError;
@@ -117,7 +121,10 @@ function createWorldStore() {
 			// WorldBuilding 조회 (player_id로 필터링, conditions와 함께)
 			const { data: buildingData, error: buildingError } = await supabase
 				.from('world_buildings')
-				.select<'*, conditions:world_building_conditions(*)', WorldBuilding>('*, conditions:world_building_conditions(*)')
+				.select<
+					'*, conditions:world_building_conditions(*)',
+					WorldBuilding
+				>('*, conditions:world_building_conditions(*)')
 				.eq('player_id', player.id);
 
 			if (buildingError) throw buildingError;

@@ -10,7 +10,7 @@
 
 	let { entity }: Props = $props();
 
-	const { store: buildingStore } = useBuilding();
+	const { buildingStore: buildingStore } = useBuilding();
 	const { worldBuildingStore, selectedEntityIdStore } = useWorld();
 
 	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);

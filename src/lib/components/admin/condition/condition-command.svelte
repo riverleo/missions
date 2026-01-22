@@ -21,7 +21,7 @@
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionStore, openDialog } = useCondition();
+	const { conditionStore, openConditionDialog } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentConditionId = $derived(page.params.conditionId);
 
@@ -64,7 +64,7 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', conditionId: condition.id })}
+									onclick={() => openConditionDialog({ type: 'delete', conditionId: condition.id })}
 								>
 									삭제
 								</DropdownMenuItem>

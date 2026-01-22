@@ -13,7 +13,7 @@
 	import ItemDeleteDialog from './item-delete-dialog.svelte';
 	import ItemStateUpdateDialog from './item-state-update-dialog.svelte';
 
-	const { openDialog } = useItem();
+	const { openItemDialog } = useItem();
 	const currentItemId = $derived(page.params.itemId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -42,7 +42,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openItemDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								size="icon"
 								disabled={!currentItemId}
 								onclick={() =>
-									currentItemId && openDialog({ type: 'update', itemId: currentItemId as ItemId })}
+									currentItemId && openItemDialog({ type: 'update', itemId: currentItemId as ItemId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +79,7 @@
 							size="icon"
 							disabled={!currentItemId}
 							onclick={() =>
-								currentItemId && openDialog({ type: 'delete', itemId: currentItemId as ItemId })}
+								currentItemId && openItemDialog({ type: 'delete', itemId: currentItemId as ItemId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

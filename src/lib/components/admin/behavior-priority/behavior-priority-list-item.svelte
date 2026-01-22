@@ -8,8 +8,7 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useCondition } from '$lib/hooks/use-condition';
@@ -27,10 +26,9 @@
 
 	let { priority, isFirst, isLast, onmoveup, onmovedown, onremove }: Props = $props();
 
-	const { needBehaviorStore } = useNeedBehavior();
-	const { conditionBehaviorStore } = useConditionBehavior();
+	const { needBehaviorStore, conditionBehaviorStore } = useBehavior();
 	const { needStore } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const { conditionStore } = useCondition();
 
 	// behavior 타입 구분

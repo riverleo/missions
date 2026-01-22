@@ -11,13 +11,13 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
 
-	const { store, admin, dialogStore, closeDialog } = useScenario();
+	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($scenarioDialogStore?.type === 'update');
 	const scenarioId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.scenarioId : undefined
+		$scenarioDialogStore?.type === 'update' ? $scenarioDialogStore.scenarioId : undefined
 	);
-	const currentScenario = $derived(scenarioId ? $store.data?.[scenarioId] : undefined);
+	const currentScenario = $derived(scenarioId ? $scenarioStore.data?.[scenarioId] : undefined);
 
 	let title = $state('');
 	let isSubmitting = $state(false);
@@ -30,7 +30,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeScenarioDialog();
 		}
 	}
 
@@ -41,9 +41,9 @@
 		isSubmitting = true;
 
 		admin
-			.update(scenarioId, { title: title.trim() })
+			.updateScenario(scenarioId, { title: title.trim() })
 			.then(() => {
-				closeDialog();
+				closeScenarioDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update scenario:', error);

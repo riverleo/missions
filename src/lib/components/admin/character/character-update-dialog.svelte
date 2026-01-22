@@ -17,18 +17,17 @@
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import type { CharacterBodyId } from '$lib/types';
 
-	const { store, admin, dialogStore, closeDialog } = useCharacter();
-	const { store: bodyStore } = useCharacterBody();
+	const { characterStore, admin, characterDialogStore, closeCharacterDialog, characterBodyStore } =
+		useCharacter();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($characterDialogStore?.type === 'update');
 	const characterId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.characterId : undefined
+		$characterDialogStore?.type === 'update' ? $characterDialogStore.characterId : undefined
 	);
-	const character = $derived(characterId ? $store.data[characterId] : undefined);
-	const bodies = $derived(Object.values($bodyStore.data));
+	const character = $derived(characterId ? $characterStore.data[characterId] : undefined);
+	const bodies = $derived(Object.values($characterBodyStore.data));
 
 	let name = $state('');
 	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
@@ -49,7 +48,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeCharacterDialog();
 		}
 	}
 
@@ -64,9 +63,9 @@
 		isSubmitting = true;
 
 		admin
-			.update(characterId, { name: name.trim(), character_body_id: characterBodyId })
+			.updateCharacter(characterId, { name: name.trim(), character_body_id: characterBodyId })
 			.then(() => {
-				closeDialog();
+				closeCharacterDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update character:', error);

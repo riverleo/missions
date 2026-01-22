@@ -64,12 +64,12 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onclick={() => admin.openDialog({ type: 'update', narrativeId: narrative.id })}
+									onclick={() => admin.openNarrativeDialog({ type: 'update', narrativeId: narrative.id })}
 								>
 									수정
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onclick={() => admin.openDialog({ type: 'delete', narrativeId: narrative.id })}
+									onclick={() => admin.openNarrativeDialog({ type: 'delete', narrativeId: narrative.id })}
 								>
 									삭제
 								</DropdownMenuItem>

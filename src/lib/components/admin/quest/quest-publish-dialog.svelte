@@ -11,16 +11,16 @@
 	} from '$lib/components/ui/alert-dialog';
 	import { useQuest } from '$lib/hooks/use-quest';
 
-	const { questStore, admin, dialogStore, closeDialog } = useQuest();
+	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 
-	const open = $derived($dialogStore?.type === 'publish');
-	const questId = $derived($dialogStore?.type === 'publish' ? $dialogStore.questId : undefined);
+	const open = $derived($questDialogStore?.type === 'publish');
+	const questId = $derived($questDialogStore?.type === 'publish' ? $questDialogStore.questId : undefined);
 	const currentQuest = $derived(questId ? $questStore.data?.[questId] : undefined);
 	const isPublished = $derived(currentQuest?.status === 'published');
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeQuestDialog();
 		}
 	}
 
@@ -31,7 +31,7 @@
 
 		action
 			.then(() => {
-				closeDialog();
+				closeQuestDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to toggle publish:', error);

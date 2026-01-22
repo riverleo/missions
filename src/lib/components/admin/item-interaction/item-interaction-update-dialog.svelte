@@ -14,19 +14,19 @@
 	import { alphabetical } from 'radash';
 	import type { ItemId, CharacterId, CharacterBehaviorType } from '$lib/types';
 
-	const { store, itemInteractionStore, interactionDialogStore, closeItemInteractionDialog, admin } =
+	const { itemStore, itemInteractionStore, itemInteractionDialogStore, closeItemInteractionDialog, admin } =
 		useItem();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
-	const open = $derived($interactionDialogStore?.type === 'update');
+	const open = $derived($itemInteractionDialogStore?.type === 'update');
 	const interactionId = $derived(
-		$interactionDialogStore?.type === 'update' ? $interactionDialogStore.interactionId : undefined
+		$itemInteractionDialogStore?.type === 'update' ? $itemInteractionDialogStore.interactionId : undefined
 	);
 	const interaction = $derived(
 		interactionId ? $itemInteractionStore.data[interactionId] : undefined
 	);
 
-	const items = $derived(alphabetical(Object.values($store.data), (b) => b.name));
+	const items = $derived(alphabetical(Object.values($itemStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let itemId = $state<string>('');
@@ -86,7 +86,7 @@
 		isSubmitting = true;
 
 		try {
-			await admin.updateInteraction(interactionId, {
+			await admin.updateItemInteraction(interactionId, {
 				item_id: itemId as ItemId,
 				character_behavior_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,

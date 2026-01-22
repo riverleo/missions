@@ -37,12 +37,12 @@ let instance: ReturnType<typeof createTerrainStore> | null = null;
 function createTerrainStore() {
 	const { supabase } = useApp();
 
-	const store = writable<RecordFetchState<TerrainId, Terrain>>({
+	const terrainStore = writable<RecordFetchState<TerrainId, Terrain>>({
 		status: 'idle',
 		data: {},
 	});
 
-	const dialogStore = writable<TerrainDialogState>(undefined);
+	const terrainDialogStore = writable<TerrainDialogState>(undefined);
 
 	const tileStore = writable<RecordFetchState<TileId, Tile>>({
 		status: 'idle',
@@ -64,7 +64,7 @@ function createTerrainStore() {
 	});
 
 	// 어드민 UI 상태
-	const uiStore = writable({
+	const terrainUiStore = writable({
 		isSettingStartMarker: false,
 	});
 
@@ -81,7 +81,7 @@ function createTerrainStore() {
 		}
 		currentScenarioId = scenarioId;
 
-		store.update((state) => ({ ...state, status: 'loading' }));
+		terrainStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
@@ -97,14 +97,14 @@ function createTerrainStore() {
 				record[item.id as TerrainId] = item as Terrain;
 			}
 
-			store.set({
+			terrainStore.set({
 				status: 'success',
 				data: record,
 				error: undefined,
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
-			store.set({
+			terrainStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -112,12 +112,12 @@ function createTerrainStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<TerrainDialogState>) {
-		dialogStore.set(state);
+	function openTerrainDialog(state: NonNullable<TerrainDialogState>) {
+		terrainDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	function closeTerrainDialog() {
+		terrainDialogStore.set(undefined);
 	}
 
 	async function fetchTiles(scenarioId: ScenarioId) {
@@ -246,13 +246,13 @@ function createTerrainStore() {
 	}
 
 	const admin = {
-		uiStore: uiStore as Readable<{ isSettingStartMarker: boolean }>,
+		terrainUiStore: terrainUiStore as Readable<{ isSettingStartMarker: boolean }>,
 
 		setSettingStartMarker(value: boolean) {
-			uiStore.update((s) => ({ ...s, isSettingStartMarker: value }));
+			terrainUiStore.update((s) => ({ ...s, isSettingStartMarker: value }));
 		},
 
-		async create(terrain: Omit<TerrainInsert, 'scenario_id'>) {
+		async createTerrain(terrain: Omit<TerrainInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useTerrain: currentScenarioId is not set.');
 			}
@@ -268,7 +268,7 @@ function createTerrainStore() {
 
 			if (error) throw error;
 
-			store.update((state) =>
+			terrainStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id as TerrainId] = data;
 				})
@@ -277,12 +277,12 @@ function createTerrainStore() {
 			return data;
 		},
 
-		async update(id: TerrainId, terrain: TerrainUpdate) {
+		async updateTerrain(id: TerrainId, terrain: TerrainUpdate) {
 			const { error } = await supabase.from('terrains').update(terrain).eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			terrainStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data?.[id]) {
 						Object.assign(draft.data[id], terrain);
@@ -291,12 +291,12 @@ function createTerrainStore() {
 			);
 		},
 
-		async remove(id: TerrainId) {
+		async removeTerrain(id: TerrainId) {
 			const { error } = await supabase.from('terrains').delete().eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			terrainStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -484,8 +484,8 @@ function createTerrainStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<TerrainId, Terrain>>,
-		dialogStore: dialogStore as Readable<TerrainDialogState>,
+		terrainStore: terrainStore as Readable<RecordFetchState<TerrainId, Terrain>>,
+		terrainDialogStore: terrainDialogStore as Readable<TerrainDialogState>,
 		tileStore: tileStore as Readable<RecordFetchState<TileId, Tile>>,
 		tileDialogStore: tileDialogStore as Readable<TileDialogState>,
 		tileStateStore: tileStateStore as Readable<RecordFetchState<TileId, TileState[]>>,
@@ -496,8 +496,8 @@ function createTerrainStore() {
 		fetchTiles,
 		fetchTileStates,
 		fetchTerrainTiles,
-		openDialog,
-		closeDialog,
+		openTerrainDialog,
+		closeTerrainDialog,
 		openTileDialog,
 		closeTileDialog,
 		openTileStateDialog,

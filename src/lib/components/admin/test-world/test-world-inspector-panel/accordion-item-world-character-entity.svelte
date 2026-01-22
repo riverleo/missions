@@ -18,7 +18,7 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { worldCharacterStore } = useWorld();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(

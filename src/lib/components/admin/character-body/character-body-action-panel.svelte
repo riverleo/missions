@@ -16,7 +16,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEye, IconEyeOff, IconHeading, IconX, IconShape } from '@tabler/icons-svelte';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import { getColliderTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {
@@ -25,8 +25,8 @@
 
 	let { body }: Props = $props();
 
-	const { admin } = useCharacterBody();
-	const { uiStore } = admin;
+	const { admin } = useCharacter();
+	const { characterUiStore } = admin;
 
 	const colliderTypes: ColliderType[] = ['circle', 'rectangle'];
 	let selectedColliderType = $state(body.collider_type);
@@ -57,7 +57,7 @@
 	async function updateName() {
 		const trimmed = name.trim();
 		if (trimmed === (body.name ?? '')) return;
-		await admin.update(body.id, { name: trimmed || undefined });
+		await admin.updateCharacterBody(body.id, { name: trimmed || undefined });
 	}
 
 	async function updateCollider() {
@@ -74,7 +74,7 @@
 		)
 			return;
 
-		await admin.update(body.id, {
+		await admin.updateCharacterBody(body.id, {
 			collider_width: newColliderWidth,
 			collider_height: newColliderHeight,
 			collider_offset_x: newColliderOffsetX,
@@ -98,12 +98,12 @@
 
 	$effect(() => {
 		if (selectedColliderType !== body.collider_type) {
-			admin.update(body.id, { collider_type: selectedColliderType });
+			admin.updateCharacterBody(body.id, { collider_type: selectedColliderType });
 		}
 	});
 
 	function toggleShowBodyPreview() {
-		admin.setShowBodyPreview(!$uiStore.showBodyPreview);
+		admin.setShowBodyPreview(!$characterUiStore.showBodyPreview);
 	}
 </script>
 
@@ -183,9 +183,9 @@
 				<TooltipTrigger>
 					<InputGroupButton
 						onclick={toggleShowBodyPreview}
-						variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}
+						variant={$characterUiStore.showBodyPreview ? 'secondary' : 'ghost'}
 					>
-						{#if $uiStore.showBodyPreview}
+						{#if $characterUiStore.showBodyPreview}
 							<IconEye />
 						{:else}
 							<IconEyeOff />

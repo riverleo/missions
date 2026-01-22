@@ -71,9 +71,12 @@ export class WorldContext {
 	}
 
 	get terrain(): Terrain | undefined {
-		const world = get(useWorld().worldStore).data[this.worldId];
+		const { worldStore } = useWorld();
+		const { terrainStore } = useTerrain();
+
+		const world = get(worldStore).data[this.worldId];
 		if (!world?.terrain_id) return undefined;
-		return get(useTerrain().store).data[world.terrain_id];
+		return get(terrainStore).data[world.terrain_id];
 	}
 
 	// debug 변경 시 모든 엔티티 및 바운더리 업데이트
@@ -133,6 +136,8 @@ export class WorldContext {
 
 	// canvas mouseup 처리
 	private handleCanvasMouseUp = (e: MouseEvent) => {
+		const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
+
 		if (!this.mouseDownScreenPosition) return;
 
 		// 드래그 거리 계산 (클릭 판정: 5px 이내)
@@ -150,8 +155,6 @@ export class WorldContext {
 				vectorUtils.createScreenVector(e.clientX, e.clientY)
 			);
 			if (worldPos) {
-				const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
-
 				// 캐릭터 이동 우선 처리 (selectedEntityId가 character면)
 				const selectedEntityId = get(selectedEntityIdStore).entityId;
 				if (EntityIdUtils.is('character', selectedEntityId)) {
@@ -316,8 +319,8 @@ export class WorldContext {
 		Runner.run(this.runner, this.engine);
 
 		// 틱 구독 (틱이 변경될 때마다 모든 엔티티의 tick 메서드 호출)
-		const { tick } = useCurrent();
-		this.tickUnsubscriber = tick.subscribe((currentTick) => {
+		const currentHook = useCurrent();
+		this.tickUnsubscriber = currentHook.tickStore.subscribe((currentTick) => {
 			this.tickEntities(currentTick);
 		});
 

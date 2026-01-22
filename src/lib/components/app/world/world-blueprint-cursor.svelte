@@ -11,7 +11,7 @@
 	import type { BuildingId, CharacterId, ItemId } from '$lib/types';
 
 	const world = useWorldContext();
-	const { store: buildingStore } = useBuilding();
+	const { buildingStore: buildingStore } = useBuilding();
 
 	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
 	const tileCells = $derived(

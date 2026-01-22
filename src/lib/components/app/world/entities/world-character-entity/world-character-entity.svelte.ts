@@ -7,7 +7,6 @@ import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
-import { useCharacterBody } from '$lib/hooks/use-character-body';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
@@ -19,6 +18,9 @@ export class WorldCharacterEntity extends Entity {
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 
+	private worldHook = useWorld();
+	private characterHook = useCharacter();
+
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
 	}
@@ -27,7 +29,8 @@ export class WorldCharacterEntity extends Entity {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
 		// 스토어에서 데이터 조회 (초기값만)
-		const worldCharacter = get(useWorld().worldCharacterStore).data[worldCharacterId];
+		const { worldCharacterStore } = this.worldHook;
+		const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter) {
@@ -56,17 +59,20 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	get characterBody(): CharacterBody {
-		const worldCharacter = get(useWorld().worldCharacterStore).data[this.instanceId];
+		const { worldCharacterStore } = this.worldHook;
+		const { characterStore, characterBodyStore } = this.characterHook;
+
+		const worldCharacter = get(worldCharacterStore).data[this.instanceId];
 		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
 
-		const characterStore = get(useCharacter().store).data;
-		const characterBodyStore = get(useCharacterBody().store).data;
+		const characterStoreData = get(characterStore).data;
+		const characterBodyStoreData = get(characterBodyStore).data;
 
-		const character = characterStore[worldCharacter.character_id];
+		const character = characterStoreData[worldCharacter.character_id];
 		if (character === undefined)
 			throw new Error(`Character not found for id ${worldCharacter.character_id}`);
 
-		const characterBody = characterBodyStore[character.character_body_id];
+		const characterBody = characterBodyStoreData[character.character_body_id];
 		if (characterBody === undefined)
 			throw new Error(`CharacterBody not found for id ${character.character_body_id}`);
 
@@ -74,7 +80,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore } = useWorld();
+		const { worldCharacterStore } = this.worldHook;
 		const store = get(worldCharacterStore);
 		const worldCharacter = store.data[this.instanceId];
 

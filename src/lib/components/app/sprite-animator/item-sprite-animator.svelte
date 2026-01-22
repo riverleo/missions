@@ -24,9 +24,9 @@
 		...restProps
 	}: Props = $props();
 
-	const { store, stateStore } = useItem();
-	const item = $derived($store.data[itemId]);
-	const itemStates = $derived($stateStore.data[itemId] ?? []);
+	const { itemStore, itemStateStore } = useItem();
+	const item = $derived($itemStore.data[itemId]);
+	const itemStates = $derived($itemStateStore.data[itemId] ?? []);
 	const itemState = $derived(itemStates.find((s) => s.type === stateType));
 	const scale = $derived(item?.scale ?? 1);
 

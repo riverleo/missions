@@ -18,24 +18,24 @@
 	import { useItem } from '$lib/hooks/use-item';
 	import type { ItemStateId, ItemId } from '$lib/types';
 
-	const { store, stateStore, admin, stateDialogStore, closeStateDialog } = useItem();
+	const { itemStore, itemStateStore, admin, itemStateDialogStore, closeStateDialog } = useItem();
 
-	const open = $derived($stateDialogStore?.type === 'update');
+	const open = $derived($itemStateDialogStore?.type === 'update');
 	const itemStateId = $derived(
-		$stateDialogStore?.type === 'update' ? $stateDialogStore.itemStateId : undefined
+		$itemStateDialogStore?.type === 'update' ? $itemStateDialogStore.itemStateId : undefined
 	);
 
 	// Find the item state from all item states
 	const itemState = $derived.by(() => {
 		if (!itemStateId) return undefined;
-		for (const states of Object.values($stateStore.data)) {
+		for (const states of Object.values($itemStateStore.data)) {
 			const state = states.find((s) => s.id === itemStateId);
 			if (state) return state;
 		}
 		return undefined;
 	});
 
-	const item = $derived(itemState ? $store.data[itemState.item_id as ItemId] : undefined);
+	const item = $derived(itemState ? $itemStore.data[itemState.item_id as ItemId] : undefined);
 
 	let minDurability = $state('');
 	let maxDurability = $state('');

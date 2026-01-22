@@ -13,12 +13,19 @@
 	import { alphabetical } from 'radash';
 	import type { CharacterId, CharacterBehaviorType } from '$lib/types';
 
-	const { store: characterStore, characterInteractionStore, interactionDialogStore, closeCharacterInteractionDialog, admin } =
-		useCharacter();
+	const {
+		characterStore,
+		characterInteractionStore,
+		characterInteractionDialogStore,
+		closeCharacterInteractionDialog,
+		admin,
+	} = useCharacter();
 
-	const open = $derived($interactionDialogStore?.type === 'update');
+	const open = $derived($characterInteractionDialogStore?.type === 'update');
 	const interactionId = $derived(
-		$interactionDialogStore?.type === 'update' ? $interactionDialogStore.interactionId : undefined
+		$characterInteractionDialogStore?.type === 'update'
+			? $characterInteractionDialogStore.interactionId
+			: undefined
 	);
 	const interaction = $derived(
 		interactionId ? $characterInteractionStore.data[interactionId] : undefined
@@ -83,7 +90,7 @@
 		isSubmitting = true;
 
 		try {
-			await admin.updateInteraction(interactionId, {
+			await admin.updateCharacterInteraction(interactionId, {
 				target_character_id: targetCharacterId as CharacterId,
 				character_behavior_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,

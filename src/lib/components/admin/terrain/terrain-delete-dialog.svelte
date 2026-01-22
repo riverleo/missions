@@ -14,15 +14,15 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useTerrain();
+	const { admin, terrainDialogStore, closeTerrainDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'delete');
-	const terrainId = $derived($dialogStore?.type === 'delete' ? $dialogStore.terrainId : undefined);
+	const open = $derived($terrainDialogStore?.type === 'delete');
+	const terrainId = $derived($terrainDialogStore?.type === 'delete' ? $terrainDialogStore.terrainId : undefined);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeTerrainDialog();
 		}
 	}
 
@@ -30,9 +30,9 @@
 		if (!terrainId || !scenarioId) return;
 
 		admin
-			.remove(terrainId)
+			.removeTerrain(terrainId)
 			.then(() => {
-				closeDialog();
+				closeTerrainDialog();
 				goto(`/admin/scenarios/${scenarioId}/terrains`);
 			})
 			.catch((error) => {

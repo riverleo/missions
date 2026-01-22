@@ -54,7 +54,7 @@
 		conditionEffectStore,
 		admin,
 	} = useCondition();
-	const { store: buildingStore } = useBuilding();
+	const { buildingStore: buildingStore } = useBuilding();
 	const { needStore } = useNeed();
 
 	const flowNodes = useNodes();

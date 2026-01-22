@@ -19,9 +19,9 @@
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
 
-	const { store: buildingStore } = useBuilding();
-	const { store: characterStore } = useCharacter();
-	const { store: itemStore } = useItem();
+	const { buildingStore } = useBuilding();
+	const { characterStore } = useCharacter();
+	const { itemStore } = useItem();
 
 	const targetLabel = $derived(() => {
 		if (action.building_id) {

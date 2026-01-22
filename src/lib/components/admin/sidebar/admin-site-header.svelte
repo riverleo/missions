@@ -15,12 +15,10 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useBuilding } from '$lib/hooks/use-building';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useNeed } from '$lib/hooks/use-need';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import type {
 		ScenarioId,
@@ -39,18 +37,16 @@
 	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
 
-	const { store: scenarioStore } = useScenario();
-	const { store: chapterStore } = useChapter();
+	const { scenarioStore } = useScenario();
+	const { chapterStore } = useChapter();
 	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
-	const { store: terrainStore } = useTerrain();
-	const { store: characterStore } = useCharacter();
-	const { store: characterBodyStore } = useCharacterBody();
-	const { store: buildingStore } = useBuilding();
-	const { conditionBehaviorStore } = useConditionBehavior();
-	const { store: itemStore } = useItem();
+	const { terrainStore } = useTerrain();
+	const { characterStore, characterBodyStore } = useCharacter();
+	const { buildingStore } = useBuilding();
+	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
+	const { itemStore } = useItem();
 	const { needStore } = useNeed();
-	const { needBehaviorStore } = useNeedBehavior();
 	const { conditionStore } = useCondition();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {

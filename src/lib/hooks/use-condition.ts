@@ -57,7 +57,7 @@ function createConditionStore() {
 		data: {},
 	});
 
-	const dialogStore = writable<ConditionDialogState>(undefined);
+	const conditionDialogStore = writable<ConditionDialogState>(undefined);
 
 	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
@@ -124,12 +124,12 @@ function createConditionStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<ConditionDialogState>) {
-		dialogStore.set(state);
+	function openConditionDialog(state: NonNullable<ConditionDialogState>) {
+		conditionDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	function closeConditionDialog() {
+		conditionDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -360,11 +360,11 @@ function createConditionStore() {
 		conditionEffectStore: conditionEffectStore as Readable<
 			RecordFetchState<ConditionEffectId, ConditionEffect>
 		>,
-		dialogStore: dialogStore as Readable<ConditionDialogState>,
+		conditionDialogStore: conditionDialogStore as Readable<ConditionDialogState>,
 		init,
 		fetch,
-		openDialog,
-		closeDialog,
+		openConditionDialog,
+		closeConditionDialog,
 		admin,
 	};
 }

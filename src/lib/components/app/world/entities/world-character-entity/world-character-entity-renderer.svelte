@@ -2,7 +2,6 @@
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { useWorld } from '$lib/hooks/use-world';
 
 	interface Props {
@@ -11,8 +10,7 @@
 
 	let { entity }: Props = $props();
 
-	const { store: characterStore } = useCharacter();
-	const { store: characterBodyStore } = useCharacterBody();
+	const { characterStore, characterBodyStore } = useCharacter();
 	const { worldCharacterStore, selectedEntityIdStore } = useWorld();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);

@@ -14,10 +14,10 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useTerrain();
+	const { admin, terrainDialogStore, closeTerrainDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($terrainDialogStore?.type === 'create');
 
 	let title = $state('');
 	let isSubmitting = $state(false);
@@ -30,7 +30,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeTerrainDialog();
 		}
 	}
 
@@ -41,9 +41,9 @@
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim() })
+			.createTerrain({ title: title.trim() })
 			.then((terrain) => {
-				closeDialog();
+				closeTerrainDialog();
 				goto(`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`);
 			})
 			.catch((error) => {

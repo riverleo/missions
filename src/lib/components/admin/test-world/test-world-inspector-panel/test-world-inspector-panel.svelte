@@ -26,7 +26,7 @@
 	let { worldContext }: Props = $props();
 
 	const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
-	const { tick } = useCurrent();
+	const { tickStore } = useCurrent();
 
 	// WorldContext에서 실시간 엔티티 정보 가져오기
 	const entities = $derived(worldContext ? Object.values(worldContext.entities) : []);
@@ -54,7 +54,7 @@
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
 			<AccordionContentItem label="현재 틱">
-				{$tick} 틱
+				{$tickStore} 틱
 			</AccordionContentItem>
 		</AccordionContent>
 	</AccordionItem>

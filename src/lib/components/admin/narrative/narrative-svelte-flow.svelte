@@ -169,7 +169,7 @@
 
 				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
 				if (narrativeNode.type === 'text') {
-					await admin.updateNode(narrativeNodeId as NarrativeNodeId, {
+					await admin.updateNarrativeNode(narrativeNodeId as NarrativeNodeId, {
 						narrative_dice_roll_id: narrativeDiceRollId as NarrativeDiceRollId,
 					});
 
@@ -189,7 +189,7 @@
 					const choiceId = connection.sourceHandle;
 					if (!choiceId) return;
 
-					await admin.updateChoice(choiceId as NarrativeNodeChoiceId, {
+					await admin.updateNarrativeNodeChoice(choiceId as NarrativeNodeChoiceId, {
 						narrative_dice_roll_id: narrativeDiceRollId as NarrativeDiceRollId,
 					});
 
@@ -271,14 +271,16 @@
 				// 1. narrative_node → narrative_dice_roll 엣지
 				if (isNarrativeNodeToNarrativeDiceRollEdge(edge.id)) {
 					const { nodeId } = parseNarrativeNodeToNarrativeDiceRollEdgeId(edge.id);
-					await admin.updateNode(nodeId as NarrativeNodeId, { narrative_dice_roll_id: null });
+					await admin.updateNarrativeNode(nodeId as NarrativeNodeId, {
+						narrative_dice_roll_id: null,
+					});
 				}
 				// 2. narrative_node_choice → narrative_dice_roll 엣지
 				else if (isNarrativeNodeChoiceToNarrativeDiceRollEdge(edge.id)) {
 					const { narrativeNodeChoiceId } = parseNarrativeNodeChoiceToNarrativeDiceRollEdgeId(
 						edge.id
 					);
-					await admin.updateChoice(narrativeNodeChoiceId as NarrativeNodeChoiceId, {
+					await admin.updateNarrativeNodeChoice(narrativeNodeChoiceId as NarrativeNodeChoiceId, {
 						narrative_dice_roll_id: null,
 					});
 				}
@@ -302,7 +304,7 @@
 			for (const node of nodesToDelete) {
 				if (node.type === 'narrativeNode') {
 					const narrativeNodeId = parseNarrativeNodeId(node.id);
-					await admin.removeNode(narrativeNodeId as NarrativeNodeId);
+					await admin.removeNarrativeNode(narrativeNodeId as NarrativeNodeId);
 				} else if (node.type === 'narrativeDiceRoll') {
 					const narrativeDiceRollId = parseNarrativeDiceRollNodeId(node.id);
 					await admin.removeNarrativeDiceRoll(narrativeDiceRollId as NarrativeDiceRollId);
@@ -358,13 +360,13 @@
 
 				// text 타입: narrative_node의 narrative_dice_roll_id 업데이트
 				if (narrativeNode.type === 'text') {
-					await admin.updateNode(narrativeNode.id, {
+					await admin.updateNarrativeNode(narrativeNode.id, {
 						narrative_dice_roll_id: newDiceRoll.id,
 					});
 				}
 				// choice 타입: sourceHandle로 어느 choice인지 확인
 				else if (narrativeNode.type === 'choice' && sourceHandle) {
-					await admin.updateChoice(sourceHandle as NarrativeNodeChoiceId, {
+					await admin.updateNarrativeNodeChoice(sourceHandle as NarrativeNodeChoiceId, {
 						narrative_dice_roll_id: newDiceRoll.id,
 					});
 				}
@@ -380,7 +382,7 @@
 				}
 
 				// 새 노드 생성
-				const newNarrativeNode = await admin.createNode({
+				const newNarrativeNode = await admin.createNarrativeNode({
 					narrative_id: narrativeId,
 					scenario_id: scenarioId,
 					type: 'text',

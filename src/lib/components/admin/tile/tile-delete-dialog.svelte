@@ -14,12 +14,12 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, tileDialogStore, closeTileDialog } = useTerrain();
+	const { admin, tileDialogStore: terrainTileDialogStore, closeTileDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($tileDialogStore?.type === 'delete');
+	const open = $derived($terrainTileDialogStore?.type === 'delete');
 	const tileId = $derived(
-		$tileDialogStore?.type === 'delete' ? $tileDialogStore.tileId : undefined
+		$terrainTileDialogStore?.type === 'delete' ? $terrainTileDialogStore.tileId : undefined
 	);
 
 	function onOpenChange(value: boolean) {

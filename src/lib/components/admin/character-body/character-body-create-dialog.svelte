@@ -16,19 +16,19 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
-	const { dialogStore, closeDialog, admin } = useCharacterBody();
+	const { characterBodyDialogStore, closeCharacterBodyDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	let open = $derived($dialogStore?.type === 'create');
+	let open = $derived($characterBodyDialogStore?.type === 'create');
 	let name = $state('');
 	let isSubmitting = $state(false);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeCharacterBodyDialog();
 			name = '';
 		}
 	}
@@ -39,10 +39,10 @@
 
 		isSubmitting = true;
 		admin
-			.create({ name: name.trim() })
+			.createCharacterBody({ name: name.trim() })
 			.then((body) => {
 				goto(`/admin/scenarios/${scenarioId}/character-bodies/${body.id}`);
-				closeDialog();
+				closeCharacterBodyDialog();
 				name = '';
 			})
 			.catch((error) => {

@@ -25,7 +25,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			admin.closeDialog();
+			admin.closeNarrativeDialog();
 		}
 	}
 
@@ -33,9 +33,9 @@
 		if (!narrativeId || !scenarioId) return;
 
 		admin
-			.remove(narrativeId)
+			.removeNarrative(narrativeId)
 			.then(() => {
-				admin.closeDialog();
+				admin.closeNarrativeDialog();
 				goto(`/admin/scenarios/${scenarioId}/narratives`);
 			})
 			.catch((error) => {

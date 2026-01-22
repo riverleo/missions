@@ -16,13 +16,18 @@
 	import { alphabetical } from 'radash';
 	import type { BuildingId, CharacterId, CharacterBehaviorType, ScenarioId } from '$lib/types';
 
-	const { store, interactionDialogStore, closeBuildingInteractionDialog, admin } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const {
+		buildingStore,
+		buildingInteractionDialogStore: buildingInteractionDialogStore,
+		closeBuildingInteractionDialog,
+		admin,
+	} = useBuilding();
+	const { characterStore } = useCharacter();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const open = $derived($interactionDialogStore?.type === 'create');
+	const open = $derived($buildingInteractionDialogStore?.type === 'create');
 
-	const buildings = $derived(alphabetical(Object.values($store.data), (b) => b.name));
+	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<string>('');
@@ -73,7 +78,7 @@
 		isSubmitting = true;
 
 		try {
-			const interaction = await admin.createInteraction({
+			const interaction = await admin.createBuildingInteraction({
 				building_id: buildingId as BuildingId,
 				character_behavior_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,

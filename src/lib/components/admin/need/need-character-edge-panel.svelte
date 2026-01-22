@@ -22,7 +22,7 @@
 	let { characterNeed }: Props = $props();
 
 	const { admin } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const flowEdges = useEdges();
 
 	const characters = $derived(Object.values($characterStore.data));

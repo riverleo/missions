@@ -36,7 +36,7 @@
 	import type { CharacterId, NeedId, NeedFulfillmentId } from '$lib/types';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();

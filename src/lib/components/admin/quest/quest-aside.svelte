@@ -20,7 +20,7 @@
 	import QuestDeleteDialog from './quest-delete-dialog.svelte';
 	import QuestPublishDialog from './quest-publish-dialog.svelte';
 
-	const { questStore, openDialog } = useQuest();
+	const { questStore, openQuestDialog } = useQuest();
 	const currentQuestId = $derived(page.params.questId);
 	const currentQuest = $derived(
 		currentQuestId ? $questStore.data?.[currentQuestId as QuestId] : undefined
@@ -53,7 +53,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openQuestDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -71,7 +71,7 @@
 								disabled={!currentQuestId}
 								onclick={() =>
 									currentQuestId &&
-									openDialog({ type: 'update', questId: currentQuestId as QuestId })}
+									openQuestDialog({ type: 'update', questId: currentQuestId as QuestId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -89,7 +89,7 @@
 								disabled={!currentQuestId}
 								onclick={() =>
 									currentQuestId &&
-									openDialog({ type: 'publish', questId: currentQuestId as QuestId })}
+									openQuestDialog({ type: 'publish', questId: currentQuestId as QuestId })}
 							>
 								{#if isPublished}
 									<IconEyeClosed class="size-4" />
@@ -114,7 +114,7 @@
 							disabled={!currentQuestId}
 							onclick={() =>
 								currentQuestId &&
-								openDialog({ type: 'delete', questId: currentQuestId as QuestId })}
+								openQuestDialog({ type: 'delete', questId: currentQuestId as QuestId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

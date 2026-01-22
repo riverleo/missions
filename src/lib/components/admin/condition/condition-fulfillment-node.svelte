@@ -16,8 +16,8 @@
 	const { data, id, selected = false }: Props = $props();
 	const fulfillment = $derived(data.fulfillment);
 
-	const { store: characterStore } = useCharacter();
-	const { store: itemStore } = useItem();
+	const { characterStore } = useCharacter();
+	const { itemStore } = useItem();
 
 	const typeLabel = $derived(() => {
 		const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);

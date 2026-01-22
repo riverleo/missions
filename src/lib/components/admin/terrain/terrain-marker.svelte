@@ -12,7 +12,7 @@
 	let { terrain }: Props = $props();
 
 	const { admin } = useTerrain();
-	const uiStore = admin.uiStore;
+	const uiStore = admin.terrainUiStore;
 	const world = useWorldContext();
 
 	let isDragging = $state(false);
@@ -62,7 +62,7 @@
 		window.removeEventListener('mouseup', onmouseup);
 
 		if (isDragging && dragX != null && dragY != null) {
-			await admin.update(terrain.id, { respawn_x: dragX, respawn_y: dragY });
+			await admin.updateTerrain(terrain.id, { respawn_x: dragX, respawn_y: dragY });
 		}
 
 		isDragging = false;
@@ -76,7 +76,7 @@
 		const x = ((e.clientX - rect.left) / rect.width) * terrain.width;
 		const y = ((e.clientY - rect.top) / rect.height) * terrain.height;
 
-		await admin.update(terrain.id, { respawn_x: x, respawn_y: y });
+		await admin.updateTerrain(terrain.id, { respawn_x: x, respawn_y: y });
 		admin.setSettingStartMarker(false);
 	}
 </script>

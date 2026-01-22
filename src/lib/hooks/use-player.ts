@@ -19,7 +19,7 @@ let initialized = false;
 function createPlayerStore() {
 	const { supabase, user } = useApp();
 
-	const store = writable<PlayerStoreState>({ status: 'idle', data: {} });
+	const playerStore = writable<PlayerStoreState>({ status: 'idle', data: {} });
 	const playerScenarioStore = writable<PlayerScenarioStoreState>({ status: 'idle', data: {} });
 
 	function init() {
@@ -31,7 +31,7 @@ function createPlayerStore() {
 			throw new Error('usePlayer not initialized. Call init() first.');
 		}
 
-		store.update((state) => ({ ...state, status: 'loading' }));
+		playerStore.update((state) => ({ ...state, status: 'loading' }));
 		playerScenarioStore.update((state) => ({ ...state, status: 'loading' }));
 
 		if (!user) return;
@@ -63,7 +63,7 @@ function createPlayerStore() {
 				playerScenarioRecord[item.id as PlayerScenarioId] = item as PlayerScenario;
 			}
 
-			store.set({
+			playerStore.set({
 				status: 'success',
 				data: playerRecord,
 				error: undefined,
@@ -77,7 +77,7 @@ function createPlayerStore() {
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 
-			store.set({
+			playerStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -109,7 +109,7 @@ function createPlayerStore() {
 		);
 	}
 
-	async function create(playerInsert: PlayerInsert) {
+	async function createPlayer(playerInsert: PlayerInsert) {
 		const { data, error } = await supabase
 			.from('players')
 			.insert({ ...playerInsert })
@@ -119,7 +119,7 @@ function createPlayerStore() {
 		if (error) throw error;
 
 		// 로컬 스토어 업데이트
-		store.update((state) =>
+		playerStore.update((state) =>
 			produce(state, (draft) => {
 				draft.data[data.id] = data;
 			})
@@ -129,12 +129,12 @@ function createPlayerStore() {
 	}
 
 	return {
-		store,
+		playerStore,
 		playerScenarioStore,
 		init,
 		fetch,
 		updatePlayerScenarioTick,
-		create,
+		createPlayer,
 	};
 }
 

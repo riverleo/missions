@@ -9,7 +9,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
@@ -25,9 +25,9 @@
 
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
-	const { openDialog } = useNeedBehavior();
+	const { openNeedBehaviorDialog } = useBehavior();
 	const { needStore } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
 	const label = $derived(() => {
 		const need = behavior.need_id ? $needStore.data[behavior.need_id] : undefined;
@@ -69,12 +69,12 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'update', needBehaviorId: behavior.id })}
+						onclick={() => openNeedBehaviorDialog({ type: 'update', needBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'delete', needBehaviorId: behavior.id })}
+						onclick={() => openNeedBehaviorDialog({ type: 'delete', needBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>
@@ -106,12 +106,12 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'update', needBehaviorId: behavior.id })}
+						onclick={() => openNeedBehaviorDialog({ type: 'update', needBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'delete', needBehaviorId: behavior.id })}
+						onclick={() => openNeedBehaviorDialog({ type: 'delete', needBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>

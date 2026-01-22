@@ -24,7 +24,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
@@ -35,13 +35,13 @@
 		BuildingStateType,
 	} from '$lib/types';
 
-	const { conditionBehaviorStore, dialogStore, closeDialog, admin } = useConditionBehavior();
+	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const { conditionStore } = useCondition();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($conditionBehaviorDialogStore?.type === 'update');
 	const behaviorId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.conditionBehaviorId : undefined
+		$conditionBehaviorDialogStore?.type === 'update' ? $conditionBehaviorDialogStore.conditionBehaviorId : undefined
 	);
 	const currentBehavior = $derived(
 		behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined
@@ -94,7 +94,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionBehaviorDialog();
 		}
 	}
 
@@ -105,7 +105,7 @@
 		isSubmitting = true;
 
 		admin
-			.update(behaviorId, {
+			.updateConditionBehavior(behaviorId, {
 				name: name.trim(),
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,
@@ -113,7 +113,7 @@
 				building_state_type: buildingStateType,
 			} as ConditionBehaviorUpdate)
 			.then(() => {
-				closeDialog();
+				closeConditionBehaviorDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update condition behavior:', error);

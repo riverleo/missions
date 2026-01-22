@@ -23,8 +23,8 @@
 
 	let { interaction, itemInteractionId, onlayout }: Props = $props();
 
-	const { itemInteractionActionStore, stateStore: itemStateStore, store: itemStore, admin } = useItem();
-	const { store: characterStore } = useCharacter();
+	const { itemInteractionActionStore, itemStateStore, itemStore, admin } = useItem();
+	const { characterStore } = useCharacter();
 
 	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
@@ -75,7 +75,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createInteractionAction(itemInteractionId, {
+			await admin.createItemInteractionAction(itemInteractionId, {
 				root: false,
 			});
 		} catch (error) {

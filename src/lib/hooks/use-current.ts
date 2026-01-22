@@ -13,13 +13,13 @@ function createCurrentStore() {
 	const userStore = writable<User | undefined>(undefined);
 	const roleStore = writable<UserRole | undefined>(undefined);
 
-	const { store: playerStore, playerScenarioStore } = usePlayer();
+	const { playerStore: _playerStore, playerScenarioStore: _playerScenarioStore } = usePlayer();
 
 	// 선택된 플레이어 ID
 	const playerIdStore = writable<PlayerId | undefined>(undefined);
 
 	// playerStore가 성공 상태가 되면 자동으로 첫 번째 플레이어 선택
-	playerStore.subscribe(($store) => {
+	_playerStore.subscribe(($store) => {
 		if ($store.status === 'success') {
 			const players = Object.values($store.data);
 			if (players.length > 0 && get(playerIdStore) === undefined) {
@@ -29,14 +29,17 @@ function createCurrentStore() {
 	});
 
 	// 선택된 플레이어
-	const player = derived([playerStore, playerIdStore], ([$playerStore, $selectedPlayerId]) => {
-		if (!$selectedPlayerId) return undefined;
-		return $playerStore.data[$selectedPlayerId];
-	});
+	const playerStore = derived(
+		[_playerStore, playerIdStore],
+		([$playerStore, $selectedPlayerId]) => {
+			if (!$selectedPlayerId) return undefined;
+			return $playerStore.data[$selectedPlayerId];
+		}
+	);
 
 	// 현재 활성화된 PlayerScenario (현재 player의 status가 'in_progress'인 것)
-	const playerScenario = derived(
-		[player, playerScenarioStore],
+	const playerScenarioStore = derived(
+		[playerStore, _playerScenarioStore],
 		([$player, $playerScenarioStore]) => {
 			if (!$player) return undefined;
 			const playerScenarios = Object.values($playerScenarioStore.data);
@@ -50,7 +53,7 @@ function createCurrentStore() {
 	const tickStore = writable<number>(0);
 
 	// playerScenario가 변경되면 tickStore 초기화
-	playerScenario.subscribe(($playerScenario) => {
+	playerScenarioStore.subscribe(($playerScenario) => {
 		if ($playerScenario) {
 			tickStore.set($playerScenario.current_tick);
 			startTick();
@@ -147,11 +150,11 @@ function createCurrentStore() {
 	}
 
 	return {
-		user: userStore as Readable<User | undefined>,
-		role: roleStore as Readable<UserRole | undefined>,
-		player: player as Readable<Player | undefined>,
-		playerScenario: playerScenario as Readable<PlayerScenario | undefined>,
-		tick: tickStore as Readable<number>,
+		userStore: userStore as Readable<User | undefined>,
+		roleStore: roleStore as Readable<UserRole | undefined>,
+		playerStore: playerStore as Readable<Player | undefined>,
+		playerScenarioStore: playerScenarioStore as Readable<PlayerScenario | undefined>,
+		tickStore: tickStore as Readable<number>,
 		init,
 		stopTick,
 		selectPlayer,

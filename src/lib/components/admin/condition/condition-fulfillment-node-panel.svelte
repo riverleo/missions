@@ -31,8 +31,8 @@
 	let { fulfillment }: Props = $props();
 
 	const { admin } = useCondition();
-	const { store: characterStore } = useCharacter();
-	const { store: itemStore } = useItem();
+	const { characterStore } = useCharacter();
+	const { itemStore } = useItem();
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));

@@ -9,7 +9,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ConditionBehavior, CharacterId } from '$lib/types';
@@ -24,9 +24,9 @@
 
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
-	const { openDialog } = useConditionBehavior();
+	const { openConditionBehaviorDialog } = useBehavior();
 	const { conditionStore } = useCondition();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
 	const description = $derived.by(() => {
 		const condition = behavior.condition_id
@@ -70,12 +70,12 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'update', conditionBehaviorId: behavior.id })}
+						onclick={() => openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
+						onclick={() => openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>
@@ -107,12 +107,12 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'update', conditionBehaviorId: behavior.id })}
+						onclick={() => openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
+						onclick={() => openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>

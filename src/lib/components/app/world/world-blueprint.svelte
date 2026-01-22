@@ -6,7 +6,7 @@
 
 	const world = useWorldContext();
 	const { worldStore } = useWorld();
-	const { store: terrainStore } = useTerrain();
+	const { terrainStore } = useTerrain();
 
 	const terrainId = $derived($worldStore.data[world.worldId]?.terrain_id);
 	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);

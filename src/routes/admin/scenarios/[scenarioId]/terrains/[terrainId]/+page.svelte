@@ -7,10 +7,10 @@
 	import TerrainPreview from '$lib/components/admin/terrain/terrain-preview.svelte';
 	import type { TerrainId } from '$lib/types';
 
-	const { store, admin } = useTerrain();
+	const { terrainStore, admin } = useTerrain();
 	const { supabase } = useApp();
 	const terrainId = $derived(page.params.terrainId as TerrainId);
-	const terrain = $derived(terrainId ? $store.data[terrainId] : undefined);
+	const terrain = $derived(terrainId ? $terrainStore.data[terrainId] : undefined);
 	const terrainAssetUrl = $derived(
 		terrain ? getGameAssetUrl(supabase, 'terrain', terrain) : undefined
 	);

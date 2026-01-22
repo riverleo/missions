@@ -36,8 +36,8 @@
 
 	let { action, itemInteractionId, hasParent = false }: Props = $props();
 
-	const { itemInteractionStore, itemInteractionActionStore, stateStore: itemStateStore, admin } = useItem();
-	const { store: characterStore } = useCharacter();
+	const { itemInteractionStore, itemInteractionActionStore, itemStateStore, admin } = useItem();
+	const { characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
 	const interaction = $derived($itemInteractionStore.data[itemInteractionId]);
@@ -126,12 +126,12 @@
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) =>
-						admin.updateInteractionAction(a.id, itemInteractionId, { root: false })
+						admin.updateItemInteractionAction(a.id, itemInteractionId, { root: false })
 					)
 				);
 			}
 
-			await admin.updateInteractionAction(actionId, itemInteractionId, {
+			await admin.updateItemInteractionAction(actionId, itemInteractionId, {
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				item_offset_x: changes.item_offset_x,

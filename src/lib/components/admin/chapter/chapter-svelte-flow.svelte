@@ -20,7 +20,7 @@
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
 
-	const { store, admin } = useChapter();
+	const { chapterStore, admin } = useChapter();
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -34,7 +34,7 @@
 		chapter: ChapterNode,
 	};
 
-	const chapters = $derived(Object.values($store.data));
+	const chapters = $derived(Object.values($chapterStore.data));
 
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
@@ -65,7 +65,7 @@
 			const targetChapter = chapters.find((c: Chapter) => c.id === connection.target);
 			if (!targetChapter) return;
 
-			await admin.update(connection.target as ChapterId, {
+			await admin.updateChapter(connection.target as ChapterId, {
 				parent_chapter_id: connection.source,
 			});
 
@@ -97,14 +97,14 @@
 		try {
 			// 엣지 삭제 처리
 			for (const edge of edgesToDelete) {
-				await admin.update(edge.target as ChapterId, {
+				await admin.updateChapter(edge.target as ChapterId, {
 					parent_chapter_id: null,
 				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
-				await admin.remove(node.id as ChapterId);
+				await admin.removeChapter(node.id as ChapterId);
 			}
 
 			// 모든 업데이트 완료 후 노드/엣지 재생성
@@ -140,7 +140,7 @@
 
 		try {
 			// 새 챕터 생성 (소스 노드를 부모로 설정)
-			const newChapter = await admin.create({
+			const newChapter = await admin.createChapter({
 				parent_chapter_id: sourceNode.id,
 			});
 

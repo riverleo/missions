@@ -12,6 +12,9 @@ export class WorldItemEntity extends Entity {
 	readonly type = 'item' as const;
 	body: Matter.Body;
 
+	private worldHook = useWorld();
+	private itemHook = useItem();
+
 	override get instanceId(): WorldItemId {
 		return EntityIdUtils.instanceId<WorldItemId>(this.id);
 	}
@@ -20,7 +23,8 @@ export class WorldItemEntity extends Entity {
 		super(worldContext, 'item', worldId, worldItemId);
 
 		// 스토어에서 데이터 조회
-		const worldItem = get(useWorld().worldItemStore).data[worldItemId];
+		const { worldItemStore } = this.worldHook;
+		const worldItem = get(worldItemStore).data[worldItemId];
 		const item = this.item;
 
 		if (!worldItem) {
@@ -47,17 +51,20 @@ export class WorldItemEntity extends Entity {
 	}
 
 	get item(): Item {
-		const worldItem = get(useWorld().worldItemStore).data[this.instanceId];
+		const { worldItemStore } = this.worldHook;
+		const { itemStore } = this.itemHook;
+
+		const worldItem = get(worldItemStore).data[this.instanceId];
 		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
 
-		const item = get(useItem().store).data[worldItem.item_id];
+		const item = get(itemStore).data[worldItem.item_id];
 		if (!item) throw new Error(`Item not found for id ${worldItem.item_id}`);
 
 		return item;
 	}
 
 	save(): void {
-		const { worldItemStore } = useWorld();
+		const { worldItemStore } = this.worldHook;
 		const store = get(worldItemStore);
 		const worldItem = store.data[this.instanceId];
 

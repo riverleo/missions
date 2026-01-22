@@ -14,7 +14,7 @@ let instance: ReturnType<typeof createChapterStore> | null = null;
 
 function createChapterStore() {
 	const { supabase } = useApp();
-	const store = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
+	const chapterStore = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
 
 	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
@@ -28,7 +28,7 @@ function createChapterStore() {
 			throw new Error('useChapter not initialized. Call init() first.');
 		}
 		currentScenarioId = scenarioId;
-		store.update((state) => ({ ...state, status: 'loading' }));
+		chapterStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
@@ -45,13 +45,13 @@ function createChapterStore() {
 				record[item.id as ChapterId] = item as Chapter;
 			}
 
-			store.set({
+			chapterStore.set({
 				status: 'success',
 				data: record,
 				error: undefined,
 			});
 		} catch (error) {
-			store.set({
+			chapterStore.set({
 				status: 'error',
 				data: {},
 				error: error instanceof Error ? error : new Error('Unknown error'),
@@ -59,7 +59,7 @@ function createChapterStore() {
 		}
 	}
 
-	async function create(chapter: Omit<ChapterInsert, 'scenario_id'>) {
+	async function createChapter(chapter: Omit<ChapterInsert, 'scenario_id'>) {
 		if (!currentScenarioId) {
 			throw new Error('useChapter: currentScenarioId is not set. Call useScenario.init() first.');
 		}
@@ -74,7 +74,7 @@ function createChapterStore() {
 
 		if (error) throw error;
 
-		store.update((state) =>
+		chapterStore.update((state) =>
 			produce(state, (draft) => {
 				draft.data[data.id as ChapterId] = data;
 			})
@@ -83,12 +83,12 @@ function createChapterStore() {
 		return data;
 	}
 
-	async function update(id: ChapterId, chapter: ChapterUpdate) {
+	async function updateChapter(id: ChapterId, chapter: ChapterUpdate) {
 		const { error } = await supabase.from('chapters').update(chapter).eq('id', id);
 
 		if (error) throw error;
 
-		store.update((state) =>
+		chapterStore.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data?.[id]) {
 					Object.assign(draft.data[id], chapter);
@@ -97,12 +97,12 @@ function createChapterStore() {
 		);
 	}
 
-	async function remove(id: ChapterId) {
+	async function removeChapter(id: ChapterId) {
 		const { error } = await supabase.from('chapters').delete().eq('id', id);
 
 		if (error) throw error;
 
-		store.update((state) =>
+		chapterStore.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data) {
 					delete draft.data[id];
@@ -111,12 +111,12 @@ function createChapterStore() {
 		);
 	}
 
-	async function publish(id: ChapterId) {
+	async function publishChapter(id: ChapterId) {
 		const { error } = await supabase.from('chapters').update({ status: 'published' }).eq('id', id);
 
 		if (error) throw error;
 
-		store.update((state) =>
+		chapterStore.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data?.[id]) {
 					draft.data[id].status = 'published';
@@ -125,12 +125,12 @@ function createChapterStore() {
 		);
 	}
 
-	async function unpublish(id: ChapterId) {
+	async function unpublishChapter(id: ChapterId) {
 		const { error } = await supabase.from('chapters').update({ status: 'draft' }).eq('id', id);
 
 		if (error) throw error;
 
-		store.update((state) =>
+		chapterStore.update((state) =>
 			produce(state, (draft) => {
 				if (draft.data?.[id]) {
 					draft.data[id].status = 'draft';
@@ -140,15 +140,15 @@ function createChapterStore() {
 	}
 
 	return {
-		store: store as Readable<RecordFetchState<ChapterId, Chapter>>,
+		chapterStore: chapterStore as Readable<RecordFetchState<ChapterId, Chapter>>,
 		init,
 		fetch,
 		admin: {
-			create,
-			update,
-			remove,
-			publish,
-			unpublish,
+			createChapter,
+			updateChapter,
+			removeChapter,
+			publishChapter,
+			unpublishChapter,
 		},
 	};
 }

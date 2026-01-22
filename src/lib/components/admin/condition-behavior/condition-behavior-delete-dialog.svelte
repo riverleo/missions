@@ -10,28 +10,28 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionBehaviorStore, dialogStore, closeDialog, admin } = useConditionBehavior();
+	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const { conditionStore } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.conditionBehaviorId : undefined
+		$conditionBehaviorDialogStore?.type === 'delete' ? $conditionBehaviorDialogStore.conditionBehaviorId : undefined
 	);
 	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
 	const condition = $derived(
 		behavior?.condition_id ? $conditionStore.data[behavior.condition_id] : undefined
 	);
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($conditionBehaviorDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionBehaviorDialog();
 		}
 	}
 
@@ -42,9 +42,9 @@
 		isSubmitting = true;
 
 		admin
-			.remove(behaviorId)
+			.removeConditionBehavior(behaviorId)
 			.then(() => {
-				closeDialog();
+				closeConditionBehaviorDialog();
 				goto(`/admin/scenarios/${scenarioId}/condition-behaviors`);
 			})
 			.catch((error) => {
@@ -66,7 +66,7 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeConditionBehaviorDialog()}>취소</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

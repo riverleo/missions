@@ -22,7 +22,7 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
@@ -30,13 +30,13 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 
-	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
+	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const { needStore } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($needBehaviorDialogStore?.type === 'update');
 	const needBehaviorId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.needBehaviorId : undefined
+		$needBehaviorDialogStore?.type === 'update' ? $needBehaviorDialogStore.needBehaviorId : undefined
 	);
 	const currentBehavior = $derived(
 		needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined
@@ -89,7 +89,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedBehaviorDialog();
 		}
 	}
 
@@ -100,7 +100,7 @@
 		isSubmitting = true;
 
 		admin
-			.update(needBehaviorId, {
+			.updateNeedBehavior(needBehaviorId, {
 				name: name.trim(),
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,
@@ -108,7 +108,7 @@
 				character_face_state_type: characterFaceStateType,
 			})
 			.then(() => {
-				closeDialog();
+				closeNeedBehaviorDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update behavior:', error);

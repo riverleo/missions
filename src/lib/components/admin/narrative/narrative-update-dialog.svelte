@@ -12,11 +12,11 @@
 	import { useNarrative } from '$lib/hooks/use-narrative';
 
 	const { narrativeStore, admin } = useNarrative();
-	const { store: adminStore } = admin;
+	const { store } = admin;
 
-	const open = $derived($adminStore.dialog?.type === 'update');
+	const open = $derived($store.dialog?.type === 'update');
 	const narrativeId = $derived(
-		$adminStore.dialog?.type === 'update' ? $adminStore.dialog.narrativeId : undefined
+		$store.dialog?.type === 'update' ? $store.dialog.narrativeId : undefined
 	);
 	const currentNarrative = $derived(narrativeId ? $narrativeStore.data?.[narrativeId] : undefined);
 
@@ -31,7 +31,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			admin.closeDialog();
+			admin.closeNarrativeDialog();
 		}
 	}
 
@@ -42,9 +42,9 @@
 		isSubmitting = true;
 
 		admin
-			.update(narrativeId, { title: title.trim() })
+			.updateNarrative(narrativeId, { title: title.trim() })
 			.then(() => {
-				admin.closeDialog();
+				admin.closeNarrativeDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update narrative:', error);

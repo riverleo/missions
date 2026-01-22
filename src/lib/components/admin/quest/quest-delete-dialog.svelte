@@ -14,15 +14,15 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useQuest();
+	const { admin, questDialogStore, closeQuestDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'delete');
-	const questId = $derived($dialogStore?.type === 'delete' ? $dialogStore.questId : undefined);
+	const open = $derived($questDialogStore?.type === 'delete');
+	const questId = $derived($questDialogStore?.type === 'delete' ? $questDialogStore.questId : undefined);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeQuestDialog();
 		}
 	}
 
@@ -32,7 +32,7 @@
 		admin
 			.removeQuest(questId)
 			.then(() => {
-				closeDialog();
+				closeQuestDialog();
 				goto(`/admin/scenarios/${scenarioId}/quests`);
 			})
 			.catch((error) => {

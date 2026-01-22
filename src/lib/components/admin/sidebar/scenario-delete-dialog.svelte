@@ -13,17 +13,17 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
-	const { store, admin, dialogStore, closeDialog } = useScenario();
+	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($scenarioDialogStore?.type === 'delete');
 	const scenarioId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.scenarioId : undefined
+		$scenarioDialogStore?.type === 'delete' ? $scenarioDialogStore.scenarioId : undefined
 	);
 	const currentScenarioId = $derived(page.params.scenarioId);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeScenarioDialog();
 		}
 	}
 
@@ -31,11 +31,11 @@
 		if (!scenarioId) return;
 
 		admin
-			.remove(scenarioId)
+			.removeScenario(scenarioId)
 			.then(() => {
-				closeDialog();
+				closeScenarioDialog();
 				// 삭제된 시나리오가 현재 선택된 시나리오인 경우 첫 번째 시나리오로 이동
-				const remainingScenarios = Object.values($store.data).filter((s) => s.id !== scenarioId);
+				const remainingScenarios = Object.values($scenarioStore.data).filter((s) => s.id !== scenarioId);
 				const nextScenario = remainingScenarios[0];
 				if (scenarioId === currentScenarioId && nextScenario) {
 					goto(`/admin/scenarios/${nextScenario.id}/quests`);

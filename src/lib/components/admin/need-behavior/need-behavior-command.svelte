@@ -16,7 +16,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
@@ -24,9 +24,9 @@
 	import type { ScenarioId, CharacterId } from '$lib/types';
 	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 
-	const { needBehaviorStore, openDialog } = useNeedBehavior();
+	const { needBehaviorStore, openNeedBehaviorDialog } = useBehavior();
 	const { needStore } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -91,12 +91,12 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'update', needBehaviorId: behavior.id })}
+										onclick={() => openNeedBehaviorDialog({ type: 'update', needBehaviorId: behavior.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'delete', needBehaviorId: behavior.id })}
+										onclick={() => openNeedBehaviorDialog({ type: 'delete', needBehaviorId: behavior.id })}
 									>
 										삭제
 									</DropdownMenuItem>

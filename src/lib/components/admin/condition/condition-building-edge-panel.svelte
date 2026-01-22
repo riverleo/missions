@@ -23,7 +23,7 @@
 	let { buildingCondition }: Props = $props();
 
 	const { admin } = useCondition();
-	const { store: buildingStore } = useBuilding();
+	const { buildingStore: buildingStore } = useBuilding();
 	const flowEdges = useEdges();
 
 	const buildings = $derived(Object.values($buildingStore.data));

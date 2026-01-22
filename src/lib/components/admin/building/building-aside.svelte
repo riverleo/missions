@@ -12,7 +12,7 @@
 	import BuildingUpdateDialog from './building-update-dialog.svelte';
 	import BuildingDeleteDialog from './building-delete-dialog.svelte';
 
-	const { openDialog } = useBuilding();
+	const { openBuildingDialog } = useBuilding();
 	const currentBuildingId = $derived(page.params.buildingId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openBuildingDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,10 @@
 								disabled={!currentBuildingId}
 								onclick={() =>
 									currentBuildingId &&
-									openDialog({ type: 'update', buildingId: currentBuildingId as BuildingId })}
+									openBuildingDialog({
+										type: 'update',
+										buildingId: currentBuildingId as BuildingId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +83,7 @@
 							disabled={!currentBuildingId}
 							onclick={() =>
 								currentBuildingId &&
-								openDialog({ type: 'delete', buildingId: currentBuildingId as BuildingId })}
+								openBuildingDialog({ type: 'delete', buildingId: currentBuildingId as BuildingId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

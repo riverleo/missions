@@ -12,6 +12,9 @@ export class WorldBuildingEntity extends Entity {
 	readonly type = 'building' as const;
 	body: Matter.Body;
 
+	private worldHook = useWorld();
+	private buildingHook = useBuilding();
+
 	override get instanceId(): WorldBuildingId {
 		return EntityIdUtils.instanceId<WorldBuildingId>(this.id);
 	}
@@ -20,7 +23,8 @@ export class WorldBuildingEntity extends Entity {
 		super(worldContext, 'building', worldId, worldBuildingId);
 
 		// 스토어에서 데이터 조회
-		const worldBuilding = get(useWorld().worldBuildingStore).data[worldBuildingId];
+		const { worldBuildingStore } = this.worldHook;
+		const worldBuilding = get(worldBuildingStore).data[worldBuildingId];
 		const building = this.building;
 
 		if (!worldBuilding) {
@@ -48,10 +52,13 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	get building(): Building {
-		const worldBuilding = get(useWorld().worldBuildingStore).data[this.instanceId];
+		const { worldBuildingStore } = this.worldHook;
+		const { buildingStore } = this.buildingHook;
+
+		const worldBuilding = get(worldBuildingStore).data[this.instanceId];
 		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
 
-		const building = get(useBuilding().store).data[worldBuilding.building_id];
+		const building = get(buildingStore).data[worldBuilding.building_id];
 		if (!building) throw new Error(`Building not found for id ${worldBuilding.building_id}`);
 
 		return building;

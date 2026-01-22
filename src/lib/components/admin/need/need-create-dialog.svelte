@@ -21,10 +21,10 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { dialogStore, closeDialog, admin } = useNeed();
+	const { needDialogStore, closeNeedDialog, admin } = useNeed();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($needDialogStore?.type === 'create');
 
 	let name = $state('');
 	let maxValue = $state(100);
@@ -43,7 +43,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedDialog();
 		}
 	}
 
@@ -61,7 +61,7 @@
 				decrease_per_tick: decreasePerTick,
 			})
 			.then((need) => {
-				closeDialog();
+				closeNeedDialog();
 				goto(`/admin/scenarios/${scenarioId}/needs/${need.id}`);
 			})
 			.catch((error) => {

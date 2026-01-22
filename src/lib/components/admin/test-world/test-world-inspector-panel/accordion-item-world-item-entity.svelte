@@ -18,7 +18,7 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { worldItemStore } = useWorld();
-	const { store: itemStore } = useItem();
+	const { itemStore } = useItem();
 
 	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);

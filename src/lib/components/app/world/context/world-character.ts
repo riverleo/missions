@@ -19,7 +19,7 @@ export async function createWorldCharacter(
 		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
 ) {
 	const { worldCharacterStore } = useWorld();
-	const { player: playerStore, playerScenario: playerScenarioStore, tick } = useCurrent();
+	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
 	const player = get(playerStore);
@@ -40,7 +40,7 @@ export async function createWorldCharacter(
 			scenario_id,
 			user_id,
 			created_at: new Date().toISOString(),
-			created_at_tick: get(tick),
+			created_at_tick: get(tickStore),
 			needs: [],
 		};
 	} else {
@@ -54,7 +54,7 @@ export async function createWorldCharacter(
 				player_id,
 				scenario_id,
 				user_id,
-				created_at_tick: get(tick),
+				created_at_tick: get(tickStore),
 			})
 			.select()
 			.single<WorldCharacter>();

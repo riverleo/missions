@@ -7,17 +7,13 @@
 		CommandEmpty,
 		CommandGroup,
 	} from '$lib/components/ui/command';
-	import { useBehaviorPriority } from '$lib/hooks/use-behavior-priority';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { page } from '$app/state';
 	import type { ScenarioId, NeedBehavior, ConditionBehavior } from '$lib/types';
 	import NeedBehaviorCommandItem from '../need-behavior/need-behavior-command-item.svelte';
 	import ConditionBehaviorCommandItem from '../condition-behavior/condition-behavior-command-item.svelte';
 
-	const { store: behaviorPriorityStore, admin } = useBehaviorPriority();
-	const { needBehaviorStore } = useNeedBehavior();
-	const { conditionBehaviorStore } = useConditionBehavior();
+	const { behaviorPriorityStore, needBehaviorStore, conditionBehaviorStore, admin } = useBehavior();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
@@ -26,7 +22,7 @@
 		const maxPriority = Math.max(0, ...priorities.map((p) => p.priority));
 
 		try {
-			await admin.create({
+			await admin.createBehaviorPriority({
 				need_behavior_id: behavior.id,
 				priority: maxPriority + 1,
 			});
@@ -40,7 +36,7 @@
 		const maxPriority = Math.max(0, ...priorities.map((p) => p.priority));
 
 		try {
-			await admin.create({
+			await admin.createBehaviorPriority({
 				condition_behavior_id: behavior.id,
 				priority: maxPriority + 1,
 			});

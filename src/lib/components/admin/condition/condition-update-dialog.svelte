@@ -18,11 +18,11 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCondition } from '$lib/hooks/use-condition';
 
-	const { conditionStore, dialogStore, closeDialog, admin } = useCondition();
+	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useCondition();
 
-	const open = $derived($dialogStore?.type === 'update');
+	const open = $derived($conditionDialogStore?.type === 'update');
 	const conditionId = $derived(
-		$dialogStore?.type === 'update' ? $dialogStore.conditionId : undefined
+		$conditionDialogStore?.type === 'update' ? $conditionDialogStore.conditionId : undefined
 	);
 	const currentCondition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
 
@@ -43,7 +43,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionDialog();
 		}
 	}
 
@@ -61,7 +61,7 @@
 				decrease_per_tick: decreasePerTick,
 			})
 			.then(() => {
-				closeDialog();
+				closeConditionDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update condition:', error);

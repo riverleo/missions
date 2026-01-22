@@ -10,23 +10,23 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needBehaviorStore, dialogStore, closeDialog, admin } = useNeedBehavior();
+	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needBehaviorId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.needBehaviorId : undefined
+		$needBehaviorDialogStore?.type === 'delete' ? $needBehaviorDialogStore.needBehaviorId : undefined
 	);
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($needBehaviorDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedBehaviorDialog();
 		}
 	}
 
@@ -37,9 +37,9 @@
 		isSubmitting = true;
 
 		admin
-			.remove(needBehaviorId)
+			.removeNeedBehavior(needBehaviorId)
 			.then(() => {
-				closeDialog();
+				closeNeedBehaviorDialog();
 				goto(`/admin/scenarios/${scenarioId}/need-behaviors`);
 			})
 			.catch((error) => {
@@ -61,7 +61,7 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeNeedBehaviorDialog()}>취소</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

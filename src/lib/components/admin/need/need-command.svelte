@@ -21,7 +21,7 @@
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needStore, openDialog } = useNeed();
+	const { needStore, openNeedDialog } = useNeed();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentNeedId = $derived(page.params.needId);
 
@@ -60,7 +60,7 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openDialog({ type: 'delete', needId: need.id })}>
+								<DropdownMenuItem onclick={() => openNeedDialog({ type: 'delete', needId: need.id })}>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

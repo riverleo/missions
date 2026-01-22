@@ -44,7 +44,7 @@ function createNeedStore() {
 		data: {},
 	});
 
-	const dialogStore = writable<NeedDialogState>(undefined);
+	const needDialogStore = writable<NeedDialogState>(undefined);
 
 	let initialized = false;
 	let currentScenarioId: ScenarioId | undefined;
@@ -100,12 +100,12 @@ function createNeedStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<NeedDialogState>) {
-		dialogStore.set(state);
+	function openNeedDialog(state: NonNullable<NeedDialogState>) {
+		needDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	function closeNeedDialog() {
+		needDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -265,11 +265,11 @@ function createNeedStore() {
 		characterNeedStore: characterNeedStore as Readable<
 			RecordFetchState<CharacterNeedId, CharacterNeed>
 		>,
-		dialogStore: dialogStore as Readable<NeedDialogState>,
+		needDialogStore: needDialogStore as Readable<NeedDialogState>,
 		init,
 		fetch,
-		openDialog,
-		closeDialog,
+		openNeedDialog,
+		closeNeedDialog,
 		admin,
 	};
 }

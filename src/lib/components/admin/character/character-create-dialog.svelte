@@ -17,17 +17,15 @@
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { CharacterBodyId, ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useCharacter();
-	const { store: bodyStore } = useCharacterBody();
+	const { admin, characterDialogStore, closeCharacterDialog, characterBodyStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
-	const bodies = $derived(Object.values($bodyStore.data));
+	const open = $derived($characterDialogStore?.type === 'create');
+	const bodies = $derived(Object.values($characterBodyStore.data));
 
 	let name = $state('');
 	let characterBodyId = $state<CharacterBodyId | undefined>(undefined);
@@ -48,7 +46,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeCharacterDialog();
 		}
 	}
 
@@ -63,9 +61,9 @@
 		isSubmitting = true;
 
 		admin
-			.create({ name: name.trim(), character_body_id: characterBodyId })
+			.createCharacter({ name: name.trim(), character_body_id: characterBodyId })
 			.then((character) => {
-				closeDialog();
+				closeCharacterDialog();
 				goto(`/admin/scenarios/${scenarioId}/characters/${character.id}`);
 			})
 			.catch((error) => {

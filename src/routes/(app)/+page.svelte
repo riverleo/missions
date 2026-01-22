@@ -5,7 +5,7 @@
 	import { useApp } from '$lib/hooks/use-app.svelte';
 
 	const { supabase } = useApp();
-	const { user, role } = useCurrent();
+	const { userStore: user, roleStore: role } = useCurrent();
 	const player = usePlayer();
 
 	let isCreatingAnonymousUser = $state(false);
@@ -18,7 +18,7 @@
 
 			if (data.user) {
 				// 플레이어 생성
-				await player.create({ user_id: data.user.id as UserId, name: '모험가' });
+				await player.createPlayer({ user_id: data.user.id as UserId, name: '모험가' });
 			}
 
 			// 페이지 새로고침하여 새 유저 정보 로드

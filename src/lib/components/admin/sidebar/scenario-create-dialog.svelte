@@ -16,9 +16,9 @@
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
 
-	const { admin, dialogStore, closeDialog, fetchAll } = useScenario();
+	const { admin, scenarioDialogStore, closeScenarioDialog, fetchAll } = useScenario();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($scenarioDialogStore?.type === 'create');
 
 	let title = $state('');
 	let isSubmitting = $state(false);
@@ -31,7 +31,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeScenarioDialog();
 		}
 	}
 
@@ -42,9 +42,9 @@
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim() })
+			.createScenario({ title: title.trim() })
 			.then((scenario) => {
-				closeDialog();
+				closeScenarioDialog();
 				fetchAll(scenario.id);
 				goto(`/admin/scenarios/${scenario.id}/quests`);
 			})

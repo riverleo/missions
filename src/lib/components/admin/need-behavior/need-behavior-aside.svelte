@@ -5,14 +5,14 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { NeedBehaviorId } from '$lib/types';
 	import NeedBehaviorCommand from './need-behavior-command.svelte';
 	import NeedBehaviorCreateDialog from './need-behavior-create-dialog.svelte';
 	import NeedBehaviorUpdateDialog from './need-behavior-update-dialog.svelte';
 	import NeedBehaviorDeleteDialog from './need-behavior-delete-dialog.svelte';
 
-	const { openDialog } = useNeedBehavior();
+	const { openNeedBehaviorDialog } = useBehavior();
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openNeedBehaviorDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								disabled={!currentBehaviorId}
 								onclick={() =>
 									currentBehaviorId &&
-									openDialog({
+									openNeedBehaviorDialog({
 										type: 'update',
 										needBehaviorId: currentBehaviorId as NeedBehaviorId,
 									})}
@@ -83,7 +83,7 @@
 							disabled={!currentBehaviorId}
 							onclick={() =>
 								currentBehaviorId &&
-								openDialog({ type: 'delete', needBehaviorId: currentBehaviorId as NeedBehaviorId })}
+								openNeedBehaviorDialog({ type: 'delete', needBehaviorId: currentBehaviorId as NeedBehaviorId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

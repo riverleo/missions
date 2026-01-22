@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useCharacter } from '$lib/hooks/use-character';
 
-	const { store } = useCharacter();
-	const characters = $derived(Object.values($store.data));
+	const { characterStore } = useCharacter();
+	const characters = $derived(Object.values($characterStore.data));
 </script>
 
 <div class="flex h-full items-center justify-center">

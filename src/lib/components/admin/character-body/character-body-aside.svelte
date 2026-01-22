@@ -6,12 +6,12 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterBodyCommand from './character-body-command.svelte';
 	import CharacterBodyCreateDialog from './character-body-create-dialog.svelte';
 	import CharacterBodyDeleteDialog from './character-body-delete-dialog.svelte';
 
-	const { openDialog } = useCharacterBody();
+	const { openCharacterBodyDialog } = useCharacter();
 	const currentBodyId = $derived(page.params.bodyId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -40,7 +40,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openCharacterBodyDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -61,7 +61,7 @@
 							disabled={!currentBodyId}
 							onclick={() =>
 								currentBodyId &&
-								openDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
+								openCharacterBodyDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

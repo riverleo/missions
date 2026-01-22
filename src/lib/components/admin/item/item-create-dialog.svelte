@@ -20,10 +20,10 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useItem();
+	const { admin, itemDialogStore, closeItemDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($itemDialogStore?.type === 'create');
 
 	let name = $state('');
 	let maxDurabilityTicks = $state<number | undefined>(undefined);
@@ -38,7 +38,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeItemDialog();
 		}
 	}
 
@@ -49,12 +49,12 @@
 		isSubmitting = true;
 
 		admin
-			.create({
+			.createItem({
 				name: name.trim(),
 				max_durability_ticks: maxDurabilityTicks ?? null,
 			})
 			.then((item) => {
-				closeDialog();
+				closeItemDialog();
 				goto(`/admin/scenarios/${scenarioId}/items/${item.id}`);
 			})
 			.catch((error) => {

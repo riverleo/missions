@@ -27,15 +27,15 @@
 		ItemInteraction,
 	} from '$lib/types';
 
-	const { store, itemInteractionStore, openItemInteractionDialog } = useItem();
-	const { store: characterStore } = useCharacter();
+	const { itemStore, itemInteractionStore, openItemInteractionDialog } = useItem();
+	const { characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.itemInteractionId);
 
 	const interactionsGroupedByItem = $derived(() => {
 		const interactions = Object.values($itemInteractionStore.data);
 		const grouped = group(interactions, (i) => i.item_id);
-		const items = Object.values($store.data);
+		const items = Object.values($itemStore.data);
 		const sortedItems = alphabetical(items, (b) => b.name);
 
 		return sortedItems

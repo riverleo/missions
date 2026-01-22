@@ -22,7 +22,7 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useNeedBehavior } from '$lib/hooks/use-need-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useNeed } from '$lib/hooks/use-need';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
@@ -32,12 +32,12 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 
-	const { dialogStore, closeDialog, admin } = useNeedBehavior();
+	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { needStore } = useNeed();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($needBehaviorDialogStore?.type === 'create');
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
@@ -86,7 +86,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeNeedBehaviorDialog();
 		}
 	}
 
@@ -97,7 +97,7 @@
 		isSubmitting = true;
 
 		admin
-			.create({
+			.createNeedBehavior({
 				name: name.trim(),
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,
@@ -105,7 +105,7 @@
 				character_face_state_type: characterFaceStateType,
 			})
 			.then((behavior) => {
-				closeDialog();
+				closeNeedBehaviorDialog();
 				goto(`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`);
 			})
 			.catch((error) => {

@@ -63,11 +63,11 @@ function createNarrativeStore() {
 	const playStore = writable<PlayStoreState>({});
 
 	// Admin dialog functions
-	const openDialog = (state: NonNullable<DialogState>) => {
+	const openNarrativeDialog = (state: NonNullable<DialogState>) => {
 		adminStore.update((s) => ({ ...s, dialog: state }));
 	};
 
-	const closeDialog = () => {
+	const closeNarrativeDialog = () => {
 		adminStore.update((s) => ({ ...s, dialog: undefined }));
 	};
 
@@ -96,17 +96,17 @@ function createNarrativeStore() {
 		>,
 		admin: {
 			store: adminStore as Readable<NarrativeAdminStoreState>,
-			openDialog,
-			closeDialog,
-			create: createNarrative(supabase, narrativeStore),
-			update: updateNarrative(supabase, narrativeStore),
-			remove: removeNarrative(supabase, narrativeStore),
-			createNode: createNarrativeNode(supabase, narrativeNodeStore),
-			updateNode: updateNarrativeNode(supabase, narrativeNodeStore),
-			removeNode: removeNarrativeNode(supabase, narrativeNodeStore),
-			createChoice: createNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
-			updateChoice: updateNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
-			removeChoice: removeNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			openNarrativeDialog,
+			closeNarrativeDialog,
+			createNarrative: createNarrative(supabase, narrativeStore),
+			updateNarrative: updateNarrative(supabase, narrativeStore),
+			removeNarrative: removeNarrative(supabase, narrativeStore),
+			createNarrativeNode: createNarrativeNode(supabase, narrativeNodeStore),
+			updateNarrativeNode: updateNarrativeNode(supabase, narrativeNodeStore),
+			removeNarrativeNode: removeNarrativeNode(supabase, narrativeNodeStore),
+			createNarrativeNodeChoice: createNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			updateNarrativeNodeChoice: updateNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
+			removeNarrativeNodeChoice: removeNarrativeNodeChoice(supabase, narrativeNodeChoiceStore),
 			createNarrativeDiceRoll: createNarrativeDiceRoll(supabase, narrativeDiceRollStore),
 			updateNarrativeDiceRoll: updateNarrativeDiceRoll(supabase, narrativeDiceRollStore),
 			removeNarrativeDiceRoll: removeNarrativeDiceRoll(supabase, narrativeDiceRollStore),

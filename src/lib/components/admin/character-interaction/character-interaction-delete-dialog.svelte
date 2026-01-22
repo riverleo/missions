@@ -13,12 +13,15 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
-	const { interactionDialogStore, closeCharacterInteractionDialog, admin } = useCharacter();
+	const { characterInteractionDialogStore, closeCharacterInteractionDialog, admin } =
+		useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($interactionDialogStore?.type === 'delete');
+	const open = $derived($characterInteractionDialogStore?.type === 'delete');
 	const interactionId = $derived(
-		$interactionDialogStore?.type === 'delete' ? $interactionDialogStore.interactionId : undefined
+		$characterInteractionDialogStore?.type === 'delete'
+			? $characterInteractionDialogStore.interactionId
+			: undefined
 	);
 
 	let isSubmitting = $state(false);
@@ -36,7 +39,7 @@
 		isSubmitting = true;
 
 		try {
-			await admin.removeInteraction(interactionId);
+			await admin.removeCharacterInteraction(interactionId);
 			closeCharacterInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/character-interactions`);
 		} catch (error) {

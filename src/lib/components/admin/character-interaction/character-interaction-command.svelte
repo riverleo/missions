@@ -25,7 +25,7 @@
 		CharacterInteraction,
 	} from '$lib/types';
 
-	const { store: characterStore, characterInteractionStore, openCharacterInteractionDialog } = useCharacter();
+	const { characterStore, characterInteractionStore, openCharacterInteractionDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.characterInteractionId);
 

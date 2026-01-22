@@ -26,7 +26,7 @@
 	let { item }: Props = $props();
 
 	const { admin } = useItem();
-	const { uiStore } = admin;
+	const { itemUiStore } = admin;
 
 	const colliderTypes: ColliderType[] = ['circle', 'rectangle'];
 	let selectedColliderType = $state(item.collider_type);
@@ -60,7 +60,7 @@
 	async function updateScale() {
 		const newScale = parseFloat(scale) || 1.0;
 		if (newScale === item.scale) return;
-		await admin.update(item.id, { scale: newScale });
+		await admin.updateItem(item.id, { scale: newScale });
 	}
 
 	function onkeydownScale(e: KeyboardEvent) {
@@ -84,7 +84,7 @@
 		)
 			return;
 
-		await admin.update(item.id, {
+		await admin.updateItem(item.id, {
 			collider_width: newColliderWidth,
 			collider_height: newColliderHeight,
 			collider_offset_x: newColliderOffsetX,
@@ -100,12 +100,12 @@
 	}
 
 	function toggleShowBodyPreview() {
-		admin.setShowBodyPreview(!$uiStore.showBodyPreview);
+		admin.setShowBodyPreview(!$itemUiStore.showBodyPreview);
 	}
 
 	$effect(() => {
 		if (selectedColliderType !== item.collider_type) {
-			admin.update(item.id, { collider_type: selectedColliderType });
+			admin.updateItem(item.id, { collider_type: selectedColliderType });
 		}
 	});
 </script>
@@ -193,9 +193,9 @@
 				<TooltipTrigger>
 					<InputGroupButton
 						onclick={toggleShowBodyPreview}
-						variant={$uiStore.showBodyPreview ? 'secondary' : 'ghost'}
+						variant={$itemUiStore.showBodyPreview ? 'secondary' : 'ghost'}
 					>
-						{#if $uiStore.showBodyPreview}
+						{#if $itemUiStore.showBodyPreview}
 							<IconEye />
 						{:else}
 							<IconEyeOff />

@@ -12,7 +12,7 @@
 	let { terrain, terrainAssetUrl }: Props = $props();
 
 	const { admin } = useTerrain();
-	const uiStore = admin.uiStore;
+	const uiStore = admin.terrainUiStore;
 
 	let containerRef = $state<HTMLDivElement | undefined>(undefined);
 	let isDragging = $state(false);
@@ -51,7 +51,7 @@
 		window.removeEventListener('mouseup', onmouseup);
 
 		if (isDragging && dragX != null && dragY != null) {
-			await admin.update(terrain.id, { respawn_x: dragX, respawn_y: dragY });
+			await admin.updateTerrain(terrain.id, { respawn_x: dragX, respawn_y: dragY });
 		}
 
 		isDragging = false;
@@ -66,7 +66,7 @@
 		const x = e.clientX - rect.left;
 		const y = e.clientY - rect.top;
 
-		await admin.update(terrain.id, { respawn_x: x, respawn_y: y });
+		await admin.updateTerrain(terrain.id, { respawn_x: x, respawn_y: y });
 		admin.setSettingStartMarker(false);
 	}
 </script>

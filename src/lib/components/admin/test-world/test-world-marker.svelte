@@ -13,7 +13,7 @@
 
 	const { store } = useWorldTest();
 	const { worldStore } = useWorld();
-	const { store: terrainStore } = useTerrain();
+	const { terrainStore } = useTerrain();
 
 	// terrain을 terrainStore에서 구독
 	const terrainId = $derived(

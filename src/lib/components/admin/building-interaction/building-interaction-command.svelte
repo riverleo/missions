@@ -20,22 +20,17 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type {
-		ScenarioId,
-		BuildingId,
-		CharacterId,
-		BuildingInteraction,
-	} from '$lib/types';
+	import type { ScenarioId, BuildingId, CharacterId, BuildingInteraction } from '$lib/types';
 
-	const { store, buildingInteractionStore, openBuildingInteractionDialog } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { buildingStore, buildingInteractionStore, openBuildingInteractionDialog } = useBuilding();
+	const { characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.buildingInteractionId);
 
 	const interactionsGroupedByBuilding = $derived(() => {
 		const interactions = Object.values($buildingInteractionStore.data);
 		const grouped = group(interactions, (i) => i.building_id);
-		const buildings = Object.values($store.data);
+		const buildings = Object.values($buildingStore.data);
 		const sortedBuildings = alphabetical(buildings, (b) => b.name);
 
 		return sortedBuildings
@@ -106,13 +101,19 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openBuildingInteractionDialog({ type: 'update', interactionId: interaction.id })}
+											openBuildingInteractionDialog({
+												type: 'update',
+												interactionId: interaction.id,
+											})}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openBuildingInteractionDialog({ type: 'delete', interactionId: interaction.id })}
+											openBuildingInteractionDialog({
+												type: 'delete',
+												interactionId: interaction.id,
+											})}
 									>
 										삭제
 									</DropdownMenuItem>

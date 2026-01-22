@@ -21,7 +21,7 @@ export async function createWorldBuilding(
 	const { worldBuildingStore } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
-	const { player: playerStore, playerScenario: playerScenarioStore, tick } = useCurrent();
+	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const player = get(playerStore);
 	const playerScenario = get(playerScenarioStore);
 	const player_id = player!.id;
@@ -40,7 +40,7 @@ export async function createWorldBuilding(
 			scenario_id,
 			user_id,
 			created_at: new Date().toISOString(),
-			created_at_tick: get(tick),
+			created_at_tick: get(tickStore),
 			conditions: [],
 		};
 	} else {

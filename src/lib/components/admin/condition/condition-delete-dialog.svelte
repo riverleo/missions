@@ -13,20 +13,20 @@
 	import { useCondition } from '$lib/hooks/use-condition';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionStore, dialogStore, closeDialog, admin } = useCondition();
+	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useCondition();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const conditionId = $derived(
-		$dialogStore?.type === 'delete' ? $dialogStore.conditionId : undefined
+		$conditionDialogStore?.type === 'delete' ? $conditionDialogStore.conditionId : undefined
 	);
 	const condition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
-	const open = $derived($dialogStore?.type === 'delete');
+	const open = $derived($conditionDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeConditionDialog();
 		}
 	}
 
@@ -39,7 +39,7 @@
 		admin
 			.removeCondition(conditionId)
 			.then(() => {
-				closeDialog();
+				closeConditionDialog();
 				goto(`/admin/scenarios/${scenarioId}/conditions`);
 			})
 			.catch((error) => {
@@ -61,7 +61,7 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeConditionDialog()}>취소</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

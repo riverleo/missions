@@ -11,7 +11,7 @@
 	import TerrainCreateDialog from './terrain-create-dialog.svelte';
 	import TerrainDeleteDialog from './terrain-delete-dialog.svelte';
 
-	const { openDialog } = useTerrain();
+	const { openTerrainDialog } = useTerrain();
 	const currentTerrainId = $derived(page.params.terrainId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -40,7 +40,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openTerrainDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -61,7 +61,7 @@
 							disabled={!currentTerrainId}
 							onclick={() =>
 								currentTerrainId &&
-								openDialog({ type: 'delete', terrainId: currentTerrainId as TerrainId })}
+								openTerrainDialog({ type: 'delete', terrainId: currentTerrainId as TerrainId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

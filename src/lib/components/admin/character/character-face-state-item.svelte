@@ -15,14 +15,15 @@
 
 	let { characterId, type }: Props = $props();
 
-	const { store, faceStateStore, admin, openFaceStateDialog } = useCharacter();
+	const { characterStore, characterFaceStateStore, admin, openCharacterFaceStateDialog } =
+		useCharacter();
 
-	const character = $derived($store.data[characterId]);
-	const faceStates = $derived($faceStateStore.data[characterId] ?? []);
+	const character = $derived($characterStore.data[characterId]);
+	const faceStates = $derived($characterFaceStateStore.data[characterId] ?? []);
 	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
 
 	// 선택된 바디 상태 가져오기
-	const uiStore = admin.uiStore;
+	const uiStore = admin.characterUiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
 
 	async function onchange(change: SpriteStateChange) {
@@ -44,7 +45,7 @@
 
 	function onOffsetClick() {
 		if (faceState) {
-			openFaceStateDialog({ type: 'update', characterFaceStateId: faceState.id });
+			openCharacterFaceStateDialog({ type: 'update', characterFaceStateId: faceState.id });
 		}
 	}
 </script>
@@ -58,7 +59,7 @@
 >
 	{#snippet action()}
 		{#if faceState}
-			<Button variant="outline" size="sm" onclick={onOffsetClick}> 오프셋 수정 </Button>
+			<Button variant="outline" size="sm" onclick={onOffsetClick}>오프셋 수정</Button>
 		{/if}
 	{/snippet}
 	{#snippet preview()}

@@ -6,13 +6,13 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import ConditionBehaviorCommand from './condition-behavior-command.svelte';
 	import ConditionBehaviorCreateDialog from './condition-behavior-create-dialog.svelte';
 	import ConditionBehaviorUpdateDialog from './condition-behavior-update-dialog.svelte';
 	import ConditionBehaviorDeleteDialog from './condition-behavior-delete-dialog.svelte';
 
-	const { openDialog } = useConditionBehavior();
+	const { openConditionBehaviorDialog } = useBehavior();
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
 	let toggleValue = $state<string[]>(['list']);
@@ -41,7 +41,7 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								onclick={() => openDialog({ type: 'create' })}
+								onclick={() => openConditionBehaviorDialog({ type: 'create' })}
 							>
 								<IconPlus class="size-4" />
 							</Button>
@@ -59,7 +59,7 @@
 								disabled={!currentBehaviorId}
 								onclick={() =>
 									currentBehaviorId &&
-									openDialog({
+									openConditionBehaviorDialog({
 										type: 'update',
 										conditionBehaviorId: currentBehaviorId as ConditionBehaviorId,
 									})}
@@ -83,7 +83,7 @@
 							disabled={!currentBehaviorId}
 							onclick={() =>
 								currentBehaviorId &&
-								openDialog({
+								openConditionBehaviorDialog({
 									type: 'delete',
 									conditionBehaviorId: currentBehaviorId as ConditionBehaviorId,
 								})}

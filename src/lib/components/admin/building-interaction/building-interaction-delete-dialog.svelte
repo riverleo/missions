@@ -13,12 +13,18 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 
-	const { interactionDialogStore, closeBuildingInteractionDialog, admin } = useBuilding();
+	const {
+		buildingInteractionDialogStore: buildingInteractionDialogStore,
+		closeBuildingInteractionDialog,
+		admin,
+	} = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($interactionDialogStore?.type === 'delete');
+	const open = $derived($buildingInteractionDialogStore?.type === 'delete');
 	const interactionId = $derived(
-		$interactionDialogStore?.type === 'delete' ? $interactionDialogStore.interactionId : undefined
+		$buildingInteractionDialogStore?.type === 'delete'
+			? $buildingInteractionDialogStore.interactionId
+			: undefined
 	);
 
 	let isSubmitting = $state(false);
@@ -36,7 +42,7 @@
 		isSubmitting = true;
 
 		try {
-			await admin.removeInteraction(interactionId);
+			await admin.removeBuildingInteraction(interactionId);
 			closeBuildingInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/building-interactions`);
 		} catch (error) {

@@ -47,7 +47,7 @@
 		isUpdating = true;
 
 		admin
-			.update(chapterId, {
+			.updateChapter(chapterId, {
 				title: changes.title,
 				display_order_in_scenario: changes.display_order_in_scenario,
 			})
@@ -76,7 +76,7 @@
 
 		isPublishing = true;
 
-		const action = isPublished ? admin.unpublish : admin.publish;
+		const action = isPublished ? admin.unpublishChapter : admin.publishChapter;
 
 		action(changes.id)
 			.catch((error) => {

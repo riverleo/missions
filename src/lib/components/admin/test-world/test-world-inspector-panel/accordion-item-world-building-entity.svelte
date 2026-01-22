@@ -18,7 +18,7 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { worldBuildingStore } = useWorld();
-	const { store: buildingStore } = useBuilding();
+	const { buildingStore: buildingStore } = useBuilding();
 
 	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
 	const building = $derived(

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { useCharacterBody } from '$lib/hooks/use-character-body';
+	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterBodyPanel from '$lib/components/admin/character-body/character-body-action-panel.svelte';
 	import CharacterBodyStateItemGroup from '$lib/components/admin/character-body/character-body-state-item-group.svelte';
 	import type { CharacterBodyId } from '$lib/types';
 
-	const { store } = useCharacterBody();
+	const { characterBodyStore } = useCharacter();
 	const bodyId = $derived(page.params.bodyId as CharacterBodyId);
-	const body = $derived(bodyId ? $store.data[bodyId] : undefined);
+	const body = $derived(bodyId ? $characterBodyStore.data[bodyId] : undefined);
 </script>
 
 {#if body && bodyId}

@@ -5,7 +5,7 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconLayoutDistributeHorizontal, IconPlus } from '@tabler/icons-svelte';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 
 	interface Props {
 		behavior: ConditionBehavior | undefined;
@@ -14,7 +14,7 @@
 
 	let { behavior, onlayout }: Props = $props();
 
-	const { admin } = useConditionBehavior();
+	const { admin } = useBehavior();
 
 	let isLayouting = $state(false);
 	let isCreating = $state(false);

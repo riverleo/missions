@@ -24,11 +24,11 @@
 	import type { ScenarioId } from '$lib/types';
 
 	const { supabase } = useApp();
-	const { store, openDialog } = useTerrain();
+	const { terrainStore, openTerrainDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentTerrainId = $derived(page.params.terrainId);
 
-	const terrains = $derived(sort(Object.values($store.data), (t) => t.display_order));
+	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -73,7 +73,7 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', terrainId: terrain.id })}
+									onclick={() => openTerrainDialog({ type: 'delete', terrainId: terrain.id })}
 								>
 									삭제
 								</DropdownMenuItem>

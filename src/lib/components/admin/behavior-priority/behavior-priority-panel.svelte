@@ -2,9 +2,9 @@
 	import BehaviorPriorityList from './behavior-priority-list.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import type { BehaviorPriority, BehaviorPriorityId, BulkChanges } from '$lib/types';
-	import { useBehaviorPriority } from '$lib/hooks/use-behavior-priority';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 
-	const { admin } = useBehaviorPriority();
+	const { admin } = useBehavior();
 
 	let changes = $state<BulkChanges<BehaviorPriority> | undefined>(undefined);
 	let isSaving = $state(false);
@@ -22,9 +22,9 @@
 			// updated와 deleted를 동시에 처리
 			await Promise.all([
 				...changes.updated.map((priority) =>
-					admin.update(priority.id as BehaviorPriorityId, { priority: priority.priority })
+					admin.updateBehaviorPriority(priority.id as BehaviorPriorityId, { priority: priority.priority })
 				),
-				...changes.deleted.map((id) => admin.remove(id as BehaviorPriorityId)),
+				...changes.deleted.map((id) => admin.removeBehaviorPriority(id as BehaviorPriorityId)),
 			]);
 
 			// 저장 후 changes 초기화

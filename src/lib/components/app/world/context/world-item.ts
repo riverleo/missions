@@ -36,7 +36,7 @@ export async function createWorldItem(
 		>
 ) {
 	const { worldItemStore } = useWorld();
-	const { player: playerStore, playerScenario: playerScenarioStore, tick } = useCurrent();
+	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
 	const player = get(playerStore);
@@ -60,7 +60,7 @@ export async function createWorldItem(
 			durability_ticks: insert.durability_ticks ?? null,
 			rotation: insert.rotation ?? 0,
 			created_at: new Date().toISOString(),
-			created_at_tick: get(tick),
+			created_at_tick: get(tickStore),
 		};
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
@@ -73,7 +73,7 @@ export async function createWorldItem(
 				player_id,
 				scenario_id,
 				user_id,
-				created_at_tick: get(tick),
+				created_at_tick: get(tickStore),
 			})
 			.select()
 			.single<WorldItem>();

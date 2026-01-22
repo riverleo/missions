@@ -44,7 +44,7 @@
 		...restProps
 	}: Props = $props();
 
-	const { stateStore } = useBuilding();
+	const { buildingStateStore: stateStore } = useBuilding();
 	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s) => s.type === stateType));
 

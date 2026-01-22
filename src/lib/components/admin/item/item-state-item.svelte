@@ -16,11 +16,11 @@
 
 	let { itemId, type }: Props = $props();
 
-	const { store, stateStore, admin, openStateDialog } = useItem();
-	const { uiStore } = admin;
+	const { itemStore, itemStateStore, admin, openStateDialog } = useItem();
+	const { itemUiStore } = admin;
 
-	const item = $derived($store.data[itemId]);
-	const itemStates = $derived($stateStore.data[itemId] ?? []);
+	const item = $derived($itemStore.data[itemId]);
+	const itemStates = $derived($itemStateStore.data[itemId] ?? []);
 	const itemState = $derived(itemStates.find((s) => s.type === type));
 
 	const durabilityPreview = $derived.by(() => {
@@ -65,7 +65,7 @@
 		<ItemSpriteAnimator {itemId} stateType={type} resolution={2} />
 	{/snippet}
 	{#snippet collider()}
-		{#if $uiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}
+		{#if $itemUiStore.showBodyPreview && item && (item.collider_width > 0 || item.collider_height > 0)}
 			<svg
 				width={item.collider_width}
 				height={item.collider_height}

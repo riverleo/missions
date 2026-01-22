@@ -37,11 +37,11 @@
 	import { page } from '$app/state';
 	import type { ChapterId, ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useQuest();
+	const { admin, questDialogStore, closeQuestDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const { store: chapterStore } = useChapter();
+	const { chapterStore } = useChapter();
 
-	const open = $derived($dialogStore?.type === 'create');
+	const open = $derived($questDialogStore?.type === 'create');
 	const chapters = $derived(Object.values($chapterStore.data));
 
 	let title = $state('');
@@ -75,7 +75,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeQuestDialog();
 		}
 	}
 
@@ -93,7 +93,7 @@
 				order_in_chapter: orderInChapter,
 			})
 			.then((quest) => {
-				closeDialog();
+				closeQuestDialog();
 				goto(`/admin/scenarios/${scenarioId}/quests/${quest.id}`);
 			})
 			.catch((error) => {

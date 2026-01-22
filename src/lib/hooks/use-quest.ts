@@ -35,7 +35,7 @@ function createQuestStore() {
 		data: {},
 	});
 
-	const dialogStore = writable<QuestDialogState>(undefined);
+	const questDialogStore = writable<QuestDialogState>(undefined);
 
 	let currentScenarioId: ScenarioId | undefined;
 
@@ -106,12 +106,12 @@ function createQuestStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<QuestDialogState>) {
-		dialogStore.set(state);
+	function openQuestDialog(state: NonNullable<QuestDialogState>) {
+		questDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	function closeQuestDialog() {
+		questDialogStore.set(undefined);
 	}
 
 	const admin = {
@@ -259,11 +259,11 @@ function createQuestStore() {
 	return {
 		questStore: questStore as Readable<RecordFetchState<QuestId, Quest>>,
 		questBranchStore: questBranchStore as Readable<RecordFetchState<QuestBranchId, QuestBranch>>,
-		dialogStore: dialogStore as Readable<QuestDialogState>,
+		questDialogStore: questDialogStore as Readable<QuestDialogState>,
 		init,
 		fetch,
-		openDialog,
-		closeDialog,
+		openQuestDialog,
+		closeQuestDialog,
 		admin,
 	};
 }

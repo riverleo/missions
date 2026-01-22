@@ -32,11 +32,13 @@ export class WorldContextBlueprint {
 	 * 엔티티 템플릿 선택
 	 */
 	setSelectedEntityTemplateId(entityTemplateId: EntityTemplateId | undefined) {
+		const { selectedEntityIdStore } = useWorld();
+
 		this.selectedEntityTemplateId = entityTemplateId;
 
 		// 템플릿을 선택할 때만 엔티티 선택 해제
 		if (entityTemplateId !== undefined) {
-			useWorld().selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
+			selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
 		} else {
 			// 템플릿 해제 시 캐시 클리어
 			this.cursorTileBounds = undefined;
@@ -73,7 +75,7 @@ export class WorldContextBlueprint {
 		let cursorType: 'cell' | 'tile';
 
 		if (type === 'building') {
-			const { store: buildingStore } = useBuilding();
+			const { buildingStore } = useBuilding();
 			const building = get(buildingStore).data[id as BuildingId];
 
 			if (!building) {
@@ -152,9 +154,12 @@ export class WorldContextBlueprint {
 		const { x, y } = current;
 
 		// 스토어 값들을 한 번만 조회
-		const buildingStore = get(useBuilding().store).data;
-		const worldBuildingStore = get(useWorld().worldBuildingStore).data;
-		const worldTileMapStore = get(useWorld().worldTileMapStore).data;
+		const { buildingStore } = useBuilding();
+		const { worldBuildingStore, worldTileMapStore } = useWorld();
+
+		const buildingStoreData = get(buildingStore).data;
+		const worldBuildingStoreData = get(worldBuildingStore).data;
+		const worldTileMapStoreData = get(worldTileMapStore).data;
 
 		// 배치하려는 셀의 범위 계산 (객체 생성 대신 범위만)
 		let targetMinCol: number;
@@ -165,7 +170,7 @@ export class WorldContextBlueprint {
 
 		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
-			const building = buildingStore[buildingId];
+			const building = buildingStoreData[buildingId];
 			if (!building) return [];
 			// 픽셀 좌표를 셀로 변환
 			const cell = vectorUtils.vectorToCell({ x, y } as Vector);
@@ -192,12 +197,12 @@ export class WorldContextBlueprint {
 		const invalidCellSet = new Set<string>();
 
 		// worldId 필터링
-		const worldBuildings = Object.values(worldBuildingStore).filter(
+		const worldBuildings = Object.values(worldBuildingStoreData).filter(
 			(b) => !this.context?.worldId || b.world_id === this.context.worldId
 		);
 
 		for (const worldBuilding of worldBuildings) {
-			const buildingData = buildingStore[worldBuilding.building_id];
+			const buildingData = buildingStoreData[worldBuilding.building_id];
 			if (!buildingData) continue;
 
 			// 모든 셀 생성 대신 키만 Set에 추가
@@ -209,7 +214,7 @@ export class WorldContextBlueprint {
 		}
 
 		// 기존 타일들이 차지하는 셀 수집 (1 tile = 2x2 cells)
-		const worldTileMap = worldTileMapStore[this.context.worldId];
+		const worldTileMap = worldTileMapStoreData[this.context.worldId];
 		if (worldTileMap) {
 			for (const vector of Object.keys(worldTileMap.data)) {
 				const [tileXStr, tileYStr] = vector.split(',');
@@ -230,7 +235,7 @@ export class WorldContextBlueprint {
 		let unsupported = false;
 		if (isBuilding) {
 			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
-			const building = buildingStore[buildingId];
+			const building = buildingStoreData[buildingId];
 			if (building) {
 				// 건물의 가장 아래 행 (픽셀 좌표)
 				const cell = vectorUtils.vectorToCell({ x, y } as Vector);

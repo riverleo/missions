@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useBuilding } from '$lib/hooks/use-building';
 
-	const { store } = useBuilding();
-	const buildings = $derived(Object.values($store.data));
+	const { buildingStore } = useBuilding();
+	const buildings = $derived(Object.values($buildingStore.data));
 </script>
 
 <div class="flex h-full items-center justify-center">

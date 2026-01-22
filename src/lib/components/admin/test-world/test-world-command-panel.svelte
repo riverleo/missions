@@ -27,11 +27,11 @@
 	let { worldContext }: Props = $props();
 
 	const { supabase } = useApp();
-	const { store: terrainStore, tileStore } = useTerrain();
-	const { store: characterStore } = useCharacter();
-	const { store: buildingStore } = useBuilding();
-	const { store: itemStore } = useItem();
-	const { store: testWorldStore, setSelectedTerrainId } = useWorldTest();
+	const { terrainStore, tileStore } = useTerrain();
+	const { characterStore } = useCharacter();
+	const { buildingStore } = useBuilding();
+	const { itemStore } = useItem();
+	const { store, setSelectedTerrainId } = useWorldTest();
 
 	const terrains = $derived(sort(Object.values($terrainStore.data), (t) => t.display_order));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
@@ -52,7 +52,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								terrain.id === $testWorldStore.selectedTerrainId ? 'opacity-100' : 'opacity-0'
+								terrain.id === $store.selectedTerrainId ? 'opacity-100' : 'opacity-0'
 							)}
 						/>
 						{#if assetUrl}

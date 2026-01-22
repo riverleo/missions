@@ -14,15 +14,15 @@
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { admin, dialogStore, closeDialog } = useItem();
+	const { admin, itemDialogStore, closeItemDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const open = $derived($dialogStore?.type === 'delete');
-	const itemId = $derived($dialogStore?.type === 'delete' ? $dialogStore.itemId : undefined);
+	const open = $derived($itemDialogStore?.type === 'delete');
+	const itemId = $derived($itemDialogStore?.type === 'delete' ? $itemDialogStore.itemId : undefined);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeItemDialog();
 		}
 	}
 
@@ -30,9 +30,9 @@
 		if (!itemId || !scenarioId) return;
 
 		admin
-			.remove(itemId)
+			.removeItem(itemId)
 			.then(() => {
-				closeDialog();
+				closeItemDialog();
 				goto(`/admin/scenarios/${scenarioId}/items`);
 			})
 			.catch((error) => {

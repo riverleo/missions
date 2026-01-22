@@ -27,7 +27,7 @@
 		isCreating = true;
 
 		admin
-			.create({ title: '' })
+			.createChapter({ title: '' })
 			.catch((error) => {
 				console.error('Failed to create chapter:', error);
 			})

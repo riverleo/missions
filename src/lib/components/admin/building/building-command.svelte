@@ -21,11 +21,11 @@
 	import { alphabetical } from 'radash';
 	import type { ScenarioId } from '$lib/types';
 
-	const { store, openDialog } = useBuilding();
+	const { buildingStore, openBuildingDialog } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBuildingId = $derived(page.params.buildingId);
 
-	const buildings = $derived(alphabetical(Object.values($store.data), (b) => b.name));
+	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -64,12 +64,12 @@
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'update', buildingId: building.id })}
+									onclick={() => openBuildingDialog({ type: 'update', buildingId: building.id })}
 								>
 									수정
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onclick={() => openDialog({ type: 'delete', buildingId: building.id })}
+									onclick={() => openBuildingDialog({ type: 'delete', buildingId: building.id })}
 								>
 									삭제
 								</DropdownMenuItem>

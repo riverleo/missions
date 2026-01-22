@@ -34,11 +34,11 @@
 	import { useQuest } from '$lib/hooks/use-quest';
 	import { useChapter } from '$lib/hooks/use-chapter';
 
-	const { questStore, admin, dialogStore, closeDialog } = useQuest();
-	const { store: chapterStore } = useChapter();
+	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
+	const { chapterStore } = useChapter();
 
-	const open = $derived($dialogStore?.type === 'update');
-	const questId = $derived($dialogStore?.type === 'update' ? $dialogStore.questId : undefined);
+	const open = $derived($questDialogStore?.type === 'update');
+	const questId = $derived($questDialogStore?.type === 'update' ? $questDialogStore.questId : undefined);
 	const currentQuest = $derived(questId ? $questStore.data?.[questId] : undefined);
 	const chapters = $derived(Object.values($chapterStore.data));
 
@@ -73,7 +73,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			closeDialog();
+			closeQuestDialog();
 		}
 	}
 
@@ -91,7 +91,7 @@
 				order_in_chapter: orderInChapter,
 			})
 			.then(() => {
-				closeDialog();
+				closeQuestDialog();
 			})
 			.catch((error) => {
 				console.error('Failed to update quest:', error);

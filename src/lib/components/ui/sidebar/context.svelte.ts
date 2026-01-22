@@ -1,4 +1,4 @@
-import { IsMobile } from '$lib/hooks/is-mobile.svelte.js';
+import { MediaQuery } from 'svelte/reactivity';
 import { getContext, setContext } from 'svelte';
 import { SIDEBAR_KEYBOARD_SHORTCUT } from './constants.js';
 
@@ -25,12 +25,12 @@ class SidebarState {
 	open = $derived.by(() => this.props.open());
 	openMobile = $state(false);
 	setOpen: SidebarStateProps['setOpen'];
-	#isMobile: IsMobile;
+	#isMobile: MediaQuery;
 	state = $derived.by(() => (this.open ? 'expanded' : 'collapsed'));
 
 	constructor(props: SidebarStateProps) {
 		this.setOpen = props.setOpen;
-		this.#isMobile = new IsMobile();
+		this.#isMobile = new MediaQuery('(max-width: 767px)');
 		this.props = props;
 	}
 

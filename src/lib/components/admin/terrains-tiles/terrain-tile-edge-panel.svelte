@@ -19,7 +19,7 @@
 
 	let { terrainTile }: Props = $props();
 
-	const { store: terrainStore, tileStore, admin } = useTerrain();
+	const { terrainStore, tileStore, admin } = useTerrain();
 	const flowEdges = useEdges();
 
 	const terrain = $derived(terrainTile ? $terrainStore.data[terrainTile.terrain_id] : undefined);

@@ -16,11 +16,16 @@
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { useTerrain } from '$lib/hooks/use-terrain';
 
-	const { tileStore, admin, tileDialogStore, closeTileDialog } = useTerrain();
+	const {
+		tileStore,
+		admin,
+		tileDialogStore: terrainTileDialogStore,
+		closeTileDialog,
+	} = useTerrain();
 
-	const open = $derived($tileDialogStore?.type === 'update');
+	const open = $derived($terrainTileDialogStore?.type === 'update');
 	const tileId = $derived(
-		$tileDialogStore?.type === 'update' ? $tileDialogStore.tileId : undefined
+		$terrainTileDialogStore?.type === 'update' ? $terrainTileDialogStore.tileId : undefined
 	);
 	const tile = $derived(tileId ? $tileStore.data[tileId] : undefined);
 

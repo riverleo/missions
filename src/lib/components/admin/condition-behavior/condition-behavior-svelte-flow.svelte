@@ -14,7 +14,7 @@
 	import { mode } from 'mode-watcher';
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import {
 		createConditionBehaviorActionNodeId,
 		parseConditionBehaviorActionNodeId,
@@ -26,7 +26,7 @@
 	import ConditionBehaviorActionNodePanel from './condition-behavior-action-node-panel.svelte';
 	import type { ConditionBehaviorId, ConditionBehaviorActionId } from '$lib/types';
 
-	const { conditionBehaviorStore, conditionBehaviorActionStore, admin } = useConditionBehavior();
+	const { conditionBehaviorStore, conditionBehaviorActionStore, admin } = useBehavior();
 
 	const behaviorId = $derived(page.params.behaviorId as ConditionBehaviorId);
 	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);

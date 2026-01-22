@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useItem } from '$lib/hooks/use-item';
 
-	const { store } = useItem();
-	const items = $derived(Object.values($store.data));
+	const { itemStore } = useItem();
+	const items = $derived(Object.values($itemStore.data));
 </script>
 
 <div class="flex h-full items-center justify-center">

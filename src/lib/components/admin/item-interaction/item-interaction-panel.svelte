@@ -36,10 +36,10 @@
 
 	let { interaction, interactionId }: Props = $props();
 
-	const { store, itemInteractionActionStore, openItemInteractionDialog, admin } = useItem();
-	const { store: characterStore } = useCharacter();
+	const { itemStore, itemInteractionActionStore, openItemInteractionDialog, admin } = useItem();
+	const { characterStore } = useCharacter();
 
-	const item = $derived($store.data[interaction.item_id]);
+	const item = $derived($itemStore.data[interaction.item_id]);
 	const actions = $derived($itemInteractionActionStore.data[interactionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
@@ -56,14 +56,14 @@
 	});
 
 	async function updateInteraction() {
-		await admin.updateInteraction(interactionId, {
+		await admin.updateItemInteraction(interactionId, {
 			character_behavior_type: characterBehaviorType,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
 
 	async function createAction() {
-		await admin.createInteractionAction(interactionId, {
+		await admin.createItemInteractionAction(interactionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -72,11 +72,11 @@
 		actionId: ItemInteractionActionId,
 		updates: Partial<ItemInteractionAction>
 	) {
-		await admin.updateInteractionAction(actionId, interactionId, updates);
+		await admin.updateItemInteractionAction(actionId, interactionId, updates);
 	}
 
 	async function removeAction(actionId: ItemInteractionActionId) {
-		await admin.removeInteractionAction(actionId, interactionId);
+		await admin.removeItemInteractionAction(actionId, interactionId);
 	}
 
 	function getBehaviorLabel(type: string) {

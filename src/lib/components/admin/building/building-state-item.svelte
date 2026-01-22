@@ -17,11 +17,11 @@
 
 	let { buildingId, type }: Props = $props();
 
-	const { store, stateStore, admin, openStateDialog } = useBuilding();
+	const { buildingStore, buildingStateStore, admin } = useBuilding();
 	const { uiStore } = admin;
 
-	const building = $derived($store.data[buildingId]);
-	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
+	const building = $derived($buildingStore.data[buildingId]);
+	const buildingStates = $derived($buildingStateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
 
 	async function onchange(change: SpriteStateChange) {
@@ -40,7 +40,7 @@
 			if (atlas) {
 				const cell_cols = Math.max(1, Math.round(atlas.frameWidth / CELL_SIZE));
 				const cell_rows = Math.max(1, Math.round(atlas.frameHeight / CELL_SIZE));
-				await admin.update(buildingId, { cell_cols, cell_rows });
+				await admin.updateBuilding(buildingId, { cell_cols, cell_rows });
 			}
 		}
 	}

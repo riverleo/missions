@@ -42,13 +42,13 @@ let instance: ReturnType<typeof createItemStore> | null = null;
 function createItemStore() {
 	const { supabase } = useApp();
 
-	const store = writable<RecordFetchState<ItemId, Item>>({
+	const itemStore = writable<RecordFetchState<ItemId, Item>>({
 		status: 'idle',
 		data: {},
 	});
 
 	// item_id를 키로, 해당 아이템의 states 배열을 값으로
-	const stateStore = writable<RecordFetchState<ItemId, ItemState[]>>({
+	const itemStateStore = writable<RecordFetchState<ItemId, ItemState[]>>({
 		status: 'idle',
 		data: {},
 	});
@@ -67,11 +67,11 @@ function createItemStore() {
 		data: {},
 	});
 
-	const dialogStore = writable<ItemDialogState>(undefined);
-	const stateDialogStore = writable<ItemStateDialogState>(undefined);
-	const interactionDialogStore = writable<ItemInteractionDialogState>(undefined);
+	const itemDialogStore = writable<ItemDialogState>(undefined);
+	const itemStateDialogStore = writable<ItemStateDialogState>(undefined);
+	const itemInteractionDialogStore = writable<ItemInteractionDialogState>(undefined);
 
-	const uiStore = writable({
+	const itemUiStore = writable({
 		showBodyPreview: false,
 	});
 
@@ -88,7 +88,7 @@ function createItemStore() {
 		}
 		currentScenarioId = scenarioId;
 
-		store.update((state) => ({ ...state, status: 'loading' }));
+		itemStore.update((state) => ({ ...state, status: 'loading' }));
 		itemInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
@@ -128,13 +128,13 @@ function createItemStore() {
 					[]) as ItemInteractionAction[];
 			}
 
-			store.set({
+			itemStore.set({
 				status: 'success',
 				data: itemRecord,
 				error: undefined,
 			});
 
-			stateStore.set({
+			itemStateStore.set({
 				status: 'success',
 				data: stateRecord,
 				error: undefined,
@@ -153,12 +153,12 @@ function createItemStore() {
 			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
-			store.set({
+			itemStore.set({
 				status: 'error',
 				data: {},
 				error: err,
 			});
-			stateStore.set({
+			itemStateStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -176,38 +176,38 @@ function createItemStore() {
 		}
 	}
 
-	function openDialog(state: NonNullable<ItemDialogState>) {
-		dialogStore.set(state);
+	function openItemDialog(state: NonNullable<ItemDialogState>) {
+		itemDialogStore.set(state);
 	}
 
-	function closeDialog() {
-		dialogStore.set(undefined);
+	function closeItemDialog() {
+		itemDialogStore.set(undefined);
 	}
 
 	function openStateDialog(state: NonNullable<ItemStateDialogState>) {
-		stateDialogStore.set(state);
+		itemStateDialogStore.set(state);
 	}
 
 	function closeStateDialog() {
-		stateDialogStore.set(undefined);
+		itemStateDialogStore.set(undefined);
 	}
 
 	function openItemInteractionDialog(state: NonNullable<ItemInteractionDialogState>) {
-		interactionDialogStore.set(state);
+		itemInteractionDialogStore.set(state);
 	}
 
 	function closeItemInteractionDialog() {
-		interactionDialogStore.set(undefined);
+		itemInteractionDialogStore.set(undefined);
 	}
 
 	const admin = {
-		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
+		itemUiStore: itemUiStore as Readable<{ showBodyPreview: boolean }>,
 
 		setShowBodyPreview(value: boolean) {
-			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
+			itemUiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async create(item: Omit<ItemInsert, 'scenario_id'>) {
+		async createItem(item: Omit<ItemInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useItem: currentScenarioId is not set.');
 			}
@@ -223,13 +223,13 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			store.update((state) =>
+			itemStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id as ItemId] = data;
 				})
 			);
 
-			stateStore.update((state) =>
+			itemStateStore.update((state) =>
 				produce(state, (draft) => {
 					draft.data[data.id as ItemId] = [];
 				})
@@ -238,12 +238,12 @@ function createItemStore() {
 			return data;
 		},
 
-		async update(id: ItemId, item: ItemUpdate) {
+		async updateItem(id: ItemId, item: ItemUpdate) {
 			const { error } = await supabase.from('items').update(item).eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			itemStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data?.[id]) {
 						Object.assign(draft.data[id], item);
@@ -252,12 +252,12 @@ function createItemStore() {
 			);
 		},
 
-		async remove(id: ItemId) {
+		async removeItem(id: ItemId) {
 			const { error } = await supabase.from('items').delete().eq('id', id);
 
 			if (error) throw error;
 
-			store.update((state) =>
+			itemStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -265,7 +265,7 @@ function createItemStore() {
 				})
 			);
 
-			stateStore.update((state) =>
+			itemStateStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -286,7 +286,7 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			itemStateStore.update((s) =>
 				produce(s, (draft) => {
 					if (draft.data[itemId]) {
 						draft.data[itemId].push(data);
@@ -304,7 +304,7 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			itemStateStore.update((s) =>
 				produce(s, (draft) => {
 					const states = draft.data[itemId];
 					if (states) {
@@ -322,7 +322,7 @@ function createItemStore() {
 
 			if (error) throw error;
 
-			stateStore.update((s) =>
+			itemStateStore.update((s) =>
 				produce(s, (draft) => {
 					const states = draft.data[itemId];
 					if (states) {
@@ -332,7 +332,7 @@ function createItemStore() {
 			);
 		},
 
-		async createInteraction(interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
+		async createItemInteraction(interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
 			if (!currentScenarioId) {
 				throw new Error('useItem: currentScenarioId is not set.');
 			}
@@ -363,7 +363,7 @@ function createItemStore() {
 			return data;
 		},
 
-		async updateInteraction(id: ItemInteractionId, updates: ItemInteractionUpdate) {
+		async updateItemInteraction(id: ItemInteractionId, updates: ItemInteractionUpdate) {
 			const { error } = await supabase
 				.from('item_interactions')
 				.update(updates)
@@ -380,7 +380,7 @@ function createItemStore() {
 			);
 		},
 
-		async removeInteraction(id: ItemInteractionId) {
+		async removeItemInteraction(id: ItemInteractionId) {
 			const { error } = await supabase.from('item_interactions').delete().eq('id', id);
 
 			if (error) throw error;
@@ -402,7 +402,7 @@ function createItemStore() {
 			);
 		},
 
-		async createInteractionAction(
+		async createItemInteractionAction(
 			interactionId: ItemInteractionId,
 			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
 		) {
@@ -445,7 +445,7 @@ function createItemStore() {
 			return data;
 		},
 
-		async updateInteractionAction(
+		async updateItemInteractionAction(
 			actionId: ItemInteractionActionId,
 			interactionId: ItemInteractionId,
 			updates: ItemInteractionActionUpdate
@@ -470,7 +470,7 @@ function createItemStore() {
 			);
 		},
 
-		async removeInteractionAction(
+		async removeItemInteractionAction(
 			actionId: ItemInteractionActionId,
 			interactionId: ItemInteractionId
 		) {
@@ -493,21 +493,21 @@ function createItemStore() {
 	};
 
 	return {
-		store: store as Readable<RecordFetchState<ItemId, Item>>,
-		stateStore: stateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
+		itemStore: itemStore as Readable<RecordFetchState<ItemId, Item>>,
+		itemStateStore: itemStateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
 		itemInteractionStore: itemInteractionStore as Readable<
 			RecordFetchState<ItemInteractionId, ItemInteraction>
 		>,
 		itemInteractionActionStore: itemInteractionActionStore as Readable<
 			RecordFetchState<ItemInteractionId, ItemInteractionAction[]>
 		>,
-		dialogStore: dialogStore as Readable<ItemDialogState>,
-		stateDialogStore: stateDialogStore as Readable<ItemStateDialogState>,
-		interactionDialogStore: interactionDialogStore as Readable<ItemInteractionDialogState>,
+		itemDialogStore: itemDialogStore as Readable<ItemDialogState>,
+		itemStateDialogStore: itemStateDialogStore as Readable<ItemStateDialogState>,
+		itemInteractionDialogStore: itemInteractionDialogStore as Readable<ItemInteractionDialogState>,
 		init,
 		fetch,
-		openDialog,
-		closeDialog,
+		openItemDialog,
+		closeItemDialog,
 		openStateDialog,
 		closeStateDialog,
 		openItemInteractionDialog,

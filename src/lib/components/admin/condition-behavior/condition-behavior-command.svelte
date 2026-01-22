@@ -16,16 +16,16 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useConditionBehavior } from '$lib/hooks/use-condition-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useCondition } from '$lib/hooks/use-condition';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
 
-	const { conditionBehaviorStore, openDialog } = useConditionBehavior();
+	const { conditionBehaviorStore, openConditionBehaviorDialog } = useBehavior();
 	const { conditionStore } = useCondition();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -90,12 +90,12 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'update', conditionBehaviorId: behavior.id })}
+										onclick={() => openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
+										onclick={() => openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
 									>
 										삭제
 									</DropdownMenuItem>

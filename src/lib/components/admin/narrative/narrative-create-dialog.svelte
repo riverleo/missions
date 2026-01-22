@@ -31,7 +31,7 @@
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
-			admin.closeDialog();
+			admin.closeNarrativeDialog();
 		}
 	}
 
@@ -42,9 +42,9 @@
 		isSubmitting = true;
 
 		admin
-			.create({ title: title.trim(), scenario_id: scenarioId })
+			.createNarrative({ title: title.trim(), scenario_id: scenarioId })
 			.then((narrative) => {
-				admin.closeDialog();
+				admin.closeNarrativeDialog();
 				goto(`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`);
 			})
 			.catch((error) => {

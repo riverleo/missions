@@ -37,7 +37,7 @@
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
 	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
 	const interaction = $derived($buildingInteractionStore.data[buildingInteractionId]);
@@ -120,12 +120,12 @@
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) =>
-						admin.updateInteractionAction(a.id, buildingInteractionId, { root: false })
+						admin.updateBuildingInteractionAction(a.id, buildingInteractionId, { root: false })
 					)
 				);
 			}
 
-			await admin.updateInteractionAction(actionId, buildingInteractionId, {
+			await admin.updateBuildingInteractionAction(actionId, buildingInteractionId, {
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				character_offset_x: changes.character_offset_x,

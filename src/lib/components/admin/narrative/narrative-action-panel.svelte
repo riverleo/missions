@@ -39,7 +39,11 @@
 		isCreatingNode = true;
 
 		try {
-			await admin.createNode({ narrative_id: narrativeId, scenario_id: scenarioId, type: 'text' });
+			await admin.createNarrativeNode({
+				narrative_id: narrativeId,
+				scenario_id: scenarioId,
+				type: 'text',
+			});
 		} catch (error) {
 			console.error('Failed to create narrative node:', error);
 		} finally {

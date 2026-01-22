@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-	import { useBehaviorPriority } from '$lib/hooks/use-behavior-priority';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { BehaviorPriority, BulkChanges } from '$lib/types';
 	import BehaviorPriorityListItem from './behavior-priority-list-item.svelte';
 	import { isEqual, clone, sort } from 'radash';
@@ -12,7 +12,7 @@
 
 	let { onchange }: Props = $props();
 
-	const { store: behaviorPriorityStore } = useBehaviorPriority();
+	const { behaviorPriorityStore } = useBehavior();
 
 	// priority 순으로 정렬된 우선도 리스트
 	type DndItem = BehaviorPriority & { id: string };

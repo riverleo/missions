@@ -5,9 +5,9 @@
 	import BuildingStateItemGroup from '$lib/components/admin/building/building-state-item-group.svelte';
 	import type { BuildingId } from '$lib/types';
 
-	const { store } = useBuilding();
+	const { buildingStore } = useBuilding();
 	const buildingId = $derived(page.params.buildingId as BuildingId);
-	const building = $derived(buildingId ? $store.data[buildingId] : undefined);
+	const building = $derived(buildingId ? $buildingStore.data[buildingId] : undefined);
 </script>
 
 {#if building && buildingId}

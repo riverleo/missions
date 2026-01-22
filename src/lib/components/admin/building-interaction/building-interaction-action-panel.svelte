@@ -24,7 +24,7 @@
 	let { interaction, buildingInteractionId, onlayout }: Props = $props();
 
 	const { buildingInteractionActionStore, admin } = useBuilding();
-	const { store: characterStore } = useCharacter();
+	const { characterStore } = useCharacter();
 
 	const actions = $derived($buildingInteractionActionStore.data[buildingInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
@@ -69,7 +69,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createInteractionAction(buildingInteractionId, {
+			await admin.createBuildingInteractionAction(buildingInteractionId, {
 				root: false,
 			});
 		} catch (error) {

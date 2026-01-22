@@ -29,7 +29,7 @@
 
 	const { supabase } = useApp();
 	const { admin } = useTerrain();
-	const uiStore = admin.uiStore;
+	const uiStore = admin.terrainUiStore;
 
 	let fileInput: HTMLInputElement;
 	let isUploading = $state(false);
@@ -39,7 +39,7 @@
 
 	async function onclickStartMarker() {
 		if (hasStartMarker) {
-			await admin.update(terrain.id, { respawn_x: null, respawn_y: null });
+			await admin.updateTerrain(terrain.id, { respawn_x: null, respawn_y: null });
 		} else {
 			admin.setSettingStartMarker(!$uiStore.isSettingStartMarker);
 		}
@@ -48,7 +48,7 @@
 	async function updateTitle() {
 		const trimmed = title.trim();
 		if (trimmed === (terrain.title ?? '')) return;
-		await admin.update(terrain.id, { title: trimmed || undefined });
+		await admin.updateTerrain(terrain.id, { title: trimmed || undefined });
 	}
 
 	function onkeydown(e: KeyboardEvent) {
@@ -97,7 +97,7 @@
 				throw new Error('Failed to upload file');
 			}
 
-			await admin.update(terrain.id, {
+			await admin.updateTerrain(terrain.id, {
 				game_asset: filename,
 				...(size && { width: size.width, height: size.height }),
 			});
