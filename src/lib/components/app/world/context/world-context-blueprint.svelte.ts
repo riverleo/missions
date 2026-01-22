@@ -260,7 +260,7 @@ export class WorldContextBlueprint {
 			// 지지대 없으면 모든 타겟 셀이 겹침
 			for (let r = targetMinRow; r <= targetMaxRow; r++) {
 				for (let c = targetMinCol; c <= targetMaxCol; c++) {
-					overlappingCells.push({ col: c, row: r } as Cell);
+					overlappingCells.push(vectorUtils.createCell(c, r));
 				}
 			}
 		} else {
@@ -268,7 +268,7 @@ export class WorldContextBlueprint {
 			for (let r = targetMinRow; r <= targetMaxRow; r++) {
 				for (let c = targetMinCol; c <= targetMaxCol; c++) {
 					if (invalidCellSet.has(vectorUtils.createCellKey(c, r))) {
-						overlappingCells.push({ col: c, row: r } as Cell);
+						overlappingCells.push(vectorUtils.createCell(c, r));
 					}
 				}
 			}
@@ -281,7 +281,7 @@ export class WorldContextBlueprint {
 	 * 현재 배치가 유효한지 (겹치는 셀이 없는지)
 	 */
 	get placable(): boolean {
-		return this.getOverlappingCells().length === 0;
+		return (this.cursor?.overlappingCells.length ?? 0) === 0;
 	}
 
 	/**
