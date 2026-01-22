@@ -7,6 +7,7 @@ import type {
 	CharacterBody,
 	WorldItemId,
 	WorldCharacterNeed,
+	NeedId,
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -25,7 +26,7 @@ export class WorldCharacterEntity extends Entity {
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
-	needs: WorldCharacterNeed[] = $state([]);
+	needs: Record<NeedId, WorldCharacterNeed> = $state({});
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -48,9 +49,13 @@ export class WorldCharacterEntity extends Entity {
 		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
 
 		// needs 초기화
-		this.needs = Object.values(get(worldCharacterNeedStore).data).filter(
+		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
+		this.needs = {};
+		for (const need of characterNeeds) {
+			this.needs[need.need_id] = need;
+		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -115,7 +120,7 @@ export class WorldCharacterEntity extends Entity {
 		// needs 저장
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
-				for (const need of this.needs) {
+				for (const need of Object.values(this.needs)) {
 					if (draft.data[need.id]) {
 						draft.data[need.id].value = need.value;
 					}
@@ -130,7 +135,7 @@ export class WorldCharacterEntity extends Entity {
 
 	tick(tick: number): void {
 		// 모든 needs를 1씩 감소
-		for (const need of this.needs) {
+		for (const need of Object.values(this.needs)) {
 			need.value = Math.max(0, need.value - 1);
 		}
 	}
