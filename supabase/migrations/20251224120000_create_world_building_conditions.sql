@@ -18,12 +18,12 @@ create table world_building_conditions (
 
 alter table world_building_conditions enable row level security;
 
--- 월드 소유자만 조회/수정 가능 (soft delete된 것 제외)
-create policy "world owner can view world_building_conditions"
+-- 누구나 조회 가능 (soft delete된 것 제외)
+create policy "anyone can view world_building_conditions"
   on world_building_conditions
   for select
   to public
-  using (is_world_owner(world_id) and deleted_at is null);
+  using (deleted_at is null);
 
 create policy "world owner can insert world_building_conditions"
   on world_building_conditions
