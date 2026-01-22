@@ -82,6 +82,9 @@ export async function createWorldCharacter(
 			}
 			return { ...state, data: newData };
 		});
+
+		// TEST 환경에서는 needs 데이터를 직접 전달
+		(worldCharacter as any).__worldCharacterNeeds = worldCharacterNeeds;
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
 		const { supabase } = useApp();
@@ -161,6 +164,17 @@ export async function createWorldCharacter(
 
 	// 엔티티 생성
 	const entity = new WorldCharacterEntity(worldContext, worldContext.worldId, worldCharacter.id);
+
+	// TEST 환경에서 needs 직접 설정
+	const tempNeeds = (worldCharacter as any).__worldCharacterNeeds;
+	if (tempNeeds) {
+		entity.worldCharacterNeeds = {};
+		for (const need of tempNeeds) {
+			entity.worldCharacterNeeds[need.need_id] = need;
+		}
+		delete (worldCharacter as any).__worldCharacterNeeds;
+	}
+
 	entity.addToWorld();
 }
 
