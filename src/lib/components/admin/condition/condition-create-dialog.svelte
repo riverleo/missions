@@ -41,7 +41,7 @@
 		isSubmitting = true;
 
 		admin
-			.createCondition({ name: name.trim() })
+			.createCondition(scenarioId, { name: name.trim() })
 			.then((condition) => {
 				closeConditionDialog();
 				goto(`/admin/scenarios/${scenarioId}/conditions/${condition.id}`);

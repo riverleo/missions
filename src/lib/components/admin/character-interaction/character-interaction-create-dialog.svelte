@@ -75,7 +75,7 @@
 		isSubmitting = true;
 
 		try {
-			const interaction = await admin.createCharacterInteraction({
+			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId as CharacterId,
 				character_behavior_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,

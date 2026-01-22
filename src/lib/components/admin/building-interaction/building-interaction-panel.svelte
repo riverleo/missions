@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import {
@@ -40,6 +42,8 @@
 		useBuilding();
 	const { characterStore } = useCharacter();
 
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
 	const building = $derived($buildingStore.data[interaction.building_id]);
 	const actions = $derived($buildingInteractionActionStore.data[interactionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
@@ -62,7 +66,7 @@
 	}
 
 	async function createAction() {
-		await admin.createBuildingInteractionAction(interactionId, {
+		await admin.createBuildingInteractionAction(scenarioId, interactionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}

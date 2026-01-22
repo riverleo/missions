@@ -41,7 +41,7 @@
 		isSubmitting = true;
 
 		admin
-			.createTerrain({ title: title.trim() })
+			.createTerrain(scenarioId, { title: title.trim() })
 			.then((terrain) => {
 				closeTerrainDialog();
 				goto(`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`);

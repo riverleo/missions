@@ -60,17 +60,15 @@ function createConditionStore() {
 	const conditionDialogStore = writable<ConditionDialogState>(undefined);
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useCondition not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		conditionStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
@@ -80,10 +78,10 @@ function createConditionStore() {
 		try {
 			const [conditionsResult, fulfillmentsResult, buildingConditionsResult, effectsResult] =
 				await Promise.all([
-					supabase.from('conditions').select('*').eq('scenario_id', scenarioId).order('name'),
-					supabase.from('condition_fulfillments').select('*').eq('scenario_id', scenarioId),
-					supabase.from('building_conditions').select('*').eq('scenario_id', scenarioId),
-					supabase.from('condition_effects').select('*').eq('scenario_id', scenarioId),
+					supabase.from('conditions').select('*').order('name'),
+					supabase.from('condition_fulfillments').select('*'),
+					supabase.from('building_conditions').select('*'),
+					supabase.from('condition_effects').select('*'),
 				]);
 
 			if (conditionsResult.error) throw conditionsResult.error;
@@ -134,14 +132,10 @@ function createConditionStore() {
 
 	const admin = {
 		// Condition CRUD
-		async createCondition(condition: Omit<ConditionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCondition: currentScenarioId is not set.');
-			}
-
+		async createCondition(scenarioId: ScenarioId, condition: Omit<ConditionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('conditions')
-				.insert({ ...condition, scenario_id: currentScenarioId })
+				.insert({ ...condition, scenario_id: scenarioId })
 				.select()
 				.single<Condition>();
 
@@ -183,14 +177,10 @@ function createConditionStore() {
 		},
 
 		// ConditionFulfillment CRUD
-		async createConditionFulfillment(fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCondition: currentScenarioId is not set.');
-			}
-
+		async createConditionFulfillment(scenarioId: ScenarioId, fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('condition_fulfillments')
-				.insert({ ...fulfillment, scenario_id: currentScenarioId })
+				.insert({ ...fulfillment, scenario_id: scenarioId })
 				.select()
 				.single<ConditionFulfillment>();
 
@@ -238,14 +228,10 @@ function createConditionStore() {
 		},
 
 		// BuildingCondition CRUD
-		async createBuildingCondition(buildingCondition: Omit<BuildingConditionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCondition: currentScenarioId is not set.');
-			}
-
+		async createBuildingCondition(scenarioId: ScenarioId, buildingCondition: Omit<BuildingConditionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('building_conditions')
-				.insert({ ...buildingCondition, scenario_id: currentScenarioId })
+				.insert({ ...buildingCondition, scenario_id: scenarioId })
 				.select()
 				.single<BuildingCondition>();
 
@@ -294,19 +280,16 @@ function createConditionStore() {
 
 		// ConditionEffect CRUD
 		async createConditionEffect(
+			scenarioId: ScenarioId,
 			effect: Omit<ConditionEffectInsert, 'scenario_id' | 'condition_id'> & {
 				condition_id: ConditionId;
 			}
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useCondition: currentScenarioId is not set.');
-			}
-
 			const { data, error } = await supabase
 				.from('condition_effects')
 				.insert({
 					...effect,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select()
 				.single<ConditionEffect>();

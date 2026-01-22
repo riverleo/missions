@@ -2377,6 +2377,8 @@ export type Database = {
           id: string
           player_id: string
           scenario_id: string
+          scenario_snapshot_id: string
+          snapshot_id: string | null
           status: Database["public"]["Enums"]["player_scenario_status"]
           user_id: string
         }
@@ -2386,6 +2388,8 @@ export type Database = {
           id?: string
           player_id: string
           scenario_id: string
+          scenario_snapshot_id: string
+          snapshot_id?: string | null
           status?: Database["public"]["Enums"]["player_scenario_status"]
           user_id?: string
         }
@@ -2395,6 +2399,8 @@ export type Database = {
           id?: string
           player_id?: string
           scenario_id?: string
+          scenario_snapshot_id?: string
+          snapshot_id?: string | null
           status?: Database["public"]["Enums"]["player_scenario_status"]
           user_id?: string
         }
@@ -2411,6 +2417,20 @@ export type Database = {
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenarios_scenario_snapshot_id_fkey"
+            columns: ["scenario_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "player_scenarios_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "scenario_snapshots"
             referencedColumns: ["id"]
           },
         ]
@@ -2563,6 +2583,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           data: Json
+          description: string
           id: string
           name: string
           scenario_id: string
@@ -2571,6 +2592,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data?: Json
+          description?: string
           id?: string
           name?: string
           scenario_id: string
@@ -2579,6 +2601,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           data?: Json
+          description?: string
           id?: string
           name?: string
           scenario_id?: string

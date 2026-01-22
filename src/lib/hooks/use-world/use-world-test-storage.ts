@@ -19,7 +19,13 @@ import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useCurrent } from '../use-current';
 import { vectorUtils } from '$lib/utils/vector';
-import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
+import {
+	TEST_USER_ID,
+	TEST_WORLD_ID,
+	TEST_PLAYER_ID,
+	TEST_SCENARIO_ID,
+	TEST_SCENARIO_SNAPSHOT_ID,
+} from '$lib/constants';
 
 const STORAGE_KEY = 'test-world-state';
 
@@ -47,6 +53,7 @@ const defaultState: StoredState = {
 		current_tick: 0,
 		created_at: new Date().toISOString(),
 		user_id: TEST_USER_ID,
+		scenario_snapshot_id: TEST_SCENARIO_SNAPSHOT_ID,
 	},
 };
 

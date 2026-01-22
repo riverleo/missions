@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import {
 		SvelteFlow,
 		Controls,
@@ -26,6 +28,8 @@
 	import type { TerrainId, TileId } from '$lib/types';
 
 	const { terrainStore, tileStore, terrainTileStore, admin } = useTerrain();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();
@@ -81,7 +85,7 @@
 				const terrainId = parseTerrainNodeId(connection.source);
 				const tileId = parseTileNodeId(connection.target);
 
-				const newTerrainTile = await admin.createTerrainTile({
+				const newTerrainTile = await admin.createTerrainTile(scenarioId, {
 					terrain_id: terrainId as TerrainId,
 					tile_id: tileId as TileId,
 				});

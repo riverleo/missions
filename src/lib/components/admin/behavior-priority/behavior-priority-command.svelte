@@ -22,7 +22,7 @@
 		const maxPriority = Math.max(0, ...priorities.map((p) => p.priority));
 
 		try {
-			await admin.createBehaviorPriority({
+			await admin.createBehaviorPriority(scenarioId, {
 				need_behavior_id: behavior.id,
 				priority: maxPriority + 1,
 			});
@@ -36,7 +36,7 @@
 		const maxPriority = Math.max(0, ...priorities.map((p) => p.priority));
 
 		try {
-			await admin.createBehaviorPriority({
+			await admin.createBehaviorPriority(scenarioId, {
 				condition_behavior_id: behavior.id,
 				priority: maxPriority + 1,
 			});

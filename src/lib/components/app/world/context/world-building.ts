@@ -4,9 +4,7 @@ import type {
 	WorldBuilding,
 	WorldBuildingId,
 	WorldBuildingInsert,
-	WorldBuildingCondition,
 	WorldBuildingConditionId,
-	UserId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
@@ -14,7 +12,7 @@ import { useCurrent } from '$lib/hooks/use-current';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCondition } from '$lib/hooks/use-condition';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
-import { TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID, TEST_USER_ID } from '$lib/constants';
+import { TEST_WORLD_ID } from '$lib/constants';
 
 export async function createWorldBuilding(
 	worldContext: WorldContext,

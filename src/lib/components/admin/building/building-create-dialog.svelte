@@ -50,7 +50,7 @@
 		const capacity = parseInt(itemMaxCapacity) || 0;
 
 		admin
-			.createBuilding({
+			.createBuilding(scenarioId, {
 				name: name.trim(),
 				item_max_capacity: capacity,
 			})

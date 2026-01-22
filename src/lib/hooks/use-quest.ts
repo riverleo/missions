@@ -37,18 +37,14 @@ function createQuestStore() {
 
 	const questDialogStore = writable<QuestDialogState>(undefined);
 
-	let currentScenarioId: ScenarioId | undefined;
-
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useQuest not initialized. Call init() first.');
 		}
-
-		currentScenarioId = scenarioId;
 
 		questStore.update((state) => ({ ...state, status: 'loading' }));
 		questBranchStore.update((state) => ({ ...state, status: 'loading' }));
@@ -56,7 +52,7 @@ function createQuestStore() {
 		try {
 			// Fetch quests and branches separately
 			const [questsResult, branchesResult] = await Promise.all([
-				supabase.from('quests').select('*').eq('scenario_id', scenarioId),
+				supabase.from('quests').select('*'),
 				supabase.from('quest_branches').select('*'),
 			]);
 
@@ -115,16 +111,12 @@ function createQuestStore() {
 	}
 
 	const admin = {
-		async createQuest(quest: Omit<QuestInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useQuest: currentScenarioId is not set. Call useScenario.init() first.');
-			}
-
+		async createQuest(scenarioId: ScenarioId, quest: Omit<QuestInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('quests')
 				.insert({
 					...quest,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select()
 				.single<Quest>();

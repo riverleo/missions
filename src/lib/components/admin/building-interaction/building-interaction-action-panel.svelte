@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import type {
 		BuildingInteraction,
 		BuildingInteractionId,
@@ -24,6 +26,8 @@
 	let { interaction, buildingInteractionId, onlayout }: Props = $props();
 
 	const { buildingInteractionActionStore, admin } = useBuilding();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
 	const actions = $derived($buildingInteractionActionStore.data[buildingInteractionId] ?? []);
@@ -69,7 +73,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createBuildingInteractionAction(buildingInteractionId, {
+			await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {
 				root: false,
 			});
 		} catch (error) {

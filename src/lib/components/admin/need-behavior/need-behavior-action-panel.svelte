@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import type { NeedBehavior } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -15,6 +17,8 @@
 	let { behavior, onlayout }: Props = $props();
 
 	const { admin } = useBehavior();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	let isLayouting = $state(false);
 	let isCreating = $state(false);
@@ -37,7 +41,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createNeedBehaviorAction({
+			await admin.createNeedBehaviorAction(scenarioId, {
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'idle',

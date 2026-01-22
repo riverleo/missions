@@ -54,7 +54,7 @@
 		isSubmitting = true;
 
 		admin
-			.createNeed({
+			.createNeed(scenarioId, {
 				name: name.trim(),
 				max_value: maxValue,
 				initial_value: initialValue,

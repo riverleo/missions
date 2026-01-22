@@ -165,7 +165,7 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createCharacterInteractionAction(characterInteractionId, {
+			const newAction = await admin.createCharacterInteractionAction(scenarioId, characterInteractionId, {
 				root: false,
 			});
 

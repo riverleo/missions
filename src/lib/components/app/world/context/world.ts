@@ -1,6 +1,6 @@
 import type { World, WorldId, WorldInsert } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
-import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/hooks/use-world';
+import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';
 
 export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 'scenario_id'>) {

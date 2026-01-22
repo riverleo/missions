@@ -76,17 +76,15 @@ function createItemStore() {
 	});
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useItem not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		itemStore.update((state) => ({ ...state, status: 'loading' }));
 		itemInteractionStore.update((state) => ({ ...state, status: 'loading' }));
@@ -95,7 +93,6 @@ function createItemStore() {
 			const { data, error } = await supabase
 				.from('items')
 				.select('*, item_states(*)')
-				.eq('scenario_id', scenarioId)
 				.order('name');
 
 			if (error) throw error;
@@ -113,7 +110,6 @@ function createItemStore() {
 			const { data: interactionsData, error: interactionsError } = await supabase
 				.from('item_interactions')
 				.select('*, item_interaction_actions(*)')
-				.eq('scenario_id', scenarioId)
 				.order('created_at');
 
 			if (interactionsError) throw interactionsError;
@@ -207,16 +203,12 @@ function createItemStore() {
 			itemUiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async createItem(item: Omit<ItemInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useItem: currentScenarioId is not set.');
-			}
-
+		async createItem(scenarioId: ScenarioId, item: Omit<ItemInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('items')
 				.insert({
 					...item,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<Item>();
@@ -332,16 +324,12 @@ function createItemStore() {
 			);
 		},
 
-		async createItemInteraction(interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useItem: currentScenarioId is not set.');
-			}
-
+		async createItemInteraction(scenarioId: ScenarioId, interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('item_interactions')
 				.insert({
 					...interaction,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<ItemInteraction>();
@@ -403,13 +391,10 @@ function createItemStore() {
 		},
 
 		async createItemInteractionAction(
+			scenarioId: ScenarioId,
 			interactionId: ItemInteractionId,
 			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useItem: currentScenarioId is not set.');
-			}
-
 			// Get item_id from interaction
 			const itemInteractionStoreValue = get(itemInteractionStore);
 			const interaction = itemInteractionStoreValue.data[interactionId];
@@ -423,7 +408,7 @@ function createItemStore() {
 				.from('item_interaction_actions')
 				.insert({
 					...action,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 					item_id: itemId,
 					item_interaction_id: interactionId,
 				})

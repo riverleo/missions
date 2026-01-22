@@ -86,7 +86,7 @@
 		isSubmitting = true;
 
 		admin
-			.createQuest({
+			.createQuest(scenarioId, {
 				title: title.trim(),
 				type,
 				chapter_id: (chapterId as ChapterId) || null,

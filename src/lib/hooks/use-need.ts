@@ -47,17 +47,15 @@ function createNeedStore() {
 	const needDialogStore = writable<NeedDialogState>(undefined);
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useNeed not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		needStore.update((state) => ({ ...state, status: 'loading' }));
 		needFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
@@ -65,9 +63,9 @@ function createNeedStore() {
 
 		try {
 			const [needsResult, fulfillmentsResult, characterNeedsResult] = await Promise.all([
-				supabase.from('needs').select('*').eq('scenario_id', scenarioId).order('name'),
-				supabase.from('need_fulfillments').select('*').eq('scenario_id', scenarioId),
-				supabase.from('character_needs').select('*').eq('scenario_id', scenarioId),
+				supabase.from('needs').select('*').order('name'),
+				supabase.from('need_fulfillments').select('*'),
+				supabase.from('character_needs').select('*'),
 			]);
 
 			if (needsResult.error) throw needsResult.error;
@@ -110,14 +108,10 @@ function createNeedStore() {
 
 	const admin = {
 		// Need CRUD
-		async createNeed(need: Omit<NeedInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useNeed: currentScenarioId is not set.');
-			}
-
+		async createNeed(scenarioId: ScenarioId, need: Omit<NeedInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('needs')
-				.insert({ ...need, scenario_id: currentScenarioId })
+				.insert({ ...need, scenario_id: scenarioId })
 				.select()
 				.single<Need>();
 
@@ -159,14 +153,10 @@ function createNeedStore() {
 		},
 
 		// NeedFulfillment CRUD
-		async createNeedFulfillment(fulfillment: Omit<NeedFulfillmentInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useNeed: currentScenarioId is not set.');
-			}
-
+		async createNeedFulfillment(scenarioId: ScenarioId, fulfillment: Omit<NeedFulfillmentInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('need_fulfillments')
-				.insert({ ...fulfillment, scenario_id: currentScenarioId })
+				.insert({ ...fulfillment, scenario_id: scenarioId })
 				.select()
 				.single<NeedFulfillment>();
 
@@ -208,14 +198,10 @@ function createNeedStore() {
 		},
 
 		// CharacterNeed CRUD
-		async createCharacterNeed(characterNeed: Omit<CharacterNeedInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useNeed: currentScenarioId is not set.');
-			}
-
+		async createCharacterNeed(scenarioId: ScenarioId, characterNeed: Omit<CharacterNeedInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('character_needs')
-				.insert({ ...characterNeed, scenario_id: currentScenarioId })
+				.insert({ ...characterNeed, scenario_id: scenarioId })
 				.select()
 				.single<CharacterNeed>();
 

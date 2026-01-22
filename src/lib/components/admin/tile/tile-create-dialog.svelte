@@ -48,7 +48,7 @@
 		isSubmitting = true;
 
 		admin
-			.createTile({
+			.createTile(scenarioId, {
 				name: name.trim(),
 				max_durability: maxDurability ?? 1000,
 			})

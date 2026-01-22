@@ -39,7 +39,7 @@
 
 		isSubmitting = true;
 		admin
-			.createCharacterBody({ name: name.trim() })
+			.createCharacterBody(scenarioId, { name: name.trim() })
 			.then((body) => {
 				goto(`/admin/scenarios/${scenarioId}/character-bodies/${body.id}`);
 				closeCharacterBodyDialog();

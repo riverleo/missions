@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
 		Controls,
@@ -54,6 +55,8 @@
 		conditionEffectStore,
 		admin,
 	} = useCondition();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { buildingStore: buildingStore } = useBuilding();
 	const { needStore } = useNeed();
 
@@ -152,7 +155,7 @@
 				const buildingId = parseBuildingNodeId(connection.source);
 				const conditionId = parseConditionNodeId(connection.target);
 
-				const newBuildingCondition = await admin.createBuildingCondition({
+				const newBuildingCondition = await admin.createBuildingCondition(scenarioId, {
 					building_id: buildingId as BuildingId,
 					condition_id: conditionId as ConditionId,
 				});
@@ -211,7 +214,7 @@
 					return;
 				}
 
-				const newEffect = await admin.createConditionEffect({
+				const newEffect = await admin.createConditionEffect(scenarioId, {
 					condition_id: conditionIdStr as ConditionId,
 					name: '',
 					need_id: defaultNeed.id,
@@ -233,7 +236,7 @@
 				}
 			} else {
 				// 오른쪽 handle에서 드래그한 경우 fulfillment 생성
-				const newFulfillment = await admin.createConditionFulfillment({
+				const newFulfillment = await admin.createConditionFulfillment(scenarioId, {
 					condition_id: conditionIdStr as ConditionId,
 					fulfillment_type: 'character',
 					increase_per_tick: 10,

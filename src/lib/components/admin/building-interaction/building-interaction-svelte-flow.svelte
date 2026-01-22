@@ -157,7 +157,7 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createBuildingInteractionAction(buildingInteractionId, {
+			const newAction = await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {
 				root: false,
 			});
 

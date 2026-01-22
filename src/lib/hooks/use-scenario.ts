@@ -1,4 +1,4 @@
-import { writable, type Readable } from 'svelte/store';
+import { writable, type Readable, get } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	RecordFetchState,
@@ -7,6 +7,8 @@ import type {
 	ScenarioInsert,
 	ScenarioUpdate,
 	ScenarioId,
+	ScenarioSnapshot,
+	ScenarioSnapshotId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { usePlayer } from './use-player';
@@ -20,8 +22,10 @@ import { useBehavior } from './use-behavior';
 import { useCondition } from './use-condition';
 import { useItem } from './use-item';
 import { useWorld } from './use-world';
+import { useNarrative } from './use-narrative';
 
 type ScenarioStoreState = RecordFetchState<ScenarioId, Scenario>;
+type SnapshotStoreState = RecordFetchState<ScenarioSnapshotId, ScenarioSnapshot>;
 
 type ScenarioDialogState =
 	| { type: 'create' }
@@ -30,15 +34,19 @@ type ScenarioDialogState =
 	| { type: 'publish'; scenarioId: ScenarioId }
 	| undefined;
 
+type SnapshotDialogState = { type: 'create'; scenarioId: ScenarioId } | undefined;
+
 let instance: ReturnType<typeof createScenarioStore> | null = null;
 
 function createScenarioStore() {
 	const { supabase } = useApp();
 
 	const scenarioStore = writable<ScenarioStoreState>({ status: 'idle', data: {} });
+	const snapshotStore = writable<SnapshotStoreState>({ status: 'idle', data: {} });
 	const fetchAllStatus = writable<FetchStatus>('idle');
 
 	const scenarioDialogStore = writable<ScenarioDialogState>(undefined);
+	const snapshotDialogStore = writable<SnapshotDialogState>(undefined);
 
 	function openScenarioDialog(state: NonNullable<ScenarioDialogState>) {
 		scenarioDialogStore.set(state);
@@ -46,6 +54,14 @@ function createScenarioStore() {
 
 	function closeScenarioDialog() {
 		scenarioDialogStore.set(undefined);
+	}
+
+	function openScenarioSnapshotDialog(state: NonNullable<SnapshotDialogState>) {
+		snapshotDialogStore.set(state);
+	}
+
+	function closeScenarioSnapshotDialog() {
+		snapshotDialogStore.set(undefined);
 	}
 
 	async function fetch() {
@@ -80,49 +96,82 @@ function createScenarioStore() {
 		}
 	}
 
-	async function fetchAll(scenarioId: ScenarioId) {
-		fetchAllStatus.set('loading');
+	async function fetchScenarioSnapshots(scenarioId: ScenarioId) {
+		snapshotStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
-			const { fetch: fetchPlayer } = usePlayer();
-			await fetchPlayer();
+			const { data, error } = await supabase
+				.from('scenario_snapshots')
+				.select('*')
+				.eq('scenario_id', scenarioId)
+				.order('created_at', { ascending: false });
 
-			const { fetch: fetchQuest } = useQuest();
-			const { fetch: fetchChapter } = useChapter();
-			const { fetch: fetchTerrain, fetchTiles, fetchTileStates, fetchTerrainTiles } = useTerrain();
-			const { fetch: fetchCharacter } = useCharacter();
-			const { fetch: fetchBuilding } = useBuilding();
-			const { fetch: fetchNeed } = useNeed();
-			const { fetch: fetchBehavior } = useBehavior();
-			const { fetch: fetchCondition } = useCondition();
-			const { fetch: fetchItem } = useItem();
-			const { fetch: fetchWorld } = useWorld();
+			if (error) throw error;
 
-			await Promise.all([
-				fetchQuest(scenarioId),
-				fetchChapter(scenarioId),
-				fetchTerrain(scenarioId),
-				fetchTiles(scenarioId),
-				fetchTileStates(scenarioId),
-				fetchTerrainTiles(scenarioId),
-				fetchCharacter(scenarioId),
-				fetchBuilding(scenarioId),
-				fetchNeed(scenarioId),
-				fetchBehavior(scenarioId),
-				fetchCondition(scenarioId),
-				fetchItem(scenarioId),
-				fetchWorld(),
-			]);
+			// Convert array to Record
+			const record: Record<ScenarioSnapshotId, ScenarioSnapshot> = {};
+			for (const item of data ?? []) {
+				record[item.id as ScenarioSnapshotId] = item as ScenarioSnapshot;
+			}
 
-			fetchAllStatus.set('success');
+			snapshotStore.update((state) => ({
+				...state,
+				status: 'success',
+				data: record,
+				error: undefined,
+			}));
 		} catch (error) {
-			fetchAllStatus.set('error');
-			throw error;
+			snapshotStore.update((state) => ({
+				...state,
+				status: 'error',
+				error: error instanceof Error ? error : new Error('Unknown error'),
+			}));
 		}
 	}
 
 	const admin = {
+		async fetchAll() {
+			fetchAllStatus.set('loading');
+
+			try {
+				// Player 먼저 초기화 (다른 훅에서 참조 가능하도록)
+				const { fetch: fetchPlayer } = usePlayer();
+				await fetchPlayer();
+
+				const { fetch: fetchQuest } = useQuest();
+				const { fetch: fetchChapter } = useChapter();
+				const { fetch: fetchTerrain, fetchTiles, fetchTileStates, fetchTerrainTiles } = useTerrain();
+				const { fetch: fetchCharacter } = useCharacter();
+				const { fetch: fetchBuilding } = useBuilding();
+				const { fetch: fetchNeed } = useNeed();
+				const { fetch: fetchBehavior } = useBehavior();
+				const { fetch: fetchCondition } = useCondition();
+				const { fetch: fetchItem } = useItem();
+				const { fetch: fetchWorld } = useWorld();
+
+				await Promise.all([
+					fetchQuest(),
+					fetchChapter(),
+					fetchTerrain(),
+					fetchTiles(),
+					fetchTileStates(),
+					fetchTerrainTiles(),
+					fetchCharacter(),
+					fetchBuilding(),
+					fetchNeed(),
+					fetchBehavior(),
+					fetchCondition(),
+					fetchItem(),
+					fetchWorld(),
+				]);
+
+				fetchAllStatus.set('success');
+			} catch (error) {
+				fetchAllStatus.set('error');
+				throw error;
+			}
+		},
+
 		async createScenario(input: Omit<ScenarioInsert, 'display_order'>) {
 			const { data, error } = await supabase
 				.from('scenarios')
@@ -202,16 +251,260 @@ function createScenarioStore() {
 				})
 			);
 		},
+
+		async createScenarioSnapshot(scenarioId: ScenarioId, name: string, description: string = '') {
+			// Collect all master data for the scenario
+			const { terrainStore, tileStore, tileStateStore, terrainTileStore } = useTerrain();
+			const {
+				characterStore,
+				characterBodyStore,
+				characterBodyStateStore,
+				characterFaceStateStore,
+				characterInteractionStore,
+				characterInteractionActionStore,
+			} = useCharacter();
+			const {
+				buildingStore,
+				buildingStateStore,
+				buildingInteractionStore,
+				buildingInteractionActionStore,
+			} = useBuilding();
+			const { needStore, characterNeedStore, needFulfillmentStore } = useNeed();
+			const {
+				conditionStore,
+				buildingConditionStore,
+				conditionFulfillmentStore,
+				conditionEffectStore,
+			} = useCondition();
+			const { itemStore, itemStateStore, itemInteractionStore, itemInteractionActionStore } =
+				useItem();
+			const {
+				behaviorPriorityStore,
+				needBehaviorStore,
+				needBehaviorActionStore,
+				conditionBehaviorStore,
+				conditionBehaviorActionStore,
+			} = useBehavior();
+			const { questStore, questBranchStore } = useQuest();
+			const { chapterStore } = useChapter();
+			const {
+				narrativeStore,
+				narrativeNodeStore,
+				narrativeNodeChoiceStore,
+				narrativeDiceRollStore,
+			} = useNarrative();
+
+			// Get all data from stores
+			// Terrain related
+			const terrains = Object.values(get(terrainStore).data).filter(
+				(t) => t.scenario_id === scenarioId
+			);
+			const tiles = Object.values(get(tileStore).data).filter((t) => t.scenario_id === scenarioId);
+			const tileStates = Object.values(get(tileStateStore).data);
+			const terrainTiles = Object.values(get(terrainTileStore).data).filter((tt) =>
+				terrains.some((t) => t.id === tt.terrain_id)
+			);
+
+			// Character related
+			const characters = Object.values(get(characterStore).data).filter(
+				(c) => c.scenario_id === scenarioId
+			);
+			const characterNeeds = Object.values(get(characterNeedStore).data).filter((cn) =>
+				characters.some((c) => c.id === cn.character_id)
+			);
+			const characterBodies = Object.values(get(characterBodyStore).data).filter((cb) =>
+				characters.some((c) => c.character_body_id === cb.id)
+			);
+			const characterBodyStates = characterBodies.flatMap((cb) =>
+				Object.values(get(characterBodyStateStore).data[cb.id] ?? [])
+			);
+			const characterFaceStates = characters.flatMap((c) =>
+				Object.values(get(characterFaceStateStore).data[c.id] ?? [])
+			);
+			const characterInteractions = Object.values(get(characterInteractionStore).data).filter(
+				(ci) => ci.scenario_id === scenarioId
+			);
+			const characterInteractionActions = characterInteractions.flatMap((ci) =>
+				Object.values(get(characterInteractionActionStore).data[ci.id] ?? [])
+			);
+
+			// Building related
+			const buildings = Object.values(get(buildingStore).data).filter(
+				(b) => b.scenario_id === scenarioId
+			);
+			const buildingConditions = Object.values(get(buildingConditionStore).data).filter((bc) =>
+				buildings.some((b) => b.id === bc.building_id)
+			);
+			const buildingStates = buildings.flatMap((b) =>
+				Object.values(get(buildingStateStore).data[b.id] ?? [])
+			);
+			const buildingInteractions = Object.values(get(buildingInteractionStore).data).filter(
+				(bi) => bi.scenario_id === scenarioId
+			);
+			const buildingInteractionActions = buildingInteractions.flatMap((bi) =>
+				Object.values(get(buildingInteractionActionStore).data[bi.id] ?? [])
+			);
+
+			// Item related
+			const items = Object.values(get(itemStore).data).filter((i) => i.scenario_id === scenarioId);
+			const itemStates = items.flatMap((i) =>
+				Object.values(get(itemStateStore).data[i.id] ?? [])
+			);
+			const itemInteractions = Object.values(get(itemInteractionStore).data).filter(
+				(ii) => ii.scenario_id === scenarioId
+			);
+			const itemInteractionActions = itemInteractions.flatMap((ii) =>
+				Object.values(get(itemInteractionActionStore).data[ii.id] ?? [])
+			);
+
+			// Need related
+			const needs = Object.values(get(needStore).data).filter((n) => n.scenario_id === scenarioId);
+			const needFulfillments = Object.values(get(needFulfillmentStore).data).filter((nf) =>
+				needs.some((n) => n.id === nf.need_id)
+			);
+			const needBehaviors = Object.values(get(needBehaviorStore).data).filter((nb) =>
+				needs.some((n) => n.id === nb.need_id)
+			);
+			const needBehaviorActions = Object.values(get(needBehaviorActionStore).data).filter((nba) =>
+				needBehaviors.some((nb) => nb.id === nba.behavior_id)
+			);
+
+			// Condition related
+			const conditions = Object.values(get(conditionStore).data).filter(
+				(c) => c.scenario_id === scenarioId
+			);
+			const conditionFulfillments = Object.values(get(conditionFulfillmentStore).data).filter(
+				(cf) => conditions.some((c) => c.id === cf.condition_id)
+			);
+			const conditionEffects = Object.values(get(conditionEffectStore).data).filter((ce) =>
+				conditions.some((c) => c.id === ce.condition_id)
+			);
+			const conditionBehaviors = Object.values(get(conditionBehaviorStore).data).filter(
+				(cb) => cb.scenario_id === scenarioId
+			);
+			const conditionBehaviorActions = Object.values(
+				get(conditionBehaviorActionStore).data
+			).filter((cba) => conditionBehaviors.some((cb) => cb.id === cba.condition_behavior_id));
+
+			// Behavior priorities
+			const behaviorPriorities = Object.values(get(behaviorPriorityStore).data).filter(
+				(bp) => bp.scenario_id === scenarioId
+			);
+
+			// Quest related
+			const quests = Object.values(get(questStore).data).filter((q) => q.scenario_id === scenarioId);
+			const questBranches = Object.values(get(questBranchStore).data).filter((qb) =>
+				quests.some((q) => q.id === qb.quest_id)
+			);
+
+			// Chapter
+			const chapters = Object.values(get(chapterStore).data).filter(
+				(c) => c.scenario_id === scenarioId
+			);
+
+			// Narrative related
+			const narratives = Object.values(get(narrativeStore).data).filter(
+				(n) => n.scenario_id === scenarioId
+			);
+			const narrativeNodes = Object.values(get(narrativeNodeStore).data).filter((nn) =>
+				narratives.some((n) => n.id === nn.narrative_id)
+			);
+			const narrativeNodeChoices = Object.values(get(narrativeNodeChoiceStore).data).filter(
+				(nnc) => narrativeNodes.some((nn) => nn.id === nnc.narrative_node_id)
+			);
+			const narrativeDiceRolls = Object.values(get(narrativeDiceRollStore).data).filter((ndr) =>
+				narratives.some((n) => n.id === ndr.narrative_id)
+			);
+
+			// Create snapshot data
+			const snapshotData = {
+				// Terrain
+				terrains,
+				tiles,
+				tileStates,
+				terrainTiles,
+				// Character
+				characters,
+				characterNeeds,
+				characterBodies,
+				characterBodyStates,
+				characterFaceStates,
+				characterInteractions,
+				characterInteractionActions,
+				// Building
+				buildings,
+				buildingConditions,
+				buildingStates,
+				buildingInteractions,
+				buildingInteractionActions,
+				// Item
+				items,
+				itemStates,
+				itemInteractions,
+				itemInteractionActions,
+				// Need
+				needs,
+				needFulfillments,
+				needBehaviors,
+				needBehaviorActions,
+				// Condition
+				conditions,
+				conditionFulfillments,
+				conditionEffects,
+				conditionBehaviors,
+				conditionBehaviorActions,
+				// Behavior
+				behaviorPriorities,
+				// Quest
+				quests,
+				questBranches,
+				// Chapter
+				chapters,
+				// Narrative
+				narratives,
+				narrativeNodes,
+				narrativeNodeChoices,
+				narrativeDiceRolls,
+			};
+
+			// Insert snapshot
+			const { data, error } = await supabase
+				.from('scenario_snapshots')
+				.insert({
+					scenario_id: scenarioId,
+					name,
+					description,
+					data: snapshotData,
+				})
+				.select()
+				.single<ScenarioSnapshot>();
+
+			if (error) throw error;
+
+			snapshotStore.update((state) => ({
+				...state,
+				data: {
+					...state.data,
+					[data.id]: data,
+				},
+			}));
+
+			return data;
+		},
 	};
 
 	return {
 		scenarioStore: scenarioStore as Readable<ScenarioStoreState>,
+		scenarioSnapshotStore: snapshotStore as Readable<SnapshotStoreState>,
 		scenarioDialogStore: scenarioDialogStore as Readable<ScenarioDialogState>,
+		scenarioSnapshotDialogStore: snapshotDialogStore as Readable<SnapshotDialogState>,
 		fetchAllStatus: fetchAllStatus as Readable<FetchStatus>,
 		fetch,
-		fetchAll,
+		fetchScenarioSnapshots,
 		openScenarioDialog,
 		closeScenarioDialog,
+		openScenarioSnapshotDialog,
+		closeScenarioSnapshotDialog,
 		admin,
 	};
 }

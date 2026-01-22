@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import type { CharacterInteraction, CharacterInteractionId, CharacterId } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -19,6 +21,8 @@
 	let { interaction, characterInteractionId, onlayout }: Props = $props();
 
 	const { characterStore, characterInteractionActionStore, admin } = useCharacter();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const actions = $derived($characterInteractionActionStore.data[characterInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
@@ -63,7 +67,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createCharacterInteractionAction(characterInteractionId, {
+			await admin.createCharacterInteractionAction(scenarioId, characterInteractionId, {
 				root: false,
 			});
 		} catch (error) {

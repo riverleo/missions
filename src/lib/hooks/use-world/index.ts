@@ -3,7 +3,6 @@ import { createContext } from 'svelte';
 
 export { useWorld } from './use-world';
 export { useWorldTest } from './use-world-test';
-export { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID, TEST_WORLD_ID } from '$lib/constants';
 
 // WorldContext (Svelte context)
 export const [useWorldContext, setWorldContext] = createContext<WorldContext>();

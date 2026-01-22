@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -16,6 +18,8 @@
 	let { onlayout }: Props = $props();
 
 	const { admin } = useChapter();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const flowNodes = useNodes();
 
 	let isCreating = $state(false);
@@ -27,7 +31,7 @@
 		isCreating = true;
 
 		admin
-			.createChapter({ title: '' })
+			.createChapter(scenarioId, { title: '' })
 			.catch((error) => {
 				console.error('Failed to create chapter:', error);
 			})

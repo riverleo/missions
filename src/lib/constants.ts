@@ -22,9 +22,10 @@ export const CATEGORY_BUILDING = 0x0008;
 export const CATEGORY_ITEM = 0x0010;
 
 // 테스트 상수
-import type { WorldId, PlayerId, ScenarioId, UserId } from '$lib/types';
+import type { WorldId, PlayerId, ScenarioId, UserId, ScenarioSnapshotId } from '$lib/types';
 
 export const TEST_USER_ID = 'test-user-id' as UserId;
 export const TEST_WORLD_ID = 'test-world-id' as WorldId;
 export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
+export const TEST_SCENARIO_SNAPSHOT_ID = 'test-scenario-snapshot-id' as ScenarioSnapshotId;

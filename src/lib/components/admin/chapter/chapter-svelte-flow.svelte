@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import {
 		SvelteFlow,
 		Controls,
@@ -21,6 +23,8 @@
 	import { toTreeMap } from '$lib/utils';
 
 	const { chapterStore, admin } = useChapter();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const flowNodes = useNodes();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
@@ -140,7 +144,7 @@
 
 		try {
 			// 새 챕터 생성 (소스 노드를 부모로 설정)
-			const newChapter = await admin.createChapter({
+			const newChapter = await admin.createChapter(scenarioId, {
 				parent_chapter_id: sourceNode.id,
 			});
 

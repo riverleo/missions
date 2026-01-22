@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
 		Controls,
@@ -23,6 +24,8 @@
 	import type { NeedBehaviorId, NeedBehaviorActionId } from '$lib/types';
 
 	const { needBehaviorStore, needBehaviorActionStore, admin } = useBehavior();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needBehaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
@@ -140,7 +143,7 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createNeedBehaviorAction({
+			const newAction = await admin.createNeedBehaviorAction(scenarioId, {
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'idle',

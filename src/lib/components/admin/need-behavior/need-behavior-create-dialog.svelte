@@ -97,7 +97,7 @@
 		isSubmitting = true;
 
 		admin
-			.createNeedBehavior({
+			.createNeedBehavior(scenarioId, {
 				name: name.trim(),
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,

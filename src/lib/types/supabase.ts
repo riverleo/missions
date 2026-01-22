@@ -70,6 +70,7 @@ export type TileId = Brand<string, 'TileId'>;
 export type TileStateId = Brand<string, 'TileStateId'>;
 export type TerrainTileId = Brand<string, 'TerrainTileId'>;
 export type WorldTileMapId = Brand<string, 'WorldTileMapId'>;
+export type ScenarioSnapshotId = Brand<string, 'ScenarioSnapshotId'>;
 
 // ============================================================
 // Entity Types
@@ -141,31 +142,34 @@ export type ScenarioUpdate = Omit<ScenarioUpdateRow, 'id'> & {
 type PlayerScenarioRow = Tables<'player_scenarios'>;
 export type PlayerScenario = Omit<
 	PlayerScenarioRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'scenario_snapshot_id'
 > & {
 	id: PlayerScenarioId;
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
+	scenario_snapshot_id: ScenarioSnapshotId;
 };
 type PlayerScenarioInsertRow = TablesInsert<'player_scenarios'>;
 export type PlayerScenarioInsert = Omit<
 	PlayerScenarioInsertRow,
-	'user_id' | 'player_id' | 'scenario_id'
+	'user_id' | 'player_id' | 'scenario_id' | 'scenario_snapshot_id'
 > & {
 	user_id?: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
+	scenario_snapshot_id: ScenarioSnapshotId;
 };
 type PlayerScenarioUpdateRow = TablesUpdate<'player_scenarios'>;
 export type PlayerScenarioUpdate = Omit<
 	PlayerScenarioUpdateRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'scenario_snapshot_id'
 > & {
 	id?: PlayerScenarioId;
 	user_id?: UserId;
 	player_id?: PlayerId;
 	scenario_id?: ScenarioId;
+	scenario_snapshot_id?: ScenarioSnapshotId;
 };
 
 // Chapter types
@@ -750,34 +754,37 @@ export type CharacterUpdate = Omit<
 type WorldRow = Tables<'worlds'>;
 export type World = Omit<
 	WorldRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'deleted_at'
 > & {
 	id: WorldId;
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId | null;
+	deleted_at: string | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
 export type WorldInsert = Omit<
 	WorldInsertRow,
-	'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+	'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'deleted_at'
 > & {
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId | null;
+	deleted_at?: string | null;
 };
 type WorldUpdateRow = TablesUpdate<'worlds'>;
 export type WorldUpdate = Omit<
 	WorldUpdateRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'deleted_at'
 > & {
 	id?: WorldId;
 	user_id?: UserId;
 	player_id?: PlayerId;
 	scenario_id?: ScenarioId;
 	terrain_id?: TerrainId | null;
+	deleted_at?: string | null;
 };
 
 // World Character types
@@ -1896,4 +1903,32 @@ export type WorldCharacterNeedUpdate = Omit<
 	need_id?: NeedId;
 	player_id?: PlayerId;
 	scenario_id?: ScenarioId;
+};
+
+// ============================================================
+// ScenarioSnapshot
+// ============================================================
+type ScenarioSnapshotRow = Tables<'scenario_snapshots'>;
+export type ScenarioSnapshot = Omit<ScenarioSnapshotRow, 'id' | 'scenario_id' | 'created_by'> & {
+	id: ScenarioSnapshotId;
+	scenario_id: ScenarioId;
+	created_by: UserRoleId | null;
+};
+type ScenarioSnapshotInsertRow = TablesInsert<'scenario_snapshots'>;
+export type ScenarioSnapshotInsert = Omit<
+	ScenarioSnapshotInsertRow,
+	'id' | 'scenario_id' | 'created_by'
+> & {
+	id?: ScenarioSnapshotId;
+	scenario_id: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+type ScenarioSnapshotUpdateRow = TablesUpdate<'scenario_snapshots'>;
+export type ScenarioSnapshotUpdate = Omit<
+	ScenarioSnapshotUpdateRow,
+	'id' | 'scenario_id' | 'created_by'
+> & {
+	id?: ScenarioSnapshotId;
+	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
 };

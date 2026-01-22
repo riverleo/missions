@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import type {
 		ItemInteraction,
 		ItemInteractionId,
@@ -24,6 +26,8 @@
 	let { interaction, itemInteractionId, onlayout }: Props = $props();
 
 	const { itemInteractionActionStore, itemStateStore, itemStore, admin } = useItem();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
 	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
@@ -75,7 +79,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createItemInteractionAction(itemInteractionId, {
+			await admin.createItemInteractionAction(scenarioId, itemInteractionId, {
 				root: false,
 			});
 		} catch (error) {

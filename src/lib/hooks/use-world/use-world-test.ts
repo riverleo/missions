@@ -8,7 +8,8 @@ import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
 import { load, save } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
-import { TEST_WORLD_ID } from '$lib/constants';
+import { TEST_PLAYER_ID, TEST_WORLD_ID } from '$lib/constants';
+import { useCurrent } from '../use-current';
 
 let instance: ReturnType<typeof createTestWorldStore> | undefined;
 
@@ -77,6 +78,10 @@ function createTestWorldStore() {
 		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
 		const world = useWorld();
 		const player = usePlayer();
+		const { selectPlayer } = useCurrent();
+
+		// 테스트 플레이어 자동 선택 (테스트 월드 사용을 위해)
+		selectPlayer(TEST_PLAYER_ID);
 
 		if (stored.worlds) {
 			world.worldStore.update((state) =>

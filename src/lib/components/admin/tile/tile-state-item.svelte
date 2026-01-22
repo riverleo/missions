@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import type { TileStateType } from '$lib/types';
 	import type { TileId } from '$lib/types';
 	import SpriteStateItem, {
@@ -17,6 +19,8 @@
 
 	const { tileStore, tileStateStore, admin, openTileStateDialog } = useTerrain();
 
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
 	const tile = $derived($tileStore.data[tileId]);
 	const tileStates = $derived($tileStateStore.data[tileId] ?? []);
 	const tileState = $derived(tileStates.find((s) => s.type === type));
@@ -33,7 +37,7 @@
 		if (tileState) {
 			await admin.updateTileState(tileState.id, tileId, change);
 		} else if (change.atlas_name) {
-			await admin.createTileState(tileId, { type, atlas_name: change.atlas_name });
+			await admin.createTileState(scenarioId, tileId, { type, atlas_name: change.atlas_name });
 		}
 	}
 

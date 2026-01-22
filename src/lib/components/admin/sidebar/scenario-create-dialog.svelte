@@ -16,7 +16,7 @@
 	import { useScenario } from '$lib/hooks/use-scenario';
 	import { goto } from '$app/navigation';
 
-	const { admin, scenarioDialogStore, closeScenarioDialog, fetchAll } = useScenario();
+	const { admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 
 	const open = $derived($scenarioDialogStore?.type === 'create');
 
@@ -45,7 +45,7 @@
 			.createScenario({ title: title.trim() })
 			.then((scenario) => {
 				closeScenarioDialog();
-				fetchAll(scenario.id);
+				admin.fetchAll();
 				goto(`/admin/scenarios/${scenario.id}/quests`);
 			})
 			.catch((error) => {

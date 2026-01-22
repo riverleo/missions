@@ -49,7 +49,7 @@
 		isSubmitting = true;
 
 		admin
-			.createItem({
+			.createItem(scenarioId, {
 				name: name.trim(),
 				max_durability_ticks: maxDurabilityTicks ?? null,
 			})

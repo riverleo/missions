@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
 		Controls,
@@ -36,6 +37,8 @@
 	import type { CharacterId, NeedId, NeedFulfillmentId } from '$lib/types';
 
 	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useNeed();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
 	const flowNodes = useNodes();
@@ -118,7 +121,7 @@
 				const characterId = parseCharacterNodeId(connection.source);
 				const needId = parseNeedNodeId(connection.target);
 
-				const newCharacterNeed = await admin.createCharacterNeed({
+				const newCharacterNeed = await admin.createCharacterNeed(scenarioId, {
 					character_id: characterId as CharacterId,
 					need_id: needId as NeedId,
 				});
@@ -166,7 +169,7 @@
 			const needId = parseNeedNodeId(sourceNode.id);
 
 			// 새 fulfillment 생성
-			const newFulfillment = await admin.createNeedFulfillment({
+			const newFulfillment = await admin.createNeedFulfillment(scenarioId, {
 				need_id: needId as NeedId,
 				fulfillment_type: 'building',
 				increase_per_tick: 10,

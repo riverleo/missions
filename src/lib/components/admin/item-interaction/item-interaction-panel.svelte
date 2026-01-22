@@ -1,4 +1,6 @@
 <script lang="ts">
+	import type { ScenarioId } from '$lib/types';
+	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 	import {
@@ -37,6 +39,8 @@
 	let { interaction, interactionId }: Props = $props();
 
 	const { itemStore, itemInteractionActionStore, openItemInteractionDialog, admin } = useItem();
+
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
 	const item = $derived($itemStore.data[interaction.item_id]);
@@ -63,7 +67,7 @@
 	}
 
 	async function createAction() {
-		await admin.createItemInteractionAction(interactionId, {
+		await admin.createItemInteractionAction(scenarioId, interactionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}

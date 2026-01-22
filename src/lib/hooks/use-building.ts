@@ -74,17 +74,15 @@ function createBuildingStore() {
 	});
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useBuilding not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		buildingStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingInteractionStore.update((state) => ({ ...state, status: 'loading' }));
@@ -94,7 +92,6 @@ function createBuildingStore() {
 			const { data: buildingsData, error: buildingsError } = await supabase
 				.from('buildings')
 				.select('*, building_states(*)')
-				.eq('scenario_id', scenarioId)
 				.order('name');
 
 			if (buildingsError) throw buildingsError;
@@ -112,7 +109,6 @@ function createBuildingStore() {
 			const { data: interactionsData, error: interactionsError } = await supabase
 				.from('building_interactions')
 				.select('*, building_interaction_actions(*)')
-				.eq('scenario_id', scenarioId)
 				.order('created_at');
 
 			if (interactionsError) throw interactionsError;
@@ -198,16 +194,12 @@ function createBuildingStore() {
 			uiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async createBuilding(building: Omit<BuildingInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useBuilding: currentScenarioId is not set.');
-			}
-
+		async createBuilding(scenarioId: ScenarioId, building: Omit<BuildingInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('buildings')
 				.insert({
 					...building,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<Building>();
@@ -330,16 +322,12 @@ function createBuildingStore() {
 			);
 		},
 
-		async createBuildingInteraction(interaction: Omit<BuildingInteractionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useBuilding: currentScenarioId is not set.');
-			}
-
+		async createBuildingInteraction(scenarioId: ScenarioId, interaction: Omit<BuildingInteractionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('building_interactions')
 				.insert({
 					...interaction,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<BuildingInteraction>();
@@ -398,16 +386,13 @@ function createBuildingStore() {
 		},
 
 		async createBuildingInteractionAction(
+			scenarioId: ScenarioId,
 			interactionId: BuildingInteractionId,
 			action: Omit<
 				BuildingInteractionActionInsert,
 				'scenario_id' | 'building_id' | 'building_interaction_id'
 			>
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useBuilding: currentScenarioId is not set.');
-			}
-
 			// Get building_id from interaction
 			const buildingInteractionStoreValue = get(buildingInteractionStore);
 			const buildingId = buildingInteractionStoreValue.data[interactionId]?.building_id;
@@ -420,7 +405,7 @@ function createBuildingStore() {
 				.from('building_interaction_actions')
 				.insert({
 					...action,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 					building_id: buildingId,
 					building_interaction_id: interactionId,
 				})

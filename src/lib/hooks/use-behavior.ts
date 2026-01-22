@@ -85,17 +85,15 @@ function createBehaviorStore() {
 	const conditionBehaviorDialogStore = writable<ConditionBehaviorDialogState>(undefined);
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useBehavior not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		behaviorPriorityStore.update((state) => ({ ...state, status: 'loading' }));
 		needBehaviorStore.update((state) => ({ ...state, status: 'loading' }));
@@ -111,11 +109,11 @@ function createBehaviorStore() {
 				conditionBehaviorsResult,
 				conditionBehaviorActionsResult,
 			] = await Promise.all([
-				supabase.from('behavior_priorities').select('*').eq('scenario_id', scenarioId).order('priority'),
-				supabase.from('need_behaviors').select('*').eq('scenario_id', scenarioId).order('name'),
-				supabase.from('need_behavior_actions').select('*').eq('scenario_id', scenarioId),
-				supabase.from('condition_behaviors').select('*').eq('scenario_id', scenarioId),
-				supabase.from('condition_behavior_actions').select('*').eq('scenario_id', scenarioId),
+				supabase.from('behavior_priorities').select('*').order('priority'),
+				supabase.from('need_behaviors').select('*').order('name'),
+				supabase.from('need_behavior_actions').select('*'),
+				supabase.from('condition_behaviors').select('*'),
+				supabase.from('condition_behavior_actions').select('*'),
 			]);
 
 			if (prioritiesResult.error) throw prioritiesResult.error;
@@ -190,12 +188,10 @@ function createBehaviorStore() {
 
 	const admin = {
 		// BehaviorPriority CRUD
-		async createBehaviorPriority(priority: Omit<BehaviorPriorityInsert, 'scenario_id'>) {
-			if (!currentScenarioId) throw new Error('Scenario ID is not set');
-
+		async createBehaviorPriority(scenarioId: ScenarioId, priority: Omit<BehaviorPriorityInsert, 'scenario_id'>) {
 			const result = await supabase
 				.from('behavior_priorities')
-				.insert({ ...priority, scenario_id: currentScenarioId })
+				.insert({ ...priority, scenario_id: scenarioId })
 				.select()
 				.single();
 
@@ -246,14 +242,10 @@ function createBehaviorStore() {
 		},
 
 		// NeedBehavior CRUD
-		async createNeedBehavior(behavior: Omit<NeedBehaviorInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useBehavior: currentScenarioId is not set.');
-			}
-
+		async createNeedBehavior(scenarioId: ScenarioId, behavior: Omit<NeedBehaviorInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('need_behaviors')
-				.insert({ ...behavior, scenario_id: currentScenarioId })
+				.insert({ ...behavior, scenario_id: scenarioId })
 				.select()
 				.single<NeedBehavior>();
 
@@ -306,18 +298,14 @@ function createBehaviorStore() {
 		},
 
 		// NeedBehaviorAction CRUD
-		async createNeedBehaviorAction(action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useBehavior: currentScenarioId is not set.');
-			}
-
+		async createNeedBehaviorAction(scenarioId: ScenarioId, action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
 			const existingActions = Object.values(get(needBehaviorActionStore).data);
 			const isFirstAction = !existingActions.some((a) => a.behavior_id === action.behavior_id);
 
 			const { data, error } = await supabase
 				.from('need_behavior_actions')
-				.insert({ ...action, scenario_id: currentScenarioId, root: isFirstAction })
+				.insert({ ...action, scenario_id: scenarioId, root: isFirstAction })
 				.select()
 				.single<NeedBehaviorAction>();
 
@@ -359,14 +347,10 @@ function createBehaviorStore() {
 		},
 
 		// ConditionBehavior CRUD
-		async createConditionBehavior(behavior: Omit<ConditionBehaviorInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useBehavior: currentScenarioId is not set.');
-			}
-
+		async createConditionBehavior(scenarioId: ScenarioId, behavior: Omit<ConditionBehaviorInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('condition_behaviors')
-				.insert({ ...behavior, scenario_id: currentScenarioId })
+				.insert({ ...behavior, scenario_id: scenarioId })
 				.select()
 				.single<ConditionBehavior>();
 
@@ -420,12 +404,9 @@ function createBehaviorStore() {
 
 		// ConditionBehaviorAction CRUD
 		async createConditionBehaviorAction(
+			scenarioId: ScenarioId,
 			action: Omit<ConditionBehaviorActionInsert, 'scenario_id'>
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useBehavior: currentScenarioId is not set.');
-			}
-
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
 			const existingActions = Object.values(get(conditionBehaviorActionStore).data);
 			const isFirstAction = !existingActions.some(
@@ -434,7 +415,7 @@ function createBehaviorStore() {
 
 			const { data, error } = await supabase
 				.from('condition_behavior_actions')
-				.insert({ ...action, scenario_id: currentScenarioId, root: isFirstAction })
+				.insert({ ...action, scenario_id: scenarioId, root: isFirstAction })
 				.select()
 				.single<ConditionBehaviorAction>();
 

@@ -7,6 +7,7 @@ export type {
 	Enums,
 	// Branded ID Types
 	ScenarioId,
+	ScenarioSnapshotId,
 	ChapterId,
 	QuestId,
 	QuestBranchId,
@@ -69,6 +70,7 @@ export type {
 	EntityInstance,
 	// Table Types
 	Scenario,
+	ScenarioSnapshot,
 	PlayerScenario,
 	Chapter,
 	PlayerChapter,
@@ -123,6 +125,7 @@ export type {
 	WorldTileMap,
 	// Insert Types
 	ScenarioInsert,
+	ScenarioSnapshotInsert,
 	PlayerScenarioInsert,
 	ChapterInsert,
 	PlayerChapterInsert,
@@ -177,6 +180,7 @@ export type {
 	WorldTileMapInsert,
 	// Update Types
 	ScenarioUpdate,
+	ScenarioSnapshotUpdate,
 	PlayerScenarioUpdate,
 	ChapterUpdate,
 	PlayerChapterUpdate,

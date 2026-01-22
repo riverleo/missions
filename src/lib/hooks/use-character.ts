@@ -112,17 +112,15 @@ function createCharacterStore() {
 	});
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useCharacter not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		characterStore.update((state) => ({ ...state, status: 'loading' }));
 		characterInteractionStore.update((state) => ({ ...state, status: 'loading' }));
@@ -137,7 +135,6 @@ function createCharacterStore() {
 					character_face_states(*)
 				`
 				)
-				.eq('scenario_id', scenarioId)
 				.order('name');
 
 			if (error) throw error;
@@ -156,7 +153,6 @@ function createCharacterStore() {
 			const { data: interactionsData, error: interactionsError } = await supabase
 				.from('character_interactions')
 				.select('*, character_interaction_actions(*)')
-				.eq('scenario_id', scenarioId)
 				.order('created_at');
 
 			if (interactionsError) throw interactionsError;
@@ -175,7 +171,6 @@ function createCharacterStore() {
 			const { data: bodiesData, error: bodiesError } = await supabase
 				.from('character_bodies')
 				.select('*, character_body_states(*)')
-				.eq('scenario_id', scenarioId)
 				.order('name');
 
 			if (bodiesError) throw bodiesError;
@@ -306,16 +301,12 @@ function createCharacterStore() {
 			characterUiStore.update((s) => ({ ...s, showBodyPreview: value }));
 		},
 
-		async createCharacter(character: Omit<CharacterInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCharacter: currentScenarioId is not set.');
-			}
-
+		async createCharacter(scenarioId: ScenarioId, character: Omit<CharacterInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('characters')
 				.insert({
 					...character,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<Character>();
@@ -441,16 +432,12 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterInteraction(interaction: Omit<CharacterInteractionInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCharacter: currentScenarioId is not set.');
-			}
-
+		async createCharacterInteraction(scenarioId: ScenarioId, interaction: Omit<CharacterInteractionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('character_interactions')
 				.insert({
 					...interaction,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<CharacterInteraction>();
@@ -512,16 +499,13 @@ function createCharacterStore() {
 		},
 
 		async createCharacterInteractionAction(
+			scenarioId: ScenarioId,
 			interactionId: CharacterInteractionId,
 			action: Omit<
 				CharacterInteractionActionInsert,
 				'scenario_id' | 'character_id' | 'target_character_id' | 'character_interaction_id'
 			>
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useCharacter: currentScenarioId is not set.');
-			}
-
 			// Get character_id and target_character_id from interaction
 			const characterInteractionStoreValue = get(characterInteractionStore);
 			const interaction = characterInteractionStoreValue.data[interactionId];
@@ -536,7 +520,7 @@ function createCharacterStore() {
 				.from('character_interaction_actions')
 				.insert({
 					...action,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 					character_id: characterId || targetCharacterId, // Use targetCharacterId as fallback if character_id is null
 					target_character_id: targetCharacterId,
 					character_interaction_id: interactionId,
@@ -605,16 +589,12 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterBody(body: Omit<CharacterBodyInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useCharacter: currentScenarioId is not set.');
-			}
-
+		async createCharacterBody(scenarioId: ScenarioId, body: Omit<CharacterBodyInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('character_bodies')
 				.insert({
 					...body,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select('*')
 				.single<CharacterBody>();

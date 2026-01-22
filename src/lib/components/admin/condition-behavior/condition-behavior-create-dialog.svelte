@@ -103,7 +103,7 @@
 		isSubmitting = true;
 
 		admin
-			.createConditionBehavior({
+			.createConditionBehavior(scenarioId, {
 				name: name.trim(),
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,

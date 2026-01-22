@@ -17,24 +17,21 @@ function createChapterStore() {
 	const chapterStore = writable<RecordFetchState<ChapterId, Chapter>>({ status: 'idle', data: {} });
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useChapter not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 		chapterStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
 				.from('chapters')
 				.select('*')
-				.eq('scenario_id', scenarioId)
 				.order('display_order_in_scenario', { ascending: true });
 
 			if (error) throw error;
@@ -59,15 +56,12 @@ function createChapterStore() {
 		}
 	}
 
-	async function createChapter(chapter: Omit<ChapterInsert, 'scenario_id'>) {
-		if (!currentScenarioId) {
-			throw new Error('useChapter: currentScenarioId is not set. Call useScenario.init() first.');
-		}
+	async function createChapter(scenarioId: ScenarioId, chapter: Omit<ChapterInsert, 'scenario_id'>) {
 		const { data, error } = await supabase
 			.from('chapters')
 			.insert({
 				...chapter,
-				scenario_id: currentScenarioId,
+				scenario_id: scenarioId,
 			})
 			.select()
 			.single<Chapter>();

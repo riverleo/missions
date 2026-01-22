@@ -69,17 +69,15 @@ function createTerrainStore() {
 	});
 
 	let initialized = false;
-	let currentScenarioId: ScenarioId | undefined;
 
 	function init() {
 		initialized = true;
 	}
 
-	async function fetch(scenarioId: ScenarioId) {
+	async function fetch() {
 		if (!initialized) {
 			throw new Error('useTerrain not initialized. Call init() first.');
 		}
-		currentScenarioId = scenarioId;
 
 		terrainStore.update((state) => ({ ...state, status: 'loading' }));
 
@@ -87,7 +85,6 @@ function createTerrainStore() {
 			const { data, error } = await supabase
 				.from('terrains')
 				.select('*')
-				.eq('scenario_id', scenarioId)
 				.order('display_order');
 
 			if (error) throw error;
@@ -120,7 +117,7 @@ function createTerrainStore() {
 		terrainDialogStore.set(undefined);
 	}
 
-	async function fetchTiles(scenarioId: ScenarioId) {
+	async function fetchTiles() {
 		if (!initialized) {
 			throw new Error('useTerrain not initialized. Call init() first.');
 		}
@@ -130,8 +127,7 @@ function createTerrainStore() {
 		try {
 			const { data, error } = await supabase
 				.from('tiles')
-				.select('*')
-				.eq('scenario_id', scenarioId);
+				.select('*');
 
 			if (error) throw error;
 
@@ -155,7 +151,7 @@ function createTerrainStore() {
 		}
 	}
 
-	async function fetchTileStates(scenarioId: ScenarioId) {
+	async function fetchTileStates() {
 		if (!initialized) {
 			throw new Error('useTerrain not initialized. Call init() first.');
 		}
@@ -165,8 +161,7 @@ function createTerrainStore() {
 		try {
 			const { data, error } = await supabase
 				.from('tile_states')
-				.select('*')
-				.eq('scenario_id', scenarioId);
+				.select('*');
 
 			if (error) throw error;
 
@@ -194,7 +189,7 @@ function createTerrainStore() {
 		}
 	}
 
-	async function fetchTerrainTiles(scenarioId: ScenarioId) {
+	async function fetchTerrainTiles() {
 		if (!initialized) {
 			throw new Error('useTerrain not initialized. Call init() first.');
 		}
@@ -204,8 +199,7 @@ function createTerrainStore() {
 		try {
 			const { data, error } = await supabase
 				.from('terrains_tiles')
-				.select('*')
-				.eq('scenario_id', scenarioId);
+				.select('*');
 
 			if (error) throw error;
 
@@ -252,16 +246,12 @@ function createTerrainStore() {
 			terrainUiStore.update((s) => ({ ...s, isSettingStartMarker: value }));
 		},
 
-		async createTerrain(terrain: Omit<TerrainInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useTerrain: currentScenarioId is not set.');
-			}
-
+		async createTerrain(scenarioId: ScenarioId, terrain: Omit<TerrainInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('terrains')
 				.insert({
 					...terrain,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select()
 				.single<Terrain>();
@@ -306,16 +296,12 @@ function createTerrainStore() {
 		},
 
 		// Tile CRUD operations
-		async createTile(tile: Omit<TileInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useTerrain: currentScenarioId is not set.');
-			}
-
+		async createTile(scenarioId: ScenarioId, tile: Omit<TileInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('tiles')
 				.insert({
 					...tile,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select()
 				.single<Tile>();
@@ -361,18 +347,15 @@ function createTerrainStore() {
 
 		// TileState CRUD operations
 		async createTileState(
+			scenarioId: ScenarioId,
 			tileId: TileId,
 			tileState: Omit<TileStateInsert, 'tile_id' | 'scenario_id'>
 		) {
-			if (!currentScenarioId) {
-				throw new Error('useTerrain: currentScenarioId is not set.');
-			}
-
 			const { data, error } = await supabase
 				.from('tile_states')
 				.insert({
 					...tileState,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 					tile_id: tileId,
 				})
 				.select()
@@ -429,16 +412,12 @@ function createTerrainStore() {
 		},
 
 		// TerrainTile CRUD operations
-		async createTerrainTile(terrainTile: Omit<TerrainTileInsert, 'scenario_id'>) {
-			if (!currentScenarioId) {
-				throw new Error('useTerrain: currentScenarioId is not set.');
-			}
-
+		async createTerrainTile(scenarioId: ScenarioId, terrainTile: Omit<TerrainTileInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
 				.from('terrains_tiles')
 				.insert({
 					...terrainTile,
-					scenario_id: currentScenarioId,
+					scenario_id: scenarioId,
 				})
 				.select()
 				.single<TerrainTile>();
