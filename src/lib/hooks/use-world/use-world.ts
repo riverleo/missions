@@ -4,12 +4,16 @@ import type {
 	RecordFetchState,
 	World,
 	WorldCharacter,
+	WorldCharacterNeed,
 	WorldBuilding,
+	WorldBuildingCondition,
 	WorldItem,
 	WorldTileMap,
 	WorldId,
 	WorldCharacterId,
+	WorldCharacterNeedId,
 	WorldBuildingId,
+	WorldBuildingConditionId,
 	WorldItemId,
 	EntityId,
 } from '$lib/types';
@@ -33,7 +37,21 @@ function createWorldStore() {
 		data: {},
 	});
 
+	const worldCharacterNeedStore = writable<
+		RecordFetchState<WorldCharacterNeedId, WorldCharacterNeed>
+	>({
+		status: 'idle',
+		data: {},
+	});
+
 	const worldBuildingStore = writable<RecordFetchState<WorldBuildingId, WorldBuilding>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const worldBuildingConditionStore = writable<
+		RecordFetchState<WorldBuildingConditionId, WorldBuildingCondition>
+	>({
 		status: 'idle',
 		data: {},
 	});
@@ -73,14 +91,34 @@ function createWorldStore() {
 			const player = get(playerStore);
 			if (!player) return;
 
-			// World 조회 (player_id로 필터링)
-			const { data: worldData, error: worldError } = await supabase
-				.from('worlds')
-				.select('*')
-				.eq('player_id', player.id);
+			// 모든 데이터를 병렬로 조회
+			const [
+				{ data: worldData, error: worldError },
+				{ data: characterData, error: characterError },
+				{ data: characterNeedData, error: characterNeedError },
+				{ data: buildingData, error: buildingError },
+				{ data: buildingConditionData, error: buildingConditionError },
+				{ data: itemData, error: itemError },
+				{ data: tileMapData, error: tileMapError },
+			] = await Promise.all([
+				supabase.from('worlds').select('*').eq('player_id', player.id),
+				supabase.from('world_characters').select('*').eq('player_id', player.id),
+				supabase.from('world_character_needs').select('*').eq('player_id', player.id),
+				supabase.from('world_buildings').select('*').eq('player_id', player.id),
+				supabase.from('world_building_conditions').select('*').eq('player_id', player.id),
+				supabase.from('world_items').select('*').eq('player_id', player.id),
+				supabase.from('world_tile_maps').select('*').eq('player_id', player.id),
+			]);
 
 			if (worldError) throw worldError;
+			if (characterError) throw characterError;
+			if (characterNeedError) throw characterNeedError;
+			if (buildingError) throw buildingError;
+			if (buildingConditionError) throw buildingConditionError;
+			if (itemError) throw itemError;
+			if (tileMapError) throw tileMapError;
 
+			// World 데이터 변환
 			const worldRecord: Record<WorldId, World> = {};
 			for (const world of worldData ?? []) {
 				worldRecord[world.id as WorldId] = world as World;
@@ -94,17 +132,7 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldCharacter 조회 (player_id로 필터링, needs와 함께)
-			const { data: characterData, error: characterError } = await supabase
-				.from('world_characters')
-				.select<
-					'*, needs:world_character_needs(*)',
-					WorldCharacter
-				>('*, needs:world_character_needs(*)')
-				.eq('player_id', player.id);
-
-			if (characterError) throw characterError;
-
+			// WorldCharacter 데이터 변환
 			const characterRecord: Record<WorldCharacterId, WorldCharacter> = {};
 			for (const character of characterData ?? []) {
 				characterRecord[character.id as WorldCharacterId] = character as WorldCharacter;
@@ -118,17 +146,21 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldBuilding 조회 (player_id로 필터링, conditions와 함께)
-			const { data: buildingData, error: buildingError } = await supabase
-				.from('world_buildings')
-				.select<
-					'*, conditions:world_building_conditions(*)',
-					WorldBuilding
-				>('*, conditions:world_building_conditions(*)')
-				.eq('player_id', player.id);
+			// WorldCharacterNeed 데이터 변환
+			const characterNeedRecord: Record<WorldCharacterNeedId, WorldCharacterNeed> = {};
+			for (const need of characterNeedData ?? []) {
+				characterNeedRecord[need.id as WorldCharacterNeedId] = need as WorldCharacterNeed;
+			}
 
-			if (buildingError) throw buildingError;
+			worldCharacterNeedStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = characterNeedRecord;
+					draft.error = undefined;
+				})
+			);
 
+			// WorldBuilding 데이터 변환
 			const buildingRecord: Record<WorldBuildingId, WorldBuilding> = {};
 			for (const building of buildingData ?? []) {
 				buildingRecord[building.id as WorldBuildingId] = building as WorldBuilding;
@@ -142,14 +174,25 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldItem 조회 (player_id로 필터링)
-			const { data: itemData, error: itemError } = await supabase
-				.from('world_items')
-				.select('*')
-				.eq('player_id', player.id);
+			// WorldBuildingCondition 데이터 변환
+			const buildingConditionRecord: Record<
+				WorldBuildingConditionId,
+				WorldBuildingCondition
+			> = {};
+			for (const condition of buildingConditionData ?? []) {
+				buildingConditionRecord[condition.id as WorldBuildingConditionId] =
+					condition as WorldBuildingCondition;
+			}
 
-			if (itemError) throw itemError;
+			worldBuildingConditionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.status = 'success';
+					draft.data = buildingConditionRecord;
+					draft.error = undefined;
+				})
+			);
 
+			// WorldItem 데이터 변환
 			const itemRecord: Record<WorldItemId, WorldItem> = {};
 			for (const item of itemData ?? []) {
 				itemRecord[item.id as WorldItemId] = item as WorldItem;
@@ -163,14 +206,7 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldTileMap 조회 (player_id로 필터링)
-			const { data: tileMapData, error: tileMapError } = await supabase
-				.from('world_tile_maps')
-				.select('*')
-				.eq('player_id', player.id);
-
-			if (tileMapError) throw tileMapError;
-
+			// WorldTileMap 데이터 변환
 			const tileMapRecord: Record<WorldId, WorldTileMap> = {};
 			for (const tileMap of tileMapData ?? []) {
 				tileMapRecord[tileMap.world_id as WorldId] = tileMap as WorldTileMap;
@@ -196,7 +232,9 @@ function createWorldStore() {
 	return {
 		worldStore,
 		worldCharacterStore,
+		worldCharacterNeedStore,
 		worldBuildingStore,
+		worldBuildingConditionStore,
 		worldItemStore,
 		worldTileMapStore,
 		selectedEntityIdStore,

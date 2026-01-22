@@ -17,9 +17,7 @@ import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
-import { useNeed } from './use-need';
 import { useBehavior } from './use-behavior';
-import { useCondition } from './use-condition';
 import { useItem } from './use-item';
 import { useWorld } from './use-world';
 import { useNarrative } from './use-narrative';
@@ -143,9 +141,7 @@ function createScenarioStore() {
 				const { fetch: fetchTerrain, fetchTiles, fetchTileStates, fetchTerrainTiles } = useTerrain();
 				const { fetch: fetchCharacter } = useCharacter();
 				const { fetch: fetchBuilding } = useBuilding();
-				const { fetch: fetchNeed } = useNeed();
 				const { fetch: fetchBehavior } = useBehavior();
-				const { fetch: fetchCondition } = useCondition();
 				const { fetch: fetchItem } = useItem();
 				const { fetch: fetchWorld } = useWorld();
 
@@ -158,9 +154,7 @@ function createScenarioStore() {
 					fetchTerrainTiles(),
 					fetchCharacter(),
 					fetchBuilding(),
-					fetchNeed(),
 					fetchBehavior(),
-					fetchCondition(),
 					fetchItem(),
 					fetchWorld(),
 				]);
@@ -268,14 +262,12 @@ function createScenarioStore() {
 				buildingStateStore,
 				buildingInteractionStore,
 				buildingInteractionActionStore,
-			} = useBuilding();
-			const { needStore, characterNeedStore, needFulfillmentStore } = useNeed();
-			const {
 				conditionStore,
 				buildingConditionStore,
 				conditionFulfillmentStore,
 				conditionEffectStore,
-			} = useCondition();
+			} = useBuilding();
+			const { needStore, characterNeedStore, needFulfillmentStore } = useCharacter();
 			const { itemStore, itemStateStore, itemInteractionStore, itemInteractionActionStore } =
 				useItem();
 			const {

@@ -5,9 +5,7 @@ import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
-import { useNeed } from './use-need';
 import { useBehavior } from './use-behavior';
-import { useCondition } from './use-condition';
 import { useItem } from './use-item';
 import { useWorld } from './use-world';
 
@@ -22,9 +20,7 @@ export function init() {
 	useTerrain().init();
 	useCharacter().init();
 	useBuilding().init();
-	useNeed().init();
 	useBehavior().init();
-	useCondition().init();
 	useItem().init();
 	useWorld().init();
 }

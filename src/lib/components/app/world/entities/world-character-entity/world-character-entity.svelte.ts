@@ -18,6 +18,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
+	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -35,6 +36,9 @@ export class WorldCharacterEntity extends Entity {
 				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
 			);
 		}
+
+		// held_world_item_id 초기화
+		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(
@@ -90,6 +94,7 @@ export class WorldCharacterEntity extends Entity {
 						...worldCharacter,
 						x: this.x,
 						y: this.y,
+						held_world_item_id: this.heldWorldItemId ?? null,
 					},
 				},
 			});

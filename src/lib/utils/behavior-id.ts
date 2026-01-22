@@ -13,14 +13,6 @@ export const BehaviorIdUtils = {
 	 * BehaviorIdUtils.createBehaviorId('condition', conditionBehaviorId) // "condition_{conditionBehaviorId}"
 	 */
 	createBehaviorId(
-		type: 'need',
-		id: NeedBehaviorId
-	): `need_${NeedBehaviorId}`;
-	createBehaviorId(
-		type: 'condition',
-		id: ConditionBehaviorId
-	): `condition_${ConditionBehaviorId}`;
-	createBehaviorId(
 		type: BehaviorType,
 		id: NeedBehaviorId | ConditionBehaviorId
 	): BehaviorId {

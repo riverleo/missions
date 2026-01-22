@@ -12,7 +12,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCurrent } from '$lib/hooks/use-current';
 import { useApp } from '$lib/hooks/use-app.svelte';
-import { useNeed } from '$lib/hooks/use-need';
+import { useCharacter } from '$lib/hooks/use-character';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 
@@ -41,7 +41,8 @@ export async function createWorldCharacter(
 	if (isTestWorld) {
 		// TEST 환경: 클라이언트에서 UUID 생성
 		const worldCharacterId = crypto.randomUUID() as WorldCharacterId;
-		const { characterNeedStore, needStore } = useNeed();
+		const { worldCharacterNeedStore } = useWorld();
+		const { characterNeedStore, needStore } = useCharacter();
 		const characterNeeds = Object.values(get(characterNeedStore).data).filter(
 			(cn) => cn.character_id === insert.character_id
 		);
@@ -56,20 +57,31 @@ export async function createWorldCharacter(
 			user_id,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
-			needs: characterNeeds.map((cn) => ({
-				id: crypto.randomUUID() as WorldCharacterNeedId,
-				scenario_id,
-				user_id,
-				player_id,
-				world_id: worldContext.worldId,
-				character_id: insert.character_id,
-				world_character_id: worldCharacterId,
-				need_id: cn.need_id,
-				value: needs[cn.need_id]?.initial_value ?? 50,
-				deleted_at: null,
-			})),
+			held_world_item_id: insert.held_world_item_id ?? null,
 			deleted_at: null,
 		};
+
+		// WorldCharacterNeed를 별도 스토어에 저장
+		const worldCharacterNeeds = characterNeeds.map((cn) => ({
+			id: crypto.randomUUID() as WorldCharacterNeedId,
+			scenario_id,
+			user_id,
+			player_id,
+			world_id: worldContext.worldId,
+			character_id: insert.character_id,
+			world_character_id: worldCharacterId,
+			need_id: cn.need_id,
+			value: needs[cn.need_id]?.initial_value ?? 50,
+			deleted_at: null,
+		}));
+
+		worldCharacterNeedStore.update((state) => {
+			const newData = { ...state.data };
+			for (const need of worldCharacterNeeds) {
+				newData[need.id] = need;
+			}
+			return { ...state, data: newData };
+		});
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
 		const { supabase } = useApp();
@@ -98,7 +110,7 @@ export async function createWorldCharacter(
 		const worldCharacterId = insertResult.id;
 
 		// WorldCharacterNeed insert
-		const { characterNeedStore, needStore } = useNeed();
+		const { characterNeedStore, needStore } = useCharacter();
 		const characterNeeds = Object.values(get(characterNeedStore).data).filter(
 			(cn) => cn.character_id === insert.character_id
 		);

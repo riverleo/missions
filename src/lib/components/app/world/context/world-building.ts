@@ -10,7 +10,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCurrent } from '$lib/hooks/use-current';
 import { useApp } from '$lib/hooks/use-app.svelte';
-import { useCondition } from '$lib/hooks/use-condition';
+import { useBuilding } from '$lib/hooks/use-building';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { TEST_WORLD_ID } from '$lib/constants';
 
@@ -46,7 +46,8 @@ export async function createWorldBuilding(
 	if (isTestWorld) {
 		// TEST 환경: 클라이언트에서 UUID 생성
 		const worldBuildingId = crypto.randomUUID() as WorldBuildingId;
-		const { buildingConditionStore, conditionStore } = useCondition();
+		const { worldBuildingConditionStore } = useWorld();
+		const { buildingConditionStore, conditionStore } = useBuilding();
 		const buildingConditions = Object.values(get(buildingConditionStore).data).filter(
 			(bc) => bc.building_id === insert.building_id
 		);
@@ -61,22 +62,32 @@ export async function createWorldBuilding(
 			scenario_id,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
-			conditions: buildingConditions.map((bc) => ({
-				id: crypto.randomUUID() as WorldBuildingConditionId,
-				user_id,
-				world_id: worldContext.worldId,
-				player_id,
-				scenario_id,
-				building_id: insert.building_id,
-				world_building_id: worldBuildingId,
-				building_condition_id: bc.id,
-				condition_id: bc.condition_id,
-				value: conditions[bc.condition_id]?.initial_value ?? 100,
-				created_at: new Date().toISOString(),
-				deleted_at: null,
-			})),
 			deleted_at: null,
 		};
+
+		// WorldBuildingCondition을 별도 스토어에 저장
+		const worldBuildingConditions = buildingConditions.map((bc) => ({
+			id: crypto.randomUUID() as WorldBuildingConditionId,
+			user_id,
+			world_id: worldContext.worldId,
+			player_id,
+			scenario_id,
+			building_id: insert.building_id,
+			world_building_id: worldBuildingId,
+			building_condition_id: bc.id,
+			condition_id: bc.condition_id,
+			value: conditions[bc.condition_id]?.initial_value ?? 100,
+			created_at: new Date().toISOString(),
+			deleted_at: null,
+		}));
+
+		worldBuildingConditionStore.update((state) => {
+			const newData = { ...state.data };
+			for (const condition of worldBuildingConditions) {
+				newData[condition.id] = condition;
+			}
+			return { ...state, data: newData };
+		});
 	} else {
 		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
 		const { supabase } = useApp();
@@ -105,7 +116,7 @@ export async function createWorldBuilding(
 		const worldBuildingId = insertResult.id;
 
 		// WorldBuildingCondition insert
-		const { buildingConditionStore, conditionStore } = useCondition();
+		const { buildingConditionStore, conditionStore } = useBuilding();
 		const buildingConditions = Object.values(get(buildingConditionStore).data).filter(
 			(bc) => bc.building_id === insert.building_id
 		);

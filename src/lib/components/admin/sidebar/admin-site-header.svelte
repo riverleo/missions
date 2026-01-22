@@ -18,8 +18,6 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useItem } from '$lib/hooks/use-item';
-	import { useNeed } from '$lib/hooks/use-need';
-	import { useCondition } from '$lib/hooks/use-condition';
 	import type {
 		ScenarioId,
 		ChapterId,
@@ -42,12 +40,10 @@
 	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
 	const { terrainStore } = useTerrain();
-	const { characterStore, characterBodyStore } = useCharacter();
-	const { buildingStore } = useBuilding();
+	const { characterStore, characterBodyStore, needStore } = useCharacter();
+	const { buildingStore, conditionStore } = useBuilding();
 	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
 	const { itemStore } = useItem();
-	const { needStore } = useNeed();
-	const { conditionStore } = useCondition();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정

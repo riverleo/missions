@@ -273,6 +273,7 @@ export type {
 	Supabase,
 	AppPayload,
 	BehaviorId,
+	BehaviorType,
 } from './core';
 
 // Re-export specific Enums for convenience
