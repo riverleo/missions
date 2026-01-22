@@ -80,4 +80,8 @@ export class WorldItemEntity extends Entity {
 	update(_: BeforeUpdateEvent): void {
 		// 아이템은 물리 엔진이 자동으로 처리하므로 update 로직 없음
 	}
+
+	tick(tick: number): void {
+		// 아이템 틱 로직 (필요 시 구현)
+	}
 }

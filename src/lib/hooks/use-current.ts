@@ -1,9 +1,9 @@
 import { writable, get, derived, type Readable } from 'svelte/store';
-import { browser } from '$app/environment';
 import type { Player, UserRole, PlayerScenario, PlayerId } from '$lib/types';
 import type { User } from '@supabase/supabase-js';
 import { useApp } from './use-app.svelte';
 import { usePlayer } from './use-player';
+import { TICK_INTERVAL } from '$lib/constants';
 
 let instance: ReturnType<typeof createCurrentStore> | undefined = undefined;
 
@@ -119,7 +119,7 @@ function createCurrentStore() {
 
 		tickIntervalId = setInterval(() => {
 			tickStore.update((tick) => tick + 1);
-		}, 1000); // 1초마다
+		}, TICK_INTERVAL);
 	}
 
 	/**

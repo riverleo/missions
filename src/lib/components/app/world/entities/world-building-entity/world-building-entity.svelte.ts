@@ -64,4 +64,8 @@ export class WorldBuildingEntity extends Entity {
 	update(_: BeforeUpdateEvent): void {
 		// 건물은 static이므로 update 로직 없음
 	}
+
+	tick(tick: number): void {
+		// 건물 틱 로직 (필요 시 구현)
+	}
 }

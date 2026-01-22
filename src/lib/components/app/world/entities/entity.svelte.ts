@@ -57,6 +57,9 @@ export abstract class Entity {
 	// 매 프레임마다 호출되는 업데이트 로직
 	abstract update(event: BeforeUpdateEvent): void;
 
+	// 틱마다 호출되는 라이프사이클 (1초마다)
+	abstract tick(tick: number): void;
+
 	protected createBody(
 		colliderType: ColliderType,
 		colliderWidth: number,

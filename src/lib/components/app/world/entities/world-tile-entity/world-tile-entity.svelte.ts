@@ -80,4 +80,8 @@ export class WorldTileEntity extends Entity {
 	update(_: BeforeUpdateEvent): void {
 		// 타일은 static이므로 update 로직 없음
 	}
+
+	tick(tick: number): void {
+		// 타일 틱 로직 (필요 시 구현)
+	}
 }

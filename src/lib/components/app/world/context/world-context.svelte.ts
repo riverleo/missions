@@ -1,5 +1,6 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
+import type { Unsubscriber } from 'svelte/store';
 import type {
 	Terrain,
 	WorldCharacterId,
@@ -16,6 +17,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { useWorld } from '$lib/hooks/use-world';
 import { useTerrain } from '$lib/hooks/use-terrain';
+import { useCurrent } from '$lib/hooks/use-current';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
@@ -55,6 +57,7 @@ export class WorldContext {
 	private mouseDownScreenPosition: { x: number; y: number } | undefined;
 	private entityClickedInMouseDown = false;
 	private draggedEntityId: EntityId | undefined;
+	private tickUnsubscriber: Unsubscriber | undefined;
 
 	constructor(worldId: WorldId, debug: boolean = false) {
 		this.debug = debug;
@@ -312,6 +315,12 @@ export class WorldContext {
 
 		Runner.run(this.runner, this.engine);
 
+		// 틱 구독 (틱이 변경될 때마다 모든 엔티티의 tick 메서드 호출)
+		const { tick } = useCurrent();
+		this.tickUnsubscriber = tick.subscribe((currentTick) => {
+			this.tickEntities(currentTick);
+		});
+
 		return () => {
 			this.initialized = false;
 			Runner.stop(this.runner);
@@ -324,6 +333,12 @@ export class WorldContext {
 				this.render.canvas.removeEventListener('mousemove', this.handleMouseMove);
 				this.render.canvas.removeEventListener('mouseleave', this.handleMouseLeave);
 				this.render.canvas.remove();
+			}
+
+			// 틱 구독 해제
+			if (this.tickUnsubscriber) {
+				this.tickUnsubscriber();
+				this.tickUnsubscriber = undefined;
 			}
 		};
 	}
@@ -398,6 +413,13 @@ export class WorldContext {
 	private updateEntities(event: BeforeUpdateEvent) {
 		for (const entity of Object.values(this.entities)) {
 			entity.update(event);
+		}
+	}
+
+	// 엔티티 틱 (1초마다 호출)
+	private tickEntities(tick: number) {
+		for (const entity of Object.values(this.entities)) {
+			entity.tick(tick);
 		}
 	}
 

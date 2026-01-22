@@ -97,6 +97,10 @@ export class WorldCharacterEntity extends Entity {
 		move(this, event);
 	}
 
+	tick(tick: number): void {
+		// 캐릭터 틱 로직 (필요 시 구현)
+	}
+
 	moveTo(targetX: number, targetY: number): void {
 		// pathfinder로 경로 계산
 		this.path = this.worldContext.pathfinder.findPath(
