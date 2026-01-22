@@ -1,7 +1,13 @@
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import { produce } from 'immer';
-import type { WorldBuildingId, Building, WorldId } from '$lib/types';
+import type {
+	WorldBuildingId,
+	Building,
+	WorldId,
+	WorldBuildingCondition,
+	ConditionId,
+} from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BUILDING, CATEGORY_TILE, CELL_SIZE } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
@@ -12,6 +18,7 @@ import type { BeforeUpdateEvent, WorldContext } from '../../context';
 export class WorldBuildingEntity extends Entity {
 	readonly type = 'building' as const;
 	body: Matter.Body;
+	worldBuildingConditions: Record<ConditionId, WorldBuildingCondition> = $state({});
 
 	override get instanceId(): WorldBuildingId {
 		return EntityIdUtils.instanceId<WorldBuildingId>(this.id);
@@ -21,12 +28,21 @@ export class WorldBuildingEntity extends Entity {
 		super(worldContext, 'building', worldId, worldBuildingId);
 
 		// 스토어에서 데이터 조회
-		const { worldBuildingStore } = useWorld();
+		const { worldBuildingStore, worldBuildingConditionStore } = useWorld();
 		const worldBuilding = get(worldBuildingStore).data[worldBuildingId];
 		const building = this.building;
 
 		if (!worldBuilding) {
 			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${worldBuildingId}`);
+		}
+
+		// conditions 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
+		const buildingConditions = Object.values(get(worldBuildingConditionStore).data).filter(
+			(condition) => condition.world_building_id === worldBuildingId
+		);
+		this.worldBuildingConditions = {};
+		for (const condition of buildingConditions) {
+			this.worldBuildingConditions[condition.condition_id] = { ...condition };
 		}
 
 		// 타일 기반 크기 계산
@@ -64,6 +80,18 @@ export class WorldBuildingEntity extends Entity {
 
 	save(): void {
 		// 건물은 static이므로 위치가 변경되지 않음
+		// conditions 저장
+		const { worldBuildingConditionStore } = useWorld();
+		worldBuildingConditionStore.update((state) =>
+			produce(state, (draft) => {
+				for (const condition of Object.values(this.worldBuildingConditions)) {
+					const storeCondition = draft.data[condition.id];
+					if (storeCondition) {
+						storeCondition.value = condition.value;
+					}
+				}
+			})
+		);
 	}
 
 	update(_: BeforeUpdateEvent): void {
@@ -72,18 +100,8 @@ export class WorldBuildingEntity extends Entity {
 
 	tick(tick: number): void {
 		// 모든 conditions를 1씩 감소
-		const { worldBuildingConditionStore } = useWorld();
-
-		worldBuildingConditionStore.update((state) =>
-			produce(state, (draft) => {
-				const conditions = Object.values(draft.data).filter(
-					(condition) => condition.world_building_id === this.instanceId
-				);
-
-				for (const condition of conditions) {
-					condition.value = Math.max(0, condition.value - 1);
-				}
-			})
-		);
+		for (const condition of Object.values(this.worldBuildingConditions)) {
+			condition.value = Math.max(0, condition.value - 1);
+		}
 	}
 }

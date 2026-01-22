@@ -1,4 +1,5 @@
 import { get } from 'svelte/store';
+import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	WorldBuilding,
@@ -161,13 +162,27 @@ export async function createWorldBuilding(
 	}
 
 	// 스토어 업데이트
-	worldBuildingStore.update((state) => ({
-		...state,
-		data: { ...state.data, [worldBuilding.id]: worldBuilding },
-	}));
+	worldBuildingStore.update((state) =>
+		produce(state, (draft) => {
+			draft.data[worldBuilding.id] = worldBuilding;
+		})
+	);
 
 	// 엔티티 생성
 	const entity = new WorldBuildingEntity(worldContext, worldContext.worldId, worldBuilding.id);
+
+	// TEST 환경에서는 스토어에서 conditions를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
+	if (isTestWorld) {
+		const { worldBuildingConditionStore } = useWorld();
+		const buildingConditions = Object.values(get(worldBuildingConditionStore).data).filter(
+			(condition) => condition.world_building_id === worldBuilding.id
+		);
+		entity.worldBuildingConditions = {};
+		for (const condition of buildingConditions) {
+			entity.worldBuildingConditions[condition.condition_id] = { ...condition };
+		}
+	}
+
 	entity.addToWorld();
 }
 
