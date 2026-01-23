@@ -12,14 +12,18 @@
 		InputGroupInput,
 		InputGroupAddon,
 		InputGroupText,
+		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { useItem } from '$lib/hooks/use-item';
+	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 
 	const { itemStore, admin, itemDialogStore, closeItemDialog } = useItem();
 
 	const open = $derived($itemDialogStore?.type === 'update');
-	const itemId = $derived($itemDialogStore?.type === 'update' ? $itemDialogStore.itemId : undefined);
+	const itemId = $derived(
+		$itemDialogStore?.type === 'update' ? $itemDialogStore.itemId : undefined
+	);
 	const item = $derived(itemId ? $itemStore.data[itemId] : undefined);
 
 	let name = $state('');
@@ -79,13 +83,20 @@
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>
-							<IconClock />
-						</InputGroupText>
+						<Tooltip>
+							<TooltipTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props}>최대 내구도 (틱)</InputGroupButton>
+								{/snippet}
+							</TooltipTrigger>
+							<TooltipContent>
+								입력하지 않은 경우 해당 아이템의 내구도는 역구적입니다.
+							</TooltipContent>
+						</Tooltip>
 					</InputGroupAddon>
 					<InputGroupInput
 						type="number"
-						placeholder="최대 내구도"
+						placeholder="숫자 입력"
 						bind:value={maxDurabilityTicks}
 						min="0"
 					/>

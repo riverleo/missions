@@ -40,10 +40,11 @@
 	</AccordionTrigger>
 	<AccordionContent class="flex flex-col gap-3 pb-3">
 		<Separator />
-		<AccordionContentItem label="좌표와 각도">
-			({Math.round(entity.x)}, {Math.round(entity.y)}), {Math.round(
-				(entity.angle * 180) / Math.PI
-			)}°
+		<AccordionContentItem label="좌표">
+			{Math.round(entity.x)}, {Math.round(entity.y)}
+		</AccordionContentItem>
+		<AccordionContentItem label="각도">
+			{Math.round((entity.angle * 180) / Math.PI)}°
 		</AccordionContentItem>
 		<AccordionContentItem label="내구도">
 			{#if entity.durabilityTicks !== undefined}

@@ -19,6 +19,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
+	import { Tooltip } from '$lib/components/ui/tooltip';
+	import TooltipTrigger from '$lib/components/ui/tooltip/tooltip-trigger.svelte';
+	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
 
 	const { admin, itemDialogStore, closeItemDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -83,13 +86,20 @@
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">
-						<InputGroupText>
-							<IconClock />
-						</InputGroupText>
+						<Tooltip>
+							<TooltipTrigger>
+								{#snippet child({ props })}
+									<InputGroupButton {...props}>최대 내구도 (틱)</InputGroupButton>
+								{/snippet}
+							</TooltipTrigger>
+							<TooltipContent>
+								입력하지 않은 경우 해당 아이템의 내구도는 영구적입니다.
+							</TooltipContent>
+						</Tooltip>
 					</InputGroupAddon>
 					<InputGroupInput
 						type="number"
-						placeholder="최대 내구도"
+						placeholder="숫자 입력"
 						bind:value={maxDurabilityTicks}
 						min="0"
 					/>
