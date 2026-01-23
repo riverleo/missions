@@ -26,16 +26,6 @@
 	});
 
 	let modalRef = $state<HTMLDivElement | undefined>(undefined);
-
-	// 단축키: Ctrl/Cmd + Shift + P (열기/닫기)
-	function onkeydown(e: KeyboardEvent) {
-		if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'p') {
-			e.preventDefault();
-			setOpen(!$store.open);
-		}
-	}
-
-	// 지형이 선택되었는지 확인
 	const hasSelectedTerrain = $derived($store.selectedTerrainId !== undefined);
 
 	function onclick() {
@@ -44,11 +34,7 @@
 
 	// 초기 마운트 시 모달이 중앙에 위치하도록 설정
 	$effect(() => {
-		if (
-			modalRef &&
-			$store.modalScreenVector.x === 0 &&
-			$store.modalScreenVector.y === 0
-		) {
+		if (modalRef && $store.modalScreenVector.x === 0 && $store.modalScreenVector.y === 0) {
 			const modalRect = modalRef.getBoundingClientRect();
 			const centerX = (window.innerWidth - modalRect.width) / 2;
 			const centerY = (window.innerHeight - modalRect.height) / 2;
@@ -62,12 +48,11 @@
 	<KbdGroup><Kbd>⌘</Kbd><Kbd>⇧</Kbd><Kbd>P</Kbd></KbdGroup>
 </Button>
 
-<svelte:window {onkeydown} />
-
 <div
 	bind:this={modalRef}
 	class="fixed z-50 flex-col gap-0 rounded-lg border bg-background shadow-lg"
-	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalScreenVector.x}px; top: {$store.modalScreenVector.y}px;"
+	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalScreenVector
+		.x}px; top: {$store.modalScreenVector.y}px;"
 >
 	<!-- Header -->
 	<TestWorldPopoverHeader {worldContext} />

@@ -82,7 +82,7 @@
 
 		if (e.metaKey && e.shiftKey && key === 'p') {
 			e.preventDefault();
-			setOpen(false);
+			setOpen(!$store.open);
 		} else if (e.metaKey && e.shiftKey && key === 's') {
 			e.preventDefault();
 			onsave();
