@@ -36,6 +36,13 @@
 			const item = $itemStore.data[action.item_id];
 			return `"${item?.name ?? '아이템'}" 아이템`;
 		}
+		// 명시적 대상이 없을 때 target_method에 따라 레이블 생성
+		if (action.target_method === 'search') {
+			return '새로운 타겟';
+		}
+		if (action.target_method === 'search_or_continue') {
+			return '기존 선택 타겟';
+		}
 		return undefined;
 	});
 
@@ -58,13 +65,20 @@
 		const behaviorLabel = behaviorTypeLabel();
 
 		if (action.type === 'go') {
+			if (behaviorLabel && target) {
+				return `${josa(behaviorLabel, '을를')} 위해 ${josa(target, '으로로')} 이동`;
+			}
+			if (behaviorLabel) {
+				return `${josa(behaviorLabel, '을를')} 위해 이동`;
+			}
 			return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
 		}
 		if (action.type === 'interact') {
+			if (behaviorLabel && target) {
+				return `${josa(target, '을를')} ${behaviorLabel}`;
+			}
 			if (behaviorLabel) {
-				return target
-					? `${josa(target, '와과')} "${behaviorLabel}" 상호작용`
-					: `"${behaviorLabel}" 상호작용`;
+				return `${behaviorLabel}`;
 			}
 			return target ? `${josa(target, '와과')} 상호작용` : '자동 상호작용';
 		}

@@ -3,6 +3,7 @@
 	import type {
 		NeedBehaviorAction,
 		BehaviorActionType,
+		BehaviorTargetMethod,
 		CharacterBehaviorType,
 		CharacterId,
 		BuildingId,
@@ -62,6 +63,12 @@
 		{ value: 'idle', label: '대기' },
 	];
 
+	const targetMethods: { value: BehaviorTargetMethod; label: string }[] = [
+		{ value: 'explicit', label: '지정된 대상' },
+		{ value: 'search', label: '새로운 타겟' },
+		{ value: 'search_or_continue', label: '기존 선택 타겟' },
+	];
+
 	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
 		{ value: 'use', label: '사용' },
 		{ value: 'repair', label: '수리' },
@@ -77,10 +84,11 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
+	const selectedTargetMethodLabel = $derived(
+		targetMethods.find((t) => t.value === changes?.target_method)?.label ?? '타깃 결정 방법'
+	);
 	const selectedBehaviorTypeLabel = $derived(
-		changes?.character_behavior_type
-			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
-			: '행동 타입'
+		changes ? getCharacterBehaviorTypeLabel(changes.character_behavior_type) : '행동 타입'
 	);
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.building_id) {
@@ -95,7 +103,7 @@
 			const item = items.find((i) => i.id === changes?.item_id);
 			return item ? `${item.name} (아이템)` : '아이템 선택';
 		}
-		return '자동 선택';
+		return '대상을 선택하세요';
 	});
 
 	$effect(() => {
@@ -111,9 +119,21 @@
 		}
 	}
 
+	function onTargetMethodChange(value: string | undefined) {
+		if (changes && value) {
+			changes.target_method = value as BehaviorTargetMethod;
+			// search 모드로 변경 시 명시적 타깃 제거
+			if (value === 'search') {
+				changes.building_id = null;
+				changes.character_id = null;
+				changes.item_id = null;
+			}
+		}
+	}
+
 	function onBehaviorTypeChange(value: string | undefined) {
-		if (changes) {
-			changes.character_behavior_type = (value as CharacterBehaviorType) || null;
+		if (changes && value) {
+			changes.character_behavior_type = value as CharacterBehaviorType;
 		}
 	}
 
@@ -172,6 +192,7 @@
 			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
 				character_behavior_type: changes.character_behavior_type,
+				target_method: changes.target_method,
 				duration_ticks: changes.duration_ticks,
 				building_id: changes.building_id,
 				character_id: changes.character_id,
@@ -220,6 +241,46 @@
 
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
+								<ButtonGroupText>상호작용</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.character_behavior_type}
+									onValueChange={onBehaviorTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedBehaviorTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each behaviorTypes as behaviorType (behaviorType.value)}
+											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if changes.type === 'go' || changes.type === 'interact'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>대상찾기</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.target_method}
+									onValueChange={onTargetMethodChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedTargetMethodLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each targetMethods as method (method.value)}
+											<SelectItem value={method.value}>{method.label}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_method === 'explicit'}
+							<ButtonGroup class="w-full">
 								<ButtonGroup class="flex-1">
 									<ButtonGroupText>대상</ButtonGroupText>
 									<DropdownMenu>
@@ -229,7 +290,6 @@
 											{selectedTargetLabel}
 										</DropdownMenuTrigger>
 										<DropdownMenuContent align="start" class="w-56">
-											<DropdownMenuItem onclick={onSelectAutoTarget}>자동 선택</DropdownMenuItem>
 											<DropdownMenuSub>
 												<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
 												<DropdownMenuSubContent>
@@ -273,31 +333,11 @@
 											{/snippet}
 										</TooltipTrigger>
 										<TooltipContent>
-											자동 선택 시 대상을 기준으로 욕구를 채워줄 수 있는 <br />
-											가까운 건물 또는 캐릭터, 아이템을 선택합니다.
+											특정 대상을 반드시 지정해야 합니다. <br />
+											건물, 캐릭터, 아이템 중 하나를 선택하세요.
 										</TooltipContent>
 									</Tooltip>
 								</ButtonGroup>
-							</ButtonGroup>
-						{/if}
-
-						{#if changes.type === 'interact'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.character_behavior_type ?? ''}
-									onValueChange={onBehaviorTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedBehaviorTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each behaviorTypes as behaviorType (behaviorType.value)}
-											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
 							</ButtonGroup>
 						{/if}
 

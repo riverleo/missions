@@ -237,6 +237,7 @@ export type {
 	ConditionFulfillmentType,
 	NarrativeNodeType,
 	BehaviorActionType,
+	BehaviorTargetMethod,
 	NeedFulfillmentTaskCondition,
 	NeedFulfillmentType,
 	TileStateType,

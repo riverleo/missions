@@ -63,7 +63,7 @@ create table need_behavior_actions (
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
   type behavior_action_type not null default 'idle'::behavior_action_type,
-  character_behavior_type character_behavior_type, -- nullable: go, interact 타입에만 사용
+  character_behavior_type character_behavior_type not null default 'use',
   root boolean not null default false,
 
   -- go/interact 타입용: 대상 지정

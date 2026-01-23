@@ -108,6 +108,7 @@ export type CharacterBehaviorType = Enums<'character_behavior_type'>;
 export type ConditionFulfillmentType = Enums<'condition_fulfillment_type'>;
 export type NarrativeNodeType = Enums<'narrative_node_type'>;
 export type BehaviorActionType = Enums<'behavior_action_type'>;
+export type BehaviorTargetMethod = Enums<'behavior_target_method'>;
 export type NeedFulfillmentTaskCondition = Enums<'need_fulfillment_task_condition'>;
 export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
 export type TileStateType = Enums<'tile_state_type'>;
