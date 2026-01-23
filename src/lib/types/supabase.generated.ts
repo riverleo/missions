@@ -889,45 +889,71 @@ export type Database = {
       }
       condition_behavior_actions: {
         Row: {
+          building_id: string | null
           character_behavior_type:
             | Database["public"]["Enums"]["character_behavior_type"]
             | null
+          character_id: string | null
           condition_behavior_id: string
           condition_id: string
           duration_ticks: number
           id: string
+          item_id: string | null
           next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
+          target_method: Database["public"]["Enums"]["behavior_target_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
+          building_id?: string | null
           character_behavior_type?:
             | Database["public"]["Enums"]["character_behavior_type"]
             | null
+          character_id?: string | null
           condition_behavior_id: string
           condition_id: string
           duration_ticks?: number
           id?: string
+          item_id?: string | null
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
+          target_method?: Database["public"]["Enums"]["behavior_target_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
+          building_id?: string | null
           character_behavior_type?:
             | Database["public"]["Enums"]["character_behavior_type"]
             | null
+          character_id?: string | null
           condition_behavior_id?: string
           condition_id?: string
           duration_ticks?: number
           id?: string
+          item_id?: string | null
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
+          target_method?: Database["public"]["Enums"]["behavior_target_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "condition_behavior_actions_building_id_fkey"
+            columns: ["building_id"]
+            isOneToOne: false
+            referencedRelation: "buildings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_behavior_actions_character_id_fkey"
+            columns: ["character_id"]
+            isOneToOne: false
+            referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "condition_behavior_actions_condition_behavior_id_fkey"
             columns: ["condition_behavior_id"]
@@ -940,6 +966,13 @@ export type Database = {
             columns: ["condition_id"]
             isOneToOne: false
             referencedRelation: "conditions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_behavior_actions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
             referencedColumns: ["id"]
           },
           {
@@ -1766,6 +1799,7 @@ export type Database = {
           next_need_behavior_action_id: string | null
           root: boolean
           scenario_id: string
+          target_method: Database["public"]["Enums"]["behavior_target_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
@@ -1782,6 +1816,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
+          target_method?: Database["public"]["Enums"]["behavior_target_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
@@ -1798,6 +1833,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
+          target_method?: Database["public"]["Enums"]["behavior_target_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
@@ -3502,6 +3538,7 @@ export type Database = {
     }
     Enums: {
       behavior_action_type: "go" | "interact" | "idle"
+      behavior_target_method: "explicit" | "search" | "search_or_continue"
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
       character_behavior_type: "demolish" | "use" | "repair" | "clean" | "pick"
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
@@ -3652,6 +3689,7 @@ export const Constants = {
   public: {
     Enums: {
       behavior_action_type: ["go", "interact", "idle"],
+      behavior_target_method: ["explicit", "search", "search_or_continue"],
       building_state_type: ["idle", "damaged", "planning", "constructing"],
       character_behavior_type: ["demolish", "use", "repair", "clean", "pick"],
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
