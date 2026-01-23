@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import {
-		IconBug,
-		IconX,
-		IconLayoutSidebarLeftCollapse,
-		IconLayoutSidebarLeftExpand,
-		IconDeviceFloppy,
-	} from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
-	import { ButtonGroup } from '$lib/components/ui/button-group';
-	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
+	import {
+		Menubar,
+		MenubarMenu,
+		MenubarTrigger,
+		MenubarContent,
+		MenubarItem,
+		MenubarCheckboxItem,
+		MenubarShortcut,
+		MenubarSeparator,
+	} from '$lib/components/ui/menubar';
 	import type { WorldContext } from '$lib/components/app/world/context';
 
 	import { vectorUtils } from '$lib/utils/vector';
@@ -76,40 +76,68 @@
 			window.removeEventListener('mouseup', onmouseup);
 		};
 	});
+
+	function onkeydown(e: KeyboardEvent) {
+		const key = e.key.toLowerCase();
+
+		if (e.metaKey && e.shiftKey && key === 'p') {
+			e.preventDefault();
+			setOpen(false);
+		} else if (e.metaKey && e.shiftKey && key === 's') {
+			e.preventDefault();
+			onsave();
+		} else if (e.metaKey && e.shiftKey && key === 'd') {
+			e.preventDefault();
+			setDebug(!$store.debug);
+		} else if (e.metaKey && key === 'b') {
+			e.preventDefault();
+			setOpenPanel(!$store.openPanel);
+		}
+	}
 </script>
 
-<div class="relative flex shrink-0 items-center justify-between border-b p-2">
-	<div class="flex items-center gap-2">
-		<Button variant="ghost" size="icon-sm" onclick={() => setOpenPanel(!$store.openPanel)}>
-			{#if $store.openPanel}
-				<IconLayoutSidebarLeftCollapse />
-			{:else}
-				<IconLayoutSidebarLeftExpand />
-			{/if}
-		</Button>
-		<Button variant="ghost" size="sm" class="cursor-move" {onmousedown}>테스트 월드</Button>
-	</div>
-	<div class="flex items-center gap-2">
-		<ToggleGroup
-			size="sm"
-			type="single"
-			value={$store.debug ? 'debug' : ''}
-			onValueChange={(value) => {
-				setDebug(value === 'debug');
-			}}
-		>
-			<ToggleGroupItem value="debug" size="sm">
-				<IconBug />
-			</ToggleGroupItem>
-		</ToggleGroup>
-		<ButtonGroup>
-			<Button variant="ghost" size="sm" onclick={onsave}>저장</Button>
-			<Button variant="ghost" size="sm" onclick={onreset}>리셋</Button>
-		</ButtonGroup>
-		<ButtonGroup>
-			<Button variant="ghost" size="icon-sm" {onclick}>
-				<IconX />
-			</Button>
-		</ButtonGroup>
-	</div>
+<svelte:window {onkeydown} />
+
+<div class="border-b p-1">
+	<Menubar class="border-0" {onmousedown}>
+		<MenubarMenu>
+			<MenubarTrigger><strong>테스트 월드</strong></MenubarTrigger>
+			<MenubarContent>
+				<MenubarItem onclick={() => setOpen(false)}>
+					창 닫기
+					<MenubarShortcut>⌘⇧P</MenubarShortcut>
+				</MenubarItem>
+			</MenubarContent>
+		</MenubarMenu>
+		<MenubarMenu>
+			<MenubarTrigger>파일</MenubarTrigger>
+			<MenubarContent>
+				<MenubarItem onclick={onreset}>월드 초기화</MenubarItem>
+				<MenubarSeparator />
+				<MenubarItem onclick={onsave}>
+					저장
+					<MenubarShortcut>⌘⇧S</MenubarShortcut>
+				</MenubarItem>
+			</MenubarContent>
+		</MenubarMenu>
+		<MenubarMenu>
+			<MenubarTrigger>보기</MenubarTrigger>
+			<MenubarContent>
+				<MenubarCheckboxItem
+					checked={$store.openPanel}
+					onCheckedChange={(checked: boolean) => setOpenPanel(checked)}
+				>
+					사이드바
+					<MenubarShortcut>⌘B</MenubarShortcut>
+				</MenubarCheckboxItem>
+				<MenubarCheckboxItem
+					checked={$store.debug}
+					onCheckedChange={(checked: boolean) => setDebug(checked)}
+				>
+					디버그 모드
+					<MenubarShortcut>⌘⇧D</MenubarShortcut>
+				</MenubarCheckboxItem>
+			</MenubarContent>
+		</MenubarMenu>
+	</Menubar>
 </div>
