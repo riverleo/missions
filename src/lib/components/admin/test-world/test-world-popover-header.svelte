@@ -5,14 +5,23 @@
 		IconX,
 		IconLayoutSidebarLeftCollapse,
 		IconLayoutSidebarLeftExpand,
+		IconDeviceFloppy,
 	} from '@tabler/icons-svelte';
 	import { useWorldTest } from '$lib/hooks/use-world';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
+	import type { WorldContext } from '$lib/components/app/world/context';
 
 	import { vectorUtils } from '$lib/utils/vector';
 
-	const { store, setOpen, setModalScreenVector, setDebug, setOpenPanel } = useWorldTest();
+	interface Props {
+		worldContext?: WorldContext;
+	}
+
+	let { worldContext }: Props = $props();
+
+	const { store, setOpen, setModalScreenVector, setDebug, setOpenPanel, save, reset } =
+		useWorldTest();
 
 	let isDragging = $state(false);
 	let dragStartX = $state(0);
@@ -46,6 +55,17 @@
 
 	function onmouseup() {
 		isDragging = false;
+	}
+
+	function onsave() {
+		// 모든 엔티티 저장
+		worldContext?.saveAllEntities();
+		// 스토리지에 저장
+		save();
+	}
+
+	function onreset() {
+		reset(worldContext);
 	}
 
 	$effect(() => {
@@ -82,6 +102,10 @@
 				<IconBug />
 			</ToggleGroupItem>
 		</ToggleGroup>
+		<ButtonGroup>
+			<Button variant="ghost" size="sm" onclick={onsave}>저장</Button>
+			<Button variant="ghost" size="sm" onclick={onreset}>리셋</Button>
+		</ButtonGroup>
 		<ButtonGroup>
 			<Button variant="ghost" size="icon-sm" {onclick}>
 				<IconX />

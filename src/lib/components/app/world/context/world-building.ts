@@ -187,32 +187,61 @@ export async function createWorldBuilding(
 }
 
 export async function deleteWorldBuilding(
-	worldContext: WorldContext,
-	worldBuildingId: WorldBuildingId
+	worldBuildingId: WorldBuildingId,
+	worldContext?: WorldContext
 ) {
-	const { worldBuildingStore } = useWorld();
-	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
+	const { worldBuildingStore, worldBuildingConditionStore } = useWorld();
+	const worldBuilding = get(worldBuildingStore).data[worldBuildingId];
+	if (!worldBuilding) return;
+
+	const isTestWorld = worldBuilding.world_id === TEST_WORLD_ID;
 
 	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase
-			.from('world_buildings')
-			.update({ deleted_at: new Date().toISOString() })
-			.eq('id', worldBuildingId);
+		const deletedAt = new Date().toISOString();
 
-		if (error) {
-			console.error('Failed to delete world building:', error);
-			throw error;
+		const [buildingResult, conditionsResult] = await Promise.all([
+			supabase
+				.from('world_buildings')
+				.update({ deleted_at: deletedAt })
+				.eq('id', worldBuildingId),
+			supabase
+				.from('world_building_conditions')
+				.update({ deleted_at: deletedAt })
+				.eq('world_building_id', worldBuildingId),
+		]);
+
+		if (buildingResult.error) {
+			console.error('Failed to delete world building:', buildingResult.error);
+			throw buildingResult.error;
+		}
+
+		if (conditionsResult.error) {
+			console.error('Failed to delete world building conditions:', conditionsResult.error);
+			throw conditionsResult.error;
 		}
 	}
 
-	// 엔티티 제거
-	const entityId = EntityIdUtils.createId('building', worldContext.worldId, worldBuildingId);
-	const entity = worldContext.entities[entityId];
-	if (entity) {
-		entity.removeFromWorld();
+	// worldContext가 있으면 엔티티 제거
+	if (worldContext) {
+		const entityId = EntityIdUtils.createId('building', worldContext.worldId, worldBuildingId);
+		const entity = worldContext.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
 	}
+
+	// WorldBuildingCondition 제거
+	worldBuildingConditionStore.update((state) =>
+		produce(state, (draft) => {
+			for (const [id, condition] of Object.entries(draft.data)) {
+				if (condition?.world_building_id === worldBuildingId) {
+					delete draft.data[id as WorldBuildingConditionId];
+				}
+			}
+		})
+	);
 
 	// 스토어 업데이트
 	worldBuildingStore.update((state) => {

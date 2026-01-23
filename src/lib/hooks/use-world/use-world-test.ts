@@ -1,14 +1,15 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
-import type { TerrainId, ScreenVector } from '$lib/types';
-import type { StoredState } from '$lib/types/hooks';
 import { browser } from '$app/environment';
+import type { TerrainId, ScreenVector } from '$lib/types';
+import type { WorldContext } from '$lib/components/app/world/context';
+import type { StoredState } from '$lib/types/hooks';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
-import { load, save } from './use-world-test-storage';
+import { load, save, defaultState } from './use-world-test-storage';
 import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
-import { TEST_PLAYER_ID, TEST_WORLD_ID } from '$lib/constants';
+import { TEST_PLAYER_ID, TEST_WORLD_ID, TEST_WORLD_STATE_STORAGE_KEY } from '$lib/constants';
 import { useCurrent } from '../use-current';
 
 let instance: ReturnType<typeof createTestWorldStore> | undefined;
@@ -17,11 +18,6 @@ function createTestWorldStore() {
 	const stored = load();
 
 	const store = writable<StoredState>(stored);
-
-	// 5초마다 localStorage에 저장
-	if (browser) {
-		setInterval(() => save(get(store)), 5000);
-	}
 
 	function setSelectedTerrainId(terrainId: TerrainId) {
 		const { terrainStore } = useTerrain();
@@ -72,6 +68,37 @@ function createTestWorldStore() {
 
 	function setOpenPanel(open: boolean) {
 		store.update((state) => ({ ...state, openPanel: open }));
+	}
+
+	async function reset(worldContext?: WorldContext) {
+		// localStorage 클리어
+		if (browser) {
+			localStorage.removeItem(TEST_WORLD_STATE_STORAGE_KEY);
+		}
+
+		// 현재 월드 삭제 (모든 엔티티 포함)
+		await deleteWorld(TEST_WORLD_ID, worldContext);
+
+		// 스토어를 기본 상태로 리셋 (open, modalScreenVector 상태는 유지)
+		const { open, modalScreenVector } = get(store);
+		store.set({ ...defaultState, open, modalScreenVector });
+
+		// 기본 플레이어/시나리오 데이터 로드
+		const player = usePlayer();
+
+		player.playerStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[defaultState.player.id] = defaultState.player;
+				draft.status = 'success';
+			})
+		);
+
+		player.playerScenarioStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[defaultState.playerScenario.id] = defaultState.playerScenario;
+				draft.status = 'success';
+			})
+		);
 	}
 
 	function init() {
@@ -170,6 +197,8 @@ function createTestWorldStore() {
 		setOpen,
 		setModalScreenVector,
 		setOpenPanel,
+		save: () => save(get(store)),
+		reset,
 		init,
 	};
 }

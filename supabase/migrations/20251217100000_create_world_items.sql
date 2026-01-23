@@ -7,6 +7,7 @@ create table world_items (
   world_id uuid not null references worlds(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
   world_building_id uuid references world_buildings(id) on delete set null,
+  world_character_id uuid references world_characters(id) on delete set null,
   durability_ticks bigint, -- nullable: max_durability_ticks가 null인 아이템은 이것도 null
   x float not null default 0,
   y float not null default 0,

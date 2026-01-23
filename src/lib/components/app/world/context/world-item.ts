@@ -99,9 +99,12 @@ export async function createWorldItem(
 	entity.addToWorld();
 }
 
-export async function deleteWorldItem(worldContext: WorldContext, worldItemId: WorldItemId) {
+export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
 	const { worldItemStore } = useWorld();
-	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
+	const worldItem = get(worldItemStore).data[worldItemId];
+	if (!worldItem) return;
+
+	const isTestWorld = worldItem.world_id === TEST_WORLD_ID;
 
 	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
@@ -117,11 +120,13 @@ export async function deleteWorldItem(worldContext: WorldContext, worldItemId: W
 		}
 	}
 
-	// 엔티티 제거
-	const entityId = EntityIdUtils.createId('item', worldContext.worldId, worldItemId);
-	const entity = worldContext.entities[entityId];
-	if (entity) {
-		entity.removeFromWorld();
+	// worldContext가 있으면 엔티티 제거
+	if (worldContext) {
+		const entityId = EntityIdUtils.createId('item', worldContext.worldId, worldItemId);
+		const entity = worldContext.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
 	}
 
 	// 스토어 업데이트

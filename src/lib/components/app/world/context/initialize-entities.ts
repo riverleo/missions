@@ -18,7 +18,10 @@ export function initializeEntities(worldContext: WorldContext) {
 		(b) => b.world_id === worldContext.worldId
 	);
 	const items = Object.values(get(worldItemStore).data).filter(
-		(i) => i.world_id === worldContext.worldId
+		(i) =>
+			i.world_id === worldContext.worldId &&
+			i.world_building_id === null &&
+			i.world_character_id === null
 	);
 	const worldTileMap = get(worldTileMapStore).data[worldContext.worldId];
 

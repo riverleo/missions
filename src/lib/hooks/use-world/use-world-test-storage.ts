@@ -1,7 +1,6 @@
 import { get } from 'svelte/store';
 import { browser } from '$app/environment';
 import type {
-	World,
 	WorldCharacter,
 	WorldCharacterNeed,
 	WorldCharacterNeedId,
@@ -14,7 +13,6 @@ import type {
 	WorldCharacterId,
 	WorldBuildingId,
 	WorldItemId,
-	Player,
 	PlayerScenario,
 	PlayerScenarioId,
 } from '$lib/types';
@@ -29,11 +27,10 @@ import {
 	TEST_PLAYER_ID,
 	TEST_SCENARIO_ID,
 	TEST_SCENARIO_SNAPSHOT_ID,
+	TEST_WORLD_STATE_STORAGE_KEY,
 } from '$lib/constants';
 
-const STORAGE_KEY = 'test-world-state';
-
-const defaultState: StoredState = {
+export const defaultState: StoredState = {
 	open: false,
 	openPanel: true,
 	selectedTerrainId: undefined,
@@ -58,6 +55,7 @@ const defaultState: StoredState = {
 		created_at: new Date().toISOString(),
 		user_id: TEST_USER_ID,
 		scenario_snapshot_id: TEST_SCENARIO_SNAPSHOT_ID,
+		snapshot_id: null,
 	},
 };
 
@@ -65,7 +63,7 @@ export function load(): StoredState {
 	if (!browser) return defaultState;
 
 	try {
-		const saved = localStorage.getItem(STORAGE_KEY);
+		const saved = localStorage.getItem(TEST_WORLD_STATE_STORAGE_KEY);
 		if (saved) {
 			const stored: StoredState = JSON.parse(saved);
 			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
@@ -187,7 +185,7 @@ export function save(state: StoredState) {
 			player: testPlayer ?? defaultState.player,
 			playerScenario: finalPlayerScenario,
 		};
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+		localStorage.setItem(TEST_WORLD_STATE_STORAGE_KEY, JSON.stringify(stored));
 	} catch (e) {
 		console.error(e);
 	}

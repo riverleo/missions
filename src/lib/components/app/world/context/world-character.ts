@@ -65,7 +65,6 @@ export async function createWorldCharacter(
 			user_id,
 			created_at: new Date().toISOString(),
 			created_at_tick: get(tickStore),
-			held_world_item_id: insert.held_world_item_id ?? null,
 			deleted_at: null,
 		};
 
@@ -187,32 +186,61 @@ export async function createWorldCharacter(
 }
 
 export async function deleteWorldCharacter(
-	worldContext: WorldContext,
-	worldCharacterId: WorldCharacterId
+	worldCharacterId: WorldCharacterId,
+	worldContext?: WorldContext
 ) {
-	const { worldCharacterStore } = useWorld();
-	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
+	const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
+	const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
+	if (!worldCharacter) return;
+
+	const isTestWorld = worldCharacter.world_id === TEST_WORLD_ID;
 
 	// 프로덕션 환경이면 서버에서 soft delete
 	if (!isTestWorld) {
 		const { supabase } = useApp();
-		const { error } = await supabase
-			.from('world_characters')
-			.update({ deleted_at: new Date().toISOString() })
-			.eq('id', worldCharacterId);
+		const deletedAt = new Date().toISOString();
 
-		if (error) {
-			console.error('Failed to delete world character:', error);
-			throw error;
+		const [characterResult, needsResult] = await Promise.all([
+			supabase
+				.from('world_characters')
+				.update({ deleted_at: deletedAt })
+				.eq('id', worldCharacterId),
+			supabase
+				.from('world_character_needs')
+				.update({ deleted_at: deletedAt })
+				.eq('world_character_id', worldCharacterId),
+		]);
+
+		if (characterResult.error) {
+			console.error('Failed to delete world character:', characterResult.error);
+			throw characterResult.error;
+		}
+
+		if (needsResult.error) {
+			console.error('Failed to delete world character needs:', needsResult.error);
+			throw needsResult.error;
 		}
 	}
 
-	// 엔티티 제거
-	const entityId = EntityIdUtils.createId('character', worldContext.worldId, worldCharacterId);
-	const entity = worldContext.entities[entityId];
-	if (entity) {
-		entity.removeFromWorld();
+	// worldContext가 있으면 엔티티 제거
+	if (worldContext) {
+		const entityId = EntityIdUtils.createId('character', worldContext.worldId, worldCharacterId);
+		const entity = worldContext.entities[entityId];
+		if (entity) {
+			entity.removeFromWorld();
+		}
 	}
+
+	// WorldCharacterNeed 제거
+	worldCharacterNeedStore.update((state) =>
+		produce(state, (draft) => {
+			for (const [id, need] of Object.entries(draft.data)) {
+				if (need?.world_character_id === worldCharacterId) {
+					delete draft.data[id as WorldCharacterNeedId];
+				}
+			}
+		})
+	);
 
 	// 스토어 업데이트
 	worldCharacterStore.update((state) => {

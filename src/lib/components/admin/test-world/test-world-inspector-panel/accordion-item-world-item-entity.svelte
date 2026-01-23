@@ -40,7 +40,7 @@
 	</AccordionTrigger>
 	<AccordionContent class="flex flex-col gap-3 pb-3">
 		<Separator />
-		<AccordionContentItem label="좌표">
+		<AccordionContentItem label="월드 좌표">
 			{Math.round(entity.x)}, {Math.round(entity.y)}
 		</AccordionContentItem>
 		<AccordionContentItem label="각도">

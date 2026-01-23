@@ -70,7 +70,7 @@
 	style="display: {$store.open ? 'flex' : 'none'}; left: {$store.modalScreenVector.x}px; top: {$store.modalScreenVector.y}px;"
 >
 	<!-- Header -->
-	<TestWorldPopoverHeader />
+	<TestWorldPopoverHeader {worldContext} />
 
 	<!-- Content -->
 	<div class="flex flex-1 gap-0">

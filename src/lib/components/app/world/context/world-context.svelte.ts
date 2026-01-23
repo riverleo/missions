@@ -427,6 +427,12 @@ export class WorldContext {
 		}
 	}
 
+	saveAllEntities(): void {
+		for (const entity of Object.values(this.entities)) {
+			entity.save();
+		}
+	}
+
 	// 바디가 경계를 벗어나면 제거 후 1초 뒤 리스폰 위치에 다시 추가
 	private checkEntityBounds() {
 		if (!this.terrain) return;
@@ -500,15 +506,15 @@ export class WorldContext {
 	}
 
 	deleteWorldCharacter(worldCharacterId: WorldCharacterId) {
-		deleteWorldCharacter(this, worldCharacterId);
+		deleteWorldCharacter(worldCharacterId, this);
 	}
 
 	deleteWorldBuilding(worldBuildingId: WorldBuildingId) {
-		deleteWorldBuilding(this, worldBuildingId);
+		deleteWorldBuilding(worldBuildingId, this);
 	}
 
 	deleteWorldItem(worldItemId: WorldItemId) {
-		deleteWorldItem(this, worldItemId);
+		deleteWorldItem(worldItemId, this);
 	}
 
 	deleteTileFromWorldTileMap(tileCellKey: TileCellKey) {

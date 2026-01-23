@@ -1,7 +1,19 @@
-import type { World, WorldId, WorldInsert } from '$lib/types';
+import { get } from 'svelte/store';
+import type {
+	World,
+	WorldId,
+	WorldInsert,
+	WorldCharacterId,
+	WorldBuildingId,
+	WorldItemId,
+} from '$lib/types';
+import type { WorldContext } from './world-context.svelte';
 import { useWorld } from '$lib/hooks/use-world';
 import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';
+import { deleteWorldCharacter } from './world-character';
+import { deleteWorldBuilding } from './world-building';
+import { deleteWorldItem } from './world-item';
 
 export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 'scenario_id'>) {
 	const { worldStore } = useWorld();
@@ -35,10 +47,40 @@ export function createWorld(insert: Omit<WorldInsert, 'user_id' | 'player_id' | 
 	return world;
 }
 
-export function deleteWorld(worldId: WorldId) {
-	const { worldStore } = useWorld();
+export async function deleteWorld(worldId: WorldId, worldContext?: WorldContext) {
+	const { worldStore, worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
 
-	// worldTileMap 먼저 삭제
+	// 스토어에서 해당 world_id의 엔티티 ID 목록 수집
+	const characterIds = Object.entries(get(worldCharacterStore).data)
+		.filter(([_, character]) => character?.world_id === worldId)
+		.map(([id]) => id as WorldCharacterId);
+
+	const buildingIds = Object.entries(get(worldBuildingStore).data)
+		.filter(([_, building]) => building?.world_id === worldId)
+		.map(([id]) => id as WorldBuildingId);
+
+	const itemIds = Object.entries(get(worldItemStore).data)
+		.filter(([_, item]) => item?.world_id === worldId)
+		.map(([id]) => id as WorldItemId);
+
+	// 각 delete 함수 호출 (각 함수가 worldContext 처리)
+	const deletePromises: Promise<void>[] = [];
+
+	for (const characterId of characterIds) {
+		deletePromises.push(deleteWorldCharacter(characterId, worldContext));
+	}
+
+	for (const buildingId of buildingIds) {
+		deletePromises.push(deleteWorldBuilding(buildingId, worldContext));
+	}
+
+	for (const itemId of itemIds) {
+		deletePromises.push(deleteWorldItem(itemId, worldContext));
+	}
+
+	await Promise.all(deletePromises);
+
+	// worldTileMap 삭제
 	deleteWorldTileMap(worldId);
 
 	// world 삭제

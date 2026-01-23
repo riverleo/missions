@@ -63,35 +63,21 @@ export class PickupItemBehavior extends Behavior {
 	 * 아이템 픽업 실행
 	 */
 	async pickupItem(worldItemId: WorldItemId): Promise<void> {
-		const { worldCharacterStore, worldItemStore } = this.worldHook;
-		const worldCharacterStoreData = get(worldCharacterStore);
+		const { worldItemStore } = this.worldHook;
 		const worldItemStoreData = get(worldItemStore);
 
-		const worldCharacter = worldCharacterStoreData.data[this.worldCharacterId];
 		const worldItem = worldItemStoreData.data[worldItemId];
 
-		if (!worldCharacter || !worldItem) return;
+		if (!worldItem) return;
 
-		// 캐릭터의 held_world_item_id 업데이트
-		worldCharacterStore.set({
-			...worldCharacterStoreData,
-			data: {
-				...worldCharacterStoreData.data,
-				[this.worldCharacterId]: {
-					...worldCharacter,
-					held_world_item_id: worldItemId,
-				},
-			},
-		});
-
-		// 아이템을 월드에서 제거 (soft delete)
+		// 아이템의 world_character_id 업데이트 (캐릭터가 아이템을 소유)
 		worldItemStore.set({
 			...worldItemStoreData,
 			data: {
 				...worldItemStoreData.data,
 				[worldItemId]: {
 					...worldItem,
-					deleted_at: new Date().toISOString(),
+					world_character_id: this.worldCharacterId,
 				},
 			},
 		});

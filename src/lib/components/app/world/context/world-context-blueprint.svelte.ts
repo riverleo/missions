@@ -444,7 +444,6 @@ export class WorldContextBlueprint {
 				character_id: EntityIdUtils.template.id<CharacterId>(entityTemplateId),
 				x: x + CELL_SIZE / 2,
 				y: y + CELL_SIZE / 2,
-				held_world_item_id: null,
 			});
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
@@ -456,6 +455,8 @@ export class WorldContextBlueprint {
 				item_id: itemId,
 				x: x + CELL_SIZE / 2,
 				y: y + CELL_SIZE / 2,
+				world_building_id: null,
+				world_character_id: null,
 				durability_ticks: item?.max_durability_ticks ?? null,
 			});
 		}

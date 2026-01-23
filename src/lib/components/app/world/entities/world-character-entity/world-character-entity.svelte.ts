@@ -26,7 +26,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	path: Vector[] = $state([]);
 	direction: WorldCharacterEntityDirection = $state('right');
-	heldWorldItemId = $state<WorldItemId | undefined>(undefined);
+	heldWorldItemIds = $state<WorldItemId[]>([]);
 	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
 
 	override get instanceId(): WorldCharacterId {
@@ -36,7 +36,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
+		const { worldCharacterStore, worldCharacterNeedStore, worldItemStore } = useWorld();
 		const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
 		const characterBody = this.characterBody;
 
@@ -46,8 +46,10 @@ export class WorldCharacterEntity extends Entity {
 			);
 		}
 
-		// held_world_item_id 초기화
-		this.heldWorldItemId = worldCharacter.held_world_item_id ?? undefined;
+		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
+		this.heldWorldItemIds = Object.values(get(worldItemStore).data)
+			.filter((item) => item.world_character_id === worldCharacterId)
+			.map((item) => item.id);
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
@@ -112,7 +114,6 @@ export class WorldCharacterEntity extends Entity {
 						...worldCharacter,
 						x: this.x,
 						y: this.y,
-						held_world_item_id: this.heldWorldItemId ?? null,
 					},
 				},
 			});
