@@ -55,16 +55,24 @@
 - [ ] 테스트 및 검증
 
 ### 2. Condition Behavior Action Panel UI 적용
-**파일**: `src/lib/components/admin/condition-behavior/condition-behavior-action-panel.svelte`
+**파일**:
+- `src/lib/components/admin/condition-behavior/condition-behavior-action-node-panel.svelte`
+- `src/lib/components/admin/condition-behavior/condition-behavior-action-node.svelte`
 
 **작업 내용**:
-- [ ] Need Behavior 작업 결과를 기반으로 동일하게 적용
-- [ ] 타깃 필드 추가 (기존에 없었음)
+- [x] Need Behavior 작업 결과를 기반으로 동일하게 적용
+- [x] BehaviorTargetMethod, BuildingId, CharacterId, ItemId 타입 import
+- [x] useBuilding, useCharacter, useItem 훅 추가
+- [x] targetMethods 배열 추가
+- [x] target_method 선택 UI 추가 (go/interact일 때)
+- [x] 타깃 선택 UI 추가 (explicit 모드일 때만)
+- [x] go 타입에서도 character_behavior_type 선택 가능
+- [x] 저장 로직에 target_method와 타깃 필드 추가
+- [x] 노드 레이블 업데이트 (타깃 정보 표시, target_method 레이블, 자연스러운 한글 표현)
 
 ## 다음 단계
-- [ ] 액션 노드 컴포넌트도 업데이트 필요 여부 확인
 - [ ] 테스트 및 검증
-- [ ] TODO.md 업데이트 (완료된 부분 정리)
+- [ ] 커밋
 
 ---
 

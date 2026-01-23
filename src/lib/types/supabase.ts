@@ -951,22 +951,37 @@ export type ConditionBehaviorAction = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
 	| 'next_condition_behavior_action_id'
 > & {
 	id: ConditionBehaviorActionId;
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
 	condition_behavior_id: ConditionBehaviorId;
+	building_id: BuildingId | null;
+	item_id: ItemId | null;
+	character_id: CharacterId | null;
 	next_condition_behavior_action_id: ConditionBehaviorActionId | null;
 };
 type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
 export type ConditionBehaviorActionInsert = Omit<
 	ConditionBehaviorActionInsertRow,
-	'scenario_id' | 'condition_id' | 'condition_behavior_id' | 'next_condition_behavior_action_id'
+	| 'scenario_id'
+	| 'condition_id'
+	| 'condition_behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
+	| 'next_condition_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
 	condition_behavior_id: ConditionBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
 	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 type ConditionBehaviorActionUpdateRow = TablesUpdate<'condition_behavior_actions'>;
@@ -976,12 +991,18 @@ export type ConditionBehaviorActionUpdate = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
+	| 'building_id'
+	| 'item_id'
+	| 'character_id'
 	| 'next_condition_behavior_action_id'
 > & {
 	id?: ConditionBehaviorActionId;
 	scenario_id?: ScenarioId;
 	condition_id?: ConditionId;
 	condition_behavior_id?: ConditionBehaviorId;
+	building_id?: BuildingId | null;
+	item_id?: ItemId | null;
+	character_id?: CharacterId | null;
 	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 

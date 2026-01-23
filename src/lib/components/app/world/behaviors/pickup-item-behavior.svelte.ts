@@ -21,10 +21,10 @@ export class PickupItemBehavior extends Behavior {
 	}
 
 	update(event: BeforeUpdateEvent): void {
-		// 타겟 아이템이 없으면 아무것도 하지 않음
+		// 대상 아이템이 없으면 아무것도 하지 않음
 		if (!this.targetWorldItemId) return;
 
-		// 타겟 아이템 엔티티 찾기
+		// 대상 아이템 엔티티 찾기
 		const { worldItemStore } = this.worldHook;
 		const worldItem = get(worldItemStore).data[this.targetWorldItemId];
 		if (!worldItem) {
@@ -50,12 +50,12 @@ export class PickupItemBehavior extends Behavior {
 			return;
 		}
 
-		// 첫 번째 아이템을 타겟으로 설정 (거리 계산은 추후 구현)
+		// 첫 번째 아이템을 대상으로 설정 (거리 계산은 추후 구현)
 		this.targetWorldItemId = items[0]?.id;
 	}
 
 	onEnd(): void {
-		// 행동 종료 시 타겟 클리어
+		// 행동 종료 시 대상 클리어
 		this.targetWorldItemId = undefined;
 	}
 
@@ -82,7 +82,7 @@ export class PickupItemBehavior extends Behavior {
 			},
 		});
 
-		// 타겟 클리어
+		// 대상 클리어
 		this.targetWorldItemId = undefined;
 	}
 }

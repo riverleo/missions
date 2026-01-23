@@ -258,14 +258,14 @@ export class WorldContextBlueprint {
 		const overlappingCells: Cell[] = [];
 
 		if (unsupported) {
-			// 지지대 없으면 모든 타겟 셀이 겹침
+			// 지지대 없으면 모든 대상 셀이 겹침
 			for (let r = targetMinRow; r <= targetMaxRow; r++) {
 				for (let c = targetMinCol; c <= targetMaxCol; c++) {
 					overlappingCells.push(vectorUtils.createCell(c, r));
 				}
 			}
 		} else {
-			// 타겟 범위 내에서 invalidCellSet과 겹치는 셀만 찾기
+			// 대상 범위 내에서 invalidCellSet과 겹치는 셀만 찾기
 			for (let r = targetMinRow; r <= targetMaxRow; r++) {
 				for (let c = targetMinCol; c <= targetMaxCol; c++) {
 					if (invalidCellSet.has(vectorUtils.createCellKey(c, r))) {

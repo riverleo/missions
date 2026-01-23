@@ -38,10 +38,10 @@
 		}
 		// 명시적 대상이 없을 때 target_method에 따라 레이블 생성
 		if (action.target_method === 'search') {
-			return '새로운 타겟';
+			return '새로운 대상';
 		}
 		if (action.target_method === 'search_or_continue') {
-			return '기존 선택 타겟';
+			return '기존 선택 대상';
 		}
 		return undefined;
 	});

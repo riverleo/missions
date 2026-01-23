@@ -65,8 +65,8 @@
 
 	const targetMethods: { value: BehaviorTargetMethod; label: string }[] = [
 		{ value: 'explicit', label: '지정된 대상' },
-		{ value: 'search', label: '새로운 타겟' },
-		{ value: 'search_or_continue', label: '기존 선택 타겟' },
+		{ value: 'search', label: '새로운 대상' },
+		{ value: 'search_or_continue', label: '기존 선택 대상' },
 	];
 
 	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
