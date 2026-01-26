@@ -56,22 +56,6 @@
 		const target = targetLabel();
 		const behaviorLabel = behaviorTypeLabel();
 
-		// 특정 조합에 대한 특별한 라벨
-		if (
-			action.type === 'interact' &&
-			action.target_selection_method === 'search' &&
-			action.behavior_interact_type === 'item_pick'
-		) {
-			return '새로운 탐색 대상 아이템 줍기';
-		}
-		if (
-			action.type === 'interact' &&
-			action.target_selection_method === 'search_or_continue' &&
-			action.behavior_interact_type === 'item_pick'
-		) {
-			return '기존 선택 아이템 줍기';
-		}
-
 		if (action.type === 'go') {
 			if (behaviorLabel && target) {
 				return `${josa(behaviorLabel, '을를')} 위해 ${josa(target, '으로로')} 이동`;
@@ -82,6 +66,16 @@
 			return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
 		}
 		if (action.type === 'interact') {
+			// target_selection_method에 따른 라벨인 경우 단순 조합
+			if (
+				behaviorLabel &&
+				target &&
+				(action.target_selection_method === 'search' ||
+					action.target_selection_method === 'search_or_continue')
+			) {
+				return `${target} ${behaviorLabel}`;
+			}
+			// 명시적 대상이 지정된 경우
 			if (behaviorLabel && target) {
 				return `${josa(target, '을를')} ${behaviorLabel}`;
 			}
