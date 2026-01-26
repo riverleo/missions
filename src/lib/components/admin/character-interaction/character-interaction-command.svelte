@@ -59,7 +59,7 @@
 			? $characterStore.data[interaction.character_id as CharacterId]
 			: undefined;
 
-		const behaviorLabel = getBehaviorLabel(interaction.character_behavior_type);
+		const behaviorLabel = getBehaviorLabel(interaction.behavior_interact_type);
 		const characterName = character ? character.name : '모든 캐릭터';
 
 		return `${characterName} ${behaviorLabel}`;

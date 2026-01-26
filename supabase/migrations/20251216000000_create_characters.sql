@@ -4,13 +4,14 @@ create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump', 'p
 -- character_face_state_type enum
 create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 
--- character_behavior_type enum (캐릭터 행동 종류)
-create type character_behavior_type as enum (
-  'demolish',  -- 철거
-  'use',       -- 사용
-  'repair',    -- 수리
-  'clean',     -- 청소
-  'pick'       -- 줍기
+-- behavior_interact_type enum (행동 상호작용 종류)
+create type behavior_interact_type as enum (
+  'building_execute',   -- 건물 동작 실행
+  'building_demolish',  -- 건물 철거
+  'building_repair',    -- 건물 수리
+  'building_clean',     -- 건물 청소
+  'item_pick',          -- 아이템 줍기
+  'item_use'            -- 아이템 사용
 );
 
 -- loop_mode enum

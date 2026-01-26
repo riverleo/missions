@@ -3,7 +3,7 @@
 	import type {
 		ConditionFulfillment,
 		ConditionFulfillmentType,
-		CharacterBehaviorType,
+		BehaviorInteractType,
 		CharacterId,
 		ItemId,
 	} from '$lib/types';
@@ -21,7 +21,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -44,12 +44,12 @@
 		{ value: 'idle', label: '대기' },
 	];
 
-	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
-		{ value: 'use', label: '사용' },
-		{ value: 'repair', label: '수리' },
-		{ value: 'demolish', label: '철거' },
-		{ value: 'clean', label: '청소' },
-		{ value: 'pick', label: '줍기' },
+	const behaviorTypes: { value: BehaviorInteractType; label: string }[] = [
+		{ value: 'building_execute', label: '사용' },
+		{ value: 'building_repair', label: '수리' },
+		{ value: 'building_demolish', label: '철거' },
+		{ value: 'building_clean', label: '청소' },
+		{ value: 'item_pick', label: '줍기' },
 	];
 
 	function getTypeLabel(type: ConditionFulfillmentType) {
@@ -61,8 +61,8 @@
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
 	const selectedBehaviorTypeLabel = $derived(
-		changes?.character_behavior_type
-			? getCharacterBehaviorTypeLabel(changes.character_behavior_type)
+		changes?.behavior_interact_type
+			? getBehaviorInteractTypeLabel(changes.behavior_interact_type)
 			: '행동 타입'
 	);
 
@@ -101,7 +101,7 @@
 		admin
 			.updateConditionFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
-				character_behavior_type: changes.character_behavior_type,
+				behavior_interact_type: changes.behavior_interact_type,
 				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
 				increase_per_tick: changes.increase_per_tick,
@@ -153,7 +153,7 @@
 
 	function onBehaviorTypeChange(value: string | undefined) {
 		if (value && changes) {
-			changes.character_behavior_type = value as CharacterBehaviorType;
+			changes.behavior_interact_type = value as BehaviorInteractType;
 		}
 	}
 
@@ -218,7 +218,7 @@
 								<ButtonGroupText>상호작용</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.character_behavior_type}
+									value={changes.behavior_interact_type}
 									onValueChange={onBehaviorTypeChange}
 								>
 									<SelectTrigger class="flex-1">

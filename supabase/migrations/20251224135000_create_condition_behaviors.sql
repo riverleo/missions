@@ -49,17 +49,20 @@ create table condition_behavior_actions (
   condition_id uuid not null references conditions(id) on delete cascade,
   condition_behavior_id uuid not null references condition_behaviors(id) on delete cascade,
   type behavior_action_type not null default 'idle'::behavior_action_type,
-  character_behavior_type character_behavior_type not null default 'use',
+  behavior_interact_type behavior_interact_type not null default 'building_execute',
   root boolean not null default false,
 
   -- go/interact 타입용: 대상 지정
-  target_method behavior_target_method not null default 'search',
+  target_selection_method behavior_target_selection_method not null default 'search',
   building_id uuid references buildings(id) on delete set null,
   character_id uuid references characters(id) on delete set null,
   item_id uuid references items(id) on delete set null,
 
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,
+
+  -- 행동 완료 조건
+  behavior_completion_type behavior_completion_type not null default 'fixed',
 
   -- 다음 액션
   next_condition_behavior_action_id uuid references condition_behavior_actions(id) on delete set null

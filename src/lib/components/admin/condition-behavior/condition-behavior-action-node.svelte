@@ -36,18 +36,18 @@
 			const item = $itemStore.data[action.item_id];
 			return `"${item?.name ?? '아이템'}" 아이템`;
 		}
-		// 명시적 대상이 없을 때 target_method에 따라 레이블 생성
-		if (action.target_method === 'search') {
-			return '새로운 대상';
+		// 명시적 대상이 없을 때 target_selection_method에 따라 레이블 생성
+		if (action.target_selection_method === 'search') {
+			return '새로운 대상 탐색';
 		}
-		if (action.target_method === 'search_or_continue') {
+		if (action.target_selection_method === 'search_or_continue') {
 			return '기존 선택 대상';
 		}
 		return undefined;
 	});
 
 	const behaviorTypeLabel = $derived(() => {
-		if (!action.character_behavior_type) return undefined;
+		if (!action.behavior_interact_type) return undefined;
 
 		const labels: Record<string, string> = {
 			demolish: '철거',
@@ -57,7 +57,7 @@
 			pick: '줍기',
 		};
 
-		return labels[action.character_behavior_type];
+		return labels[action.behavior_interact_type];
 	});
 
 	const typeLabel = $derived(() => {

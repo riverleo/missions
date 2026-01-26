@@ -26,7 +26,7 @@
 		ItemInteractionAction,
 		ItemInteractionActionId,
 		CharacterId,
-		CharacterBehaviorType,
+		BehaviorInteractType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -49,8 +49,8 @@
 
 	const rootAction = $derived(actions.find((a) => a.root));
 
-	let characterBehaviorType = $state<CharacterBehaviorType>(
-		interaction.character_behavior_type
+	let characterBehaviorType = $state<BehaviorInteractType>(
+		interaction.behavior_interact_type
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
@@ -61,7 +61,7 @@
 
 	async function updateInteraction() {
 		await admin.updateItemInteraction(interactionId, {
-			character_behavior_type: characterBehaviorType,
+			behavior_interact_type: characterBehaviorType,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
@@ -148,7 +148,7 @@
 							<DropdownMenuRadioGroup
 								value={characterBehaviorType}
 								onValueChange={(value) => {
-									characterBehaviorType = value as CharacterBehaviorType;
+									characterBehaviorType = value as BehaviorInteractType;
 									updateInteraction();
 								}}
 							>

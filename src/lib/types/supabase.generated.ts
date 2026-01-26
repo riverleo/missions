@@ -247,8 +247,8 @@ export type Database = {
       }
       building_interactions: {
         Row: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -256,8 +256,8 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -265,8 +265,8 @@ export type Database = {
           scenario_id: string
         }
         Update: {
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -719,7 +719,7 @@ export type Database = {
       }
       character_interactions: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -728,7 +728,7 @@ export type Database = {
           target_character_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -737,7 +737,7 @@ export type Database = {
           target_character_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -889,8 +889,9 @@ export type Database = {
       }
       condition_behavior_actions: {
         Row: {
+          behavior_completion_type: Database["public"]["Enums"]["behavior_completion_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string | null
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           condition_behavior_id: string
           condition_id: string
@@ -900,12 +901,13 @@ export type Database = {
           next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          target_method: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method: Database["public"]["Enums"]["behavior_target_selection_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
+          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_behavior_id: string
           condition_id: string
@@ -915,12 +917,13 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          target_method?: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
+          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_behavior_id?: string
           condition_id?: string
@@ -930,7 +933,7 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          target_method?: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
@@ -1052,8 +1055,8 @@ export type Database = {
       }
       condition_effects: {
         Row: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick: number
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           condition_id: string
           created_at: string
@@ -1066,8 +1069,8 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick?: number
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id: string
           created_at?: string
@@ -1080,8 +1083,8 @@ export type Database = {
           scenario_id: string
         }
         Update: {
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick?: number
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           condition_id?: string
           created_at?: string
@@ -1133,7 +1136,7 @@ export type Database = {
       }
       condition_fulfillments: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id: string | null
           condition_id: string
           created_at: string
@@ -1145,7 +1148,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           condition_id: string
           created_at?: string
@@ -1157,7 +1160,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           condition_id?: string
           created_at?: string
@@ -1381,7 +1384,7 @@ export type Database = {
       }
       item_interactions: {
         Row: {
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -1390,7 +1393,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1399,7 +1402,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1780,9 +1783,10 @@ export type Database = {
       }
       need_behavior_actions: {
         Row: {
+          behavior_completion_type: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id: string
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string | null
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           duration_ticks: number
           id: string
@@ -1791,13 +1795,14 @@ export type Database = {
           next_need_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          target_method: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method: Database["public"]["Enums"]["behavior_target_selection_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
+          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id: string
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           duration_ticks?: number
           id?: string
@@ -1806,13 +1811,14 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          target_method?: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
+          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id?: string
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           duration_ticks?: number
           id?: string
@@ -1821,7 +1827,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          target_method?: Database["public"]["Enums"]["behavior_target_method"]
+          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
@@ -1943,8 +1949,8 @@ export type Database = {
       }
       need_fulfillments: {
         Row: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string | null
-          character_behavior_type: Database["public"]["Enums"]["character_behavior_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -1961,8 +1967,8 @@ export type Database = {
           task_duration_ticks: number
         }
         Insert: {
+          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1979,8 +1985,8 @@ export type Database = {
           task_duration_ticks?: number
         }
         Update: {
+          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string | null
-          character_behavior_type?: Database["public"]["Enums"]["character_behavior_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -3526,9 +3532,19 @@ export type Database = {
     }
     Enums: {
       behavior_action_type: "go" | "interact" | "idle"
-      behavior_target_method: "explicit" | "search" | "search_or_continue"
+      behavior_completion_type: "fixed" | "completion" | "immediate"
+      behavior_interact_type:
+        | "building_execute"
+        | "building_demolish"
+        | "building_repair"
+        | "building_clean"
+        | "item_pick"
+        | "item_use"
+      behavior_target_selection_method:
+        | "explicit"
+        | "search"
+        | "search_or_continue"
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
-      character_behavior_type: "demolish" | "use" | "repair" | "clean" | "pick"
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
       collider_type: "circle" | "rectangle"
@@ -3677,9 +3693,21 @@ export const Constants = {
   public: {
     Enums: {
       behavior_action_type: ["go", "interact", "idle"],
-      behavior_target_method: ["explicit", "search", "search_or_continue"],
+      behavior_completion_type: ["fixed", "completion", "immediate"],
+      behavior_interact_type: [
+        "building_execute",
+        "building_demolish",
+        "building_repair",
+        "building_clean",
+        "item_pick",
+        "item_use",
+      ],
+      behavior_target_selection_method: [
+        "explicit",
+        "search",
+        "search_or_continue",
+      ],
       building_state_type: ["idle", "damaged", "planning", "constructing"],
-      character_behavior_type: ["demolish", "use", "repair", "clean", "pick"],
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
       collider_type: ["circle", "rectangle"],

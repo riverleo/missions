@@ -5,11 +5,18 @@ create type behavior_action_type as enum (
   'idle'        -- 대기
 );
 
--- behavior_target_method enum (타깃 결정 방법)
-create type behavior_target_method as enum (
+-- behavior_target_selection_method enum (타깃 선택 방법)
+create type behavior_target_selection_method as enum (
   'explicit',          -- 지정된 대상
   'search',            -- 액션 시작 시 새로 탐색
   'search_or_continue' -- 액션 시작 시 기존 대상이 있으면 사용, 없으면 탐색
+);
+
+-- behavior_completion_type enum (행동 완료 조건)
+create type behavior_completion_type as enum (
+  'fixed',       -- 지정된 시간만큼 실행 (기본값)
+  'completion',  -- 목표 달성까지 실행 (청소/수리/철거)
+  'immediate'    -- 즉시 완료 (줍기/사용)
 );
 
 -- need_behaviors 테이블 (언제/왜 행동이 발동되는지)
@@ -63,17 +70,20 @@ create table need_behavior_actions (
   need_id uuid not null references needs(id) on delete cascade,
   behavior_id uuid not null references need_behaviors(id) on delete cascade,
   type behavior_action_type not null default 'idle'::behavior_action_type,
-  character_behavior_type character_behavior_type not null default 'use',
+  behavior_interact_type behavior_interact_type not null,
   root boolean not null default false,
 
   -- go/interact 타입용: 대상 지정
-  target_method behavior_target_method not null default 'search',
+  target_selection_method behavior_target_selection_method not null default 'search',
   building_id uuid references buildings(id) on delete set null,
   character_id uuid references characters(id) on delete set null,
   item_id uuid references items(id) on delete set null,
 
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,
+
+  -- 행동 완료 조건
+  behavior_completion_type behavior_completion_type not null default 'fixed',
 
   -- 다음 액션
   next_need_behavior_action_id uuid references need_behavior_actions(id) on delete set null

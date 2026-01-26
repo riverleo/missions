@@ -30,7 +30,7 @@
 
 		if (!tile?.max_durability) return '최대 내구도 없음';
 
-		return `내구도 (${tileState.min_durability.toLocaleString()}~${tileState.max_durability.toLocaleString()})`;
+		return `내구도 ${tileState.min_durability.toLocaleString()}~${tileState.max_durability.toLocaleString()} 틱 사이`;
 	});
 
 	async function onchange(change: SpriteStateChange) {

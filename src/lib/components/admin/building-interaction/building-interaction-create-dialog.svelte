@@ -14,7 +14,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
-	import type { BuildingId, CharacterId, CharacterBehaviorType, ScenarioId } from '$lib/types';
+	import type { BuildingId, CharacterId, BehaviorInteractType, ScenarioId } from '$lib/types';
 
 	const {
 		buildingStore,
@@ -31,16 +31,16 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<string>('');
-	let characterBehaviorType = $state<CharacterBehaviorType>('use');
+	let characterBehaviorType = $state<BehaviorInteractType>('building_execute');
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const behaviorTypeOptions: { value: CharacterBehaviorType; label: string }[] = [
-		{ value: 'demolish', label: '철거' },
-		{ value: 'use', label: '사용' },
-		{ value: 'repair', label: '수리' },
-		{ value: 'clean', label: '청소' },
-		{ value: 'pick', label: '줍기' },
+	const behaviorTypeOptions: { value: BehaviorInteractType; label: string }[] = [
+		{ value: 'building_demolish', label: '철거' },
+		{ value: 'building_execute', label: '사용' },
+		{ value: 'building_repair', label: '수리' },
+		{ value: 'building_clean', label: '청소' },
+		{ value: 'item_pick', label: '줍기' },
 	];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
@@ -57,7 +57,7 @@
 
 	function onBehaviorTypeChange(value: string | undefined) {
 		if (value) {
-			characterBehaviorType = value as CharacterBehaviorType;
+			characterBehaviorType = value as BehaviorInteractType;
 		}
 	}
 
@@ -80,7 +80,7 @@
 		try {
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
 				building_id: buildingId as BuildingId,
-				character_behavior_type: characterBehaviorType,
+				behavior_interact_type: characterBehaviorType,
 				character_id: characterId ? (characterId as CharacterId) : null,
 			});
 

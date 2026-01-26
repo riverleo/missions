@@ -26,7 +26,7 @@
 		CharacterInteractionAction,
 		CharacterInteractionActionId,
 		CharacterId,
-		CharacterBehaviorType,
+		BehaviorInteractType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -49,7 +49,7 @@
 
 	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
 
-	let characterBehaviorType = $state<CharacterBehaviorType>(interaction.character_behavior_type);
+	let characterBehaviorType = $state<BehaviorInteractType>(interaction.behavior_interact_type);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
 	const selectedCharacter = $derived.by(() => {
@@ -59,7 +59,7 @@
 
 	async function updateInteraction() {
 		await admin.updateCharacterInteraction(interactionId, {
-			character_behavior_type: characterBehaviorType,
+			behavior_interact_type: characterBehaviorType,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
@@ -146,7 +146,7 @@
 							<DropdownMenuRadioGroup
 								value={characterBehaviorType}
 								onValueChange={(value) => {
-									characterBehaviorType = value as CharacterBehaviorType;
+									characterBehaviorType = value as BehaviorInteractType;
 									updateInteraction();
 								}}
 							>

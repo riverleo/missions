@@ -44,6 +44,7 @@
 			await admin.createConditionBehaviorAction(scenarioId, {
 				condition_id: behavior.condition_id,
 				condition_behavior_id: behavior.id,
+				behavior_interact_type: 'building_execute',
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

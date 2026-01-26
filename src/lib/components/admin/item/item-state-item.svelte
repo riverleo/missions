@@ -30,7 +30,7 @@
 
 		if (!item?.max_durability_ticks) return '최대 내구도 없음';
 
-		return `내구도 (${itemState.min_durability.toLocaleString()}~${itemState.max_durability.toLocaleString()} 틱)`;
+		return `내구도 ${itemState.min_durability.toLocaleString()}~${itemState.max_durability.toLocaleString()} 틱 사이`;
 	});
 
 	async function onchange(change: SpriteStateChange) {

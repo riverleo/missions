@@ -3,8 +3,8 @@
 	import type {
 		ConditionBehaviorAction,
 		BehaviorActionType,
-		BehaviorTargetMethod,
-		CharacterBehaviorType,
+		BehaviorTargetSelectionMethod,
+		BehaviorInteractType,
 		CharacterId,
 		BuildingId,
 		ItemId,
@@ -35,7 +35,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -61,18 +61,18 @@
 		{ value: 'idle', label: '대기' },
 	];
 
-	const targetMethods: { value: BehaviorTargetMethod; label: string }[] = [
+	const targetMethods: { value: BehaviorTargetSelectionMethod; label: string }[] = [
 		{ value: 'explicit', label: '지정된 대상' },
-		{ value: 'search', label: '새로운 대상' },
+		{ value: 'search', label: '새로운 대상 탐색' },
 		{ value: 'search_or_continue', label: '기존 선택 대상' },
 	];
 
-	const behaviorTypes: { value: CharacterBehaviorType; label: string }[] = [
-		{ value: 'use', label: '사용' },
-		{ value: 'repair', label: '수리' },
-		{ value: 'demolish', label: '철거' },
-		{ value: 'clean', label: '청소' },
-		{ value: 'pick', label: '줍기' },
+	const behaviorTypes: { value: BehaviorInteractType; label: string }[] = [
+		{ value: 'building_execute', label: '사용' },
+		{ value: 'building_repair', label: '수리' },
+		{ value: 'building_demolish', label: '철거' },
+		{ value: 'building_clean', label: '청소' },
+		{ value: 'item_pick', label: '아이템 줍기' },
 	];
 
 	let isUpdating = $state(false);
@@ -83,10 +83,10 @@
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
 	const selectedTargetMethodLabel = $derived(
-		targetMethods.find((t) => t.value === changes?.target_method)?.label ?? '타깃 결정 방법'
+		targetMethods.find((t) => t.value === changes?.target_selection_method)?.label ?? '타깃 결정 방법'
 	);
 	const selectedBehaviorTypeLabel = $derived(
-		changes ? getCharacterBehaviorTypeLabel(changes.character_behavior_type) : '행동 타입'
+		changes ? getBehaviorInteractTypeLabel(changes.behavior_interact_type) : '행동 타입'
 	);
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.building_id) {
@@ -119,7 +119,7 @@
 
 	function onTargetMethodChange(value: string | undefined) {
 		if (changes && value) {
-			changes.target_method = value as BehaviorTargetMethod;
+			changes.target_selection_method = value as BehaviorTargetSelectionMethod;
 			// search 모드로 변경 시 명시적 타깃 제거
 			if (value === 'search') {
 				changes.building_id = null;
@@ -131,7 +131,7 @@
 
 	function onBehaviorTypeChange(value: string | undefined) {
 		if (changes && value) {
-			changes.character_behavior_type = value as CharacterBehaviorType;
+			changes.behavior_interact_type = value as BehaviorInteractType;
 		}
 	}
 
@@ -181,8 +181,8 @@
 
 			await admin.updateConditionBehaviorAction(actionId, {
 				type: changes.type,
-				character_behavior_type: changes.character_behavior_type,
-				target_method: changes.target_method,
+				behavior_interact_type: changes.behavior_interact_type,
+				target_selection_method: changes.target_selection_method,
 				duration_ticks: changes.duration_ticks,
 				building_id: changes.building_id,
 				character_id: changes.character_id,
@@ -236,7 +236,7 @@
 								<ButtonGroupText>상호작용</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.character_behavior_type}
+									value={changes.behavior_interact_type}
 									onValueChange={onBehaviorTypeChange}
 								>
 									<SelectTrigger class="flex-1">
@@ -256,7 +256,7 @@
 								<ButtonGroupText>대상찾기</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.target_method}
+									value={changes.target_selection_method}
 									onValueChange={onTargetMethodChange}
 								>
 									<SelectTrigger class="flex-1">
@@ -271,7 +271,7 @@
 							</ButtonGroup>
 						{/if}
 
-						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_method === 'explicit'}
+						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'explicit'}
 							<ButtonGroup class="w-full">
 								<ButtonGroup class="flex-1">
 									<ButtonGroupText>대상</ButtonGroupText>

@@ -152,6 +152,7 @@
 			const newAction = await admin.createConditionBehaviorAction(scenarioId, {
 				condition_id: behavior.condition_id,
 				condition_behavior_id: behavior.id,
+					behavior_interact_type: 'building_execute',
 			});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴

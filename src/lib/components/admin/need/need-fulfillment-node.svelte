@@ -4,7 +4,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -27,7 +27,7 @@
 				const building = fulfillment.building_id
 					? $buildingStore.data[fulfillment.building_id]
 					: undefined;
-				const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);
+				const behaviorLabel = getBehaviorInteractTypeLabel(fulfillment.behavior_interact_type);
 				const buildingName = building?.name ?? '모든 건물';
 				return `${buildingName} ${behaviorLabel}`;
 			}
@@ -35,13 +35,13 @@
 				const character = fulfillment.character_id
 					? $characterStore.data[fulfillment.character_id]
 					: undefined;
-				const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);
+				const behaviorLabel = getBehaviorInteractTypeLabel(fulfillment.behavior_interact_type);
 				const characterName = character?.name ?? '모든 캐릭터';
 				return `${characterName} ${behaviorLabel}`;
 			}
 			case 'item': {
 				const item = fulfillment.item_id ? $itemStore.data[fulfillment.item_id] : undefined;
-				const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);
+				const behaviorLabel = getBehaviorInteractTypeLabel(fulfillment.behavior_interact_type);
 				const itemName = item?.name ?? '모든 아이템';
 				return `${itemName} ${behaviorLabel}`;
 			}

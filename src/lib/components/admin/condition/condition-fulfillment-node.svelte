@@ -3,7 +3,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getCharacterBehaviorTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -20,7 +20,7 @@
 	const { itemStore } = useItem();
 
 	const typeLabel = $derived(() => {
-		const behaviorLabel = getCharacterBehaviorTypeLabel(fulfillment.character_behavior_type);
+		const behaviorLabel = getBehaviorInteractTypeLabel(fulfillment.behavior_interact_type);
 
 		switch (fulfillment.fulfillment_type) {
 			case 'character': {

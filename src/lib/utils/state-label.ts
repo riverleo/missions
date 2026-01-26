@@ -2,7 +2,7 @@ import type {
 	CharacterBodyStateType,
 	CharacterFaceStateType,
 	BuildingStateType,
-	CharacterBehaviorType,
+	BehaviorInteractType,
 	ItemStateType,
 	TileStateType,
 	ColliderType,
@@ -37,12 +37,13 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 	constructing: '건설 중',
 };
 
-const characterBehaviorTypeLabels: Record<CharacterBehaviorType, string> = {
-	demolish: '철거',
-	use: '사용',
-	repair: '수리',
-	clean: '청소',
-	pick: '줍기',
+const behaviorInteractTypeLabels: Record<BehaviorInteractType, string> = {
+	building_execute: '건물 동작 실행',
+	building_demolish: '건물 철거',
+	building_repair: '건물 수리',
+	building_clean: '건물 청소',
+	item_pick: '아이템 줍기',
+	item_use: '아이템 사용',
 };
 
 export function getColliderTypeLabel(type: ColliderType): string {
@@ -61,8 +62,8 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 	return buildingStateLabels[state];
 }
 
-export function getCharacterBehaviorTypeLabel(type: CharacterBehaviorType): string {
-	return characterBehaviorTypeLabels[type];
+export function getBehaviorInteractTypeLabel(type: BehaviorInteractType): string {
+	return behaviorInteractTypeLabels[type];
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {
