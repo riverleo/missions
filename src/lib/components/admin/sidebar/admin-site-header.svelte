@@ -27,6 +27,9 @@
 		CharacterId,
 		CharacterBodyId,
 		BuildingId,
+		BuildingInteractionId,
+		CharacterInteractionId,
+		ItemInteractionId,
 		ConditionId,
 		ConditionBehaviorId,
 		ItemId,
@@ -34,16 +37,17 @@
 		NeedBehaviorId,
 	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	const { scenarioStore } = useScenario();
 	const { chapterStore } = useChapter();
 	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
 	const { terrainStore } = useTerrain();
-	const { characterStore, characterBodyStore, needStore } = useCharacter();
-	const { buildingStore, conditionStore } = useBuilding();
+	const { characterStore, characterBodyStore, needStore, characterInteractionStore } = useCharacter();
+	const { buildingStore, conditionStore, buildingInteractionStore } = useBuilding();
 	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
-	const { itemStore } = useItem();
+	const { itemStore, itemInteractionStore } = useItem();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
@@ -70,6 +74,39 @@
 		}
 		if (prevSegment === 'buildings') {
 			return $buildingStore.data?.[id as BuildingId]?.name;
+		}
+		if (prevSegment === 'building-interactions') {
+			const interaction = $buildingInteractionStore.data?.[id as BuildingInteractionId];
+			if (!interaction) return undefined;
+			const building = $buildingStore.data?.[interaction.building_id];
+			const character = interaction.character_id
+				? $characterStore.data?.[interaction.character_id]
+				: undefined;
+			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
+			const characterName = character ? character.name : '모든 캐릭터';
+			return `${building?.name ?? '건물'}: ${characterName} ${behaviorLabel}`;
+		}
+		if (prevSegment === 'character-interactions') {
+			const interaction = $characterInteractionStore.data?.[id as CharacterInteractionId];
+			if (!interaction) return undefined;
+			const targetCharacter = $characterStore.data?.[interaction.target_character_id];
+			const character = interaction.character_id
+				? $characterStore.data?.[interaction.character_id]
+				: undefined;
+			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
+			const characterName = character ? character.name : '모든 캐릭터';
+			return `${targetCharacter?.name ?? '캐릭터'}: ${characterName} ${behaviorLabel}`;
+		}
+		if (prevSegment === 'item-interactions') {
+			const interaction = $itemInteractionStore.data?.[id as ItemInteractionId];
+			if (!interaction) return undefined;
+			const item = $itemStore.data?.[interaction.item_id];
+			const character = interaction.character_id
+				? $characterStore.data?.[interaction.character_id]
+				: undefined;
+			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
+			const characterName = character ? character.name : '모든 캐릭터';
+			return `${item?.name ?? '아이템'}: ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'conditions') {
 			return $conditionStore.data?.[id as ConditionId]?.name;
@@ -126,6 +163,9 @@
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';
+			else if (segment === 'building-interactions') label = '건물 상호작용';
+			else if (segment === 'character-interactions') label = '캐릭터 상호작용';
+			else if (segment === 'item-interactions') label = '아이템 상호작용';
 			else if (segment === 'interactions') label = '상호작용';
 			else if (segment === 'conditions') label = '컨디션';
 			else if (segment === 'condition-behaviors') label = '컨디션 행동';
