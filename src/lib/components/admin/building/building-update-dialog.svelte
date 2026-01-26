@@ -14,7 +14,13 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { Checkbox } from '$lib/components/ui/checkbox';
-	import { IconHeading } from '@tabler/icons-svelte';
+	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
+	import {
+		DropdownMenu,
+		DropdownMenuContent,
+		DropdownMenuTrigger,
+	} from '$lib/components/ui/dropdown-menu';
+	import { IconHeading, IconChevronDown } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import type { ItemId, ScenarioId } from '$lib/types';
@@ -133,20 +139,34 @@
 					/>
 				</InputGroup>
 				{#if items.length > 0}
-					<div class="rounded-md border p-3">
-						<div class="mb-2 text-sm font-medium">보관 가능한 아이템</div>
-						<div class="flex flex-col gap-2">
-							{#each items as item (item.id)}
-								<label class="flex items-center gap-2">
-									<Checkbox
-										checked={selectedItemIds.has(item.id)}
-										onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
-									/>
-									<span class="text-sm">{item.name}</span>
-								</label>
-							{/each}
-						</div>
-					</div>
+					<ButtonGroup class="w-full">
+						<ButtonGroupText>아이템 선택</ButtonGroupText>
+						<DropdownMenu>
+							<DropdownMenuTrigger
+								class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+							>
+								<span>
+									{selectedItemIds.size > 0
+										? `${selectedItemIds.size}개 선택됨`
+										: '아이템을 선택하세요'}
+								</span>
+								<IconChevronDown class="size-4" />
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="start" class="w-56 max-h-64 overflow-y-auto">
+								<div class="p-2 space-y-2">
+									{#each items as item (item.id)}
+										<label class="flex items-center gap-2 cursor-pointer">
+											<Checkbox
+												checked={selectedItemIds.has(item.id)}
+												onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
+											/>
+											<span class="text-sm">{item.name}</span>
+										</label>
+									{/each}
+								</div>
+							</DropdownMenuContent>
+						</DropdownMenu>
+					</ButtonGroup>
 				{/if}
 			</div>
 			<DialogFooter>
