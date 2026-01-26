@@ -127,46 +127,48 @@
 					</InputGroupAddon>
 					<InputGroupInput placeholder="건물 이름" bind:value={name} />
 				</InputGroup>
-				<InputGroup>
-					<InputGroupAddon align="inline-start">
-						<InputGroupText>아이템 저장 수</InputGroupText>
-					</InputGroupAddon>
-					<InputGroupInput
-						placeholder="숫자 입력"
-						type="number"
-						min="0"
-						bind:value={itemMaxCapacity}
-					/>
-				</InputGroup>
-				{#if items.length > 0}
-					<ButtonGroup class="w-full">
-						<ButtonGroupText>아이템 선택</ButtonGroupText>
-						<DropdownMenu>
-							<DropdownMenuTrigger
-								class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-							>
-								<span>
-									{selectedItemIds.size > 0
-										? `${selectedItemIds.size}개 선택됨`
-										: '아이템을 선택하세요'}
-								</span>
-								<IconChevronDown class="size-4" />
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="start" class="w-56 max-h-64 overflow-y-auto">
-								<div class="p-2 space-y-2">
-									{#each items as item (item.id)}
-										<label class="flex items-center gap-2 cursor-pointer">
-											<Checkbox
-												checked={selectedItemIds.has(item.id)}
-												onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
-											/>
-											<span class="text-sm">{item.name}</span>
-										</label>
-									{/each}
-								</div>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</ButtonGroup>
+{#if items.length > 0}
+					<div class="flex gap-2">
+						<ButtonGroup class="flex-1">
+							<ButtonGroupText>아이템 선택</ButtonGroupText>
+							<DropdownMenu>
+								<DropdownMenuTrigger
+									class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+								>
+									<span>
+										{selectedItemIds.size > 0
+											? `${selectedItemIds.size}개 선택됨`
+											: '아이템을 선택하세요'}
+									</span>
+									<IconChevronDown class="size-4" />
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="start" class="w-56 max-h-64 overflow-y-auto">
+									<div class="p-2 space-y-2">
+										{#each items as item (item.id)}
+											<label class="flex items-center gap-2 cursor-pointer">
+												<Checkbox
+													checked={selectedItemIds.has(item.id)}
+													onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
+												/>
+												<span class="text-sm">{item.name}</span>
+											</label>
+										{/each}
+									</div>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</ButtonGroup>
+						<InputGroup class="w-32">
+							<InputGroupAddon align="inline-start">
+								<InputGroupText>최대</InputGroupText>
+							</InputGroupAddon>
+							<InputGroupInput
+								placeholder="0"
+								type="number"
+								min="0"
+								bind:value={itemMaxCapacity}
+							/>
+						</InputGroup>
+					</div>
 				{/if}
 			</div>
 			<DialogFooter>
