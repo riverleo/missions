@@ -25,7 +25,7 @@ import type {
 	ScenarioId,
 	WorldCharacterId,
 } from '$lib/types';
-import { useApp } from './use-app.svelte';
+import { useApp } from '../use-app.svelte';
 import type { Behavior } from '$lib/components/app/world/behaviors';
 
 type BehaviorPriorityDialogState =
@@ -539,4 +539,4 @@ export function useBehavior() {
 	return instance;
 }
 
-export { getInteractableEntityTemplates } from './use-behavior/get-interactable-entity-templates';
+export { getInteractableEntityTemplates } from './get-interactable-entity-templates';
