@@ -112,7 +112,7 @@
 			return $conditionStore.data?.[id as ConditionId]?.name;
 		}
 		if (prevSegment === 'condition-behaviors') {
-			return undefined;
+			return $conditionBehaviorStore.data?.[id as ConditionBehaviorId]?.name;
 		}
 		if (prevSegment === 'items') {
 			return $itemStore.data?.[id as ItemId]?.name;
