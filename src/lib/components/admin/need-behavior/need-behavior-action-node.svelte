@@ -3,6 +3,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
@@ -48,21 +49,21 @@
 
 	const behaviorTypeLabel = $derived(() => {
 		if (!action.behavior_interact_type) return undefined;
-
-		const labels: Record<string, string> = {
-			demolish: '철거',
-			use: '사용',
-			repair: '수리',
-			clean: '청소',
-			pick: '줍기',
-		};
-
-		return labels[action.behavior_interact_type];
+		return getBehaviorInteractTypeLabel(action.behavior_interact_type);
 	});
 
 	const typeLabel = $derived(() => {
 		const target = targetLabel();
 		const behaviorLabel = behaviorTypeLabel();
+
+		// 특정 조합에 대한 특별한 라벨
+		if (
+			action.type === 'interact' &&
+			action.target_selection_method === 'search_or_continue' &&
+			action.behavior_interact_type === 'item_pick'
+		) {
+			return '기존 선택 아이템 줍기';
+		}
 
 		if (action.type === 'go') {
 			if (behaviorLabel && target) {
