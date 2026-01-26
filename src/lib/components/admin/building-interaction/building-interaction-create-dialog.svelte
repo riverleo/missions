@@ -13,6 +13,7 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type { BuildingId, CharacterId, BehaviorInteractType, ScenarioId } from '$lib/types';
 
@@ -35,13 +36,7 @@
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const behaviorTypeOptions: { value: BehaviorInteractType; label: string }[] = [
-		{ value: 'building_demolish', label: '철거' },
-		{ value: 'building_execute', label: '사용' },
-		{ value: 'building_repair', label: '수리' },
-		{ value: 'building_clean', label: '청소' },
-		{ value: 'item_pick', label: '줍기' },
-	];
+	const behaviorTypeOptions = getBehaviorInteractTypeOptions();
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');

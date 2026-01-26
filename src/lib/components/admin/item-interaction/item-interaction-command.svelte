@@ -18,6 +18,7 @@
 	import { cn } from '$lib/utils';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type {
@@ -45,17 +46,6 @@
 			}))
 			.filter((g) => g.interactions.length > 0);
 	});
-
-	function getBehaviorInteractTypeLabel(type: string) {
-		const labels: Record<string, string> = {
-			demolish: '철거',
-			use: '사용',
-			repair: '수리',
-			clean: '청소',
-			pick: '줍기',
-		};
-		return labels[type] ?? type;
-	}
 
 	function getInteractionLabel(interaction: ItemInteraction) {
 		const character = interaction.character_id

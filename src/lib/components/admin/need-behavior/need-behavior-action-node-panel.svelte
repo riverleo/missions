@@ -38,7 +38,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import {
+		getBehaviorInteractTypeLabel,
+		getBehaviorInteractTypeOptions,
+	} from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -76,13 +79,7 @@
 		{ value: 'search_or_continue', label: '기존 선택 대상' },
 	];
 
-	const behaviorTypes: { value: BehaviorInteractType; label: string }[] = [
-		{ value: 'building_execute', label: '건물 사용' },
-		{ value: 'building_repair', label: '건물 수리' },
-		{ value: 'building_demolish', label: '건물 철거' },
-		{ value: 'building_clean', label: '건물 청소' },
-		{ value: 'item_pick', label: '아이템 줍기' },
-	];
+	const behaviorTypes = getBehaviorInteractTypeOptions();
 
 	const completionTypes: { value: BehaviorCompletionType; label: string }[] = [
 		{ value: 'fixed', label: '고정 시간' },
@@ -286,7 +283,7 @@
 
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상찾기</ButtonGroupText>
+								<ButtonGroupText>대상</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.target_selection_method}
@@ -307,7 +304,7 @@
 						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'explicit'}
 							<ButtonGroup class="w-full">
 								<ButtonGroup class="flex-1">
-									<ButtonGroupText>대상</ButtonGroupText>
+									<ButtonGroupText>대상선택</ButtonGroupText>
 									<DropdownMenu>
 										<DropdownMenuTrigger
 											class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"

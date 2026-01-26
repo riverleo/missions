@@ -38,7 +38,7 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 };
 
 const behaviorInteractTypeLabels: Record<BehaviorInteractType, string> = {
-	building_execute: '건물 동작 실행',
+	building_execute: '건물 사용',
 	building_demolish: '건물 철거',
 	building_repair: '건물 수리',
 	building_clean: '건물 청소',
@@ -64,6 +64,13 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 
 export function getBehaviorInteractTypeLabel(type: BehaviorInteractType): string {
 	return behaviorInteractTypeLabels[type];
+}
+
+export function getBehaviorInteractTypeOptions(): { value: BehaviorInteractType; label: string }[] {
+	return Object.entries(behaviorInteractTypeLabels).map(([value, label]) => ({
+		value: value as BehaviorInteractType,
+		label,
+	}));
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {

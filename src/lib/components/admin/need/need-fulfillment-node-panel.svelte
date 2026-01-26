@@ -31,7 +31,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel, getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -63,13 +63,7 @@
 		{ value: 'created', label: '생성' },
 	];
 
-	const behaviorTypes: { value: BehaviorInteractType; label: string }[] = [
-		{ value: 'building_execute', label: '사용' },
-		{ value: 'building_repair', label: '수리' },
-		{ value: 'building_demolish', label: '철거' },
-		{ value: 'building_clean', label: '청소' },
-		{ value: 'item_pick', label: '줍기' },
-	];
+	const behaviorTypes = getBehaviorInteractTypeOptions();
 
 	function getTypeLabel(type: NeedFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
