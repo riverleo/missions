@@ -17,7 +17,7 @@ import { useChapter } from './use-chapter';
 import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
-import { useBehavior } from './use-behavior';
+import { useBehavior } from './use-behavior/index';
 import { useItem } from './use-item';
 import { useWorld } from './use-world';
 import { useNarrative } from './use-narrative';
