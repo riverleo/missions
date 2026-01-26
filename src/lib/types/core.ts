@@ -15,6 +15,10 @@ import type {
 	WorldBuilding,
 	WorldCharacter,
 	WorldItem,
+	Tile,
+	Item,
+	Character,
+	Building,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -74,9 +78,10 @@ export type EntityTemplateId =
 	| `tile_${TileId}`;
 
 // Instance types for EntityId and EntityTemplateId
-export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
-export type EntityTemplateIdCandidate = BuildingId | CharacterId | ItemId | TileId;
+export type EntityTemplate = Building | Character | Item | Tile;
+export type EntityTemplateCandidateId = BuildingId | CharacterId | ItemId | TileId;
 export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
+export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
 
 // ============================================================
 // World entity types

@@ -80,7 +80,7 @@ export type {
 	EntityType,
 	EntityTemplateId,
 	EntityInstanceId,
-	EntityTemplateIdCandidate,
+	EntityTemplateCandidateId,
 	EntityInstance,
 } from './core';
 
@@ -946,26 +946,33 @@ export type ConditionBehaviorUpdate = Omit<
 
 // Condition Behavior Action types
 type ConditionBehaviorActionRow = Tables<'condition_behavior_actions'>;
-export type ConditionBehaviorAction = Omit<
-	ConditionBehaviorActionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'condition_id'
-	| 'condition_behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
-	| 'next_condition_behavior_action_id'
-> & {
-	id: ConditionBehaviorActionId;
-	scenario_id: ScenarioId;
-	condition_id: ConditionId;
-	condition_behavior_id: ConditionBehaviorId;
-	building_id: BuildingId | null;
-	item_id: ItemId | null;
-	character_id: CharacterId | null;
-	next_condition_behavior_action_id: ConditionBehaviorActionId | null;
-};
+export type ConditionBehaviorAction = BehaviorAction &
+	Omit<
+		ConditionBehaviorActionRow,
+		| 'id'
+		| 'scenario_id'
+		| 'condition_id'
+		| 'condition_behavior_id'
+		| 'building_id'
+		| 'item_id'
+		| 'character_id'
+		| 'next_condition_behavior_action_id'
+		| 'type'
+		| 'behavior_interact_type'
+		| 'target_selection_method'
+		| 'behavior_completion_type'
+		| 'duration_ticks'
+		| 'root'
+	> & {
+		id: ConditionBehaviorActionId;
+		scenario_id: ScenarioId;
+		condition_id: ConditionId;
+		condition_behavior_id: ConditionBehaviorId;
+		building_id: BuildingId | null;
+		item_id: ItemId | null;
+		character_id: CharacterId | null;
+		next_condition_behavior_action_id: ConditionBehaviorActionId | null;
+	};
 type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
 export type ConditionBehaviorActionInsert = Omit<
 	ConditionBehaviorActionInsertRow,
@@ -1301,27 +1308,47 @@ export type NeedBehaviorUpdate = Omit<
 
 // Need Behavior Action types
 type NeedBehaviorActionRow = Tables<'need_behavior_actions'>;
-export type NeedBehaviorAction = Omit<
-	NeedBehaviorActionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'need_id'
-	| 'behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
-	| 'success_need_behavior_action_id'
-	| 'failure_need_behavior_action_id'
-> & {
-	id: NeedBehaviorActionId;
-	scenario_id: ScenarioId;
-	need_id: NeedId;
-	behavior_id: NeedBehaviorId;
+// Common type for all behavior actions
+export type BehaviorAction = {
+	type: BehaviorActionType;
+	behavior_interact_type: BehaviorInteractType;
+	target_selection_method: BehaviorTargetSelectionMethod;
+	behavior_completion_type: BehaviorCompletionType;
+	duration_ticks: number;
 	building_id: BuildingId | null;
 	item_id: ItemId | null;
 	character_id: CharacterId | null;
-	next_need_behavior_action_id: NeedBehaviorActionId | null;
+	root: boolean;
 };
+
+export type NeedBehaviorAction = BehaviorAction &
+	Omit<
+		NeedBehaviorActionRow,
+		| 'id'
+		| 'scenario_id'
+		| 'need_id'
+		| 'behavior_id'
+		| 'building_id'
+		| 'item_id'
+		| 'character_id'
+		| 'success_need_behavior_action_id'
+		| 'failure_need_behavior_action_id'
+		| 'type'
+		| 'behavior_interact_type'
+		| 'target_selection_method'
+		| 'behavior_completion_type'
+		| 'duration_ticks'
+		| 'root'
+	> & {
+		id: NeedBehaviorActionId;
+		scenario_id: ScenarioId;
+		need_id: NeedId;
+		behavior_id: NeedBehaviorId;
+		building_id: BuildingId | null;
+		item_id: ItemId | null;
+		character_id: CharacterId | null;
+		next_need_behavior_action_id: NeedBehaviorActionId | null;
+	};
 type NeedBehaviorActionInsertRow = TablesInsert<'need_behavior_actions'>;
 export type NeedBehaviorActionInsert = Omit<
 	NeedBehaviorActionInsertRow,

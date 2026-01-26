@@ -3,7 +3,7 @@ import type {
 	EntityTemplateId,
 	EntityType,
 	EntityInstanceId,
-	EntityTemplateIdCandidate,
+	EntityTemplateCandidateId,
 	EntityInstance,
 	WorldId,
 } from '$lib/types';
@@ -125,7 +125,7 @@ export const EntityIdUtils = {
 		 * @example
 		 * EntityIdUtils.template.create('building', buildingId) // "building_{buildingId}"
 		 */
-		create(type: EntityType, id: EntityTemplateIdCandidate): EntityTemplateId {
+		create(type: EntityType, id: EntityTemplateCandidateId): EntityTemplateId {
 			return `${type}_${id}` as EntityTemplateId;
 		},
 
@@ -134,7 +134,7 @@ export const EntityIdUtils = {
 		 * @example
 		 * const { type, value } = EntityIdUtils.template.parse(templateId);
 		 */
-		parse<T extends EntityTemplateIdCandidate | string = string>(
+		parse<T extends EntityTemplateCandidateId | string = string>(
 			templateId: EntityTemplateId
 		): { type: EntityType; value: T } {
 			const parts = templateId.split('_');
@@ -148,7 +148,7 @@ export const EntityIdUtils = {
 		 * @example
 		 * const { type, value } = EntityIdUtils.template.parse(templateId);
 		 */
-		id<T extends EntityTemplateIdCandidate | string = string>(
+		id<T extends EntityTemplateCandidateId | string = string>(
 			entityTemplateId: EntityTemplateId
 		): T {
 			const parts = entityTemplateId.split('_');

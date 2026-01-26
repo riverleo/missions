@@ -538,3 +538,5 @@ export function useBehavior() {
 	}
 	return instance;
 }
+
+export { getInteractableEntityTemplates } from './use-behavior/get-interactable-entity-templates';

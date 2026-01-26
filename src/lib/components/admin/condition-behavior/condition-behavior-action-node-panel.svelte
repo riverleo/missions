@@ -31,7 +31,7 @@
 		DropdownMenuSubContent,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBehavior } from '$lib/hooks/use-behavior';
+	import { useBehavior, getInteractableEntityTemplates } from '$lib/hooks/use-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
@@ -113,6 +113,12 @@
 			return item ? `${item.name} (아이템)` : '아이템 선택';
 		}
 		return '대상을 선택하세요';
+	});
+
+	// 현재 액션의 behavior_interact_type에 따라 검색 가능한 대상
+	const searchableTargets = $derived.by(() => {
+		if (!changes || changes.target_selection_method !== 'search') return [];
+		return getInteractableEntityTemplates(changes);
 	});
 
 	$effect(() => {
@@ -347,6 +353,23 @@
 									</Tooltip>
 								</ButtonGroup>
 							</ButtonGroup>
+						{/if}
+
+						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'search'}
+							<div class="rounded-md border p-3">
+								<div class="mb-2 text-xs font-medium text-muted-foreground">
+									검색 가능한 대상 ({searchableTargets.length})
+								</div>
+								{#if searchableTargets.length > 0}
+									<div class="space-y-1">
+										{#each searchableTargets as target (target.id)}
+											<div class="text-xs">• {target.name}</div>
+										{/each}
+									</div>
+								{:else}
+									<div class="text-xs text-muted-foreground">해당 타입의 대상이 없습니다.</div>
+								{/if}
+							</div>
 						{/if}
 
 						{#if changes.type === 'idle'}
