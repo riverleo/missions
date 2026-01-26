@@ -30,7 +30,7 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBehavior, getInteractableEntityTemplates } from '$lib/hooks/use-behavior';
+	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
@@ -48,7 +48,8 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorStore, needBehaviorActionStore, admin } = useBehavior();
+	const { needBehaviorStore, needBehaviorActionStore, getInteractableEntityTemplates, admin } =
+		useBehavior();
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
 	const { itemStore } = useItem();
