@@ -258,7 +258,8 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select type="single"
+								<Select
+									type="single"
 									value={changes.behavior_interact_type}
 									onValueChange={onBehaviorTypeChange}
 								>
@@ -277,7 +278,8 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>대상찾기</ButtonGroupText>
-								<Select type="single"
+								<Select
+									type="single"
 									value={changes.target_selection_method}
 									onValueChange={onTargetMethodChange}
 								>
@@ -374,7 +376,8 @@
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>완료 조건</ButtonGroupText>
-								<Select type="single"
+								<Select
+									type="single"
 									value={changes.behavior_completion_type}
 									onValueChange={onCompletionTypeChange}
 								>
@@ -391,9 +394,7 @@
 								</Select>
 							</ButtonGroup>
 						{/if}
-					</div>
-
-						{#if changes.type === 'idle' || (changes.type === 'interact' && changes.behavior_completion_type === 'fixed')}
+						{#if (changes.type === 'idle' || changes.type === 'interact') && changes.behavior_completion_type === 'fixed'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
@@ -418,6 +419,8 @@
 								/>
 							</InputGroup>
 						{/if}
+					</div>
+
 					<div class="flex justify-between">
 						<Tooltip>
 							<TooltipTrigger>

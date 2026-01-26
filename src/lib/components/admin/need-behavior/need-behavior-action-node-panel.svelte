@@ -404,8 +404,7 @@
 								</Select>
 							</ButtonGroup>
 						{/if}
-					</div>
-						{#if changes.type === 'idle' || (changes.type === 'interact' && changes.behavior_completion_type === 'fixed')}
+						{#if (changes.type === 'idle' || changes.type === 'interact') && changes.behavior_completion_type === 'fixed'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
@@ -430,6 +429,7 @@
 								/>
 							</InputGroup>
 						{/if}
+					</div>
 
 					<div class="flex justify-between">
 						<Tooltip>
