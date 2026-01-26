@@ -62,7 +62,7 @@
 	const items = $derived(Object.values($itemStore.data));
 
 	// 현재 액션의 behavior_interact_type에 따라 검색 가능한 대상
-	const searchableTargets = $derived.by(() => {
+	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
 		return getInteractableEntityTemplates(changes);
 	});
@@ -303,76 +303,57 @@
 
 						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'explicit'}
 							<ButtonGroup class="w-full">
-								<ButtonGroup class="flex-1">
-									<ButtonGroupText>대상선택</ButtonGroupText>
-									<DropdownMenu>
-										<DropdownMenuTrigger
-											class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-										>
-											{selectedTargetLabel}
-										</DropdownMenuTrigger>
-										<DropdownMenuContent align="start" class="w-56">
-											<DropdownMenuSub>
-												<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
-												<DropdownMenuSubContent>
-													{#each buildings as building (building.id)}
-														<DropdownMenuItem onclick={() => onSelectBuilding(building.id)}>
-															{building.name}
-														</DropdownMenuItem>
-													{/each}
-												</DropdownMenuSubContent>
-											</DropdownMenuSub>
-											<DropdownMenuSub>
-												<DropdownMenuSubTrigger>캐릭터</DropdownMenuSubTrigger>
-												<DropdownMenuSubContent>
-													{#each characters as character (character.id)}
-														<DropdownMenuItem onclick={() => onSelectCharacter(character.id)}>
-															{character.name}
-														</DropdownMenuItem>
-													{/each}
-												</DropdownMenuSubContent>
-											</DropdownMenuSub>
-											<DropdownMenuSub>
-												<DropdownMenuSubTrigger>아이템</DropdownMenuSubTrigger>
-												<DropdownMenuSubContent>
-													{#each items as item (item.id)}
-														<DropdownMenuItem onclick={() => onSelectItem(item.id)}>
-															{item.name}
-														</DropdownMenuItem>
-													{/each}
-												</DropdownMenuSubContent>
-											</DropdownMenuSub>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</ButtonGroup>
-								<ButtonGroup>
-									<Tooltip>
-										<TooltipTrigger>
-											{#snippet child({ props })}
-												<Button {...props} variant="ghost" size="icon" class="rounded-full">
-													<IconInfoCircle class="size-4" />
-												</Button>
-											{/snippet}
-										</TooltipTrigger>
-										<TooltipContent>
-											특정 대상을 반드시 지정해야 합니다. <br />
-											건물, 캐릭터, 아이템 중 하나를 선택하세요.
-										</TooltipContent>
-									</Tooltip>
-								</ButtonGroup>
+								<ButtonGroupText>대상선택</ButtonGroupText>
+								<DropdownMenu>
+									<DropdownMenuTrigger
+										class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+									>
+										{selectedTargetLabel}
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="start" class="w-56">
+										<DropdownMenuSub>
+											<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
+											<DropdownMenuSubContent>
+												{#each buildings as building (building.id)}
+													<DropdownMenuItem onclick={() => onSelectBuilding(building.id)}>
+														{building.name}
+													</DropdownMenuItem>
+												{/each}
+											</DropdownMenuSubContent>
+										</DropdownMenuSub>
+										<DropdownMenuSub>
+											<DropdownMenuSubTrigger>캐릭터</DropdownMenuSubTrigger>
+											<DropdownMenuSubContent>
+												{#each characters as character (character.id)}
+													<DropdownMenuItem onclick={() => onSelectCharacter(character.id)}>
+														{character.name}
+													</DropdownMenuItem>
+												{/each}
+											</DropdownMenuSubContent>
+										</DropdownMenuSub>
+										<DropdownMenuSub>
+											<DropdownMenuSubTrigger>아이템</DropdownMenuSubTrigger>
+											<DropdownMenuSubContent>
+												{#each items as item (item.id)}
+													<DropdownMenuItem onclick={() => onSelectItem(item.id)}>
+														{item.name}
+													</DropdownMenuItem>
+												{/each}
+											</DropdownMenuSubContent>
+										</DropdownMenuSub>
+									</DropdownMenuContent>
+								</DropdownMenu>
 							</ButtonGroup>
 						{/if}
 
 						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'search'}
 							<div class="rounded-md border p-3">
 								<div class="mb-2 text-xs font-medium text-muted-foreground">
-									검색 가능한 대상 ({searchableTargets.length})
+									상호작용이 가능한 대상 ({interactableEntityTemplates.length})
 								</div>
-								{#if searchableTargets.length > 0}
-									<div class="space-y-1">
-										{#each searchableTargets as target (target.id)}
-											<div class="text-xs">• {target.name}</div>
-										{/each}
+								{#if interactableEntityTemplates.length > 0}
+									<div class="text-xs">
+										{interactableEntityTemplates.map(({ name }) => name).join(', ')}
 									</div>
 								{:else}
 									<div class="text-xs text-muted-foreground">해당 타입의 대상이 없습니다.</div>

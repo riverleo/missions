@@ -44,7 +44,8 @@
 	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
 	const { terrainStore } = useTerrain();
-	const { characterStore, characterBodyStore, needStore, characterInteractionStore } = useCharacter();
+	const { characterStore, characterBodyStore, needStore, characterInteractionStore } =
+		useCharacter();
 	const { buildingStore, conditionStore, buildingInteractionStore } = useBuilding();
 	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
 	const { itemStore, itemInteractionStore } = useItem();
@@ -84,7 +85,7 @@
 				: undefined;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
 			const characterName = character ? character.name : '모든 캐릭터';
-			return `${building?.name ?? '건물'}: ${characterName} ${behaviorLabel}`;
+			return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'character-interactions') {
 			const interaction = $characterInteractionStore.data?.[id as CharacterInteractionId];
@@ -95,7 +96,7 @@
 				: undefined;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
 			const characterName = character ? character.name : '모든 캐릭터';
-			return `${targetCharacter?.name ?? '캐릭터'}: ${characterName} ${behaviorLabel}`;
+			return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'item-interactions') {
 			const interaction = $itemInteractionStore.data?.[id as ItemInteractionId];
@@ -106,7 +107,7 @@
 				: undefined;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
 			const characterName = character ? character.name : '모든 캐릭터';
-			return `${item?.name ?? '아이템'}: ${characterName} ${behaviorLabel}`;
+			return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'conditions') {
 			return $conditionStore.data?.[id as ConditionId]?.name;
