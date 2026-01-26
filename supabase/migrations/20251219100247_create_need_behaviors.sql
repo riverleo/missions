@@ -12,7 +12,7 @@ create type behavior_target_selection_method as enum (
   'search_or_continue' -- 액션 시작 시 기존 대상이 있으면 사용, 없으면 탐색
 );
 
--- behavior_completion_type enum (행동 완료 조건)
+-- behavior_completion_type enum (행동 완료)
 create type behavior_completion_type as enum (
   'fixed',       -- 지정된 시간만큼 실행 (기본값)
   'completion',  -- 목표 달성까지 실행 (청소/수리/철거)
@@ -82,7 +82,7 @@ create table need_behavior_actions (
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,
 
-  -- 행동 완료 조건
+  -- 행동 완료
   behavior_completion_type behavior_completion_type not null default 'fixed',
 
   -- 다음 액션

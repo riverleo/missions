@@ -61,7 +61,7 @@ create table condition_behavior_actions (
   -- 지속 시간 (틱 단위, idle 타입에서만 사용)
   duration_ticks float not null default 0,
 
-  -- 행동 완료 조건
+  -- 행동 완료
   behavior_completion_type behavior_completion_type not null default 'fixed',
 
   -- 다음 액션

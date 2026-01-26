@@ -371,6 +371,27 @@
 								{/if}
 							</div>
 						{/if}
+						{#if changes.type === 'interact' || changes.type === 'idle'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>완료 조건</ButtonGroupText>
+								<Select type="single"
+									value={changes.behavior_completion_type}
+									onValueChange={onCompletionTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedCompletionTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each completionTypes as completionType}
+											<SelectItem value={completionType.value}>
+												{completionType.label}
+											</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+					</div>
 
 						{#if changes.type === 'idle' || (changes.type === 'interact' && changes.behavior_completion_type === 'fixed')}
 							<InputGroup>
@@ -397,27 +418,6 @@
 								/>
 							</InputGroup>
 						{/if}
-						{#if changes.type === 'interact' || changes.type === 'idle'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>완료 조건</ButtonGroupText>
-								<Select type="single"
-									value={changes.behavior_completion_type}
-									onValueChange={onCompletionTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedCompletionTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each completionTypes as completionType}
-											<SelectItem value={completionType.value}>
-												{completionType.label}
-											</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
-						{/if}
-					</div>
 					<div class="flex justify-between">
 						<Tooltip>
 							<TooltipTrigger>
