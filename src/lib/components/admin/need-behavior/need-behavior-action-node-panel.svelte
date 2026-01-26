@@ -5,6 +5,7 @@
 		BehaviorActionType,
 		BehaviorTargetSelectionMethod,
 		BehaviorInteractType,
+		BehaviorCompletionType,
 		CharacterId,
 		BuildingId,
 		ItemId,
@@ -77,6 +78,12 @@
 		{ value: 'item_pick', label: '아이템 줍기' },
 	];
 
+	const completionTypes: { value: BehaviorCompletionType; label: string }[] = [
+		{ value: 'fixed', label: '고정 시간' },
+		{ value: 'completion', label: '목표 달성까지' },
+		{ value: 'immediate', label: '즉시 완료' },
+	];
+
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
@@ -85,10 +92,14 @@
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
 	const selectedTargetMethodLabel = $derived(
-		targetMethods.find((t) => t.value === changes?.target_selection_method)?.label ?? '타깃 결정 방법'
+		targetMethods.find((t) => t.value === changes?.target_selection_method)?.label ??
+			'타깃 결정 방법'
 	);
 	const selectedBehaviorTypeLabel = $derived(
 		changes ? getBehaviorInteractTypeLabel(changes.behavior_interact_type) : '행동 타입'
+	);
+	const selectedCompletionTypeLabel = $derived(
+		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '완료 조건'
 	);
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.building_id) {
@@ -134,6 +145,12 @@
 	function onBehaviorTypeChange(value: string | undefined) {
 		if (changes && value) {
 			changes.behavior_interact_type = value as BehaviorInteractType;
+		}
+	}
+
+	function onCompletionTypeChange(value: string | undefined) {
+		if (changes && value) {
+			changes.behavior_completion_type = value as BehaviorCompletionType;
 		}
 	}
 
@@ -193,6 +210,7 @@
 				type: changes.type,
 				behavior_interact_type: changes.behavior_interact_type,
 				target_selection_method: changes.target_selection_method,
+				behavior_completion_type: changes.behavior_completion_type,
 				duration_ticks: changes.duration_ticks,
 				building_id: changes.building_id,
 				character_id: changes.character_id,
@@ -242,8 +260,7 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select
-									type="single"
+								<Select type="single"
 									value={changes.behavior_interact_type}
 									onValueChange={onBehaviorTypeChange}
 								>
@@ -262,8 +279,7 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>대상찾기</ButtonGroupText>
-								<Select
-									type="single"
+								<Select type="single"
 									value={changes.target_selection_method}
 									onValueChange={onTargetMethodChange}
 								>
@@ -361,6 +377,27 @@
 									bind:value={changes.duration_ticks}
 								/>
 							</InputGroup>
+						{/if}
+
+						{#if changes.type === 'interact' || changes.type === 'idle'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>완료 조건</ButtonGroupText>
+								<Select type="single"
+									value={changes.behavior_completion_type}
+									onValueChange={onCompletionTypeChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedCompletionTypeLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each completionTypes as completionType}
+											<SelectItem value={completionType.value}>
+												{completionType.label}
+											</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
 						{/if}
 					</div>
 					<div class="flex justify-between">
