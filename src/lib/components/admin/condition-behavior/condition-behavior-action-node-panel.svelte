@@ -26,9 +26,6 @@
 		DropdownMenuContent,
 		DropdownMenuItem,
 		DropdownMenuTrigger,
-		DropdownMenuSub,
-		DropdownMenuSubTrigger,
-		DropdownMenuSubContent,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useBehavior, getInteractableEntityTemplates } from '$lib/hooks/use-behavior';
@@ -113,6 +110,18 @@
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
 		return getInteractableEntityTemplates(changes);
+	});
+
+	// 현재 액션의 behavior_interact_type에 따라 명시적으로 선택 가능한 대상
+	const explicitTargets = $derived.by(() => {
+		if (!changes) return [];
+		const type = changes.behavior_interact_type;
+		if (type.startsWith('building_')) {
+			return buildings.map((b) => ({ id: b.id, name: b.name, type: 'building' as const }));
+		} else if (type.startsWith('item_')) {
+			return items.map((i) => ({ id: i.id, name: i.name, type: 'item' as const }));
+		}
+		return [];
 	});
 
 	$effect(() => {
@@ -299,36 +308,19 @@
 										{selectedTargetLabel}
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="start" class="w-56">
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>건물</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent>
-												{#each buildings as building (building.id)}
-													<DropdownMenuItem onclick={() => onSelectBuilding(building.id)}>
-														{building.name}
-													</DropdownMenuItem>
-												{/each}
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>캐릭터</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent>
-												{#each characters as character (character.id)}
-													<DropdownMenuItem onclick={() => onSelectCharacter(character.id)}>
-														{character.name}
-													</DropdownMenuItem>
-												{/each}
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
-										<DropdownMenuSub>
-											<DropdownMenuSubTrigger>아이템</DropdownMenuSubTrigger>
-											<DropdownMenuSubContent>
-												{#each items as item (item.id)}
-													<DropdownMenuItem onclick={() => onSelectItem(item.id)}>
-														{item.name}
-													</DropdownMenuItem>
-												{/each}
-											</DropdownMenuSubContent>
-										</DropdownMenuSub>
+										{#each explicitTargets as target (target.id)}
+											<DropdownMenuItem
+												onclick={() => {
+													if (target.type === 'building') {
+														onSelectBuilding(target.id);
+													} else if (target.type === 'item') {
+														onSelectItem(target.id);
+													}
+												}}
+											>
+												{target.name}
+											</DropdownMenuItem>
+										{/each}
 									</DropdownMenuContent>
 								</DropdownMenu>
 							</ButtonGroup>
