@@ -124,7 +124,7 @@
 								<SelectTrigger class="w-32">
 									{selectedItemIds.length > 0
 										? `${selectedItemIds.length}개 선택됨`
-										: '아이템 선택'}
+										: '보관 아이템'}
 								</SelectTrigger>
 								<SelectContent>
 									{#each items as item (item.id)}

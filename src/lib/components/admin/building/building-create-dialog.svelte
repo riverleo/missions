@@ -105,10 +105,10 @@
 					<div class="flex gap-2">
 						<ButtonGroup>
 							<Select type="multiple" value={selectedItemIds} onValueChange={onItemsChange}>
-								<SelectTrigger class="w-40">
+								<SelectTrigger class="w-32">
 									{selectedItemIds.length > 0
 										? `${selectedItemIds.length}개 선택됨`
-										: '보관 아이템 선택'}
+										: '보관 아이템'}
 								</SelectTrigger>
 								<SelectContent>
 									{#each items as item (item.id)}
