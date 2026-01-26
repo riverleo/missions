@@ -69,10 +69,10 @@
 	];
 
 	const behaviorTypes: { value: BehaviorInteractType; label: string }[] = [
-		{ value: 'building_execute', label: '사용' },
-		{ value: 'building_repair', label: '수리' },
-		{ value: 'building_demolish', label: '철거' },
-		{ value: 'building_clean', label: '청소' },
+		{ value: 'building_execute', label: '건물 사용' },
+		{ value: 'building_repair', label: '건물 수리' },
+		{ value: 'building_demolish', label: '건물 철거' },
+		{ value: 'building_clean', label: '건물 청소' },
 		{ value: 'item_pick', label: '아이템 줍기' },
 	];
 
@@ -94,7 +94,7 @@
 			'타깃 결정 방법'
 	);
 	const selectedBehaviorTypeLabel = $derived(
-		changes ? getBehaviorInteractTypeLabel(changes.behavior_interact_type) : '행동 타입'
+		behaviorTypes.find((t) => t.value === changes?.behavior_interact_type)?.label ?? '행동 타입'
 	);
 	const selectedCompletionTypeLabel = $derived(
 		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '완료 조건'
