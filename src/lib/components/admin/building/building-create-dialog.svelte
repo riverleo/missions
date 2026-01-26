@@ -13,19 +13,14 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import {
-		DropdownMenu,
-		DropdownMenuContent,
-		DropdownMenuTrigger,
-	} from '$lib/components/ui/dropdown-menu';
-	import { IconHeading, IconChevronDown } from '@tabler/icons-svelte';
+	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
+	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { ScenarioId, ItemId, BuildingId } from '$lib/types';
+	import type { ScenarioId, ItemId } from '$lib/types';
 
 	const { admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
 	const { itemStore } = useItem();
@@ -36,25 +31,19 @@
 
 	let name = $state('');
 	let itemMaxCapacity = $state('');
-	let selectedItemIds = $state<Set<ItemId>>(new Set());
+	let selectedItemIds = $state<ItemId[]>([]);
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open) {
 			name = '';
 			itemMaxCapacity = '';
-			selectedItemIds = new Set();
+			selectedItemIds = [];
 		}
 	});
 
-	function toggleItem(itemId: ItemId, checked: boolean) {
-		const newSet = new Set(selectedItemIds);
-		if (checked) {
-			newSet.add(itemId);
-		} else {
-			newSet.delete(itemId);
-		}
-		selectedItemIds = newSet;
+	function onItemsChange(value: string[] | undefined) {
+		selectedItemIds = (value ?? []) as ItemId[];
 	}
 
 	function onOpenChange(value: boolean) {
@@ -79,7 +68,7 @@
 
 			// Create building_items for selected items
 			await Promise.all(
-				Array.from(selectedItemIds).map((itemId) =>
+				selectedItemIds.map((itemId) =>
 					admin.createBuildingItem(scenarioId, {
 						building_id: building.id,
 						item_id: itemId,
@@ -112,46 +101,27 @@
 					</InputGroupAddon>
 					<InputGroupInput placeholder="건물 이름" bind:value={name} />
 				</InputGroup>
-{#if items.length > 0}
+				{#if items.length > 0}
 					<div class="flex gap-2">
-						<ButtonGroup class="flex-1">
-							<ButtonGroupText>아이템 선택</ButtonGroupText>
-							<DropdownMenu>
-								<DropdownMenuTrigger
-									class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-								>
-									<span>
-										{selectedItemIds.size > 0
-											? `${selectedItemIds.size}개 선택됨`
-											: '아이템을 선택하세요'}
-									</span>
-									<IconChevronDown class="size-4" />
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="start" class="w-56 max-h-64 overflow-y-auto">
-									<div class="p-2 space-y-2">
-										{#each items as item (item.id)}
-											<label class="flex items-center gap-2 cursor-pointer">
-												<Checkbox
-													checked={selectedItemIds.has(item.id)}
-													onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
-												/>
-												<span class="text-sm">{item.name}</span>
-											</label>
-										{/each}
-									</div>
-								</DropdownMenuContent>
-							</DropdownMenu>
+						<ButtonGroup>
+							<Select type="multiple" value={selectedItemIds} onValueChange={onItemsChange}>
+								<SelectTrigger>
+									{selectedItemIds.length > 0
+										? `${selectedItemIds.length}개 선택됨`
+										: '아이템 선택'}
+								</SelectTrigger>
+								<SelectContent>
+									{#each items as item (item.id)}
+										<SelectItem value={item.id}>{item.name}</SelectItem>
+									{/each}
+								</SelectContent>
+							</Select>
 						</ButtonGroup>
 						<InputGroup class="w-32">
 							<InputGroupAddon align="inline-start">
 								<InputGroupText>최대</InputGroupText>
 							</InputGroupAddon>
-							<InputGroupInput
-								placeholder="0"
-								type="number"
-								min="0"
-								bind:value={itemMaxCapacity}
-							/>
+							<InputGroupInput placeholder="0" type="number" min="0" bind:value={itemMaxCapacity} />
 						</InputGroup>
 					</div>
 				{/if}
