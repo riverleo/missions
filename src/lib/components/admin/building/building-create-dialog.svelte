@@ -105,10 +105,10 @@
 					<div class="flex gap-2">
 						<ButtonGroup>
 							<Select type="multiple" value={selectedItemIds} onValueChange={onItemsChange}>
-								<SelectTrigger>
+								<SelectTrigger class="w-40">
 									{selectedItemIds.length > 0
 										? `${selectedItemIds.length}개 선택됨`
-										: '아이템 선택'}
+										: '보관 아이템 선택'}
 								</SelectTrigger>
 								<SelectContent>
 									{#each items as item (item.id)}
@@ -117,11 +117,11 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
-						<InputGroup class="w-32">
-							<InputGroupAddon align="inline-start">
-								<InputGroupText>최대</InputGroupText>
-							</InputGroupAddon>
+						<InputGroup class="flex-1">
 							<InputGroupInput placeholder="0" type="number" min="0" bind:value={itemMaxCapacity} />
+							<InputGroupAddon align="inline-end">
+								<InputGroupText>개 / 최대</InputGroupText>
+							</InputGroupAddon>
 						</InputGroup>
 					</div>
 				{/if}

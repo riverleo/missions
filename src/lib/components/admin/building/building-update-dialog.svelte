@@ -13,7 +13,7 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
+	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
@@ -119,13 +119,12 @@
 				</InputGroup>
 				{#if items.length > 0}
 					<div class="flex gap-2">
-						<ButtonGroup class="flex-1">
-							<ButtonGroupText>아이템 선택</ButtonGroupText>
+						<ButtonGroup>
 							<Select type="multiple" value={selectedItemIds} onValueChange={onItemsChange}>
-								<SelectTrigger class="flex-1">
+								<SelectTrigger class="w-32">
 									{selectedItemIds.length > 0
 										? `${selectedItemIds.length}개 선택됨`
-										: '아이템을 선택하세요'}
+										: '아이템 선택'}
 								</SelectTrigger>
 								<SelectContent>
 									{#each items as item (item.id)}
@@ -134,11 +133,11 @@
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
-						<InputGroup class="w-32">
-							<InputGroupAddon align="inline-start">
-								<InputGroupText>최대</InputGroupText>
-							</InputGroupAddon>
+						<InputGroup class="flex-1">
 							<InputGroupInput placeholder="0" type="number" min="0" bind:value={itemMaxCapacity} />
+							<InputGroupAddon align="inline-end">
+								<InputGroupText>개 / 최대</InputGroupText>
+							</InputGroupAddon>
 						</InputGroup>
 					</div>
 				{/if}
