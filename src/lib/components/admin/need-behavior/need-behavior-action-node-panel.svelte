@@ -65,9 +65,11 @@
 	});
 
 	// 현재 액션의 behavior_interact_type에 따라 명시적으로 선택 가능한 대상
+	// 지정된 대상(explicit)은 fulfillment 조건 없이 모든 엔티티 선택 가능
 	const explicitTargets = $derived.by(() => {
 		if (!changes) return [];
 		const type = changes.behavior_interact_type;
+
 		if (type.startsWith('building_')) {
 			return buildings.map((b) => ({ id: b.id, name: b.name, type: 'building' as const }));
 		} else if (type.startsWith('item_')) {
@@ -355,7 +357,7 @@
 
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>완료 조건</ButtonGroupText>
+								<ButtonGroupText>완료조건</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.behavior_completion_type}
