@@ -83,7 +83,7 @@
 		await admin.removeItemInteractionAction(actionId, interactionId);
 	}
 
-	function getBehaviorLabel(type: string) {
+	function getBehaviorInteractTypeLabel(type: string) {
 		const labels: Record<string, string> = {
 			demolish: '철거',
 			use: '사용',
@@ -140,7 +140,7 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{getBehaviorLabel(characterBehaviorType)}
+									{getBehaviorInteractTypeLabel(characterBehaviorType)}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>

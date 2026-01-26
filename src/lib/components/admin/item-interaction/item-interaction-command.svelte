@@ -46,7 +46,7 @@
 			.filter((g) => g.interactions.length > 0);
 	});
 
-	function getBehaviorLabel(type: string) {
+	function getBehaviorInteractTypeLabel(type: string) {
 		const labels: Record<string, string> = {
 			demolish: '철거',
 			use: '사용',
@@ -62,7 +62,7 @@
 			? $characterStore.data[interaction.character_id as CharacterId]
 			: undefined;
 
-		const behaviorLabel = getBehaviorLabel(interaction.behavior_interact_type);
+		const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
 		const characterName = character ? character.name : '모든 캐릭터';
 
 		return `${characterName} ${behaviorLabel}`;

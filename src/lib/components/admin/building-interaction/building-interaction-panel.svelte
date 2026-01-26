@@ -20,6 +20,7 @@
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import type {
 		BuildingInteraction,
 		BuildingInteractionId,
@@ -82,16 +83,6 @@
 		await admin.removeBuildingInteractionAction(actionId, interactionId);
 	}
 
-	function getBehaviorLabel(type: string) {
-		const labels: Record<string, string> = {
-			demolish: '철거',
-			use: '사용',
-			repair: '수리',
-			clean: '청소',
-			pick: '줍기',
-		};
-		return labels[type] ?? type;
-	}
 
 	function getBodyStateLabel(type: string) {
 		const labels: Record<string, string> = {
@@ -139,7 +130,7 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{getBehaviorLabel(characterBehaviorType)}
+									{getBehaviorInteractTypeLabel(characterBehaviorType)}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>

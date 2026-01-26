@@ -21,6 +21,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, BuildingId, CharacterId, BuildingInteraction } from '$lib/types';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	const { buildingStore, buildingInteractionStore, openBuildingInteractionDialog } = useBuilding();
 	const { characterStore } = useCharacter();
@@ -41,23 +42,12 @@
 			.filter((g) => g.interactions.length > 0);
 	});
 
-	function getBehaviorLabel(type: string) {
-		const labels: Record<string, string> = {
-			demolish: '철거',
-			use: '사용',
-			repair: '수리',
-			clean: '청소',
-			pick: '줍기',
-		};
-		return labels[type] ?? type;
-	}
-
 	function getInteractionLabel(interaction: BuildingInteraction) {
 		const character = interaction.character_id
 			? $characterStore.data[interaction.character_id as CharacterId]
 			: undefined;
 
-		const behaviorLabel = getBehaviorLabel(interaction.behavior_interact_type);
+		const behaviorLabel = getBehaviorInteractTypeLabel(interaction.behavior_interact_type);
 		const characterName = character ? character.name : '모든 캐릭터';
 
 		return `${characterName} ${behaviorLabel}`;
