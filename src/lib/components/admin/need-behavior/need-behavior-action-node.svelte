@@ -39,7 +39,7 @@
 		}
 		// 명시적 대상이 없을 때 target_selection_method에 따라 레이블 생성
 		if (action.target_selection_method === 'search') {
-			return '새로운 대상 탐색';
+			return '새로운 탐색 대상';
 		}
 		if (action.target_selection_method === 'search_or_continue') {
 			return '기존 선택 대상';
@@ -57,6 +57,13 @@
 		const behaviorLabel = behaviorTypeLabel();
 
 		// 특정 조합에 대한 특별한 라벨
+		if (
+			action.type === 'interact' &&
+			action.target_selection_method === 'search' &&
+			action.behavior_interact_type === 'item_pick'
+		) {
+			return '새로운 탐색 대상 아이템 줍기';
+		}
 		if (
 			action.type === 'interact' &&
 			action.target_selection_method === 'search_or_continue' &&
