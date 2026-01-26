@@ -105,7 +105,8 @@
 		changes ? getBehaviorInteractTypeLabel(changes.behavior_interact_type) : '행동 타입'
 	);
 	const selectedCompletionTypeLabel = $derived(
-		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '완료 조건'
+		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ??
+			'상호작용 완료'
 	);
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.building_id) {
@@ -266,7 +267,8 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select type="single"
+								<Select
+									type="single"
 									value={changes.behavior_interact_type}
 									onValueChange={onBehaviorTypeChange}
 								>
@@ -285,7 +287,8 @@
 						{#if changes.type === 'go' || changes.type === 'interact'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>대상찾기</ButtonGroupText>
-								<Select type="single"
+								<Select
+									type="single"
 									value={changes.target_selection_method}
 									onValueChange={onTargetMethodChange}
 								>
@@ -380,7 +383,7 @@
 							</div>
 						{/if}
 
-						{#if changes.type === 'idle'}
+						{#if changes.type === 'idle' || (changes.type === 'interact' && changes.behavior_completion_type === 'fixed')}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
@@ -388,7 +391,11 @@
 											<InputGroupButton>지속 시간(틱)</InputGroupButton>
 										</TooltipTrigger>
 										<TooltipContent>
-											대기에서만 사용할 수 있습니다. 0이면 즉시 다음 액션으로 넘어갑니다.
+											{#if changes.type === 'idle'}
+												대기 시간을 설정합니다.
+											{:else}
+												고정 시간만큼 상호작용을 실행합니다.
+											{/if}
 										</TooltipContent>
 									</Tooltip>
 								</InputGroupAddon>
@@ -404,8 +411,9 @@
 
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>완료 조건</ButtonGroupText>
-								<Select type="single"
+								<ButtonGroupText>상호작용 완료</ButtonGroupText>
+								<Select
+									type="single"
 									value={changes.behavior_completion_type}
 									onValueChange={onCompletionTypeChange}
 								>

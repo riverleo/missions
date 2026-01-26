@@ -372,7 +372,7 @@
 							</div>
 						{/if}
 
-						{#if changes.type === 'idle'}
+						{#if changes.type === 'idle' || (changes.type === 'interact' && changes.behavior_completion_type === 'fixed')}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
@@ -380,7 +380,11 @@
 											<InputGroupButton>지속 시간(틱)</InputGroupButton>
 										</TooltipTrigger>
 										<TooltipContent>
-											대기에서만 사용할 수 있습니다. 0이면 즉시 다음 액션으로 넘어갑니다.
+											{#if changes.type === 'idle'}
+												대기 시간을 설정합니다.
+											{:else}
+												고정 시간만큼 상호작용을 실행합니다.
+											{/if}
 										</TooltipContent>
 									</Tooltip>
 								</InputGroupAddon>
@@ -393,7 +397,6 @@
 								/>
 							</InputGroup>
 						{/if}
-
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>완료 조건</ButtonGroupText>
