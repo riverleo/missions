@@ -13,27 +13,43 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
+	import { useItem } from '$lib/hooks/use-item';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { ScenarioId } from '$lib/types';
+	import type { ScenarioId, ItemId, BuildingId } from '$lib/types';
 
 	const { admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
+	const { itemStore } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+	const items = $derived(Object.values($itemStore.data));
 
 	const open = $derived($buildingDialogStore?.type === 'create');
 
 	let name = $state('');
 	let itemMaxCapacity = $state('');
+	let selectedItemIds = $state<Set<ItemId>>(new Set());
 	let isSubmitting = $state(false);
 
 	$effect(() => {
 		if (open) {
 			name = '';
 			itemMaxCapacity = '';
+			selectedItemIds = new Set();
 		}
 	});
+
+	function toggleItem(itemId: ItemId, checked: boolean) {
+		const newSet = new Set(selectedItemIds);
+		if (checked) {
+			newSet.add(itemId);
+		} else {
+			newSet.delete(itemId);
+		}
+		selectedItemIds = newSet;
+	}
 
 	function onOpenChange(value: boolean) {
 		if (!value) {
@@ -41,7 +57,7 @@
 		}
 	}
 
-	function onsubmit(e: SubmitEvent) {
+	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!name.trim() || isSubmitting) return;
 
@@ -49,21 +65,29 @@
 
 		const capacity = parseInt(itemMaxCapacity) || 0;
 
-		admin
-			.createBuilding(scenarioId, {
+		try {
+			const building = await admin.createBuilding(scenarioId, {
 				name: name.trim(),
 				item_max_capacity: capacity,
-			})
-			.then((building) => {
-				closeBuildingDialog();
-				goto(`/admin/scenarios/${scenarioId}/buildings/${building.id}`);
-			})
-			.catch((error) => {
-				console.error('Failed to create building:', error);
-			})
-			.finally(() => {
-				isSubmitting = false;
 			});
+
+			// Create building_items for selected items
+			await Promise.all(
+				Array.from(selectedItemIds).map((itemId) =>
+					admin.createBuildingItem(scenarioId, {
+						building_id: building.id,
+						item_id: itemId,
+					})
+				)
+			);
+
+			closeBuildingDialog();
+			goto(`/admin/scenarios/${scenarioId}/buildings/${building.id}`);
+		} catch (error) {
+			console.error('Failed to create building:', error);
+		} finally {
+			isSubmitting = false;
+		}
 	}
 </script>
 
@@ -93,6 +117,22 @@
 						bind:value={itemMaxCapacity}
 					/>
 				</InputGroup>
+				{#if items.length > 0}
+					<div class="rounded-md border p-3">
+						<div class="mb-2 text-sm font-medium">보관 가능한 아이템</div>
+						<div class="flex flex-col gap-2">
+							{#each items as item (item.id)}
+								<label class="flex items-center gap-2">
+									<Checkbox
+										checked={selectedItemIds.has(item.id)}
+										onCheckedChange={(checked) => toggleItem(item.id, checked === true)}
+									/>
+									<span class="text-sm">{item.name}</span>
+								</label>
+							{/each}
+						</div>
+					</div>
+				{/if}
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !name.trim()}>

@@ -5,6 +5,9 @@ import type {
 	Building,
 	BuildingInsert,
 	BuildingUpdate,
+	BuildingItem,
+	BuildingItemInsert,
+	BuildingItemUpdate,
 	BuildingState,
 	BuildingStateInsert,
 	BuildingStateUpdate,
@@ -27,6 +30,7 @@ import type {
 	ConditionEffectInsert,
 	ConditionEffectUpdate,
 	BuildingId,
+	BuildingItemId,
 	BuildingStateId,
 	BuildingInteractionId,
 	BuildingInteractionActionId,
@@ -62,6 +66,11 @@ function createBuildingStore() {
 	const { supabase } = useApp();
 
 	const buildingStore = writable<RecordFetchState<BuildingId, Building>>({
+		status: 'idle',
+		data: {},
+	});
+
+	const buildingItemStore = writable<RecordFetchState<BuildingItemId, BuildingItem>>({
 		status: 'idle',
 		data: {},
 	});
@@ -133,6 +142,7 @@ function createBuildingStore() {
 		}
 
 		buildingStore.update((state) => ({ ...state, status: 'loading' }));
+		buildingItemStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
@@ -142,6 +152,7 @@ function createBuildingStore() {
 		try {
 			const [
 				buildingsResult,
+				buildingItemsResult,
 				interactionsResult,
 				conditionsResult,
 				fulfillmentsResult,
@@ -149,6 +160,7 @@ function createBuildingStore() {
 				effectsResult,
 			] = await Promise.all([
 				supabase.from('buildings').select('*, building_states(*)').order('name'),
+				supabase.from('building_items').select('*'),
 				supabase.from('building_interactions').select('*, building_interaction_actions(*)').order('created_at'),
 				supabase.from('conditions').select('*').order('name'),
 				supabase.from('condition_fulfillments').select('*'),
@@ -157,6 +169,7 @@ function createBuildingStore() {
 			]);
 
 			if (buildingsResult.error) throw buildingsResult.error;
+			if (buildingItemsResult.error) throw buildingItemsResult.error;
 			if (interactionsResult.error) throw interactionsResult.error;
 			if (conditionsResult.error) throw conditionsResult.error;
 			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
@@ -171,6 +184,12 @@ function createBuildingStore() {
 				const { building_states, ...building } = item;
 				buildingRecord[item.id as BuildingId] = building as Building;
 				stateRecord[item.id as BuildingId] = (building_states ?? []) as BuildingState[];
+			}
+
+			// Building items
+			const buildingItemRecord: Record<BuildingItemId, BuildingItem> = {};
+			for (const item of buildingItemsResult.data ?? []) {
+				buildingItemRecord[item.id as BuildingItemId] = item as BuildingItem;
 			}
 
 			// Building interactions and actions
@@ -209,6 +228,7 @@ function createBuildingStore() {
 			}
 
 			buildingStore.set({ status: 'success', data: buildingRecord, error: undefined });
+			buildingItemStore.set({ status: 'success', data: buildingItemRecord, error: undefined });
 			buildingStateStore.set({ status: 'success', data: stateRecord, error: undefined });
 			buildingInteractionStore.set({ status: 'success', data: interactionRecord, error: undefined });
 			buildingInteractionActionStore.set({ status: 'success', data: actionRecord, error: undefined });
@@ -219,6 +239,7 @@ function createBuildingStore() {
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			buildingStore.set({ status: 'error', data: {}, error: err });
+			buildingItemStore.set({ status: 'error', data: {}, error: err });
 			buildingStateStore.set({ status: 'error', data: {}, error: err });
 			buildingInteractionStore.set({ status: 'error', data: {}, error: err });
 			buildingInteractionActionStore.set({ status: 'error', data: {}, error: err });
@@ -315,6 +336,58 @@ function createBuildingStore() {
 			);
 
 			buildingStateStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
+
+		async createBuildingItem(
+			scenarioId: ScenarioId,
+			buildingItem: Omit<BuildingItemInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('building_items')
+				.insert({
+					...buildingItem,
+					scenario_id: scenarioId,
+				})
+				.select('*')
+				.single<BuildingItem>();
+
+			if (error) throw error;
+
+			buildingItemStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as BuildingItemId] = data;
+				})
+			);
+
+			return data;
+		},
+
+		async updateBuildingItem(id: BuildingItemId, buildingItem: BuildingItemUpdate) {
+			const { error } = await supabase.from('building_items').update(buildingItem).eq('id', id);
+
+			if (error) throw error;
+
+			buildingItemStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], buildingItem);
+					}
+				})
+			);
+		},
+
+		async removeBuildingItem(id: BuildingItemId) {
+			const { error } = await supabase.from('building_items').delete().eq('id', id);
+
+			if (error) throw error;
+
+			buildingItemStore.update((state) =>
 				produce(state, (draft) => {
 					if (draft.data) {
 						delete draft.data[id];
@@ -748,6 +821,7 @@ function createBuildingStore() {
 
 	return {
 		buildingStore: buildingStore as Readable<RecordFetchState<BuildingId, Building>>,
+		buildingItemStore: buildingItemStore as Readable<RecordFetchState<BuildingItemId, BuildingItem>>,
 		buildingStateStore: buildingStateStore as Readable<
 			RecordFetchState<BuildingId, BuildingState[]>
 		>,

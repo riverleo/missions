@@ -43,6 +43,7 @@ export type WorldId = Brand<string, 'WorldId'>;
 export type WorldCharacterId = Brand<string, 'WorldCharacterId'>;
 export type WorldCharacterNeedId = Brand<string, 'WorldCharacterNeedId'>;
 export type BuildingId = Brand<string, 'BuildingId'>;
+export type BuildingItemId = Brand<string, 'BuildingItemId'>;
 export type BuildingStateId = Brand<string, 'BuildingStateId'>;
 export type ConditionBehaviorId = Brand<string, 'ConditionBehaviorId'>;
 export type ConditionBehaviorActionId = Brand<string, 'ConditionBehaviorActionId'>;
@@ -866,6 +867,40 @@ type BuildingUpdateRow = TablesUpdate<'buildings'>;
 export type BuildingUpdate = Omit<BuildingUpdateRow, 'id' | 'scenario_id' | 'created_by'> & {
 	id?: BuildingId;
 	scenario_id?: ScenarioId;
+	created_by?: UserRoleId | null;
+};
+
+// Building Item types
+type BuildingItemRow = Tables<'building_items'>;
+export type BuildingItem = Omit<
+	BuildingItemRow,
+	'id' | 'scenario_id' | 'building_id' | 'item_id' | 'created_by'
+> & {
+	id: BuildingItemId;
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	item_id: ItemId;
+	created_by: UserRoleId | null;
+};
+type BuildingItemInsertRow = TablesInsert<'building_items'>;
+export type BuildingItemInsert = Omit<
+	BuildingItemInsertRow,
+	'scenario_id' | 'building_id' | 'item_id' | 'created_by'
+> & {
+	scenario_id: ScenarioId;
+	building_id: BuildingId;
+	item_id: ItemId;
+	created_by?: UserRoleId | null;
+};
+type BuildingItemUpdateRow = TablesUpdate<'building_items'>;
+export type BuildingItemUpdate = Omit<
+	BuildingItemUpdateRow,
+	'id' | 'scenario_id' | 'building_id' | 'item_id' | 'created_by'
+> & {
+	id?: BuildingItemId;
+	scenario_id?: ScenarioId;
+	building_id?: BuildingId;
+	item_id?: ItemId;
 	created_by?: UserRoleId | null;
 };
 
