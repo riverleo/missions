@@ -281,11 +281,29 @@ function checkActionCompletion(
 
 	// INTERACT/IDLE: behavior_completion_type에 따라
 	if (action.behavior_completion_type === 'immediate') {
-		return true; // 즉시 완료
+		// interact 액션의 경우, 타겟과의 거리가 가까울 때만 완료 (실제로 상호작용 완료)
+		if (action.type === 'interact') {
+			if (!entity.currentTargetEntityId) return false;
+			const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+			if (!targetEntity) return false;
+			const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+			return distance < 50;
+		}
+		// idle 액션은 즉시 완료
+		return true;
 	}
 
 	if (action.behavior_completion_type === 'fixed') {
-		// duration_ticks 경과 확인
+		// interact 액션: 타겟에 도착했고 duration_ticks 경과
+		if (action.type === 'interact') {
+			if (!entity.currentTargetEntityId) return false;
+			const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+			if (!targetEntity) return false;
+			const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+			if (distance >= 50) return false; // 아직 도착하지 않음
+			return currentTick - entity.actionStartTick >= action.duration_ticks;
+		}
+		// idle 액션: duration_ticks 경과 확인
 		return currentTick - entity.actionStartTick >= action.duration_ticks;
 	}
 
