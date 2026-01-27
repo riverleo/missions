@@ -57,7 +57,7 @@ create table building_states (
   frame_from integer,
   frame_to integer,
   fps integer,
-  loop loop_mode not null default 'loop',
+  loop loop_type not null default 'loop',
 
   constraint uq_building_states_building_id_type unique (building_id, type)
 );

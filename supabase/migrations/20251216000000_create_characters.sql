@@ -4,18 +4,6 @@ create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump', 'p
 -- character_face_state_type enum
 create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 
--- behavior_interact_type enum (행동 상호작용 종류)
-create type behavior_interact_type as enum (
-  'building_execute',   -- 건물 동작 실행
-  'building_construct', -- 건물 건설
-  'building_demolish',  -- 건물 철거
-  'building_repair',    -- 건물 수리
-  'building_clean',     -- 건물 청소
-  'item_pick',          -- 아이템 줍기
-  'item_use',           -- 아이템 사용
-  'character_hug'       -- 캐릭터 허그
-);
-
 -- once/repeat 타입 분리
 create type once_interaction_type as enum (
   'item_pick',
@@ -31,8 +19,8 @@ create type repeat_interaction_type as enum (
   'character_hug'
 );
 
--- loop_mode enum
-create type loop_mode as enum ('loop', 'once', 'ping-pong', 'ping-pong-once');
+-- loop_type enum
+create type loop_type as enum ('loop', 'once', 'ping-pong', 'ping-pong-once');
 
 -- collider_type enum
 create type collider_type as enum ('circle', 'rectangle');
@@ -88,7 +76,7 @@ create table character_body_states (
   frame_from integer,
   frame_to integer,
   fps integer,
-  loop loop_mode not null default 'loop',
+  loop loop_type not null default 'loop',
   -- 얼굴 렌더링 설정
   character_face_state character_face_state_type,  -- 이 body state일 때 강제할 face state (null이면 현재 감정 따라감)
   in_front boolean not null default false,         -- true면 몸이 앞, 얼굴이 뒤에 렌더링
@@ -170,7 +158,7 @@ create table character_face_states (
   frame_from integer,
   frame_to integer,
   fps integer,
-  loop loop_mode not null default 'loop',
+  loop loop_type not null default 'loop',
   -- 얼굴 위치 offset (캐릭터별, 표정별로 세밀하게 조정)
   offset_x real not null default 0,
   offset_y real not null default 0,

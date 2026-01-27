@@ -48,7 +48,7 @@ create table tile_states (
   frame_from int,
   frame_to int,
   fps int,
-  loop loop_mode not null default 'loop',
+  loop loop_type not null default 'loop',
 
   -- 상태 활성화 조건 (내구도 기반)
   min_durability int not null default 0,

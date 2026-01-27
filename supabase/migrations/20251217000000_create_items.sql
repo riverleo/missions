@@ -54,7 +54,7 @@ create table item_states (
   frame_from integer,
   frame_to integer,
   fps integer,
-  loop loop_mode not null default 'loop',
+  loop loop_type not null default 'loop',
 
   -- 상태 활성화 조건 (내구도 기반)
   min_durability int not null default 0,

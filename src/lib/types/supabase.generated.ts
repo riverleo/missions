@@ -383,7 +383,7 @@ export type Database = {
           frame_from: number | null
           frame_to: number | null
           id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
+          loop: Database["public"]["Enums"]["loop_type"]
           type: Database["public"]["Enums"]["building_state_type"]
         }
         Insert: {
@@ -393,7 +393,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["building_state_type"]
         }
         Update: {
@@ -403,7 +403,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["building_state_type"]
         }
         Relationships: [
@@ -594,7 +594,7 @@ export type Database = {
           frame_to: number | null
           id: string
           in_front: boolean
-          loop: Database["public"]["Enums"]["loop_mode"]
+          loop: Database["public"]["Enums"]["loop_type"]
           type: Database["public"]["Enums"]["character_body_state_type"]
         }
         Insert: {
@@ -608,7 +608,7 @@ export type Database = {
           frame_to?: number | null
           id?: string
           in_front?: boolean
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["character_body_state_type"]
         }
         Update: {
@@ -622,7 +622,7 @@ export type Database = {
           frame_to?: number | null
           id?: string
           in_front?: boolean
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["character_body_state_type"]
         }
         Relationships: [
@@ -643,7 +643,7 @@ export type Database = {
           frame_from: number | null
           frame_to: number | null
           id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
+          loop: Database["public"]["Enums"]["loop_type"]
           offset_x: number
           offset_y: number
           type: Database["public"]["Enums"]["character_face_state_type"]
@@ -655,7 +655,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           offset_x?: number
           offset_y?: number
           type?: Database["public"]["Enums"]["character_face_state_type"]
@@ -667,7 +667,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           offset_x?: number
           offset_y?: number
           type?: Database["public"]["Enums"]["character_face_state_type"]
@@ -1558,7 +1558,7 @@ export type Database = {
           frame_to: number | null
           id: string
           item_id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
+          loop: Database["public"]["Enums"]["loop_type"]
           max_durability: number
           min_durability: number
           type: Database["public"]["Enums"]["item_state_type"]
@@ -1570,7 +1570,7 @@ export type Database = {
           frame_to?: number | null
           id?: string
           item_id: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           max_durability?: number
           min_durability?: number
           type?: Database["public"]["Enums"]["item_state_type"]
@@ -1582,7 +1582,7 @@ export type Database = {
           frame_to?: number | null
           id?: string
           item_id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           max_durability?: number
           min_durability?: number
           type?: Database["public"]["Enums"]["item_state_type"]
@@ -2919,7 +2919,7 @@ export type Database = {
           frame_from: number | null
           frame_to: number | null
           id: string
-          loop: Database["public"]["Enums"]["loop_mode"]
+          loop: Database["public"]["Enums"]["loop_type"]
           max_durability: number
           min_durability: number
           scenario_id: string
@@ -2934,7 +2934,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           max_durability?: number
           min_durability?: number
           scenario_id: string
@@ -2949,7 +2949,7 @@ export type Database = {
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          loop?: Database["public"]["Enums"]["loop_mode"]
+          loop?: Database["public"]["Enums"]["loop_type"]
           max_durability?: number
           min_durability?: number
           scenario_id?: string
@@ -3622,15 +3622,6 @@ export type Database = {
     }
     Enums: {
       behavior_action_type: "go" | "interact" | "fulfill" | "idle"
-      behavior_interact_type:
-        | "building_execute"
-        | "building_construct"
-        | "building_demolish"
-        | "building_repair"
-        | "building_clean"
-        | "item_pick"
-        | "item_use"
-        | "character_hug"
       behavior_target_selection_method:
         | "explicit"
         | "search"
@@ -3642,7 +3633,7 @@ export type Database = {
       condition_fulfillment_type: "character" | "item" | "idle"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       item_state_type: "idle" | "broken"
-      loop_mode: "loop" | "once" | "ping-pong" | "ping-pong-once"
+      loop_type: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_fulfillment_task_condition: "completed" | "created"
       need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
@@ -3794,16 +3785,6 @@ export const Constants = {
   public: {
     Enums: {
       behavior_action_type: ["go", "interact", "fulfill", "idle"],
-      behavior_interact_type: [
-        "building_execute",
-        "building_construct",
-        "building_demolish",
-        "building_repair",
-        "building_clean",
-        "item_pick",
-        "item_use",
-        "character_hug",
-      ],
       behavior_target_selection_method: [
         "explicit",
         "search",
@@ -3816,7 +3797,7 @@ export const Constants = {
       condition_fulfillment_type: ["character", "item", "idle"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       item_state_type: ["idle", "broken"],
-      loop_mode: ["loop", "once", "ping-pong", "ping-pong-once"],
+      loop_type: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_fulfillment_task_condition: ["completed", "created"],
       need_fulfillment_type: ["building", "character", "task", "item", "idle"],
