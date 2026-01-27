@@ -26,7 +26,6 @@ create type once_interaction_type as enum (
 );
 
 create type repeat_interaction_type as enum (
-  'building_execute',
   'building_repair',
   'building_clean',
   'character_hug'

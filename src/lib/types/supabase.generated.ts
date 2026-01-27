@@ -3658,7 +3658,6 @@ export type Database = {
       publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
       repeat_interaction_type:
-        | "building_execute"
         | "building_repair"
         | "building_clean"
         | "character_hug"
@@ -3834,7 +3833,6 @@ export const Constants = {
       publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
       repeat_interaction_type: [
-        "building_execute",
         "building_repair",
         "building_clean",
         "character_hug",

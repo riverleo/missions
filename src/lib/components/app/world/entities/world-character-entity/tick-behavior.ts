@@ -12,7 +12,6 @@ import type { WorldCharacterEntity } from './world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
 import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 
 /**
@@ -238,16 +237,54 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 			entity.currentTargetEntityId = undefined;
 		}
 	} else if (interactType === 'item_use') {
-		// 들고 있는 아이템이 있으면 사용 (즉시 소진)
+		// 들고 있는 아이템 사용
 		if (entity.heldWorldItemIds.length > 0) {
 			const lastHeldItemId = entity.heldWorldItemIds[entity.heldWorldItemIds.length - 1];
 			if (!lastHeldItemId) return;
 
-			// heldWorldItemIds에서 제거
-			entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+			const heldItemEntity = Object.values(entity.worldContext.entities).find(
+				(e) => e.type === 'item' && e.instanceId === lastHeldItemId
+			);
 
-			// worldContext를 통해 worldItem 삭제
-			entity.worldContext.deleteWorldItem(lastHeldItemId);
+			if (heldItemEntity && heldItemEntity.type === 'item') {
+				// behavior_completion_type에 따라 처리
+				if (action.behavior_completion_type === 'immediate') {
+					// 즉시 소비: 아이템 삭제
+					entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+					entity.worldContext.deleteWorldItem(lastHeldItemId);
+				} else if (action.behavior_completion_type === 'fixed') {
+					// 지속 사용: 매 틱마다 durability 감소
+					const { worldItemStore } = useWorld();
+					const worldItem = get(worldItemStore).data[lastHeldItemId];
+
+					if (
+						worldItem &&
+						worldItem.durability_ticks !== undefined &&
+						worldItem.durability_ticks !== null &&
+						worldItem.durability_ticks > 0
+					) {
+						const newDurability = worldItem.durability_ticks - 1;
+
+						// durability 업데이트
+						worldItemStore.update((state) => ({
+							...state,
+							data: {
+								...state.data,
+								[lastHeldItemId]: {
+									...worldItem,
+									durability_ticks: newDurability,
+								},
+							},
+						}));
+
+						// durability가 0이 되면 아이템 삭제
+						if (newDurability === 0) {
+							entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+							entity.worldContext.deleteWorldItem(lastHeldItemId);
+						}
+					}
+				}
+			}
 		}
 	} else if (
 		interactType === 'building_execute' ||
