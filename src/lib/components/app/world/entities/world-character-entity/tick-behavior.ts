@@ -13,6 +13,7 @@ import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
 import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 
 /**
  * 캐릭터의 행동을 tick마다 처리
@@ -138,25 +139,55 @@ function searchTargetAndSetPath(
 			return false;
 		});
 
-		// 가장 가까운 엔티티 선택
+		// 가장 가까운 엔티티 중 경로를 찾을 수 있는 것 선택
 		if (candidateEntities.length > 0) {
-			targetEntity = candidateEntities.reduce((closest, current) => {
-				const distToCurrent = Math.hypot(current.x - entity.x, current.y - entity.y);
-				const distToClosest = Math.hypot(closest.x - entity.x, closest.y - entity.y);
-				return distToCurrent < distToClosest ? current : closest;
+			// 거리순으로 정렬
+			const sortedCandidates = candidateEntities.sort((a, b) => {
+				const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
+				const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+				return distA - distB;
 			});
+
+			// 경로를 찾을 수 있는 첫 번째 타겟 선택
+			for (const candidate of sortedCandidates) {
+				const testPath = entity.worldContext.pathfinder.findPath(
+					vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+					vectorUtils.createVector(candidate.x, candidate.y)
+				);
+				if (testPath.length > 0) {
+					targetEntity = candidate;
+					console.log('[searchTargetAndSetPath] found reachable target:', candidate.id);
+					break;
+				} else {
+					console.log('[searchTargetAndSetPath] candidate unreachable, trying next:', candidate.id);
+				}
+			}
 		}
 	}
 
-	// 대상을 찾았으면 타겟 설정 및 경로 설정
+	// 대상을 찾았으면 경로 확인 후 타겟 설정
 	if (targetEntity) {
-		console.log('[searchTargetAndSetPath] target found:', {
-			targetId: targetEntity.id,
-			targetType: targetEntity.type,
-			targetPosition: { x: targetEntity.x, y: targetEntity.y },
-		});
-		entity.currentTargetEntityId = targetEntity.id as EntityId;
-		entity.moveTo(targetEntity.x, targetEntity.y);
+		// 경로를 찾을 수 있는지 확인
+		const testPath = entity.worldContext.pathfinder.findPath(
+			vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+			vectorUtils.createVector(targetEntity.x, targetEntity.y)
+		);
+
+		if (testPath.length > 0) {
+			console.log('[searchTargetAndSetPath] target found and reachable:', {
+				targetId: targetEntity.id,
+				targetType: targetEntity.type,
+				targetPosition: { x: targetEntity.x, y: targetEntity.y },
+				pathLength: testPath.length,
+			});
+			entity.currentTargetEntityId = targetEntity.id as EntityId;
+			entity.path = testPath;
+		} else {
+			console.log('[searchTargetAndSetPath] target found but unreachable:', {
+				targetId: targetEntity.id,
+				targetType: targetEntity.type,
+			});
+		}
 	} else {
 		console.log('[searchTargetAndSetPath] no target found');
 	}
@@ -200,8 +231,19 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 	if (distance >= 50) {
 		// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
 		if (entity.path.length === 0) {
-			console.log('[executeInteractAction] target too far, setting path again');
-			entity.moveTo(targetEntity.x, targetEntity.y);
+			console.log('[executeInteractAction] target too far, trying to set path again');
+			const testPath = entity.worldContext.pathfinder.findPath(
+				vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+				vectorUtils.createVector(targetEntity.x, targetEntity.y)
+			);
+			if (testPath.length > 0) {
+				entity.path = testPath;
+				console.log('[executeInteractAction] path set, length:', testPath.length);
+			} else {
+				console.log('[executeInteractAction] target unreachable, clearing target');
+				// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
+				entity.currentTargetEntityId = undefined;
+			}
 		}
 		return;
 	}
