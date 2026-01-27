@@ -3,7 +3,9 @@ import type Matter from 'matter-js';
 import type { Database } from './supabase.generated';
 import type {
 	ConditionBehaviorId,
+	ConditionBehaviorActionId,
 	NeedBehaviorId,
+	NeedBehaviorActionId,
 	WorldId,
 	WorldBuildingId,
 	WorldCharacterId,
@@ -53,9 +55,12 @@ export interface AppPayload {
 	user?: User;
 }
 
-// Runtime-only behavior ID: "{behaviorType}_{behaviorId}"
-export type BehaviorId = `need_${NeedBehaviorId}` | `condition_${ConditionBehaviorId}`;
 export type BehaviorType = 'need' | 'condition';
+
+// Runtime-only behavior action ID: "{behaviorType}_{behaviorId}_{actionId}"
+export type BehaviorActionId =
+	| `need_${NeedBehaviorId}_${NeedBehaviorActionId}`
+	| `condition_${ConditionBehaviorId}_${ConditionBehaviorActionId}`;
 
 // ============================================================
 // Entity Types

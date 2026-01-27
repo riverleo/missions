@@ -1,12 +1,16 @@
 import type { BeforeUpdateEvent } from '../context';
-import type { BehaviorId, WorldCharacterId } from '$lib/types';
+import type {
+	WorldCharacterId,
+	NeedBehaviorId,
+	ConditionBehaviorId,
+} from '$lib/types';
 
 export abstract class Behavior {
-	readonly id: BehaviorId;
+	readonly id: NeedBehaviorId | ConditionBehaviorId;
 	abstract readonly type: string;
 	readonly worldCharacterId: WorldCharacterId;
 
-	constructor(id: BehaviorId, worldCharacterId: WorldCharacterId) {
+	constructor(id: NeedBehaviorId | ConditionBehaviorId, worldCharacterId: WorldCharacterId) {
 		this.id = id;
 		this.worldCharacterId = worldCharacterId;
 	}

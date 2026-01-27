@@ -1,7 +1,12 @@
 import { get } from 'svelte/store';
 import { Behavior } from './behavior.svelte';
 import { useWorld } from '$lib/hooks/use-world';
-import type { BehaviorId, WorldCharacterId, WorldItemId } from '$lib/types';
+import type {
+	WorldCharacterId,
+	WorldItemId,
+	NeedBehaviorId,
+	ConditionBehaviorId,
+} from '$lib/types';
 import type { BeforeUpdateEvent } from '../context';
 
 export class PickupItemBehavior extends Behavior {
@@ -11,7 +16,7 @@ export class PickupItemBehavior extends Behavior {
 	private worldHook = useWorld();
 
 	constructor(worldCharacterId: WorldCharacterId) {
-		const id = `pickup-item_${worldCharacterId}` as BehaviorId;
+		const id = `pickup-item_${worldCharacterId}` as NeedBehaviorId | ConditionBehaviorId;
 		super(id, worldCharacterId);
 	}
 

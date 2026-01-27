@@ -1,14 +1,13 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent } from '../../context';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
-import { vectorUtils } from '$lib/utils/vector';
 
 const { Body } = Matter;
 
 /**
  * 경로를 따라 이동
  */
-export function move(entity: WorldCharacterEntity, event: BeforeUpdateEvent): void {
+export function updateMove(entity: WorldCharacterEntity, event: BeforeUpdateEvent): void {
 	if (entity.path.length === 0) {
 		// path가 없으면 dynamic으로 전환 (중력 적용)
 		Body.setStatic(entity.body, false);

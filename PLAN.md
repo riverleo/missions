@@ -13,10 +13,11 @@ WorldCharacterEntity에 행동 시스템을 통합하여 캐릭터가 욕구와 
 
 ### 2. Interactable Entity Templates 필터링
 - ✅ `getInteractableEntityTemplates` 함수 구현
-  - NeedBehaviorAction: `needFulfillmentStore` 사용
+  - NeedBehaviorAction: `needFulfillmentStore`에서 `need_id`와 `fulfillment_type` 기반 필터링
   - ConditionBehaviorAction: `buildingConditionStore`, `conditionFulfillmentStore` 사용
 - ✅ explicit 타깃: 모든 엔티티 선택 가능
 - ✅ search/search_or_continue: fulfillment 기반 필터링
+- ✅ null 값 처리: `building_id`/`item_id`가 null이면 해당 타입의 모든 엔티티 반환
 
 ### 3. useBehavior 훅 리팩토링
 - ✅ `use-behavior.ts` → `use-behavior/` 디렉토리 구조로 변경
@@ -24,6 +25,33 @@ WorldCharacterEntity에 행동 시스템을 통합하여 캐릭터가 욕구와 
 - ✅ `use-behavior.ts`: 실제 구현
 - ✅ `get-interactable-entity-templates.ts`: 헬퍼 함수
 - ✅ `getInteractableEntityTemplates`를 `useBehavior()` 반환값에 포함
+
+### 4. 행동 액션 UI 개선
+- ✅ 대상 선택을 2-depth Select UI로 통합
+  - "새로운 탐색 대상", "기존 선택 대상" 최상위
+  - "지정된 대상" 그룹에 엔티티 목록
+  - DropdownMenu 제거, SelectGroup/SelectLabel 사용
+- ✅ BehaviorCompletionType 라벨 중앙화
+  - `state-label.ts`에 라벨 및 헬퍼 함수 추가
+  - 행동 패널에서 하드코딩 제거
+- ✅ 행동 액션 노드에 completion type 표시
+  - fixed: "N틱 동안" 형식
+  - completion: "목표 달성까지"
+  - immediate: "즉시"
+  - idle 타입도 적용
+- ✅ completion type 선택 제한
+  - 아이템 관련 행동: immediate만 선택 가능
+  - 건물 관련 행동: fixed, completion만 선택 가능
+
+### 5. BehaviorActionId 타입 시스템
+- ✅ `BehaviorActionId` 타입 정의 (`core.ts`)
+  - Format: `"{behaviorType}_{behaviorId}_{actionId}"`
+  - `need_{NeedBehaviorId}_{NeedBehaviorActionId}` | `condition_{ConditionBehaviorId}_{ConditionBehaviorActionId}`
+- ✅ `BehaviorActionIdUtils` 유틸리티 (`behavior-id.ts`)
+  - `create(type, behaviorId, actionId)`: BehaviorActionId 생성
+  - `parse(id)`: type, behaviorId, actionId 추출
+  - `type(id)`, `behaviorId<T>(id)`, `actionId<T>(id)`: 개별 요소 추출 (제네릭 지원)
+  - `is(type, id)`: 타입 확인
 
 ## 다음 작업: WorldCharacterEntity 행동 시스템 통합
 
@@ -46,10 +74,12 @@ class WorldCharacterEntity extends Entity {
 
 ### 구현 단계
 
-#### 1단계: Behavior 인스턴스 관리
-- [ ] `currentBehavior` 상태 추가
+#### 1단계: Behavior Action 관리
+- [ ] `currentBehaviorActionId` 상태 추가 (현재 실행 중인 BehaviorActionId | undefined)
 - [ ] `useBehavior` 훅 통합
-- [ ] `getBehavior()`, `addBehavior()`, `removeBehavior()` 사용
+- [ ] `BehaviorActionIdUtils`를 사용한 ID 파싱 및 관리
+- [ ] 액션 체인 순회 로직 (root action → next_action_id 따라가기)
+- [ ] 행동 완료 시 다음 액션으로 전환
 
 #### 2단계: 행동 우선순위 시스템
 - [ ] `BehaviorPriority` 기반 우선순위 계산
@@ -83,11 +113,11 @@ class WorldCharacterEntity extends Entity {
 - [ ] `duration_ticks` 동안 대기
 - [ ] 애니메이션 상태 업데이트
 
-#### 4단계: beforeUpdate 통합
-- [ ] 매 tick마다 현재 행동 확인
-- [ ] 행동이 없으면 우선순위에 따라 새 행동 선택
-- [ ] 현재 행동 실행 (tick 처리)
-- [ ] 행동 완료 시 다음 액션으로 전환 또는 행동 제거
+#### 4단계: tick 라이프사이클 통합
+- [ ] tick마다 현재 행동 액션 확인
+- [ ] 행동 액션이 없으면 우선순위에 따라 새 행동 선택 (root action부터 시작)
+- [ ] 현재 행동 액션 실행 (tick 처리)
+- [ ] 행동 액션 완료 시 next_action_id로 전환 또는 행동 종료
 
 #### 5단계: 디버깅 및 테스트
 - [ ] 행동 전환 로그 추가

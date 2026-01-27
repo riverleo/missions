@@ -18,8 +18,8 @@ import { useCharacter } from '$lib/hooks/use-character';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
-import { move } from './move';
-import { decreaseNeeds } from './decrease-needs';
+import { updateMove } from './update-move';
+import { tickWorldCharacterNeeds } from './tick-world-character-needs';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -133,11 +133,11 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override update(event: BeforeUpdateEvent): void {
-		move(this, event);
+		updateMove(this, event);
 	}
 
 	tick(tick: number): void {
-		decreaseNeeds(this);
+		tickWorldCharacterNeeds(this, tick);
 	}
 
 	moveTo(targetX: number, targetY: number): void {
