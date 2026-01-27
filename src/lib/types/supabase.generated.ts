@@ -986,7 +986,7 @@ export type Database = {
           next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          target_selection_method: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method: Database["public"]["Enums"]["target_selection_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
@@ -1001,7 +1001,7 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method?: Database["public"]["Enums"]["target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
@@ -1016,7 +1016,7 @@ export type Database = {
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method?: Database["public"]["Enums"]["target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
@@ -1903,7 +1903,7 @@ export type Database = {
           next_need_behavior_action_id: string | null
           root: boolean
           scenario_id: string
-          target_selection_method: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method: Database["public"]["Enums"]["target_selection_method"]
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
@@ -1918,7 +1918,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
-          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method?: Database["public"]["Enums"]["target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
@@ -1933,7 +1933,7 @@ export type Database = {
           next_need_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
-          target_selection_method?: Database["public"]["Enums"]["behavior_target_selection_method"]
+          target_selection_method?: Database["public"]["Enums"]["target_selection_method"]
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Relationships: [
@@ -3622,10 +3622,6 @@ export type Database = {
     }
     Enums: {
       behavior_action_type: "go" | "interact" | "fulfill" | "idle"
-      behavior_target_selection_method:
-        | "explicit"
-        | "search"
-        | "search_or_continue"
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
@@ -3652,6 +3648,7 @@ export type Database = {
         | "building_repair"
         | "building_clean"
         | "character_hug"
+      target_selection_method: "explicit" | "search" | "search_or_continue"
       tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
     }
@@ -3785,11 +3782,6 @@ export const Constants = {
   public: {
     Enums: {
       behavior_action_type: ["go", "interact", "fulfill", "idle"],
-      behavior_target_selection_method: [
-        "explicit",
-        "search",
-        "search_or_continue",
-      ],
       building_state_type: ["idle", "damaged", "planning", "constructing"],
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
@@ -3818,6 +3810,7 @@ export const Constants = {
         "building_clean",
         "character_hug",
       ],
+      target_selection_method: ["explicit", "search", "search_or_continue"],
       tile_state_type: ["idle", "damaged_1", "damaged_2"],
       user_role_type: ["admin"],
     },

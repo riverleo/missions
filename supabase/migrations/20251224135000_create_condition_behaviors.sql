@@ -52,7 +52,7 @@ create table condition_behavior_actions (
   root boolean not null default false,
 
   -- go/interact/fulfill 타입용: 대상 지정
-  target_selection_method behavior_target_selection_method not null default 'search',
+  target_selection_method target_selection_method not null default 'search',
 
   -- fulfill 타입용: Fulfillment 참조 (null이면 자동 탐색)
   condition_fulfillment_id uuid references condition_fulfillments(id) on delete set null,

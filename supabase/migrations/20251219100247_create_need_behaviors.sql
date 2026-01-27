@@ -6,8 +6,8 @@ create type behavior_action_type as enum (
   'idle'        -- 대기
 );
 
--- behavior_target_selection_method enum (타깃 선택 방법)
-create type behavior_target_selection_method as enum (
+-- target_selection_method enum (타깃 선택 방법)
+create type target_selection_method as enum (
   'explicit',          -- 지정된 대상
   'search',            -- 액션 시작 시 새로 탐색
   'search_or_continue' -- 액션 시작 시 기존 대상이 있으면 사용, 없으면 탐색
@@ -68,7 +68,7 @@ create table need_behavior_actions (
   root boolean not null default false,
 
   -- go/interact/fulfill 타입용: 대상 지정
-  target_selection_method behavior_target_selection_method not null default 'search',
+  target_selection_method target_selection_method not null default 'search',
 
   -- fulfill 타입용: Fulfillment 참조 (null이면 자동 탐색)
   need_fulfillment_id uuid references need_fulfillments(id) on delete set null,
