@@ -22,13 +22,14 @@
 	import { IconCircleDashedNumber1, IconInfoCircle } from '@tabler/icons-svelte';
 	import { Separator } from '$lib/components/ui/separator';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import {
-		DropdownMenu,
-		DropdownMenuContent,
-		DropdownMenuItem,
-		DropdownMenuTrigger,
-	} from '$lib/components/ui/dropdown-menu';
+		Select,
+		SelectTrigger,
+		SelectContent,
+		SelectItem,
+		SelectGroup,
+		SelectLabel,
+	} from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { useBuilding } from '$lib/hooks/use-building';
@@ -85,12 +86,6 @@
 		{ value: 'idle', label: '대기' },
 	];
 
-	const targetMethods: { value: BehaviorTargetSelectionMethod; label: string }[] = [
-		{ value: 'explicit', label: '지정된 대상' },
-		{ value: 'search', label: '새로운 탐색 대상' },
-		{ value: 'search_or_continue', label: '기존 선택 대상' },
-	];
-
 	const behaviorTypes = getBehaviorInteractTypeOptions();
 
 	const completionTypes: { value: BehaviorCompletionType; label: string }[] = [
@@ -106,10 +101,27 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
-	const selectedTargetMethodLabel = $derived(
-		targetMethods.find((t) => t.value === changes?.target_selection_method)?.label ??
-			'타깃 결정 방법'
-	);
+	const selectedTargetMethodLabel = $derived.by(() => {
+		if (!changes) return '타깃 결정 방법';
+
+		if (changes.target_selection_method === 'search') return '새로운 탐색 대상';
+		if (changes.target_selection_method === 'search_or_continue') return '기존 선택 대상';
+
+		// explicit인 경우 선택된 엔티티 이름 표시
+		if (changes.target_selection_method === 'explicit') {
+			if (changes?.building_id) {
+				const building = buildings.find((b) => b.id === changes?.building_id);
+				return building ? building.name : '지정된 대상';
+			}
+			if (changes?.item_id) {
+				const item = items.find((i) => i.id === changes?.item_id);
+				return item ? item.name : '지정된 대상';
+			}
+			return '지정된 대상';
+		}
+
+		return '타깃 결정 방법';
+	});
 	const selectedBehaviorTypeLabel = $derived(
 		behaviorTypes.find((t) => t.value === changes?.behavior_interact_type)?.label ?? '행동 타입'
 	);
@@ -117,20 +129,20 @@
 		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ??
 			'상호작용 완료'
 	);
-	const selectedTargetLabel = $derived.by(() => {
-		if (changes?.building_id) {
-			const building = buildings.find((b) => b.id === changes?.building_id);
-			return building ? `${building.name} (건물)` : '건물 선택';
+	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
+	const selectedTargetValue = $derived.by(() => {
+		if (!changes) return undefined;
+
+		if (changes.target_selection_method === 'search') return 'search';
+		if (changes.target_selection_method === 'search_or_continue') return 'search_or_continue';
+
+		// explicit인 경우
+		if (changes.target_selection_method === 'explicit') {
+			if (changes.building_id) return `explicit:building:${changes.building_id}`;
+			if (changes.item_id) return `explicit:item:${changes.item_id}`;
 		}
-		if (changes?.character_id) {
-			const character = characters.find((c) => c.id === changes?.character_id);
-			return character ? `${character.name} (캐릭터)` : '캐릭터 선택';
-		}
-		if (changes?.item_id) {
-			const item = items.find((i) => i.id === changes?.item_id);
-			return item ? `${item.name} (아이템)` : '아이템 선택';
-		}
-		return '대상을 선택하세요';
+
+		return undefined;
 	});
 
 	$effect(() => {
@@ -147,14 +159,30 @@
 	}
 
 	function onTargetMethodChange(value: string | undefined) {
-		if (changes && value) {
+		if (!changes || !value) return;
+
+		// "explicit:building:id" 또는 "search" 형식 파싱
+		if (value.startsWith('explicit:')) {
+			const parts = value.split(':');
+			const entityType = parts[1];
+			const entityId = parts[2];
+
+			changes.target_selection_method = 'explicit';
+			changes.building_id = null;
+			changes.character_id = null;
+			changes.item_id = null;
+
+			if (entityType === 'building' && entityId) {
+				changes.building_id = entityId as BuildingId;
+			} else if (entityType === 'item' && entityId) {
+				changes.item_id = entityId as ItemId;
+			}
+		} else {
 			changes.target_selection_method = value as BehaviorTargetSelectionMethod;
 			// search 모드로 변경 시 명시적 타깃 제거
-			if (value === 'search') {
-				changes.building_id = null;
-				changes.character_id = null;
-				changes.item_id = null;
-			}
+			changes.building_id = null;
+			changes.character_id = null;
+			changes.item_id = null;
 		}
 	}
 
@@ -167,38 +195,6 @@
 	function onCompletionTypeChange(value: string | undefined) {
 		if (changes && value) {
 			changes.behavior_completion_type = value as BehaviorCompletionType;
-		}
-	}
-
-	function onSelectBuilding(buildingId: string) {
-		if (changes) {
-			changes.building_id = buildingId as BuildingId;
-			changes.character_id = null;
-			changes.item_id = null;
-		}
-	}
-
-	function onSelectCharacter(characterId: string) {
-		if (changes) {
-			changes.character_id = characterId as CharacterId;
-			changes.building_id = null;
-			changes.item_id = null;
-		}
-	}
-
-	function onSelectItem(itemId: string) {
-		if (changes) {
-			changes.item_id = itemId as ItemId;
-			changes.building_id = null;
-			changes.character_id = null;
-		}
-	}
-
-	function onSelectAutoTarget() {
-		if (changes) {
-			changes.building_id = null;
-			changes.character_id = null;
-			changes.item_id = null;
 		}
 	}
 
@@ -298,54 +294,31 @@
 								<ButtonGroupText>대상</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.target_selection_method}
+									value={selectedTargetValue}
 									onValueChange={onTargetMethodChange}
 								>
 									<SelectTrigger class="flex-1">
 										{selectedTargetMethodLabel}
 									</SelectTrigger>
 									<SelectContent>
-										{#each targetMethods as method (method.value)}
-											<SelectItem value={method.value}>{method.label}</SelectItem>
-										{/each}
+										<SelectItem value="search">새로운 탐색 대상</SelectItem>
+										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
+
+										<SelectGroup>
+											<SelectLabel>지정된 대상</SelectLabel>
+											{#each explicitTargets as target (target.id)}
+												<SelectItem value={`explicit:${target.type}:${target.id}`}>
+													{target.name}
+												</SelectItem>
+											{/each}
+										</SelectGroup>
 									</SelectContent>
 								</Select>
 							</ButtonGroup>
 						{/if}
 
-						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'explicit'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상선택</ButtonGroupText>
-								<DropdownMenu>
-									<DropdownMenuTrigger
-										class="flex h-9 flex-1 items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm"
-									>
-										{selectedTargetLabel}
-									</DropdownMenuTrigger>
-									<DropdownMenuContent align="start" class="w-56">
-										{#each explicitTargets as target (target.id)}
-											<DropdownMenuItem
-												onclick={() => {
-													if (target.type === 'building') {
-														onSelectBuilding(target.id);
-													} else if (target.type === 'item') {
-														onSelectItem(target.id);
-													}
-												}}
-											>
-												{target.name}
-											</DropdownMenuItem>
-										{/each}
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</ButtonGroup>
-						{/if}
-
 						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'search'}
-							<div class="rounded-md border p-3">
-								<div class="mb-2 text-xs font-medium text-muted-foreground">
-									상호작용이 가능한 대상 ({interactableEntityTemplates.length})
-								</div>
+							<div class="px-2 text-right text-xs">
 								{#if interactableEntityTemplates.length > 0}
 									<div class="text-xs">
 										{interactableEntityTemplates.map(({ name }) => name).join(', ')}
@@ -358,7 +331,7 @@
 
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>완료조건</ButtonGroupText>
+								<ButtonGroupText>완료</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.behavior_completion_type}
