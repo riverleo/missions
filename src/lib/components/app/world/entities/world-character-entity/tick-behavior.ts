@@ -194,10 +194,15 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 		targetType: targetEntity.type,
 		distance,
 		threshold: 50,
+		pathLength: entity.path.length,
 	});
 
 	if (distance >= 50) {
-		// 아직 도착하지 않았으면 대기
+		// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
+		if (entity.path.length === 0) {
+			console.log('[executeInteractAction] target too far, setting path again');
+			entity.moveTo(targetEntity.x, targetEntity.y);
+		}
 		return;
 	}
 
