@@ -3,6 +3,7 @@
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useWorld } from '$lib/hooks/use-world';
+	import { useItem } from '$lib/hooks/use-item';
 
 	interface Props {
 		entity: WorldCharacterEntity;
@@ -11,7 +12,8 @@
 	let { entity }: Props = $props();
 
 	const { characterStore, characterBodyStore } = useCharacter();
-	const { worldCharacterStore, selectedEntityIdStore } = useWorld();
+	const { worldCharacterStore, worldItemStore, selectedEntityIdStore } = useWorld();
+	const { itemStore, itemStateStore } = useItem();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(
@@ -21,6 +23,25 @@
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
 	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
+
+	// 캐릭터가 들고 있는 마지막 아이템의 상태 가져오기
+	const heldItemState = $derived.by(() => {
+		if (entity.heldWorldItemIds.length === 0) return undefined;
+
+		const lastHeldItemId = entity.heldWorldItemIds[entity.heldWorldItemIds.length - 1];
+		if (!lastHeldItemId) return undefined;
+
+		const worldItem = $worldItemStore.data[lastHeldItemId];
+		if (!worldItem) return undefined;
+
+		const item = $itemStore.data[worldItem.item_id];
+		if (!item) return undefined;
+
+		const itemStates = $itemStateStore.data[item.id] ?? [];
+		const itemState = itemStates.find((s) => s.type === 'idle');
+
+		return itemState;
+	});
 
 	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
 	const pathString = $derived.by(() => {
@@ -48,6 +69,7 @@
 		characterId={character.id}
 		bodyStateType="idle"
 		faceStateType="idle"
+		{heldItemState}
 		flip={entity.direction === 'right'}
 		{selected}
 		class="absolute -translate-x-1/2 -translate-y-1/2"
