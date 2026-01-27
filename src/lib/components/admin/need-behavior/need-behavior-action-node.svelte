@@ -3,7 +3,10 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import {
+		getBehaviorInteractTypeLabel,
+		getBehaviorCompletionTypeLabel,
+	} from '$lib/utils/state-label';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
@@ -66,6 +69,11 @@
 			return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
 		}
 		if (action.type === 'interact') {
+			const completionLabel =
+				action.behavior_completion_type === 'fixed'
+					? `${action.duration_ticks}틱 동안`
+					: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
+
 			// target_selection_method에 따른 라벨인 경우 단순 조합
 			if (
 				behaviorLabel &&
@@ -73,19 +81,23 @@
 				(action.target_selection_method === 'search' ||
 					action.target_selection_method === 'search_or_continue')
 			) {
-				return `${target} ${behaviorLabel}`;
+				return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
 			}
 			// 명시적 대상이 지정된 경우
 			if (behaviorLabel && target) {
-				return `${josa(target, '을를')} ${behaviorLabel}`;
+				return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
 			}
 			if (behaviorLabel) {
-				return `${behaviorLabel}`;
+				return `${completionLabel} ${behaviorLabel}`;
 			}
 			return target ? `${josa(target, '와과')} 상호작용` : '자동 상호작용';
 		}
 		if (action.type === 'idle') {
-			return `대기 ${action.duration_ticks}틱`;
+			const completionLabel =
+				action.behavior_completion_type === 'fixed'
+					? `${action.duration_ticks}틱 동안`
+					: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
+			return `${completionLabel} 대기`;
 		}
 		return action.type;
 	});

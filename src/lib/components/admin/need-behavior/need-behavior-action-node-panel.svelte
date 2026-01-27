@@ -337,7 +337,12 @@
 									</SelectTrigger>
 									<SelectContent>
 										{#each completionTypes as completionType}
-											<SelectItem value={completionType.value}>
+											<SelectItem
+												value={completionType.value}
+												disabled={changes.behavior_interact_type.startsWith('item_')
+													? completionType.value !== 'immediate'
+													: completionType.value === 'immediate'}
+											>
 												{completionType.label}
 											</SelectItem>
 										{/each}
