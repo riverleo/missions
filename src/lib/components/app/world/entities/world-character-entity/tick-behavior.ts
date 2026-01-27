@@ -40,9 +40,18 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
+		console.log('[tickBehavior] action not found:', entity.currentBehaviorActionId);
 		entity.currentBehaviorActionId = undefined;
 		return;
 	}
+
+	console.log('[tickBehavior]', {
+		entity: entity.id.split('-')[0],
+		actionType: action.type,
+		behaviorInteractType: action.behavior_interact_type,
+		pathLength: entity.path.length,
+		targetEntityId: entity.currentTargetEntityId,
+	});
 
 	// 1. Search: path가 없고 타겟이 없으면 대상 탐색 및 경로 설정
 	if (
@@ -50,6 +59,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 		entity.path.length === 0 &&
 		!entity.currentTargetEntityId
 	) {
+		console.log('[tickBehavior] searching target...');
 		searchTargetAndSetPath(entity, action);
 		return; // 경로 설정 후 다음 tick에서 실행
 	}
@@ -86,6 +96,12 @@ function searchTargetAndSetPath(
 	const { getInteractableEntityTemplates } = useBehavior();
 	const { worldBuildingStore, worldItemStore } = useWorld();
 	const worldEntities = Object.values(entity.worldContext.entities);
+
+	console.log('[searchTargetAndSetPath]', {
+		targetSelectionMethod: action.target_selection_method,
+		behaviorInteractType: action.behavior_interact_type,
+		worldEntitiesCount: worldEntities.length,
+	});
 
 	let targetEntity: any = undefined;
 
@@ -134,8 +150,15 @@ function searchTargetAndSetPath(
 
 	// 대상을 찾았으면 타겟 설정 및 경로 설정
 	if (targetEntity) {
+		console.log('[searchTargetAndSetPath] target found:', {
+			targetId: targetEntity.id,
+			targetType: targetEntity.type,
+			targetPosition: { x: targetEntity.x, y: targetEntity.y },
+		});
 		entity.currentTargetEntityId = targetEntity.id as EntityId;
 		entity.moveTo(targetEntity.x, targetEntity.y);
+	} else {
+		console.log('[searchTargetAndSetPath] no target found');
 	}
 }
 
@@ -151,11 +174,15 @@ function executeGoAction(entity: WorldCharacterEntity, action: any): void {
  * INTERACT 행동 실행 (상호작용)
  */
 function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
-	if (!entity.currentTargetEntityId) return;
+	if (!entity.currentTargetEntityId) {
+		console.log('[executeInteractAction] no target entity id');
+		return;
+	}
 
 	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
 	if (!targetEntity) {
 		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
+		console.log('[executeInteractAction] target entity disappeared');
 		entity.currentTargetEntityId = undefined;
 		entity.path = [];
 		return;
@@ -163,25 +190,37 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 
 	// 타겟과의 거리 확인 (임계값: 50)
 	const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+	console.log('[executeInteractAction]', {
+		targetType: targetEntity.type,
+		distance,
+		threshold: 50,
+	});
+
 	if (distance >= 50) {
 		// 아직 도착하지 않았으면 대기
 		return;
 	}
 
 	const interactType = action.behavior_interact_type;
+	console.log('[executeInteractAction] interacting:', interactType);
 
 	if (interactType === 'item_pick') {
+		console.log('[executeInteractAction] item_pick - targetEntity.type:', targetEntity.type);
 		if (targetEntity.type === 'item') {
 			const { worldItemStore } = useWorld();
 			const worldItemId = targetEntity.instanceId as WorldItemId;
 
+			console.log('[executeInteractAction] picking up item:', worldItemId);
+
 			// 아이템 줍기: heldWorldItemIds에 추가
 			if (!entity.heldWorldItemIds.includes(worldItemId)) {
 				entity.heldWorldItemIds.push(worldItemId);
+				console.log('[executeInteractAction] added to heldWorldItemIds');
 			}
 
 			// 바디만 월드에서 제거 (엔티티는 삭제 X)
 			targetEntity.removeFromWorld();
+			console.log('[executeInteractAction] removed from world');
 
 			// worldItem.world_character_id 업데이트
 			const worldItem = get(worldItemStore).data[worldItemId];
@@ -197,10 +236,12 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 						},
 					},
 				}));
+				console.log('[executeInteractAction] updated worldItem ownership');
 			}
 
 			// 타겟 클리어
 			entity.currentTargetEntityId = undefined;
+			console.log('[executeInteractAction] item pick completed');
 		}
 	} else if (interactType === 'item_use') {
 		// TODO: heldWorldItemIds에서 아이템 사용
