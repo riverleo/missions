@@ -10,8 +10,6 @@ export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 
 		// durability가 0이 되면 아이템 삭제
 		if (entity.durabilityTicks === 0) {
-			console.log('[decreaseDurabilityTicks] durability reached 0, deleting item:', entity.instanceId);
-
 			const { worldItemStore } = useWorld();
 			const worldItem = get(worldItemStore).data[entity.instanceId];
 
@@ -26,7 +24,6 @@ export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 					const index = characterEntity.heldWorldItemIds.indexOf(entity.instanceId);
 					if (index !== -1) {
 						characterEntity.heldWorldItemIds.splice(index, 1);
-						console.log('[decreaseDurabilityTicks] removed from character heldWorldItemIds');
 					}
 				}
 			}

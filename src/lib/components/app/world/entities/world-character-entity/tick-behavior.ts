@@ -41,18 +41,9 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
-		console.log('[tickBehavior] action not found:', entity.currentBehaviorActionId);
 		entity.currentBehaviorActionId = undefined;
 		return;
 	}
-
-	console.log('[tickBehavior]', {
-		entity: entity.id.split('-')[0],
-		actionType: action.type,
-		behaviorInteractType: action.behavior_interact_type,
-		pathLength: entity.path.length,
-		targetEntityId: entity.currentTargetEntityId,
-	});
 
 	// 1. Search: path가 없고 타겟이 없으면 대상 탐색 및 경로 설정
 	if (
@@ -60,7 +51,6 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 		entity.path.length === 0 &&
 		!entity.currentTargetEntityId
 	) {
-		console.log('[tickBehavior] searching target...');
 		searchTargetAndSetPath(entity, action);
 		return; // 경로 설정 후 다음 tick에서 실행
 	}
@@ -97,12 +87,6 @@ function searchTargetAndSetPath(
 	const { getInteractableEntityTemplates } = useBehavior();
 	const { worldBuildingStore, worldItemStore } = useWorld();
 	const worldEntities = Object.values(entity.worldContext.entities);
-
-	console.log('[searchTargetAndSetPath]', {
-		targetSelectionMethod: action.target_selection_method,
-		behaviorInteractType: action.behavior_interact_type,
-		worldEntitiesCount: worldEntities.length,
-	});
 
 	let targetEntity: any = undefined;
 
@@ -156,10 +140,7 @@ function searchTargetAndSetPath(
 				);
 				if (testPath.length > 0) {
 					targetEntity = candidate;
-					console.log('[searchTargetAndSetPath] found reachable target:', candidate.id);
 					break;
-				} else {
-					console.log('[searchTargetAndSetPath] candidate unreachable, trying next:', candidate.id);
 				}
 			}
 		}
@@ -174,22 +155,9 @@ function searchTargetAndSetPath(
 		);
 
 		if (testPath.length > 0) {
-			console.log('[searchTargetAndSetPath] target found and reachable:', {
-				targetId: targetEntity.id,
-				targetType: targetEntity.type,
-				targetPosition: { x: targetEntity.x, y: targetEntity.y },
-				pathLength: testPath.length,
-			});
 			entity.currentTargetEntityId = targetEntity.id as EntityId;
 			entity.path = testPath;
-		} else {
-			console.log('[searchTargetAndSetPath] target found but unreachable:', {
-				targetId: targetEntity.id,
-				targetType: targetEntity.type,
-			});
 		}
-	} else {
-		console.log('[searchTargetAndSetPath] no target found');
 	}
 }
 
@@ -205,15 +173,11 @@ function executeGoAction(entity: WorldCharacterEntity, action: any): void {
  * INTERACT 행동 실행 (상호작용)
  */
 function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
-	if (!entity.currentTargetEntityId) {
-		console.log('[executeInteractAction] no target entity id');
-		return;
-	}
+	if (!entity.currentTargetEntityId) return;
 
 	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
 	if (!targetEntity) {
 		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-		console.log('[executeInteractAction] target entity disappeared');
 		entity.currentTargetEntityId = undefined;
 		entity.path = [];
 		return;
@@ -221,26 +185,17 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 
 	// 타겟과의 거리 확인 (임계값: 50)
 	const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
-	console.log('[executeInteractAction]', {
-		targetType: targetEntity.type,
-		distance,
-		threshold: 50,
-		pathLength: entity.path.length,
-	});
 
 	if (distance >= 50) {
 		// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
 		if (entity.path.length === 0) {
-			console.log('[executeInteractAction] target too far, trying to set path again');
 			const testPath = entity.worldContext.pathfinder.findPath(
 				vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
 				vectorUtils.createVector(targetEntity.x, targetEntity.y)
 			);
 			if (testPath.length > 0) {
 				entity.path = testPath;
-				console.log('[executeInteractAction] path set, length:', testPath.length);
 			} else {
-				console.log('[executeInteractAction] target unreachable, clearing target');
 				// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
 				entity.currentTargetEntityId = undefined;
 			}
@@ -249,25 +204,19 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 	}
 
 	const interactType = action.behavior_interact_type;
-	console.log('[executeInteractAction] interacting:', interactType);
 
 	if (interactType === 'item_pick') {
-		console.log('[executeInteractAction] item_pick - targetEntity.type:', targetEntity.type);
 		if (targetEntity.type === 'item') {
 			const { worldItemStore } = useWorld();
 			const worldItemId = targetEntity.instanceId as WorldItemId;
 
-			console.log('[executeInteractAction] picking up item:', worldItemId);
-
 			// 아이템 줍기: heldWorldItemIds에 추가
 			if (!entity.heldWorldItemIds.includes(worldItemId)) {
 				entity.heldWorldItemIds.push(worldItemId);
-				console.log('[executeInteractAction] added to heldWorldItemIds');
 			}
 
 			// 바디만 월드에서 제거 (엔티티는 삭제 X)
 			targetEntity.removeFromWorld();
-			console.log('[executeInteractAction] removed from world');
 
 			// worldItem.world_character_id 업데이트
 			const worldItem = get(worldItemStore).data[worldItemId];
@@ -283,32 +232,22 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 						},
 					},
 				}));
-				console.log('[executeInteractAction] updated worldItem ownership');
 			}
 
 			// 타겟 클리어
 			entity.currentTargetEntityId = undefined;
-			console.log('[executeInteractAction] item pick completed');
 		}
 	} else if (interactType === 'item_use') {
-		console.log('[executeInteractAction] item_use');
-
 		// 들고 있는 아이템이 있으면 사용 (즉시 소진)
 		if (entity.heldWorldItemIds.length > 0) {
 			const lastHeldItemId = entity.heldWorldItemIds[entity.heldWorldItemIds.length - 1];
 			if (!lastHeldItemId) return;
-
-			console.log('[executeInteractAction] using and consuming held item:', lastHeldItemId);
 
 			// heldWorldItemIds에서 제거
 			entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
 
 			// worldContext를 통해 worldItem 삭제
 			entity.worldContext.deleteWorldItem(lastHeldItemId);
-
-			console.log('[executeInteractAction] item consumed and removed');
-		} else {
-			console.log('[executeInteractAction] no held items to use');
 		}
 	} else if (
 		interactType === 'building_execute' ||
@@ -425,18 +364,8 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 		behaviorPriorityStore,
 	} = useBehavior();
 
-	const allNeedBehaviors = Object.values(get(needBehaviorStore).data);
-	const allNeedBehaviorActions = Object.values(get(needBehaviorActionStore).data);
-
-	console.log('[selectNewBehavior]', {
-		entity: entity.id,
-		allNeedBehaviors: allNeedBehaviors.length,
-		allNeedBehaviorActions: allNeedBehaviorActions.length,
-		needs: entity.worldCharacterNeeds,
-	});
-
 	// 1. 후보 need behaviors 찾기 (threshold 이하인 욕구)
-	const candidateNeedBehaviors = allNeedBehaviors.filter((behavior) => {
+	const candidateNeedBehaviors = Object.values(get(needBehaviorStore).data).filter((behavior) => {
 		const need = entity.worldCharacterNeeds[behavior.need_id];
 		if (!need) return false;
 
@@ -462,12 +391,6 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 			behaviorId: behavior.id,
 		})),
 	];
-
-	console.log('[selectNewBehavior] candidates:', {
-		needBehaviors: candidateNeedBehaviors.length,
-		conditionBehaviors: candidateConditionBehaviors.length,
-		total: allCandidates.length,
-	});
 
 	if (allCandidates.length === 0) {
 		// 후보가 없으면 종료
@@ -521,10 +444,4 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 		rootAction.id
 	);
 	entity.actionStartTick = tick;
-
-	console.log('[selectNewBehavior] selected:', {
-		behaviorId: selected.behaviorId,
-		actionId: rootAction.id,
-		currentBehaviorActionId: entity.currentBehaviorActionId,
-	});
 }
