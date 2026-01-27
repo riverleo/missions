@@ -291,8 +291,25 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 			console.log('[executeInteractAction] item pick completed');
 		}
 	} else if (interactType === 'item_use') {
-		// TODO: heldWorldItemIds에서 아이템 사용
-		// 아이템 사용 로직은 아이템 타입에 따라 다름
+		console.log('[executeInteractAction] item_use');
+
+		// 들고 있는 아이템이 있으면 사용 (즉시 소진)
+		if (entity.heldWorldItemIds.length > 0) {
+			const lastHeldItemId = entity.heldWorldItemIds[entity.heldWorldItemIds.length - 1];
+			if (!lastHeldItemId) return;
+
+			console.log('[executeInteractAction] using and consuming held item:', lastHeldItemId);
+
+			// heldWorldItemIds에서 제거
+			entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+
+			// worldContext를 통해 worldItem 삭제
+			entity.worldContext.deleteWorldItem(lastHeldItemId);
+
+			console.log('[executeInteractAction] item consumed and removed');
+		} else {
+			console.log('[executeInteractAction] no held items to use');
+		}
 	} else if (
 		interactType === 'building_execute' ||
 		interactType === 'building_repair' ||
