@@ -1,0 +1,349 @@
+import { get } from 'svelte/store';
+import type {
+	NeedBehaviorActionId,
+	ConditionBehaviorActionId,
+	NeedBehaviorId,
+	ConditionBehaviorId,
+	ConditionBehavior,
+} from '$lib/types';
+import type { WorldCharacterEntity } from './world-character-entity.svelte';
+import { useBehavior } from '$lib/hooks/use-behavior';
+import { useWorld } from '$lib/hooks/use-world';
+import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+
+/**
+ * 캐릭터의 행동을 tick마다 처리
+ */
+export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
+	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
+
+	// 현재 행동 액션이 없으면 새로운 행동 선택
+	if (!entity.currentBehaviorActionId) {
+		selectNewBehavior(entity, tick);
+		return;
+	}
+
+	// 현재 행동 액션 가져오기
+	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
+
+	const action =
+		type === 'need'
+			? get(needBehaviorActionStore).data[
+					BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(
+						entity.currentBehaviorActionId
+					)
+				]
+			: get(conditionBehaviorActionStore).data[
+					BehaviorActionIdUtils.actionId<ConditionBehaviorActionId>(
+						entity.currentBehaviorActionId
+					)
+				];
+
+	if (!action) {
+		// 액션을 찾을 수 없으면 행동 종료
+		entity.currentBehaviorActionId = undefined;
+		return;
+	}
+
+	// 1. Search: path가 없으면 대상 탐색 및 경로 설정
+	if ((action.type === 'go' || action.type === 'interact') && entity.path.length === 0) {
+		searchTargetAndSetPath(entity, action);
+		return; // 경로 설정 후 다음 tick에서 실행
+	}
+
+	// 2. Go or Interact: 행동 실행
+	if (action.type === 'go') {
+		executeGoAction(entity, action);
+	} else if (action.type === 'interact') {
+		executeInteractAction(entity, action);
+	} else if (action.type === 'idle') {
+		executeIdleAction(entity, action);
+	}
+
+	// 3. Do until behavior_completion_type: 완료 조건 확인
+	const isCompleted = checkActionCompletion(entity, action, tick);
+	if (isCompleted) {
+		transitionToNextAction(entity, action, tick);
+	}
+}
+
+/**
+ * 대상 탐색 및 경로 설정 (target_selection_method에 따라)
+ */
+function searchTargetAndSetPath(
+	entity: WorldCharacterEntity,
+	action: {
+		target_selection_method: string;
+		behavior_interact_type: string;
+		building_id?: string | null;
+		item_id?: string | null;
+		character_id?: string | null;
+	}
+): void {
+	const { getInteractableEntityTemplates } = useBehavior();
+	const { worldBuildingStore, worldItemStore } = useWorld();
+	const worldEntities = Object.values(entity.worldContext.entities);
+
+	let targetEntity: any = undefined;
+
+	if (action.target_selection_method === 'explicit') {
+		// explicit: 지정된 대상으로 이동
+		if (action.building_id) {
+			targetEntity = worldEntities.find(
+				(e) => e.type === 'building' && e.instanceId === action.building_id
+			);
+		} else if (action.item_id) {
+			targetEntity = worldEntities.find(
+				(e) => e.type === 'item' && e.instanceId === action.item_id
+			);
+		}
+	} else if (
+		action.target_selection_method === 'search' ||
+		action.target_selection_method === 'search_or_continue'
+	) {
+		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
+		const templates = getInteractableEntityTemplates(action as any);
+
+		// 템플릿 ID 집합
+		const templateIds = new Set(templates.map((t) => t.id));
+
+		// 템플릿에 해당하는 월드 엔티티 찾기
+		const candidateEntities = worldEntities.filter((e) => {
+			if (e.type === 'building') {
+				const worldBuilding = get(worldBuildingStore).data[e.instanceId as any];
+				return worldBuilding && templateIds.has(worldBuilding.building_id);
+			} else if (e.type === 'item') {
+				const worldItem = get(worldItemStore).data[e.instanceId as any];
+				return worldItem && templateIds.has(worldItem.item_id);
+			}
+			return false;
+		});
+
+		// 가장 가까운 엔티티 선택
+		if (candidateEntities.length > 0) {
+			targetEntity = candidateEntities.reduce((closest, current) => {
+				const distToCurrent = Math.hypot(current.x - entity.x, current.y - entity.y);
+				const distToClosest = Math.hypot(closest.x - entity.x, closest.y - entity.y);
+				return distToCurrent < distToClosest ? current : closest;
+			});
+		}
+	}
+
+	// 대상을 찾았으면 경로 설정
+	if (targetEntity) {
+		entity.moveTo(targetEntity.x, targetEntity.y);
+	}
+}
+
+/**
+ * GO 행동 실행 (이동)
+ */
+function executeGoAction(entity: WorldCharacterEntity, action: any): void {
+	// path를 따라 이동하는 로직은 updateMove에서 처리
+	// 여기서는 특별히 할 일이 없음 (완료 조건만 체크)
+}
+
+/**
+ * INTERACT 행동 실행 (상호작용)
+ */
+function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
+	const interactType = action.behavior_interact_type;
+
+	if (interactType === 'item_pick') {
+		// 현재 위치에서 가까운 아이템 찾기 (임계값: 50)
+		const nearbyItem = Object.values(entity.worldContext.entities).find((e) => {
+			if (e.type !== 'item') return false;
+			const distance = Math.hypot(e.x - entity.x, e.y - entity.y);
+			return distance < 50;
+		});
+
+		if (nearbyItem && nearbyItem.type === 'item') {
+			// 아이템 줍기: heldWorldItemIds에 추가
+			if (!entity.heldWorldItemIds.includes(nearbyItem.instanceId as any)) {
+				entity.heldWorldItemIds.push(nearbyItem.instanceId as any);
+			}
+			// 월드에서 아이템 제거
+			entity.worldContext.deleteWorldItem(nearbyItem.instanceId as any);
+		}
+	} else if (interactType === 'item_use') {
+		// TODO: heldWorldItemIds에서 아이템 사용
+		// 아이템 사용 로직은 아이템 타입에 따라 다름
+	} else if (
+		interactType === 'building_execute' ||
+		interactType === 'building_repair' ||
+		interactType === 'building_clean'
+	) {
+		// 현재 위치에서 가까운 건물 찾기
+		const nearbyBuilding = Object.values(entity.worldContext.entities).find((e) => {
+			if (e.type !== 'building') return false;
+			const distance = Math.hypot(e.x - entity.x, e.y - entity.y);
+			return distance < 50;
+		});
+
+		if (nearbyBuilding && nearbyBuilding.type === 'building') {
+			// TODO: 건물과 상호작용 (캐릭터 숨김, 건물 점유 등)
+			// 현재는 구현 보류
+		}
+	}
+}
+
+/**
+ * IDLE 행동 실행 (대기)
+ */
+function executeIdleAction(entity: WorldCharacterEntity, action: any): void {
+	// 대기는 특별히 할 일이 없음
+	// 완료 조건만 체크 (duration_ticks)
+}
+
+/**
+ * 행동 완료 조건 확인
+ */
+function checkActionCompletion(
+	entity: WorldCharacterEntity,
+	action: any,
+	currentTick: number
+): boolean {
+	// GO: path가 비면 완료
+	if (action.type === 'go') {
+		return entity.path.length === 0;
+	}
+
+	// INTERACT/IDLE: behavior_completion_type에 따라
+	if (action.behavior_completion_type === 'immediate') {
+		return true; // 즉시 완료
+	}
+
+	if (action.behavior_completion_type === 'fixed') {
+		// duration_ticks 경과 확인
+		return currentTick - entity.actionStartTick >= action.duration_ticks;
+	}
+
+	if (action.behavior_completion_type === 'completion') {
+		// TODO: 목표 달성 여부 확인 (건물 수리/청소 완료 등)
+		return false;
+	}
+
+	return false;
+}
+
+/**
+ * 다음 액션으로 전환
+ */
+function transitionToNextAction(entity: WorldCharacterEntity, action: any, currentTick: number): void {
+	if (!entity.currentBehaviorActionId) return;
+
+	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
+	const behaviorId = BehaviorActionIdUtils.behaviorId(entity.currentBehaviorActionId);
+
+	// 현재 액션 완료 시 path 클리어
+	entity.path = [];
+
+	// 다음 액션 ID 가져오기
+	const nextActionId =
+		type === 'need'
+			? action.next_need_behavior_action_id
+			: action.next_condition_behavior_action_id;
+
+	if (nextActionId) {
+		// 다음 액션으로 전환
+		entity.currentBehaviorActionId = BehaviorActionIdUtils.create(type, behaviorId, nextActionId);
+		entity.actionStartTick = currentTick;
+	} else {
+		// 다음 액션이 없으면 행동 종료
+		entity.currentBehaviorActionId = undefined;
+		entity.actionStartTick = 0;
+	}
+}
+
+/**
+ * 새로운 행동을 선택 (우선순위 기반)
+ */
+function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
+	const {
+		needBehaviorStore,
+		needBehaviorActionStore,
+		conditionBehaviorStore,
+		conditionBehaviorActionStore,
+		behaviorPriorityStore,
+	} = useBehavior();
+
+	// 1. 후보 need behaviors 찾기 (threshold 이하인 욕구)
+	const candidateNeedBehaviors = Object.values(get(needBehaviorStore).data).filter((behavior) => {
+		const need = entity.worldCharacterNeeds[behavior.need_id];
+		if (!need) return false;
+
+		// 욕구 레벨이 threshold 이하이면 발동
+		return need.value <= behavior.need_threshold;
+	});
+
+	// 2. 후보 condition behaviors 찾기
+	// TODO: 컨디션 조건 체크 로직 (나중에 구현)
+	const candidateConditionBehaviors: ConditionBehavior[] = [];
+
+	// 3. 우선순위에 따라 정렬
+	const allCandidates: Array<
+		{ type: 'need'; behaviorId: NeedBehaviorId } | { type: 'condition'; behaviorId: ConditionBehaviorId }
+	> = [
+		...candidateNeedBehaviors.map((behavior) => ({
+			type: 'need' as const,
+			behaviorId: behavior.id,
+		})),
+		...candidateConditionBehaviors.map((behavior) => ({
+			type: 'condition' as const,
+			behaviorId: behavior.id,
+		})),
+	];
+
+	if (allCandidates.length === 0) {
+		// 후보가 없으면 종료
+		return;
+	}
+
+	// BehaviorPriority에서 우선순위 가져오기
+	const priorities = get(behaviorPriorityStore).data;
+	const sortedCandidates = allCandidates.sort((a, b) => {
+		const priorityA = Object.values(priorities).find((p) =>
+			a.type === 'need'
+				? p.need_behavior_id === a.behaviorId
+				: p.condition_behavior_id === a.behaviorId
+		);
+		const priorityB = Object.values(priorities).find((p) =>
+			b.type === 'need'
+				? p.need_behavior_id === b.behaviorId
+				: p.condition_behavior_id === b.behaviorId
+		);
+
+		const valA = priorityA?.priority ?? 0;
+		const valB = priorityB?.priority ?? 0;
+
+		// 높은 우선순위가 먼저 오도록 내림차순 정렬
+		return valB - valA;
+	});
+
+	const selected = sortedCandidates[0];
+	if (!selected) return;
+
+	// 4. root action 찾기
+	const actions =
+		selected.type === 'need'
+			? Object.values(get(needBehaviorActionStore).data).filter(
+					(a) => a.behavior_id === selected.behaviorId && a.root
+				)
+			: Object.values(get(conditionBehaviorActionStore).data).filter(
+					(a) => a.condition_behavior_id === selected.behaviorId && a.root
+				);
+
+	const rootAction = actions[0];
+	if (!rootAction) {
+		// root action이 없으면 종료
+		return;
+	}
+
+	// 5. currentBehaviorActionId 설정 및 시작 tick 기록
+	entity.currentBehaviorActionId = BehaviorActionIdUtils.create(
+		selected.type,
+		selected.behaviorId,
+		rootAction.id
+	);
+	entity.actionStartTick = tick;
+}

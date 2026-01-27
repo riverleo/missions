@@ -8,18 +8,22 @@ import type {
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
+	BehaviorActionId,
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
+import { useBehavior } from '$lib/hooks/use-behavior';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 import { updateMove } from './update-move';
 import { tickWorldCharacterNeeds } from './tick-world-character-needs';
+import { tickBehavior } from './tick-behavior';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -28,6 +32,8 @@ export class WorldCharacterEntity extends Entity {
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemIds = $state<WorldItemId[]>([]);
 	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
+	currentBehaviorActionId = $state<BehaviorActionId | undefined>(undefined);
+	actionStartTick = $state<number>(0);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -138,6 +144,7 @@ export class WorldCharacterEntity extends Entity {
 
 	tick(tick: number): void {
 		tickWorldCharacterNeeds(this, tick);
+		tickBehavior(this, tick);
 	}
 
 	moveTo(targetX: number, targetY: number): void {

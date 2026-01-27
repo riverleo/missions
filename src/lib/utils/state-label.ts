@@ -9,7 +9,12 @@ import type {
 	ColliderType,
 	NeedBehavior,
 	ConditionBehavior,
+	NeedBehaviorAction,
+	ConditionBehaviorAction,
+	BehaviorActionType,
+	BehaviorTargetSelectionMethod,
 } from '$lib/types';
+import { josa } from './josa';
 
 const colliderTypeLabels: Record<ColliderType, string> = {
 	circle: '원형',
@@ -137,5 +142,75 @@ export function getConditionBehaviorLabel(params: {
 		title: `${buildingName ?? '건물'} 행동`,
 		description: `${characterName ?? '모든 캐릭터'} (${conditionName ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
 	};
+}
+
+// Behavior Action 라벨 생성
+export function getBehaviorActionLabel(params: {
+	action: NeedBehaviorAction | ConditionBehaviorAction;
+	buildingName?: string;
+	itemName?: string;
+}): string {
+	const { action, buildingName, itemName } = params;
+
+	// target 결정
+	let target: string | undefined;
+	if (action.target_selection_method === 'search') {
+		target = '새로운 탐색 대상';
+	} else if (action.target_selection_method === 'search_or_continue') {
+		target = '기존 선택 대상';
+	} else if (action.target_selection_method === 'explicit') {
+		if (buildingName) {
+			target = buildingName;
+		} else if (itemName) {
+			target = itemName;
+		}
+	}
+
+	const behaviorLabel = getBehaviorInteractTypeLabel(action.behavior_interact_type);
+
+	if (action.type === 'go') {
+		if (behaviorLabel && target) {
+			return `${josa(behaviorLabel, '을를')} 위해 ${josa(target, '으로로')} 이동`;
+		}
+		if (behaviorLabel) {
+			return `${josa(behaviorLabel, '을를')} 위해 이동`;
+		}
+		return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
+	}
+
+	if (action.type === 'interact') {
+		const completionLabel =
+			action.behavior_completion_type === 'fixed'
+				? `${action.duration_ticks}틱 동안`
+				: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
+
+		// target_selection_method에 따른 라벨인 경우 단순 조합
+		if (
+			behaviorLabel &&
+			target &&
+			(action.target_selection_method === 'search' ||
+				action.target_selection_method === 'search_or_continue')
+		) {
+			return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
+		}
+		// 명시적 대상이 지정된 경우
+		if (behaviorLabel && target) {
+			return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
+		}
+		if (behaviorLabel) {
+			return `${completionLabel} ${behaviorLabel}`;
+		}
+		return target ? `${josa(target, '와과')} 상호작용` : '자동 상호작용';
+	}
+
+	if (action.type === 'idle') {
+		const completionLabel =
+			action.behavior_completion_type === 'fixed'
+				? `${action.duration_ticks}틱 동안`
+				: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
+		return `${completionLabel} 대기`;
+	}
+
+	return action.type;
 }
 
