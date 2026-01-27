@@ -7,13 +7,15 @@ create table building_interactions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   building_id uuid not null references buildings(id) on delete cascade,
-  character_behavior_type character_behavior_type not null default 'use',
+  once_interaction_type once_interaction_type,
+  repeat_interaction_type repeat_interaction_type,
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_building_interactions_building_id_character_behavior_type_character_id unique nulls not distinct (building_id, character_behavior_type, character_id)
+  constraint chk_building_interaction_type_exclusive check ((once_interaction_type is not null)::int + (repeat_interaction_type is not null)::int = 1),
+  constraint uq_building_interactions_building_id_interaction_type_character_id unique nulls not distinct (building_id, once_interaction_type, repeat_interaction_type, character_id)
 );
 
 alter table building_interactions enable row level security;
@@ -109,13 +111,15 @@ create table item_interactions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
-  character_behavior_type character_behavior_type not null default 'use',
+  once_interaction_type once_interaction_type,
+  repeat_interaction_type repeat_interaction_type,
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_item_interactions_item_id_character_behavior_type_character_id unique nulls not distinct (item_id, character_behavior_type, character_id)
+  constraint chk_item_interaction_type_exclusive check ((once_interaction_type is not null)::int + (repeat_interaction_type is not null)::int = 1),
+  constraint uq_item_interactions_item_id_interaction_type_character_id unique nulls not distinct (item_id, once_interaction_type, repeat_interaction_type, character_id)
 );
 
 alter table item_interactions enable row level security;
@@ -212,12 +216,14 @@ create table character_interactions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   target_character_id uuid not null references characters(id) on delete cascade,
-  character_behavior_type character_behavior_type not null default 'use',
+  once_interaction_type once_interaction_type,
+  repeat_interaction_type repeat_interaction_type,
 
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
-  constraint uq_character_interactions_character_id_target_character_id_character_behavior_type unique nulls not distinct (character_id, target_character_id, character_behavior_type)
+  constraint chk_character_interaction_type_exclusive check ((once_interaction_type is not null)::int + (repeat_interaction_type is not null)::int = 1),
+  constraint uq_character_interactions_character_id_target_character_id_interaction_type unique nulls not distinct (character_id, target_character_id, once_interaction_type, repeat_interaction_type)
 );
 
 alter table character_interactions enable row level security;

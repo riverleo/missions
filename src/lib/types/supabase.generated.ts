@@ -216,17 +216,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "building_interaction_actions_building_interaction_id_fkey"
+            columns: ["building_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "building_interactions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "building_interaction_actions_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "building_interaction_actions_interaction_id_fkey"
-            columns: ["building_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "building_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -247,30 +247,45 @@ export type Database = {
       }
       building_interactions: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string
           character_id: string | null
           created_at: string
           created_by: string | null
           id: string
+          once_interaction_type:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           building_id: string
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           building_id?: string
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id?: string
         }
         Relationships: [
@@ -737,17 +752,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "character_interaction_actions_character_interaction_id_fkey"
+            columns: ["character_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "character_interactions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "character_interaction_actions_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "user_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "character_interaction_actions_interaction_id_fkey"
-            columns: ["character_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -775,29 +790,44 @@ export type Database = {
       }
       character_interactions: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
           id: string
+          once_interaction_type:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
           target_character_id: string
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
           target_character_id: string
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id?: string
           target_character_id?: string
         }
@@ -945,15 +975,14 @@ export type Database = {
       }
       condition_behavior_actions: {
         Row: {
-          behavior_completion_type: Database["public"]["Enums"]["behavior_completion_type"]
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id: string | null
-          character_id: string | null
+          building_interaction_id: string | null
+          character_interaction_id: string | null
           condition_behavior_id: string
+          condition_fulfillment_id: string | null
           condition_id: string
           duration_ticks: number
           id: string
-          item_id: string | null
+          item_interaction_id: string | null
           next_condition_behavior_action_id: string | null
           root: boolean
           scenario_id: string
@@ -961,15 +990,14 @@ export type Database = {
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
-          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           condition_behavior_id: string
+          condition_fulfillment_id?: string | null
           condition_id: string
           duration_ticks?: number
           id?: string
-          item_id?: string | null
+          item_interaction_id?: string | null
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id: string
@@ -977,15 +1005,14 @@ export type Database = {
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
-          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           condition_behavior_id?: string
+          condition_fulfillment_id?: string | null
           condition_id?: string
           duration_ticks?: number
           id?: string
-          item_id?: string | null
+          item_interaction_id?: string | null
           next_condition_behavior_action_id?: string | null
           root?: boolean
           scenario_id?: string
@@ -994,17 +1021,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "condition_behavior_actions_building_id_fkey"
-            columns: ["building_id"]
+            foreignKeyName: "condition_behavior_actions_building_interaction_id_fkey"
+            columns: ["building_interaction_id"]
             isOneToOne: false
-            referencedRelation: "buildings"
+            referencedRelation: "building_interactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "condition_behavior_actions_character_id_fkey"
-            columns: ["character_id"]
+            foreignKeyName: "condition_behavior_actions_character_interaction_id_fkey"
+            columns: ["character_interaction_id"]
             isOneToOne: false
-            referencedRelation: "characters"
+            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1015,6 +1042,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "condition_behavior_actions_condition_fulfillment_id_fkey"
+            columns: ["condition_fulfillment_id"]
+            isOneToOne: false
+            referencedRelation: "condition_fulfillments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "condition_behavior_actions_condition_id_fkey"
             columns: ["condition_id"]
             isOneToOne: false
@@ -1022,10 +1056,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "condition_behavior_actions_item_id_fkey"
-            columns: ["item_id"]
+            foreignKeyName: "condition_behavior_actions_item_interaction_id_fkey"
+            columns: ["item_interaction_id"]
             isOneToOne: false
-            referencedRelation: "items"
+            referencedRelation: "item_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1111,7 +1145,6 @@ export type Database = {
       }
       condition_effects: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick: number
           character_id: string | null
           condition_id: string
@@ -1125,7 +1158,6 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick?: number
           character_id?: string | null
           condition_id: string
@@ -1139,7 +1171,6 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           change_per_tick?: number
           character_id?: string | null
           condition_id?: string
@@ -1192,47 +1223,54 @@ export type Database = {
       }
       condition_fulfillments: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          character_id: string | null
+          building_interaction_id: string | null
+          character_interaction_id: string | null
           condition_id: string
           created_at: string
           created_by: string | null
           fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
           id: string
           increase_per_tick: number
-          item_id: string | null
+          item_interaction_id: string | null
           scenario_id: string
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           condition_id: string
           created_at?: string
           created_by?: string | null
           fulfillment_type: Database["public"]["Enums"]["condition_fulfillment_type"]
           id?: string
           increase_per_tick?: number
-          item_id?: string | null
+          item_interaction_id?: string | null
           scenario_id: string
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           condition_id?: string
           created_at?: string
           created_by?: string | null
           fulfillment_type?: Database["public"]["Enums"]["condition_fulfillment_type"]
           id?: string
           increase_per_tick?: number
-          item_id?: string | null
+          item_interaction_id?: string | null
           scenario_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "condition_fulfillments_character_id_fkey"
-            columns: ["character_id"]
+            foreignKeyName: "condition_fulfillments_building_interaction_id_fkey"
+            columns: ["building_interaction_id"]
             isOneToOne: false
-            referencedRelation: "characters"
+            referencedRelation: "building_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "condition_fulfillments_character_interaction_id_fkey"
+            columns: ["character_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1250,10 +1288,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "condition_fulfillments_item_id_fkey"
-            columns: ["item_id"]
+            foreignKeyName: "condition_fulfillments_item_interaction_id_fkey"
+            columns: ["item_interaction_id"]
             isOneToOne: false
-            referencedRelation: "items"
+            referencedRelation: "item_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1409,17 +1447,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "item_interaction_actions_interaction_id_fkey"
-            columns: ["item_interaction_id"]
-            isOneToOne: false
-            referencedRelation: "item_interactions"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "item_interaction_actions_item_id_fkey"
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_interaction_actions_item_interaction_id_fkey"
+            columns: ["item_interaction_id"]
+            isOneToOne: false
+            referencedRelation: "item_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -1440,30 +1478,45 @@ export type Database = {
       }
       item_interactions: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
           id: string
           item_id: string
+          once_interaction_type:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           item_id: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id: string
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           item_id?: string
+          once_interaction_type?:
+            | Database["public"]["Enums"]["once_interaction_type"]
+            | null
+          repeat_interaction_type?:
+            | Database["public"]["Enums"]["repeat_interaction_type"]
+            | null
           scenario_id?: string
         }
         Relationships: [
@@ -1839,14 +1892,13 @@ export type Database = {
       }
       need_behavior_actions: {
         Row: {
-          behavior_completion_type: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id: string
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id: string | null
-          character_id: string | null
+          building_interaction_id: string | null
+          character_interaction_id: string | null
           duration_ticks: number
           id: string
-          item_id: string | null
+          item_interaction_id: string | null
+          need_fulfillment_id: string | null
           need_id: string
           next_need_behavior_action_id: string | null
           root: boolean
@@ -1855,14 +1907,13 @@ export type Database = {
           type: Database["public"]["Enums"]["behavior_action_type"]
         }
         Insert: {
-          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id: string
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           duration_ticks?: number
           id?: string
-          item_id?: string | null
+          item_interaction_id?: string | null
+          need_fulfillment_id?: string | null
           need_id: string
           next_need_behavior_action_id?: string | null
           root?: boolean
@@ -1871,14 +1922,13 @@ export type Database = {
           type?: Database["public"]["Enums"]["behavior_action_type"]
         }
         Update: {
-          behavior_completion_type?: Database["public"]["Enums"]["behavior_completion_type"]
           behavior_id?: string
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           duration_ticks?: number
           id?: string
-          item_id?: string | null
+          item_interaction_id?: string | null
+          need_fulfillment_id?: string | null
           need_id?: string
           next_need_behavior_action_id?: string | null
           root?: boolean
@@ -1895,24 +1945,31 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_behavior_actions_building_id_fkey"
-            columns: ["building_id"]
+            foreignKeyName: "need_behavior_actions_building_interaction_id_fkey"
+            columns: ["building_interaction_id"]
             isOneToOne: false
-            referencedRelation: "buildings"
+            referencedRelation: "building_interactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_behavior_actions_character_id_fkey"
-            columns: ["character_id"]
+            foreignKeyName: "need_behavior_actions_character_interaction_id_fkey"
+            columns: ["character_interaction_id"]
             isOneToOne: false
-            referencedRelation: "characters"
+            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_behavior_actions_item_id_fkey"
-            columns: ["item_id"]
+            foreignKeyName: "need_behavior_actions_item_interaction_id_fkey"
+            columns: ["item_interaction_id"]
             isOneToOne: false
-            referencedRelation: "items"
+            referencedRelation: "item_interactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "need_behavior_actions_need_fulfillment_id_fkey"
+            columns: ["need_fulfillment_id"]
+            isOneToOne: false
+            referencedRelation: "need_fulfillments"
             referencedColumns: ["id"]
           },
           {
@@ -2005,15 +2062,14 @@ export type Database = {
       }
       need_fulfillments: {
         Row: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id: string | null
-          character_id: string | null
+          building_interaction_id: string | null
+          character_interaction_id: string | null
           created_at: string
           created_by: string | null
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id: string
           increase_per_tick: number
-          item_id: string | null
+          item_interaction_id: string | null
           need_id: string
           scenario_id: string
           task_condition:
@@ -2023,15 +2079,14 @@ export type Database = {
           task_duration_ticks: number
         }
         Insert: {
-          behavior_interact_type: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           created_at?: string
           created_by?: string | null
           fulfillment_type: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
           increase_per_tick?: number
-          item_id?: string | null
+          item_interaction_id?: string | null
           need_id: string
           scenario_id: string
           task_condition?:
@@ -2041,15 +2096,14 @@ export type Database = {
           task_duration_ticks?: number
         }
         Update: {
-          behavior_interact_type?: Database["public"]["Enums"]["behavior_interact_type"]
-          building_id?: string | null
-          character_id?: string | null
+          building_interaction_id?: string | null
+          character_interaction_id?: string | null
           created_at?: string
           created_by?: string | null
           fulfillment_type?: Database["public"]["Enums"]["need_fulfillment_type"]
           id?: string
           increase_per_tick?: number
-          item_id?: string | null
+          item_interaction_id?: string | null
           need_id?: string
           scenario_id?: string
           task_condition?:
@@ -2060,17 +2114,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "need_fulfillments_building_id_fkey"
-            columns: ["building_id"]
+            foreignKeyName: "need_fulfillments_building_interaction_id_fkey"
+            columns: ["building_interaction_id"]
             isOneToOne: false
-            referencedRelation: "buildings"
+            referencedRelation: "building_interactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_fulfillments_character_id_fkey"
-            columns: ["character_id"]
+            foreignKeyName: "need_fulfillments_character_interaction_id_fkey"
+            columns: ["character_interaction_id"]
             isOneToOne: false
-            referencedRelation: "characters"
+            referencedRelation: "character_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -2081,10 +2135,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "need_fulfillments_item_id_fkey"
-            columns: ["item_id"]
+            foreignKeyName: "need_fulfillments_item_interaction_id_fkey"
+            columns: ["item_interaction_id"]
             isOneToOne: false
-            referencedRelation: "items"
+            referencedRelation: "item_interactions"
             referencedColumns: ["id"]
           },
           {
@@ -2464,7 +2518,6 @@ export type Database = {
           player_id: string
           scenario_id: string
           scenario_snapshot_id: string
-          snapshot_id: string | null
           status: Database["public"]["Enums"]["player_scenario_status"]
           user_id: string
         }
@@ -2475,7 +2528,6 @@ export type Database = {
           player_id: string
           scenario_id: string
           scenario_snapshot_id: string
-          snapshot_id?: string | null
           status?: Database["public"]["Enums"]["player_scenario_status"]
           user_id?: string
         }
@@ -2486,7 +2538,6 @@ export type Database = {
           player_id?: string
           scenario_id?: string
           scenario_snapshot_id?: string
-          snapshot_id?: string | null
           status?: Database["public"]["Enums"]["player_scenario_status"]
           user_id?: string
         }
@@ -2508,13 +2559,6 @@ export type Database = {
           {
             foreignKeyName: "player_scenarios_scenario_snapshot_id_fkey"
             columns: ["scenario_snapshot_id"]
-            isOneToOne: false
-            referencedRelation: "scenario_snapshots"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "player_scenarios_snapshot_id_fkey"
-            columns: ["snapshot_id"]
             isOneToOne: false
             referencedRelation: "scenario_snapshots"
             referencedColumns: ["id"]
@@ -2680,7 +2724,7 @@ export type Database = {
           data?: Json
           description?: string
           id?: string
-          name?: string
+          name: string
           scenario_id: string
         }
         Update: {
@@ -3515,7 +3559,6 @@ export type Database = {
           name: string
           player_id: string
           scenario_id: string
-          snapshot_id: string | null
           terrain_id: string | null
           user_id: string
         }
@@ -3526,7 +3569,6 @@ export type Database = {
           name: string
           player_id: string
           scenario_id: string
-          snapshot_id?: string | null
           terrain_id?: string | null
           user_id?: string
         }
@@ -3537,7 +3579,6 @@ export type Database = {
           name?: string
           player_id?: string
           scenario_id?: string
-          snapshot_id?: string | null
           terrain_id?: string | null
           user_id?: string
         }
@@ -3554,13 +3595,6 @@ export type Database = {
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "scenarios"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "worlds_snapshot_id_fkey"
-            columns: ["snapshot_id"]
-            isOneToOne: false
-            referencedRelation: "scenario_snapshots"
             referencedColumns: ["id"]
           },
           {
@@ -3587,15 +3621,16 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
-      behavior_action_type: "go" | "interact" | "idle"
-      behavior_completion_type: "fixed" | "completion" | "immediate"
+      behavior_action_type: "go" | "interact" | "fulfill" | "idle"
       behavior_interact_type:
         | "building_execute"
+        | "building_construct"
         | "building_demolish"
         | "building_repair"
         | "building_clean"
         | "item_pick"
         | "item_use"
+        | "character_hug"
       behavior_target_selection_method:
         | "explicit"
         | "search"
@@ -3611,11 +3646,22 @@ export type Database = {
       narrative_node_type: "text" | "choice"
       need_fulfillment_task_condition: "completed" | "created"
       need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
+      once_interaction_type:
+        | "item_pick"
+        | "item_use"
+        | "building_execute"
+        | "building_construct"
+        | "building_demolish"
       player_chapter_status: "in_progress" | "completed"
       player_quest_status: "in_progress" | "completed" | "abandoned"
       player_scenario_status: "in_progress" | "completed"
       publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
+      repeat_interaction_type:
+        | "building_execute"
+        | "building_repair"
+        | "building_clean"
+        | "character_hug"
       tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
     }
@@ -3748,15 +3794,16 @@ export const Constants = {
   },
   public: {
     Enums: {
-      behavior_action_type: ["go", "interact", "idle"],
-      behavior_completion_type: ["fixed", "completion", "immediate"],
+      behavior_action_type: ["go", "interact", "fulfill", "idle"],
       behavior_interact_type: [
         "building_execute",
+        "building_construct",
         "building_demolish",
         "building_repair",
         "building_clean",
         "item_pick",
         "item_use",
+        "character_hug",
       ],
       behavior_target_selection_method: [
         "explicit",
@@ -3774,11 +3821,24 @@ export const Constants = {
       narrative_node_type: ["text", "choice"],
       need_fulfillment_task_condition: ["completed", "created"],
       need_fulfillment_type: ["building", "character", "task", "item", "idle"],
+      once_interaction_type: [
+        "item_pick",
+        "item_use",
+        "building_execute",
+        "building_construct",
+        "building_demolish",
+      ],
       player_chapter_status: ["in_progress", "completed"],
       player_quest_status: ["in_progress", "completed", "abandoned"],
       player_scenario_status: ["in_progress", "completed"],
       publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
+      repeat_interaction_type: [
+        "building_execute",
+        "building_repair",
+        "building_clean",
+        "character_hug",
+      ],
       tile_state_type: ["idle", "damaged_1", "damaged_2"],
       user_role_type: ["admin"],
     },

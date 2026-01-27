@@ -4,7 +4,6 @@ create table condition_effects (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   name text not null,
   condition_id uuid not null references conditions(id) on delete cascade,
-  character_behavior_type character_behavior_type not null default 'use',
   character_id uuid references characters(id) on delete set null,
   need_id uuid not null references needs(id) on delete cascade,
   min_threshold float not null default 0,

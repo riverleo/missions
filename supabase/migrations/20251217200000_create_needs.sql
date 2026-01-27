@@ -62,10 +62,7 @@ create table need_fulfillments (
   need_id uuid not null references needs(id) on delete cascade,
 
   fulfillment_type need_fulfillment_type not null,
-  behavior_interact_type behavior_interact_type not null,
-  building_id uuid references buildings(id) on delete set null,
-  character_id uuid references characters(id) on delete set null,
-  item_id uuid references items(id) on delete set null,
+
   task_condition need_fulfillment_task_condition,
   task_count integer not null default 1,
   task_duration_ticks float not null default 0,

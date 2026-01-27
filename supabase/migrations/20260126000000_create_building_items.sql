@@ -35,4 +35,3 @@ CREATE POLICY "admins can delete building items"
 
 -- Comments
 COMMENT ON TABLE building_items IS '건물에 보관 가능한 아이템을 정의';
-COMMENT ON COLUMN building_items.max_capacity IS '해당 건물에서 이 아이템을 보관할 수 있는 최대 개수';

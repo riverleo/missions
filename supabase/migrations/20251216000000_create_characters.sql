@@ -7,11 +7,29 @@ create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 -- behavior_interact_type enum (행동 상호작용 종류)
 create type behavior_interact_type as enum (
   'building_execute',   -- 건물 동작 실행
+  'building_construct', -- 건물 건설
   'building_demolish',  -- 건물 철거
   'building_repair',    -- 건물 수리
   'building_clean',     -- 건물 청소
   'item_pick',          -- 아이템 줍기
-  'item_use'            -- 아이템 사용
+  'item_use',           -- 아이템 사용
+  'character_hug'       -- 캐릭터 허그
+);
+
+-- once/repeat 타입 분리
+create type once_interaction_type as enum (
+  'item_pick',
+  'item_use',
+  'building_execute',
+  'building_construct',
+  'building_demolish'
+);
+
+create type repeat_interaction_type as enum (
+  'building_execute',
+  'building_repair',
+  'building_clean',
+  'character_hug'
 );
 
 -- loop_mode enum
