@@ -57,8 +57,8 @@ create table condition_behavior_actions (
   -- fulfill 타입용: Fulfillment 참조 (null이면 자동 탐색)
   condition_fulfillment_id uuid references condition_fulfillments(id) on delete set null,
 
-  -- 지속 시간 (틱 단위, idle 타입에서만 사용)
-  duration_ticks float not null default 0,
+  -- idle 대기 시간 (틱 단위, idle 타입에서만 사용)
+  idle_duration_ticks float not null default 6,
 
   -- 다음 액션
   next_condition_behavior_action_id uuid references condition_behavior_actions(id) on delete set null

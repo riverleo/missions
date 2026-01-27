@@ -66,8 +66,8 @@ create table building_interaction_actions (
   -- 캐릭터 회전 (도)
   character_rotation float not null default 0,
 
-  -- 대기 시간 (틱 단위)
-  idle_duration_ticks float not null default 12,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 6,
 
   -- 다음 액션
   next_building_interaction_action_id uuid references building_interaction_actions(id) on delete set null,
@@ -170,8 +170,8 @@ create table item_interaction_actions (
   -- 아이템 회전 (도)
   item_rotation float not null default 0,
 
-  -- 대기 시간 (틱 단위)
-  idle_duration_ticks float not null default 12,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 6,
 
   -- 다음 액션
   next_item_interaction_action_id uuid references item_interaction_actions(id) on delete set null,
@@ -279,8 +279,8 @@ create table character_interaction_actions (
   -- 캐릭터 회전 (도)
   target_character_rotation float not null default 0,
 
-  -- 대기 시간 (틱 단위)
-  idle_duration_ticks float not null default 12,
+  -- 지속 시간 (틱 단위)
+  duration_ticks float not null default 6,
 
   -- 다음 액션
   next_character_interaction_action_id uuid references character_interaction_actions(id) on delete set null,
