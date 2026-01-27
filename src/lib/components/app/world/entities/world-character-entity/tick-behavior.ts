@@ -1,15 +1,18 @@
 import { get } from 'svelte/store';
 import type {
+	WorldItemId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
 	NeedBehaviorId,
 	ConditionBehaviorId,
 	ConditionBehavior,
+	EntityId,
 } from '$lib/types';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
 import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 
 /**
  * 캐릭터의 행동을 tick마다 처리
@@ -29,14 +32,10 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const action =
 		type === 'need'
 			? get(needBehaviorActionStore).data[
-					BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(
-						entity.currentBehaviorActionId
-					)
+					BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(entity.currentBehaviorActionId)
 				]
 			: get(conditionBehaviorActionStore).data[
-					BehaviorActionIdUtils.actionId<ConditionBehaviorActionId>(
-						entity.currentBehaviorActionId
-					)
+					BehaviorActionIdUtils.actionId<ConditionBehaviorActionId>(entity.currentBehaviorActionId)
 				];
 
 	if (!action) {
@@ -45,8 +44,12 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 		return;
 	}
 
-	// 1. Search: path가 없으면 대상 탐색 및 경로 설정
-	if ((action.type === 'go' || action.type === 'interact') && entity.path.length === 0) {
+	// 1. Search: path가 없고 타겟이 없으면 대상 탐색 및 경로 설정
+	if (
+		(action.type === 'go' || action.type === 'interact') &&
+		entity.path.length === 0 &&
+		!entity.currentTargetEntityId
+	) {
 		searchTargetAndSetPath(entity, action);
 		return; // 경로 설정 후 다음 tick에서 실행
 	}
@@ -129,8 +132,9 @@ function searchTargetAndSetPath(
 		}
 	}
 
-	// 대상을 찾았으면 경로 설정
+	// 대상을 찾았으면 타겟 설정 및 경로 설정
 	if (targetEntity) {
+		entity.currentTargetEntityId = targetEntity.id as EntityId;
 		entity.moveTo(targetEntity.x, targetEntity.y);
 	}
 }
@@ -147,23 +151,56 @@ function executeGoAction(entity: WorldCharacterEntity, action: any): void {
  * INTERACT 행동 실행 (상호작용)
  */
 function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
+	if (!entity.currentTargetEntityId) return;
+
+	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+	if (!targetEntity) {
+		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
+		entity.currentTargetEntityId = undefined;
+		entity.path = [];
+		return;
+	}
+
+	// 타겟과의 거리 확인 (임계값: 50)
+	const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+	if (distance >= 50) {
+		// 아직 도착하지 않았으면 대기
+		return;
+	}
+
 	const interactType = action.behavior_interact_type;
 
 	if (interactType === 'item_pick') {
-		// 현재 위치에서 가까운 아이템 찾기 (임계값: 50)
-		const nearbyItem = Object.values(entity.worldContext.entities).find((e) => {
-			if (e.type !== 'item') return false;
-			const distance = Math.hypot(e.x - entity.x, e.y - entity.y);
-			return distance < 50;
-		});
+		if (targetEntity.type === 'item') {
+			const { worldItemStore } = useWorld();
+			const worldItemId = targetEntity.instanceId as WorldItemId;
 
-		if (nearbyItem && nearbyItem.type === 'item') {
 			// 아이템 줍기: heldWorldItemIds에 추가
-			if (!entity.heldWorldItemIds.includes(nearbyItem.instanceId as any)) {
-				entity.heldWorldItemIds.push(nearbyItem.instanceId as any);
+			if (!entity.heldWorldItemIds.includes(worldItemId)) {
+				entity.heldWorldItemIds.push(worldItemId);
 			}
-			// 월드에서 아이템 제거
-			entity.worldContext.deleteWorldItem(nearbyItem.instanceId as any);
+
+			// 바디만 월드에서 제거 (엔티티는 삭제 X)
+			targetEntity.removeFromWorld();
+
+			// worldItem.world_character_id 업데이트
+			const worldItem = get(worldItemStore).data[worldItemId];
+			if (worldItem) {
+				worldItemStore.update((state) => ({
+					...state,
+					data: {
+						...state.data,
+						[worldItemId]: {
+							...worldItem,
+							world_character_id: entity.instanceId,
+							world_building_id: null,
+						},
+					},
+				}));
+			}
+
+			// 타겟 클리어
+			entity.currentTargetEntityId = undefined;
 		}
 	} else if (interactType === 'item_use') {
 		// TODO: heldWorldItemIds에서 아이템 사용
@@ -173,14 +210,7 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 		interactType === 'building_repair' ||
 		interactType === 'building_clean'
 	) {
-		// 현재 위치에서 가까운 건물 찾기
-		const nearbyBuilding = Object.values(entity.worldContext.entities).find((e) => {
-			if (e.type !== 'building') return false;
-			const distance = Math.hypot(e.x - entity.x, e.y - entity.y);
-			return distance < 50;
-		});
-
-		if (nearbyBuilding && nearbyBuilding.type === 'building') {
+		if (targetEntity.type === 'building') {
 			// TODO: 건물과 상호작용 (캐릭터 숨김, 건물 점유 등)
 			// 현재는 구현 보류
 		}
@@ -229,14 +259,19 @@ function checkActionCompletion(
 /**
  * 다음 액션으로 전환
  */
-function transitionToNextAction(entity: WorldCharacterEntity, action: any, currentTick: number): void {
+function transitionToNextAction(
+	entity: WorldCharacterEntity,
+	action: any,
+	currentTick: number
+): void {
 	if (!entity.currentBehaviorActionId) return;
 
 	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
 	const behaviorId = BehaviorActionIdUtils.behaviorId(entity.currentBehaviorActionId);
 
-	// 현재 액션 완료 시 path 클리어
+	// 현재 액션 완료 시 path와 타겟 클리어
 	entity.path = [];
+	entity.currentTargetEntityId = undefined;
 
 	// 다음 액션 ID 가져오기
 	const nextActionId =
@@ -282,7 +317,8 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	// 3. 우선순위에 따라 정렬
 	const allCandidates: Array<
-		{ type: 'need'; behaviorId: NeedBehaviorId } | { type: 'condition'; behaviorId: ConditionBehaviorId }
+		| { type: 'need'; behaviorId: NeedBehaviorId }
+		| { type: 'condition'; behaviorId: ConditionBehaviorId }
 	> = [
 		...candidateNeedBehaviors.map((behavior) => ({
 			type: 'need' as const,

@@ -148,6 +148,9 @@
 				없음
 			{/if}
 		</AccordionContentItem>
+		<AccordionContentItem label="현재 타겟">
+			{entity.currentTargetEntityId ?? '없음'}
+		</AccordionContentItem>
 		{#each needs as need}
 			{@const needData = $needStore.data[need.need_id]}
 			<AccordionContentItem label={needData?.name ?? need.need_id}>
