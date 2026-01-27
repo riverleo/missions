@@ -12,8 +12,8 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import {
-		getOnceInteractionTypeOptions,
-		getRepeatInteractionTypeOptions,
+		getBuildingOnceInteractionTypeOptions,
+		getBuildingRepeatInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -50,8 +50,8 @@
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const onceOptions = getOnceInteractionTypeOptions();
-	const repeatOptions = getRepeatInteractionTypeOptions();
+	const onceOptions = getBuildingOnceInteractionTypeOptions();
+	const repeatOptions = getBuildingRepeatInteractionTypeOptions();
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));

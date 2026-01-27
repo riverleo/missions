@@ -97,6 +97,61 @@ export function getRepeatInteractionTypeOptions(): {
 	}));
 }
 
+// Building interaction type options
+export function getBuildingOnceInteractionTypeOptions(): {
+	value: OnceInteractionType;
+	label: string;
+}[] {
+	return [
+		{ value: 'building_execute', label: onceInteractionTypeLabels.building_execute },
+		{ value: 'building_construct', label: onceInteractionTypeLabels.building_construct },
+		{ value: 'building_demolish', label: onceInteractionTypeLabels.building_demolish },
+	];
+}
+
+export function getBuildingRepeatInteractionTypeOptions(): {
+	value: RepeatInteractionType;
+	label: string;
+}[] {
+	return [
+		{ value: 'building_repair', label: repeatInteractionTypeLabels.building_repair },
+		{ value: 'building_clean', label: repeatInteractionTypeLabels.building_clean },
+	];
+}
+
+// Item interaction type options
+export function getItemOnceInteractionTypeOptions(): {
+	value: OnceInteractionType;
+	label: string;
+}[] {
+	return [
+		{ value: 'item_pick', label: onceInteractionTypeLabels.item_pick },
+		{ value: 'item_use', label: onceInteractionTypeLabels.item_use },
+	];
+}
+
+export function getItemRepeatInteractionTypeOptions(): {
+	value: RepeatInteractionType;
+	label: string;
+}[] {
+	return [];
+}
+
+// Character interaction type options
+export function getCharacterOnceInteractionTypeOptions(): {
+	value: OnceInteractionType;
+	label: string;
+}[] {
+	return [];
+}
+
+export function getCharacterRepeatInteractionTypeOptions(): {
+	value: RepeatInteractionType;
+	label: string;
+}[] {
+	return [{ value: 'character_hug', label: repeatInteractionTypeLabels.character_hug }];
+}
+
 // Backward compatibility - 구버전 함수명 유지 (once/repeat 모두 합쳐서 반환)
 export function getBehaviorInteractTypeLabel(type: OnceInteractionType | RepeatInteractionType): string {
 	if (type in onceInteractionTypeLabels) {

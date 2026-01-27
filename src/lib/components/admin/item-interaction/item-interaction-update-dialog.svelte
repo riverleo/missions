@@ -12,8 +12,8 @@
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import {
-		getOnceInteractionTypeOptions,
-		getRepeatInteractionTypeOptions,
+		getItemOnceInteractionTypeOptions,
+		getItemRepeatInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -50,8 +50,8 @@
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const onceOptions = getOnceInteractionTypeOptions();
-	const repeatOptions = getRepeatInteractionTypeOptions();
+	const onceOptions = getItemOnceInteractionTypeOptions();
+	const repeatOptions = getItemRepeatInteractionTypeOptions();
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));

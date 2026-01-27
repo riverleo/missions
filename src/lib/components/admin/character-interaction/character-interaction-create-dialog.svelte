@@ -13,11 +13,16 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import {
-		getOnceInteractionTypeOptions,
-		getRepeatInteractionTypeOptions,
+		getCharacterOnceInteractionTypeOptions,
+		getCharacterRepeatInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { CharacterId, OnceInteractionType, RepeatInteractionType, ScenarioId } from '$lib/types';
+	import type {
+		CharacterId,
+		OnceInteractionType,
+		RepeatInteractionType,
+		ScenarioId,
+	} from '$lib/types';
 
 	const {
 		characterStore,
@@ -36,8 +41,8 @@
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const onceOptions = getOnceInteractionTypeOptions();
-	const repeatOptions = getRepeatInteractionTypeOptions();
+	const onceOptions = getCharacterOnceInteractionTypeOptions();
+	const repeatOptions = getCharacterRepeatInteractionTypeOptions();
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
@@ -128,7 +133,7 @@
 							{/each}
 						</SelectContent>
 					</Select>
-					<ButtonGroupText>행동</ButtonGroupText>
+					<ButtonGroupText>상호 작용</ButtonGroupText>
 					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
 						<SelectTrigger class="flex-1">
 							{selectedBehaviorLabel}
