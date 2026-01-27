@@ -34,7 +34,10 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
-	import { getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
+	import {
+		getBehaviorInteractTypeOptions,
+		getBehaviorCompletionTypeOptions,
+	} from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -61,12 +64,7 @@
 	];
 
 	const behaviorTypes = getBehaviorInteractTypeOptions();
-
-	const completionTypes: { value: BehaviorCompletionType; label: string }[] = [
-		{ value: 'fixed', label: '고정 시간' },
-		{ value: 'completion', label: '목표 달성까지' },
-		{ value: 'immediate', label: '즉시 완료' },
-	];
+	const completionTypes = getBehaviorCompletionTypeOptions();
 
 	let isUpdating = $state(false);
 	let changes = $state<ConditionBehaviorAction | undefined>(undefined);
@@ -100,7 +98,7 @@
 		behaviorTypes.find((t) => t.value === changes?.behavior_interact_type)?.label ?? '행동 타입'
 	);
 	const selectedCompletionTypeLabel = $derived(
-		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '완료'
+		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '종료'
 	);
 	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
 	const selectedTargetValue = $derived.by(() => {
@@ -325,7 +323,7 @@
 						{/if}
 						{#if changes.type === 'interact' || changes.type === 'idle'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>완료</ButtonGroupText>
+								<ButtonGroupText>종료</ButtonGroupText>
 								<Select
 									type="single"
 									value={changes.behavior_completion_type}

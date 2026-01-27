@@ -3,6 +3,7 @@ import type {
 	CharacterFaceStateType,
 	BuildingStateType,
 	BehaviorInteractType,
+	BehaviorCompletionType,
 	ItemStateType,
 	TileStateType,
 	ColliderType,
@@ -46,6 +47,12 @@ const behaviorInteractTypeLabels: Record<BehaviorInteractType, string> = {
 	item_use: '아이템 사용',
 };
 
+const behaviorCompletionTypeLabels: Record<BehaviorCompletionType, string> = {
+	fixed: '고정 시간',
+	completion: '목표 달성까지',
+	immediate: '즉시',
+};
+
 export function getColliderTypeLabel(type: ColliderType): string {
 	return colliderTypeLabels[type];
 }
@@ -69,6 +76,20 @@ export function getBehaviorInteractTypeLabel(type: BehaviorInteractType): string
 export function getBehaviorInteractTypeOptions(): { value: BehaviorInteractType; label: string }[] {
 	return Object.entries(behaviorInteractTypeLabels).map(([value, label]) => ({
 		value: value as BehaviorInteractType,
+		label,
+	}));
+}
+
+export function getBehaviorCompletionTypeLabel(type: BehaviorCompletionType): string {
+	return behaviorCompletionTypeLabels[type];
+}
+
+export function getBehaviorCompletionTypeOptions(): {
+	value: BehaviorCompletionType;
+	label: string;
+}[] {
+	return Object.entries(behaviorCompletionTypeLabels).map(([value, label]) => ({
+		value: value as BehaviorCompletionType,
 		label,
 	}));
 }

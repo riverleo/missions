@@ -76,7 +76,7 @@ class WorldCharacterEntity extends Entity {
 - [ ] `behavior_completion_type`에 따른 완료 조건
   - fixed: `duration_ticks` 후 완료
   - completion: 목표 달성 시 완료
-  - immediate: 즉시 완료
+  - immediate: 즉시
 - [ ] 상호작용 결과 반영 (욕구 증가, 컨디션 변경 등)
 
 **IDLE 행동 (대기)**
