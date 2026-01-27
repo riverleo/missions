@@ -7,10 +7,18 @@ import type {
 	ConditionBehaviorId,
 	ConditionBehavior,
 	EntityId,
+	BuildingInteractionId,
+	ItemInteractionId,
+	CharacterInteractionId,
+	NeedFulfillmentId,
+	ConditionFulfillmentId,
 } from '$lib/types';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
+import { useBuilding } from '$lib/hooks/use-building';
+import { useItem } from '$lib/hooks/use-item';
+import { useCharacter } from '$lib/hooks/use-character';
 import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
 import { vectorUtils } from '$lib/utils/vector';
 
@@ -29,14 +37,11 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	// 현재 행동 액션 가져오기
 	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
 
+	const actionId = BehaviorActionIdUtils.actionId(entity.currentBehaviorActionId);
 	const action =
 		type === 'need'
-			? get(needBehaviorActionStore).data[
-					BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(entity.currentBehaviorActionId)
-				]
-			: get(conditionBehaviorActionStore).data[
-					BehaviorActionIdUtils.actionId<ConditionBehaviorActionId>(entity.currentBehaviorActionId)
-				];
+			? get(needBehaviorActionStore).data[actionId as NeedBehaviorActionId]
+			: get(conditionBehaviorActionStore).data[actionId as ConditionBehaviorActionId];
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
@@ -46,7 +51,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	// 1. Search: path가 없고 타겟이 없으면 대상 탐색 및 경로 설정
 	if (
-		(action.type === 'go' || action.type === 'interact') &&
+		(action.type === 'go' || action.type === 'interact' || action.type === 'fulfill') &&
 		entity.path.length === 0 &&
 		!entity.currentTargetEntityId
 	) {
@@ -54,11 +59,13 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 		return; // 경로 설정 후 다음 tick에서 실행
 	}
 
-	// 2. Go or Interact: 행동 실행
+	// 2. 행동 실행
 	if (action.type === 'go') {
 		executeGoAction(entity, action);
 	} else if (action.type === 'interact') {
 		executeInteractAction(entity, action);
+	} else if (action.type === 'fulfill') {
+		executeFulfillAction(entity, action, tick);
 	} else if (action.type === 'idle') {
 		executeIdleAction(entity, action);
 	}
@@ -77,28 +84,58 @@ function searchTargetAndSetPath(
 	entity: WorldCharacterEntity,
 	action: {
 		target_selection_method: string;
-		behavior_interact_type: string;
-		building_id?: string | null;
-		item_id?: string | null;
-		character_id?: string | null;
+		building_interaction_id?: string | null;
+		item_interaction_id?: string | null;
+		character_interaction_id?: string | null;
 	}
 ): void {
 	const { getInteractableEntityTemplates } = useBehavior();
-	const { worldBuildingStore, worldItemStore } = useWorld();
+	const { buildingInteractionStore } = useBuilding();
+	const { itemInteractionStore } = useItem();
+	const { characterInteractionStore } = useCharacter();
+	const { worldBuildingStore, worldItemStore, worldCharacterStore } = useWorld();
 	const worldEntities = Object.values(entity.worldContext.entities);
 
 	let targetEntity: any = undefined;
 
 	if (action.target_selection_method === 'explicit') {
-		// explicit: 지정된 대상으로 이동
-		if (action.building_id) {
-			targetEntity = worldEntities.find(
-				(e) => e.type === 'building' && e.instanceId === action.building_id
-			);
-		} else if (action.item_id) {
-			targetEntity = worldEntities.find(
-				(e) => e.type === 'item' && e.instanceId === action.item_id
-			);
+		// explicit: Interaction ID를 통해 타겟 엔티티 찾기
+		if (action.building_interaction_id) {
+			const interaction =
+				get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+			if (interaction) {
+				targetEntity = worldEntities.find(
+					(e) => {
+						if (e.type !== 'building') return false;
+						const worldBuilding = get(worldBuildingStore).data[e.instanceId as any];
+						return worldBuilding && worldBuilding.building_id === interaction.building_id;
+					}
+				);
+			}
+		} else if (action.item_interaction_id) {
+			const interaction =
+				get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+			if (interaction) {
+				targetEntity = worldEntities.find(
+					(e) => {
+						if (e.type !== 'item') return false;
+						const worldItem = get(worldItemStore).data[e.instanceId as any];
+						return worldItem && worldItem.item_id === interaction.item_id;
+					}
+				);
+			}
+		} else if (action.character_interaction_id) {
+			const interaction =
+				get(characterInteractionStore).data[action.character_interaction_id as CharacterInteractionId];
+			if (interaction) {
+				targetEntity = worldEntities.find(
+					(e) => {
+						if (e.type !== 'character') return false;
+						const worldCharacter = get(worldCharacterStore).data[e.instanceId as any];
+						return worldCharacter && worldCharacter.character_id === interaction.target_character_id;
+					}
+				);
+			}
 		}
 	} else if (
 		action.target_selection_method === 'search' ||
@@ -118,6 +155,9 @@ function searchTargetAndSetPath(
 			} else if (e.type === 'item') {
 				const worldItem = get(worldItemStore).data[e.instanceId as any];
 				return worldItem && templateIds.has(worldItem.item_id);
+			} else if (e.type === 'character') {
+				const worldCharacter = get(worldCharacterStore).data[e.instanceId as any];
+				return worldCharacter && templateIds.has(worldCharacter.character_id);
 			}
 			return false;
 		});
@@ -169,7 +209,7 @@ function executeGoAction(entity: WorldCharacterEntity, action: any): void {
 }
 
 /**
- * INTERACT 행동 실행 (상호작용)
+ * INTERACT 행동 실행 (상호작용 - once_interaction_type)
  */
 function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
 	if (!entity.currentTargetEntityId) return;
@@ -202,7 +242,28 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 		return;
 	}
 
-	const interactType = action.behavior_interact_type;
+	// 타겟에 도착: Interaction 가져오기
+	const { buildingInteractionStore } = useBuilding();
+	const { itemInteractionStore } = useItem();
+	const { characterInteractionStore } = useCharacter();
+
+	let interaction: any = undefined;
+	if (action.building_interaction_id) {
+		interaction =
+			get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+	} else if (action.item_interaction_id) {
+		interaction = get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+	} else if (action.character_interaction_id) {
+		interaction =
+			get(characterInteractionStore).data[action.character_interaction_id as CharacterInteractionId];
+	}
+
+	if (!interaction || !interaction.once_interaction_type) {
+		console.error('Interaction not found or not a once_interaction_type:', action);
+		return;
+	}
+
+	const interactType = interaction.once_interaction_type;
 
 	if (interactType === 'item_pick') {
 		if (targetEntity.type === 'item') {
@@ -247,55 +308,144 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 			);
 
 			if (heldItemEntity && heldItemEntity.type === 'item') {
-				// behavior_completion_type에 따라 처리
-				if (action.behavior_completion_type === 'immediate') {
-					// 즉시 소비: 아이템 삭제
-					entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
-					entity.worldContext.deleteWorldItem(lastHeldItemId);
-				} else if (action.behavior_completion_type === 'fixed') {
-					// 지속 사용: 매 틱마다 durability 감소
-					const { worldItemStore } = useWorld();
-					const worldItem = get(worldItemStore).data[lastHeldItemId];
-
-					if (
-						worldItem &&
-						worldItem.durability_ticks !== undefined &&
-						worldItem.durability_ticks !== null &&
-						worldItem.durability_ticks > 0
-					) {
-						const newDurability = worldItem.durability_ticks - 1;
-
-						// durability 업데이트
-						worldItemStore.update((state) => ({
-							...state,
-							data: {
-								...state.data,
-								[lastHeldItemId]: {
-									...worldItem,
-									durability_ticks: newDurability,
-								},
-							},
-						}));
-
-						// durability가 0이 되면 아이템 삭제
-						if (newDurability === 0) {
-							entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
-							entity.worldContext.deleteWorldItem(lastHeldItemId);
-						}
-					}
-				}
+				// once 타입: InteractionAction 체인 1회 실행 후 소비
+				// TODO: InteractionAction 체인 지원 (현재는 즉시 소비)
+				entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+				entity.worldContext.deleteWorldItem(lastHeldItemId);
 			}
 		}
-	} else if (
-		interactType === 'building_execute' ||
-		interactType === 'building_repair' ||
-		interactType === 'building_clean'
-	) {
+	} else if (interactType === 'building_execute') {
 		if (targetEntity.type === 'building') {
-			// TODO: 건물과 상호작용 (캐릭터 숨김, 건물 점유 등)
-			// 현재는 구현 보류
+			// TODO: 건물 실행 로직
+		}
+	} else if (interactType === 'building_construct') {
+		if (targetEntity.type === 'building') {
+			// TODO: 건물 건설 로직
+		}
+	} else if (interactType === 'building_demolish') {
+		if (targetEntity.type === 'building') {
+			// TODO: 건물 철거 로직
 		}
 	}
+}
+
+/**
+ * FULFILL 행동 실행 (욕구/컨디션 충족 - repeat_interaction_type)
+ */
+function executeFulfillAction(entity: WorldCharacterEntity, action: any, currentTick: number): void {
+	if (!entity.currentTargetEntityId) return;
+
+	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+	if (!targetEntity) {
+		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
+		entity.currentTargetEntityId = undefined;
+		entity.path = [];
+		return;
+	}
+
+	// 타겟과의 거리 확인 (임계값: 50)
+	const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+
+	if (distance >= 50) {
+		// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
+		if (entity.path.length === 0) {
+			const testPath = entity.worldContext.pathfinder.findPath(
+				vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+				vectorUtils.createVector(targetEntity.x, targetEntity.y)
+			);
+			if (testPath.length > 0) {
+				entity.path = testPath;
+			} else {
+				// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
+				entity.currentTargetEntityId = undefined;
+			}
+		}
+		return;
+	}
+
+	// 타겟에 도착: Fulfillment와 Interaction 가져오기
+	const isNeedAction = 'need_id' in action;
+	let fulfillment: any = undefined;
+
+	if (isNeedAction) {
+		const { needFulfillmentStore } = useCharacter();
+		if (action.need_fulfillment_id) {
+			fulfillment = get(needFulfillmentStore).data[action.need_fulfillment_id as NeedFulfillmentId];
+		} else {
+			// 자동 탐색: need_id로 필터링
+			const fulfillments = Object.values(get(needFulfillmentStore).data).filter(
+				(f) => f.need_id === action.need_id
+			);
+			fulfillment = fulfillments[0];
+		}
+	} else {
+		const { conditionFulfillmentStore } = useBuilding();
+		if (action.condition_fulfillment_id) {
+			fulfillment =
+				get(conditionFulfillmentStore).data[
+					action.condition_fulfillment_id as ConditionFulfillmentId
+				];
+		} else {
+			// 자동 탐색: condition_id로 필터링
+			const fulfillments = Object.values(get(conditionFulfillmentStore).data).filter(
+				(f) => f.condition_id === action.condition_id
+			);
+			fulfillment = fulfillments[0];
+		}
+	}
+
+	if (!fulfillment) {
+		console.error('Fulfillment not found for action:', action);
+		return;
+	}
+
+	// Interaction 가져오기
+	const { buildingInteractionStore } = useBuilding();
+	const { itemInteractionStore } = useItem();
+	const { characterInteractionStore } = useCharacter();
+
+	let interaction: any = undefined;
+	if (fulfillment.building_interaction_id) {
+		interaction =
+			get(buildingInteractionStore).data[
+				fulfillment.building_interaction_id as BuildingInteractionId
+			];
+	} else if (fulfillment.item_interaction_id) {
+		interaction =
+			get(itemInteractionStore).data[fulfillment.item_interaction_id as ItemInteractionId];
+	} else if (fulfillment.character_interaction_id) {
+		interaction =
+			get(characterInteractionStore).data[
+				fulfillment.character_interaction_id as CharacterInteractionId
+			];
+	}
+
+	if (!interaction || !interaction.repeat_interaction_type) {
+		console.error('Interaction not found or not a repeat_interaction_type:', fulfillment);
+		return;
+	}
+
+	// 매 틱마다 increase_per_tick 적용
+	if (isNeedAction) {
+		const needId = action.need_id;
+		const currentNeed = entity.worldCharacterNeeds[needId];
+		if (currentNeed && fulfillment.increase_per_tick) {
+			const newValue = Math.min(100, currentNeed.value + fulfillment.increase_per_tick);
+			entity.worldCharacterNeeds = {
+				...entity.worldCharacterNeeds,
+				[needId]: {
+					...currentNeed,
+					value: newValue,
+				},
+			};
+		}
+	} else {
+		// TODO: Condition fulfillment 로직 (building durability/cleanliness 등)
+		// 건물 수리/청소 등 구현 필요
+	}
+
+	// TODO: InteractionAction 체인 반복 로직
+	// 현재는 단순히 매 틱마다 증가만 처리
 }
 
 /**
@@ -303,7 +453,7 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
  */
 function executeIdleAction(entity: WorldCharacterEntity, action: any): void {
 	// 대기는 특별히 할 일이 없음
-	// 완료 조건만 체크 (duration_ticks)
+	// 완료 조건만 체크 (idle_duration_ticks)
 }
 
 /**
@@ -319,37 +469,71 @@ function checkActionCompletion(
 		return entity.path.length === 0;
 	}
 
-	// INTERACT/IDLE: behavior_completion_type에 따라
-	if (action.behavior_completion_type === 'immediate') {
-		// interact 액션의 경우, 타겟과의 거리가 가까울 때만 완료 (실제로 상호작용 완료)
-		if (action.type === 'interact') {
-			if (!entity.currentTargetEntityId) return false;
-			const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
-			if (!targetEntity) return false;
-			const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
-			return distance < 50;
+	// INTERACT: once_interaction_type에 따라
+	if (action.type === 'interact') {
+		if (!entity.currentTargetEntityId) return false;
+		const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+		if (!targetEntity) return false;
+
+		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
+		if (distance >= 50) return false; // 아직 도착하지 않음
+
+		// Interaction 가져오기
+		const { buildingInteractionStore } = useBuilding();
+		const { itemInteractionStore } = useItem();
+		const { characterInteractionStore } = useCharacter();
+
+		let interaction: any = undefined;
+		if (action.building_interaction_id) {
+			interaction =
+				get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+		} else if (action.item_interaction_id) {
+			interaction =
+				get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+		} else if (action.character_interaction_id) {
+			interaction =
+				get(characterInteractionStore).data[
+					action.character_interaction_id as CharacterInteractionId
+				];
 		}
-		// idle 액션은 즉시 완료
-		return true;
+
+		if (!interaction || !interaction.once_interaction_type) return false;
+
+		// once_interaction_type에 따라 완료 조건 확인
+		if (interaction.once_interaction_type === 'item_pick') {
+			// immediate: 타겟 도달 시 즉시 완료
+			return true;
+		} else {
+			// once: InteractionAction 체인 1회 완료 (TODO: 현재는 타겟 도달 시로 단순화)
+			return true;
+		}
 	}
 
-	if (action.behavior_completion_type === 'fixed') {
-		// interact 액션: 타겟에 도착했고 duration_ticks 경과
-		if (action.type === 'interact') {
-			if (!entity.currentTargetEntityId) return false;
-			const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
-			if (!targetEntity) return false;
-			const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
-			if (distance >= 50) return false; // 아직 도착하지 않음
-			return currentTick - entity.actionStartTick >= action.duration_ticks;
+	// FULFILL: 욕구/컨디션 충족 여부 확인
+	if (action.type === 'fulfill') {
+		const isNeedAction = 'need_id' in action;
+
+		if (isNeedAction) {
+			const { needBehaviorStore } = useBehavior();
+			const behavior = Object.values(get(needBehaviorStore).data).find(
+				(b) => b.need_id === action.need_id
+			);
+			if (!behavior) return false;
+
+			const need = entity.worldCharacterNeeds[action.need_id];
+			if (!need) return false;
+
+			// 욕구가 threshold를 넘으면 완료
+			return need.value > behavior.need_threshold;
+		} else {
+			// TODO: Condition 충족 확인 (건물 수리/청소 완료 등)
+			return false;
 		}
-		// idle 액션: duration_ticks 경과 확인
-		return currentTick - entity.actionStartTick >= action.duration_ticks;
 	}
 
-	if (action.behavior_completion_type === 'completion') {
-		// TODO: 목표 달성 여부 확인 (건물 수리/청소 완료 등)
-		return false;
+	// IDLE: idle_duration_ticks 경과 확인
+	if (action.type === 'idle') {
+		return currentTick - entity.actionStartTick >= action.idle_duration_ticks;
 	}
 
 	return false;

@@ -91,7 +91,7 @@ export type { Database };
 // ============================================================
 // Enum Type Exports
 // ============================================================
-export type LoopMode = Enums<'loop_mode'>;
+export type LoopType = Enums<'loop_type'>;
 export type ColliderType = Enums<'collider_type'>;
 export type BuildingStateType = Enums<'building_state_type'>;
 export type CharacterBodyStateType = Enums<'character_body_state_type'>;
@@ -105,12 +105,12 @@ export type PlayerQuestStatus = Enums<'player_quest_status'>;
 export type PlayerChapterStatus = Enums<'player_chapter_status'>;
 export type PlayerScenarioStatus = Enums<'player_scenario_status'>;
 export type DiceRollAction = Enums<'dice_roll_action'>;
-export type BehaviorInteractType = Enums<'behavior_interact_type'>;
+export type OnceInteractionType = Enums<'once_interaction_type'>;
+export type RepeatInteractionType = Enums<'repeat_interaction_type'>;
 export type ConditionFulfillmentType = Enums<'condition_fulfillment_type'>;
 export type NarrativeNodeType = Enums<'narrative_node_type'>;
 export type BehaviorActionType = Enums<'behavior_action_type'>;
-export type BehaviorTargetSelectionMethod = Enums<'behavior_target_selection_method'>;
-export type BehaviorCompletionType = Enums<'behavior_completion_type'>;
+export type TargetSelectionMethod = Enums<'target_selection_method'>;
 export type NeedFulfillmentTaskCondition = Enums<'need_fulfillment_task_condition'>;
 export type NeedFulfillmentType = Enums<'need_fulfillment_type'>;
 export type TileStateType = Enums<'tile_state_type'>;
@@ -988,24 +988,23 @@ export type ConditionBehaviorAction = BehaviorAction &
 		| 'scenario_id'
 		| 'condition_id'
 		| 'condition_behavior_id'
-		| 'building_id'
-		| 'item_id'
-		| 'character_id'
+		| 'building_interaction_id'
+		| 'item_interaction_id'
+		| 'character_interaction_id'
 		| 'next_condition_behavior_action_id'
 		| 'type'
-		| 'behavior_interact_type'
 		| 'target_selection_method'
-		| 'behavior_completion_type'
-		| 'duration_ticks'
+		| 'idle_duration_ticks'
 		| 'root'
 	> & {
 		id: ConditionBehaviorActionId;
 		scenario_id: ScenarioId;
 		condition_id: ConditionId;
 		condition_behavior_id: ConditionBehaviorId;
-		building_id: BuildingId | null;
-		item_id: ItemId | null;
-		character_id: CharacterId | null;
+		condition_fulfillment_id: ConditionFulfillmentId | null;
+		building_interaction_id: BuildingInteractionId | null;
+		item_interaction_id: ItemInteractionId | null;
+		character_interaction_id: CharacterInteractionId | null;
 		next_condition_behavior_action_id: ConditionBehaviorActionId | null;
 	};
 type ConditionBehaviorActionInsertRow = TablesInsert<'condition_behavior_actions'>;
@@ -1014,17 +1013,18 @@ export type ConditionBehaviorActionInsert = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
 	| 'next_condition_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	condition_id: ConditionId;
 	condition_behavior_id: ConditionBehaviorId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	condition_fulfillment_id?: ConditionFulfillmentId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 type ConditionBehaviorActionUpdateRow = TablesUpdate<'condition_behavior_actions'>;
@@ -1034,18 +1034,19 @@ export type ConditionBehaviorActionUpdate = Omit<
 	| 'scenario_id'
 	| 'condition_id'
 	| 'condition_behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
 	| 'next_condition_behavior_action_id'
 > & {
 	id?: ConditionBehaviorActionId;
 	scenario_id?: ScenarioId;
 	condition_id?: ConditionId;
 	condition_behavior_id?: ConditionBehaviorId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	condition_fulfillment_id?: ConditionFulfillmentId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	next_condition_behavior_action_id?: ConditionBehaviorActionId | null;
 };
 
@@ -1346,13 +1347,11 @@ type NeedBehaviorActionRow = Tables<'need_behavior_actions'>;
 // Common type for all behavior actions
 export type BehaviorAction = {
 	type: BehaviorActionType;
-	behavior_interact_type: BehaviorInteractType;
-	target_selection_method: BehaviorTargetSelectionMethod;
-	behavior_completion_type: BehaviorCompletionType;
-	duration_ticks: number;
-	building_id: BuildingId | null;
-	item_id: ItemId | null;
-	character_id: CharacterId | null;
+	target_selection_method: TargetSelectionMethod;
+	building_interaction_id: BuildingInteractionId | null;
+	item_interaction_id: ItemInteractionId | null;
+	character_interaction_id: CharacterInteractionId | null;
+	idle_duration_ticks: number;
 	root: boolean;
 };
 
@@ -1363,25 +1362,22 @@ export type NeedBehaviorAction = BehaviorAction &
 		| 'scenario_id'
 		| 'need_id'
 		| 'behavior_id'
-		| 'building_id'
-		| 'item_id'
-		| 'character_id'
-		| 'success_need_behavior_action_id'
-		| 'failure_need_behavior_action_id'
+		| 'building_interaction_id'
+		| 'item_interaction_id'
+		| 'character_interaction_id'
 		| 'type'
-		| 'behavior_interact_type'
 		| 'target_selection_method'
-		| 'behavior_completion_type'
-		| 'duration_ticks'
+		| 'idle_duration_ticks'
 		| 'root'
 	> & {
 		id: NeedBehaviorActionId;
 		scenario_id: ScenarioId;
 		need_id: NeedId;
 		behavior_id: NeedBehaviorId;
-		building_id: BuildingId | null;
-		item_id: ItemId | null;
-		character_id: CharacterId | null;
+		need_fulfillment_id: NeedFulfillmentId | null;
+		building_interaction_id: BuildingInteractionId | null;
+		item_interaction_id: ItemInteractionId | null;
+		character_interaction_id: CharacterInteractionId | null;
 		next_need_behavior_action_id: NeedBehaviorActionId | null;
 	};
 type NeedBehaviorActionInsertRow = TablesInsert<'need_behavior_actions'>;
@@ -1390,17 +1386,18 @@ export type NeedBehaviorActionInsert = Omit<
 	| 'scenario_id'
 	| 'need_id'
 	| 'behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
 	| 'next_need_behavior_action_id'
 > & {
 	scenario_id: ScenarioId;
 	need_id: NeedId;
 	behavior_id: NeedBehaviorId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	need_fulfillment_id?: NeedFulfillmentId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	next_need_behavior_action_id?: NeedBehaviorActionId | null;
 };
 type NeedBehaviorActionUpdateRow = TablesUpdate<'need_behavior_actions'>;
@@ -1410,18 +1407,19 @@ export type NeedBehaviorActionUpdate = Omit<
 	| 'scenario_id'
 	| 'need_id'
 	| 'behavior_id'
-	| 'building_id'
-	| 'item_id'
-	| 'character_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
 	| 'next_need_behavior_action_id'
 > & {
 	id?: NeedBehaviorActionId;
 	scenario_id?: ScenarioId;
 	need_id?: NeedId;
 	behavior_id?: NeedBehaviorId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	need_fulfillment_id?: NeedFulfillmentId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	next_need_behavior_action_id?: NeedBehaviorActionId | null;
 };
 

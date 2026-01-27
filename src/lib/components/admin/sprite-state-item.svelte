@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LoopMode } from '$lib/types';
+	import type { LoopType } from '$lib/types';
 	import type { Snippet } from 'svelte';
 	import { Item, ItemContent, ItemTitle, ItemHeader } from '$lib/components/ui/item';
 	import {
@@ -27,7 +27,7 @@
 		frame_from: number | null;
 		frame_to: number | null;
 		fps: number | null;
-		loop: LoopMode;
+		loop: LoopType;
 	}
 
 	export interface SpriteStateChange {
@@ -35,7 +35,7 @@
 		frame_from?: number;
 		frame_to?: number;
 		fps?: number;
-		loop?: LoopMode;
+		loop?: LoopType;
 	}
 
 	interface Props {
@@ -53,7 +53,7 @@
 
 	const atlasNames = Object.keys(atlases);
 	const fpsOptions = [8, 16, 24, 30, 60];
-	const loopOptions: { value: LoopMode; label: string }[] = [
+	const loopOptions: { value: LoopType; label: string }[] = [
 		{ value: 'loop', label: '반복' },
 		{ value: 'once', label: '1회' },
 		{ value: 'ping-pong', label: '핑퐁' },
@@ -90,7 +90,7 @@
 	}
 
 	function onLoopChange(value: string) {
-		onchange({ loop: value as LoopMode });
+		onchange({ loop: value as LoopType });
 	}
 </script>
 

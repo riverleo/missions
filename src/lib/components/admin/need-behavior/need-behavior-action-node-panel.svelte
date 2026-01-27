@@ -3,12 +3,12 @@
 	import type {
 		NeedBehaviorAction,
 		BehaviorActionType,
-		BehaviorTargetSelectionMethod,
-		BehaviorInteractType,
-		BehaviorCompletionType,
-		CharacterId,
-		BuildingId,
-		ItemId,
+		TargetSelectionMethod,
+		BuildingInteractionId,
+		ItemInteractionId,
+		CharacterInteractionId,
+		NeedFulfillmentId,
+		NeedFulfillment,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -16,11 +16,9 @@
 		InputGroup,
 		InputGroupInput,
 		InputGroupAddon,
-		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import { IconCircleDashedNumber1, IconInfoCircle } from '@tabler/icons-svelte';
-	import { Separator } from '$lib/components/ui/separator';
+	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
 		Select,
@@ -36,11 +34,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import {
-		getBehaviorInteractTypeLabel,
-		getBehaviorInteractTypeOptions,
-		getBehaviorCompletionTypeOptions,
-	} from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -50,45 +44,31 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorStore, needBehaviorActionStore, getInteractableEntityTemplates, admin } =
-		useBehavior();
-	const { buildingStore } = useBuilding();
-	const { characterStore } = useCharacter();
-	const { itemStore } = useItem();
+	const { needBehaviorActionStore, getInteractableEntityTemplates, admin } = useBehavior();
+	const { buildingStore, buildingInteractionStore } = useBuilding();
+	const { characterStore, characterInteractionStore, needFulfillmentStore } = useCharacter();
+	const { itemStore, itemInteractionStore } = useItem();
 	const flowNodes = useNodes();
 
-	const buildings = $derived(Object.values($buildingStore.data));
-	const characters = $derived(Object.values($characterStore.data));
-	const items = $derived(Object.values($itemStore.data));
+	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
+	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
+	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
+	const fulfillments = $derived<NeedFulfillment[]>(
+		Object.values($needFulfillmentStore.data).filter((f) => f.need_id === action?.need_id)
+	);
 
-	// 현재 액션의 behavior_interact_type에 따라 검색 가능한 대상
+	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
 		return getInteractableEntityTemplates(changes);
 	});
 
-	// 현재 액션의 behavior_interact_type에 따라 명시적으로 선택 가능한 대상
-	// 지정된 대상(explicit)은 fulfillment 조건 없이 모든 엔티티 선택 가능
-	const explicitTargets = $derived.by(() => {
-		if (!changes) return [];
-		const type = changes.behavior_interact_type;
-
-		if (type.startsWith('building_')) {
-			return buildings.map((b) => ({ id: b.id, name: b.name, type: 'building' as const }));
-		} else if (type.startsWith('item_')) {
-			return items.map((i) => ({ id: i.id, name: i.name, type: 'item' as const }));
-		}
-		return [];
-	});
-
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
 		{ value: 'go', label: '이동' },
-		{ value: 'interact', label: '상호작용' },
+		{ value: 'interact', label: '상호작용 (1회)' },
+		{ value: 'fulfill', label: '욕구 충족 (반복)' },
 		{ value: 'idle', label: '대기' },
 	];
-
-	const behaviorTypes = getBehaviorInteractTypeOptions();
-	const completionTypes = getBehaviorCompletionTypeOptions();
 
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
@@ -97,46 +77,82 @@
 	const selectedTypeLabel = $derived(
 		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
 	);
+
 	const selectedTargetMethodLabel = $derived.by(() => {
 		if (!changes) return '타깃 결정 방법';
-
-		if (changes.target_selection_method === 'search') return '새로운 탐색 대상';
-		if (changes.target_selection_method === 'search_or_continue') return '기존 선택 대상';
-
-		// explicit인 경우 선택된 엔티티 이름 표시
-		if (changes.target_selection_method === 'explicit') {
-			if (changes?.building_id) {
-				const building = buildings.find((b) => b.id === changes?.building_id);
-				return building ? building.name : '지정된 대상';
+		const c = changes; // Explicitly narrow type
+		if (c.target_selection_method === 'search') return '새로운 탐색 대상';
+		if (c.target_selection_method === 'search_or_continue') return '기존 선택 대상';
+		if (c.target_selection_method === 'explicit') {
+			// Interaction 이름 표시
+			if (c.building_interaction_id) {
+				const interaction = buildingInteractions.find((i) => i.id === c.building_interaction_id);
+				if (interaction) {
+					const building = $buildingStore.data[interaction.building_id];
+					const interactionType =
+						interaction.once_interaction_type || interaction.repeat_interaction_type;
+					return `${building?.name ?? '건물'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+				}
 			}
-			if (changes?.item_id) {
-				const item = items.find((i) => i.id === changes?.item_id);
-				return item ? item.name : '지정된 대상';
+			if (c.item_interaction_id) {
+				const interaction = itemInteractions.find((i) => i.id === c.item_interaction_id);
+				if (interaction) {
+					const item = $itemStore.data[interaction.item_id];
+					const interactionType =
+						interaction.once_interaction_type || interaction.repeat_interaction_type;
+					return `${item?.name ?? '아이템'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+				}
+			}
+			if (c.character_interaction_id) {
+				const interaction = characterInteractions.find((i) => i.id === c.character_interaction_id);
+				if (interaction) {
+					const character = $characterStore.data[interaction.target_character_id];
+					const interactionType =
+						interaction.once_interaction_type || interaction.repeat_interaction_type;
+					return `${character?.name ?? '캐릭터'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+				}
 			}
 			return '지정된 대상';
 		}
-
 		return '타깃 결정 방법';
 	});
-	const selectedBehaviorTypeLabel = $derived(
-		behaviorTypes.find((t) => t.value === changes?.behavior_interact_type)?.label ?? '행동 타입'
-	);
-	const selectedCompletionTypeLabel = $derived(
-		completionTypes.find((t) => t.value === changes?.behavior_completion_type)?.label ?? '종료'
-	);
+
+	const selectedFulfillmentLabel = $derived.by(() => {
+		if (!changes || !changes.need_fulfillment_id) return '자동 선택';
+		const c = changes; // Explicitly narrow type
+		const fulfillment = fulfillments.find((f) => f.id === c.need_fulfillment_id);
+		if (!fulfillment) return '자동 선택';
+
+		// Fulfillment의 interaction 정보 표시
+		if (fulfillment.building_interaction_id) {
+			const interaction = buildingInteractions.find(
+				(i) => i.id === fulfillment.building_interaction_id
+			);
+			if (interaction) {
+				const building = $buildingStore.data[interaction.building_id];
+				return building?.name ?? '건물';
+			}
+		}
+		if (fulfillment.item_interaction_id) {
+			const interaction = itemInteractions.find((i) => i.id === fulfillment.item_interaction_id);
+			if (interaction) {
+				const item = $itemStore.data[interaction.item_id];
+				return item?.name ?? '아이템';
+			}
+		}
+		return '자동 선택';
+	});
+
 	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
 	const selectedTargetValue = $derived.by(() => {
 		if (!changes) return undefined;
-
 		if (changes.target_selection_method === 'search') return 'search';
 		if (changes.target_selection_method === 'search_or_continue') return 'search_or_continue';
-
-		// explicit인 경우
 		if (changes.target_selection_method === 'explicit') {
-			if (changes.building_id) return `explicit:building:${changes.building_id}`;
-			if (changes.item_id) return `explicit:item:${changes.item_id}`;
+			if (changes.building_interaction_id) return `building:${changes.building_interaction_id}`;
+			if (changes.item_interaction_id) return `item:${changes.item_interaction_id}`;
+			if (changes.character_interaction_id) return `character:${changes.character_interaction_id}`;
 		}
-
 		return undefined;
 	});
 
@@ -156,41 +172,34 @@
 	function onTargetMethodChange(value: string | undefined) {
 		if (!changes || !value) return;
 
-		// "explicit:building:id" 또는 "search" 형식 파싱
-		if (value.startsWith('explicit:')) {
-			const parts = value.split(':');
-			const entityType = parts[1];
-			const entityId = parts[2];
+		// "building:id" 또는 "search" 형식 파싱
+		if (value.startsWith('building:') || value.startsWith('item:') || value.startsWith('character:')) {
+			const [entityType, entityId] = value.split(':');
 
 			changes.target_selection_method = 'explicit';
-			changes.building_id = null;
-			changes.character_id = null;
-			changes.item_id = null;
+			changes.building_interaction_id = null;
+			changes.item_interaction_id = null;
+			changes.character_interaction_id = null;
 
 			if (entityType === 'building' && entityId) {
-				changes.building_id = entityId as BuildingId;
+				changes.building_interaction_id = entityId as BuildingInteractionId;
 			} else if (entityType === 'item' && entityId) {
-				changes.item_id = entityId as ItemId;
+				changes.item_interaction_id = entityId as ItemInteractionId;
+			} else if (entityType === 'character' && entityId) {
+				changes.character_interaction_id = entityId as CharacterInteractionId;
 			}
 		} else {
-			changes.target_selection_method = value as BehaviorTargetSelectionMethod;
+			changes.target_selection_method = value as TargetSelectionMethod;
 			// search 모드로 변경 시 명시적 타깃 제거
-			changes.building_id = null;
-			changes.character_id = null;
-			changes.item_id = null;
+			changes.building_interaction_id = null;
+			changes.item_interaction_id = null;
+			changes.character_interaction_id = null;
 		}
 	}
 
-	function onBehaviorTypeChange(value: string | undefined) {
-		if (changes && value) {
-			changes.behavior_interact_type = value as BehaviorInteractType;
-		}
-	}
-
-	function onCompletionTypeChange(value: string | undefined) {
-		if (changes && value) {
-			changes.behavior_completion_type = value as BehaviorCompletionType;
-		}
+	function onFulfillmentChange(value: string | undefined) {
+		if (!changes) return;
+		changes.need_fulfillment_id = value ? (value as NeedFulfillmentId) : null;
 	}
 
 	async function onsubmit(e: SubmitEvent) {
@@ -215,13 +224,12 @@
 
 			await admin.updateNeedBehaviorAction(actionId, {
 				type: changes.type,
-				behavior_interact_type: changes.behavior_interact_type,
 				target_selection_method: changes.target_selection_method,
-				behavior_completion_type: changes.behavior_completion_type,
-				duration_ticks: changes.duration_ticks,
-				building_id: changes.building_id,
-				character_id: changes.character_id,
-				item_id: changes.item_id,
+				building_interaction_id: changes.building_interaction_id,
+				item_interaction_id: changes.item_interaction_id,
+				character_interaction_id: changes.character_interaction_id,
+				need_fulfillment_id: changes.need_fulfillment_id,
+				idle_duration_ticks: changes.idle_duration_ticks,
 				root: changes.root,
 			});
 
@@ -250,6 +258,7 @@
 			{#if changes}
 				<form {onsubmit} class="space-y-4">
 					<div class="space-y-2">
+						<!-- 액션 타입 -->
 						<ButtonGroup class="w-full">
 							<ButtonGroupText>행동</ButtonGroupText>
 							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
@@ -264,27 +273,8 @@
 							</Select>
 						</ButtonGroup>
 
-						{#if changes.type === 'go' || changes.type === 'interact'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.behavior_interact_type}
-									onValueChange={onBehaviorTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedBehaviorTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each behaviorTypes as behaviorType (behaviorType.value)}
-											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
-						{/if}
-
-						{#if changes.type === 'go' || changes.type === 'interact'}
+						<!-- interact 타입: Interaction 선택 -->
+						{#if changes.type === 'interact' || changes.type === 'go'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>대상</ButtonGroupText>
 								<Select
@@ -299,20 +289,139 @@
 										<SelectItem value="search">새로운 탐색 대상</SelectItem>
 										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
 
-										<SelectGroup>
-											<SelectLabel>지정된 대상</SelectLabel>
-											{#each explicitTargets as target (target.id)}
-												<SelectItem value={`explicit:${target.type}:${target.id}`}>
-													{target.name}
-												</SelectItem>
-											{/each}
-										</SelectGroup>
+										{#if buildingInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>건물 상호작용</SelectLabel>
+												{#each buildingInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
+													{@const building = $buildingStore.data[interaction.building_id]}
+													{@const interactionType = interaction.once_interaction_type}
+													<SelectItem value={`building:${interaction.id}`}>
+														{building?.name ?? '건물'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
+
+										{#if itemInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>아이템 상호작용</SelectLabel>
+												{#each itemInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
+													{@const item = $itemStore.data[interaction.item_id]}
+													{@const interactionType = interaction.once_interaction_type}
+													<SelectItem value={`item:${interaction.id}`}>
+														{item?.name ?? '아이템'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
+
+										{#if characterInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>캐릭터 상호작용</SelectLabel>
+												{#each characterInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
+													{@const character = $characterStore.data[interaction.target_character_id]}
+													{@const interactionType = interaction.once_interaction_type}
+													<SelectItem value={`character:${interaction.id}`}>
+														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
 									</SelectContent>
 								</Select>
 							</ButtonGroup>
 						{/if}
 
-						{#if (changes.type === 'go' || changes.type === 'interact') && changes.target_selection_method === 'search'}
+						<!-- fulfill 타입: Fulfillment 선택 -->
+						{#if changes.type === 'fulfill'}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>대상</ButtonGroupText>
+								<Select
+									type="single"
+									value={selectedTargetValue}
+									onValueChange={onTargetMethodChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedTargetMethodLabel}
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="search">새로운 탐색 대상</SelectItem>
+										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
+
+										{#if fulfillments.length > 0}
+											<SelectGroup>
+												<SelectLabel>충족 방법</SelectLabel>
+												{#each fulfillments as fulfillment (fulfillment.id)}
+													{@const interaction =
+														fulfillment.building_interaction_id
+															? buildingInteractions.find(
+																	(i) => i.id === fulfillment.building_interaction_id
+																)
+															: fulfillment.item_interaction_id
+																? itemInteractions.find(
+																		(i) => i.id === fulfillment.item_interaction_id
+																	)
+																: undefined}
+													{@const entity =
+														interaction && 'building_id' in interaction
+															? $buildingStore.data[interaction.building_id]
+															: interaction && 'item_id' in interaction
+																? $itemStore.data[interaction.item_id]
+																: undefined}
+													<SelectItem value={`explicit:fulfillment:${fulfillment.id}`}>
+														{entity?.name ?? '자동'}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>충족 방법</ButtonGroupText>
+								<Select
+									type="single"
+									value={changes.need_fulfillment_id ?? ''}
+									onValueChange={onFulfillmentChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedFulfillmentLabel}
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="">자동 선택</SelectItem>
+										{#each fulfillments as fulfillment (fulfillment.id)}
+											{@const interaction =
+												fulfillment.building_interaction_id
+													? buildingInteractions.find(
+															(i) => i.id === fulfillment.building_interaction_id
+														)
+													: fulfillment.item_interaction_id
+														? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
+														: undefined}
+											{@const entity =
+												interaction && 'building_id' in interaction
+													? $buildingStore.data[interaction.building_id]
+													: interaction && 'item_id' in interaction
+														? $itemStore.data[interaction.item_id]
+														: undefined}
+											<SelectItem value={fulfillment.id}>
+												{entity?.name ?? '자동'}
+											</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						<!-- search 모드일 때 검색 가능한 대상 표시 -->
+						{#if (changes.type === 'go' || changes.type === 'interact' || changes.type === 'fulfill') && changes.target_selection_method === 'search'}
 							<div class="px-2 text-right text-xs">
 								{#if interactableEntityTemplates.length > 0}
 									<div class="text-xs">
@@ -324,46 +433,15 @@
 							</div>
 						{/if}
 
-						{#if changes.type === 'interact' || changes.type === 'idle'}
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>종료</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.behavior_completion_type}
-									onValueChange={onCompletionTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedCompletionTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each completionTypes as completionType}
-											<SelectItem
-												value={completionType.value}
-												disabled={changes.behavior_interact_type.startsWith('item_')
-													? completionType.value !== 'immediate'
-													: completionType.value === 'immediate'}
-											>
-												{completionType.label}
-											</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
-						{/if}
-						{#if (changes.type === 'idle' || changes.type === 'interact') && changes.behavior_completion_type === 'fixed'}
+						<!-- idle 타입: 지속 시간 -->
+						{#if changes.type === 'idle'}
 							<InputGroup>
 								<InputGroupAddon align="inline-start">
 									<Tooltip>
 										<TooltipTrigger>
-											<InputGroupButton>지속 시간(틱)</InputGroupButton>
+											<InputGroupButton>대기 시간 (틱)</InputGroupButton>
 										</TooltipTrigger>
-										<TooltipContent>
-											{#if changes.type === 'idle'}
-												대기 시간을 설정합니다.
-											{:else}
-												고정 시간만큼 상호작용을 실행합니다.
-											{/if}
-										</TooltipContent>
+										<TooltipContent>대기 시간을 설정합니다.</TooltipContent>
 									</Tooltip>
 								</InputGroupAddon>
 								<InputGroupInput
@@ -371,7 +449,7 @@
 									step="1"
 									min="0"
 									placeholder="숫자 입력"
-									bind:value={changes.duration_ticks}
+									bind:value={changes.idle_duration_ticks}
 								/>
 							</InputGroup>
 						{/if}

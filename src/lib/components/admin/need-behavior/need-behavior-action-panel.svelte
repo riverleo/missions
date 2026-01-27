@@ -45,7 +45,6 @@
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'idle',
-				behavior_interact_type: 'building_execute',
 			});
 		} catch (error) {
 			console.error('Failed to create action:', error);

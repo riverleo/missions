@@ -4,7 +4,7 @@
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 		ItemState,
-		LoopMode,
+		LoopType,
 	} from '$lib/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
@@ -98,7 +98,7 @@
 			});
 			newAnimator.play({
 				name: bodyState.type,
-				loop: (bodyState.loop as LoopMode) ?? 'loop',
+				loop: (bodyState.loop as LoopType) ?? 'loop',
 			});
 			bodyAnimator = newAnimator;
 		});
@@ -127,7 +127,7 @@
 			});
 			newAnimator.play({
 				name: faceState.type,
-				loop: (faceState.loop as LoopMode) ?? 'loop',
+				loop: (faceState.loop as LoopType) ?? 'loop',
 			});
 			faceAnimator = newAnimator;
 		});
@@ -156,7 +156,7 @@
 			});
 			newAnimator.play({
 				name: heldItemState.type,
-				loop: (heldItemState.loop as LoopMode) ?? 'loop',
+				loop: (heldItemState.loop as LoopType) ?? 'loop',
 			});
 			heldItemAnimator = newAnimator;
 		});

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ItemId, ItemStateType, LoopMode } from '$lib/types';
+	import type { ItemId, ItemStateType, LoopType } from '$lib/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
@@ -46,7 +46,7 @@
 			});
 			newAnimator.play({
 				name: itemState.type,
-				loop: (itemState.loop as LoopMode) ?? 'loop',
+				loop: (itemState.loop as LoopType) ?? 'loop',
 			});
 			animator = newAnimator;
 		});

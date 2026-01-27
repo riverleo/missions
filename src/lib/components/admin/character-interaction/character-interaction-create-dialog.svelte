@@ -12,9 +12,12 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
+	import {
+		getOnceInteractionTypeOptions,
+		getRepeatInteractionTypeOptions,
+	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { CharacterId, BehaviorInteractType, ScenarioId } from '$lib/types';
+	import type { CharacterId, OnceInteractionType, RepeatInteractionType, ScenarioId } from '$lib/types';
 
 	const {
 		characterStore,
@@ -29,27 +32,29 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let targetCharacterId = $state<string>('');
-	let characterBehaviorType = $state<BehaviorInteractType>('building_execute');
+	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('character_hug');
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const behaviorTypeOptions = getBehaviorInteractTypeOptions();
+	const onceOptions = getOnceInteractionTypeOptions();
+	const repeatOptions = getRepeatInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedBehaviorLabel = $derived(
-		behaviorTypeOptions.find((o) => o.value === characterBehaviorType)?.label ?? '사용'
+		allOptions.find((o) => o.value === interactionType)?.label ?? '포옹'
 	);
 
 	function onTargetCharacterChange(value: string | undefined) {
 		targetCharacterId = value || '';
 	}
 
-	function onBehaviorTypeChange(value: string | undefined) {
+	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			characterBehaviorType = value as BehaviorInteractType;
+			interactionType = value as OnceInteractionType | RepeatInteractionType;
 		}
 	}
 
@@ -70,9 +75,12 @@
 		isSubmitting = true;
 
 		try {
+			const isOnce = onceOptions.some((o) => o.value === interactionType);
+
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId as CharacterId,
-				behavior_interact_type: characterBehaviorType,
+				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
+				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 				character_id: characterId ? (characterId as CharacterId) : null,
 			});
 
@@ -121,12 +129,12 @@
 						</SelectContent>
 					</Select>
 					<ButtonGroupText>행동</ButtonGroupText>
-					<Select type="single" value={characterBehaviorType} onValueChange={onBehaviorTypeChange}>
+					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
 						<SelectTrigger class="flex-1">
 							{selectedBehaviorLabel}
 						</SelectTrigger>
 						<SelectContent>
-							{#each behaviorTypeOptions as option (option.value)}
+							{#each allOptions as option (option.value)}
 								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>

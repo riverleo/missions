@@ -147,7 +147,6 @@
 				need_id: behavior.need_id,
 				behavior_id: behavior.id,
 				type: 'idle',
-				behavior_interact_type: 'building_execute',
 			});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴

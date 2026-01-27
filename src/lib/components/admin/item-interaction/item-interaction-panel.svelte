@@ -20,13 +20,19 @@
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import {
+		getBehaviorInteractTypeLabel,
+		getOnceInteractionTypeOptions,
+		getRepeatInteractionTypeOptions,
+	} from '$lib/utils/state-label';
 	import type {
 		ItemInteraction,
 		ItemInteractionId,
 		ItemInteractionAction,
 		ItemInteractionActionId,
 		CharacterId,
-		BehaviorInteractType,
+		OnceInteractionType,
+		RepeatInteractionType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -49,10 +55,16 @@
 
 	const rootAction = $derived(actions.find((a) => a.root));
 
-	let characterBehaviorType = $state<BehaviorInteractType>(
-		interaction.behavior_interact_type
+	let interactionType = $state<OnceInteractionType | RepeatInteractionType>(
+		(interaction.once_interaction_type ||
+			interaction.repeat_interaction_type ||
+			'item_use') as OnceInteractionType | RepeatInteractionType
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
+
+	const onceOptions = getOnceInteractionTypeOptions();
+	const repeatOptions = getRepeatInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedCharacter = $derived.by(() => {
 		if (!characterId) return null;
@@ -60,8 +72,11 @@
 	});
 
 	async function updateInteraction() {
+		const isOnce = onceOptions.some((o) => o.value === interactionType);
+
 		await admin.updateItemInteraction(interactionId, {
-			behavior_interact_type: characterBehaviorType,
+			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
+			repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
@@ -81,17 +96,6 @@
 
 	async function removeAction(actionId: ItemInteractionActionId) {
 		await admin.removeItemInteractionAction(actionId, interactionId);
-	}
-
-	function getBehaviorInteractTypeLabel(type: string) {
-		const labels: Record<string, string> = {
-			demolish: '철거',
-			use: '사용',
-			repair: '수리',
-			clean: '청소',
-			pick: '줍기',
-		};
-		return labels[type] ?? type;
 	}
 
 	function getBodyStateLabel(type: string) {
@@ -140,23 +144,23 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{getBehaviorInteractTypeLabel(characterBehaviorType)}
+									{getBehaviorInteractTypeLabel(interactionType)}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
 							<DropdownMenuRadioGroup
-								value={characterBehaviorType}
+								value={interactionType}
 								onValueChange={(value) => {
-									characterBehaviorType = value as BehaviorInteractType;
+									interactionType = value as OnceInteractionType | RepeatInteractionType;
 									updateInteraction();
 								}}
 							>
-								<DropdownMenuRadioItem value="demolish">철거</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="use">사용</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="repair">수리</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="clean">청소</DropdownMenuRadioItem>
-								<DropdownMenuRadioItem value="pick">줍기</DropdownMenuRadioItem>
+								{#each allOptions as option (option.value)}
+									<DropdownMenuRadioItem value={option.value}>
+										{option.label}
+									</DropdownMenuRadioItem>
+								{/each}
 							</DropdownMenuRadioGroup>
 						</DropdownMenuContent>
 					</DropdownMenu>

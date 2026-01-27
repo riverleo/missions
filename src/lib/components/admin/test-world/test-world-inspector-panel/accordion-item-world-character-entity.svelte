@@ -30,8 +30,8 @@
 
 	const { worldCharacterStore } = useWorld();
 	const { characterStore, needStore } = useCharacter();
-	const { buildingStore } = useBuilding();
-	const { itemStore } = useItem();
+	const { buildingStore, buildingInteractionStore } = useBuilding();
+	const { itemStore, itemInteractionStore } = useItem();
 	const {
 		needBehaviorStore,
 		needBehaviorActionStore,
@@ -63,11 +63,23 @@
 
 			if (!action) return undefined;
 
-			// building/item 이름 가져오기
-			const buildingName = action.building_id
-				? $buildingStore.data[action.building_id]?.name
-				: undefined;
-			const itemName = action.item_id ? $itemStore.data[action.item_id]?.name : undefined;
+			// Get names from interactions
+			let buildingName: string | undefined;
+			let itemName: string | undefined;
+
+			if (action.building_interaction_id) {
+				const interaction = $buildingInteractionStore.data[action.building_interaction_id];
+				if (interaction) {
+					buildingName = $buildingStore.data[interaction.building_id]?.name;
+				}
+			}
+
+			if (action.item_interaction_id) {
+				const interaction = $itemInteractionStore.data[action.item_interaction_id];
+				if (interaction) {
+					itemName = $itemStore.data[interaction.item_id]?.name;
+				}
+			}
 
 			const actionLabel = getBehaviorActionLabel({
 				action,
@@ -93,10 +105,23 @@
 
 			if (!action) return undefined;
 
-			const buildingName = action.building_id
-				? $buildingStore.data[action.building_id]?.name
-				: undefined;
-			const itemName = action.item_id ? $itemStore.data[action.item_id]?.name : undefined;
+			// Get names from interactions
+			let buildingName: string | undefined;
+			let itemName: string | undefined;
+
+			if (action.building_interaction_id) {
+				const interaction = $buildingInteractionStore.data[action.building_interaction_id];
+				if (interaction) {
+					buildingName = $buildingStore.data[interaction.building_id]?.name;
+				}
+			}
+
+			if (action.item_interaction_id) {
+				const interaction = $itemInteractionStore.data[action.item_interaction_id];
+				if (interaction) {
+					itemName = $itemStore.data[interaction.item_id]?.name;
+				}
+			}
 
 			const actionLabel = getBehaviorActionLabel({
 				action,

@@ -220,7 +220,6 @@
 					min_threshold: 0,
 					max_threshold: 100,
 					change_per_tick: 0,
-					behavior_interact_type: 'building_execute',
 				});
 
 				// 모든 업데이트 완료 후 노드/엣지 재생성
@@ -239,7 +238,6 @@
 				const newFulfillment = await admin.createConditionFulfillment(scenarioId, {
 					condition_id: conditionIdStr as ConditionId,
 					fulfillment_type: 'character',
-				behavior_interact_type: 'building_execute',
 					increase_per_tick: 10,
 				});
 

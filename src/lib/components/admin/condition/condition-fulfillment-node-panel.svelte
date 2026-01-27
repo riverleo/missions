@@ -3,7 +3,9 @@
 	import type {
 		ConditionFulfillment,
 		ConditionFulfillmentType,
-		BehaviorInteractType,
+		BuildingInteractionId,
+		ItemInteractionId,
+		CharacterInteractionId,
 		CharacterId,
 		ItemId,
 	} from '$lib/types';
@@ -54,11 +56,6 @@
 	let changes = $state<ConditionFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
-	const selectedBehaviorTypeLabel = $derived(
-		changes?.behavior_interact_type
-			? getBehaviorInteractTypeLabel(changes.behavior_interact_type)
-			: '행동 타입'
-	);
 
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.fulfillment_type === 'character') {
@@ -95,7 +92,6 @@
 		admin
 			.updateConditionFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
-				behavior_interact_type: changes.behavior_interact_type,
 				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
 				increase_per_tick: changes.increase_per_tick,
@@ -145,11 +141,6 @@
 		}
 	}
 
-	function onBehaviorTypeChange(value: string | undefined) {
-		if (value && changes) {
-			changes.behavior_interact_type = value as BehaviorInteractType;
-		}
-	}
 
 	const targetOptions = $derived.by(() => {
 		if (changes?.fulfillment_type === 'character') {
@@ -207,24 +198,6 @@
 									</SelectContent>
 								</Select>
 							</ButtonGroup>
-
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.behavior_interact_type}
-									onValueChange={onBehaviorTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedBehaviorTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each behaviorTypes as behaviorType (behaviorType.value)}
-											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
 						{/if}
 
 						<InputGroup>
@@ -236,9 +209,9 @@
 										{/snippet}
 									</TooltipTrigger>
 									<TooltipContent side="bottom">
-										이 충족 수단을 이용할 때
+										조건 충족 수단 이용 시
 										<br />
-										틱당 증가하는 컨디션 수치입니다
+										틱당 증가하는 수치입니다
 									</TooltipContent>
 								</Tooltip>
 							</InputGroupAddon>

@@ -4,7 +4,9 @@
 		NeedFulfillment,
 		NeedFulfillmentType,
 		NeedFulfillmentTaskCondition,
-		BehaviorInteractType,
+		BuildingInteractionId,
+		ItemInteractionId,
+		CharacterInteractionId,
 		BuildingId,
 		CharacterId,
 		ItemId,
@@ -78,11 +80,6 @@
 	let changes = $state<NeedFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
-	const selectedBehaviorTypeLabel = $derived(
-		changes?.behavior_interact_type
-			? getBehaviorInteractTypeLabel(changes.behavior_interact_type)
-			: '행동 타입'
-	);
 
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.fulfillment_type === 'building') {
@@ -126,7 +123,6 @@
 		admin
 			.updateNeedFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
-				behavior_interact_type: changes.behavior_interact_type,
 				building_id: changes.fulfillment_type === 'building' ? changes.building_id : null,
 				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
 				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
@@ -171,12 +167,6 @@
 	function onTaskConditionChange(value: string | undefined) {
 		if (changes) {
 			changes.task_condition = (value as NeedFulfillmentTaskCondition) || null;
-		}
-	}
-
-	function onBehaviorTypeChange(value: string | undefined) {
-		if (changes) {
-			changes.behavior_interact_type = value as BehaviorInteractType;
 		}
 	}
 
@@ -250,24 +240,6 @@
 										<SelectItem value="">전체</SelectItem>
 										{#each targetOptions as option (option.id)}
 											<SelectItem value={option.id}>{option.name}</SelectItem>
-										{/each}
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
-
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>상호작용</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.behavior_interact_type}
-									onValueChange={onBehaviorTypeChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedBehaviorTypeLabel}
-									</SelectTrigger>
-									<SelectContent>
-										{#each behaviorTypes as behaviorType (behaviorType.value)}
-											<SelectItem value={behaviorType.value}>{behaviorType.label}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>

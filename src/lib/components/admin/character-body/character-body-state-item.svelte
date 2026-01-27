@@ -4,7 +4,7 @@
 		CharacterFaceStateType,
 		CharacterBodyId,
 		CharacterBodyState,
-		LoopMode,
+		LoopType,
 	} from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
@@ -57,7 +57,7 @@
 			});
 			newAnimator.play({
 				name: bodyState.type,
-				loop: (bodyState.loop as LoopMode) ?? 'loop',
+				loop: (bodyState.loop as LoopType) ?? 'loop',
 			});
 			animator = newAnimator;
 		});

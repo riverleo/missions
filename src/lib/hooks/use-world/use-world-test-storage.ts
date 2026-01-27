@@ -55,7 +55,6 @@ export const defaultState: StoredState = {
 		created_at: new Date().toISOString(),
 		user_id: TEST_USER_ID,
 		scenario_snapshot_id: TEST_SCENARIO_SNAPSHOT_ID,
-		snapshot_id: null,
 	},
 };
 

@@ -5,7 +5,7 @@
 		CharacterId,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
-		LoopMode,
+		LoopType,
 	} from '$lib/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
@@ -67,7 +67,7 @@
 			});
 			newAnimator.play({
 				name: buildingState.type,
-				loop: (buildingState.loop as LoopMode) ?? 'loop',
+				loop: (buildingState.loop as LoopType) ?? 'loop',
 			});
 			animator = newAnimator;
 		});

@@ -1,4 +1,4 @@
-import type { LoopMode } from '$lib/types';
+import type { LoopType } from '$lib/types';
 import type { AtlasMetadata } from '$lib/types/atlas';
 import { atlases, DEFAULT_FPS, type SpriteAnimation } from './index';
 
@@ -53,7 +53,7 @@ export class SpriteAnimator {
 		onComplete,
 	}: {
 		name: string;
-		loop?: LoopMode;
+		loop?: LoopType;
 		onLoop?: () => void;
 		onComplete?: () => void;
 	}) {
@@ -82,7 +82,7 @@ export class SpriteAnimator {
 
 	private startFrameUpdate(
 		animation: SpriteAnimation,
-		loop: LoopMode,
+		loop: LoopType,
 		onLoop?: () => void,
 		onComplete?: () => void
 	) {

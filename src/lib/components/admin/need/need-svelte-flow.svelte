@@ -171,7 +171,6 @@
 			const newFulfillment = await admin.createNeedFulfillment(scenarioId, {
 				need_id: needId as NeedId,
 				fulfillment_type: 'building',
-				behavior_interact_type: 'building_execute',
 				increase_per_tick: 10,
 			});
 

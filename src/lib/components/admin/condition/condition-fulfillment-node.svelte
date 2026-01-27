@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { ConditionFulfillment } from '$lib/types';
+	import type { ConditionFulfillment, BuildingInteractionId, ItemInteractionId, CharacterInteractionId } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
@@ -16,28 +17,46 @@
 	const { data, id, selected = false }: Props = $props();
 	const fulfillment = $derived(data.fulfillment);
 
-	const { characterStore } = useCharacter();
-	const { itemStore } = useItem();
+	const { buildingStore, buildingInteractionStore } = useBuilding();
+	const { characterStore, characterInteractionStore } = useCharacter();
+	const { itemStore, itemInteractionStore } = useItem();
 
 	const typeLabel = $derived(() => {
-		const behaviorLabel = getBehaviorInteractTypeLabel(fulfillment.behavior_interact_type);
-
-		switch (fulfillment.fulfillment_type) {
-			case 'character': {
-				const character = fulfillment.character_id
-					? $characterStore.data[fulfillment.character_id]
-					: undefined;
-				return character ? `${character.name} ${behaviorLabel}` : `모든 캐릭터 ${behaviorLabel}`;
+		// Interaction 기반
+		if (fulfillment.building_interaction_id) {
+			const interaction = $buildingInteractionStore.data[fulfillment.building_interaction_id as BuildingInteractionId];
+			if (interaction) {
+				const building = $buildingStore.data[interaction.building_id];
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				return `${building?.name ?? '건물'} ${behaviorLabel}`;
 			}
-			case 'item': {
-				const item = fulfillment.item_id ? $itemStore.data[fulfillment.item_id] : undefined;
-				return item ? `${item.name} ${behaviorLabel}` : `모든 아이템 ${behaviorLabel}`;
-			}
-			case 'idle':
-				return `${behaviorLabel} 중 대기`;
-			default:
-				return fulfillment.fulfillment_type;
 		}
+		if (fulfillment.item_interaction_id) {
+			const interaction = $itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
+			if (interaction) {
+				const item = $itemStore.data[interaction.item_id];
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				return `${item?.name ?? '아이템'} ${behaviorLabel}`;
+			}
+		}
+		if (fulfillment.character_interaction_id) {
+			const interaction = $characterInteractionStore.data[fulfillment.character_interaction_id as CharacterInteractionId];
+			if (interaction) {
+				const character = $characterStore.data[interaction.target_character_id];
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				return `${character?.name ?? '캐릭터'} ${behaviorLabel}`;
+			}
+		}
+
+		// fulfillment_type 기반 (idle)
+		if (fulfillment.fulfillment_type === 'idle') {
+			return '대기';
+		}
+
+		return '상호작용 없음';
 	});
 </script>
 

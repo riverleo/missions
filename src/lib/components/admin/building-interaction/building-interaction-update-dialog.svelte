@@ -11,9 +11,17 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
-	import { getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
+	import {
+		getOnceInteractionTypeOptions,
+		getRepeatInteractionTypeOptions,
+	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { BuildingId, CharacterId, BehaviorInteractType } from '$lib/types';
+	import type {
+		BuildingId,
+		CharacterId,
+		OnceInteractionType,
+		RepeatInteractionType,
+	} from '$lib/types';
 
 	const {
 		buildingStore,
@@ -38,25 +46,30 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<string>('');
-	let characterBehaviorType = $state<BehaviorInteractType>('building_execute');
+	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('building_execute');
 	let characterId = $state<string>('');
 	let isSubmitting = $state(false);
 
-	const behaviorTypeOptions = getBehaviorInteractTypeOptions();
+	const onceOptions = getOnceInteractionTypeOptions();
+	const repeatOptions = getRepeatInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
-	const selectedBehaviorLabel = $derived(
-		behaviorTypeOptions.find((o) => o.value === characterBehaviorType)?.label ?? '사용'
+	const selectedInteractionLabel = $derived(
+		allOptions.find((o) => o.value === interactionType)?.label ?? '사용'
 	);
 
 	// interaction이 변경될 때 폼 초기화
 	$effect(() => {
 		if (interaction) {
 			buildingId = interaction.building_id;
-			characterBehaviorType = interaction.behavior_interact_type;
+			interactionType =
+				(interaction.once_interaction_type as OnceInteractionType | null) ||
+				(interaction.repeat_interaction_type as RepeatInteractionType | null) ||
+				'building_execute';
 			characterId = interaction.character_id || '';
 		}
 	});
@@ -65,9 +78,9 @@
 		buildingId = value || '';
 	}
 
-	function onBehaviorTypeChange(value: string | undefined) {
+	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			characterBehaviorType = value as BehaviorInteractType;
+			interactionType = value as OnceInteractionType | RepeatInteractionType;
 		}
 	}
 
@@ -88,9 +101,13 @@
 		isSubmitting = true;
 
 		try {
+			// Check if it's once or repeat type
+			const isOnce = onceOptions.some((o) => o.value === interactionType);
+
 			await admin.updateBuildingInteraction(interactionId, {
 				building_id: buildingId as BuildingId,
-				behavior_interact_type: characterBehaviorType,
+				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
+				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 				character_id: characterId ? (characterId as CharacterId) : null,
 			});
 
@@ -125,6 +142,20 @@
 				</ButtonGroup>
 
 				<ButtonGroup class="w-full">
+					<ButtonGroupText>상호작용 타입</ButtonGroupText>
+					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
+						<SelectTrigger class="flex-1">
+							{selectedInteractionLabel}
+						</SelectTrigger>
+						<SelectContent>
+							{#each allOptions as option (option.value)}
+								<SelectItem value={option.value}>{option.label}</SelectItem>
+							{/each}
+						</SelectContent>
+					</Select>
+				</ButtonGroup>
+
+				<ButtonGroup class="w-full">
 					<ButtonGroupText>캐릭터</ButtonGroupText>
 					<Select type="single" value={characterId} onValueChange={onCharacterChange}>
 						<SelectTrigger class="flex-1">
@@ -134,17 +165,6 @@
 							<SelectItem value="">모두</SelectItem>
 							{#each characters as character (character.id)}
 								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-					<ButtonGroupText>행동</ButtonGroupText>
-					<Select type="single" value={characterBehaviorType} onValueChange={onBehaviorTypeChange}>
-						<SelectTrigger class="flex-1">
-							{selectedBehaviorLabel}
-						</SelectTrigger>
-						<SelectContent>
-							{#each behaviorTypeOptions as option (option.value)}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>
 					</Select>

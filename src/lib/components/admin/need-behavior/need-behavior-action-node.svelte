@@ -1,12 +1,14 @@
 <script lang="ts">
-	import type { NeedBehaviorAction } from '$lib/types';
+	import type {
+		NeedBehaviorAction,
+		BuildingInteractionId,
+		ItemInteractionId,
+		CharacterInteractionId,
+	} from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
-	import {
-		getBehaviorInteractTypeLabel,
-		getBehaviorCompletionTypeLabel,
-	} from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
@@ -23,23 +25,49 @@
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
 
-	const { buildingStore } = useBuilding();
-	const { characterStore } = useCharacter();
-	const { itemStore } = useItem();
+	const { buildingStore, buildingInteractionStore } = useBuilding();
+	const { characterStore, characterInteractionStore, needFulfillmentStore } = useCharacter();
+	const { itemStore, itemInteractionStore } = useItem();
+
+	const interactionInfo = $derived(() => {
+		if (action.building_interaction_id) {
+			const interaction = $buildingInteractionStore.data[action.building_interaction_id];
+			if (!interaction) return undefined;
+			const building = $buildingStore.data[interaction.building_id];
+			const interactionType =
+				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			return {
+				target: `"${building?.name ?? '건물'}" 건물`,
+				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+			};
+		}
+		if (action.item_interaction_id) {
+			const interaction = $itemInteractionStore.data[action.item_interaction_id];
+			if (!interaction) return undefined;
+			const item = $itemStore.data[interaction.item_id];
+			const interactionType =
+				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			return {
+				target: `"${item?.name ?? '아이템'}" 아이템`,
+				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+			};
+		}
+		if (action.character_interaction_id) {
+			const interaction = $characterInteractionStore.data[action.character_interaction_id];
+			if (!interaction) return undefined;
+			const character = $characterStore.data[interaction.target_character_id];
+			const interactionType =
+				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			return {
+				target: `"${character?.name ?? '캐릭터'}" 캐릭터`,
+				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+			};
+		}
+		return undefined;
+	});
 
 	const targetLabel = $derived(() => {
-		if (action.building_id) {
-			const building = $buildingStore.data[action.building_id];
-			return `"${building?.name ?? '건물'}" 건물`;
-		}
-		if (action.character_id) {
-			const character = $characterStore.data[action.character_id];
-			return `"${character?.name ?? '캐릭터'}" 캐릭터`;
-		}
-		if (action.item_id) {
-			const item = $itemStore.data[action.item_id];
-			return `"${item?.name ?? '아이템'}" 아이템`;
-		}
+		if (interactionInfo()) return interactionInfo()?.target;
 		// 명시적 대상이 없을 때 target_selection_method에 따라 레이블 생성
 		if (action.target_selection_method === 'search') {
 			return '새로운 탐색 대상';
@@ -51,8 +79,7 @@
 	});
 
 	const behaviorTypeLabel = $derived(() => {
-		if (!action.behavior_interact_type) return undefined;
-		return getBehaviorInteractTypeLabel(action.behavior_interact_type);
+		return interactionInfo()?.behaviorLabel;
 	});
 
 	const typeLabel = $derived(() => {
@@ -69,35 +96,56 @@
 			return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
 		}
 		if (action.type === 'interact') {
-			const completionLabel =
-				action.behavior_completion_type === 'fixed'
-					? `${action.duration_ticks}틱 동안`
-					: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
-
-			// target_selection_method에 따른 라벨인 경우 단순 조합
-			if (
-				behaviorLabel &&
-				target &&
-				(action.target_selection_method === 'search' ||
-					action.target_selection_method === 'search_or_continue')
-			) {
-				return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
-			}
-			// 명시적 대상이 지정된 경우
 			if (behaviorLabel && target) {
-				return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
+				return `${josa(target, '을를')} ${behaviorLabel}`;
 			}
 			if (behaviorLabel) {
-				return `${completionLabel} ${behaviorLabel}`;
+				return behaviorLabel;
 			}
 			return target ? `${josa(target, '와과')} 상호작용` : '자동 상호작용';
 		}
+		if (action.type === 'fulfill') {
+			const fulfillment = action.need_fulfillment_id
+				? $needFulfillmentStore.data[action.need_fulfillment_id]
+				: undefined;
+			const fulfillmentLabel = fulfillment
+				? (() => {
+						if (fulfillment.building_interaction_id) {
+							const interaction =
+								$buildingInteractionStore.data[
+									fulfillment.building_interaction_id as BuildingInteractionId
+								];
+							const building = interaction
+								? $buildingStore.data[interaction.building_id]
+								: undefined;
+							return building?.name ?? '건물';
+						}
+						if (fulfillment.item_interaction_id) {
+							const interaction =
+								$itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
+							const item = interaction ? $itemStore.data[interaction.item_id] : undefined;
+							return item?.name ?? '아이템';
+						}
+						if (fulfillment.character_interaction_id) {
+							const interaction =
+								$characterInteractionStore.data[
+									fulfillment.character_interaction_id as CharacterInteractionId
+								];
+							const character = interaction
+								? $characterStore.data[interaction.target_character_id]
+								: undefined;
+							return character?.name ?? '캐릭터';
+						}
+						return '자동';
+					})()
+				: '자동';
+			return `${fulfillmentLabel}로 욕구 충족`;
+		}
 		if (action.type === 'idle') {
-			const completionLabel =
-				action.behavior_completion_type === 'fixed'
-					? `${action.duration_ticks}틱 동안`
-					: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
-			return `${completionLabel} 대기`;
+			const durationLabel = action.idle_duration_ticks
+				? `${action.idle_duration_ticks}틱 동안`
+				: '무한히';
+			return `${durationLabel} 대기`;
 		}
 		return action.type;
 	});

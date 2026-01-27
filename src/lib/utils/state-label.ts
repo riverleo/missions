@@ -2,8 +2,6 @@ import type {
 	CharacterBodyStateType,
 	CharacterFaceStateType,
 	BuildingStateType,
-	BehaviorInteractType,
-	BehaviorCompletionType,
 	ItemStateType,
 	TileStateType,
 	ColliderType,
@@ -12,7 +10,8 @@ import type {
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
 	BehaviorActionType,
-	BehaviorTargetSelectionMethod,
+	OnceInteractionType,
+	RepeatInteractionType,
 } from '$lib/types';
 import { josa } from './josa';
 
@@ -43,19 +42,18 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 	constructing: '건설 중',
 };
 
-const behaviorInteractTypeLabels: Record<BehaviorInteractType, string> = {
-	building_execute: '건물 사용',
-	building_demolish: '건물 철거',
-	building_repair: '건물 수리',
-	building_clean: '건물 청소',
+const onceInteractionTypeLabels: Record<OnceInteractionType, string> = {
 	item_pick: '아이템 줍기',
 	item_use: '아이템 사용',
+	building_execute: '건물 사용',
+	building_construct: '건물 건설',
+	building_demolish: '건물 철거',
 };
 
-const behaviorCompletionTypeLabels: Record<BehaviorCompletionType, string> = {
-	fixed: '고정 시간',
-	completion: '목표 달성까지',
-	immediate: '즉시',
+const repeatInteractionTypeLabels: Record<RepeatInteractionType, string> = {
+	building_repair: '건물 수리',
+	building_clean: '건물 청소',
+	character_hug: '캐릭터 포옹',
 };
 
 export function getColliderTypeLabel(type: ColliderType): string {
@@ -74,29 +72,44 @@ export function getBuildingStateLabel(state: BuildingStateType): string {
 	return buildingStateLabels[state];
 }
 
-export function getBehaviorInteractTypeLabel(type: BehaviorInteractType): string {
-	return behaviorInteractTypeLabels[type];
+export function getOnceInteractionTypeLabel(type: OnceInteractionType): string {
+	return onceInteractionTypeLabels[type];
 }
 
-export function getBehaviorInteractTypeOptions(): { value: BehaviorInteractType; label: string }[] {
-	return Object.entries(behaviorInteractTypeLabels).map(([value, label]) => ({
-		value: value as BehaviorInteractType,
+export function getOnceInteractionTypeOptions(): { value: OnceInteractionType; label: string }[] {
+	return Object.entries(onceInteractionTypeLabels).map(([value, label]) => ({
+		value: value as OnceInteractionType,
 		label,
 	}));
 }
 
-export function getBehaviorCompletionTypeLabel(type: BehaviorCompletionType): string {
-	return behaviorCompletionTypeLabels[type];
+export function getRepeatInteractionTypeLabel(type: RepeatInteractionType): string {
+	return repeatInteractionTypeLabels[type];
 }
 
-export function getBehaviorCompletionTypeOptions(): {
-	value: BehaviorCompletionType;
+export function getRepeatInteractionTypeOptions(): {
+	value: RepeatInteractionType;
 	label: string;
 }[] {
-	return Object.entries(behaviorCompletionTypeLabels).map(([value, label]) => ({
-		value: value as BehaviorCompletionType,
+	return Object.entries(repeatInteractionTypeLabels).map(([value, label]) => ({
+		value: value as RepeatInteractionType,
 		label,
 	}));
+}
+
+// Backward compatibility - 구버전 함수명 유지 (once/repeat 모두 합쳐서 반환)
+export function getBehaviorInteractTypeLabel(type: OnceInteractionType | RepeatInteractionType): string {
+	if (type in onceInteractionTypeLabels) {
+		return onceInteractionTypeLabels[type as OnceInteractionType];
+	}
+	return repeatInteractionTypeLabels[type as RepeatInteractionType];
+}
+
+export function getBehaviorInteractTypeOptions(): { value: OnceInteractionType | RepeatInteractionType; label: string }[] {
+	return [
+		...getOnceInteractionTypeOptions(),
+		...getRepeatInteractionTypeOptions(),
+	];
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {
@@ -166,49 +179,20 @@ export function getBehaviorActionLabel(params: {
 		}
 	}
 
-	const behaviorLabel = getBehaviorInteractTypeLabel(action.behavior_interact_type);
-
 	if (action.type === 'go') {
-		if (behaviorLabel && target) {
-			return `${josa(behaviorLabel, '을를')} 위해 ${josa(target, '으로로')} 이동`;
-		}
-		if (behaviorLabel) {
-			return `${josa(behaviorLabel, '을를')} 위해 이동`;
-		}
-		return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
+		return target ? `${josa(target, '으로로')} 이동` : '이동';
 	}
 
 	if (action.type === 'interact') {
-		const completionLabel =
-			action.behavior_completion_type === 'fixed'
-				? `${action.duration_ticks}틱 동안`
-				: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
+		return target ? `${josa(target, '와과')} 상호작용` : '상호작용';
+	}
 
-		// target_selection_method에 따른 라벨인 경우 단순 조합
-		if (
-			behaviorLabel &&
-			target &&
-			(action.target_selection_method === 'search' ||
-				action.target_selection_method === 'search_or_continue')
-		) {
-			return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
-		}
-		// 명시적 대상이 지정된 경우
-		if (behaviorLabel && target) {
-			return `${josa(target, '을를')} ${completionLabel} ${behaviorLabel}`;
-		}
-		if (behaviorLabel) {
-			return `${completionLabel} ${behaviorLabel}`;
-		}
-		return target ? `${josa(target, '와과')} 상호작용` : '자동 상호작용';
+	if (action.type === 'fulfill') {
+		return target ? `${target}에서 욕구 충족` : '욕구 충족';
 	}
 
 	if (action.type === 'idle') {
-		const completionLabel =
-			action.behavior_completion_type === 'fixed'
-				? `${action.duration_ticks}틱 동안`
-				: getBehaviorCompletionTypeLabel(action.behavior_completion_type);
-		return `${completionLabel} 대기`;
+		return `${action.idle_duration_ticks}틱 동안 대기`;
 	}
 
 	return action.type;
