@@ -167,8 +167,8 @@ export type Database = {
           character_scale: number
           created_at: string
           created_by: string | null
-          duration_ticks: number
           id: string
+          idle_duration_ticks: number
           next_building_interaction_action_id: string | null
           root: boolean
           scenario_id: string
@@ -184,8 +184,8 @@ export type Database = {
           character_scale?: number
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           next_building_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
@@ -201,8 +201,8 @@ export type Database = {
           character_scale?: number
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           next_building_interaction_action_id?: string | null
           root?: boolean
           scenario_id?: string
@@ -690,8 +690,8 @@ export type Database = {
           character_interaction_id: string
           created_at: string
           created_by: string | null
-          duration_ticks: number
           id: string
+          idle_duration_ticks: number
           next_character_interaction_action_id: string | null
           root: boolean
           scenario_id: string
@@ -710,8 +710,8 @@ export type Database = {
           character_interaction_id: string
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           next_character_interaction_action_id?: string | null
           root?: boolean
           scenario_id: string
@@ -730,8 +730,8 @@ export type Database = {
           character_interaction_id?: string
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           next_character_interaction_action_id?: string | null
           root?: boolean
           scenario_id?: string
@@ -1392,8 +1392,8 @@ export type Database = {
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           created_at: string
           created_by: string | null
-          duration_ticks: number
           id: string
+          idle_duration_ticks: number
           item_id: string
           item_interaction_id: string
           item_offset_x: number
@@ -1409,8 +1409,8 @@ export type Database = {
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           item_id: string
           item_interaction_id: string
           item_offset_x?: number
@@ -1426,8 +1426,8 @@ export type Database = {
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           created_at?: string
           created_by?: string | null
-          duration_ticks?: number
           id?: string
+          idle_duration_ticks?: number
           item_id?: string
           item_interaction_id?: string
           item_offset_x?: number
