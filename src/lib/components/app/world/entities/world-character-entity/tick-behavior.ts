@@ -302,8 +302,18 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 		behaviorPriorityStore,
 	} = useBehavior();
 
+	const allNeedBehaviors = Object.values(get(needBehaviorStore).data);
+	const allNeedBehaviorActions = Object.values(get(needBehaviorActionStore).data);
+
+	console.log('[selectNewBehavior]', {
+		entity: entity.id,
+		allNeedBehaviors: allNeedBehaviors.length,
+		allNeedBehaviorActions: allNeedBehaviorActions.length,
+		needs: entity.worldCharacterNeeds,
+	});
+
 	// 1. 후보 need behaviors 찾기 (threshold 이하인 욕구)
-	const candidateNeedBehaviors = Object.values(get(needBehaviorStore).data).filter((behavior) => {
+	const candidateNeedBehaviors = allNeedBehaviors.filter((behavior) => {
 		const need = entity.worldCharacterNeeds[behavior.need_id];
 		if (!need) return false;
 
@@ -329,6 +339,12 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 			behaviorId: behavior.id,
 		})),
 	];
+
+	console.log('[selectNewBehavior] candidates:', {
+		needBehaviors: candidateNeedBehaviors.length,
+		conditionBehaviors: candidateConditionBehaviors.length,
+		total: allCandidates.length,
+	});
 
 	if (allCandidates.length === 0) {
 		// 후보가 없으면 종료
@@ -382,4 +398,10 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 		rootAction.id
 	);
 	entity.actionStartTick = tick;
+
+	console.log('[selectNewBehavior] selected:', {
+		behaviorId: selected.behaviorId,
+		actionId: rootAction.id,
+		currentBehaviorActionId: entity.currentBehaviorActionId,
+	});
 }
