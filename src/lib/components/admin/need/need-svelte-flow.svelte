@@ -167,10 +167,10 @@
 		try {
 			const needId = parseNeedNodeId(sourceNode.id);
 
-			// 새 fulfillment 생성
+			// 새 fulfillment 생성 (기본값은 idle 타입)
 			const newFulfillment = await admin.createNeedFulfillment(scenarioId, {
 				need_id: needId as NeedId,
-				fulfillment_type: 'building',
+				fulfillment_type: 'idle',
 				increase_per_tick: 10,
 			});
 

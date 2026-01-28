@@ -3,11 +3,8 @@
 	import type {
 		ConditionFulfillment,
 		ConditionFulfillmentType,
-		BuildingInteractionId,
 		ItemInteractionId,
 		CharacterInteractionId,
-		CharacterId,
-		ItemId,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -23,7 +20,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useItem } from '$lib/hooks/use-item';
-	import { getBehaviorInteractTypeLabel, getBehaviorInteractTypeOptions } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -33,20 +30,20 @@
 	let { fulfillment }: Props = $props();
 
 	const { admin } = useBuilding();
-	const { characterStore } = useCharacter();
-	const { itemStore } = useItem();
+	const { characterStore, characterInteractionStore } = useCharacter();
+	const { itemStore, itemInteractionStore } = useItem();
 	const flowNodes = useNodes();
 
 	const characters = $derived(Object.values($characterStore.data));
 	const items = $derived(Object.values($itemStore.data));
+	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
+	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
 
 	const fulfillmentTypeOptions: { value: ConditionFulfillmentType; label: string }[] = [
 		{ value: 'character', label: '캐릭터' },
 		{ value: 'item', label: '아이템' },
 		{ value: 'idle', label: '대기' },
 	];
-
-	const behaviorTypes = getBehaviorInteractTypeOptions();
 
 	function getTypeLabel(type: ConditionFulfillmentType) {
 		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
@@ -58,21 +55,33 @@
 
 
 	const selectedTargetLabel = $derived.by(() => {
-		if (changes?.fulfillment_type === 'character') {
-			if (changes?.character_id) {
-				const character = characters.find((c) => c.id === changes?.character_id);
-				return character?.name ?? '캐릭터 선택';
+		if (changes?.fulfillment_type === 'character' && changes?.character_interaction_id) {
+			const interaction = characterInteractions.find((i) => i.id === changes?.character_interaction_id);
+			if (interaction) {
+				const targetCharacter = characters.find((c) => c.id === interaction.target_character_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 			}
-			return '전체';
 		}
-		if (changes?.fulfillment_type === 'item') {
-			if (changes?.item_id) {
-				const item = items.find((i) => i.id === changes?.item_id);
-				return item?.name ?? '아이템 선택';
+		if (changes?.fulfillment_type === 'item' && changes?.item_interaction_id) {
+			const interaction = itemInteractions.find((i) => i.id === changes?.item_interaction_id);
+			if (interaction) {
+				const item = items.find((i) => i.id === interaction.item_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 			}
-			return '전체';
 		}
-		return '선택...';
+		return '상호작용 선택...';
 	});
 
 	$effect(() => {
@@ -92,8 +101,8 @@
 		admin
 			.updateConditionFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
-				character_id: changes.fulfillment_type === 'character' ? changes.character_id : null,
-				item_id: changes.fulfillment_type === 'item' ? changes.item_id : null,
+				character_interaction_id: changes.fulfillment_type === 'character' ? changes.character_interaction_id : null,
+				item_interaction_id: changes.fulfillment_type === 'item' ? changes.item_interaction_id : null,
 				increase_per_tick: changes.increase_per_tick,
 			})
 			.then(() => {
@@ -126,8 +135,8 @@
 		if (value && changes) {
 			changes.fulfillment_type = value as ConditionFulfillmentType;
 			// 타입 변경 시 대상 ID 초기화
-			changes.character_id = null;
-			changes.item_id = null;
+			changes.character_interaction_id = null;
+			changes.item_interaction_id = null;
 		}
 	}
 
@@ -135,26 +144,50 @@
 		if (!changes) return;
 		const id = value && value !== '' ? value : null;
 		if (changes.fulfillment_type === 'character') {
-			changes.character_id = id as CharacterId | null;
+			changes.character_interaction_id = id as CharacterInteractionId | null;
 		} else if (changes.fulfillment_type === 'item') {
-			changes.item_id = id as ItemId | null;
+			changes.item_interaction_id = id as ItemInteractionId | null;
 		}
 	}
 
 
 	const targetOptions = $derived.by(() => {
 		if (changes?.fulfillment_type === 'character') {
-			return characters.map((c) => ({ id: c.id, name: c.name }));
+			return characterInteractions.map((interaction) => {
+				const targetCharacter = characters.find((c) => c.id === interaction.target_character_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return {
+					id: interaction.id,
+					name: `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`,
+				};
+			});
 		}
 		if (changes?.fulfillment_type === 'item') {
-			return items.map((i) => ({ id: i.id, name: i.name }));
+			return itemInteractions.map((interaction) => {
+				const item = items.find((i) => i.id === interaction.item_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return {
+					id: interaction.id,
+					name: `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`,
+				};
+			});
 		}
 		return [];
 	});
 
 	const selectedTargetId = $derived.by(() => {
-		if (changes?.fulfillment_type === 'character') return changes.character_id;
-		if (changes?.fulfillment_type === 'item') return changes.item_id;
+		if (changes?.fulfillment_type === 'character') return changes.character_interaction_id;
+		if (changes?.fulfillment_type === 'item') return changes.item_interaction_id;
 		return undefined;
 	});
 
@@ -185,13 +218,16 @@
 
 						{#if hasTargetSelector}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상</ButtonGroupText>
+								<ButtonGroupText>상호작용</ButtonGroupText>
 								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
-										{selectedTargetLabel}
+										{#if selectedTargetLabel.length > 15}
+											{selectedTargetLabel.substring(0, 15) + '...'}
+										{:else}
+											{selectedTargetLabel}
+										{/if}
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="">전체</SelectItem>
 										{#each targetOptions as option (option.id)}
 											<SelectItem value={option.id}>{option.name}</SelectItem>
 										{/each}

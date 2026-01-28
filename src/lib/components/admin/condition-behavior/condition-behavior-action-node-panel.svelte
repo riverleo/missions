@@ -341,45 +341,24 @@
 						<!-- fulfill 타입: Fulfillment 선택 -->
 						{#if changes.type === 'fulfill'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상</ButtonGroupText>
+								<ButtonGroupText>대상 탐색</ButtonGroupText>
 								<Select
 									type="single"
-									value={selectedTargetValue}
-									onValueChange={onTargetMethodChange}
+									value={changes.target_selection_method ?? 'search'}
+									onValueChange={(value) => {
+										if (changes && value) {
+											changes.target_selection_method = value as TargetSelectionMethod;
+										}
+									}}
 								>
 									<SelectTrigger class="flex-1">
-										{selectedTargetMethodLabel}
+										{changes.target_selection_method === 'search'
+											? '새로운 탐색 대상'
+											: '기존 선택 대상'}
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="search">새로운 탐색 대상</SelectItem>
 										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
-
-										{#if fulfillments.length > 0}
-											<SelectGroup>
-												<SelectLabel>충족 방법</SelectLabel>
-												{#each fulfillments as fulfillment (fulfillment.id)}
-													{@const interaction =
-														fulfillment.building_interaction_id
-															? buildingInteractions.find(
-																	(i) => i.id === fulfillment.building_interaction_id
-																)
-															: fulfillment.item_interaction_id
-																? itemInteractions.find(
-																		(i) => i.id === fulfillment.item_interaction_id
-																	)
-																: undefined}
-													{@const entity =
-														interaction && 'building_id' in interaction
-															? $buildingStore.data[interaction.building_id]
-															: interaction && 'item_id' in interaction
-																? $itemStore.data[interaction.item_id]
-																: undefined}
-													<SelectItem value={`explicit:fulfillment:${fulfillment.id}`}>
-														{entity?.name ?? '자동'}
-													</SelectItem>
-												{/each}
-											</SelectGroup>
-										{/if}
 									</SelectContent>
 								</Select>
 							</ButtonGroup>

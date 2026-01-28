@@ -1091,36 +1091,56 @@ export type ConditionEffectUpdate = Omit<
 type ConditionFulfillmentRow = Tables<'condition_fulfillments'>;
 export type ConditionFulfillment = Omit<
 	ConditionFulfillmentRow,
-	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+	| 'id'
+	| 'condition_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	id: ConditionFulfillmentId;
 	condition_id: ConditionId;
 	scenario_id: ScenarioId;
-	character_id: CharacterId | null;
-	item_id: ItemId | null;
+	building_interaction_id: BuildingInteractionId | null;
+	item_interaction_id: ItemInteractionId | null;
+	character_interaction_id: CharacterInteractionId | null;
 	created_by: UserRoleId | null;
 };
 type ConditionFulfillmentInsertRow = TablesInsert<'condition_fulfillments'>;
 export type ConditionFulfillmentInsert = Omit<
 	ConditionFulfillmentInsertRow,
-	'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+	| 'condition_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	condition_id: ConditionId;
 	scenario_id: ScenarioId;
-	character_id?: CharacterId | null;
-	item_id?: ItemId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	created_by?: UserRoleId | null;
 };
 type ConditionFulfillmentUpdateRow = TablesUpdate<'condition_fulfillments'>;
 export type ConditionFulfillmentUpdate = Omit<
 	ConditionFulfillmentUpdateRow,
-	'id' | 'condition_id' | 'scenario_id' | 'character_id' | 'item_id' | 'created_by'
+	| 'id'
+	| 'condition_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	id?: ConditionFulfillmentId;
 	condition_id?: ConditionId;
 	scenario_id?: ScenarioId;
-	character_id?: CharacterId | null;
-	item_id?: ItemId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	created_by?: UserRoleId | null;
 };
 
@@ -1284,39 +1304,56 @@ export type CharacterNeedUpdate = Omit<
 type NeedFulfillmentRow = Tables<'need_fulfillments'>;
 export type NeedFulfillment = Omit<
 	NeedFulfillmentRow,
-	'id' | 'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+	| 'id'
+	| 'need_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	id: NeedFulfillmentId;
 	need_id: NeedId;
 	scenario_id: ScenarioId;
-	building_id: BuildingId | null;
-	item_id: ItemId | null;
-	character_id: CharacterId | null;
+	building_interaction_id: BuildingInteractionId | null;
+	item_interaction_id: ItemInteractionId | null;
+	character_interaction_id: CharacterInteractionId | null;
 	created_by: UserRoleId | null;
 };
 type NeedFulfillmentInsertRow = TablesInsert<'need_fulfillments'>;
 export type NeedFulfillmentInsert = Omit<
 	NeedFulfillmentInsertRow,
-	'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+	| 'need_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	need_id: NeedId;
 	scenario_id: ScenarioId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	created_by?: UserRoleId | null;
 };
 type NeedFulfillmentUpdateRow = TablesUpdate<'need_fulfillments'>;
 export type NeedFulfillmentUpdate = Omit<
 	NeedFulfillmentUpdateRow,
-	'id' | 'need_id' | 'scenario_id' | 'building_id' | 'item_id' | 'character_id' | 'created_by'
+	| 'id'
+	| 'need_id'
+	| 'scenario_id'
+	| 'building_interaction_id'
+	| 'item_interaction_id'
+	| 'character_interaction_id'
+	| 'created_by'
 > & {
 	id?: NeedFulfillmentId;
 	need_id?: NeedId;
 	scenario_id?: ScenarioId;
-	building_id?: BuildingId | null;
-	item_id?: ItemId | null;
-	character_id?: CharacterId | null;
+	building_interaction_id?: BuildingInteractionId | null;
+	item_interaction_id?: ItemInteractionId | null;
+	character_interaction_id?: CharacterInteractionId | null;
 	created_by?: UserRoleId | null;
 };
 
