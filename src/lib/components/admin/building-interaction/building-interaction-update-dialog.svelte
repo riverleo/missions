@@ -142,7 +142,7 @@
 				</ButtonGroup>
 
 				<ButtonGroup class="w-full">
-					<ButtonGroupText>상호작용 타입</ButtonGroupText>
+					<ButtonGroupText>상호작용</ButtonGroupText>
 					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
 						<SelectTrigger class="flex-1">
 							{selectedInteractionLabel}
