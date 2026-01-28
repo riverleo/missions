@@ -55,7 +55,7 @@
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
-	const selectedItemName = $derived(selectedItem?.name ?? '건물 선택');
+	const selectedItemName = $derived(selectedItem?.name ?? '아이템 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
@@ -123,12 +123,12 @@
 <Dialog {open} {onOpenChange}>
 	<DialogContent>
 		<DialogHeader>
-			<DialogTitle>건물 상호작용 수정</DialogTitle>
+			<DialogTitle>아이템 상호작용 수정</DialogTitle>
 		</DialogHeader>
 		<form {onsubmit} class="flex flex-col gap-4">
 			<div class="flex flex-col gap-2">
 				<ButtonGroup class="w-full">
-					<ButtonGroupText>건물</ButtonGroupText>
+					<ButtonGroupText>아이템</ButtonGroupText>
 					<Select type="single" value={itemId} onValueChange={onItemChange}>
 						<SelectTrigger class="flex-1">
 							{selectedItemName}
