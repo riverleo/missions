@@ -167,6 +167,8 @@
 			else if (segment === 'quests') label = '퀘스트';
 			else if (segment === 'narratives') label = '내러티브';
 			else if (segment === 'terrains') label = '지형';
+			else if (segment === 'terrains-tiles') label = '지형 타일';
+			else if (segment === 'tiles') label = '타일';
 			else if (segment === 'characters') label = '캐릭터';
 			else if (segment === 'character-bodies') label = '캐릭터 바디';
 			else if (segment === 'buildings') label = '건물';

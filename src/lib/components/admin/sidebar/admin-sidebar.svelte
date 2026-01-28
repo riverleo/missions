@@ -54,7 +54,7 @@
 					subItems: [
 						{ title: '생성 및 관리', href: `/admin/scenarios/${scenarioId}/terrains` },
 						{ title: '타일', href: `/admin/scenarios/${scenarioId}/tiles` },
-						{ title: '지형과 타일 연결', href: `/admin/scenarios/${scenarioId}/terrains-tiles` },
+						{ title: '지형 타일', href: `/admin/scenarios/${scenarioId}/terrains-tiles` },
 					],
 				},
 				{
