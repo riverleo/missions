@@ -14,14 +14,18 @@ import type {
 	BuildingId,
 	ItemId,
 	CharacterId,
+	NeedBehaviorActionId,
+	ConditionBehaviorActionId,
 } from '$lib/types';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
 import { useItem } from '../use-item';
+import { useBehavior } from '../use-behavior';
 
 /**
  * 액션의 타입과 Interaction 참조에 따라 상호작용 가능한 엔티티 템플릿 목록을 반환합니다.
  *
+ * - go 타입: 다음 액션에 따라 결정 (interact/fulfill → 해당 대상, idle/없음 → 모든 엔티티)
  * - interact 타입: once_interaction_type이 있는 Interaction의 엔티티 반환
  * - fulfill 타입: fulfillment의 repeat_interaction_type이 있는 Interaction의 엔티티 반환
  *
@@ -34,7 +38,23 @@ export function getInteractableEntityTemplates(
 	// NeedBehaviorAction인지 확인
 	const isNeedAction = 'need_id' in action;
 
-	if (action.type === 'interact') {
+	if (action.type === 'go') {
+		// go 타입: search 모드일 때만 대상 반환
+		if (action.target_selection_method !== 'search') {
+			return [];
+		}
+
+		// 다음 액션 조회
+		const nextAction = getNextAction(action, isNeedAction);
+		if (nextAction?.type === 'interact') {
+			return getInteractableTemplatesForInteract(nextAction);
+		} else if (nextAction?.type === 'fulfill') {
+			return getInteractableTemplatesForFulfill(nextAction, isNeedAction);
+		} else {
+			// next가 idle이거나 없으면: 모든 엔티티 반환
+			return getAllEntityTemplates();
+		}
+	} else if (action.type === 'interact') {
 		// interact 타입: Interaction 직접 참조
 		return getInteractableTemplatesForInteract(action);
 	} else if (action.type === 'fulfill') {
@@ -195,6 +215,52 @@ function interactionsToTemplates(
 			if (character) templates.push(character);
 		}
 	}
+
+	return templates;
+}
+
+/**
+ * 다음 액션을 조회합니다.
+ */
+function getNextAction(
+	action: NeedBehaviorAction | ConditionBehaviorAction,
+	isNeedAction: boolean
+): (NeedBehaviorAction | ConditionBehaviorAction) | undefined {
+	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
+
+	if (isNeedAction) {
+		const needAction = action as NeedBehaviorAction;
+		if (!needAction.next_need_behavior_action_id) return undefined;
+		return get(needBehaviorActionStore).data[
+			needAction.next_need_behavior_action_id as NeedBehaviorActionId
+		];
+	} else {
+		const conditionAction = action as ConditionBehaviorAction;
+		if (!conditionAction.next_condition_behavior_action_id) return undefined;
+		return get(conditionBehaviorActionStore).data[
+			conditionAction.next_condition_behavior_action_id as ConditionBehaviorActionId
+		];
+	}
+}
+
+/**
+ * 모든 엔티티 템플릿을 반환합니다.
+ */
+function getAllEntityTemplates(): EntityTemplate[] {
+	const { buildingStore } = useBuilding();
+	const { itemStore } = useItem();
+	const { characterStore } = useCharacter();
+
+	const templates: EntityTemplate[] = [];
+
+	// 모든 건물
+	templates.push(...Object.values(get(buildingStore).data));
+
+	// 모든 아이템
+	templates.push(...Object.values(get(itemStore).data));
+
+	// 모든 캐릭터
+	templates.push(...Object.values(get(characterStore).data));
 
 	return templates;
 }
