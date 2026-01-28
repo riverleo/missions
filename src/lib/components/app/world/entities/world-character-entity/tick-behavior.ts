@@ -12,6 +12,9 @@ import type {
 	CharacterInteractionId,
 	NeedFulfillmentId,
 	ConditionFulfillmentId,
+	BuildingInteractionActionId,
+	ItemInteractionActionId,
+	CharacterInteractionActionId,
 } from '$lib/types';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
@@ -63,7 +66,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	if (action.type === 'go') {
 		executeGoAction(entity, action);
 	} else if (action.type === 'interact') {
-		executeInteractAction(entity, action);
+		executeInteractAction(entity, action, tick);
 	} else if (action.type === 'fulfill') {
 		executeFulfillAction(entity, action, tick);
 	} else if (action.type === 'idle') {
@@ -211,7 +214,7 @@ function executeGoAction(entity: WorldCharacterEntity, action: any): void {
 /**
  * INTERACT 행동 실행 (상호작용 - once_interaction_type)
  */
-function executeInteractAction(entity: WorldCharacterEntity, action: any): void {
+function executeInteractAction(entity: WorldCharacterEntity, action: any, currentTick: number): void {
 	if (!entity.currentTargetEntityId) return;
 
 	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
@@ -242,10 +245,10 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 		return;
 	}
 
-	// 타겟에 도착: Interaction 가져오기
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
+	// 타겟에 도착: InteractionAction 체인 시작 또는 실행
+	const { buildingInteractionStore, buildingInteractionActionStore } = useBuilding();
+	const { itemInteractionStore, itemInteractionActionStore } = useItem();
+	const { characterInteractionStore, characterInteractionActionStore } = useCharacter();
 
 	let interaction: any = undefined;
 	if (action.building_interaction_id) {
@@ -263,6 +266,19 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 		return;
 	}
 
+	// InteractionAction 체인이 아직 시작되지 않았으면 시작
+	if (!entity.currentInteractionActionId) {
+		startInteractionChain(entity, interaction, currentTick);
+		return;
+	}
+
+	// InteractionAction 체인 실행
+	const interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+	if (!interactionCompleted) {
+		return; // 아직 체인 실행 중
+	}
+
+	// 체인 완료: 상호작용 타입별 로직 실행
 	const interactType = interaction.once_interaction_type;
 
 	if (interactType === 'item_pick') {
@@ -309,7 +325,6 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 
 			if (heldItemEntity && heldItemEntity.type === 'item') {
 				// once 타입: InteractionAction 체인 1회 실행 후 소비
-				// TODO: InteractionAction 체인 지원 (현재는 즉시 소비)
 				entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
 				entity.worldContext.deleteWorldItem(lastHeldItemId);
 			}
@@ -327,6 +342,10 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any): void 
 			// TODO: 건물 철거 로직
 		}
 	}
+
+	// once_interaction_type: 체인 완료 후 InteractionAction 상태 초기화
+	entity.currentInteractionActionId = undefined;
+	entity.interactionActionStartTick = 0;
 }
 
 /**
@@ -400,9 +419,9 @@ function executeFulfillAction(entity: WorldCharacterEntity, action: any, current
 	}
 
 	// Interaction 가져오기
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
+	const { buildingInteractionStore, buildingInteractionActionStore } = useBuilding();
+	const { itemInteractionStore, itemInteractionActionStore } = useItem();
+	const { characterInteractionStore, characterInteractionActionStore } = useCharacter();
 
 	let interaction: any = undefined;
 	if (fulfillment.building_interaction_id) {
@@ -425,6 +444,15 @@ function executeFulfillAction(entity: WorldCharacterEntity, action: any, current
 		return;
 	}
 
+	// InteractionAction 체인이 아직 시작되지 않았으면 시작
+	if (!entity.currentInteractionActionId) {
+		startInteractionChain(entity, interaction, currentTick);
+		return;
+	}
+
+	// InteractionAction 체인 실행
+	const interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+
 	// 매 틱마다 increase_per_tick 적용
 	if (isNeedAction) {
 		const needId = action.need_id;
@@ -444,8 +472,12 @@ function executeFulfillAction(entity: WorldCharacterEntity, action: any, current
 		// 건물 수리/청소 등 구현 필요
 	}
 
-	// TODO: InteractionAction 체인 반복 로직
-	// 현재는 단순히 매 틱마다 증가만 처리
+	// repeat_interaction_type: 체인 완료 시 root로 돌아가서 반복
+	if (interactionCompleted) {
+		entity.currentInteractionActionId = undefined;
+		entity.interactionActionStartTick = 0;
+		// 다음 틱에서 체인이 다시 시작됨
+	}
 }
 
 /**
@@ -469,7 +501,7 @@ function checkActionCompletion(
 		return entity.path.length === 0;
 	}
 
-	// INTERACT: once_interaction_type에 따라
+	// INTERACT: InteractionAction 체인이 완료되어야 함
 	if (action.type === 'interact') {
 		if (!entity.currentTargetEntityId) return false;
 		const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
@@ -478,35 +510,9 @@ function checkActionCompletion(
 		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
 		if (distance >= 50) return false; // 아직 도착하지 않음
 
-		// Interaction 가져오기
-		const { buildingInteractionStore } = useBuilding();
-		const { itemInteractionStore } = useItem();
-		const { characterInteractionStore } = useCharacter();
-
-		let interaction: any = undefined;
-		if (action.building_interaction_id) {
-			interaction =
-				get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
-		} else if (action.item_interaction_id) {
-			interaction =
-				get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
-		} else if (action.character_interaction_id) {
-			interaction =
-				get(characterInteractionStore).data[
-					action.character_interaction_id as CharacterInteractionId
-				];
-		}
-
-		if (!interaction || !interaction.once_interaction_type) return false;
-
-		// once_interaction_type에 따라 완료 조건 확인
-		if (interaction.once_interaction_type === 'item_pick') {
-			// immediate: 타겟 도달 시 즉시 완료
-			return true;
-		} else {
-			// once: InteractionAction 체인 1회 완료 (TODO: 현재는 타겟 도달 시로 단순화)
-			return true;
-		}
+		// once_interaction_type: InteractionAction 체인이 완료되었는지 확인
+		// currentInteractionActionId가 undefined이면 체인 완료
+		return !entity.currentInteractionActionId;
 	}
 
 	// FULFILL: 욕구/컨디션 충족 여부 확인
@@ -665,4 +671,108 @@ function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 		rootAction.id
 	);
 	entity.actionStartTick = tick;
+}
+
+/**
+ * InteractionAction 체인 시작 (root action 찾아서 설정)
+ */
+function startInteractionChain(
+	entity: WorldCharacterEntity,
+	interaction: any,
+	currentTick: number
+): void {
+	const { buildingInteractionActionStore } = useBuilding();
+	const { itemInteractionActionStore } = useItem();
+	const { characterInteractionActionStore } = useCharacter();
+
+	// Interaction 타입별로 InteractionAction 가져오기
+	let interactionActions: any[] = [];
+	if (interaction.id && interaction.building_id !== undefined) {
+		// BuildingInteraction: store.data[interactionId]에 actions 배열이 저장됨
+		const actions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId];
+		interactionActions = actions || [];
+	} else if (interaction.id && interaction.item_id !== undefined) {
+		// ItemInteraction
+		const actions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId];
+		interactionActions = actions || [];
+	} else if (interaction.id && interaction.target_character_id !== undefined) {
+		// CharacterInteraction
+		const actions =
+			get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId];
+		interactionActions = actions || [];
+	}
+
+	// root action 찾기
+	const rootAction = interactionActions.find((a) => a.root);
+	if (!rootAction) {
+		console.error('No root InteractionAction found for interaction:', interaction);
+		return;
+	}
+
+	// 체인 시작
+	entity.currentInteractionActionId = rootAction.id;
+	entity.interactionActionStartTick = currentTick;
+}
+
+/**
+ * InteractionAction 체인 실행 및 다음 액션으로 전환
+ * @returns 체인이 완료되었으면 true, 아직 실행 중이면 false
+ */
+function tickInteractionAction(
+	entity: WorldCharacterEntity,
+	interaction: any,
+	currentTick: number
+): boolean {
+	if (!entity.currentInteractionActionId) return false;
+
+	const { buildingInteractionActionStore } = useBuilding();
+	const { itemInteractionActionStore } = useItem();
+	const { characterInteractionActionStore } = useCharacter();
+
+	// 현재 InteractionAction 가져오기
+	let currentAction: any = undefined;
+	if (interaction.building_id !== undefined) {
+		const actions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId];
+		if (actions) {
+			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+		}
+	} else if (interaction.item_id !== undefined) {
+		const actions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId];
+		if (actions) {
+			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+		}
+	} else if (interaction.target_character_id !== undefined) {
+		const actions =
+			get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId];
+		if (actions) {
+			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+		}
+	}
+
+	if (!currentAction) {
+		console.error('CurrentInteractionAction not found:', entity.currentInteractionActionId);
+		entity.currentInteractionActionId = undefined;
+		return true;
+	}
+
+	// duration_ticks 경과 확인
+	const elapsed = currentTick - entity.interactionActionStartTick;
+	if (elapsed < currentAction.duration_ticks) {
+		return false; // 아직 실행 중
+	}
+
+	// 다음 액션이 있으면 전환
+	const nextActionId =
+		currentAction.next_building_interaction_action_id ||
+		currentAction.next_item_interaction_action_id ||
+		currentAction.next_character_interaction_action_id;
+
+	if (nextActionId) {
+		entity.currentInteractionActionId = nextActionId;
+		entity.interactionActionStartTick = currentTick;
+		return false; // 체인 계속 진행
+	}
+
+	// 다음 액션이 없으면 체인 완료
+	return true;
 }
