@@ -55,19 +55,35 @@ function createTestWorldStore() {
 	}
 
 	function setDebug(debug: boolean) {
-		store.update((state) => ({ ...state, debug }));
+		store.update((state) => {
+			const newState = { ...state, debug };
+			save(newState);
+			return newState;
+		});
 	}
 
 	function setOpen(open: boolean) {
-		store.update((state) => ({ ...state, open }));
+		store.update((state) => {
+			const newState = { ...state, open };
+			save(newState);
+			return newState;
+		});
 	}
 
 	function setModalScreenVector(screenVector: ScreenVector) {
-		store.update((state) => ({ ...state, modalScreenVector: screenVector }));
+		store.update((state) => {
+			const newState = { ...state, modalScreenVector: screenVector };
+			save(newState);
+			return newState;
+		});
 	}
 
 	function setOpenPanel(open: boolean) {
-		store.update((state) => ({ ...state, openPanel: open }));
+		store.update((state) => {
+			const newState = { ...state, openPanel: open };
+			save(newState);
+			return newState;
+		});
 	}
 
 	async function reset(worldContext?: WorldContext) {
