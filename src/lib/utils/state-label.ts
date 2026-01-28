@@ -103,9 +103,9 @@ export function getBuildingOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_execute', label: onceInteractionTypeLabels.building_execute },
-		{ value: 'building_construct', label: onceInteractionTypeLabels.building_construct },
-		{ value: 'building_demolish', label: onceInteractionTypeLabels.building_demolish },
+		{ value: 'building_execute', label: `${onceInteractionTypeLabels.building_execute} (1회)` },
+		{ value: 'building_construct', label: `${onceInteractionTypeLabels.building_construct} (1회)` },
+		{ value: 'building_demolish', label: `${onceInteractionTypeLabels.building_demolish} (1회)` },
 	];
 }
 
@@ -114,8 +114,8 @@ export function getBuildingRepeatInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_repair', label: repeatInteractionTypeLabels.building_repair },
-		{ value: 'building_clean', label: repeatInteractionTypeLabels.building_clean },
+		{ value: 'building_repair', label: `${repeatInteractionTypeLabels.building_repair} (반복)` },
+		{ value: 'building_clean', label: `${repeatInteractionTypeLabels.building_clean} (반복)` },
 	];
 }
 
@@ -125,8 +125,8 @@ export function getItemOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'item_pick', label: onceInteractionTypeLabels.item_pick },
-		{ value: 'item_use', label: onceInteractionTypeLabels.item_use },
+		{ value: 'item_pick', label: `${onceInteractionTypeLabels.item_pick} (1회)` },
+		{ value: 'item_use', label: `${onceInteractionTypeLabels.item_use} (1회)` },
 	];
 }
 
@@ -149,7 +149,7 @@ export function getCharacterRepeatInteractionTypeOptions(): {
 	value: RepeatInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'character_hug', label: repeatInteractionTypeLabels.character_hug }];
+	return [{ value: 'character_hug', label: `${repeatInteractionTypeLabels.character_hug} (반복)` }];
 }
 
 // Backward compatibility - 구버전 함수명 유지 (once/repeat 모두 합쳐서 반환)
