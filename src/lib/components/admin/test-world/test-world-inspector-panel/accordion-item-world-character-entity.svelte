@@ -52,8 +52,9 @@
 		const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
 
 		if (type === 'need') {
-			const behaviorId =
-				BehaviorActionIdUtils.behaviorId<NeedBehaviorId>(entity.currentBehaviorActionId);
+			const behaviorId = BehaviorActionIdUtils.behaviorId<NeedBehaviorId>(
+				entity.currentBehaviorActionId
+			);
 			const actionId = BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(
 				entity.currentBehaviorActionId
 			);
@@ -173,7 +174,7 @@
 				없음
 			{/if}
 		</AccordionContentItem>
-		<AccordionContentItem label="현재 타겟">
+		<AccordionContentItem label="현재 대상">
 			{entity.currentTargetEntityId ?? '없음'}
 		</AccordionContentItem>
 		{#each needs as need}

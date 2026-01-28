@@ -51,8 +51,9 @@
 			(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
 		const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 		const characterName = character ? character.name : '모든 캐릭터';
+		const shortId = interaction.id.split('-')[0];
 
-		return `${characterName} ${behaviorLabel}`;
+		return `${characterName} ${behaviorLabel} (${shortId})`;
 	}
 </script>
 
@@ -65,14 +66,16 @@
 				<CommandGroup heading={building.name}>
 					{#each interactions as interaction (interaction.id)}
 						{@const label = getInteractionLabel(interaction)}
+						{@const isSelected = interaction.id === currentInteractionId}
+						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
 						<CommandLinkItem
-							href={`/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
+							{href}
 							class="group pr-1"
 						>
 							<IconCheck
 								class={cn(
 									'mr-2 size-4',
-									interaction.id === currentInteractionId ? 'opacity-100' : 'opacity-0'
+									isSelected ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
 							<span class="flex-1 truncate">{label}</span>
