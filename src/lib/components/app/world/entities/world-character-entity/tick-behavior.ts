@@ -274,6 +274,29 @@ function executeInteractAction(entity: WorldCharacterEntity, action: any, curren
 
 	// InteractionAction 체인 실행
 	const interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+
+	// 매 틱마다 increase_per_tick 적용 (once 상호작용도 체인 실행 중 욕구 충족)
+	const isNeedAction = 'need_id' in action;
+	if (isNeedAction && action.need_fulfillment_id) {
+		const { needFulfillmentStore } = useCharacter();
+		const fulfillment = get(needFulfillmentStore).data[action.need_fulfillment_id as NeedFulfillmentId];
+
+		if (fulfillment && fulfillment.increase_per_tick) {
+			const needId = action.need_id;
+			const currentNeed = entity.worldCharacterNeeds[needId];
+			if (currentNeed) {
+				const newValue = Math.min(100, currentNeed.value + fulfillment.increase_per_tick);
+				entity.worldCharacterNeeds = {
+					...entity.worldCharacterNeeds,
+					[needId]: {
+						...currentNeed,
+						value: newValue,
+					},
+				};
+			}
+		}
+	}
+
 	if (!interactionCompleted) {
 		return; // 아직 체인 실행 중
 	}
