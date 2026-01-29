@@ -4,6 +4,7 @@
 		BuildingInteractionAction,
 		BuildingInteractionActionId,
 		BuildingInteractionId,
+		BuildingId,
 		CharacterId,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
@@ -36,12 +37,29 @@
 
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
-	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useBuilding();
+	const { buildingInteractionStore, buildingInteractionActionStore, buildingStore, admin } = useBuilding();
 	const { characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
 	const interaction = $derived($buildingInteractionStore.data[buildingInteractionId]);
 	const characters = $derived(Object.values($characterStore.data));
+	const buildings = $derived(Object.values($buildingStore.data));
+
+	// 미리보기용 건물 선택
+	const interactionHasSpecificBuilding = $derived(interaction?.building_id != null);
+	let previewBuildingId = $state<string | undefined>(undefined);
+	const previewBuilding = $derived(
+		interactionHasSpecificBuilding && interaction?.building_id
+			? $buildingStore.data[interaction.building_id as BuildingId]
+			: previewBuildingId
+				? $buildingStore.data[previewBuildingId as BuildingId]
+				: buildings[0]
+	);
+	const selectedPreviewBuildingLabel = $derived(previewBuilding?.name ?? '건물 선택');
+
+	function onPreviewBuildingChange(value: string | undefined) {
+		previewBuildingId = value || undefined;
+	}
 
 	// 미리보기용 캐릭터 선택
 	const behaviorHasSpecificCharacter = $derived(interaction?.character_id != null);
@@ -269,7 +287,7 @@
 							</InputGroup>
 						</div>
 
-						{#if previewCharacter && changes && interaction}
+						{#if previewCharacter && previewBuilding && changes && interaction}
 							<Separator />
 
 							<div class="flex flex-col gap-2">
@@ -278,7 +296,7 @@
 									style:height="120px"
 								>
 									<BuildingSpriteAnimator
-										buildingId={interaction.building_id}
+										buildingId={previewBuilding.id}
 										stateType="idle"
 										characterId={previewCharacter.id}
 										characterBodyStateType={changes.character_body_state_type}
@@ -304,6 +322,26 @@
 											<SelectContent>
 												{#each characters as character (character.id)}
 													<SelectItem value={character.id}>{character.name}</SelectItem>
+												{/each}
+											</SelectContent>
+										</Select>
+									</ButtonGroup>
+								{/if}
+
+								{#if !interactionHasSpecificBuilding && buildings.length > 0}
+									<ButtonGroup class="w-full">
+										<ButtonGroupText>건물</ButtonGroupText>
+										<Select
+											type="single"
+											value={previewBuildingId ?? previewBuilding?.id ?? ''}
+											onValueChange={onPreviewBuildingChange}
+										>
+											<SelectTrigger class="flex-1">
+												{selectedPreviewBuildingLabel}
+											</SelectTrigger>
+											<SelectContent>
+												{#each buildings as building (building.id)}
+													<SelectItem value={building.id}>{building.name}</SelectItem>
 												{/each}
 											</SelectContent>
 										</Select>

@@ -12,6 +12,7 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import type { QuestBranch, QuestId, QuestBranchId } from '$lib/types';
 	import QuestBranchNode from './quest-branch-node.svelte';
 	import QuestActionPanel from './quest-action-panel.svelte';
@@ -172,6 +173,11 @@
 	};
 
 	async function convertToNodesAndEdges(questBranches: QuestBranch[]) {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -184,8 +190,9 @@
 		// 노드 생성
 		sortedQuestBranches.forEach((questBranch) => {
 			const treeNode = treeMap.get(questBranch.id);
+			const id = questBranch.id;
 			newNodes.push({
-				id: questBranch.id,
+				id,
 				type: 'questBranch',
 				data: {
 					label: questBranch.title,
@@ -194,6 +201,7 @@
 				},
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 
 			// 엣지 생성 (parent -> child)

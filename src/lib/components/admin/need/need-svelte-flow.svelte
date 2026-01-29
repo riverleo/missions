@@ -13,6 +13,7 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		createCharacterNodeId,
@@ -233,6 +234,11 @@
 	}
 
 	function convertToNodesAndEdges() {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -241,34 +247,40 @@
 
 		// 1. Character 노드 (왼쪽 열)
 		characters.forEach((character, index) => {
+			const id = createCharacterNodeId(character);
 			newNodes.push({
-				id: createCharacterNodeId(character),
+				id,
 				type: 'character',
 				data: { character },
 				position: { x: 0, y: index * ROW_GAP },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
 		// 2. Need 노드 (가운데)
 		if (need) {
+			const id = createNeedNodeId(need);
 			newNodes.push({
-				id: createNeedNodeId(need),
+				id,
 				type: 'need',
 				data: { need },
 				position: { x: COLUMN_GAP, y: 0 },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		}
 
 		// 3. Fulfillment 노드 (오른쪽 열)
 		needFulfillments.forEach((fulfillment, index) => {
+			const id = createFulfillmentNodeId(fulfillment);
 			newNodes.push({
-				id: createFulfillmentNodeId(fulfillment),
+				id,
 				type: 'fulfillment',
 				data: { fulfillment },
 				position: { x: COLUMN_GAP * 2, y: index * ROW_GAP },
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 

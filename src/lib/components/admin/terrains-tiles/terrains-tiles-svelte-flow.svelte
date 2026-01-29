@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import {
 		SvelteFlow,
 		Controls,
@@ -128,6 +129,11 @@
 	}
 
 	function convertToNodesAndEdges() {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -136,23 +142,27 @@
 
 		// 1. Terrain 노드 (왼쪽 열)
 		terrains.forEach((terrain, index) => {
+			const id = createTerrainNodeId(terrain);
 			newNodes.push({
-				id: createTerrainNodeId(terrain),
+				id,
 				type: 'terrain',
 				data: { terrain },
 				position: { x: 0, y: index * ROW_GAP },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
 		// 2. Tile 노드 (오른쪽 열)
 		tiles.forEach((tile, index) => {
+			const id = createTileNodeId(tile);
 			newNodes.push({
-				id: createTileNodeId(tile),
+				id,
 				type: 'tile',
 				data: { tile },
 				position: { x: COLUMN_GAP, y: index * ROW_GAP },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 

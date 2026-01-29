@@ -13,7 +13,7 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { useBehavior } from '$lib/hooks/use-behavior';
 	import {
@@ -214,6 +214,11 @@
 	}
 
 	function convertToNodesAndEdges() {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -228,12 +233,14 @@
 			// 이 액션을 가리키는 부모 액션 찾기
 			const parentAction = actions.find((a) => a.next_condition_behavior_action_id === action.id);
 
+			const id = createConditionBehaviorActionNodeId(action);
 			newNodes.push({
-				id: createConditionBehaviorActionNodeId(action),
+				id,
 				type: 'action',
 				data: { action, parentAction },
 				position: { x: col * COLUMN_GAP, y: row * ROW_GAP },
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 

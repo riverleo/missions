@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import {
 		SvelteFlow,
 		Controls,
@@ -165,6 +166,11 @@
 	};
 
 	async function convertToNodesAndEdges(chapters: Chapter[]) {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -177,8 +183,9 @@
 		// 노드 생성
 		sortedChapters.forEach((chapter) => {
 			const treeNode = treeMap.get(chapter.id as ChapterId);
+			const id = chapter.id;
 			newNodes.push({
-				id: chapter.id,
+				id,
 				type: 'chapter',
 				data: {
 					label: chapter.title,
@@ -187,6 +194,7 @@
 				},
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 
 			// 엣지 생성 (parent -> child)

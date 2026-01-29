@@ -13,6 +13,7 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import {
@@ -304,6 +305,11 @@
 	}
 
 	function convertToNodesAndEdges() {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
@@ -312,45 +318,53 @@
 
 		// 1. Building 노드 (왼쪽 열)
 		buildings.forEach((building, index) => {
+			const id = createBuildingNodeId(building);
 			newNodes.push({
-				id: createBuildingNodeId(building),
+				id,
 				type: 'building',
 				data: { building },
 				position: { x: 0, y: index * ROW_GAP },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
 		// 2. Condition 노드 (가운데)
 		if (condition) {
+			const id = createConditionNodeId(condition);
 			newNodes.push({
-				id: createConditionNodeId(condition),
+				id,
 				type: 'condition',
 				data: { condition },
 				position: { x: COLUMN_GAP, y: 0 },
 				deletable: false,
+				selected: selectedNodeIds.has(id),
 			});
 		}
 
 		// 3. Fulfillment 노드 (오른쪽 열)
 		conditionFulfillments.forEach((fulfillment, index) => {
+			const id = createConditionFulfillmentNodeId(fulfillment);
 			newNodes.push({
-				id: createConditionFulfillmentNodeId(fulfillment),
+				id,
 				type: 'fulfillment',
 				data: { fulfillment },
 				position: { x: COLUMN_GAP * 2, y: index * ROW_GAP },
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
 		// 4. Effect 노드 (하단)
 		conditionEffects.forEach((effect, index) => {
+			const id = createConditionEffectNodeId(effect);
 			newNodes.push({
-				id: createConditionEffectNodeId(effect),
+				id,
 				type: 'effect',
 				data: { effect },
 				position: { x: COLUMN_GAP, y: (index + 1) * ROW_GAP },
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 

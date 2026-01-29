@@ -12,6 +12,7 @@
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
+	import { untrack } from 'svelte';
 	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodeNode from './narrative-node-node.svelte';
 	import NarrativeDiceRollNode from './narrative-dice-roll-node.svelte';
@@ -418,28 +419,37 @@
 	};
 
 	async function convertToNodesAndEdges() {
+		// 현재 선택된 노드 ID들 저장 (untrack으로 의존성 추적 방지)
+		const selectedNodeIds = new Set(
+			untrack(() => flowNodes.current.filter((n) => n.selected).map((n) => n.id))
+		);
+
 		const newNodes: Node[] = [];
 		const newEdges: Edge[] = [];
 
 		// 1. narrative_node 노드 생성
 		narrativeNodes.forEach((narrativeNode) => {
+			const id = createNarrativeNodeId(narrativeNode);
 			newNodes.push({
-				id: createNarrativeNodeId(narrativeNode),
+				id,
 				type: 'narrativeNode',
 				data: { narrativeNode },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
 		// 2. 현재 내러티브의 모든 narrative_dice_roll을 노드로 생성
 		narrativeDiceRolls.forEach((narrativeDiceRollData) => {
+			const id = createNarrativeDiceRollNodeId(narrativeDiceRollData);
 			newNodes.push({
-				id: createNarrativeDiceRollNodeId(narrativeDiceRollData),
+				id,
 				type: 'narrativeDiceRoll',
 				data: { narrativeDiceRoll: narrativeDiceRollData },
 				position: { x: 0, y: 0 }, // elkjs가 계산할 예정
 				deletable: true,
+				selected: selectedNodeIds.has(id),
 			});
 		});
 
