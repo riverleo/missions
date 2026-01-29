@@ -190,6 +190,7 @@ function getInteractableTemplatesForFulfill(
 
 /**
  * Interaction 배열을 EntityTemplate 배열로 변환합니다.
+ * 기본 인터랙션(NULL entity_id)의 경우 모든 해당 타입 엔티티를 반환합니다.
  */
 function interactionsToTemplates(
 	interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[]
@@ -203,16 +204,34 @@ function interactionsToTemplates(
 	for (const interaction of interactions) {
 		if ('building_id' in interaction) {
 			// BuildingInteraction
-			const building = get(buildingStore).data[interaction.building_id as BuildingId];
-			if (building) templates.push(building);
+			if (interaction.building_id) {
+				// 특정 건물
+				const building = get(buildingStore).data[interaction.building_id as BuildingId];
+				if (building) templates.push(building);
+			} else {
+				// 기본 인터랙션: 모든 건물
+				templates.push(...Object.values(get(buildingStore).data));
+			}
 		} else if ('item_id' in interaction) {
 			// ItemInteraction
-			const item = get(itemStore).data[interaction.item_id as ItemId];
-			if (item) templates.push(item);
+			if (interaction.item_id) {
+				// 특정 아이템
+				const item = get(itemStore).data[interaction.item_id as ItemId];
+				if (item) templates.push(item);
+			} else {
+				// 기본 인터랙션: 모든 아이템
+				templates.push(...Object.values(get(itemStore).data));
+			}
 		} else if ('target_character_id' in interaction) {
 			// CharacterInteraction
-			const character = get(characterStore).data[interaction.target_character_id as CharacterId];
-			if (character) templates.push(character);
+			if (interaction.target_character_id) {
+				// 특정 캐릭터
+				const character = get(characterStore).data[interaction.target_character_id as CharacterId];
+				if (character) templates.push(character);
+			} else {
+				// 기본 인터랙션: 모든 캐릭터
+				templates.push(...Object.values(get(characterStore).data));
+			}
 		}
 	}
 
