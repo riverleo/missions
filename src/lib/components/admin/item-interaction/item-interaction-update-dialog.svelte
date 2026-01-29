@@ -170,7 +170,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={!itemId || isSubmitting}>
+				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '수정 중...' : '수정'}
 				</Button>
 			</DialogFooter>
