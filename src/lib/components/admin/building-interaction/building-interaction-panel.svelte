@@ -39,10 +39,10 @@
 
 	interface Props {
 		interaction: BuildingInteraction;
-		interactionId: BuildingInteractionId;
+		buildingInteractionId: BuildingInteractionId;
 	}
 
-	let { interaction, interactionId }: Props = $props();
+	let { interaction, buildingInteractionId }: Props = $props();
 
 	const { buildingStore, buildingInteractionActionStore, openBuildingInteractionDialog, admin } =
 		useBuilding();
@@ -51,7 +51,7 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const building = $derived($buildingStore.data[interaction.building_id]);
-	const actions = $derived($buildingInteractionActionStore.data[interactionId] ?? []);
+	const actions = $derived($buildingInteractionActionStore.data[buildingInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a) => a.root));
@@ -75,7 +75,7 @@
 	async function updateInteraction() {
 		const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-		await admin.updateBuildingInteraction(interactionId, {
+		await admin.updateBuildingInteraction(buildingInteractionId, {
 			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 			repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 			character_id: characterId ? (characterId as CharacterId) : null,
@@ -83,7 +83,7 @@
 	}
 
 	async function createAction() {
-		await admin.createBuildingInteractionAction(scenarioId, interactionId, {
+		await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -92,11 +92,11 @@
 		actionId: BuildingInteractionActionId,
 		updates: Partial<BuildingInteractionAction>
 	) {
-		await admin.updateBuildingInteractionAction(actionId, interactionId, updates);
+		await admin.updateBuildingInteractionAction(actionId, buildingInteractionId, updates);
 	}
 
 	async function removeAction(actionId: BuildingInteractionActionId) {
-		await admin.removeBuildingInteractionAction(actionId, interactionId);
+		await admin.removeBuildingInteractionAction(actionId, buildingInteractionId);
 	}
 
 
@@ -128,7 +128,7 @@
 		<Button
 			variant="destructive"
 			size="sm"
-			onclick={() => openBuildingInteractionDialog({ type: 'delete', interactionId })}
+			onclick={() => openBuildingInteractionDialog({ type: 'delete', buildingInteractionId })}
 		>
 			<IconTrash class="mr-2 size-4" />
 			삭제

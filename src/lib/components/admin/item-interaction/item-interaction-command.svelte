@@ -103,7 +103,7 @@
 										onclick={() =>
 											openItemInteractionDialog({
 												type: 'update',
-												interactionId: interaction.id,
+												itemInteractionId: interaction.id,
 											})}
 									>
 										수정
@@ -112,7 +112,7 @@
 										onclick={() =>
 											openItemInteractionDialog({
 												type: 'delete',
-												interactionId: interaction.id,
+												itemInteractionId: interaction.id,
 											})}
 									>
 										삭제
@@ -166,13 +166,13 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openItemInteractionDialog({ type: 'update', interactionId: interaction.id })}
+											openItemInteractionDialog({ type: 'update', itemInteractionId: interaction.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openItemInteractionDialog({ type: 'delete', interactionId: interaction.id })}
+											openItemInteractionDialog({ type: 'delete', itemInteractionId: interaction.id })}
 									>
 										삭제
 									</DropdownMenuItem>

@@ -61,7 +61,7 @@
 									currentInteractionId &&
 									openCharacterInteractionDialog({
 										type: 'update',
-										interactionId: currentInteractionId as CharacterInteractionId,
+										characterInteractionId: currentInteractionId as CharacterInteractionId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
@@ -85,7 +85,7 @@
 								currentInteractionId &&
 								openCharacterInteractionDialog({
 									type: 'delete',
-									interactionId: currentInteractionId as CharacterInteractionId,
+									characterInteractionId: currentInteractionId as CharacterInteractionId,
 								})}
 						>
 							<IconTrash class="size-4" />

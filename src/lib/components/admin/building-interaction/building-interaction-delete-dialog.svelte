@@ -21,9 +21,9 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($buildingInteractionDialogStore?.type === 'delete');
-	const interactionId = $derived(
+	const buildingInteractionId = $derived(
 		$buildingInteractionDialogStore?.type === 'delete'
-			? $buildingInteractionDialogStore.interactionId
+			? $buildingInteractionDialogStore.buildingInteractionId
 			: undefined
 	);
 
@@ -37,12 +37,12 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!interactionId || isSubmitting) return;
+		if (!buildingInteractionId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
-			await admin.removeBuildingInteraction(interactionId);
+			await admin.removeBuildingInteraction(buildingInteractionId);
 			closeBuildingInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/building-interactions`);
 		} catch (error) {

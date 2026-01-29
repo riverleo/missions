@@ -99,7 +99,7 @@
 										onclick={() =>
 											openBuildingInteractionDialog({
 												type: 'update',
-												interactionId: interaction.id,
+												buildingInteractionId: interaction.id,
 											})}
 									>
 										수정
@@ -108,7 +108,7 @@
 										onclick={() =>
 											openBuildingInteractionDialog({
 												type: 'delete',
-												interactionId: interaction.id,
+												buildingInteractionId: interaction.id,
 											})}
 									>
 										삭제
@@ -164,7 +164,7 @@
 										onclick={() =>
 											openBuildingInteractionDialog({
 												type: 'update',
-												interactionId: interaction.id,
+												buildingInteractionId: interaction.id,
 											})}
 									>
 										수정
@@ -173,7 +173,7 @@
 										onclick={() =>
 											openBuildingInteractionDialog({
 												type: 'delete',
-												interactionId: interaction.id,
+												buildingInteractionId: interaction.id,
 											})}
 									>
 										삭제

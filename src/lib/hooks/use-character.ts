@@ -55,8 +55,8 @@ type CharacterFaceStateDialogState =
 
 type CharacterInteractionDialogState =
 	| { type: 'create' }
-	| { type: 'update'; interactionId: CharacterInteractionId }
-	| { type: 'delete'; interactionId: CharacterInteractionId }
+	| { type: 'update'; characterInteractionId: CharacterInteractionId }
+	| { type: 'delete'; characterInteractionId: CharacterInteractionId }
 	| undefined;
 
 type CharacterBodyDialogState =
@@ -515,7 +515,7 @@ function createCharacterStore() {
 
 		async createCharacterInteractionAction(
 			scenarioId: ScenarioId,
-			interactionId: CharacterInteractionId,
+			characterInteractionId: CharacterInteractionId,
 			action: Omit<
 				CharacterInteractionActionInsert,
 				'scenario_id' | 'character_id' | 'target_character_id' | 'character_interaction_id'
@@ -523,7 +523,7 @@ function createCharacterStore() {
 		) {
 			// Get character_id and target_character_id from interaction (nullable for default interactions)
 			const characterInteractionStoreValue = get(characterInteractionStore);
-			const interaction = characterInteractionStoreValue.data[interactionId];
+			const interaction = characterInteractionStoreValue.data[characterInteractionId];
 			const characterId = interaction?.character_id || null;
 			const targetCharacterId = interaction?.target_character_id || null;
 
@@ -534,7 +534,7 @@ function createCharacterStore() {
 					scenario_id: scenarioId,
 					character_id: characterId,
 					target_character_id: targetCharacterId,
-					character_interaction_id: interactionId,
+					character_interaction_id: characterInteractionId,
 				})
 				.select()
 				.single<CharacterInteractionAction>();
@@ -543,10 +543,10 @@ function createCharacterStore() {
 
 			characterInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					if (draft.data[interactionId]) {
-						draft.data[interactionId].push(data);
+					if (draft.data[characterInteractionId]) {
+						draft.data[characterInteractionId].push(data);
 					} else {
-						draft.data[interactionId] = [data];
+						draft.data[characterInteractionId] = [data];
 					}
 				})
 			);
@@ -556,7 +556,7 @@ function createCharacterStore() {
 
 		async updateCharacterInteractionAction(
 			actionId: CharacterInteractionActionId,
-			interactionId: CharacterInteractionId,
+			characterInteractionId: CharacterInteractionId,
 			updates: CharacterInteractionActionUpdate
 		) {
 			const { error } = await supabase
@@ -568,7 +568,7 @@ function createCharacterStore() {
 
 			characterInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[characterInteractionId];
 					if (actions) {
 						const action = actions.find((a) => a.id === actionId);
 						if (action) {
@@ -581,7 +581,7 @@ function createCharacterStore() {
 
 		async removeCharacterInteractionAction(
 			actionId: CharacterInteractionActionId,
-			interactionId: CharacterInteractionId
+			characterInteractionId: CharacterInteractionId
 		) {
 			const { error } = await supabase
 				.from('character_interaction_actions')
@@ -592,9 +592,9 @@ function createCharacterStore() {
 
 			characterInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[characterInteractionId];
 					if (actions) {
-						draft.data[interactionId] = actions.filter((a) => a.id !== actionId);
+						draft.data[characterInteractionId] = actions.filter((a) => a.id !== actionId);
 					}
 				})
 			);

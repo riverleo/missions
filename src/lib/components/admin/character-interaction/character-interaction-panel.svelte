@@ -39,10 +39,10 @@
 
 	interface Props {
 		interaction: CharacterInteraction;
-		interactionId: CharacterInteractionId;
+		characterInteractionId: CharacterInteractionId;
 	}
 
-	let { interaction, interactionId }: Props = $props();
+	let { interaction, characterInteractionId }: Props = $props();
 
 	const { characterStore, characterInteractionActionStore, openCharacterInteractionDialog, admin } =
 		useCharacter();
@@ -50,7 +50,7 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const targetCharacter = $derived($characterStore.data[interaction.target_character_id]);
-	const actions = $derived($characterInteractionActionStore.data[interactionId] ?? []);
+	const actions = $derived($characterInteractionActionStore.data[characterInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
@@ -74,7 +74,7 @@
 	async function updateInteraction() {
 		const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-		await admin.updateCharacterInteraction(interactionId, {
+		await admin.updateCharacterInteraction(characterInteractionId, {
 			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 			repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 			character_id: characterId ? (characterId as CharacterId) : null,
@@ -82,7 +82,7 @@
 	}
 
 	async function createAction() {
-		await admin.createCharacterInteractionAction(scenarioId, interactionId, {
+		await admin.createCharacterInteractionAction(scenarioId, characterInteractionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -91,11 +91,11 @@
 		actionId: CharacterInteractionActionId,
 		updates: Partial<CharacterInteractionAction>
 	) {
-		await admin.updateCharacterInteractionAction(actionId, interactionId, updates);
+		await admin.updateCharacterInteractionAction(actionId, characterInteractionId, updates);
 	}
 
 	async function removeAction(actionId: CharacterInteractionActionId) {
-		await admin.removeCharacterInteractionAction(actionId, interactionId);
+		await admin.removeCharacterInteractionAction(actionId, characterInteractionId);
 	}
 
 	function getBodyStateLabel(type: string) {
@@ -126,7 +126,7 @@
 		<Button
 			variant="destructive"
 			size="sm"
-			onclick={() => openCharacterInteractionDialog({ type: 'delete', interactionId })}
+			onclick={() => openCharacterInteractionDialog({ type: 'delete', characterInteractionId })}
 		>
 			<IconTrash class="mr-2 size-4" />
 			삭제

@@ -28,13 +28,13 @@
 	const { characterStore } = useCharacter();
 
 	const open = $derived($itemInteractionDialogStore?.type === 'update');
-	const interactionId = $derived(
+	const itemInteractionId = $derived(
 		$itemInteractionDialogStore?.type === 'update'
-			? $itemInteractionDialogStore.interactionId
+			? $itemInteractionDialogStore.itemInteractionId
 			: undefined
 	);
 	const interaction = $derived(
-		interactionId ? $itemInteractionStore.data[interactionId] : undefined
+		itemInteractionId ? $itemInteractionStore.data[itemInteractionId] : undefined
 	);
 
 	const items = $derived(alphabetical(Object.values($itemStore.data), (b) => b.name));
@@ -93,7 +93,7 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!interactionId || !itemId || isSubmitting) return;
+		if (!itemInteractionId || !itemId || isSubmitting) return;
 
 		isSubmitting = true;
 
@@ -101,7 +101,7 @@
 			// Check if it's once or repeat type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-			await admin.updateItemInteraction(interactionId, {
+			await admin.updateItemInteraction(itemInteractionId, {
 				item_id: itemId || undefined,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),

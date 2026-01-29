@@ -33,13 +33,13 @@
 	const { characterStore } = useCharacter();
 
 	const open = $derived($buildingInteractionDialogStore?.type === 'update');
-	const interactionId = $derived(
+	const buildingInteractionId = $derived(
 		$buildingInteractionDialogStore?.type === 'update'
-			? $buildingInteractionDialogStore.interactionId
+			? $buildingInteractionDialogStore.buildingInteractionId
 			: undefined
 	);
 	const interaction = $derived(
-		interactionId ? $buildingInteractionStore.data[interactionId] : undefined
+		buildingInteractionId ? $buildingInteractionStore.data[buildingInteractionId] : undefined
 	);
 
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
@@ -98,7 +98,7 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!interactionId || !buildingId || isSubmitting) return;
+		if (!buildingInteractionId || !buildingId || isSubmitting) return;
 
 		isSubmitting = true;
 
@@ -106,7 +106,7 @@
 			// Check if it's once or repeat type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-			await admin.updateBuildingInteraction(interactionId, {
+			await admin.updateBuildingInteraction(buildingInteractionId, {
 				building_id: buildingId || undefined,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),

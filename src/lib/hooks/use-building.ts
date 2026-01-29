@@ -50,8 +50,8 @@ type BuildingDialogState =
 
 type BuildingInteractionDialogState =
 	| { type: 'create' }
-	| { type: 'update'; interactionId: BuildingInteractionId }
-	| { type: 'delete'; interactionId: BuildingInteractionId }
+	| { type: 'update'; buildingInteractionId: BuildingInteractionId }
+	| { type: 'delete'; buildingInteractionId: BuildingInteractionId }
 	| undefined;
 
 type ConditionDialogState =
@@ -526,7 +526,7 @@ function createBuildingStore() {
 
 		async createBuildingInteractionAction(
 			scenarioId: ScenarioId,
-			interactionId: BuildingInteractionId,
+			buildingInteractionId: BuildingInteractionId,
 			action: Omit<
 				BuildingInteractionActionInsert,
 				'scenario_id' | 'building_id' | 'building_interaction_id'
@@ -534,7 +534,7 @@ function createBuildingStore() {
 		) {
 			// Get building_id from interaction (nullable for default interactions)
 			const buildingInteractionStoreValue = get(buildingInteractionStore);
-			const buildingId = buildingInteractionStoreValue.data[interactionId]?.building_id || null;
+			const buildingId = buildingInteractionStoreValue.data[buildingInteractionId]?.building_id || null;
 
 			const { data, error } = await supabase
 				.from('building_interaction_actions')
@@ -542,7 +542,7 @@ function createBuildingStore() {
 					...action,
 					scenario_id: scenarioId,
 					building_id: buildingId,
-					building_interaction_id: interactionId,
+					building_interaction_id: buildingInteractionId,
 				})
 				.select()
 				.single<BuildingInteractionAction>();
@@ -551,10 +551,10 @@ function createBuildingStore() {
 
 			buildingInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					if (draft.data[interactionId]) {
-						draft.data[interactionId].push(data);
+					if (draft.data[buildingInteractionId]) {
+						draft.data[buildingInteractionId].push(data);
 					} else {
-						draft.data[interactionId] = [data];
+						draft.data[buildingInteractionId] = [data];
 					}
 				})
 			);
@@ -564,7 +564,7 @@ function createBuildingStore() {
 
 		async updateBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
-			interactionId: BuildingInteractionId,
+			buildingInteractionId: BuildingInteractionId,
 			updates: BuildingInteractionActionUpdate
 		) {
 			const { error } = await supabase
@@ -576,7 +576,7 @@ function createBuildingStore() {
 
 			buildingInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[buildingInteractionId];
 					if (actions) {
 						const action = actions.find((a) => a.id === actionId);
 						if (action) {
@@ -589,7 +589,7 @@ function createBuildingStore() {
 
 		async removeBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
-			interactionId: BuildingInteractionId
+			buildingInteractionId: BuildingInteractionId
 		) {
 			const { error } = await supabase
 				.from('building_interaction_actions')
@@ -600,9 +600,9 @@ function createBuildingStore() {
 
 			buildingInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[buildingInteractionId];
 					if (actions) {
-						draft.data[interactionId] = actions.filter((a) => a.id !== actionId);
+						draft.data[buildingInteractionId] = actions.filter((a) => a.id !== actionId);
 					}
 				})
 			);

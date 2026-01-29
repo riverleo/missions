@@ -61,7 +61,7 @@
 									currentInteractionId &&
 									openBuildingInteractionDialog({
 										type: 'update',
-										interactionId: currentInteractionId as BuildingInteractionId,
+										buildingInteractionId: currentInteractionId as BuildingInteractionId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
@@ -85,7 +85,7 @@
 								currentInteractionId &&
 								openBuildingInteractionDialog({
 									type: 'delete',
-									interactionId: currentInteractionId as BuildingInteractionId,
+									buildingInteractionId: currentInteractionId as BuildingInteractionId,
 								})}
 						>
 							<IconTrash class="size-4" />

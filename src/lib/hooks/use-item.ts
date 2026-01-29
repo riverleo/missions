@@ -32,8 +32,8 @@ type ItemStateDialogState = { type: 'update'; itemStateId: ItemStateId } | undef
 
 type ItemInteractionDialogState =
 	| { type: 'create' }
-	| { type: 'update'; interactionId: ItemInteractionId }
-	| { type: 'delete'; interactionId: ItemInteractionId }
+	| { type: 'update'; itemInteractionId: ItemInteractionId }
+	| { type: 'delete'; itemInteractionId: ItemInteractionId }
 	| undefined;
 
 let instance: ReturnType<typeof createItemStore> | null = null;
@@ -391,12 +391,12 @@ function createItemStore() {
 
 		async createItemInteractionAction(
 			scenarioId: ScenarioId,
-			interactionId: ItemInteractionId,
+			itemInteractionId: ItemInteractionId,
 			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
 		) {
 			// Get item_id from interaction (nullable for default interactions)
 			const itemInteractionStoreValue = get(itemInteractionStore);
-			const interaction = itemInteractionStoreValue.data[interactionId];
+			const interaction = itemInteractionStoreValue.data[itemInteractionId];
 			const itemId = interaction?.item_id || null;
 
 			const { data, error } = await supabase
@@ -405,7 +405,7 @@ function createItemStore() {
 					...action,
 					scenario_id: scenarioId,
 					item_id: itemId,
-					item_interaction_id: interactionId,
+					item_interaction_id: itemInteractionId,
 				})
 				.select()
 				.single<ItemInteractionAction>();
@@ -414,10 +414,10 @@ function createItemStore() {
 
 			itemInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					if (draft.data[interactionId]) {
-						draft.data[interactionId].push(data);
+					if (draft.data[itemInteractionId]) {
+						draft.data[itemInteractionId].push(data);
 					} else {
-						draft.data[interactionId] = [data];
+						draft.data[itemInteractionId] = [data];
 					}
 				})
 			);
@@ -427,7 +427,7 @@ function createItemStore() {
 
 		async updateItemInteractionAction(
 			actionId: ItemInteractionActionId,
-			interactionId: ItemInteractionId,
+			itemInteractionId: ItemInteractionId,
 			updates: ItemInteractionActionUpdate
 		) {
 			const { error } = await supabase
@@ -439,7 +439,7 @@ function createItemStore() {
 
 			itemInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[itemInteractionId];
 					if (actions) {
 						const action = actions.find((a) => a.id === actionId);
 						if (action) {
@@ -452,7 +452,7 @@ function createItemStore() {
 
 		async removeItemInteractionAction(
 			actionId: ItemInteractionActionId,
-			interactionId: ItemInteractionId
+			itemInteractionId: ItemInteractionId
 		) {
 			const { error } = await supabase.from('item_interaction_actions').delete().eq('id', actionId);
 
@@ -460,9 +460,9 @@ function createItemStore() {
 
 			itemInteractionActionStore.update((s) =>
 				produce(s, (draft) => {
-					const actions = draft.data[interactionId];
+					const actions = draft.data[itemInteractionId];
 					if (actions) {
-						draft.data[interactionId] = actions.filter((a) => a.id !== actionId);
+						draft.data[itemInteractionId] = actions.filter((a) => a.id !== actionId);
 					}
 				})
 			);

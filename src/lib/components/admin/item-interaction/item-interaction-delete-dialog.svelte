@@ -17,8 +17,8 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($itemInteractionDialogStore?.type === 'delete');
-	const interactionId = $derived(
-		$itemInteractionDialogStore?.type === 'delete' ? $itemInteractionDialogStore.interactionId : undefined
+	const itemInteractionId = $derived(
+		$itemInteractionDialogStore?.type === 'delete' ? $itemInteractionDialogStore.itemInteractionId : undefined
 	);
 
 	let isSubmitting = $state(false);
@@ -31,12 +31,12 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!interactionId || isSubmitting) return;
+		if (!itemInteractionId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
-			await admin.removeItemInteraction(interactionId);
+			await admin.removeItemInteraction(itemInteractionId);
 			closeItemInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/item-interactions`);
 		} catch (error) {

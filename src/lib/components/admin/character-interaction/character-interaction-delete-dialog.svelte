@@ -18,9 +18,9 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($characterInteractionDialogStore?.type === 'delete');
-	const interactionId = $derived(
+	const characterInteractionId = $derived(
 		$characterInteractionDialogStore?.type === 'delete'
-			? $characterInteractionDialogStore.interactionId
+			? $characterInteractionDialogStore.characterInteractionId
 			: undefined
 	);
 
@@ -34,12 +34,12 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!interactionId || isSubmitting) return;
+		if (!characterInteractionId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
-			await admin.removeCharacterInteraction(interactionId);
+			await admin.removeCharacterInteraction(characterInteractionId);
 			closeCharacterInteractionDialog();
 			goto(`/admin/scenarios/${scenarioId}/character-interactions`);
 		} catch (error) {

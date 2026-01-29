@@ -39,10 +39,10 @@
 
 	interface Props {
 		interaction: ItemInteraction;
-		interactionId: ItemInteractionId;
+		itemInteractionId: ItemInteractionId;
 	}
 
-	let { interaction, interactionId }: Props = $props();
+	let { interaction, itemInteractionId }: Props = $props();
 
 	const { itemStore, itemInteractionActionStore, openItemInteractionDialog, admin } = useItem();
 
@@ -50,7 +50,7 @@
 	const { characterStore } = useCharacter();
 
 	const item = $derived($itemStore.data[interaction.item_id]);
-	const actions = $derived($itemInteractionActionStore.data[interactionId] ?? []);
+	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a) => a.root));
@@ -74,7 +74,7 @@
 	async function updateInteraction() {
 		const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-		await admin.updateItemInteraction(interactionId, {
+		await admin.updateItemInteraction(itemInteractionId, {
 			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 			repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 			character_id: characterId ? (characterId as CharacterId) : null,
@@ -82,7 +82,7 @@
 	}
 
 	async function createAction() {
-		await admin.createItemInteractionAction(scenarioId, interactionId, {
+		await admin.createItemInteractionAction(scenarioId, itemInteractionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
@@ -91,11 +91,11 @@
 		actionId: ItemInteractionActionId,
 		updates: Partial<ItemInteractionAction>
 	) {
-		await admin.updateItemInteractionAction(actionId, interactionId, updates);
+		await admin.updateItemInteractionAction(actionId, itemInteractionId, updates);
 	}
 
 	async function removeAction(actionId: ItemInteractionActionId) {
-		await admin.removeItemInteractionAction(actionId, interactionId);
+		await admin.removeItemInteractionAction(actionId, itemInteractionId);
 	}
 
 	function getBodyStateLabel(type: string) {
@@ -126,7 +126,7 @@
 		<Button
 			variant="destructive"
 			size="sm"
-			onclick={() => openItemInteractionDialog({ type: 'delete', interactionId })}
+			onclick={() => openItemInteractionDialog({ type: 'delete', itemInteractionId })}
 		>
 			<IconTrash class="mr-2 size-4" />
 			삭제
