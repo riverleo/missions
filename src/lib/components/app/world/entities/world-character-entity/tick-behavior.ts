@@ -107,25 +107,49 @@ function searchTargetAndSetPath(
 			const interaction =
 				get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
 			if (interaction) {
-				targetEntity = worldEntities.find(
-					(e) => {
+				if (!interaction.building_id) {
+					// 기본 인터렉션 (NULL building_id): 모든 건물 중 가장 가까운 것 선택
+					const buildingEntities = worldEntities.filter((e) => e.type === 'building');
+					if (buildingEntities.length > 0) {
+						const sortedBuildings = buildingEntities.sort((a, b) => {
+							const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
+							const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+							return distA - distB;
+						});
+						targetEntity = sortedBuildings[0];
+					}
+				} else {
+					// 특정 건물 인터렉션
+					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'building') return false;
 						const worldBuilding = get(worldBuildingStore).data[e.instanceId as any];
 						return worldBuilding && worldBuilding.building_id === interaction.building_id;
-					}
-				);
+					});
+				}
 			}
 		} else if (action.item_interaction_id) {
 			const interaction =
 				get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
 			if (interaction) {
-				targetEntity = worldEntities.find(
-					(e) => {
+				if (!interaction.item_id) {
+					// 기본 인터렉션 (NULL item_id): 모든 아이템 중 가장 가까운 것 선택
+					const itemEntities = worldEntities.filter((e) => e.type === 'item');
+					if (itemEntities.length > 0) {
+						const sortedItems = itemEntities.sort((a, b) => {
+							const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
+							const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+							return distA - distB;
+						});
+						targetEntity = sortedItems[0];
+					}
+				} else {
+					// 특정 아이템 인터렉션
+					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'item') return false;
 						const worldItem = get(worldItemStore).data[e.instanceId as any];
 						return worldItem && worldItem.item_id === interaction.item_id;
-					}
-				);
+					});
+				}
 			}
 		} else if (action.character_interaction_id) {
 			const interaction =
