@@ -47,6 +47,12 @@ export function getInteractableEntityTemplates(
 		// 다음 액션 조회
 		const nextAction = getNextAction(action, isNeedAction);
 		if (nextAction?.type === 'interact') {
+			// INTERACT 다음에 FULFILL이 있는지 확인
+			const nextNextAction = getNextAction(nextAction, isNeedAction);
+			if (nextNextAction?.type === 'fulfill') {
+				// INTERACT -> FULFILL 체인: FULFILL의 조건을 사용
+				return getInteractableTemplatesForFulfill(nextNextAction, isNeedAction);
+			}
 			return getInteractableTemplatesForInteract(nextAction);
 		} else if (nextAction?.type === 'fulfill') {
 			return getInteractableTemplatesForFulfill(nextAction, isNeedAction);
