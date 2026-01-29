@@ -27,7 +27,7 @@ import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
 import { updateMove } from './update-move';
 import { tickWorldCharacterNeeds } from './tick-world-character-needs';
-import { tickBehavior } from './tick-behavior';
+import { tickBehavior } from './tick-behavior/index';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
