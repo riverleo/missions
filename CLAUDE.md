@@ -288,6 +288,53 @@ const data = result.data as Building;
 
 - `update_updated_at()` - Auto-update `updated_at` on UPDATE
 
+### Debugging with Database
+
+**IMPORTANT: Prefer direct database inspection over console logs**
+
+When debugging data issues:
+1. ✅ **First**: Check database directly with `psql`
+2. ❌ **Avoid**: Adding console.log statements before verifying data state
+3. ✅ **Then**: Add logs only if needed for runtime behavior
+
+**psql Usage:**
+
+```bash
+# Connect to local Supabase database
+psql postgresql://postgres:postgres@localhost:54322/postgres
+
+# Common queries
+\dt                          # List all tables
+\d table_name                # Describe table schema
+SELECT * FROM table_name;    # View all records
+SELECT * FROM table_name WHERE id = 'uuid';  # Specific record
+\q                           # Quit psql
+```
+
+**Quick Inspection Commands:**
+
+```bash
+# Check specific entity
+psql postgresql://postgres:postgres@localhost:54322/postgres -c "SELECT * FROM building_interactions WHERE id = 'uuid';"
+
+# Count records
+psql postgresql://postgres:postgres@localhost:54322/postgres -c "SELECT COUNT(*) FROM building_interactions;"
+
+# Check relationships
+psql postgresql://postgres:postgres@localhost:54322/postgres -c "
+  SELECT bi.id, b.name, bi.once_interaction_type, bi.repeat_interaction_type
+  FROM building_interactions bi
+  JOIN buildings b ON bi.building_id = b.id;
+"
+```
+
+**When to use psql:**
+- Verifying data exists in database
+- Checking foreign key relationships
+- Understanding why queries return empty results
+- Validating migration results
+- Before adding debug logs to code
+
 ---
 
 ## UI Components
@@ -367,4 +414,4 @@ This is a **gamified task management app** where:
 
 ---
 
-**Last Updated**: 2025-01-14
+**Last Updated**: 2025-01-29
