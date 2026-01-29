@@ -93,7 +93,7 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!itemInteractionId || !itemId || isSubmitting) return;
+		if (!itemInteractionId || isSubmitting) return;
 
 		isSubmitting = true;
 

@@ -98,7 +98,7 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!buildingInteractionId || !buildingId || isSubmitting) return;
+		if (!buildingInteractionId || isSubmitting) return;
 
 		isSubmitting = true;
 
