@@ -215,7 +215,7 @@ create table character_interactions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
-  target_character_id uuid not null references characters(id) on delete cascade,
+  target_character_id uuid references characters(id) on delete cascade, -- nullable: null이면 기본 인터렉션 (모든 캐릭터 대상)
   once_interaction_type once_interaction_type,
   repeat_interaction_type repeat_interaction_type,
 

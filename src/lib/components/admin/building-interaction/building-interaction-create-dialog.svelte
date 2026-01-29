@@ -90,10 +90,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
-				building_id: buildingId ? (buildingId as BuildingId) : null,
+				building_id: buildingId as any,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId ? (characterId as CharacterId) : null,
+				character_id: characterId as any,
 			});
 
 			closeBuildingInteractionDialog();

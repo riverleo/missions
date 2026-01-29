@@ -801,7 +801,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
-          target_character_id: string
+          target_character_id: string | null
         }
         Insert: {
           character_id?: string | null
@@ -815,7 +815,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
-          target_character_id: string
+          target_character_id?: string | null
         }
         Update: {
           character_id?: string | null
@@ -829,7 +829,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id?: string
-          target_character_id?: string
+          target_character_id?: string | null
         }
         Relationships: [
           {

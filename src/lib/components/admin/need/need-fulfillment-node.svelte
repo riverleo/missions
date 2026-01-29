@@ -61,8 +61,6 @@
 					? `할 일 ${count}개 ${condition} (${duration}틱)`
 					: `할 일 ${count}개 ${condition}`;
 			}
-			case 'idle':
-				return '대기';
 			default:
 				return '상호작용 없음';
 		}

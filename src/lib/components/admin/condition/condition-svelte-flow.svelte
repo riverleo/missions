@@ -237,7 +237,7 @@
 				// 오른쪽 handle에서 드래그한 경우 fulfillment 생성
 				const newFulfillment = await admin.createConditionFulfillment(scenarioId, {
 					condition_id: conditionIdStr as ConditionId,
-					fulfillment_type: 'character',
+					fulfillment_type: 'building',
 					increase_per_tick: 10,
 				});
 

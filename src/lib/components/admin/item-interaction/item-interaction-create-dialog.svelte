@@ -90,10 +90,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createItemInteraction(scenarioId, {
-				item_id: itemId ? (itemId as ItemId) : null,
+				item_id: itemId as any,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId ? (characterId as CharacterId) : null,
+				character_id: characterId as any,
 			});
 
 			closeItemInteractionDialog();

@@ -51,11 +51,6 @@
 			}
 		}
 
-		// fulfillment_type 기반 (idle)
-		if (fulfillment.fulfillment_type === 'idle') {
-			return '대기';
-		}
-
 		return '상호작용 없음';
 	});
 </script>

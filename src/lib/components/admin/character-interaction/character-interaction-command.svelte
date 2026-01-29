@@ -31,8 +31,12 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.characterInteractionId);
 
+	const defaultInteractions = $derived(() => {
+		return Object.values($characterInteractionStore.data).filter((i) => !i.target_character_id);
+	});
+
 	const interactionsGroupedByTargetCharacter = $derived(() => {
-		const interactions = Object.values($characterInteractionStore.data);
+		const interactions = Object.values($characterInteractionStore.data).filter((i) => i.target_character_id);
 		const grouped = group(interactions, (i) => i.target_character_id);
 		const characters = Object.values($characterStore.data);
 		const sortedCharacters = alphabetical(characters, (c) => c.name);
@@ -61,9 +65,59 @@
 
 <Command class="w-full rounded-lg border shadow-md">
 	<CommandInput placeholder="캐릭터 상호작용 검색..." />
-	{#if interactionsGroupedByTargetCharacter().length > 0}
+	{#if defaultInteractions().length > 0 || interactionsGroupedByTargetCharacter().length > 0}
 		<CommandList class="max-h-80">
 			<CommandEmpty />
+			{#if defaultInteractions().length > 0}
+				<CommandGroup heading="기본 (모든 캐릭터)">
+					{#each defaultInteractions() as interaction (interaction.id)}
+						{@const label = getInteractionLabel(interaction)}
+						{@const shortId = interaction.id.split('-')[0]}
+						<CommandLinkItem
+							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
+							class="group pr-1"
+						>
+							<IconCheck
+								class={cn(
+									'mr-2 size-4',
+									interaction.id === currentInteractionId ? 'opacity-100' : 'opacity-0'
+								)}
+							/>
+							<span class="flex-1 truncate">{label}</span>
+							<CommandShortcut>{shortId}</CommandShortcut>
+							<DropdownMenu>
+								<DropdownMenuTrigger>
+									{#snippet child({ props })}
+										<Button
+											{...props}
+											variant="ghost"
+											size="icon"
+											class="size-6 group-hover:opacity-100"
+											onclick={(e) => e.preventDefault()}
+										>
+											<IconDotsVertical class="size-4" />
+										</Button>
+									{/snippet}
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<DropdownMenuItem
+										onclick={() =>
+											openCharacterInteractionDialog({ type: 'update', interactionId: interaction.id })}
+									>
+										수정
+									</DropdownMenuItem>
+									<DropdownMenuItem
+										onclick={() =>
+											openCharacterInteractionDialog({ type: 'delete', interactionId: interaction.id })}
+									>
+										삭제
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</CommandLinkItem>
+					{/each}
+				</CommandGroup>
+			{/if}
 			{#each interactionsGroupedByTargetCharacter() as { targetCharacter, interactions } (targetCharacter.id)}
 				<CommandGroup heading={targetCharacter.name}>
 					{#each interactions as interaction (interaction.id)}
