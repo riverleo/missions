@@ -24,6 +24,14 @@ export default function searchTargetAndSetPath(
 	entity: WorldCharacterEntity,
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): void {
+	console.log('[searchTarget] Starting search:', {
+		actionType: action.type,
+		targetMethod: action.target_selection_method,
+		buildingInteractionId: action.building_interaction_id,
+		itemInteractionId: action.item_interaction_id,
+		characterInteractionId: action.character_interaction_id,
+	});
+
 	const { getInteractableEntityTemplates } = useBehavior();
 	const { buildingInteractionStore } = useBuilding();
 	const { itemInteractionStore } = useItem();
@@ -102,6 +110,7 @@ export default function searchTargetAndSetPath(
 	) {
 		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
 		const templates = getInteractableEntityTemplates(action);
+		console.log('[searchTarget] Interactable templates:', templates.length, templates.map((t) => t.name));
 
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));
@@ -120,6 +129,7 @@ export default function searchTargetAndSetPath(
 			}
 			return false;
 		});
+		console.log('[searchTarget] Candidate entities:', candidateEntities.length);
 
 		// 가장 가까운 엔티티 중 경로를 찾을 수 있는 것 선택
 		if (candidateEntities.length > 0) {
@@ -152,9 +162,16 @@ export default function searchTargetAndSetPath(
 			vectorUtils.createVector(targetEntity.x, targetEntity.y)
 		);
 
+		console.log('[searchTarget] Target found, path length:', testPath.length);
+
 		if (testPath.length > 0) {
 			entity.currentTargetEntityId = targetEntity.id;
 			entity.path = testPath;
+			console.log('[searchTarget] Target set:', targetEntity.id);
+		} else {
+			console.log('[searchTarget] No path found to target');
 		}
+	} else {
+		console.log('[searchTarget] No target entity found');
 	}
 }
