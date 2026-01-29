@@ -143,12 +143,12 @@ ALTER TABLE building_interactions
 - ✅ go, idle 타입 완료
 - ✅ interact 타입: item_pick 완료
 - ✅ fulfill 타입: Need용 반복 로직 완료
-
-### 진행 중 (이번 목표)
-- 🚧 Interaction-Fulfillment 연결 방식 결정 (옵션 A vs B)
-- 🚧 executeInteractAction에 욕구 충족 로직 추가
-- 🚧 item_use 완성
-- 🚧 building_execute 완성
+- ✅ Interaction-Fulfillment 연결 (옵션 A: BehaviorAction의 need_fulfillment_id 사용)
+- ✅ executeInteractAction에 욕구 충족 로직 추가 (매 틱마다 increase_per_tick 적용)
+- ✅ item_use 완성 (once 상호작용 체인 중 욕구 충족)
+- ✅ building_execute 완성 (once 상호작용 체인 중 욕구 충족)
+- ✅ Fulfillment Type Enum 정리 (condition: building만, need: idle 제거)
+- ✅ 기본 인터렉션 구현 (NULL entity_id로 공통 상호작용 관리)
 
 ### 미구현 (향후 추가)
 - ❌ building_construct (건물 건설)
@@ -577,8 +577,8 @@ GROUP BY fulfillment_type;
    ```
 
 #### Phase 3: Admin UI 업데이트
-- [ ] `condition-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 character, item, idle 제거
-- [ ] `need-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 idle 제거
+- [x] `condition-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 character, item, idle 제거 ✅
+- [x] `need-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 idle 제거 ✅
 
 #### Phase 4: TypeScript 타입 재생성
 ```bash
@@ -586,11 +586,13 @@ pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.gener
 ```
 
 ### 파일 작업
-- [ ] 기존 마이그레이션 수정: condition_fulfillment_type enum ('building'만)
-- [ ] 기존 마이그레이션 수정: need_fulfillment_type enum ('idle' 제거)
-- [ ] `pnpm supabase db reset`
-- [ ] Admin UI 컴포넌트 수정
-- [ ] TypeScript 타입 재생성
+- [x] 기존 마이그레이션 수정: condition_fulfillment_type enum ('building'만) ✅
+- [x] 기존 마이그레이션 수정: need_fulfillment_type enum ('idle' 제거) ✅
+- [x] `pnpm supabase db reset` ✅
+- [x] Admin UI 컴포넌트 수정 ✅
+- [x] TypeScript 타입 재생성 ✅
+
+**완료!** Fulfillment Type Enum이 정리되었습니다.
 
 ---
 
@@ -725,20 +727,22 @@ if (!interaction.building_id) {
 ### 파일 작업
 
 **DB 마이그레이션:**
-- [ ] 기존 마이그레이션 수정: `building_interactions.building_id` NULL 허용
-- [ ] 기존 마이그레이션 수정: `item_interactions.item_id` NULL 허용
-- [ ] `pnpm supabase db reset`
-- [ ] TypeScript 타입 재생성
+- [x] 기존 마이그레이션 수정: `building_interactions.building_id` NULL 허용 ✅
+- [x] 기존 마이그레이션 수정: `item_interactions.item_id` NULL 허용 ✅
+- [x] `pnpm supabase db reset` ✅
+- [x] TypeScript 타입 재생성 ✅
 
 **Admin UI:**
-- [ ] `building-interaction-create-dialog.svelte` - 기본 옵션 추가
-- [ ] `building-interaction-update-dialog.svelte` - 기본 옵션 추가
-- [ ] `building-interaction-command.svelte` - 기본 인터렉션 표시 개선
-- [ ] `item-interaction-create-dialog.svelte` - 기본 옵션 추가
-- [ ] `item-interaction-update-dialog.svelte` - 기본 옵션 추가
-- [ ] `item-interaction-command.svelte` - 기본 인터렉션 표시 개선
-- [ ] Fulfillment 패널들 - 기본 인터렉션 선택 UI
+- [x] `building-interaction-create-dialog.svelte` - 기본 옵션 추가 ✅
+- [x] `building-interaction-update-dialog.svelte` - 기본 옵션 추가 ✅
+- [x] `building-interaction-command.svelte` - 기본 인터렉션 표시 개선 ✅
+- [x] `item-interaction-create-dialog.svelte` - 기본 옵션 추가 ✅
+- [x] `item-interaction-update-dialog.svelte` - 기본 옵션 추가 ✅
+- [x] `item-interaction-command.svelte` - 기본 인터렉션 표시 개선 ✅
+- [x] Fulfillment 패널들 - 기본 인터렉션 선택 UI ✅
 
 **런타임 로직:**
-- [ ] `tick-behavior.ts` - 대상 검색 시 기본 인터렉션 처리
-- [ ] 관련 유틸리티 함수들
+- [x] `tick-behavior.ts` - 대상 검색 시 기본 인터렉션 처리 ✅
+- [x] 관련 유틸리티 함수들 ✅
+
+**완료!** 기본 인터렉션 기능이 완전히 구현되었습니다.
