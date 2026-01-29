@@ -1503,7 +1503,7 @@ export type BuildingInteractionInsert = Omit<
 	'scenario_id' | 'building_id' | 'character_id' | 'next_building_interaction_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
+	building_id?: BuildingId | null;
 	character_id?: CharacterId | null;
 	next_building_interaction_id?: BuildingInteractionId | null;
 	created_by?: UserRoleId | null;
@@ -1596,7 +1596,7 @@ export type ItemInteractionInsert = Omit<
 	'scenario_id' | 'item_id' | 'character_id' | 'next_item_interaction_id' | 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	item_id: ItemId;
+	item_id?: ItemId | null;
 	character_id?: CharacterId | null;
 	next_item_interaction_id?: ItemInteractionId | null;
 	created_by?: UserRoleId | null;
@@ -1684,7 +1684,7 @@ export type CharacterInteractionInsert = Omit<
 > & {
 	scenario_id: ScenarioId;
 	character_id?: CharacterId | null;
-	target_character_id: CharacterId;
+	target_character_id?: CharacterId | null;
 	created_by?: UserRoleId | null;
 };
 type CharacterInteractionUpdateRow = TablesUpdate<'character_interactions'>;

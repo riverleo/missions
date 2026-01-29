@@ -18,7 +18,6 @@ import type {
 	ItemStateId,
 	ItemInteractionId,
 	ItemInteractionActionId,
-	CharacterId,
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
@@ -324,7 +323,10 @@ function createItemStore() {
 			);
 		},
 
-		async createItemInteraction(scenarioId: ScenarioId, interaction: Omit<ItemInteractionInsert, 'scenario_id'>) {
+		async createItemInteraction(
+			scenarioId: ScenarioId,
+			interaction: Omit<ItemInteractionInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('item_interactions')
 				.insert({
@@ -352,10 +354,7 @@ function createItemStore() {
 		},
 
 		async updateItemInteraction(id: ItemInteractionId, updates: ItemInteractionUpdate) {
-			const { error } = await supabase
-				.from('item_interactions')
-				.update(updates)
-				.eq('id', id);
+			const { error } = await supabase.from('item_interactions').update(updates).eq('id', id);
 
 			if (error) throw error;
 
@@ -459,10 +458,7 @@ function createItemStore() {
 			actionId: ItemInteractionActionId,
 			interactionId: ItemInteractionId
 		) {
-			const { error } = await supabase
-				.from('item_interaction_actions')
-				.delete()
-				.eq('id', actionId);
+			const { error } = await supabase.from('item_interaction_actions').delete().eq('id', actionId);
 
 			if (error) throw error;
 

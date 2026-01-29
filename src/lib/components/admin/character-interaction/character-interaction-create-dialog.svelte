@@ -36,9 +36,9 @@
 
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	let targetCharacterId = $state<string>('');
+	let targetCharacterId = $state<CharacterId | undefined>(undefined);
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('character_hug');
-	let characterId = $state<string>('');
+	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getCharacterOnceInteractionTypeOptions();
@@ -47,7 +47,9 @@
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(
-		targetCharacterId === '' ? '기본 (모든 캐릭터)' : selectedTargetCharacter?.name ?? '대상 캐릭터 선택'
+		targetCharacterId === undefined
+			? '기본 (모든 캐릭터)'
+			: (selectedTargetCharacter?.name ?? '대상 캐릭터 선택')
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
@@ -56,7 +58,7 @@
 	);
 
 	function onTargetCharacterChange(value: string | undefined) {
-		targetCharacterId = value || '';
+		targetCharacterId = (value as CharacterId) || undefined;
 	}
 
 	function onInteractionTypeChange(value: string | undefined) {
@@ -66,7 +68,7 @@
 	}
 
 	function onCharacterChange(value: string | undefined) {
-		characterId = value || '';
+		characterId = (value as CharacterId) || undefined;
 	}
 
 	function onOpenChange(value: boolean) {
@@ -85,10 +87,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
-				target_character_id: targetCharacterId as any,
+				target_character_id: targetCharacterId || null,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId as any,
+				character_id: characterId || null,
 			});
 
 			closeCharacterInteractionDialog();

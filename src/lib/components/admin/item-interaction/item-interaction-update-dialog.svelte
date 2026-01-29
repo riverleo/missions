@@ -16,12 +16,7 @@
 		getItemRepeatInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type {
-		ItemId,
-		CharacterId,
-		OnceInteractionType,
-		RepeatInteractionType,
-	} from '$lib/types';
+	import type { CharacterId, ItemId, OnceInteractionType, RepeatInteractionType } from '$lib/types';
 
 	const {
 		itemStore,
@@ -45,9 +40,9 @@
 	const items = $derived(alphabetical(Object.values($itemStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	let itemId = $state<string>('');
+	let itemId = $state<ItemId | undefined>(undefined);
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('item_use');
-	let characterId = $state<string>('');
+	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getItemOnceInteractionTypeOptions();
@@ -56,7 +51,7 @@
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
 	const selectedItemName = $derived(
-		itemId === '' ? '기본 (모든 아이템)' : selectedItem?.name ?? '아이템 선택'
+		itemId === '' ? '기본 (모든 아이템)' : (selectedItem?.name ?? '아이템 선택')
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
@@ -72,12 +67,12 @@
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.repeat_interaction_type as RepeatInteractionType | null) ||
 				'item_use';
-			characterId = interaction.character_id || '';
+			characterId = interaction.character_id || undefined;
 		}
 	});
 
 	function onItemChange(value: string | undefined) {
-		itemId = value || '';
+		itemId = (value as ItemId) || undefined;
 	}
 
 	function onInteractionTypeChange(value: string | undefined) {
@@ -87,7 +82,7 @@
 	}
 
 	function onCharacterChange(value: string | undefined) {
-		characterId = value || '';
+		characterId = (value as CharacterId) || undefined;
 	}
 
 	function onOpenChange(value: boolean) {
@@ -107,10 +102,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			await admin.updateItemInteraction(interactionId, {
-				item_id: itemId as any,
+				item_id: itemId || undefined,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId as any,
+				character_id: characterId || undefined,
 			});
 
 			closeItemInteractionDialog();

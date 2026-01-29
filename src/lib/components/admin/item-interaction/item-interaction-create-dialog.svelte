@@ -19,8 +19,8 @@
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
-		ItemId,
 		CharacterId,
+		ItemId,
 		OnceInteractionType,
 		RepeatInteractionType,
 		ScenarioId,
@@ -40,9 +40,9 @@
 	const items = $derived(alphabetical(Object.values($itemStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	let itemId = $state<string>('');
+	let itemId = $state<ItemId | undefined>(undefined);
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('item_use');
-	let characterId = $state<string>('');
+	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getItemOnceInteractionTypeOptions();
@@ -51,7 +51,7 @@
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
 	const selectedItemName = $derived(
-		itemId === '' ? '기본 (모든 아이템)' : selectedItem?.name ?? '아이템 선택'
+		itemId === undefined ? '기본 (모든 아이템)' : (selectedItem?.name ?? '아이템 선택')
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
@@ -60,7 +60,7 @@
 	);
 
 	function onItemChange(value: string | undefined) {
-		itemId = value || '';
+		itemId = (value as ItemId) || undefined;
 	}
 
 	function onInteractionTypeChange(value: string | undefined) {
@@ -70,7 +70,7 @@
 	}
 
 	function onCharacterChange(value: string | undefined) {
-		characterId = value || '';
+		characterId = (value as CharacterId) || undefined;
 	}
 
 	function onOpenChange(value: boolean) {
@@ -89,15 +89,15 @@
 			// Check if it's once or repeat type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
-			const interaction = await admin.createItemInteraction(scenarioId, {
-				item_id: itemId as any,
+			const itemInteraction = await admin.createItemInteraction(scenarioId, {
+				item_id: itemId || null,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId as any,
+				character_id: characterId || null,
 			});
 
 			closeItemInteractionDialog();
-			goto(`/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`);
+			goto(`/admin/scenarios/${scenarioId}/item-interactions/${itemInteraction.id}`);
 		} catch (error) {
 			console.error('Failed to create interaction:', error);
 		} finally {

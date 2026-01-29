@@ -37,9 +37,9 @@
 
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	let targetCharacterId = $state<string>('');
+	let targetCharacterId = $state<CharacterId | undefined>(undefined);
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('character_hug');
-	let characterId = $state<string>('');
+	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getCharacterOnceInteractionTypeOptions();
@@ -48,7 +48,7 @@
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(
-		targetCharacterId === '' ? '기본 (모든 캐릭터)' : selectedTargetCharacter?.name ?? '대상 캐릭터 선택'
+		targetCharacterId === undefined ? '기본 (모든 캐릭터)' : selectedTargetCharacter?.name ?? '대상 캐릭터 선택'
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
@@ -59,17 +59,17 @@
 	// interaction이 변경될 때 폼 초기화
 	$effect(() => {
 		if (interaction) {
-			targetCharacterId = interaction.target_character_id;
+			targetCharacterId = interaction.target_character_id || undefined;
 			interactionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.repeat_interaction_type as RepeatInteractionType | null) ||
 				'character_hug';
-			characterId = interaction.character_id || '';
+			characterId = interaction.character_id || undefined;
 		}
 	});
 
 	function onTargetCharacterChange(value: string | undefined) {
-		targetCharacterId = value || '';
+		targetCharacterId = (value as CharacterId) || undefined;
 	}
 
 	function onInteractionTypeChange(value: string | undefined) {
@@ -79,7 +79,7 @@
 	}
 
 	function onCharacterChange(value: string | undefined) {
-		characterId = value || '';
+		characterId = (value as CharacterId) || undefined;
 	}
 
 	function onOpenChange(value: boolean) {
@@ -98,10 +98,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			await admin.updateCharacterInteraction(interactionId, {
-				target_character_id: targetCharacterId as any,
+				target_character_id: targetCharacterId || undefined,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId as any,
+				character_id: characterId || undefined,
 			});
 
 			closeCharacterInteractionDialog();

@@ -40,9 +40,9 @@
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
-	let buildingId = $state<string>('');
+	let buildingId = $state<BuildingId | undefined>(undefined);
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('building_execute');
-	let characterId = $state<string>('');
+	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getBuildingOnceInteractionTypeOptions();
@@ -51,7 +51,7 @@
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(
-		buildingId === '' ? '기본 (모든 건물)' : selectedBuilding?.name ?? '건물 선택'
+		buildingId === undefined ? '기본 (모든 건물)' : selectedBuilding?.name ?? '건물 선택'
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
@@ -60,7 +60,7 @@
 	);
 
 	function onBuildingChange(value: string | undefined) {
-		buildingId = value || '';
+		buildingId = (value as BuildingId) || undefined;
 	}
 
 	function onInteractionTypeChange(value: string | undefined) {
@@ -70,7 +70,7 @@
 	}
 
 	function onCharacterChange(value: string | undefined) {
-		characterId = value || '';
+		characterId = (value as CharacterId) || undefined;
 	}
 
 	function onOpenChange(value: boolean) {
@@ -90,10 +90,10 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
-				building_id: buildingId as any,
+				building_id: buildingId || null,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
-				character_id: characterId as any,
+				character_id: characterId || null,
 			});
 
 			closeBuildingInteractionDialog();
