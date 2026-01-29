@@ -418,41 +418,36 @@ $effect(() => {
 ### 수정 대상 리스트 페이지 (15개)
 
 #### Behavior 관련 (2개)
-- [ ] `need-behaviors/+page.svelte`
-- [ ] `condition-behaviors/+page.svelte`
+- [x] `need-behaviors/+page.svelte` ✅
+- [x] `condition-behaviors/+page.svelte` ✅
 - ~~`behavior-priorities/+page.svelte`~~ - 제외 (상세 페이지 자체가 없음, bulk 관리 인터페이스)
 
 #### Interaction 관련 (3개)
-- [ ] `building-interactions/+page.svelte`
-- [ ] `item-interactions/+page.svelte`
-- [ ] `character-interactions/+page.svelte`
+- [x] `building-interactions/+page.svelte` ✅
+- [x] `item-interactions/+page.svelte` ✅
+- [x] `character-interactions/+page.svelte` ✅
 
 #### Need/Condition 관련 (2개)
-- [ ] `needs/+page.svelte`
-- [ ] `conditions/+page.svelte`
+- [x] `needs/+page.svelte` ✅
+- [x] `conditions/+page.svelte` ✅
 
-#### Entity 관련 (5개)
-- [ ] `buildings/+page.svelte`
-- [ ] `items/+page.svelte`
-- [ ] `characters/+page.svelte`
-- [ ] `character-bodies/+page.svelte`
-- [ ] `terrains/+page.svelte`
-- [ ] `tiles/+page.svelte`
+#### Entity 관련 (6개)
+- [x] `buildings/+page.svelte` ✅
+- [x] `items/+page.svelte` ✅
+- [x] `characters/+page.svelte` ✅
+- [x] `character-bodies/+page.svelte` ✅
+- [x] `terrains/+page.svelte` ✅
+- [x] `tiles/+page.svelte` ✅
 
 #### Quest/Narrative 관련 (2개)
-- [ ] `quests/+page.svelte`
-- [ ] `narratives/+page.svelte`
+- [x] `quests/+page.svelte` ✅
+- [x] `narratives/+page.svelte` ✅
 
 #### 예외 (리다이렉트 불필요)
 - `chapters` - detail 페이지 없음
 - `terrains-tiles` - detail 페이지 없음
 
-**총 16개 리스트 페이지**
-
-### 주의사항
-- store가 로드되기 전에 리다이렉트하지 않도록 주의
-- 아이템이 없는 경우 처리 (빈 상태 표시)
-- 무한 리다이렉트 방지
+**완료!** 모든 15개 리스트 페이지에 자동 리다이렉트 구현 완료
 
 ---
 
