@@ -247,7 +247,7 @@ export type Database = {
       }
       building_interactions: {
         Row: {
-          building_id: string
+          building_id: string | null
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -261,7 +261,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          building_id: string
+          building_id?: string | null
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -275,7 +275,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          building_id?: string
+          building_id?: string | null
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -1482,7 +1482,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
-          item_id: string
+          item_id: string | null
           once_interaction_type:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
@@ -1496,7 +1496,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_id: string
+          item_id?: string | null
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
@@ -1510,7 +1510,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_id?: string
+          item_id?: string | null
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null

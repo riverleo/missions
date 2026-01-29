@@ -55,7 +55,9 @@
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
-	const selectedItemName = $derived(selectedItem?.name ?? '아이템 선택');
+	const selectedItemName = $derived(
+		itemId === '' ? '기본 (모든 아이템)' : selectedItem?.name ?? '아이템 선택'
+	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
@@ -105,7 +107,7 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			await admin.updateItemInteraction(interactionId, {
-				item_id: itemId as ItemId,
+				item_id: itemId ? (itemId as ItemId) : null,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 				character_id: characterId ? (characterId as CharacterId) : null,
@@ -134,6 +136,7 @@
 							{selectedItemName}
 						</SelectTrigger>
 						<SelectContent>
+							<SelectItem value="">기본 (모든 아이템)</SelectItem>
 							{#each items as item (item.id)}
 								<SelectItem value={item.id}>{item.name}</SelectItem>
 							{/each}
