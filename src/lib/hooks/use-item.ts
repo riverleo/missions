@@ -394,14 +394,10 @@ function createItemStore() {
 			interactionId: ItemInteractionId,
 			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
 		) {
-			// Get item_id from interaction
+			// Get item_id from interaction (nullable for default interactions)
 			const itemInteractionStoreValue = get(itemInteractionStore);
 			const interaction = itemInteractionStoreValue.data[interactionId];
-			const itemId = interaction?.item_id;
-
-			if (!itemId) {
-				throw new Error('Cannot find item_id for this interaction');
-			}
+			const itemId = interaction?.item_id || null;
 
 			const { data, error } = await supabase
 				.from('item_interaction_actions')

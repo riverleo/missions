@@ -1554,7 +1554,7 @@ export type BuildingInteractionActionInsert = Omit<
 	| 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	building_id: BuildingId;
+	building_id?: BuildingId | null;
 	building_interaction_id: BuildingInteractionId;
 	next_building_interaction_action_id?: BuildingInteractionActionId | null;
 	created_by?: UserRoleId | null;
@@ -1642,7 +1642,7 @@ export type ItemInteractionActionInsert = Omit<
 	| 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	item_id: ItemId;
+	item_id?: ItemId | null;
 	item_interaction_id: ItemInteractionId;
 	next_item_interaction_action_id?: ItemInteractionActionId | null;
 	created_by?: UserRoleId | null;
@@ -1730,8 +1730,8 @@ export type CharacterInteractionActionInsert = Omit<
 	| 'created_by'
 > & {
 	scenario_id: ScenarioId;
-	character_id: CharacterId;
-	target_character_id: CharacterId;
+	character_id?: CharacterId | null;
+	target_character_id?: CharacterId | null;
 	character_interaction_id: CharacterInteractionId;
 	next_character_interaction_action_id?: CharacterInteractionActionId | null;
 	created_by?: UserRoleId | null;

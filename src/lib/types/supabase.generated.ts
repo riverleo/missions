@@ -157,7 +157,7 @@ export type Database = {
       }
       building_interaction_actions: {
         Row: {
-          building_id: string
+          building_id: string | null
           building_interaction_id: string
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
@@ -174,7 +174,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          building_id: string
+          building_id?: string | null
           building_interaction_id: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
@@ -191,7 +191,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          building_id?: string
+          building_id?: string | null
           building_interaction_id?: string
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
@@ -686,7 +686,7 @@ export type Database = {
         Row: {
           character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string
+          character_id: string | null
           character_interaction_id: string
           created_at: string
           created_by: string | null
@@ -697,7 +697,7 @@ export type Database = {
           scenario_id: string
           target_character_body_state_type: Database["public"]["Enums"]["character_body_state_type"]
           target_character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
-          target_character_id: string
+          target_character_id: string | null
           target_character_offset_x: number
           target_character_offset_y: number
           target_character_rotation: number
@@ -706,7 +706,7 @@ export type Database = {
         Insert: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id: string
+          character_id?: string | null
           character_interaction_id: string
           created_at?: string
           created_by?: string | null
@@ -717,7 +717,7 @@ export type Database = {
           scenario_id: string
           target_character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           target_character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          target_character_id: string
+          target_character_id?: string | null
           target_character_offset_x?: number
           target_character_offset_y?: number
           target_character_rotation?: number
@@ -726,7 +726,7 @@ export type Database = {
         Update: {
           character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          character_id?: string
+          character_id?: string | null
           character_interaction_id?: string
           created_at?: string
           created_by?: string | null
@@ -737,7 +737,7 @@ export type Database = {
           scenario_id?: string
           target_character_body_state_type?: Database["public"]["Enums"]["character_body_state_type"]
           target_character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
-          target_character_id?: string
+          target_character_id?: string | null
           target_character_offset_x?: number
           target_character_offset_y?: number
           target_character_rotation?: number
@@ -1394,7 +1394,7 @@ export type Database = {
           created_by: string | null
           duration_ticks: number
           id: string
-          item_id: string
+          item_id: string | null
           item_interaction_id: string
           item_offset_x: number
           item_offset_y: number
@@ -1411,7 +1411,7 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          item_id: string
+          item_id?: string | null
           item_interaction_id: string
           item_offset_x?: number
           item_offset_y?: number
@@ -1428,7 +1428,7 @@ export type Database = {
           created_by?: string | null
           duration_ticks?: number
           id?: string
-          item_id?: string
+          item_id?: string | null
           item_interaction_id?: string
           item_offset_x?: number
           item_offset_y?: number

@@ -532,13 +532,9 @@ function createBuildingStore() {
 				'scenario_id' | 'building_id' | 'building_interaction_id'
 			>
 		) {
-			// Get building_id from interaction
+			// Get building_id from interaction (nullable for default interactions)
 			const buildingInteractionStoreValue = get(buildingInteractionStore);
-			const buildingId = buildingInteractionStoreValue.data[interactionId]?.building_id;
-
-			if (!buildingId) {
-				throw new Error('Cannot find building_id for this interaction');
-			}
+			const buildingId = buildingInteractionStoreValue.data[interactionId]?.building_id || null;
 
 			const { data, error } = await supabase
 				.from('building_interaction_actions')

@@ -521,22 +521,18 @@ function createCharacterStore() {
 				'scenario_id' | 'character_id' | 'target_character_id' | 'character_interaction_id'
 			>
 		) {
-			// Get character_id and target_character_id from interaction
+			// Get character_id and target_character_id from interaction (nullable for default interactions)
 			const characterInteractionStoreValue = get(characterInteractionStore);
 			const interaction = characterInteractionStoreValue.data[interactionId];
-			const characterId = interaction?.character_id;
-			const targetCharacterId = interaction?.target_character_id;
-
-			if (!targetCharacterId) {
-				throw new Error('Cannot find target_character_id for this interaction');
-			}
+			const characterId = interaction?.character_id || null;
+			const targetCharacterId = interaction?.target_character_id || null;
 
 			const { data, error } = await supabase
 				.from('character_interaction_actions')
 				.insert({
 					...action,
 					scenario_id: scenarioId,
-					character_id: characterId || targetCharacterId, // Use targetCharacterId as fallback if character_id is null
+					character_id: characterId,
 					target_character_id: targetCharacterId,
 					character_interaction_id: interactionId,
 				})

@@ -48,7 +48,7 @@ create policy "admins can delete building_interactions"
 create table building_interaction_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
-  building_id uuid not null references buildings(id) on delete cascade,
+  building_id uuid references buildings(id) on delete cascade, -- nullable: null이면 기본 인터랙션의 액션
   building_interaction_id uuid not null references building_interactions(id) on delete cascade,
   root boolean not null default false,
 
@@ -152,7 +152,7 @@ create policy "admins can delete item_interactions"
 create table item_interaction_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
-  item_id uuid not null references items(id) on delete cascade,
+  item_id uuid references items(id) on delete cascade, -- nullable: null이면 기본 인터랙션의 액션
   item_interaction_id uuid not null references item_interactions(id) on delete cascade,
   root boolean not null default false,
 
@@ -256,8 +256,8 @@ create policy "admins can delete character_interactions"
 create table character_interaction_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
-  character_id uuid not null references characters(id) on delete cascade,
-  target_character_id uuid not null references characters(id) on delete cascade,
+  character_id uuid references characters(id) on delete cascade, -- nullable: null이면 기본 인터랙션의 액션
+  target_character_id uuid references characters(id) on delete cascade, -- nullable: null이면 기본 인터랙션의 액션
   character_interaction_id uuid not null references character_interactions(id) on delete cascade,
   root boolean not null default false,
 
