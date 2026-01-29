@@ -145,8 +145,43 @@ export default function executeInteractAction(
 			entity.currentTargetEntityId = undefined;
 		}
 	} else if (interactType === 'item_use') {
-		// 들고 있는 아이템 사용
-		if (entity.heldWorldItemIds.length > 0) {
+		// item_use는 줍기가 내포됨: 타겟이 월드에 있으면 먼저 줍고, 그게 아니면 들고 있는 아이템 사용
+		if (targetEntity.type === 'item') {
+			const { worldItemStore } = useWorld();
+			const worldItemId = targetEntity.instanceId as WorldItemId;
+
+			// 월드에 있는 아이템: 줍기
+			if (!entity.heldWorldItemIds.includes(worldItemId)) {
+				entity.heldWorldItemIds.push(worldItemId);
+			}
+
+			// 바디만 월드에서 제거
+			targetEntity.removeFromWorld();
+
+			// worldItem.world_character_id 업데이트
+			const worldItem = get(worldItemStore).data[worldItemId];
+			if (worldItem) {
+				worldItemStore.update((state) => ({
+					...state,
+					data: {
+						...state.data,
+						[worldItemId]: {
+							...worldItem,
+							world_character_id: entity.instanceId,
+							world_building_id: null,
+						},
+					},
+				}));
+			}
+
+			// 줍은 후 즉시 사용
+			entity.heldWorldItemIds.splice(entity.heldWorldItemIds.length - 1, 1);
+			entity.worldContext.deleteWorldItem(worldItemId);
+
+			// 타겟 클리어
+			entity.currentTargetEntityId = undefined;
+		} else if (entity.heldWorldItemIds.length > 0) {
+			// 이미 들고 있는 아이템 사용
 			const lastHeldItemId = entity.heldWorldItemIds[entity.heldWorldItemIds.length - 1];
 			if (!lastHeldItemId) return;
 

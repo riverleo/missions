@@ -5,11 +5,13 @@ import type {
 	CharacterInteractionId,
 	NeedFulfillmentId,
 	ConditionFulfillmentId,
+	WorldItemId,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
+import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
 import startInteractionChain from '../interaction-chain/start-chain';
 import tickInteractionAction from '../interaction-chain/tick-chain';
@@ -84,40 +86,35 @@ export default function executeFulfillAction(
 		return;
 	}
 
-	// item_use의 경우 월드 타겟이 필요 없음 (들고 있는 아이템 사용)
-	const isItemUse = interaction.repeat_interaction_type === 'item_use';
+	// 타겟 엔티티 확인
+	if (!entity.currentTargetEntityId) return;
 
-	if (!isItemUse) {
-		// item_use가 아닌 경우에만 타겟 엔티티 필요
-		if (!entity.currentTargetEntityId) return;
+	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+	if (!targetEntity) {
+		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
+		entity.currentTargetEntityId = undefined;
+		entity.path = [];
+		return;
+	}
 
-		const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
-		if (!targetEntity) {
-			// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-			entity.currentTargetEntityId = undefined;
-			entity.path = [];
-			return;
-		}
+	// 타겟과의 거리 확인 (임계값: 50)
+	const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
 
-		// 타겟과의 거리 확인 (임계값: 50)
-		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
-
-		if (distance >= 50) {
-			// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
-			if (entity.path.length === 0) {
-				const testPath = entity.worldContext.pathfinder.findPath(
-					vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
-					vectorUtils.createVector(targetEntity.x, targetEntity.y)
-				);
-				if (testPath.length > 0) {
-					entity.path = testPath;
-				} else {
-					// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
-					entity.currentTargetEntityId = undefined;
-				}
+	if (distance >= 50) {
+		// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
+		if (entity.path.length === 0) {
+			const testPath = entity.worldContext.pathfinder.findPath(
+				vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+				vectorUtils.createVector(targetEntity.x, targetEntity.y)
+			);
+			if (testPath.length > 0) {
+				entity.path = testPath;
+			} else {
+				// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
+				entity.currentTargetEntityId = undefined;
 			}
-			return;
 		}
+		return;
 	}
 
 	// InteractionAction 체인이 아직 시작되지 않았으면 시작
@@ -148,10 +145,50 @@ export default function executeFulfillAction(
 		// 건물 수리/청소 등 구현 필요
 	}
 
-	// repeat_interaction_type: 체인 완료 시 root로 돌아가서 반복
+	// repeat_interaction_type: 체인 완료 시 처리
 	if (interactionCompleted) {
 		entity.currentInteractionActionId = undefined;
 		entity.interactionActionStartTick = 0;
-		// 다음 틱에서 체인이 다시 시작됨
+
+		// item_use는 줍기가 내포됨: 타겟 아이템을 주워서 사용
+		if (interaction.repeat_interaction_type === 'item_use' && targetEntity.type === 'item') {
+			const { worldItemStore } = useWorld();
+			const worldItemId = targetEntity.instanceId as WorldItemId;
+
+			// 월드에 있는 아이템: 줍기
+			if (!entity.heldWorldItemIds.includes(worldItemId)) {
+				entity.heldWorldItemIds.push(worldItemId);
+
+				// 바디만 월드에서 제거
+				targetEntity.removeFromWorld();
+
+				// worldItem.world_character_id 업데이트
+				const worldItem = get(worldItemStore).data[worldItemId];
+				if (worldItem) {
+					worldItemStore.update((state) => ({
+						...state,
+						data: {
+							...state.data,
+							[worldItemId]: {
+								...worldItem,
+								world_character_id: entity.instanceId,
+								world_building_id: null,
+							},
+						},
+					}));
+				}
+			}
+
+			// 줍은 후 즉시 사용 (소비)
+			const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
+			if (itemIndex !== -1) {
+				entity.heldWorldItemIds.splice(itemIndex, 1);
+				entity.worldContext.deleteWorldItem(worldItemId);
+			}
+
+			// 타겟 클리어 (다음 tick에서 재탐색)
+			entity.currentTargetEntityId = undefined;
+		}
+		// 다음 틱에서 체인이 다시 시작됨 (item_use는 새로운 타겟으로)
 	}
 }
