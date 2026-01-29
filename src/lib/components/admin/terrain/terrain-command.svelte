@@ -7,6 +7,7 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandLinkItem,
+		CommandShortcut,
 	} from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
@@ -39,6 +40,7 @@
 			<CommandGroup>
 				{#each terrains as terrain (terrain.id)}
 					{@const assetUrl = getGameAssetUrl(supabase, 'terrain', terrain)}
+					{@const shortId = terrain.id.split('-')[0]}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/terrains/${terrain.id}`}
 						class="group pr-1"
@@ -55,8 +57,9 @@
 							<div class="mr-2 size-6 rounded bg-muted"></div>
 						{/if}
 						<span class="flex-1 truncate">
-							{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
+							{terrain.title || `제목없음 (${shortId})`}
 						</span>
+						<CommandShortcut>{shortId}</CommandShortcut>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}

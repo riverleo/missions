@@ -7,6 +7,7 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandLinkItem,
+		CommandShortcut,
 	} from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
@@ -35,6 +36,7 @@
 			<CommandEmpty />
 			<CommandGroup>
 				{#each narratives as narrative (narrative.id)}
+					{@const shortId = narrative.id.split('-')[0]}
 					<CommandLinkItem
 						href={`/admin/scenarios/${scenarioId}/narratives/${narrative.id}`}
 						class="group pr-1"
@@ -46,8 +48,9 @@
 							)}
 						/>
 						<span class="flex-1 truncate">
-							{narrative.title || `제목없음 (${narrative.id.split('-')[0]})`}
+							{narrative.title || `제목없음 (${shortId})`}
 						</span>
+						<CommandShortcut>{shortId}</CommandShortcut>
 						<DropdownMenu>
 							<DropdownMenuTrigger>
 								{#snippet child({ props })}

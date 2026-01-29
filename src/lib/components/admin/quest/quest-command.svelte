@@ -7,6 +7,7 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandLinkItem,
+		CommandShortcut,
 	} from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
@@ -66,6 +67,7 @@
 			{#each questsByChapter() as { chapterId, chapterTitle, quests } (chapterId)}
 				<CommandGroup heading={chapterTitle}>
 					{#each quests as quest (quest.id)}
+						{@const shortId = quest.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/quests/${quest.id}`}
 							class="group pr-1"
@@ -75,7 +77,7 @@
 							/>
 							<div class="flex flex-1 flex-col">
 								<span class="truncate">
-									{quest.title || `제목없음 (${quest.id.split('-')[0]})`}
+									{quest.title || `제목없음 (${shortId})`}
 								</span>
 								<span class="text-xs text-muted-foreground">
 									{quest.type === 'primary' ? '메인 퀘스트' : '보조 퀘스트'} • {quest.status ===
@@ -84,6 +86,7 @@
 										: '작업중'}
 								</span>
 							</div>
+							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}

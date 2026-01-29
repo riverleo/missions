@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
-	import { CommandLinkItem, CommandItem } from '$lib/components/ui/command';
+	import { CommandLinkItem, CommandItem, CommandShortcut } from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
 		DropdownMenuContent,
@@ -44,6 +44,7 @@
 	});
 
 	const searchValue = $derived(`${behavior.name} ${description}`);
+	const shortId = $derived(behavior.id.split('-')[0]);
 </script>
 
 {#if href}
@@ -53,6 +54,7 @@
 			<span class="truncate">{behavior.name}</span>
 			<span class="truncate text-xs text-muted-foreground">{description}</span>
 		</div>
+		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>
 				<DropdownMenuTrigger>
@@ -90,6 +92,7 @@
 			<span class="truncate">{behavior.name}</span>
 			<span class="truncate text-xs text-muted-foreground">{description}</span>
 		</div>
+		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>
 				<DropdownMenuTrigger>

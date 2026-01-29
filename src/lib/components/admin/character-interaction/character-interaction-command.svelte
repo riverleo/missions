@@ -7,6 +7,7 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandLinkItem,
+		CommandShortcut,
 	} from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
@@ -67,6 +68,7 @@
 				<CommandGroup heading={targetCharacter.name}>
 					{#each interactions as interaction (interaction.id)}
 						{@const label = getInteractionLabel(interaction)}
+						{@const shortId = interaction.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
 							class="group pr-1"
@@ -78,6 +80,7 @@
 								)}
 							/>
 							<span class="flex-1 truncate">{label}</span>
+							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
