@@ -199,7 +199,8 @@ function interactionsToTemplates(
 	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();
 
-	const templates: EntityTemplate[] = [];
+	// ID 기준 중복 제거를 위해 Map 사용
+	const templateMap = new Map<string, EntityTemplate>();
 
 	for (const interaction of interactions) {
 		if ('building_id' in interaction) {
@@ -207,35 +208,35 @@ function interactionsToTemplates(
 			if (interaction.building_id) {
 				// 특정 건물
 				const building = get(buildingStore).data[interaction.building_id as BuildingId];
-				if (building) templates.push(building);
+				if (building) templateMap.set(building.id, building);
 			} else {
 				// 기본 인터랙션: 모든 건물
-				templates.push(...Object.values(get(buildingStore).data));
+				Object.values(get(buildingStore).data).forEach((b) => templateMap.set(b.id, b));
 			}
 		} else if ('item_id' in interaction) {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
 				const item = get(itemStore).data[interaction.item_id as ItemId];
-				if (item) templates.push(item);
+				if (item) templateMap.set(item.id, item);
 			} else {
 				// 기본 인터랙션: 모든 아이템
-				templates.push(...Object.values(get(itemStore).data));
+				Object.values(get(itemStore).data).forEach((i) => templateMap.set(i.id, i));
 			}
 		} else if ('target_character_id' in interaction) {
 			// CharacterInteraction
 			if (interaction.target_character_id) {
 				// 특정 캐릭터
 				const character = get(characterStore).data[interaction.target_character_id as CharacterId];
-				if (character) templates.push(character);
+				if (character) templateMap.set(character.id, character);
 			} else {
 				// 기본 인터랙션: 모든 캐릭터
-				templates.push(...Object.values(get(characterStore).data));
+				Object.values(get(characterStore).data).forEach((c) => templateMap.set(c.id, c));
 			}
 		}
 	}
 
-	return templates;
+	return Array.from(templateMap.values());
 }
 
 /**
