@@ -142,10 +142,16 @@ export default function searchTargetAndSetPath(
 
 			// 경로를 찾을 수 있는 첫 번째 타겟 선택
 			for (const candidate of sortedCandidates) {
-				const testPath = entity.worldContext.pathfinder.findPath(
-					vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
-					vectorUtils.createVector(candidate.x, candidate.y)
-				);
+				const fromPos = vectorUtils.createVector(entity.body.position.x, entity.body.position.y);
+				const toPos = vectorUtils.createVector(candidate.x, candidate.y);
+				console.log('[searchTarget] Testing path:', {
+					from: fromPos,
+					to: toPos,
+					candidateType: candidate.type,
+					candidateId: candidate.instanceId,
+				});
+				const testPath = entity.worldContext.pathfinder.findPath(fromPos, toPos);
+				console.log('[searchTarget] Path result:', testPath.length);
 				if (testPath.length > 0) {
 					targetEntity = candidate;
 					break;
