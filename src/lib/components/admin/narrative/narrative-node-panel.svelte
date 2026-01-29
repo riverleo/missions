@@ -115,8 +115,6 @@
 				]);
 			}
 
-			// 선택 해제
-			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 		} catch (error) {
 			console.error('Failed to update narrative node:', error);
 		} finally {

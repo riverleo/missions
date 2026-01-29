@@ -57,8 +57,7 @@
 				disabled_when_depleted: changes.disabled_when_depleted,
 			})
 			.then(() => {
-				// 선택 해제
-				flowEdges.update((es) => es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e)));
+				// 저장 성공
 			})
 			.catch((error: Error) => {
 				console.error('Failed to update building condition:', error);

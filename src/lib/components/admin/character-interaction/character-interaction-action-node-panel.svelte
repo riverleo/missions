@@ -156,10 +156,6 @@
 				duration_ticks: changes.duration_ticks,
 				root: changes.root,
 			});
-
-			// 선택 해제
-			const nodeId = `character-interaction-action-${actionId}`;
-			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 		} catch (error) {
 			console.error('Failed to update action:', error);
 		} finally {

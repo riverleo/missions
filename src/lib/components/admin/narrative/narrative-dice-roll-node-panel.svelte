@@ -65,11 +65,7 @@
 				failure_action: editFailureAction,
 			})
 			.then(() => {
-				// 선택 해제
-				const narrativeDiceRollNodeId = createNarrativeDiceRollNodeId(narrativeDiceRoll);
-				flowNodes.update((ns) =>
-					ns.map((n) => (n.id === narrativeDiceRollNodeId ? { ...n, selected: false } : n))
-				);
+				// 저장 성공
 			})
 			.catch((error) => {
 				console.error('Failed to update narrative dice roll:', error);

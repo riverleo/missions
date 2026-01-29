@@ -232,10 +232,6 @@
 				idle_duration_ticks: changes.idle_duration_ticks,
 				root: changes.root,
 			});
-
-			// 선택 해제
-			const nodeId = `action-${actionId}`;
-			flowNodes.update((ns) => ns.map((n) => (n.id === nodeId ? { ...n, selected: false } : n)));
 		} catch (error) {
 			console.error('Failed to update action:', error);
 		} finally {

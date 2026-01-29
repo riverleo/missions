@@ -125,12 +125,7 @@
 				increase_per_tick: changes.increase_per_tick,
 			})
 			.then(() => {
-				// 선택 해제
-				flowNodes.update((ns) =>
-					ns.map((n) =>
-						n.id === `condition-fulfillment-${fulfillmentId}` ? { ...n, selected: false } : n
-					)
-				);
+				// 저장 성공
 			})
 			.catch((error: Error) => {
 				console.error('Failed to update fulfillment:', error);
