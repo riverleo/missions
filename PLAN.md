@@ -276,32 +276,32 @@ import { CommandShortcut } from '$lib/components/ui/command';
 ### 수정 대상 Command 목록 (16개)
 
 #### Behavior 관련 (3개)
-- [ ] `behavior-priority/behavior-priority-command.svelte`
-- [ ] `need-behavior/need-behavior-command.svelte`
-- [ ] `condition-behavior/condition-behavior-command.svelte`
+- [x] `behavior-priority/behavior-priority-command.svelte` ✅ (CommandItem만 사용, shortId 불필요)
+- [x] `need-behavior/need-behavior-command-item.svelte` ✅
+- [x] `condition-behavior/condition-behavior-command-item.svelte` ✅
 
 #### Interaction 관련 (3개)
-- [x] `building-interaction/building-interaction-command.svelte` ✅ 완료
-- [ ] `item-interaction/item-interaction-command.svelte`
-- [ ] `character-interaction/character-interaction-command.svelte`
+- [x] `building-interaction/building-interaction-command.svelte` ✅
+- [x] `item-interaction/item-interaction-command.svelte` ✅
+- [x] `character-interaction/character-interaction-command.svelte` ✅
 
 #### Need/Condition 관련 (2개)
-- [ ] `need/need-command.svelte`
-- [ ] `condition/condition-command.svelte`
+- [x] `need/need-command.svelte` ✅
+- [x] `condition/condition-command.svelte` ✅
 
 #### Entity 관련 (6개)
-- [ ] `building/building-command.svelte`
-- [ ] `item/item-command.svelte`
-- [ ] `character/character-command.svelte`
-- [ ] `character-body/character-body-command.svelte`
-- [ ] `terrain/terrain-command.svelte`
-- [ ] `tile/tile-command.svelte`
+- [x] `building/building-command.svelte` ✅
+- [x] `item/item-command.svelte` ✅
+- [x] `character/character-command.svelte` ✅
+- [x] `character-body/character-body-command.svelte` ✅
+- [x] `terrain/terrain-command.svelte` ✅
+- [x] `tile/tile-command.svelte` ✅
 
 #### Quest/Narrative 관련 (2개)
-- [ ] `quest/quest-command.svelte`
-- [ ] `narrative/narrative-command.svelte`
+- [x] `quest/quest-command.svelte` ✅
+- [x] `narrative/narrative-command.svelte` ✅
 
-**총 16개 command (1개 완료, 15개 남음)**
+**완료!** 모든 16개 command에 CommandShortcut 적용 완료
 
 ---
 
@@ -491,8 +491,10 @@ behavior-priorities/
 ```
 
 ### 파일 작업
-- [ ] `[priorityId]/` 디렉토리 전체 삭제
-- [ ] 리스트 페이지 자동 리다이렉트 작업에서 behavior-priorities 제외 (이미 올바른 페이지에 있음)
+- [x] `[priorityId]/` 디렉토리 전체 삭제 ✅
+- [x] 리스트 페이지 자동 리다이렉트 작업에서 behavior-priorities 제외 (이미 올바른 페이지에 있음) ✅
+
+**완료!** behavior-priorities에서 불필요한 [priorityId] 라우트 제거 완료
 
 ---
 
