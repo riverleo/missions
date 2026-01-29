@@ -238,11 +238,30 @@ ALTER TABLE building_interactions
 CommandLinkItem/CommandItem은 `value` prop으로 아이템을 식별하는데, 같은 라벨을 가진 아이템들이 모두 선택된 것처럼 보이는 문제가 있습니다.
 
 ### 해결 방법
-라벨에 ID의 첫 부분을 추가하여 고유하게 만들기:
-```typescript
-const shortId = item.id.split('-')[0];
-return `${label} (${shortId})`;
+CommandShortcut을 사용하여 ID를 오른쪽에 표시 (라벨은 깔끔하게 유지):
+
+```svelte
+import { CommandShortcut } from '$lib/components/ui/command';
+
+{#each items as item (item.id)}
+  {@const shortId = item.id.split('-')[0]}
+  <CommandLinkItem href={...}>
+    <IconCheck class={...} />
+    <span class="flex-1 truncate">{label}</span>
+    <CommandShortcut>{shortId}</CommandShortcut>
+    <!-- 드롭다운 메뉴 등 -->
+  </CommandLinkItem>
+{/each}
 ```
+
+**장점:**
+- 라벨은 깔끔하게 유지 (괄호 없이)
+- ID는 오른쪽에 작고 회색으로 표시 (ms-auto, text-muted-foreground)
+- 각 아이템이 고유한 textContent를 가져 bits-ui가 올바르게 식별
+
+**주의사항:**
+- 불필요한 헬퍼 함수 생성 금지 (템플릿에서 직접 처리)
+- `{@const}` 블록으로 필요한 값만 계산
 
 ### 수정 대상 Command 목록 (16개)
 
@@ -273,3 +292,88 @@ return `${label} (${shortId})`;
 - [ ] `narrative/narrative-command.svelte`
 
 **총 16개 command (1개 완료, 15개 남음)**
+
+---
+
+## [향후 작업] tick-behavior.ts 리팩토링 - 디렉토리 구조로 분리
+
+### 문제
+`tick-behavior.ts`가 779줄로 너무 커서 검토하고 논의하기 어렵습니다.
+
+### 목표
+주요 함수들을 논리적으로 분리하여 디렉토리 구조로 재구성
+
+### 제안 구조
+```
+tick-behavior/
+├── index.ts                    # tickBehavior 메인 함수
+├── search-target.ts           # searchTargetAndSetPath
+├── actions/
+│   ├── execute-go.ts          # executeGoAction
+│   ├── execute-interact.ts    # executeInteractAction
+│   ├── execute-fulfill.ts     # executeFulfillAction
+│   └── execute-idle.ts        # executeIdleAction
+├── completion/
+│   ├── check-completion.ts    # checkActionCompletion
+│   └── transition.ts          # transitionToNextAction
+├── selection/
+│   └── select-behavior.ts     # selectNewBehavior
+└── interaction-chain/
+    ├── start-chain.ts         # startInteractionChain
+    └── tick-chain.ts          # tickInteractionAction
+```
+
+### 리팩토링 방향
+```typescript
+// 현재 (복잡)
+function tickBehavior(entity, tick) {
+  if (!entity.currentBehaviorActionId) {
+    selectNewBehavior(entity, tick);
+    return;
+  }
+
+  const action = getAction(...);
+
+  if (needsTarget && !hasTarget) {
+    searchTargetAndSetPath(entity, action);
+    return;
+  }
+
+  if (action.type === 'go') executeGoAction(...);
+  else if (action.type === 'interact') executeInteractAction(...);
+  // ... 많은 로직
+}
+
+// 목표 (간결)
+function tickBehavior(entity, tick) {
+  if (!entity.currentBehaviorActionId) {
+    selectBehavior(entity, tick);
+    return;
+  }
+
+  const action = getCurrentAction(entity);
+  const target = searchTarget(entity, action);
+
+  if (!target) {
+    handleNoTarget(entity, action);
+    return;
+  }
+
+  executeAction(entity, action, target, tick);
+
+  if (isActionCompleted(entity, action, tick)) {
+    transitionToNext(entity, action, tick);
+  }
+}
+```
+
+### 장점
+1. 각 함수의 책임이 명확해짐
+2. 테스트 작성 용이
+3. 코드 리뷰 및 논의 쉬워짐
+4. 새로운 action 타입 추가 시 확장 용이
+
+### 주의사항
+- 기존 로직 동작 유지 (버그 방지)
+- 함수 간 의존성 최소화
+- 타입 정의 명확히

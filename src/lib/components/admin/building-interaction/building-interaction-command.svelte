@@ -7,6 +7,7 @@
 		CommandEmpty,
 		CommandGroup,
 		CommandLinkItem,
+		CommandShortcut,
 	} from '$lib/components/ui/command';
 	import {
 		DropdownMenu,
@@ -42,19 +43,6 @@
 			.filter((g) => g.interactions.length > 0);
 	});
 
-	function getInteractionLabel(interaction: BuildingInteraction) {
-		const character = interaction.character_id
-			? $characterStore.data[interaction.character_id as CharacterId]
-			: undefined;
-
-		const interactionType =
-			(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
-		const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
-		const characterName = character ? character.name : '모든 캐릭터';
-		const shortId = interaction.id.split('-')[0];
-
-		return `${characterName} ${behaviorLabel} (${shortId})`;
-	}
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -65,7 +53,13 @@
 			{#each interactionsGroupedByBuilding() as { building, interactions } (building.id)}
 				<CommandGroup heading={building.name}>
 					{#each interactions as interaction (interaction.id)}
-						{@const label = getInteractionLabel(interaction)}
+						{@const character = interaction.character_id
+							? $characterStore.data[interaction.character_id as CharacterId]
+							: undefined}
+						{@const interactionType = (interaction.once_interaction_type || interaction.repeat_interaction_type)!}
+						{@const characterName = character ? character.name : '모든 캐릭터'}
+						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
 						<CommandLinkItem
@@ -79,6 +73,7 @@
 								)}
 							/>
 							<span class="flex-1 truncate">{label}</span>
+							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
