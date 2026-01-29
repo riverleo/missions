@@ -177,7 +177,7 @@
 		if (changes?.fulfillment_type === 'building') {
 			return buildingInteractions.map((interaction) => {
 				const building = buildings.find((b) => b.id === interaction.building_id);
-				const buildingName = building?.name ?? (interaction.building_id ? '건물' : '기본');
+				const buildingName = building?.name ?? '기본';
 				const character = interaction.character_id
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
