@@ -177,6 +177,13 @@
 		<AccordionContentItem label="현재 대상">
 			{entity.currentTargetEntityId ?? '없음'}
 		</AccordionContentItem>
+		<AccordionContentItem label="들고 있는 아이템">
+			{#if entity.heldWorldItemIds.length > 0}
+				{entity.heldWorldItemIds.length}개
+			{:else}
+				없음
+			{/if}
+		</AccordionContentItem>
 		{#each needs as need}
 			{@const needData = $needStore.data[need.need_id]}
 			<AccordionContentItem label={needData?.name ?? need.need_id}>
