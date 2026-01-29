@@ -1,5 +1,20 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { useNarrative } from '$lib/hooks/use-narrative/use-narrative';
+	import type { ScenarioId } from '$lib/types';
 	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
+
+	const { narrativeStore } = useNarrative();
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
+	$effect(() => {
+		const narratives = Object.values($narrativeStore.data);
+		if (narratives.length > 0) {
+			const firstNarrative = narratives[0]!;
+			goto(`/admin/scenarios/${scenarioId}/narratives/${firstNarrative.id}`);
+		}
+	});
 </script>
 
 <div class="flex h-full items-center justify-center">

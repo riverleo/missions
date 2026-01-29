@@ -1,8 +1,19 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { useItem } from '$lib/hooks/use-item';
+	import type { ScenarioId } from '$lib/types';
 
 	const { itemStore } = useItem();
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const items = $derived(Object.values($itemStore.data));
+
+	$effect(() => {
+		if (items.length > 0) {
+			const firstItem = items[0]!;
+			goto(`/admin/scenarios/${scenarioId}/items/${firstItem.id}`);
+		}
+	});
 </script>
 
 <div class="flex h-full items-center justify-center">
