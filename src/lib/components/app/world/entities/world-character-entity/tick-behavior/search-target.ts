@@ -144,14 +144,11 @@ export default function searchTargetAndSetPath(
 			for (const candidate of sortedCandidates) {
 				const fromPos = vectorUtils.createVector(entity.body.position.x, entity.body.position.y);
 				const toPos = vectorUtils.createVector(candidate.x, candidate.y);
-				console.log('[searchTarget] Testing path:', {
-					from: fromPos,
-					to: toPos,
-					candidateType: candidate.type,
-					candidateId: candidate.instanceId,
-				});
+				console.log(
+					`[searchTarget] Testing path from (${fromPos.x.toFixed(1)}, ${fromPos.y.toFixed(1)}) to (${toPos.x.toFixed(1)}, ${toPos.y.toFixed(1)}) - ${candidate.type} ${candidate.instanceId}`
+				);
 				const testPath = entity.worldContext.pathfinder.findPath(fromPos, toPos);
-				console.log('[searchTarget] Path result:', testPath.length);
+				console.log(`[searchTarget] Path result: ${testPath.length} waypoints`);
 				if (testPath.length > 0) {
 					targetEntity = candidate;
 					break;
