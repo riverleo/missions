@@ -134,7 +134,7 @@
 						return '자동';
 					})()
 				: '자동';
-			return `${fulfillmentLabel}로 욕구 충족`;
+			return `${fulfillmentLabel}으로 욕구 충족`;
 		}
 		if (action.type === 'idle') {
 			const durationLabel = action.idle_duration_ticks
