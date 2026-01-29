@@ -3626,13 +3626,13 @@ export type Database = {
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
       collider_type: "circle" | "rectangle"
-      condition_fulfillment_type: "character" | "item" | "idle" | "building"
+      condition_fulfillment_type: "building"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
       item_state_type: "idle" | "broken"
       loop_type: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_fulfillment_task_condition: "completed" | "created"
-      need_fulfillment_type: "building" | "character" | "task" | "item" | "idle"
+      need_fulfillment_type: "building" | "character" | "task" | "item"
       once_interaction_type:
         | "item_pick"
         | "item_use"
@@ -3786,13 +3786,13 @@ export const Constants = {
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
       collider_type: ["circle", "rectangle"],
-      condition_fulfillment_type: ["character", "item", "idle", "building"],
+      condition_fulfillment_type: ["building"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
       item_state_type: ["idle", "broken"],
       loop_type: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_fulfillment_task_condition: ["completed", "created"],
-      need_fulfillment_type: ["building", "character", "task", "item", "idle"],
+      need_fulfillment_type: ["building", "character", "task", "item"],
       once_interaction_type: [
         "item_pick",
         "item_use",

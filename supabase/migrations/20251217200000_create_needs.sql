@@ -3,8 +3,7 @@ create type need_fulfillment_type as enum (
   'building',   -- 건물 방문
   'character',  -- 캐릭터와 상호작용
   'task',       -- 할일 완료
-  'item',       -- 아이템 소비
-  'idle'        -- 가만히 있으면 회복
+  'item'        -- 아이템 소비
 );
 
 -- 할일 조건 타입

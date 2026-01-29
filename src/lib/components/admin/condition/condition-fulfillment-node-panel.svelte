@@ -45,9 +45,6 @@
 
 	const fulfillmentTypeOptions: { value: ConditionFulfillmentType; label: string }[] = [
 		{ value: 'building', label: '건물' },
-		{ value: 'character', label: '캐릭터' },
-		{ value: 'item', label: '아이템' },
-		{ value: 'idle', label: '대기' },
 	];
 
 	function getTypeLabel(type: ConditionFulfillmentType) {

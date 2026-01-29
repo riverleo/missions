@@ -57,7 +57,6 @@
 		{ value: 'character', label: '캐릭터' },
 		{ value: 'item', label: '아이템' },
 		{ value: 'task', label: '할 일' },
-		{ value: 'idle', label: '대기' },
 	];
 
 	const taskConditionOptions: { value: NeedFulfillmentTaskCondition; label: string }[] = [

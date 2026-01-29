@@ -1,9 +1,6 @@
 -- 컨디션 충족 소스 타입
 create type condition_fulfillment_type as enum (
-  'building',   -- 건물 상호작용
-  'character',  -- 캐릭터가 행동 수행 (repair, refill 등)
-  'item',       -- 아이템 사용
-  'idle'        -- 가만히 있으면 회복
+  'building'    -- 건물 상호작용 (repair, clean 등)
 );
 
 -- 컨디션 정의 (내구도, 청결도 등)
