@@ -4,6 +4,7 @@
 	import type {
 		ItemInteraction,
 		ItemInteractionId,
+		ItemId,
 		CharacterId,
 	} from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
@@ -32,15 +33,32 @@
 
 	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
-
-	// 아이템 상태 가져오기
-	const itemStates = $derived(
-		interaction?.item_id ? $itemStateStore.data[interaction.item_id] ?? [] : []
-	);
-	const heldItemState = $derived(itemStates[0]); // 첫 번째 state 사용
+	const items = $derived(Object.values($itemStore.data));
 
 	// 루트 액션 찾기
 	const rootAction = $derived(actions.find((a) => a.root));
+
+	// 미리보기용 아이템 선택
+	const interactionHasSpecificItem = $derived(interaction?.item_id != null);
+	let previewItemId = $state<string | undefined>(undefined);
+	const previewItem = $derived(
+		interactionHasSpecificItem && interaction?.item_id
+			? $itemStore.data[interaction.item_id as ItemId]
+			: previewItemId
+				? $itemStore.data[previewItemId as ItemId]
+				: items[0]
+	);
+	const selectedPreviewItemLabel = $derived(previewItem?.name ?? '아이템 선택');
+
+	// 아이템 상태 가져오기
+	const itemStates = $derived(
+		previewItem?.id ? $itemStateStore.data[previewItem.id] ?? [] : []
+	);
+	const heldItemState = $derived(itemStates[0]); // 첫 번째 state 사용
+
+	function onPreviewItemChange(value: string | undefined) {
+		previewItemId = value || undefined;
+	}
 
 	// 미리보기용 캐릭터 선택
 	const behaviorHasSpecificCharacter = $derived(interaction?.character_id != null);
@@ -161,6 +179,26 @@
 									<SelectContent>
 										{#each characters as character (character.id)}
 											<SelectItem value={character.id}>{character.name}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if !interactionHasSpecificItem && items.length > 0}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>아이템</ButtonGroupText>
+								<Select
+									type="single"
+									value={previewItemId ?? previewItem?.id ?? ''}
+									onValueChange={onPreviewItemChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedPreviewItemLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each items as item (item.id)}
+											<SelectItem value={item.id}>{item.name}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>

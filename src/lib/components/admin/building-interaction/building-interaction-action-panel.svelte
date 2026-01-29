@@ -4,6 +4,7 @@
 	import type {
 		BuildingInteraction,
 		BuildingInteractionId,
+		BuildingId,
 		CharacterId,
 	} from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
@@ -25,16 +26,33 @@
 
 	let { interaction, buildingInteractionId, onlayout }: Props = $props();
 
-	const { buildingInteractionActionStore, admin } = useBuilding();
+	const { buildingInteractionActionStore, buildingStore, admin } = useBuilding();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
 	const actions = $derived($buildingInteractionActionStore.data[buildingInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
+	const buildings = $derived(Object.values($buildingStore.data));
 
 	// 루트 액션 찾기
 	const rootAction = $derived(actions.find((a) => a.root));
+
+	// 미리보기용 건물 선택
+	const interactionHasSpecificBuilding = $derived(interaction?.building_id != null);
+	let previewBuildingId = $state<string | undefined>(undefined);
+	const previewBuilding = $derived(
+		interactionHasSpecificBuilding && interaction?.building_id
+			? $buildingStore.data[interaction.building_id as BuildingId]
+			: previewBuildingId
+				? $buildingStore.data[previewBuildingId as BuildingId]
+				: buildings[0]
+	);
+	const selectedPreviewBuildingLabel = $derived(previewBuilding?.name ?? '건물 선택');
+
+	function onPreviewBuildingChange(value: string | undefined) {
+		previewBuildingId = value || undefined;
+	}
 
 	// 미리보기용 캐릭터 선택
 	const behaviorHasSpecificCharacter = $derived(interaction?.character_id != null);
@@ -121,7 +139,7 @@
 			</Tooltip>
 		</ButtonGroup>
 
-		{#if rootAction && previewCharacter && interaction}
+		{#if rootAction && previewCharacter && previewBuilding && interaction}
 			<Card class="w-64 py-4">
 				<CardContent class="px-4">
 					<div class="space-y-2">
@@ -130,7 +148,7 @@
 							style:height="120px"
 						>
 							<BuildingSpriteAnimator
-								buildingId={interaction.building_id}
+								buildingId={previewBuilding.id}
 								stateType="idle"
 								characterId={previewCharacter.id}
 								characterBodyStateType={rootAction.character_body_state_type}
@@ -156,6 +174,26 @@
 									<SelectContent>
 										{#each characters as character (character.id)}
 											<SelectItem value={character.id}>{character.name}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if !interactionHasSpecificBuilding && buildings.length > 0}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>건물</ButtonGroupText>
+								<Select
+									type="single"
+									value={previewBuildingId ?? previewBuilding?.id ?? ''}
+									onValueChange={onPreviewBuildingChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedPreviewBuildingLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each buildings as building (building.id)}
+											<SelectItem value={building.id}>{building.name}</SelectItem>
 										{/each}
 									</SelectContent>
 								</Select>

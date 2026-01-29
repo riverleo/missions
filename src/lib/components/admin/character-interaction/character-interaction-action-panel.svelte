@@ -46,6 +46,22 @@
 		previewCharacterId = value || undefined;
 	}
 
+	// 미리보기용 대상 캐릭터 선택
+	const interactionHasSpecificTargetCharacter = $derived(interaction?.target_character_id != null);
+	let previewTargetCharacterId = $state<string | undefined>(undefined);
+	const previewTargetCharacter = $derived(
+		interactionHasSpecificTargetCharacter && interaction?.target_character_id
+			? $characterStore.data[interaction.target_character_id as CharacterId]
+			: previewTargetCharacterId
+				? $characterStore.data[previewTargetCharacterId as CharacterId]
+				: characters[0]
+	);
+	const selectedPreviewTargetCharacterLabel = $derived(previewTargetCharacter?.name ?? '대상 캐릭터 선택');
+
+	function onPreviewTargetCharacterChange(value: string | undefined) {
+		previewTargetCharacterId = value || undefined;
+	}
+
 	let isLayouting = $state(false);
 	let isCreating = $state(false);
 
@@ -115,7 +131,7 @@
 			</Tooltip>
 		</ButtonGroup>
 
-		{#if rootAction && previewCharacter && interaction}
+		{#if rootAction && previewCharacter && previewTargetCharacter && interaction}
 			<Card class="w-64 py-4">
 				<CardContent class="px-4">
 					<div class="space-y-2">
@@ -127,7 +143,7 @@
 								characterId={previewCharacter.id}
 								bodyStateType={rootAction.character_body_state_type}
 								faceStateType={rootAction.character_face_state_type}
-								interactCharacterId={interaction.target_character_id}
+								interactCharacterId={previewTargetCharacter.id}
 								interactCharacterBodyStateType={rootAction.target_character_body_state_type}
 								interactCharacterFaceStateType={rootAction.target_character_face_state_type}
 								interactCharacterOffset={{
@@ -150,6 +166,26 @@
 								>
 									<SelectTrigger class="flex-1">
 										{selectedPreviewCharacterLabel}
+									</SelectTrigger>
+									<SelectContent>
+										{#each characters as character (character.id)}
+											<SelectItem value={character.id}>{character.name}</SelectItem>
+										{/each}
+									</SelectContent>
+								</Select>
+							</ButtonGroup>
+						{/if}
+
+						{#if !interactionHasSpecificTargetCharacter && characters.length > 0}
+							<ButtonGroup class="w-full">
+								<ButtonGroupText>대상 캐릭터</ButtonGroupText>
+								<Select
+									type="single"
+									value={previewTargetCharacterId ?? previewTargetCharacter?.id ?? ''}
+									onValueChange={onPreviewTargetCharacterChange}
+								>
+									<SelectTrigger class="flex-1">
+										{selectedPreviewTargetCharacterLabel}
 									</SelectTrigger>
 									<SelectContent>
 										{#each characters as character (character.id)}
