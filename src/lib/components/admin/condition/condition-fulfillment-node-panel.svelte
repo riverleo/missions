@@ -3,6 +3,7 @@
 	import type {
 		ConditionFulfillment,
 		ConditionFulfillmentType,
+		BuildingInteractionId,
 		ItemInteractionId,
 		CharacterInteractionId,
 	} from '$lib/types';
@@ -17,8 +18,8 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
+	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { clone } from 'radash';
@@ -29,17 +30,21 @@
 
 	let { fulfillment }: Props = $props();
 
-	const { admin } = useBuilding();
+	const { admin } = useCharacter();
+	const { buildingStore, buildingInteractionStore } = useBuilding();
 	const { characterStore, characterInteractionStore } = useCharacter();
 	const { itemStore, itemInteractionStore } = useItem();
 	const flowNodes = useNodes();
 
+	const buildings = $derived(Object.values($buildingStore.data));
 	const characters = $derived(Object.values($characterStore.data));
 	const items = $derived(Object.values($itemStore.data));
+	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
 	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
 	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
 
 	const fulfillmentTypeOptions: { value: ConditionFulfillmentType; label: string }[] = [
+		{ value: 'building', label: '건물' },
 		{ value: 'character', label: '캐릭터' },
 		{ value: 'item', label: '아이템' },
 		{ value: 'idle', label: '대기' },
@@ -55,6 +60,22 @@
 
 
 	const selectedTargetLabel = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building' && changes?.building_interaction_id) {
+			const interaction = buildingInteractions.find(
+				(i) => i.id === changes?.building_interaction_id
+			);
+			if (interaction) {
+				const building = buildings.find((b) => b.id === interaction.building_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType =
+					interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
+			}
+		}
 		if (changes?.fulfillment_type === 'character' && changes?.character_interaction_id) {
 			const interaction = characterInteractions.find((i) => i.id === changes?.character_interaction_id);
 			if (interaction) {
@@ -101,6 +122,7 @@
 		admin
 			.updateConditionFulfillment(fulfillmentId, {
 				fulfillment_type: changes.fulfillment_type,
+				building_interaction_id: changes.fulfillment_type === 'building' ? changes.building_interaction_id : null,
 				character_interaction_id: changes.fulfillment_type === 'character' ? changes.character_interaction_id : null,
 				item_interaction_id: changes.fulfillment_type === 'item' ? changes.item_interaction_id : null,
 				increase_per_tick: changes.increase_per_tick,
@@ -135,6 +157,7 @@
 		if (value && changes) {
 			changes.fulfillment_type = value as ConditionFulfillmentType;
 			// 타입 변경 시 대상 ID 초기화
+			changes.building_interaction_id = null;
 			changes.character_interaction_id = null;
 			changes.item_interaction_id = null;
 		}
@@ -143,7 +166,9 @@
 	function onTargetChange(value: string | undefined) {
 		if (!changes) return;
 		const id = value && value !== '' ? value : null;
-		if (changes.fulfillment_type === 'character') {
+		if (changes.fulfillment_type === 'building') {
+			changes.building_interaction_id = id as BuildingInteractionId | null;
+		} else if (changes.fulfillment_type === 'character') {
 			changes.character_interaction_id = id as CharacterInteractionId | null;
 		} else if (changes.fulfillment_type === 'item') {
 			changes.item_interaction_id = id as ItemInteractionId | null;
@@ -152,6 +177,22 @@
 
 
 	const targetOptions = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building') {
+			return buildingInteractions.map((interaction) => {
+				const building = buildings.find((b) => b.id === interaction.building_id);
+				const character = interaction.character_id
+					? characters.find((c) => c.id === interaction.character_id)
+					: undefined;
+				const interactionType =
+					interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const characterName = character ? character.name : '모든 캐릭터';
+				return {
+					id: interaction.id,
+					name: `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`,
+				};
+			});
+		}
 		if (changes?.fulfillment_type === 'character') {
 			return characterInteractions.map((interaction) => {
 				const targetCharacter = characters.find((c) => c.id === interaction.target_character_id);
@@ -186,13 +227,16 @@
 	});
 
 	const selectedTargetId = $derived.by(() => {
+		if (changes?.fulfillment_type === 'building') return changes.building_interaction_id;
 		if (changes?.fulfillment_type === 'character') return changes.character_interaction_id;
 		if (changes?.fulfillment_type === 'item') return changes.item_interaction_id;
 		return undefined;
 	});
 
 	const hasTargetSelector = $derived(
-		changes?.fulfillment_type === 'character' || changes?.fulfillment_type === 'item'
+		changes?.fulfillment_type === 'building' ||
+			changes?.fulfillment_type === 'character' ||
+			changes?.fulfillment_type === 'item'
 	);
 </script>
 

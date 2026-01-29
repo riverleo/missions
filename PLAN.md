@@ -5,6 +5,16 @@
 
 나머지 행동들(건설, 철거, 수리, 청소 등)은 이 기본 구조가 잡힌 후에 하나씩 추가해 나갈 예정입니다.
 
+## 데이터베이스 변경 방침
+
+**중요**: 모든 데이터베이스 스키마 변경은 다음 방식으로 진행합니다:
+
+1. **기존 마이그레이션 수정**: 새 마이그레이션 파일을 만들지 않고 기존 파일을 직접 수정
+2. **로컬 DB 리셋**: `pnpm supabase db reset`으로 마이그레이션 재적용
+3. **타입 재생성**: `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
+
+이는 개발 초기 단계이며 프로덕션 데이터가 없기 때문입니다. 마이그레이션 히스토리를 깔끔하게 유지할 수 있습니다.
+
 ## 핵심 설계: Once/Repeat 상호작용의 욕구 충족 통합
 
 ### 문제점
@@ -377,3 +387,358 @@ function tickBehavior(entity, tick) {
 - 기존 로직 동작 유지 (버그 방지)
 - 함수 간 의존성 최소화
 - 타입 정의 명확히
+
+---
+
+## [향후 작업] 리스트 페이지 자동 리다이렉트
+
+### 문제
+`/admin/scenarios/[scenarioId]/items`와 같은 리스트 페이지에 접근하면 빈 화면이 표시됩니다. 자동으로 첫 번째 아이템으로 리다이렉트되어야 UX가 개선됩니다.
+
+### 구현 방향
+각 도메인의 `+page.svelte`에서 첫 번째 아이템으로 리다이렉트:
+
+```typescript
+// +page.svelte
+import { goto } from '$app/navigation';
+import { page } from '$app/state';
+
+const { itemStore } = useItem();
+const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
+$effect(() => {
+  const items = Object.values($itemStore.data);
+  if (items.length > 0) {
+    const firstItem = items[0];
+    goto(`/admin/scenarios/${scenarioId}/items/${firstItem.id}`);
+  }
+});
+```
+
+### 수정 대상 리스트 페이지 (15개)
+
+#### Behavior 관련 (2개)
+- [ ] `need-behaviors/+page.svelte`
+- [ ] `condition-behaviors/+page.svelte`
+- ~~`behavior-priorities/+page.svelte`~~ - 제외 (상세 페이지 자체가 없음, bulk 관리 인터페이스)
+
+#### Interaction 관련 (3개)
+- [ ] `building-interactions/+page.svelte`
+- [ ] `item-interactions/+page.svelte`
+- [ ] `character-interactions/+page.svelte`
+
+#### Need/Condition 관련 (2개)
+- [ ] `needs/+page.svelte`
+- [ ] `conditions/+page.svelte`
+
+#### Entity 관련 (5개)
+- [ ] `buildings/+page.svelte`
+- [ ] `items/+page.svelte`
+- [ ] `characters/+page.svelte`
+- [ ] `character-bodies/+page.svelte`
+- [ ] `terrains/+page.svelte`
+- [ ] `tiles/+page.svelte`
+
+#### Quest/Narrative 관련 (2개)
+- [ ] `quests/+page.svelte`
+- [ ] `narratives/+page.svelte`
+
+#### 예외 (리다이렉트 불필요)
+- `chapters` - detail 페이지 없음
+- `terrains-tiles` - detail 페이지 없음
+
+**총 16개 리스트 페이지**
+
+### 주의사항
+- store가 로드되기 전에 리다이렉트하지 않도록 주의
+- 아이템이 없는 경우 처리 (빈 상태 표시)
+- 무한 리다이렉트 방지
+
+---
+
+## [향후 작업] behavior-priorities 불필요한 상세 페이지 제거
+
+### 문제
+`behavior-priorities`는 Panel이 중복되어 있습니다:
+- `+page.svelte` - BehaviorPriorityPanel
+- `[priorityId]/+page.svelte` - BehaviorPriorityPanel (동일한 내용)
+
+**더 근본적인 문제**: 상세 페이지로 진입하는 방법이 없고, 필요하지도 않습니다.
+
+### 이유
+behavior-priorities는 다른 도메인(items, buildings 등)과 달리:
+- **Command에 navigation이 없음**: `behavior-priority-command.svelte`는 `CommandLinkItem`이 아닌 `onclick` 핸들러로 직접 우선순위에 추가만 함
+- **Panel이 priorityId를 사용하지 않음**: 전체 우선순위 리스트를 drag-and-drop으로 관리하고 bulk save하는 인터페이스
+- **개별 상세 페이지가 불필요**: 우선순위 관리는 전체 리스트 컨텍스트에서만 의미가 있음
+
+### 수정 방향
+`[priorityId]` 라우트를 완전히 제거:
+
+**현재 구조:**
+```
+behavior-priorities/
+  +layout.svelte      - BehaviorPriorityAside
+  +page.svelte        - BehaviorPriorityPanel
+  [priorityId]/
+    +page.svelte      - BehaviorPriorityPanel (중복)
+```
+
+**수정 후 구조:**
+```
+behavior-priorities/
+  +layout.svelte      - BehaviorPriorityAside
+  +page.svelte        - BehaviorPriorityPanel
+```
+
+### 파일 작업
+- [ ] `[priorityId]/` 디렉토리 전체 삭제
+- [ ] 리스트 페이지 자동 리다이렉트 작업에서 behavior-priorities 제외 (이미 올바른 페이지에 있음)
+
+---
+
+## [향후 작업] Fulfillment Type Enum 정리
+
+### 문제
+
+**condition_fulfillment_type:**
+- Condition은 건물 속성 (이미 building_id 보유)
+- 현재: `'building' | 'character' | 'item' | 'idle'`
+- 문제:
+  - `character`: 건물 컨디션을 캐릭터 상호작용으로 충족? 의미 불분명
+  - `item`: 건물 컨디션을 아이템으로 충족? 의미 불분명
+  - `idle`: 시간이 지나면 자동 회복? 명시적 행동이 아님
+
+**need_fulfillment_type:**
+- Need는 캐릭터 속성
+- 현재: `'building' | 'character' | 'item' | 'task' | 'idle'`
+- 문제:
+  - `idle`: 가만히 있으면 회복? "휴식" 같은 명시적 행동이어야 함
+
+### 수정 방향
+
+**condition_fulfillment_type:**
+```sql
+-- Before
+'building' | 'character' | 'item' | 'idle'
+
+-- After
+'building'  -- 건물 상호작용만 (수리, 청소 등)
+```
+
+**need_fulfillment_type:**
+```sql
+-- Before
+'building' | 'character' | 'item' | 'task' | 'idle'
+
+-- After
+'building' | 'character' | 'item' | 'task'  -- idle 제거
+```
+
+### 구현 계획
+
+#### Phase 1: 데이터 확인 및 마이그레이션 준비
+```sql
+-- 1. 현재 사용 중인 fulfillment_type 확인
+SELECT fulfillment_type, COUNT(*)
+FROM condition_fulfillments
+GROUP BY fulfillment_type;
+
+SELECT fulfillment_type, COUNT(*)
+FROM need_fulfillments
+GROUP BY fulfillment_type;
+
+-- 2. 삭제될 타입 사용 중이면 마이그레이션 필요
+```
+
+#### Phase 2: DB 스키마 변경
+
+**기존 마이그레이션 수정 + DB 리셋 방식:**
+
+1. `supabase/migrations/20251224100000_create_conditions.sql` 수정:
+   ```sql
+   -- condition_fulfillment_type enum 수정
+   CREATE TYPE condition_fulfillment_type AS ENUM ('building');
+   ```
+
+2. `supabase/migrations/20251223000000_create_needs.sql` (또는 해당 파일) 수정:
+   ```sql
+   -- need_fulfillment_type enum 수정 (idle 제거)
+   CREATE TYPE need_fulfillment_type AS ENUM (
+     'building',
+     'character',
+     'task',
+     'item'
+   );
+   ```
+
+3. 로컬 DB 리셋:
+   ```bash
+   pnpm supabase db reset
+   ```
+
+#### Phase 3: Admin UI 업데이트
+- [ ] `condition-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 character, item, idle 제거
+- [ ] `need-fulfillment-node-panel.svelte` - fulfillmentTypeOptions에서 idle 제거
+
+#### Phase 4: TypeScript 타입 재생성
+```bash
+pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts
+```
+
+### 파일 작업
+- [ ] 기존 마이그레이션 수정: condition_fulfillment_type enum ('building'만)
+- [ ] 기존 마이그레이션 수정: need_fulfillment_type enum ('idle' 제거)
+- [ ] `pnpm supabase db reset`
+- [ ] Admin UI 컴포넌트 수정
+- [ ] TypeScript 타입 재생성
+
+---
+
+## [향후 작업] 기본 인터렉션 (Default Interactions)
+
+### 문제 상황
+
+**Condition Fulfillment의 중복 생성 문제:**
+- Condition은 건물 속성 (building_id 보유)
+- "청소하면 청결도 회복", "수리하면 내구도 회복" 같은 공통 로직
+- 현재: 각 건물마다 동일한 상호작용을 중복 생성해야 함
+  - 레스토랑A: building_clean 상호작용 생성
+  - 레스토랑B: building_clean 상호작용 생성 (동일 내용 중복)
+
+**Need Fulfillment은 문제없음:**
+- Need는 캐릭터 속성
+- "배고픔"은 어느 레스토랑에서든 채울 수 있음
+- → `building_interaction_id`로 특정 건물 선택 (중복 아님)
+
+### 해결 방안: 기본 인터렉션 개념 도입
+
+**핵심 아이디어:**
+```sql
+building_interactions:
+  building_id: uuid NULL  -- NULL이면 기본 인터렉션 (모든 건물 공통)
+  once_interaction_type / repeat_interaction_type
+  character_id: uuid NULL -- NULL이면 모든 캐릭터
+```
+
+**사용 예시:**
+1. 기본 인터렉션 생성:
+   - `building_id: NULL, repeat_interaction_type: 'building_clean'` → "청소 (기본)"
+   - 모든 건물의 청결도 Condition이 이 하나의 기본 인터렉션을 참조
+
+2. 커스텀이 필요한 경우:
+   - `building_id: 특수시설, repeat_interaction_type: 'building_clean'` → "특수 청소 프로세스"
+   - 특정 건물만 별도 인터렉션 사용 가능
+
+### 상호작용 타입 분석
+
+#### Building Interactions
+
+**Once 타입:**
+- `building_execute`: 건물 사용
+- `building_construct`: 건물 건설
+- `building_demolish`: 건물 철거
+
+**Repeat 타입:**
+- `building_repair`: 건물 수리
+- `building_clean`: 건물 청소
+
+#### Item Interactions
+
+**Once 타입:**
+- `item_pick`: 아이템 줍기
+- `item_use`: 아이템 사용
+
+**Repeat 타입:**
+- (없음)
+
+#### Character Interactions
+
+**Repeat 타입:**
+- `character_hug`: 캐릭터 포옹
+
+**참고**: 각 타입별로 기본 인터렉션을 만들지 커스텀 인터렉션을 만들지는 사용자 선택입니다.
+
+### 구현 계획
+
+#### Phase 1: DB 스키마 변경
+
+**기존 마이그레이션 수정 + DB 리셋 방식:**
+
+1. `supabase/migrations/20251225000000_create_interactions.sql` 수정:
+   ```sql
+   -- building_interactions 테이블 생성 시
+   CREATE TABLE building_interactions (
+     -- ...
+     building_id uuid REFERENCES buildings(id) ON DELETE CASCADE,  -- NOT NULL 제거
+     -- ...
+   );
+
+   -- item_interactions 테이블 생성 시
+   CREATE TABLE item_interactions (
+     -- ...
+     item_id uuid REFERENCES items(id) ON DELETE CASCADE,  -- NOT NULL 제거
+     -- ...
+   );
+
+   -- Unique constraints는 이미 NULLS NOT DISTINCT이므로 유지
+   -- building_id가 NULL: 기본 인터렉션 (interaction_type당 1개)
+   -- building_id가 있음: 특정 건물용 (기존과 동일)
+   ```
+
+2. 로컬 DB 리셋:
+   ```bash
+   pnpm supabase db reset
+   ```
+
+#### Phase 2: Admin UI 변경
+
+**1. Interaction 생성 다이얼로그:**
+- 건물/아이템 선택 드롭다운에 "기본 (모든 건물/아이템)" 옵션 추가
+- 선택 시 `building_id`/`item_id`를 NULL로 설정
+
+**2. Interaction 리스트:**
+- 기본 인터렉션을 상단에 표시
+- 라벨: "청소 (기본)" vs "청소 - 레스토랑A"
+
+**3. Fulfillment 선택:**
+- 기본 인터렉션도 선택 가능하게 표시
+- Condition Fulfillment: 기본 인터렉션 우선 표시
+- Need Fulfillment: 특정 건물 인터렉션 위주 (기존과 동일)
+
+#### Phase 3: 런타임 로직 변경
+
+**대상 검색 시 기본 인터렉션 처리:**
+```typescript
+// findTargetsForInteraction() 수정
+// building_id가 NULL인 인터렉션은 모든 건물 대상
+if (!interaction.building_id) {
+  // 기본 인터렉션 → 모든 건물 검색
+  targets = allBuildings.filter(b =>
+    canInteract(character, b, interaction)
+  );
+} else {
+  // 특정 건물 인터렉션
+  targets = [buildings[interaction.building_id]];
+}
+```
+
+### 파일 작업
+
+**DB 마이그레이션:**
+- [ ] 기존 마이그레이션 수정: `building_interactions.building_id` NULL 허용
+- [ ] 기존 마이그레이션 수정: `item_interactions.item_id` NULL 허용
+- [ ] `pnpm supabase db reset`
+- [ ] TypeScript 타입 재생성
+
+**Admin UI:**
+- [ ] `building-interaction-create-dialog.svelte` - 기본 옵션 추가
+- [ ] `building-interaction-update-dialog.svelte` - 기본 옵션 추가
+- [ ] `building-interaction-command.svelte` - 기본 인터렉션 표시 개선
+- [ ] `item-interaction-create-dialog.svelte` - 기본 옵션 추가
+- [ ] `item-interaction-update-dialog.svelte` - 기본 옵션 추가
+- [ ] `item-interaction-command.svelte` - 기본 인터렉션 표시 개선
+- [ ] Fulfillment 패널들 - 기본 인터렉션 선택 UI
+
+**런타임 로직:**
+- [ ] `tick-behavior.ts` - 대상 검색 시 기본 인터렉션 처리
+- [ ] 관련 유틸리티 함수들
