@@ -210,6 +210,7 @@
 		if (changes?.fulfillment_type === 'building') {
 			return buildingInteractions.map((interaction) => {
 				const building = buildings.find((b) => b.id === interaction.building_id);
+				const buildingName = building?.name ?? (interaction.building_id ? '건물' : '기본');
 				const character = interaction.character_id
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
@@ -219,7 +220,7 @@
 				const characterName = character ? character.name : '모든 캐릭터';
 				return {
 					id: interaction.id,
-					name: `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`,
+					name: `${buildingName} - ${characterName} ${behaviorLabel}`,
 				};
 			});
 		}
@@ -242,6 +243,7 @@
 		if (changes?.fulfillment_type === 'item') {
 			return itemInteractions.map((interaction) => {
 				const item = items.find((i) => i.id === interaction.item_id);
+				const itemName = item?.name ?? (interaction.item_id ? '아이템' : '기본');
 				const character = interaction.character_id
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
@@ -251,7 +253,7 @@
 				const characterName = character ? character.name : '모든 캐릭터';
 				return {
 					id: interaction.id,
-					name: `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`,
+					name: `${itemName} - ${characterName} ${behaviorLabel}`,
 				};
 			});
 		}
