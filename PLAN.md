@@ -180,65 +180,44 @@ ALTER TABLE building_interactions
 
 ---
 
-## [향후 작업] SvelteFlow 패널 저장 후 유지
+## [완료] SvelteFlow 패널 저장 후 유지
 
 ### 문제
 현재 모든 커스텀 SvelteFlow 패널에서 저장을 누르면 패널이 화면에서 사라짐.
 계속 사용하기 불편하므로, 저장 후에도 패널이 화면에 계속 보이도록 수정 필요.
 
-### 수정 대상 패널 목록
+### 해결
+`.then()` 블록에서 `flowNodes.update()` 호출을 제거하여 저장 후에도 패널이 유지되도록 수정.
 
-#### Behavior 관련 (5개)
-- [ ] `behavior-priority/behavior-priority-panel.svelte`
-- [ ] `need-behavior/need-behavior-action-node-panel.svelte`
-- [ ] `need-behavior/need-behavior-action-panel.svelte`
-- [ ] `condition-behavior/condition-behavior-action-node-panel.svelte`
-- [ ] `condition-behavior/condition-behavior-action-panel.svelte`
+### 수정된 패널 (16개)
 
-#### Interaction 관련 (9개)
-- [ ] `building-interaction/building-interaction-action-node-panel.svelte`
-- [ ] `building-interaction/building-interaction-action-panel.svelte`
-- [ ] `building-interaction/building-interaction-panel.svelte`
-- [ ] `item-interaction/item-interaction-action-node-panel.svelte`
-- [ ] `item-interaction/item-interaction-action-panel.svelte`
-- [ ] `item-interaction/item-interaction-panel.svelte`
-- [ ] `character-interaction/character-interaction-action-node-panel.svelte`
-- [ ] `character-interaction/character-interaction-action-panel.svelte`
-- [ ] `character-interaction/character-interaction-panel.svelte`
+#### Behavior 관련 (2개)
+- [x] `need-behavior/need-behavior-action-node-panel.svelte` ✅
+- [x] `condition-behavior/condition-behavior-action-node-panel.svelte` ✅
 
-#### Need/Condition 관련 (8개)
-- [ ] `need/need-action-panel.svelte`
-- [ ] `need/need-character-edge-panel.svelte`
-- [ ] `need/need-fulfillment-node-panel.svelte`
-- [ ] `need/need-node-panel.svelte`
-- [ ] `condition/condition-action-panel.svelte`
-- [ ] `condition/condition-building-edge-panel.svelte`
-- [ ] `condition/condition-effect-node-panel.svelte`
-- [ ] `condition/condition-fulfillment-node-panel.svelte`
-- [ ] `condition/condition-node-panel.svelte`
+#### Interaction 관련 (3개)
+- [x] `building-interaction/building-interaction-action-node-panel.svelte` ✅
+- [x] `item-interaction/item-interaction-action-node-panel.svelte` ✅
+- [x] `character-interaction/character-interaction-action-node-panel.svelte` ✅
 
-#### Entity 관련 (5개)
-- [ ] `building/building-action-panel.svelte`
-- [ ] `item/item-action-panel.svelte`
-- [ ] `character/character-action-panel.svelte`
-- [ ] `character-body/character-body-action-panel.svelte`
-- [ ] `terrain/terrain-action-panel.svelte`
+#### Need/Condition 관련 (7개)
+- [x] `need/need-character-edge-panel.svelte` ✅
+- [x] `need/need-fulfillment-node-panel.svelte` ✅
+- [x] `need/need-node-panel.svelte` ✅
+- [x] `condition/condition-building-edge-panel.svelte` ✅
+- [x] `condition/condition-effect-node-panel.svelte` ✅
+- [x] `condition/condition-fulfillment-node-panel.svelte` ✅
+- [x] `condition/condition-node-panel.svelte` ✅
 
-#### Quest/Narrative 관련 (5개)
-- [ ] `chapter/chapter-action-panel.svelte`
-- [ ] `chapter/chapter-node-panel.svelte`
-- [ ] `quest/quest-action-panel.svelte`
-- [ ] `quest/quest-branch-node-panel.svelte`
-- [ ] `narrative/narrative-action-panel.svelte`
-- [ ] `narrative/narrative-dice-roll-node-panel.svelte`
-- [ ] `narrative/narrative-node-panel.svelte`
+#### Quest/Narrative 관련 (3개)
+- [x] `chapter/chapter-node-panel.svelte` ✅
+- [x] `narrative/narrative-dice-roll-node-panel.svelte` ✅
+- [x] `narrative/narrative-node-panel.svelte` ✅
 
-#### 기타 (3개)
-- [ ] `terrains-tiles/terrain-tile-edge-panel.svelte`
-- [ ] `test-world/test-world-command-panel.svelte`
-- [ ] `test-world/test-world-inspector-panel/test-world-inspector-panel.svelte`
+#### 기타 (1개)
+- [x] `terrains-tiles/terrain-tile-edge-panel.svelte` ✅
 
-**총 35개 패널**
+**완료!** 수정이 필요했던 16개 패널 모두 완료. 나머지 action panels는 이미 올바르게 구현되어 있음.
 
 ---
 
