@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
+	import type { ItemInteractionId } from '$lib/types';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useWorld } from '$lib/hooks/use-world';
@@ -13,7 +14,7 @@
 
 	const { characterStore, characterBodyStore } = useCharacter();
 	const { worldCharacterStore, worldItemStore, selectedEntityIdStore } = useWorld();
-	const { itemStore, itemStateStore } = useItem();
+	const { itemStore, itemStateStore, itemInteractionActionStore } = useItem();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(
@@ -43,6 +44,28 @@
 		return itemState;
 	});
 
+	// InteractionAction의 아이템 transform 가져오기
+	const heldItemTransform = $derived.by(() => {
+		// InteractionAction이 없으면 기본값
+		if (!entity.currentInteractionActionId) {
+			return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
+		}
+
+		// ItemInteractionAction 조회
+		for (const [interactionId, actions] of Object.entries($itemInteractionActionStore.data)) {
+			const action = actions.find((a) => a.id === entity.currentInteractionActionId);
+			if (action) {
+				return {
+					offset: { x: action.item_offset_x ?? 0, y: action.item_offset_y ?? 0 },
+					scale: action.item_scale ?? 1,
+					rotation: action.item_rotation ?? 0,
+				};
+			}
+		}
+
+		return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
+	});
+
 	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
 	const pathString = $derived.by(() => {
 		if (entity.path.length === 0) return '';
@@ -70,6 +93,9 @@
 		bodyStateType="idle"
 		faceStateType="idle"
 		{heldItemState}
+		heldItemOffset={heldItemTransform.offset}
+		heldItemScale={heldItemTransform.scale}
+		heldItemRotation={heldItemTransform.rotation}
 		flip={entity.direction === 'right'}
 		{selected}
 		class="absolute -translate-x-1/2 -translate-y-1/2"
