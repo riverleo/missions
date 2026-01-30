@@ -74,18 +74,23 @@ export default function executeInteractAction(
 	// 아이템 타겟인 경우 자동 줍기/사용 판단
 	let autoInteractType: 'item_pick' | 'item_use' | undefined;
 	if (targetEntity.type === 'item') {
+		const { worldItemStore } = useWorld();
 		const worldItemId = targetEntity.instanceId as WorldItemId;
-		const isInWorld = !!entity.worldContext.entities[entity.currentTargetEntityId];
-		const isHeld = entity.heldWorldItemIds.includes(worldItemId);
+		const worldItem = get(worldItemStore).data[worldItemId];
 
-		if (isInWorld && !isHeld) {
-			// 월드에 존재하고 들고 있지 않음 → 줍기
-			autoInteractType = 'item_pick';
-			console.log('[executeInteract] Auto interaction type: item_pick (item in world)');
-		} else if (isHeld) {
-			// 들고 있음 → 사용
-			autoInteractType = 'item_use';
-			console.log('[executeInteract] Auto interaction type: item_use (item held)');
+		if (worldItem) {
+			const isInWorld = worldItem.world_building_id === null && worldItem.world_character_id === null;
+			const isHeld = entity.heldWorldItemIds.includes(worldItemId);
+
+			if (isInWorld && !isHeld) {
+				// 월드에 존재하고 들고 있지 않음 → 줍기
+				autoInteractType = 'item_pick';
+				console.log('[executeInteract] Auto interaction type: item_pick (item in world)');
+			} else if (isHeld) {
+				// 들고 있음 → 사용
+				autoInteractType = 'item_use';
+				console.log('[executeInteract] Auto interaction type: item_use (item held)');
+			}
 		}
 	}
 

@@ -94,9 +94,11 @@ export async function createWorldItem(
 		data: { ...state.data, [worldItem.id]: worldItem },
 	}));
 
-	// 엔티티 생성
+	// 엔티티 생성 (world_building_id와 world_character_id가 모두 null일 때만 월드에 추가)
 	const entity = new WorldItemEntity(worldContext, worldContext.worldId, worldItem.id);
-	entity.addToWorld();
+	if (worldItem.world_building_id === null && worldItem.world_character_id === null) {
+		entity.addToWorld();
+	}
 }
 
 export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
