@@ -6,6 +6,9 @@
 		NeedBehaviorActionId,
 		ConditionBehaviorId,
 		ConditionBehaviorActionId,
+		WorldBuildingId,
+		WorldItemId,
+		WorldCharacterId,
 	} from '$lib/types';
 	import { useWorld } from '$lib/hooks/use-world';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -19,6 +22,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { IconTrash } from '@tabler/icons-svelte';
+	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import AccordionContentItem from './accordion-content-item.svelte';
 
 	interface Props {
@@ -28,7 +32,7 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { worldCharacterStore } = useWorld();
+	const { worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
 	const { characterStore, needStore } = useCharacter();
 	const { buildingStore, buildingInteractionStore } = useBuilding();
 	const { itemStore, itemInteractionStore } = useItem();
@@ -44,6 +48,32 @@
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
 	const needs = $derived(Object.values(entity.worldCharacterNeeds));
+
+	// 현재 대상 이름
+	const currentTargetName = $derived.by(() => {
+		if (!entity.currentTargetEntityId) return undefined;
+
+		const { type, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
+
+		if (type === 'building') {
+			const worldBuilding = $worldBuildingStore.data[instanceId as WorldBuildingId];
+			if (!worldBuilding) return undefined;
+			const building = $buildingStore.data[worldBuilding.building_id];
+			return building?.name;
+		} else if (type === 'item') {
+			const worldItem = $worldItemStore.data[instanceId as WorldItemId];
+			if (!worldItem) return undefined;
+			const item = $itemStore.data[worldItem.item_id];
+			return item?.name;
+		} else if (type === 'character') {
+			const worldChar = $worldCharacterStore.data[instanceId as WorldCharacterId];
+			if (!worldChar) return undefined;
+			const char = $characterStore.data[worldChar.character_id];
+			return char?.name;
+		}
+
+		return undefined;
+	});
 
 	// 현재 행동 정보
 	const currentBehaviorInfo = $derived.by(() => {
@@ -175,7 +205,7 @@
 			{/if}
 		</AccordionContentItem>
 		<AccordionContentItem label="현재 대상">
-			{entity.currentTargetEntityId ?? '없음'}
+			{currentTargetName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="들고 있는 아이템">
 			{#if entity.heldWorldItemIds.length > 0}
