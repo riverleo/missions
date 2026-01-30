@@ -16,6 +16,7 @@ import { useBuilding } from '$lib/hooks/use-building';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
 import { vectorUtils } from '$lib/utils/vector';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 
 /**
  * 대상 탐색 및 경로 설정 (target_selection_method에 따라)
@@ -115,7 +116,20 @@ export default function searchTargetAndSetPath(
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));
 
-		// 템플릿에 해당하는 월드 엔티티 찾기
+		// 1. 먼저 들고 있는 아이템 확인
+		for (const heldItemId of entity.heldWorldItemIds) {
+			const worldItem = get(worldItemStore).data[heldItemId];
+			if (worldItem && templateIds.has(worldItem.item_id)) {
+				// 들고 있는 아이템이 적합한 대상이면 선택
+				const heldItemEntityId = EntityIdUtils.createId('item', entity.worldContext.worldId, heldItemId);
+				console.log('[searchTarget] Found held item matching template:', worldItem.item_id, heldItemEntityId);
+				entity.currentTargetEntityId = heldItemEntityId;
+				entity.path = []; // 들고 있는 아이템은 경로 불필요
+				return; // 검색 종료
+			}
+		}
+
+		// 2. 템플릿에 해당하는 월드 엔티티 찾기
 		const candidateEntities = worldEntities.filter((e) => {
 			if (e.type === 'building') {
 				const worldBuilding = get(worldBuildingStore).data[e.instanceId as WorldBuildingId];
