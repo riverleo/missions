@@ -1,8 +1,19 @@
 import { get } from 'svelte/store';
-import type { NeedBehaviorActionId, ConditionBehaviorActionId } from '$lib/types';
+import type {
+	NeedBehaviorActionId,
+	ConditionBehaviorActionId,
+	WorldBuildingId,
+	WorldItemId,
+	WorldCharacterId,
+} from '$lib/types';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
+import { useWorld } from '$lib/hooks/use-world';
+import { useBuilding } from '$lib/hooks/use-building';
+import { useItem } from '$lib/hooks/use-item';
+import { useCharacter } from '$lib/hooks/use-character';
 import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import searchTargetAndSetPath from './search-target';
 import executeGoAction from './actions/execute-go';
 import executeInteractAction from './actions/execute-interact';
@@ -39,7 +50,33 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 		return;
 	}
 
-	// 1. Search: path가 없고 타겟이 없으면 대상 탐색 및 경로 설정
+	// 1. 액션 시작 시점: target_selection_method에 따라 타겟 클리어 여부 결정
+	if (entity.actionStartTick === tick) {
+		if (
+			action.type === 'go' ||
+			action.type === 'interact' ||
+			action.type === 'fulfill'
+		) {
+			// search: 무조건 새로 탐색
+			if (action.target_selection_method === 'search') {
+				entity.currentTargetEntityId = undefined;
+				entity.path = [];
+			}
+			// explicit: interaction의 엔티티 템플릿이 현재 타겟과 다르면 클리어
+			else if (action.target_selection_method === 'explicit') {
+				if (entity.currentTargetEntityId) {
+					const shouldClearTarget = checkIfTargetMismatch(entity, action);
+					if (shouldClearTarget) {
+						entity.currentTargetEntityId = undefined;
+						entity.path = [];
+					}
+				}
+			}
+			// search_or_continue: 타겟 유지
+		}
+	}
+
+	// 2. Search: 타겟이 없으면 대상 탐색 및 경로 설정
 	if (
 		(action.type === 'go' || action.type === 'interact' || action.type === 'fulfill') &&
 		entity.path.length === 0 &&
@@ -65,4 +102,73 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	if (isCompleted) {
 		transitionToNextAction(entity, action, tick);
 	}
+}
+
+/**
+ * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
+ */
+function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boolean {
+	if (!entity.currentTargetEntityId) return false;
+
+	const { buildingInteractionStore } = useBuilding();
+	const { itemInteractionStore } = useItem();
+	const { characterInteractionStore } = useCharacter();
+	const { worldBuildingStore, worldItemStore, worldCharacterStore } = useWorld();
+
+	// 현재 타겟의 엔티티 타입과 템플릿 ID
+	const { type: targetType, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
+	let targetTemplateId: string | undefined;
+
+	if (targetType === 'building') {
+		const worldBuilding = get(worldBuildingStore).data[instanceId as WorldBuildingId];
+		targetTemplateId = worldBuilding?.building_id;
+	} else if (targetType === 'item') {
+		const worldItem = get(worldItemStore).data[instanceId as WorldItemId];
+		targetTemplateId = worldItem?.item_id;
+	} else if (targetType === 'character') {
+		const worldCharacter = get(worldCharacterStore).data[instanceId as WorldCharacterId];
+		targetTemplateId = worldCharacter?.character_id;
+	}
+
+	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
+	if (action.building_interaction_id) {
+		const interaction = get(buildingInteractionStore).data[action.building_interaction_id];
+		if (!interaction) return true; // interaction 없으면 클리어
+
+		// 타입이 다르면 클리어
+		if (targetType !== 'building') return true;
+
+		// 특정 건물 지정 시 템플릿 ID가 다르면 클리어
+		if (interaction.building_id && interaction.building_id !== targetTemplateId) {
+			return true;
+		}
+
+		// 기본 인터랙션(NULL)이면 모든 건물이 대상이므로 유지
+		return false;
+	} else if (action.item_interaction_id) {
+		const interaction = get(itemInteractionStore).data[action.item_interaction_id];
+		if (!interaction) return true;
+
+		if (targetType !== 'item') return true;
+
+		if (interaction.item_id && interaction.item_id !== targetTemplateId) {
+			return true;
+		}
+
+		return false;
+	} else if (action.character_interaction_id) {
+		const interaction = get(characterInteractionStore).data[action.character_interaction_id];
+		if (!interaction) return true;
+
+		if (targetType !== 'character') return true;
+
+		if (interaction.target_character_id && interaction.target_character_id !== targetTemplateId) {
+			return true;
+		}
+
+		return false;
+	}
+
+	// interaction ID가 없으면 search 모드이므로 타겟 유지
+	return false;
 }

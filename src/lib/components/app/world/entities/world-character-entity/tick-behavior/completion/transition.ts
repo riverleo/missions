@@ -14,9 +14,8 @@ export default function transitionToNextAction(
 	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
 	const behaviorId = BehaviorActionIdUtils.behaviorId(entity.currentBehaviorActionId);
 
-	// 현재 액션 완료 시 path와 타겟 클리어
+	// 현재 액션 완료 시 path 클리어 (타겟은 유지)
 	entity.path = [];
-	entity.currentTargetEntityId = undefined;
 
 	// 다음 액션 ID 가져오기
 	const nextActionId =
