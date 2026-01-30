@@ -17,9 +17,16 @@ export default function checkActionCompletion(
 
 	// INTERACT: InteractionAction 체인이 완료되어야 함
 	if (action.type === 'interact') {
-		if (!entity.currentTargetEntityId) return false;
+		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
+		if (!entity.currentTargetEntityId) {
+			return !entity.currentInteractionActionId;
+		}
+
 		const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
-		if (!targetEntity) return false;
+		// 타겟 엔티티가 없으면: 이미 완료됨 (아이템을 주워서 엔티티 제거된 경우)
+		if (!targetEntity) {
+			return !entity.currentInteractionActionId;
+		}
 
 		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
 		if (distance >= 50) return false; // 아직 도착하지 않음
