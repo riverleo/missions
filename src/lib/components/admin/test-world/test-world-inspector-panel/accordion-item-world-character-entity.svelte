@@ -194,15 +194,11 @@
 		<AccordionContentItem label="월드 좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
-		<AccordionContentItem label="현재 행동">
-			{#if currentBehaviorInfo}
-				<div class="flex flex-col items-end">
-					<div>{currentBehaviorInfo.behaviorName}</div>
-					<div class="text-xs text-muted-foreground">{currentBehaviorInfo.actionLabel}</div>
-				</div>
-			{:else}
-				없음
-			{/if}
+		<AccordionContentItem label="행동 이름">
+			{currentBehaviorInfo?.behaviorName ?? '없음'}
+		</AccordionContentItem>
+		<AccordionContentItem label="행동 액션">
+			{currentBehaviorInfo?.actionLabel ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="현재 대상">
 			{currentTargetName ?? '없음'}
