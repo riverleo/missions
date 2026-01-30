@@ -51,18 +51,32 @@
 			return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
 		}
 
+		console.log('[CharacterRenderer] Looking for InteractionAction:', entity.currentInteractionActionId);
+		console.log('[CharacterRenderer] ItemInteractionActionStore keys:', Object.keys($itemInteractionActionStore.data));
+
 		// ItemInteractionAction 조회
 		for (const [interactionId, actions] of Object.entries($itemInteractionActionStore.data)) {
+			console.log(`[CharacterRenderer] Checking interaction ${interactionId}, actions:`, actions.map(a => ({ id: a.id, offset_x: a.item_offset_x, offset_y: a.item_offset_y, scale: a.item_scale, rotation: a.item_rotation })));
 			const action = actions.find((a) => a.id === entity.currentInteractionActionId);
 			if (action) {
-				return {
+				console.log('[CharacterRenderer] Found action:', {
+					id: action.id,
+					item_offset_x: action.item_offset_x,
+					item_offset_y: action.item_offset_y,
+					item_scale: action.item_scale,
+					item_rotation: action.item_rotation,
+				});
+				const transform = {
 					offset: { x: action.item_offset_x ?? 0, y: action.item_offset_y ?? 0 },
 					scale: action.item_scale ?? 1,
 					rotation: action.item_rotation ?? 0,
 				};
+				console.log('[CharacterRenderer] Applying transform:', transform);
+				return transform;
 			}
 		}
 
+		console.log('[CharacterRenderer] No matching action found, using defaults');
 		return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
 	});
 

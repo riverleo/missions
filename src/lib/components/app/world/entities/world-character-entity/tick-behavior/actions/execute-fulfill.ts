@@ -63,7 +63,6 @@ export default function executeFulfillAction(
 
 	// 타겟 엔티티 확인
 	if (!entity.currentTargetEntityId) {
-		console.log('[executeFulfill] No target entity ID');
 		return;
 	}
 
@@ -75,11 +74,9 @@ export default function executeFulfillAction(
 	if (!targetEntity) {
 		// 아이템이고 들고 있는 경우: 계속 진행 (사용하기 위해)
 		if (targetType === 'item' && entity.heldWorldItemIds.includes(targetInstanceId as WorldItemId)) {
-			console.log('[executeFulfill] Target item is held, continuing without entity');
 			isHeldItem = true;
 		} else {
 			// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-			console.log('[executeFulfill] Target entity not found and not held, clearing');
 			entity.currentTargetEntityId = undefined;
 			entity.path = [];
 			return;
@@ -93,37 +90,30 @@ export default function executeFulfillAction(
 		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 		const worldItem = get(worldItemStore).data[worldItemId];
 
-		console.log('[executeFulfill] Item check:', {
-			worldItemId,
-			worldItem: worldItem ? {
-				world_building_id: worldItem.world_building_id,
-				world_character_id: worldItem.world_character_id,
-			} : 'not found',
-			heldWorldItemIds: entity.heldWorldItemIds,
-		});
-
 		if (worldItem) {
 			const isInWorld = worldItem.world_building_id === null && worldItem.world_character_id === null;
 			const isHeld = entity.heldWorldItemIds.includes(worldItemId);
 
-			console.log('[executeFulfill] Item state:', { isInWorld, isHeld });
-
 			if (isInWorld && !isHeld) {
 				// 월드에 존재하고 들고 있지 않음 → 줍기
 				autoInteractType = 'item_pick';
-				console.log('[executeFulfill] Auto interaction type: item_pick');
 			} else if (isHeld) {
 				// 들고 있음 → 사용
 				autoInteractType = 'item_use';
-				console.log('[executeFulfill] Auto interaction type: item_use');
 			}
 		}
 	}
 
-	// Interaction 가져오기
+	// 1. Interaction 가져오기 (Fulfillment에 명시된 경우)
 	const { buildingInteractionStore } = useBuilding();
 	const { itemInteractionStore } = useItem();
 	const { characterInteractionStore } = useCharacter();
+
+	console.log('[executeFulfill] Fulfillment:', {
+		building_interaction_id: fulfillment.building_interaction_id,
+		item_interaction_id: fulfillment.item_interaction_id,
+		character_interaction_id: fulfillment.character_interaction_id,
+	});
 
 	let interaction: any = undefined;
 	if (fulfillment.building_interaction_id) {
@@ -141,26 +131,47 @@ export default function executeFulfillAction(
 			];
 	}
 
-	// interaction이 없고 auto type이 있으면 interaction 없이 진행
+	// 2. autoInteractType이 있으면 타겟 아이템의 ItemInteraction 찾기
+	if (!interaction && autoInteractType && (targetEntity?.type === 'item' || isHeldItem)) {
+		const { worldItemStore } = useWorld();
+		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+		const worldItem = get(worldItemStore).data[worldItemId];
+
+		if (worldItem) {
+			const { itemStore } = useItem();
+			const item = get(itemStore).data[worldItem.item_id];
+
+			if (item) {
+				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
+				const itemInteractions = Object.values(get(itemInteractionStore).data);
+				interaction = itemInteractions.find((i) => i.item_id === item.id);
+				console.log('[executeFulfill] Found item interaction for auto type:', interaction?.id);
+			}
+		}
+	}
+
+	console.log('[executeFulfill] Interaction found:', !!interaction, 'autoInteractType:', autoInteractType);
+
+	// 3. interaction_type 결정 (autoInteractType 우선)
 	let repeatInteractType: string | undefined;
-	if (interaction) {
+	if (autoInteractType) {
+		repeatInteractType = autoInteractType;
+		console.log('[executeFulfill] Using autoInteractType:', repeatInteractType);
+	} else if (interaction) {
 		if (!interaction.repeat_interaction_type) {
-			console.error('Interaction has no repeat_interaction_type:', fulfillment);
 			return;
 		}
 		repeatInteractType = interaction.repeat_interaction_type;
-	} else if (autoInteractType) {
-		repeatInteractType = autoInteractType;
+		console.log('[executeFulfill] Using interaction.repeat_interaction_type:', repeatInteractType);
 	} else {
-		console.error('No interaction and no auto interaction type:', fulfillment);
 		return;
 	}
 
-	// 타겟과의 거리 확인 (임계값: 50) - 들고 있는 아이템은 스킵
+	// 타겟과의 거리 확인 (임계값: 100) - 들고 있는 아이템은 스킵
 	if (targetEntity && !isHeldItem) {
 		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
 
-		if (distance >= 50) {
+		if (distance >= 100) {
 			// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
 			if (entity.path.length === 0) {
 				const testPath = entity.worldContext.pathfinder.findPath(
@@ -178,18 +189,148 @@ export default function executeFulfillAction(
 		}
 	}
 
-	// InteractionAction 체인 시작 및 실행 (interaction이 있는 경우만)
+	// InteractionAction 가져오기 및 실행
 	let interactionCompleted = false;
 	if (interaction) {
-		if (!entity.currentInteractionActionId) {
-			startInteractionChain(entity, interaction, currentTick);
-			return;
+		// InteractionAction 가져오기
+		const { buildingInteractionActionStore } = useBuilding();
+		const { itemInteractionActionStore } = useItem();
+		const { characterInteractionActionStore } = useCharacter();
+
+		let interactionActions: any[] = [];
+		if (interaction.building_id !== undefined) {
+			interactionActions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId] || [];
+		} else if (interaction.item_id !== undefined) {
+			interactionActions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId] || [];
+		} else if (interaction.target_character_id !== undefined) {
+			interactionActions = get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId] || [];
 		}
 
-		// InteractionAction 체인 실행
-		interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+		if (interactionActions.length > 0) {
+			// InteractionAction이 있으면 첫 번째 것 사용
+			if (!entity.currentInteractionActionId) {
+				const firstAction = interactionActions[0];
+				entity.currentInteractionActionId = firstAction.id;
+				entity.interactionActionStartTick = currentTick;
+				console.log('[executeFulfill] Set currentInteractionActionId:', firstAction.id);
+
+				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
+				if (repeatInteractType === 'item_pick') {
+					console.log('[executeFulfill] Executing item_pick on start');
+					if (!entity.heldWorldItemIds.includes((targetEntity?.instanceId || targetInstanceId) as WorldItemId)) {
+						const { worldItemStore } = useWorld();
+						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+
+						entity.heldWorldItemIds.push(worldItemId);
+						console.log('[executeFulfill] Picked up item:', worldItemId);
+
+						// 바디만 월드에서 제거
+						if (targetEntity) {
+							targetEntity.removeFromWorld();
+						}
+
+						// worldItem.world_character_id 업데이트
+						const worldItem = get(worldItemStore).data[worldItemId];
+						if (worldItem) {
+							worldItemStore.update((state) => ({
+								...state,
+								data: {
+									...state.data,
+									[worldItemId]: {
+										...worldItem,
+										world_character_id: entity.instanceId,
+										world_building_id: null,
+									},
+								},
+							}));
+						}
+					}
+				}
+
+				return;
+			}
+
+			// duration_ticks 확인
+			const currentAction = interactionActions.find(a => a.id === entity.currentInteractionActionId);
+			if (currentAction && currentAction.duration_ticks) {
+				const elapsed = currentTick - entity.interactionActionStartTick;
+				if (elapsed < currentAction.duration_ticks) {
+					console.log('[executeFulfill] Action in progress:', elapsed, '/', currentAction.duration_ticks);
+					return;
+				}
+			}
+
+			// duration 완료 - item_use는 여기서 실행
+			if (repeatInteractType === 'item_use') {
+				console.log('[executeFulfill] Executing item_use on completion');
+				const { worldItemStore } = useWorld();
+				const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+
+				// 이미 들고 있는 아이템 사용 (소비)
+				const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
+				if (itemIndex !== -1) {
+					entity.heldWorldItemIds.splice(itemIndex, 1);
+					entity.worldContext.deleteWorldItem(worldItemId);
+					console.log('[executeFulfill] Used item:', worldItemId);
+				}
+			}
+
+			interactionCompleted = true;
+		} else {
+			// InteractionAction이 없으면 매 틱마다 실행
+			console.log('[executeFulfill] No InteractionAction, executing every tick');
+
+			// item_pick/use 매 틱마다 실행
+			if (repeatInteractType === 'item_pick') {
+				if (targetEntity?.type === 'item' || isHeldItem) {
+					const { worldItemStore } = useWorld();
+					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+
+					if (!entity.heldWorldItemIds.includes(worldItemId)) {
+						entity.heldWorldItemIds.push(worldItemId);
+						console.log('[executeFulfill] Picked up item (no action):', worldItemId);
+
+						// 바디만 월드에서 제거
+						if (targetEntity) {
+							targetEntity.removeFromWorld();
+						}
+
+						// worldItem.world_character_id 업데이트
+						const worldItem = get(worldItemStore).data[worldItemId];
+						if (worldItem) {
+							worldItemStore.update((state) => ({
+								...state,
+								data: {
+									...state.data,
+									[worldItemId]: {
+										...worldItem,
+										world_character_id: entity.instanceId,
+										world_building_id: null,
+									},
+								},
+							}));
+						}
+					}
+				}
+			} else if (repeatInteractType === 'item_use') {
+				if (targetEntity?.type === 'item' || isHeldItem) {
+					const { worldItemStore } = useWorld();
+					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+
+					const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
+					if (itemIndex !== -1) {
+						entity.heldWorldItemIds.splice(itemIndex, 1);
+						entity.worldContext.deleteWorldItem(worldItemId);
+						console.log('[executeFulfill] Used item (no action):', worldItemId);
+					}
+				}
+			}
+
+			interactionCompleted = true;
+		}
 	} else {
 		// interaction이 없으면 체인 없이 매 틱마다 실행
+		console.log('[executeFulfill] No interaction, executing every tick');
 		interactionCompleted = true;
 	}
 
@@ -212,51 +353,10 @@ export default function executeFulfillAction(
 		// 건물 수리/청소 등 구현 필요
 	}
 
-	// repeat_interaction_type: 체인 완료 시 처리
+	// repeat_interaction_type: InteractionAction 완료 시 초기화 (다음 틱에서 다시 시작)
 	if (interactionCompleted) {
+		console.log('[executeFulfill] InteractionAction completed, clearing for next repeat');
 		entity.currentInteractionActionId = undefined;
 		entity.interactionActionStartTick = 0;
-
-		// 자동 줍기/사용 처리
-		if (targetEntity?.type === 'item' || isHeldItem) {
-			const { worldItemStore } = useWorld();
-			const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
-
-			if (autoInteractType === 'item_pick') {
-				// 줍기만
-				if (!entity.heldWorldItemIds.includes(worldItemId)) {
-					entity.heldWorldItemIds.push(worldItemId);
-
-					// 바디만 월드에서 제거 (targetEntity가 있는 경우만)
-					if (targetEntity) {
-						targetEntity.removeFromWorld();
-					}
-
-					// worldItem.world_character_id 업데이트
-					const worldItem = get(worldItemStore).data[worldItemId];
-					if (worldItem) {
-						worldItemStore.update((state) => ({
-							...state,
-							data: {
-								...state.data,
-								[worldItemId]: {
-									...worldItem,
-									world_character_id: entity.instanceId,
-									world_building_id: null,
-								},
-							},
-						}));
-					}
-				}
-			} else if (autoInteractType === 'item_use') {
-				// 이미 들고 있는 아이템 사용 (소비)
-				const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
-				if (itemIndex !== -1) {
-					entity.heldWorldItemIds.splice(itemIndex, 1);
-					entity.worldContext.deleteWorldItem(worldItemId);
-				}
-			}
-		}
-		// 다음 틱에서 체인이 다시 시작됨
 	}
 }

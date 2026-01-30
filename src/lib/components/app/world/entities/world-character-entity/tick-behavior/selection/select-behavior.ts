@@ -26,23 +26,13 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 	const candidateNeedBehaviors = Object.values(get(needBehaviorStore).data).filter((behavior) => {
 		const need = entity.worldCharacterNeeds[behavior.need_id];
 		if (!need) {
-			console.log('[selectBehavior] Need not found for behavior:', behavior.need_id);
 			return false;
 		}
 
 		// 욕구 레벨이 threshold 이하이면 발동
 		const meetsThreshold = need.value <= behavior.need_threshold;
-		console.log('[selectBehavior] Checking behavior:', {
-			behaviorId: behavior.id,
-			needId: behavior.need_id,
-			needValue: need.value,
-			threshold: behavior.need_threshold,
-			meetsThreshold,
-		});
 		return meetsThreshold;
 	});
-
-	console.log('[selectBehavior] Candidate behaviors:', candidateNeedBehaviors.length);
 
 	// 2. 후보 condition behaviors 찾기
 	// TODO: 컨디션 조건 체크 로직 (나중에 구현)

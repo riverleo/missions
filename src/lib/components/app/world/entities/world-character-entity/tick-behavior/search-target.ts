@@ -25,14 +25,6 @@ export default function searchTargetAndSetPath(
 	entity: WorldCharacterEntity,
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): void {
-	console.log('[searchTarget] Starting search:', {
-		actionType: action.type,
-		targetMethod: action.target_selection_method,
-		buildingInteractionId: action.building_interaction_id,
-		itemInteractionId: action.item_interaction_id,
-		characterInteractionId: action.character_interaction_id,
-	});
-
 	const { getInteractableEntityTemplates } = useBehavior();
 	const { buildingInteractionStore } = useBuilding();
 	const { itemInteractionStore } = useItem();
@@ -111,7 +103,6 @@ export default function searchTargetAndSetPath(
 	) {
 		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
 		const templates = getInteractableEntityTemplates(action);
-		console.log('[searchTarget] Interactable templates:', templates.length, templates.map((t) => t.name));
 
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));
@@ -122,7 +113,6 @@ export default function searchTargetAndSetPath(
 			if (worldItem && templateIds.has(worldItem.item_id)) {
 				// 들고 있는 아이템이 적합한 대상이면 선택
 				const heldItemEntityId = EntityIdUtils.createId('item', entity.worldContext.worldId, heldItemId);
-				console.log('[searchTarget] Found held item matching template:', worldItem.item_id, heldItemEntityId);
 				entity.currentTargetEntityId = heldItemEntityId;
 				entity.path = []; // 들고 있는 아이템은 경로 불필요
 				return; // 검색 종료
@@ -143,7 +133,6 @@ export default function searchTargetAndSetPath(
 			}
 			return false;
 		});
-		console.log('[searchTarget] Candidate entities:', candidateEntities.length);
 
 		// 가장 가까운 엔티티 중 경로를 찾을 수 있는 것 선택
 		if (candidateEntities.length > 0) {
@@ -158,11 +147,7 @@ export default function searchTargetAndSetPath(
 			for (const candidate of sortedCandidates) {
 				const fromPos = vectorUtils.createVector(entity.body.position.x, entity.body.position.y);
 				const toPos = vectorUtils.createVector(candidate.x, candidate.y);
-				console.log(
-					`[searchTarget] Testing path from (${fromPos.x.toFixed(1)}, ${fromPos.y.toFixed(1)}) to (${toPos.x.toFixed(1)}, ${toPos.y.toFixed(1)}) - ${candidate.type} ${candidate.instanceId}`
-				);
 				const testPath = entity.worldContext.pathfinder.findPath(fromPos, toPos);
-				console.log(`[searchTarget] Path result: ${testPath.length} waypoints`);
 				if (testPath.length > 0) {
 					targetEntity = candidate;
 					break;
@@ -179,16 +164,9 @@ export default function searchTargetAndSetPath(
 			vectorUtils.createVector(targetEntity.x, targetEntity.y)
 		);
 
-		console.log('[searchTarget] Target found, path length:', testPath.length);
-
 		if (testPath.length > 0) {
 			entity.currentTargetEntityId = targetEntity.id;
 			entity.path = testPath;
-			console.log('[searchTarget] Target set:', targetEntity.id);
-		} else {
-			console.log('[searchTarget] No path found to target');
 		}
-	} else {
-		console.log('[searchTarget] No target entity found');
 	}
 }
