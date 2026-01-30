@@ -13,6 +13,7 @@ import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import startInteractionChain from '../interaction-chain/start-chain';
 import tickInteractionAction from '../interaction-chain/tick-chain';
 
