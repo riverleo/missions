@@ -167,7 +167,7 @@ function getInteractableTemplatesForFulfill(
 		}
 	}
 
-	// 2. Fulfillment의 Interaction 가져오기
+	// 2. Fulfillment의 Interaction 가져오기 (repeat_interaction_type만)
 	const interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[] = [];
 
 	for (const fulfillment of fulfillments) {
@@ -176,17 +176,23 @@ function getInteractableTemplatesForFulfill(
 				get(buildingInteractionStore).data[
 					fulfillment.building_interaction_id as BuildingInteractionId
 				];
-			if (interaction) interactions.push(interaction);
+			if (interaction && interaction.repeat_interaction_type) {
+				interactions.push(interaction);
+			}
 		} else if (fulfillment.item_interaction_id) {
 			const interaction =
 				get(itemInteractionStore).data[fulfillment.item_interaction_id as ItemInteractionId];
-			if (interaction) interactions.push(interaction);
+			if (interaction && interaction.repeat_interaction_type) {
+				interactions.push(interaction);
+			}
 		} else if (fulfillment.character_interaction_id) {
 			const interaction =
 				get(characterInteractionStore).data[
 					fulfillment.character_interaction_id as CharacterInteractionId
 				];
-			if (interaction) interactions.push(interaction);
+			if (interaction && interaction.repeat_interaction_type) {
+				interactions.push(interaction);
+			}
 		}
 	}
 
