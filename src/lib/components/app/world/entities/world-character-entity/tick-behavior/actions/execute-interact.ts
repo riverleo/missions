@@ -65,19 +65,33 @@ export default function executeInteractAction(
 	const { itemInteractionStore } = useItem();
 	const { characterInteractionStore } = useCharacter();
 
+	console.log('[executeInteract] Action interaction IDs:', {
+		buildingId: action.building_interaction_id,
+		itemId: action.item_interaction_id,
+		characterId: action.character_interaction_id,
+	});
+
 	let interaction: any = undefined;
 	if (action.building_interaction_id) {
 		interaction =
 			get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+		console.log('[executeInteract] Building interaction:', interaction);
 	} else if (action.item_interaction_id) {
 		interaction = get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+		console.log('[executeInteract] Item interaction:', interaction);
 	} else if (action.character_interaction_id) {
 		interaction =
 			get(characterInteractionStore).data[action.character_interaction_id as CharacterInteractionId];
+		console.log('[executeInteract] Character interaction:', interaction);
 	}
 
-	if (!interaction || !interaction.once_interaction_type) {
-		console.error('[executeInteract] Interaction not found or not a once_interaction_type:', action);
+	if (!interaction) {
+		console.error('[executeInteract] Interaction not found in store');
+		return;
+	}
+
+	if (!interaction.once_interaction_type) {
+		console.error('[executeInteract] Interaction has no once_interaction_type:', interaction);
 		return;
 	}
 

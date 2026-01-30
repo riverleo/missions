@@ -194,13 +194,13 @@
 		<AccordionContentItem label="월드 좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
-		<AccordionContentItem label="행동 이름">
+		<AccordionContentItem label="행동">
 			{currentBehaviorInfo?.behaviorName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="행동 액션">
 			{currentBehaviorInfo?.actionLabel ?? '없음'}
 		</AccordionContentItem>
-		<AccordionContentItem label="현재 대상">
+		<AccordionContentItem label="대상">
 			{currentTargetName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="들고 있는 아이템">
