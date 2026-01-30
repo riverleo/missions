@@ -60,6 +60,33 @@ export default function executeFulfillAction(
 		return;
 	}
 
+	// 타겟 엔티티 확인
+	if (!entity.currentTargetEntityId) return;
+
+	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
+	if (!targetEntity) {
+		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
+		entity.currentTargetEntityId = undefined;
+		entity.path = [];
+		return;
+	}
+
+	// 아이템 타겟인 경우 자동 줍기/사용 판단
+	let autoInteractType: 'item_pick' | 'item_use' | undefined;
+	if (targetEntity.type === 'item') {
+		const worldItemId = targetEntity.instanceId as WorldItemId;
+		const isInWorld = !!entity.worldContext.entities[entity.currentTargetEntityId];
+		const isHeld = entity.heldWorldItemIds.includes(worldItemId);
+
+		if (isInWorld && !isHeld) {
+			// 월드에 존재하고 들고 있지 않음 → 줍기
+			autoInteractType = 'item_pick';
+		} else if (isHeld) {
+			// 들고 있음 → 사용
+			autoInteractType = 'item_use';
+		}
+	}
+
 	// Interaction 가져오기
 	const { buildingInteractionStore } = useBuilding();
 	const { itemInteractionStore } = useItem();
@@ -81,19 +108,18 @@ export default function executeFulfillAction(
 			];
 	}
 
-	if (!interaction || !interaction.repeat_interaction_type) {
-		console.error('Interaction not found or not a repeat_interaction_type:', fulfillment);
-		return;
-	}
-
-	// 타겟 엔티티 확인
-	if (!entity.currentTargetEntityId) return;
-
-	const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
-	if (!targetEntity) {
-		// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-		entity.currentTargetEntityId = undefined;
-		entity.path = [];
+	// interaction이 없고 auto type이 있으면 interaction 없이 진행
+	let repeatInteractType: string | undefined;
+	if (interaction) {
+		if (!interaction.repeat_interaction_type) {
+			console.error('Interaction has no repeat_interaction_type:', fulfillment);
+			return;
+		}
+		repeatInteractType = interaction.repeat_interaction_type;
+	} else if (autoInteractType) {
+		repeatInteractType = autoInteractType;
+	} else {
+		console.error('No interaction and no auto interaction type:', fulfillment);
 		return;
 	}
 
@@ -117,14 +143,20 @@ export default function executeFulfillAction(
 		return;
 	}
 
-	// InteractionAction 체인이 아직 시작되지 않았으면 시작
-	if (!entity.currentInteractionActionId) {
-		startInteractionChain(entity, interaction, currentTick);
-		return;
-	}
+	// InteractionAction 체인 시작 및 실행 (interaction이 있는 경우만)
+	let interactionCompleted = false;
+	if (interaction) {
+		if (!entity.currentInteractionActionId) {
+			startInteractionChain(entity, interaction, currentTick);
+			return;
+		}
 
-	// InteractionAction 체인 실행
-	const interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+		// InteractionAction 체인 실행
+		interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+	} else {
+		// interaction이 없으면 체인 없이 매 틱마다 실행
+		interactionCompleted = true;
+	}
 
 	// 매 틱마다 increase_per_tick 적용
 	if (isNeedAction) {
@@ -150,45 +182,44 @@ export default function executeFulfillAction(
 		entity.currentInteractionActionId = undefined;
 		entity.interactionActionStartTick = 0;
 
-		// item_use는 줍기가 내포됨: 타겟 아이템을 주워서 사용
-		if (interaction.repeat_interaction_type === 'item_use' && targetEntity.type === 'item') {
+		// 자동 줍기/사용 처리
+		if (targetEntity.type === 'item') {
 			const { worldItemStore } = useWorld();
 			const worldItemId = targetEntity.instanceId as WorldItemId;
 
-			// 월드에 있는 아이템: 줍기
-			if (!entity.heldWorldItemIds.includes(worldItemId)) {
-				entity.heldWorldItemIds.push(worldItemId);
+			if (autoInteractType === 'item_pick') {
+				// 줍기만
+				if (!entity.heldWorldItemIds.includes(worldItemId)) {
+					entity.heldWorldItemIds.push(worldItemId);
 
-				// 바디만 월드에서 제거
-				targetEntity.removeFromWorld();
+					// 바디만 월드에서 제거
+					targetEntity.removeFromWorld();
 
-				// worldItem.world_character_id 업데이트
-				const worldItem = get(worldItemStore).data[worldItemId];
-				if (worldItem) {
-					worldItemStore.update((state) => ({
-						...state,
-						data: {
-							...state.data,
-							[worldItemId]: {
-								...worldItem,
-								world_character_id: entity.instanceId,
-								world_building_id: null,
+					// worldItem.world_character_id 업데이트
+					const worldItem = get(worldItemStore).data[worldItemId];
+					if (worldItem) {
+						worldItemStore.update((state) => ({
+							...state,
+							data: {
+								...state.data,
+								[worldItemId]: {
+									...worldItem,
+									world_character_id: entity.instanceId,
+									world_building_id: null,
+								},
 							},
-						},
-					}));
+						}));
+					}
+				}
+			} else if (autoInteractType === 'item_use') {
+				// 이미 들고 있는 아이템 사용 (소비)
+				const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
+				if (itemIndex !== -1) {
+					entity.heldWorldItemIds.splice(itemIndex, 1);
+					entity.worldContext.deleteWorldItem(worldItemId);
 				}
 			}
-
-			// 줍은 후 즉시 사용 (소비)
-			const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
-			if (itemIndex !== -1) {
-				entity.heldWorldItemIds.splice(itemIndex, 1);
-				entity.worldContext.deleteWorldItem(worldItemId);
-			}
-
-			// 타겟 클리어 (다음 tick에서 재탐색)
-			entity.currentTargetEntityId = undefined;
 		}
-		// 다음 틱에서 체인이 다시 시작됨 (item_use는 새로운 타겟으로)
+		// 다음 틱에서 체인이 다시 시작됨
 	}
 }

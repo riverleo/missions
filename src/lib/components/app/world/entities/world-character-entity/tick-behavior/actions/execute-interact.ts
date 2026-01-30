@@ -71,6 +71,24 @@ export default function executeInteractAction(
 		characterId: action.character_interaction_id,
 	});
 
+	// 아이템 타겟인 경우 자동 줍기/사용 판단
+	let autoInteractType: 'item_pick' | 'item_use' | undefined;
+	if (targetEntity.type === 'item') {
+		const worldItemId = targetEntity.instanceId as WorldItemId;
+		const isInWorld = !!entity.worldContext.entities[entity.currentTargetEntityId];
+		const isHeld = entity.heldWorldItemIds.includes(worldItemId);
+
+		if (isInWorld && !isHeld) {
+			// 월드에 존재하고 들고 있지 않음 → 줍기
+			autoInteractType = 'item_pick';
+			console.log('[executeInteract] Auto interaction type: item_pick (item in world)');
+		} else if (isHeld) {
+			// 들고 있음 → 사용
+			autoInteractType = 'item_use';
+			console.log('[executeInteract] Auto interaction type: item_use (item held)');
+		}
+	}
+
 	let interaction: any = undefined;
 	if (action.building_interaction_id) {
 		interaction =
@@ -85,29 +103,41 @@ export default function executeInteractAction(
 		console.log('[executeInteract] Character interaction:', interaction);
 	}
 
-	if (!interaction) {
-		console.error('[executeInteract] Interaction not found in store');
+	// interaction이 없고 auto type이 있으면 interaction 없이 진행
+	let interactType: string | undefined;
+	if (interaction) {
+		if (!interaction.once_interaction_type) {
+			console.error('[executeInteract] Interaction has no once_interaction_type:', interaction);
+			return;
+		}
+		interactType = interaction.once_interaction_type;
+		console.log('[executeInteract] Interaction type:', interactType);
+	} else if (autoInteractType) {
+		interactType = autoInteractType;
+		console.log('[executeInteract] Using auto interaction type:', interactType);
+	} else {
+		console.error('[executeInteract] No interaction and no auto interaction type');
 		return;
 	}
 
-	if (!interaction.once_interaction_type) {
-		console.error('[executeInteract] Interaction has no once_interaction_type:', interaction);
-		return;
+	// InteractionAction 체인 시작 및 실행 (interaction이 있는 경우만)
+	let interactionCompleted = false;
+	if (interaction) {
+		if (!entity.currentInteractionActionId) {
+			console.log('[executeInteract] Starting interaction chain');
+			startInteractionChain(entity, interaction, currentTick);
+			return;
+		}
+
+		// InteractionAction 체인 실행
+		console.log('[executeInteract] Ticking interaction chain');
+		interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
+		console.log('[executeInteract] Chain completed:', interactionCompleted);
+	} else {
+		// interaction이 없으면 체인 없이 바로 완료
+		interactionCompleted = true;
+		console.log('[executeInteract] No interaction chain, proceeding directly');
 	}
-
-	console.log('[executeInteract] Interaction type:', interaction.once_interaction_type);
-
-	// InteractionAction 체인이 아직 시작되지 않았으면 시작
-	if (!entity.currentInteractionActionId) {
-		console.log('[executeInteract] Starting interaction chain');
-		startInteractionChain(entity, interaction, currentTick);
-		return;
-	}
-
-	// InteractionAction 체인 실행
-	console.log('[executeInteract] Ticking interaction chain');
-	const interactionCompleted = tickInteractionAction(entity, interaction, currentTick);
-	console.log('[executeInteract] Chain completed:', interactionCompleted);
 
 	// 매 틱마다 increase_per_tick 적용 (once 상호작용도 체인 실행 중 욕구 충족)
 	const isNeedAction = 'need_id' in action;
@@ -136,7 +166,6 @@ export default function executeInteractAction(
 	}
 
 	// 체인 완료: 상호작용 타입별 로직 실행
-	const interactType = interaction.once_interaction_type;
 	console.log('[executeInteract] Executing interaction type:', interactType);
 
 	if (interactType === 'item_pick') {
