@@ -1,5 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import type {
 	RecordFetchState,
 	World,
@@ -140,18 +141,18 @@ function createWorldStore() {
 	}
 
 	/**
-	 * EntityType에 따라 해당하는 WorldEntity를 반환
+	 * EntityType에 따라 해당하는 EntityInstance를 반환
 	 */
-	function getEntity(
-		entityType: EntityType,
-		instanceId: string
-	): WorldBuilding | WorldItem | WorldCharacter | undefined {
+	function getEntityInstance(entityType: EntityType, instanceId: string): EntityInstance | undefined {
 		if (entityType === 'building') {
-			return getWorldBuilding(instanceId);
+			const entity = getWorldBuilding(instanceId);
+			return entity ? EntityIdUtils.to(entity) : undefined;
 		} else if (entityType === 'item') {
-			return getWorldItem(instanceId);
+			const entity = getWorldItem(instanceId);
+			return entity ? EntityIdUtils.to(entity) : undefined;
 		} else if (entityType === 'character') {
-			return getWorldCharacter(instanceId);
+			const entity = getWorldCharacter(instanceId);
+			return entity ? EntityIdUtils.to(entity) : undefined;
 		}
 		return undefined;
 	}
@@ -345,7 +346,7 @@ function createWorldStore() {
 		getAllWorldBuildingConditions,
 		getAllWorldItems,
 		getAllWorldTileMaps,
-		getEntity,
+		getEntityInstance,
 		getEntityTemplateCandidateId,
 	};
 }

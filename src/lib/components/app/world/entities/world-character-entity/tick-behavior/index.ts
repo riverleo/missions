@@ -112,12 +112,12 @@ function checkIfTargetMismatch(this: WorldCharacterEntity, action: BehaviorActio
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
-	const { getEntity, getEntityTemplateCandidateId } = useWorld();
+	const { getEntityInstance, getEntityTemplateCandidateId } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
 	const { type: entityType, instanceId } = EntityIdUtils.parse(this.currentTargetEntityId);
-	const entity = getEntity(entityType, instanceId);
-	const targetTemplateId = entity ? getEntityTemplateCandidateId(EntityIdUtils.to(entity)) : undefined;
+	const entityInstance = getEntityInstance(entityType, instanceId);
+	const targetTemplateId = entityInstance ? getEntityTemplateCandidateId(entityInstance) : undefined;
 
 	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
 	if (action.building_interaction_id) {

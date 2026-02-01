@@ -12,8 +12,7 @@ import type {
 	BuildingInteractionAction,
 	ItemInteractionAction,
 	CharacterInteractionAction,
-	NeedFulfillment,
-	ConditionFulfillment,
+	Fulfillment,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
@@ -23,6 +22,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
+import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 
 /**
  * FULFILL 행동 실행 (욕구/컨디션 충족 - repeat_interaction_type)
@@ -50,27 +50,29 @@ export default function executeFulfillAction(
 
 	// Fulfillment와 Interaction 가져오기 (타겟 확인 전에 먼저 가져옴)
 	const isNeedAction = 'need_id' in action;
-	let fulfillment: NeedFulfillment | ConditionFulfillment | undefined = undefined;
+	let fulfillment: Fulfillment | undefined = undefined;
 
 	if (isNeedAction) {
 		if (action.need_fulfillment_id) {
-			fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
+			const plainFulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
+			fulfillment = plainFulfillment ? FulfillmentIdUtils.to(plainFulfillment) : undefined;
 		} else {
 			// 자동 탐색: need_id로 필터링
 			const fulfillments = getAllNeedFulfillments().filter((f) => f.need_id === action.need_id);
-			fulfillment = fulfillments[0];
+			fulfillment = fulfillments[0] ? FulfillmentIdUtils.to(fulfillments[0]) : undefined;
 		}
 	} else {
 		if (action.condition_fulfillment_id) {
-			fulfillment = getConditionFulfillment(
+			const plainFulfillment = getConditionFulfillment(
 				action.condition_fulfillment_id as ConditionFulfillmentId
 			);
+			fulfillment = plainFulfillment ? FulfillmentIdUtils.to(plainFulfillment) : undefined;
 		} else {
 			// 자동 탐색: condition_id로 필터링
 			const fulfillments = getAllConditionFulfillments().filter(
 				(f) => f.condition_id === action.condition_id
 			);
-			fulfillment = fulfillments[0];
+			fulfillment = fulfillments[0] ? FulfillmentIdUtils.to(fulfillments[0]) : undefined;
 		}
 	}
 
