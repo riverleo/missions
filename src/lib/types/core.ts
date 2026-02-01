@@ -6,6 +6,8 @@ import type {
 	ConditionBehaviorActionId,
 	NeedBehaviorId,
 	NeedBehaviorActionId,
+	NeedFulfillmentId,
+	ConditionFulfillmentId,
 	WorldId,
 	WorldBuildingId,
 	WorldCharacterId,
@@ -25,6 +27,8 @@ import type {
 	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
+	NeedFulfillment,
+	ConditionFulfillment,
 	BuildingInteractionId,
 	BuildingInteractionActionId,
 	ItemInteractionId,
@@ -77,11 +81,17 @@ export type BehaviorType = 'need' | 'condition';
 export type Behavior = NeedBehavior | ConditionBehavior;
 export type BehaviorId = NeedBehaviorId | ConditionBehaviorId;
 export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
+export type FulfillmentId = NeedFulfillmentId | ConditionFulfillmentId;
 
 // Discriminated union for behavior actions
 export type BehaviorAction =
 	| ({ behaviorType: 'need' } & NeedBehaviorAction)
 	| ({ behaviorType: 'condition' } & ConditionBehaviorAction);
+
+// Discriminated union for fulfillments
+export type Fulfillment =
+	| ({ fulfillmentType: 'need' } & NeedFulfillment)
+	| ({ fulfillmentType: 'condition' } & ConditionFulfillment);
 
 // Runtime-only behavior target ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
 export type BehaviorTargetId =

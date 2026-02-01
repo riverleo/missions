@@ -277,6 +277,8 @@ export type {
 	BehaviorTargetId,
 	BehaviorAction,
 	BehaviorActionId,
+	Fulfillment,
+	FulfillmentId,
 	Interaction,
 	InteractionId,
 	InteractionType,

@@ -308,7 +308,7 @@ function createCharacterStore() {
 	}
 
 	function getCharacterFaceStates(characterId: string): CharacterFaceState[] | undefined {
-		return getCharacterFaceStates(characterId as CharacterId);
+		return get(characterFaceStateStore).data[characterId as CharacterId];
 	}
 
 	function getCharacterInteraction(id: string): CharacterInteraction | undefined {
@@ -326,7 +326,7 @@ function createCharacterStore() {
 	}
 
 	function getCharacterBodyStates(bodyId: string): CharacterBodyState[] | undefined {
-		return getCharacterBodyStates(bodyId as CharacterBodyId);
+		return get(characterBodyStateStore).data[bodyId as CharacterBodyId];
 	}
 
 	function getNeed(id: string): Need | undefined {
@@ -343,7 +343,7 @@ function createCharacterStore() {
 
 	// GetAll functions
 	function getAllCharacters(): Character[] {
-		return getAllCharacters();
+		return Object.values(get(characterStore).data);
 	}
 
 	function getAllCharacterFaceStates(): Record<CharacterId, CharacterFaceState[]> {
@@ -351,7 +351,7 @@ function createCharacterStore() {
 	}
 
 	function getAllCharacterInteractions(): CharacterInteraction[] {
-		return getAllCharacterInteractions();
+		return Object.values(get(characterInteractionStore).data);
 	}
 
 	function getAllCharacterInteractionActions(): Record<CharacterInteractionId, CharacterInteractionAction[]> {
@@ -359,7 +359,7 @@ function createCharacterStore() {
 	}
 
 	function getAllCharacterBodies(): CharacterBody[] {
-		return getAllCharacterBodies();
+		return Object.values(get(characterBodyStore).data);
 	}
 
 	function getAllCharacterBodyStates(): Record<CharacterBodyId, CharacterBodyState[]> {
@@ -367,15 +367,15 @@ function createCharacterStore() {
 	}
 
 	function getAllNeeds(): Need[] {
-		return getAllNeeds();
+		return Object.values(get(needStore).data);
 	}
 
 	function getAllNeedFulfillments(): NeedFulfillment[] {
-		return getAllNeedFulfillments();
+		return Object.values(get(needFulfillmentStore).data);
 	}
 
 	function getAllCharacterNeeds(): CharacterNeed[] {
-		return getAllCharacterNeeds();
+		return Object.values(get(characterNeedStore).data);
 	}
 
 	const admin = {

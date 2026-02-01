@@ -45,7 +45,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds, worldCharacterStore, worldCharacterNeedStore, worldItemStore } = useWorld();
+		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
 		const characterBody = this.characterBody;
 
@@ -89,20 +89,17 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	get characterBody(): CharacterBody {
-		const { worldCharacterStore, getAllWorldCharacterNeeds, getAllWorldItems, getWorldCharacter } = useWorld();
-		const { characterStore, characterBodyStore } = useCharacter();
+		const { getWorldCharacter } = useWorld();
+		const { getCharacter, getCharacterBody } = useCharacter();
 
 		const worldCharacter = getWorldCharacter(this.instanceId);
 		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
 
-		const characterStoreData = get(characterStore).data;
-		const characterBodyStoreData = get(characterBodyStore).data;
-
-		const character = characterStoreData[worldCharacter.character_id];
+		const character = getCharacter(worldCharacter.character_id);
 		if (character === undefined)
 			throw new Error(`Character not found for id ${worldCharacter.character_id}`);
 
-		const characterBody = characterBodyStoreData[character.character_body_id];
+		const characterBody = getCharacterBody(character.character_body_id);
 		if (characterBody === undefined)
 			throw new Error(`CharacterBody not found for id ${character.character_body_id}`);
 
@@ -110,23 +107,17 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore, worldCharacterNeedStore, getAllWorldCharacterNeeds, getAllWorldItems, getWorldCharacter } = useWorld();
-		const store = get(worldCharacterStore);
-		const worldCharacter = store.data[this.instanceId];
+		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
 
-		if (worldCharacter) {
-			worldCharacterStore.set({
-				...store,
-				data: {
-					...store.data,
-					[this.instanceId]: {
-						...worldCharacter,
-						x: this.x,
-						y: this.y,
-					},
-				},
-			});
-		}
+		worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				const worldCharacter = draft.data[this.instanceId];
+				if (worldCharacter) {
+					worldCharacter.x = this.x;
+					worldCharacter.y = this.y;
+				}
+			})
+		);
 
 		// needs 저장
 		worldCharacterNeedStore.update((state) =>

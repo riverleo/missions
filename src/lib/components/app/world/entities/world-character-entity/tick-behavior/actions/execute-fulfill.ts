@@ -1,8 +1,6 @@
 import type {
 	BuildingInteractionId,
-	ItemInteractionId,
 	CharacterInteractionId,
-	NeedFulfillmentId,
 	ConditionFulfillmentId,
 	WorldItemId,
 	InteractionType,
@@ -15,8 +13,6 @@ import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
-import startInteractionChain from '../interaction-chain/start-chain';
-import tickInteractionAction from '../interaction-chain/tick-chain';
 
 /**
  * FULFILL 행동 실행 (욕구/컨디션 충족 - repeat_interaction_type)

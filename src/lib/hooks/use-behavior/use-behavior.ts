@@ -215,23 +215,23 @@ function createBehaviorStore() {
 
 	// GetAll functions
 	function getAllBehaviorPriorities(): BehaviorPriority[] {
-		return getAllBehaviorPriorities();
+		return Object.values(get(behaviorPriorityStore).data);
 	}
 
 	function getAllNeedBehaviors(): NeedBehavior[] {
-		return getAllNeedBehaviors();
+		return Object.values(get(needBehaviorStore).data);
 	}
 
 	function getAllNeedBehaviorActions(): NeedBehaviorAction[] {
-		return getAllNeedBehaviorActions();
+		return Object.values(get(needBehaviorActionStore).data);
 	}
 
 	function getAllConditionBehaviors(): ConditionBehavior[] {
-		return getAllConditionBehaviors();
+		return Object.values(get(conditionBehaviorStore).data);
 	}
 
 	function getAllConditionBehaviorActions(): ConditionBehaviorAction[] {
-		return getAllConditionBehaviorActions();
+		return Object.values(get(conditionBehaviorActionStore).data);
 	}
 
 	const admin = {

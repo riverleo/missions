@@ -284,7 +284,7 @@ function createBuildingStore() {
 	}
 
 	function getBuildingStates(buildingId: string): BuildingState[] | undefined {
-		return getBuildingStates(buildingId as BuildingId);
+		return get(buildingStateStore).data[buildingId as BuildingId];
 	}
 
 	function getBuildingInteraction(id: string): BuildingInteraction | undefined {
@@ -315,11 +315,11 @@ function createBuildingStore() {
 
 	// GetAll functions
 	function getAllBuildings(): Building[] {
-		return getAllBuildings();
+		return Object.values(get(buildingStore).data);
 	}
 
 	function getAllBuildingItems(): BuildingItem[] {
-		return getAllBuildingItems();
+		return Object.values(get(buildingItemStore).data);
 	}
 
 	function getAllBuildingStates(): Record<BuildingId, BuildingState[]> {
@@ -327,7 +327,7 @@ function createBuildingStore() {
 	}
 
 	function getAllBuildingInteractions(): BuildingInteraction[] {
-		return getAllBuildingInteractions();
+		return Object.values(get(buildingInteractionStore).data);
 	}
 
 	function getAllBuildingInteractionActions(): Record<BuildingInteractionId, BuildingInteractionAction[]> {
@@ -335,19 +335,19 @@ function createBuildingStore() {
 	}
 
 	function getAllConditions(): Condition[] {
-		return getAllConditions();
+		return Object.values(get(conditionStore).data);
 	}
 
 	function getAllConditionFulfillments(): ConditionFulfillment[] {
-		return getAllConditionFulfillments();
+		return Object.values(get(conditionFulfillmentStore).data);
 	}
 
 	function getAllBuildingConditions(): BuildingCondition[] {
-		return getAllBuildingConditions();
+		return Object.values(get(buildingConditionStore).data);
 	}
 
 	function getAllConditionEffects(): ConditionEffect[] {
-		return getAllConditionEffects();
+		return Object.values(get(conditionEffectStore).data);
 	}
 
 	const admin = {
