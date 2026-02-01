@@ -195,6 +195,25 @@ function createItemStore() {
 		itemInteractionDialogStore.set(undefined);
 	}
 
+	// Getter functions
+	function getItem(id: ItemId): Item | undefined {
+		return get(itemStore).data[id];
+	}
+
+	function getItemStates(itemId: ItemId): ItemState[] | undefined {
+		return get(itemStateStore).data[itemId];
+	}
+
+	function getItemInteraction(id: ItemInteractionId): ItemInteraction | undefined {
+		return get(itemInteractionStore).data[id];
+	}
+
+	function getItemInteractionActions(
+		itemInteractionId: ItemInteractionId
+	): ItemInteractionAction[] | undefined {
+		return get(itemInteractionActionStore).data[itemInteractionId];
+	}
+
 	const admin = {
 		itemUiStore: itemUiStore as Readable<{ showBodyPreview: boolean }>,
 
@@ -489,6 +508,10 @@ function createItemStore() {
 		closeStateDialog,
 		openItemInteractionDialog,
 		closeItemInteractionDialog,
+		getItem,
+		getItemStates,
+		getItemInteraction,
+		getItemInteractionActions,
 		admin,
 	};
 }

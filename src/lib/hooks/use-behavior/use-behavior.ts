@@ -192,6 +192,27 @@ function createBehaviorStore() {
 		conditionBehaviorDialogStore.set(undefined);
 	}
 
+	// Getter functions
+	function getBehaviorPriority(id: BehaviorPriorityId): BehaviorPriority | undefined {
+		return get(behaviorPriorityStore).data[id];
+	}
+
+	function getNeedBehavior(id: NeedBehaviorId): NeedBehavior | undefined {
+		return get(needBehaviorStore).data[id];
+	}
+
+	function getNeedBehaviorAction(id: NeedBehaviorActionId): NeedBehaviorAction | undefined {
+		return get(needBehaviorActionStore).data[id];
+	}
+
+	function getConditionBehavior(id: ConditionBehaviorId): ConditionBehavior | undefined {
+		return get(conditionBehaviorStore).data[id];
+	}
+
+	function getConditionBehaviorAction(id: ConditionBehaviorActionId): ConditionBehaviorAction | undefined {
+		return get(conditionBehaviorActionStore).data[id];
+	}
+
 	const admin = {
 		// BehaviorPriority CRUD
 		async createBehaviorPriority(scenarioId: ScenarioId, priority: Omit<BehaviorPriorityInsert, 'scenario_id'>) {
@@ -525,6 +546,11 @@ function createBehaviorStore() {
 		closeNeedBehaviorDialog,
 		openConditionBehaviorDialog,
 		closeConditionBehaviorDialog,
+		getBehaviorPriority,
+		getNeedBehavior,
+		getNeedBehaviorAction,
+		getConditionBehavior,
+		getConditionBehaviorAction,
 		getBehavior,
 		addBehavior,
 		removeBehavior,

@@ -1,7 +1,5 @@
 import { get } from 'svelte/store';
 import type {
-	NeedBehaviorId,
-	ConditionBehaviorId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
 	WorldBuildingId,
@@ -54,11 +52,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	// 1. 액션 시작 시점: target_selection_method에 따라 타겟 클리어 여부 결정
 	if (entity.actionStartTick === tick) {
-		if (
-			action.type === 'go' ||
-			action.type === 'interact' ||
-			action.type === 'fulfill'
-		) {
+		if (action.type === 'go' || action.type === 'interact' || action.type === 'fulfill') {
 			// search: 무조건 새로 탐색
 			if (action.target_selection_method === 'search') {
 				entity.currentTargetEntityId = undefined;

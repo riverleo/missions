@@ -274,6 +274,45 @@ function createBuildingStore() {
 		conditionDialogStore.set(undefined);
 	}
 
+	// Getter functions
+	function getBuilding(id: BuildingId): Building | undefined {
+		return get(buildingStore).data[id];
+	}
+
+	function getBuildingItem(id: BuildingItemId): BuildingItem | undefined {
+		return get(buildingItemStore).data[id];
+	}
+
+	function getBuildingStates(buildingId: BuildingId): BuildingState[] | undefined {
+		return get(buildingStateStore).data[buildingId];
+	}
+
+	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction | undefined {
+		return get(buildingInteractionStore).data[id];
+	}
+
+	function getBuildingInteractionActions(
+		buildingInteractionId: BuildingInteractionId
+	): BuildingInteractionAction[] | undefined {
+		return get(buildingInteractionActionStore).data[buildingInteractionId];
+	}
+
+	function getCondition(id: ConditionId): Condition | undefined {
+		return get(conditionStore).data[id];
+	}
+
+	function getConditionFulfillment(id: ConditionFulfillmentId): ConditionFulfillment | undefined {
+		return get(conditionFulfillmentStore).data[id];
+	}
+
+	function getBuildingCondition(id: BuildingConditionId): BuildingCondition | undefined {
+		return get(buildingConditionStore).data[id];
+	}
+
+	function getConditionEffect(id: ConditionEffectId): ConditionEffect | undefined {
+		return get(conditionEffectStore).data[id];
+	}
+
 	const admin = {
 		uiStore: uiStore as Readable<{ showBodyPreview: boolean }>,
 
@@ -849,6 +888,15 @@ function createBuildingStore() {
 		closeBuildingInteractionDialog,
 		openConditionDialog,
 		closeConditionDialog,
+		getBuilding,
+		getBuildingItem,
+		getBuildingStates,
+		getBuildingInteraction,
+		getBuildingInteractionActions,
+		getCondition,
+		getConditionFulfillment,
+		getBuildingCondition,
+		getConditionEffect,
 		admin,
 	};
 }

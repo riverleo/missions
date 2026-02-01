@@ -78,6 +78,37 @@ function createWorldStore() {
 		selectedEntityIdStore.update((state) => ({ ...state, entityId }));
 	}
 
+	// Getter functions
+	function getWorld(id: WorldId): World | undefined {
+		return get(worldStore).data[id];
+	}
+
+	function getWorldCharacter(id: WorldCharacterId): WorldCharacter | undefined {
+		return get(worldCharacterStore).data[id];
+	}
+
+	function getWorldCharacterNeed(id: WorldCharacterNeedId): WorldCharacterNeed | undefined {
+		return get(worldCharacterNeedStore).data[id];
+	}
+
+	function getWorldBuilding(id: WorldBuildingId): WorldBuilding | undefined {
+		return get(worldBuildingStore).data[id];
+	}
+
+	function getWorldBuildingCondition(
+		id: WorldBuildingConditionId
+	): WorldBuildingCondition | undefined {
+		return get(worldBuildingConditionStore).data[id];
+	}
+
+	function getWorldItem(id: WorldItemId): WorldItem | undefined {
+		return get(worldItemStore).data[id];
+	}
+
+	function getWorldTileMap(worldId: WorldId): WorldTileMap | undefined {
+		return get(worldTileMapStore).data[worldId];
+	}
+
 	async function fetch() {
 		if (!initialized) {
 			throw new Error('useWorld not initialized. Call init() first.');
@@ -241,6 +272,13 @@ function createWorldStore() {
 		init,
 		fetch,
 		setSelectedEntityId,
+		getWorld,
+		getWorldCharacter,
+		getWorldCharacterNeed,
+		getWorldBuilding,
+		getWorldBuildingCondition,
+		getWorldItem,
+		getWorldTileMap,
 	};
 }
 

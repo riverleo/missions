@@ -302,6 +302,45 @@ function createCharacterStore() {
 		needDialogStore.set(undefined);
 	}
 
+	// Getter functions
+	function getCharacter(id: CharacterId): Character | undefined {
+		return get(characterStore).data[id];
+	}
+
+	function getCharacterFaceStates(characterId: CharacterId): CharacterFaceState[] | undefined {
+		return get(characterFaceStateStore).data[characterId];
+	}
+
+	function getCharacterInteraction(id: CharacterInteractionId): CharacterInteraction | undefined {
+		return get(characterInteractionStore).data[id];
+	}
+
+	function getCharacterInteractionActions(
+		characterInteractionId: CharacterInteractionId
+	): CharacterInteractionAction[] | undefined {
+		return get(characterInteractionActionStore).data[characterInteractionId];
+	}
+
+	function getCharacterBody(id: CharacterBodyId): CharacterBody | undefined {
+		return get(characterBodyStore).data[id];
+	}
+
+	function getCharacterBodyStates(bodyId: CharacterBodyId): CharacterBodyState[] | undefined {
+		return get(characterBodyStateStore).data[bodyId];
+	}
+
+	function getNeed(id: NeedId): Need | undefined {
+		return get(needStore).data[id];
+	}
+
+	function getNeedFulfillment(id: NeedFulfillmentId): NeedFulfillment | undefined {
+		return get(needFulfillmentStore).data[id];
+	}
+
+	function getCharacterNeed(id: CharacterNeedId): CharacterNeed | undefined {
+		return get(characterNeedStore).data[id];
+	}
+
 	const admin = {
 		characterUiStore: characterUiStore as Readable<{
 			previewBodyStateType: CharacterBodyStateType;
@@ -916,6 +955,15 @@ function createCharacterStore() {
 		closeCharacterBodyDialog,
 		openNeedDialog,
 		closeNeedDialog,
+		getCharacter,
+		getCharacterFaceStates,
+		getCharacterInteraction,
+		getCharacterInteractionActions,
+		getCharacterBody,
+		getCharacterBodyStates,
+		getNeed,
+		getNeedFulfillment,
+		getCharacterNeed,
 		admin,
 	};
 }
