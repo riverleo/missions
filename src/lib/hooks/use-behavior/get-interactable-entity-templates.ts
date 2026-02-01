@@ -73,9 +73,9 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
  * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForInteract(action: BehaviorAction): EntityTemplate[] {
-	const { getBuildingInteraction, getAllBuildingInteractions, getAllBuildings, getAllConditionFulfillments, getBuilding, getConditionFulfillment } = useBuilding();
-	const { getAllItemInteractions, getItemInteraction, getAllItems, getItem } = useItem();
-	const { getCharacterInteraction, getAllCharacterInteractions, getAllCharacters, getAllNeedFulfillments, getCharacter, getNeedFulfillment } = useCharacter();
+	const { getBuildingInteraction, getAllBuildingInteractions } = useBuilding();
+	const { getAllItemInteractions, getItemInteraction } = useItem();
+	const { getCharacterInteraction, getAllCharacterInteractions } = useCharacter();
 
 	const interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[] = [];
 
@@ -121,16 +121,16 @@ function getInteractableTemplatesForFulfill(
 	action: BehaviorAction,
 	isNeedAction: boolean
 ): EntityTemplate[] {
-	const { getBuildingInteraction, getAllBuildingInteractions, getAllBuildings, getAllConditionFulfillments, getBuilding, getConditionFulfillment } = useBuilding();
-	const { getItemInteraction, getAllItemInteractions, getAllItems, getItem } = useItem();
-	const { getCharacterInteraction, getAllCharacterInteractions, getAllCharacters, getAllNeedFulfillments, getCharacter, getNeedFulfillment } = useCharacter();
+	const { getBuildingInteraction } = useBuilding();
+	const { getItemInteraction } = useItem();
+	const { getCharacterInteraction } = useCharacter();
 
 	// 1. Fulfillment 가져오기
 	let fulfillments: any[] = [];
 
 	if (isNeedAction) {
 		const needAction = action as NeedBehaviorAction;
-		const { getAllNeedFulfillments, getNeedFulfillment, getAllCharacterInteractions, getAllCharacters, getCharacter, getCharacterInteraction } = useCharacter();
+		const { getAllNeedFulfillments, getNeedFulfillment } = useCharacter();
 
 		if (needAction.need_fulfillment_id) {
 			// 명시적 fulfillment
@@ -142,7 +142,7 @@ function getInteractableTemplatesForFulfill(
 		}
 	} else {
 		const conditionAction = action as ConditionBehaviorAction;
-		const { getConditionFulfillment, getAllConditionFulfillments, getAllBuildingInteractions, getAllBuildings, getBuilding, getBuildingInteraction } = useBuilding();
+		const { getConditionFulfillment, getAllConditionFulfillments } = useBuilding();
 
 		if (conditionAction.condition_fulfillment_id) {
 			// 명시적 fulfillment
@@ -195,9 +195,9 @@ function getInteractableTemplatesForFulfill(
 function interactionsToTemplates(
 	interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[]
 ): EntityTemplate[] {
-	const { getBuilding, getAllBuildings, getAllBuildingInteractions, getAllConditionFulfillments, getBuildingInteraction, getConditionFulfillment } = useBuilding();
-	const { getAllItems, getItem, getAllItemInteractions, getItemInteraction } = useItem();
-	const { getAllCharacters, getCharacter, getAllCharacterInteractions, getAllNeedFulfillments, getCharacterInteraction, getNeedFulfillment } = useCharacter();
+	const { getBuilding, getAllBuildings } = useBuilding();
+	const { getAllItems, getItem } = useItem();
+	const { getAllCharacters, getCharacter } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
 	const templateMap = new Map<string, EntityTemplate>();
@@ -265,9 +265,9 @@ function getNextBehaviorAction(
  * 모든 엔티티 템플릿을 반환합니다.
  */
 function getAllEntityTemplates(): EntityTemplate[] {
-	const { getAllBuildings, getAllBuildingInteractions, getAllConditionFulfillments, getBuilding, getBuildingInteraction, getConditionFulfillment } = useBuilding();
-	const { getAllItems, getAllItemInteractions, getItem, getItemInteraction } = useItem();
-	const { getAllCharacters, getAllCharacterInteractions, getAllNeedFulfillments, getCharacter, getCharacterInteraction, getNeedFulfillment } = useCharacter();
+	const { getAllBuildings } = useBuilding();
+	const { getAllItems } = useItem();
+	const { getAllCharacters } = useCharacter();
 
 	const templates: EntityTemplate[] = [];
 

@@ -5,6 +5,7 @@
 	import { useCharacter } from '$lib/hooks/use-character';
 	import { useWorld } from '$lib/hooks/use-world';
 	import { useItem } from '$lib/hooks/use-item';
+	import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
 	interface Props {
 		entity: WorldCharacterEntity;
@@ -47,17 +48,19 @@
 	// InteractionAction의 아이템 transform 가져오기
 	const heldItemTransform = $derived.by(() => {
 		// InteractionAction이 없으면 기본값
-		if (!entity.currentInteractionActionId) {
+		if (!entity.currentInteractionTargetId) {
 			return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
 		}
 
-		console.log('[CharacterRenderer] Looking for InteractionAction:', entity.currentInteractionActionId);
+		// InteractionTargetId 파싱
+		const { interactionActionId } = InteractionIdUtils.parse(entity.currentInteractionTargetId);
+		console.log('[CharacterRenderer] Looking for InteractionAction:', interactionActionId);
 		console.log('[CharacterRenderer] ItemInteractionActionStore keys:', Object.keys($itemInteractionActionStore.data));
 
 		// ItemInteractionAction 조회
 		for (const [interactionId, actions] of Object.entries($itemInteractionActionStore.data)) {
 			console.log(`[CharacterRenderer] Checking interaction ${interactionId}, actions:`, actions.map(a => ({ id: a.id, offset_x: a.item_offset_x, offset_y: a.item_offset_y, scale: a.item_scale, rotation: a.item_rotation })));
-			const action = actions.find((a) => a.id === entity.currentInteractionActionId);
+			const action = actions.find((a) => a.id === interactionActionId);
 			if (action) {
 				console.log('[CharacterRenderer] Found action:', {
 					id: action.id,

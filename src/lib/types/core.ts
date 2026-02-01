@@ -25,6 +25,18 @@ import type {
 	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
+	BuildingInteractionId,
+	BuildingInteractionActionId,
+	ItemInteractionId,
+	ItemInteractionActionId,
+	CharacterInteractionId,
+	CharacterInteractionActionId,
+	BuildingInteraction,
+	ItemInteraction,
+	CharacterInteraction,
+	BuildingInteractionAction,
+	ItemInteractionAction,
+	CharacterInteractionAction,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -71,6 +83,21 @@ export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
 export type BehaviorTargetId =
 	| `need_${NeedBehaviorId}_${NeedBehaviorActionId}`
 	| `condition_${ConditionBehaviorId}_${ConditionBehaviorActionId}`;
+
+// Interaction types
+export type InteractionType = 'building' | 'item' | 'character';
+
+// Union types for interactions
+export type Interaction = BuildingInteraction | ItemInteraction | CharacterInteraction;
+export type InteractionId = BuildingInteractionId | ItemInteractionId | CharacterInteractionId;
+export type InteractionAction = BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction;
+export type InteractionActionId = BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId;
+
+// Runtime-only interaction target ID: "{interactionType}_{interactionId}_{interactionActionId}"
+export type InteractionTargetId =
+	| `building_${BuildingInteractionId}_${BuildingInteractionActionId}`
+	| `item_${ItemInteractionId}_${ItemInteractionActionId}`
+	| `character_${CharacterInteractionId}_${CharacterInteractionActionId}`;
 
 // ============================================================
 // Entity Types

@@ -18,21 +18,21 @@ export default function checkActionCompletion(
 	if (action.type === 'interact') {
 		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
 		if (!entity.currentTargetEntityId) {
-			return !entity.currentInteractionActionId;
+			return !entity.currentInteractionTargetId;
 		}
 
 		const targetEntity = entity.worldContext.entities[entity.currentTargetEntityId];
 		// 타겟 엔티티가 없으면: 이미 완료됨 (아이템을 주워서 엔티티 제거된 경우)
 		if (!targetEntity) {
-			return !entity.currentInteractionActionId;
+			return !entity.currentInteractionTargetId;
 		}
 
 		const distance = Math.hypot(targetEntity.x - entity.x, targetEntity.y - entity.y);
 		if (distance >= 50) return false; // 아직 도착하지 않음
 
 		// once_interaction_type: InteractionAction 체인이 완료되었는지 확인
-		// currentInteractionActionId가 undefined이면 체인 완료
-		return !entity.currentInteractionActionId;
+		// currentInteractionTargetId가 undefined이면 체인 완료
+		return !entity.currentInteractionTargetId;
 	}
 
 	// FULFILL: 욕구/컨디션 충족 여부 확인

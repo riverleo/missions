@@ -12,8 +12,6 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 		getAllNeedBehaviors,
 		getAllNeedBehaviorActions,
 		getAllConditionBehaviorActions,
-		needBehaviorActionStore,
-		conditionBehaviorActionStore,
 		behaviorPriorityStore,
 	} = useBehavior();
 
@@ -80,9 +78,7 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 	// 4. root action 찾기
 	const actions =
 		selected.type === 'need'
-			? getAllNeedBehaviorActions().filter(
-					(a) => a.behavior_id === selected.behaviorId && a.root
-				)
+			? getAllNeedBehaviorActions().filter((a) => a.behavior_id === selected.behaviorId && a.root)
 			: getAllConditionBehaviorActions().filter(
 					(a) => a.condition_behavior_id === selected.behaviorId && a.root
 				);

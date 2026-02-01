@@ -9,10 +9,8 @@ import type {
 	WorldCharacterNeed,
 	NeedId,
 	BehaviorTargetId,
+	InteractionTargetId,
 	EntityId,
-	BuildingInteractionActionId,
-	ItemInteractionActionId,
-	CharacterInteractionActionId,
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -37,10 +35,8 @@ export class WorldCharacterEntity extends Entity {
 	currentTargetEntityId = $state<EntityId | undefined>(undefined);
 	currentBehaviorTargetId = $state<BehaviorTargetId | undefined>(undefined);
 	behaviorActionStartTick = $state<number>(0);
-	currentInteractionActionId = $state<
-		BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId | undefined
-	>(undefined);
-	interactionActionStartTick = $state<number>(0);
+	currentInteractionTargetId = $state<InteractionTargetId | undefined>(undefined);
+	interactionTargetStartTick = $state<number>(0);
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);

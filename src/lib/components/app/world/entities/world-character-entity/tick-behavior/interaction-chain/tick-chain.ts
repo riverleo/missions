@@ -7,6 +7,7 @@ import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
 /**
  * InteractionAction 체인 실행 및 다음 액션으로 전환
@@ -21,35 +22,41 @@ export default function tickInteractionAction(
 	const { getItemInteractionActions } = useItem();
 	const { getCharacterInteractionActions } = useCharacter();
 
-	if (!entity.currentInteractionActionId) return false;
+	if (!entity.currentInteractionTargetId) return false;
+
+	// InteractionTargetId 파싱
+	const { type, interactionId, interactionActionId } = InteractionIdUtils.parse(
+		entity.currentInteractionTargetId
+	);
+
 	// 현재 InteractionAction 가져오기
 	let currentAction: any = undefined;
 	if (interaction.building_id !== undefined) {
 		const actions = getBuildingInteractionActions(interaction.id);
 		if (actions) {
-			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+			currentAction = actions.find((a) => a.id === interactionActionId);
 		}
 	} else if (interaction.item_id !== undefined) {
 		const actions = getItemInteractionActions(interaction.id);
 		if (actions) {
-			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+			currentAction = actions.find((a) => a.id === interactionActionId);
 		}
 	} else if (interaction.target_character_id !== undefined) {
 		const actions =
 			getCharacterInteractionActions(interaction.id);
 		if (actions) {
-			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
+			currentAction = actions.find((a) => a.id === interactionActionId);
 		}
 	}
 
 	if (!currentAction) {
-		console.error('CurrentInteractionAction not found:', entity.currentInteractionActionId);
-		entity.currentInteractionActionId = undefined;
+		console.error('CurrentInteractionAction not found:', entity.currentInteractionTargetId);
+		entity.currentInteractionTargetId = undefined;
 		return true;
 	}
 
 	// duration_ticks 경과 확인
-	const elapsed = currentTick - entity.interactionActionStartTick;
+	const elapsed = currentTick - entity.interactionTargetStartTick;
 	if (elapsed < currentAction.duration_ticks) {
 		return false; // 아직 실행 중
 	}
@@ -61,8 +68,12 @@ export default function tickInteractionAction(
 		currentAction.next_character_interaction_action_id;
 
 	if (nextActionId) {
-		entity.currentInteractionActionId = nextActionId;
-		entity.interactionActionStartTick = currentTick;
+		entity.currentInteractionTargetId = InteractionIdUtils.create(
+			type,
+			interactionId as any,
+			nextActionId
+		);
+		entity.interactionTargetStartTick = currentTick;
 		return false; // 체인 계속 진행
 	}
 

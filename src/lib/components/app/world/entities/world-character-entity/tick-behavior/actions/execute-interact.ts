@@ -4,6 +4,7 @@ import type {
 	CharacterInteractionId,
 	WorldItemId,
 	NeedFulfillmentId,
+	InteractionType,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
@@ -12,6 +13,7 @@ import { useCharacter } from '$lib/hooks/use-character';
 import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import startInteractionChain from '../interaction-chain/start-chain';
 import tickInteractionAction from '../interaction-chain/tick-chain';
 
@@ -145,23 +147,33 @@ export default function executeInteractAction(
 	// 4. InteractionAction 가져오기 및 실행
 	let interactionCompleted = false;
 	if (interaction) {
-		// InteractionAction 가져오기
+		// Interaction 타입 판별
+		let interactionType: InteractionType;
 		let interactionActions: any[] = [];
 		if (interaction.building_id !== undefined) {
+			interactionType = 'building';
 			interactionActions = getBuildingInteractionActions(interaction.id) || [];
 		} else if (interaction.item_id !== undefined) {
+			interactionType = 'item';
 			interactionActions = getItemInteractionActions(interaction.id) || [];
 		} else if (interaction.target_character_id !== undefined) {
+			interactionType = 'character';
 			interactionActions = getCharacterInteractionActions(interaction.id) || [];
+		} else {
+			return;
 		}
 
 		if (interactionActions.length > 0) {
 			// InteractionAction이 있으면 첫 번째 것 사용
-			if (!entity.currentInteractionActionId) {
+			if (!entity.currentInteractionTargetId) {
 				const firstAction = interactionActions[0];
-				entity.currentInteractionActionId = firstAction.id;
-				entity.interactionActionStartTick = currentTick;
-				console.log('[executeInteract] Set currentInteractionActionId:', firstAction.id);
+				entity.currentInteractionTargetId = InteractionIdUtils.create(
+					interactionType,
+					interaction.id as any,
+					firstAction.id
+				);
+				entity.interactionTargetStartTick = currentTick;
+				console.log('[executeInteract] Set currentInteractionTargetId:', entity.currentInteractionTargetId);
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (interactType === 'item_pick') {
@@ -204,9 +216,10 @@ export default function executeInteractAction(
 			}
 
 			// duration_ticks 확인
-			const currentAction = interactionActions.find(a => a.id === entity.currentInteractionActionId);
+			const { interactionActionId } = InteractionIdUtils.parse(entity.currentInteractionTargetId);
+			const currentAction = interactionActions.find(a => a.id === interactionActionId);
 			if (currentAction && currentAction.duration_ticks) {
-				const elapsed = currentTick - entity.interactionActionStartTick;
+				const elapsed = currentTick - entity.interactionTargetStartTick;
 				console.log('[executeInteract] Checking duration:', elapsed, '/', currentAction.duration_ticks);
 				if (elapsed < currentAction.duration_ticks) {
 					return;
@@ -377,7 +390,7 @@ export default function executeInteractAction(
 	}
 
 	// InteractionAction 완료: 상태 초기화
-	console.log('[executeInteract] Clearing currentInteractionActionId');
-	entity.currentInteractionActionId = undefined;
-	entity.interactionActionStartTick = 0;
+	console.log('[executeInteract] Clearing currentInteractionTargetId');
+	entity.currentInteractionTargetId = undefined;
+	entity.interactionTargetStartTick = 0;
 }
