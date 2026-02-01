@@ -100,7 +100,10 @@ export default function searchTargetAndSetPath(
 		action.target_selection_method === 'search_or_continue'
 	) {
 		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
-		const templates = getInteractableEntityTemplates(action);
+		const templates =
+			'need_id' in action
+				? getInteractableEntityTemplates(action)
+				: getInteractableEntityTemplates(action);
 
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));

@@ -35,39 +35,57 @@ import { useBehavior } from '../use-behavior';
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
 export function getInteractableEntityTemplates(
+	behaviorAction: NeedBehaviorAction
+): (Building | Character | Item | Tile)[];
+export function getInteractableEntityTemplates(
+	behaviorAction: ConditionBehaviorAction
+): (Building | Character | Item | Tile)[];
+export function getInteractableEntityTemplates(
 	behaviorAction: NeedBehaviorAction | ConditionBehaviorAction
 ): (Building | Character | Item | Tile)[] {
-	// NeedBehaviorAction인지 확인
-	const isNeedAction = 'need_id' in behaviorAction;
-
 	if (behaviorAction.type === 'go') {
 		// go 타입: search 모드일 때만 대상 반환
 		if (behaviorAction.target_selection_method !== 'search') {
 			return [];
 		}
 
-		// 다음 액션 조회
-		const nextAction = getNextBehaviorAction(behaviorAction, isNeedAction);
-		if (nextAction?.type === 'interact') {
-			// INTERACT 다음에 FULFILL이 있는지 확인
-			const nextNextAction = getNextBehaviorAction(nextAction, isNeedAction);
-			if (nextNextAction?.type === 'fulfill') {
-				// INTERACT -> FULFILL 체인: FULFILL의 조건을 사용
-				return getInteractableTemplatesForFulfill(nextNextAction, isNeedAction);
+		// 다음 액션 조회 (type narrowing 사용)
+		if ('need_id' in behaviorAction) {
+			const nextAction = getNextBehaviorAction(behaviorAction);
+			if (nextAction?.type === 'interact') {
+				const nextNextAction = getNextBehaviorAction(nextAction);
+				if (nextNextAction?.type === 'fulfill') {
+					return getInteractableTemplatesForFulfill(nextNextAction);
+				}
+				return getInteractableTemplatesForInteract(nextAction);
+			} else if (nextAction?.type === 'fulfill') {
+				return getInteractableTemplatesForFulfill(nextAction);
 			}
-			return getInteractableTemplatesForInteract(nextAction);
-		} else if (nextAction?.type === 'fulfill') {
-			return getInteractableTemplatesForFulfill(nextAction, isNeedAction);
 		} else {
-			// next가 idle이거나 없으면: 모든 엔티티 반환
-			return getAllEntityTemplates();
+			const nextAction = getNextBehaviorAction(behaviorAction);
+			if (nextAction?.type === 'interact') {
+				const nextNextAction = getNextBehaviorAction(nextAction);
+				if (nextNextAction?.type === 'fulfill') {
+					return getInteractableTemplatesForFulfill(nextNextAction);
+				}
+				return getInteractableTemplatesForInteract(nextAction);
+			} else if (nextAction?.type === 'fulfill') {
+				return getInteractableTemplatesForFulfill(nextAction);
+			}
 		}
+
+		// next가 idle이거나 없으면: 모든 엔티티 반환
+		return getAllEntityTemplates();
 	} else if (behaviorAction.type === 'interact') {
 		// interact 타입: Interaction 직접 참조
 		return getInteractableTemplatesForInteract(behaviorAction);
 	} else if (behaviorAction.type === 'fulfill') {
 		// fulfill 타입: Fulfillment를 통해 Interaction 참조
-		return getInteractableTemplatesForFulfill(behaviorAction, isNeedAction);
+		if ('need_id' in behaviorAction) {
+			return getInteractableTemplatesForFulfill(behaviorAction);
+		} else {
+			return getInteractableTemplatesForFulfill(behaviorAction);
+		}
 	}
 
 	return [];
@@ -124,8 +142,13 @@ function getInteractableTemplatesForInteract(
  * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForFulfill(
-	action: NeedBehaviorAction | ConditionBehaviorAction,
-	isNeedAction: boolean
+	action: NeedBehaviorAction
+): (Building | Character | Item | Tile)[];
+function getInteractableTemplatesForFulfill(
+	action: ConditionBehaviorAction
+): (Building | Character | Item | Tile)[];
+function getInteractableTemplatesForFulfill(
+	action: NeedBehaviorAction | ConditionBehaviorAction
 ): (Building | Character | Item | Tile)[] {
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
@@ -134,8 +157,8 @@ function getInteractableTemplatesForFulfill(
 	// 1. Fulfillment 가져오기
 	let fulfillments: any[] = [];
 
-	if (isNeedAction) {
-		const needAction = action as NeedBehaviorAction;
+	if ('need_id' in action) {
+		const needAction = action;
 		const { getAllNeedFulfillments, getNeedFulfillment } = useCharacter();
 
 		if (needAction.need_fulfillment_id) {
@@ -147,7 +170,7 @@ function getInteractableTemplatesForFulfill(
 			fulfillments = getAllNeedFulfillments().filter((f) => f.need_id === needAction.need_id);
 		}
 	} else {
-		const conditionAction = action as ConditionBehaviorAction;
+		const conditionAction = action;
 		const { getConditionFulfillment, getAllConditionFulfillments } = useBuilding();
 
 		if (conditionAction.condition_fulfillment_id) {
@@ -248,18 +271,21 @@ function interactionsToTemplates(
 /**
  * 다음 액션을 조회합니다.
  */
+function getNextBehaviorAction(action: NeedBehaviorAction): NeedBehaviorAction | undefined;
 function getNextBehaviorAction(
-	action: NeedBehaviorAction | ConditionBehaviorAction,
-	isNeedAction: boolean
+	action: ConditionBehaviorAction
+): ConditionBehaviorAction | undefined;
+function getNextBehaviorAction(
+	action: NeedBehaviorAction | ConditionBehaviorAction
 ): (NeedBehaviorAction | ConditionBehaviorAction) | undefined {
 	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
 
-	if (isNeedAction) {
-		const needAction = action as NeedBehaviorAction;
+	if ('need_id' in action) {
+		const needAction = action;
 		if (!needAction.next_need_behavior_action_id) return undefined;
 		return getNeedBehaviorAction(needAction.next_need_behavior_action_id as NeedBehaviorActionId);
 	} else {
-		const conditionAction = action as ConditionBehaviorAction;
+		const conditionAction = action;
 		if (!conditionAction.next_condition_behavior_action_id) return undefined;
 		return getConditionBehaviorAction(
 			conditionAction.next_condition_behavior_action_id as ConditionBehaviorActionId
