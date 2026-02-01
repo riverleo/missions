@@ -1,5 +1,4 @@
 import Matter from 'matter-js';
-import { get } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	WorldBuildingId,
@@ -29,8 +28,8 @@ export class WorldBuildingEntity extends Entity {
 		super(worldContext, 'building', worldId, worldBuildingId);
 
 		// 스토어에서 데이터 조회
-		const { worldBuildingStore, worldBuildingConditionStore } = useWorld();
-		const worldBuilding = get(worldBuildingStore).data[worldBuildingId];
+		const { worldBuildingStore, worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const worldBuilding = getWorldBuilding(worldBuildingId);
 		const building = this.building;
 
 		if (!worldBuilding) {
@@ -38,7 +37,7 @@ export class WorldBuildingEntity extends Entity {
 		}
 
 		// conditions 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
-		const buildingConditions = Object.values(get(worldBuildingConditionStore).data).filter(
+		const buildingConditions = getAllWorldBuildingConditions().filter(
 			(condition) => condition.world_building_id === worldBuildingId
 		);
 		this.worldBuildingConditions = {};
@@ -67,13 +66,13 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	get building(): Building {
-		const { worldBuildingStore } = useWorld();
-		const { buildingStore } = useBuilding();
+		const { worldBuildingStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const { buildingStore, getBuilding } = useBuilding();
 
-		const worldBuilding = get(worldBuildingStore).data[this.instanceId];
+		const worldBuilding = getWorldBuilding(this.instanceId);
 		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
 
-		const building = get(buildingStore).data[worldBuilding.building_id];
+		const building = getBuilding(worldBuilding.building_id);
 		if (!building) throw new Error(`Building not found for id ${worldBuilding.building_id}`);
 
 		return building;
@@ -82,7 +81,7 @@ export class WorldBuildingEntity extends Entity {
 	save(): void {
 		// 건물은 static이므로 위치가 변경되지 않음
 		// conditions 저장
-		const { worldBuildingConditionStore } = useWorld();
+		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
 		worldBuildingConditionStore.update((state) =>
 			produce(state, (draft) => {
 				for (const condition of Object.values(this.worldBuildingConditions)) {

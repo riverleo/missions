@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type { TileId, WorldId, WorldTileMap, WorldTileMapInsert, TileCellKey } from '$lib/types';
@@ -13,7 +12,7 @@ export async function createWorldTileMap(
 		data?: WorldTileMapInsert['data'];
 	}
 ) {
-	const { worldTileMapStore } = useWorld();
+	const { worldTileMapStore, getWorldTileMap } = useWorld();
 	const isTestWorld = insert.world_id === TEST_WORLD_ID;
 
 	let worldTileMap: WorldTileMap;
@@ -54,7 +53,7 @@ export async function createWorldTileMap(
 }
 
 export async function deleteWorldTileMap(worldId: WorldId) {
-	const { worldTileMapStore } = useWorld();
+	const { worldTileMapStore, getWorldTileMap } = useWorld();
 	const isTestWorld = worldId === TEST_WORLD_ID;
 
 	// 프로덕션 환경이면 서버에서 soft delete
@@ -83,9 +82,9 @@ export function createTilesInWorldTileMap(
 	worldContext: WorldContext,
 	tiles: Record<TileCellKey, TileId>
 ) {
-	const { worldTileMapStore } = useWorld();
+	const { worldTileMapStore, getWorldTileMap } = useWorld();
 
-	const worldTileMap = get(worldTileMapStore).data[worldContext.worldId];
+	const worldTileMap = getWorldTileMap(worldContext.worldId);
 
 	// WorldTileMap이 없으면 에러
 	if (!worldTileMap) {
@@ -127,7 +126,7 @@ export function createTilesInWorldTileMap(
 }
 
 export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileCellKey: TileCellKey) {
-	const { worldTileMapStore } = useWorld();
+	const { worldTileMapStore, getWorldTileMap } = useWorld();
 
 	// 엔티티 제거
 	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);

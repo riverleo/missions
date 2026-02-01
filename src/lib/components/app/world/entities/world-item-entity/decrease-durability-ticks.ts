@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type { WorldItemEntity } from './world-item-entity.svelte';
 import type { WorldCharacterEntity } from '../world-character-entity';
 import { useWorld } from '$lib/hooks/use-world';
@@ -10,8 +9,8 @@ export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 
 		// durability가 0이 되면 아이템 삭제
 		if (entity.durabilityTicks === 0) {
-			const { worldItemStore } = useWorld();
-			const worldItem = get(worldItemStore).data[entity.instanceId];
+			const { worldItemStore, getWorldItem } = useWorld();
+			const worldItem = getWorldItem(entity.instanceId);
 
 			// 캐릭터가 들고 있다면 heldWorldItemIds에서 제거
 			if (worldItem?.world_character_id) {

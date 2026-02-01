@@ -16,12 +16,10 @@ import type {
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
-import { useBehavior } from '$lib/hooks/use-behavior';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import type { WorldCharacterEntityDirection } from './index';
@@ -36,9 +34,9 @@ export class WorldCharacterEntity extends Entity {
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemIds = $state<WorldItemId[]>([]);
 	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
-	currentBehaviorId = $state<BehaviorTargetId | undefined>(undefined);
 	currentTargetEntityId = $state<EntityId | undefined>(undefined);
-	actionStartTick = $state<number>(0);
+	currentBehaviorTargetId = $state<BehaviorTargetId | undefined>(undefined);
+	behaviorActionStartTick = $state<number>(0);
 	currentInteractionActionId = $state<
 		BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId | undefined
 	>(undefined);
@@ -51,8 +49,8 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		const { worldCharacterStore, worldCharacterNeedStore, worldItemStore } = useWorld();
-		const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
+		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds, worldCharacterStore, worldCharacterNeedStore, worldItemStore } = useWorld();
+		const worldCharacter = getWorldCharacter(worldCharacterId);
 		const characterBody = this.characterBody;
 
 		if (!worldCharacter) {
@@ -62,12 +60,12 @@ export class WorldCharacterEntity extends Entity {
 		}
 
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
-		this.heldWorldItemIds = Object.values(get(worldItemStore).data)
+		this.heldWorldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
 			.map((item) => item.id);
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
-		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
+		const characterNeeds = getAllWorldCharacterNeeds().filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
 		this.worldCharacterNeeds = {};
@@ -95,10 +93,10 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	get characterBody(): CharacterBody {
-		const { worldCharacterStore } = useWorld();
+		const { worldCharacterStore, getAllWorldCharacterNeeds, getAllWorldItems, getWorldCharacter } = useWorld();
 		const { characterStore, characterBodyStore } = useCharacter();
 
-		const worldCharacter = get(worldCharacterStore).data[this.instanceId];
+		const worldCharacter = getWorldCharacter(this.instanceId);
 		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
 
 		const characterStoreData = get(characterStore).data;
@@ -116,7 +114,7 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
+		const { worldCharacterStore, worldCharacterNeedStore, getAllWorldCharacterNeeds, getAllWorldItems, getWorldCharacter } = useWorld();
 		const store = get(worldCharacterStore);
 		const worldCharacter = store.data[this.instanceId];
 

@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -25,9 +24,9 @@ export default function executeFulfillAction(
 	action: any,
 	currentTick: number
 ): void {
-	const { getBuildingInteraction, getBuildingInteractionActions } = useBuilding();
-	const { getItem, getItemInteraction, getItemInteractionActions, itemInteractionStore } = useItem();
-	const { getCharacterInteraction, getCharacterInteractionActions, getNeedFulfillment, needFulfillmentStore } =
+	const { getBuildingInteraction, getBuildingInteractionActions, getConditionFulfillment, getAllConditionFulfillments } = useBuilding();
+	const { getItem, getItemInteraction, getItemInteractionActions, getAllItemInteractions, itemInteractionStore } = useItem();
+	const { getCharacterInteraction, getCharacterInteractionActions, getNeedFulfillment, getAllNeedFulfillments, needFulfillmentStore } =
 		useCharacter();
 	const { getWorldItem, worldItemStore } = useWorld();
 
@@ -39,21 +38,20 @@ export default function executeFulfillAction(
 			fulfillment = getNeedFulfillment(action.need_fulfillment_id);
 		} else {
 			// 자동 탐색: need_id로 필터링
-			const fulfillments = Object.values(get(needFulfillmentStore).data).filter(
+			const fulfillments = getAllNeedFulfillments().filter(
 				(f) => f.need_id === action.need_id
 			);
 			fulfillment = fulfillments[0];
 		}
 	} else {
-		const { conditionFulfillmentStore } = useBuilding();
 		if (action.condition_fulfillment_id) {
 			fulfillment =
-				get(conditionFulfillmentStore).data[
+				getConditionFulfillment(
 					action.condition_fulfillment_id as ConditionFulfillmentId
-				];
+				);
 		} else {
 			// 자동 탐색: condition_id로 필터링
-			const fulfillments = Object.values(get(conditionFulfillmentStore).data).filter(
+			const fulfillments = getAllConditionFulfillments().filter(
 				(f) => f.condition_id === action.condition_id
 			);
 			fulfillment = fulfillments[0];
@@ -137,7 +135,7 @@ export default function executeFulfillAction(
 
 			if (item) {
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
-				const itemInteractions = Object.values(get(itemInteractionStore).data);
+				const itemInteractions = getAllItemInteractions();
 				interaction = itemInteractions.find((i) => i.item_id === item.id);
 				console.log('[executeFulfill] Found item interaction for auto type:', interaction?.id);
 			}

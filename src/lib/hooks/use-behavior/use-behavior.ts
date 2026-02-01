@@ -194,44 +194,44 @@ function createBehaviorStore() {
 
 	// Getter functions
 	function getBehaviorPriority(id: string): BehaviorPriority | undefined {
-		return get(behaviorPriorityStore).data[id as BehaviorPriorityId];
+		return getBehaviorPriority(id as BehaviorPriorityId);
 	}
 
 	function getNeedBehavior(id: string): NeedBehavior | undefined {
-		return get(needBehaviorStore).data[id as NeedBehaviorId];
+		return getNeedBehavior(id as NeedBehaviorId);
 	}
 
 	function getNeedBehaviorAction(id: string): NeedBehaviorAction | undefined {
-		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
+		return getNeedBehaviorAction(id as NeedBehaviorActionId);
 	}
 
 	function getConditionBehavior(id: string): ConditionBehavior | undefined {
-		return get(conditionBehaviorStore).data[id as ConditionBehaviorId];
+		return getConditionBehavior(id as ConditionBehaviorId);
 	}
 
 	function getConditionBehaviorAction(id: string): ConditionBehaviorAction | undefined {
-		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
+		return getConditionBehaviorAction(id as ConditionBehaviorActionId);
 	}
 
 	// GetAll functions
 	function getAllBehaviorPriorities(): BehaviorPriority[] {
-		return Object.values(get(behaviorPriorityStore).data);
+		return getAllBehaviorPriorities();
 	}
 
 	function getAllNeedBehaviors(): NeedBehavior[] {
-		return Object.values(get(needBehaviorStore).data);
+		return getAllNeedBehaviors();
 	}
 
 	function getAllNeedBehaviorActions(): NeedBehaviorAction[] {
-		return Object.values(get(needBehaviorActionStore).data);
+		return getAllNeedBehaviorActions();
 	}
 
 	function getAllConditionBehaviors(): ConditionBehavior[] {
-		return Object.values(get(conditionBehaviorStore).data);
+		return getAllConditionBehaviors();
 	}
 
 	function getAllConditionBehaviorActions(): ConditionBehaviorAction[] {
-		return Object.values(get(conditionBehaviorActionStore).data);
+		return getAllConditionBehaviorActions();
 	}
 
 	const admin = {
@@ -348,7 +348,7 @@ function createBehaviorStore() {
 		// NeedBehaviorAction CRUD
 		async createNeedBehaviorAction(scenarioId: ScenarioId, action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
-			const existingActions = Object.values(get(needBehaviorActionStore).data);
+			const existingActions = getAllNeedBehaviorActions();
 			const isFirstAction = !existingActions.some((a) => a.behavior_id === action.behavior_id);
 
 			const { data, error } = await supabase
@@ -456,7 +456,7 @@ function createBehaviorStore() {
 			action: Omit<ConditionBehaviorActionInsert, 'scenario_id'>
 		) {
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
-			const existingActions = Object.values(get(conditionBehaviorActionStore).data);
+			const existingActions = getAllConditionBehaviorActions();
 			const isFirstAction = !existingActions.some(
 				(a) => a.condition_behavior_id === action.condition_behavior_id
 			);

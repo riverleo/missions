@@ -30,8 +30,8 @@ export class PickupItemBehavior extends Behavior {
 		if (!this.targetWorldItemId) return;
 
 		// 대상 아이템 엔티티 찾기
-		const { worldItemStore } = this.worldHook;
-		const worldItem = get(worldItemStore).data[this.targetWorldItemId];
+		const { getWorldItem } = this.worldHook;
+		const worldItem = getWorldItem(this.targetWorldItemId);
 		if (!worldItem) {
 			this.targetWorldItemId = undefined;
 			return;
@@ -47,8 +47,8 @@ export class PickupItemBehavior extends Behavior {
 
 	onStart(): void {
 		// 가장 가까운 아이템 찾기
-		const { worldItemStore } = this.worldHook;
-		const items = Object.values(get(worldItemStore).data);
+		const { getAllWorldItems } = this.worldHook;
+		const items = getAllWorldItems();
 
 		if (items.length === 0) {
 			this.targetWorldItemId = undefined;

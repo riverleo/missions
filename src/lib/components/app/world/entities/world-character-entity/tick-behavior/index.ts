@@ -29,15 +29,15 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
 
 	// 현재 행동 액션이 없으면 새로운 행동 선택
-	if (!entity.currentBehaviorId) {
+	if (!entity.currentBehaviorTargetId) {
 		selectNewBehavior(entity, tick);
 		return;
 	}
 
 	// 현재 행동 액션 가져오기
-	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
+	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorTargetId);
 
-	const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
+	const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
 	const action =
 		type === 'need'
 			? getNeedBehaviorAction(behaviorActionId)
@@ -45,12 +45,12 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
-		entity.currentBehaviorId = undefined;
+		entity.currentBehaviorTargetId = undefined;
 		return;
 	}
 
 	// 1. 액션 시작 시점: target_selection_method에 따라 타겟 클리어 여부 결정
-	if (entity.actionStartTick === tick) {
+	if (entity.behaviorActionStartTick === tick) {
 		if (action.type === 'go' || action.type === 'interact' || action.type === 'fulfill') {
 			// search: 무조건 새로 탐색
 			if (action.target_selection_method === 'search') {

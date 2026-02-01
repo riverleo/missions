@@ -69,8 +69,8 @@ export class WorldContextBlueprint {
 		let cursorType: 'cell' | 'tile';
 
 		if (type === 'building') {
-			const { buildingStore } = useBuilding();
-			const building = get(buildingStore).data[id as BuildingId];
+			const { buildingStore, getBuilding } = useBuilding();
+			const building = getBuilding(id as BuildingId);
 
 			if (!building) {
 				return;
@@ -123,7 +123,7 @@ export class WorldContextBlueprint {
 		const { x, y } = current;
 
 		// 스토어 값들을 한 번만 조회
-		const { buildingStore } = useBuilding();
+		const { buildingStore, getBuilding } = useBuilding();
 		const { worldBuildingStore, worldTileMapStore } = useWorld();
 
 		const buildingStoreData = get(buildingStore).data;
@@ -448,8 +448,8 @@ export class WorldContextBlueprint {
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
 			const itemId = EntityIdUtils.template.id<ItemId>(entityTemplateId);
-			const { itemStore } = useItem();
-			const item = get(itemStore).data[itemId];
+			const { itemStore, getItem } = useItem();
+			const item = getItem(itemId);
 
 			this.context.createWorldItem({
 				item_id: itemId,

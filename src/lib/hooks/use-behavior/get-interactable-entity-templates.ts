@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
@@ -44,10 +43,10 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
 		}
 
 		// 다음 액션 조회
-		const nextAction = getNextAction(behaviorAction, isNeedAction);
+		const nextAction = getNextBehaviorAction(behaviorAction, isNeedAction);
 		if (nextAction?.type === 'interact') {
 			// INTERACT 다음에 FULFILL이 있는지 확인
-			const nextNextAction = getNextAction(nextAction, isNeedAction);
+			const nextNextAction = getNextBehaviorAction(nextAction, isNeedAction);
 			if (nextNextAction?.type === 'fulfill') {
 				// INTERACT -> FULFILL 체인: FULFILL의 조건을 사용
 				return getInteractableTemplatesForFulfill(nextNextAction, isNeedAction);
@@ -73,42 +72,39 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
 /**
  * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
-function getInteractableTemplatesForInteract(
-	action: BehaviorAction
-): EntityTemplate[] {
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
+function getInteractableTemplatesForInteract(action: BehaviorAction): EntityTemplate[] {
+	const { getBuildingInteraction, getAllBuildingInteractions, getAllBuildings, getAllConditionFulfillments, getBuilding, getConditionFulfillment } = useBuilding();
+	const { getAllItemInteractions, getItemInteraction, getAllItems, getItem } = useItem();
+	const { getCharacterInteraction, getAllCharacterInteractions, getAllCharacters, getAllNeedFulfillments, getCharacter, getNeedFulfillment } = useCharacter();
 
 	const interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[] = [];
 
 	// 1. Interaction 목록 가져오기
 	if (action.building_interaction_id) {
 		// 명시적 building interaction
-		const interaction =
-			get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+		const interaction = getBuildingInteraction(
+			action.building_interaction_id as BuildingInteractionId
+		);
 		if (interaction) interactions.push(interaction);
 	} else if (action.item_interaction_id) {
 		// 명시적 item interaction
-		const interaction =
-			get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+		const interaction = getItemInteraction(action.item_interaction_id as ItemInteractionId);
 		if (interaction) interactions.push(interaction);
 	} else if (action.character_interaction_id) {
 		// 명시적 character interaction
-		const interaction =
-			get(characterInteractionStore).data[
-				action.character_interaction_id as CharacterInteractionId
-			];
+		const interaction = getCharacterInteraction(
+			action.character_interaction_id as CharacterInteractionId
+		);
 		if (interaction) interactions.push(interaction);
 	} else {
 		// search: once_interaction_type이 있는 모든 Interactions
-		const buildingInteractions = Object.values(get(buildingInteractionStore).data).filter(
+		const buildingInteractions = getAllBuildingInteractions().filter(
 			(i) => i.once_interaction_type !== null
 		);
-		const itemInteractions = Object.values(get(itemInteractionStore).data).filter(
+		const itemInteractions = getAllItemInteractions().filter(
 			(i) => i.once_interaction_type !== null
 		);
-		const characterInteractions = Object.values(get(characterInteractionStore).data).filter(
+		const characterInteractions = getAllCharacterInteractions().filter(
 			(i) => i.once_interaction_type !== null
 		);
 		interactions.push(...buildingInteractions, ...itemInteractions, ...characterInteractions);
@@ -125,42 +121,38 @@ function getInteractableTemplatesForFulfill(
 	action: BehaviorAction,
 	isNeedAction: boolean
 ): EntityTemplate[] {
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
+	const { getBuildingInteraction, getAllBuildingInteractions, getAllBuildings, getAllConditionFulfillments, getBuilding, getConditionFulfillment } = useBuilding();
+	const { getItemInteraction, getAllItemInteractions, getAllItems, getItem } = useItem();
+	const { getCharacterInteraction, getAllCharacterInteractions, getAllCharacters, getAllNeedFulfillments, getCharacter, getNeedFulfillment } = useCharacter();
 
 	// 1. Fulfillment 가져오기
 	let fulfillments: any[] = [];
 
 	if (isNeedAction) {
 		const needAction = action as NeedBehaviorAction;
-		const { needFulfillmentStore } = useCharacter();
+		const { getAllNeedFulfillments, getNeedFulfillment, getAllCharacterInteractions, getAllCharacters, getCharacter, getCharacterInteraction } = useCharacter();
 
 		if (needAction.need_fulfillment_id) {
 			// 명시적 fulfillment
-			const fulfillment =
-				get(needFulfillmentStore).data[needAction.need_fulfillment_id as NeedFulfillmentId];
+			const fulfillment = getNeedFulfillment(needAction.need_fulfillment_id as NeedFulfillmentId);
 			if (fulfillment) fulfillments = [fulfillment];
 		} else {
 			// 자동 탐색: need_id로 필터링
-			fulfillments = Object.values(get(needFulfillmentStore).data).filter(
-				(f) => f.need_id === needAction.need_id
-			);
+			fulfillments = getAllNeedFulfillments().filter((f) => f.need_id === needAction.need_id);
 		}
 	} else {
 		const conditionAction = action as ConditionBehaviorAction;
-		const { conditionFulfillmentStore } = useBuilding();
+		const { getConditionFulfillment, getAllConditionFulfillments, getAllBuildingInteractions, getAllBuildings, getBuilding, getBuildingInteraction } = useBuilding();
 
 		if (conditionAction.condition_fulfillment_id) {
 			// 명시적 fulfillment
-			const fulfillment =
-				get(conditionFulfillmentStore).data[
-					conditionAction.condition_fulfillment_id as ConditionFulfillmentId
-				];
+			const fulfillment = getConditionFulfillment(
+				conditionAction.condition_fulfillment_id as ConditionFulfillmentId
+			);
 			if (fulfillment) fulfillments = [fulfillment];
 		} else {
 			// 자동 탐색: condition_id로 필터링
-			fulfillments = Object.values(get(conditionFulfillmentStore).data).filter(
+			fulfillments = getAllConditionFulfillments().filter(
 				(f) => f.condition_id === conditionAction.condition_id
 			);
 		}
@@ -171,24 +163,21 @@ function getInteractableTemplatesForFulfill(
 
 	for (const fulfillment of fulfillments) {
 		if (fulfillment.building_interaction_id) {
-			const interaction =
-				get(buildingInteractionStore).data[
-					fulfillment.building_interaction_id as BuildingInteractionId
-				];
+			const interaction = getBuildingInteraction(
+				fulfillment.building_interaction_id as BuildingInteractionId
+			);
 			if (interaction && interaction.repeat_interaction_type) {
 				interactions.push(interaction);
 			}
 		} else if (fulfillment.item_interaction_id) {
-			const interaction =
-				get(itemInteractionStore).data[fulfillment.item_interaction_id as ItemInteractionId];
+			const interaction = getItemInteraction(fulfillment.item_interaction_id as ItemInteractionId);
 			if (interaction && interaction.repeat_interaction_type) {
 				interactions.push(interaction);
 			}
 		} else if (fulfillment.character_interaction_id) {
-			const interaction =
-				get(characterInteractionStore).data[
-					fulfillment.character_interaction_id as CharacterInteractionId
-				];
+			const interaction = getCharacterInteraction(
+				fulfillment.character_interaction_id as CharacterInteractionId
+			);
 			if (interaction && interaction.repeat_interaction_type) {
 				interactions.push(interaction);
 			}
@@ -206,9 +195,9 @@ function getInteractableTemplatesForFulfill(
 function interactionsToTemplates(
 	interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[]
 ): EntityTemplate[] {
-	const { buildingStore } = useBuilding();
-	const { itemStore } = useItem();
-	const { characterStore } = useCharacter();
+	const { getBuilding, getAllBuildings, getAllBuildingInteractions, getAllConditionFulfillments, getBuildingInteraction, getConditionFulfillment } = useBuilding();
+	const { getAllItems, getItem, getAllItemInteractions, getItemInteraction } = useItem();
+	const { getAllCharacters, getCharacter, getAllCharacterInteractions, getAllNeedFulfillments, getCharacterInteraction, getNeedFulfillment } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
 	const templateMap = new Map<string, EntityTemplate>();
@@ -218,31 +207,31 @@ function interactionsToTemplates(
 			// BuildingInteraction
 			if (interaction.building_id) {
 				// 특정 건물
-				const building = get(buildingStore).data[interaction.building_id as BuildingId];
+				const building = getBuilding(interaction.building_id as BuildingId);
 				if (building) templateMap.set(building.id, building);
 			} else {
 				// 기본 인터랙션: 모든 건물
-				Object.values(get(buildingStore).data).forEach((b) => templateMap.set(b.id, b));
+				getAllBuildings().forEach((b) => templateMap.set(b.id, b));
 			}
 		} else if ('item_id' in interaction) {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
-				const item = get(itemStore).data[interaction.item_id as ItemId];
+				const item = getItem(interaction.item_id as ItemId);
 				if (item) templateMap.set(item.id, item);
 			} else {
 				// 기본 인터랙션: 모든 아이템
-				Object.values(get(itemStore).data).forEach((i) => templateMap.set(i.id, i));
+				getAllItems().forEach((i) => templateMap.set(i.id, i));
 			}
 		} else if ('target_character_id' in interaction) {
 			// CharacterInteraction
 			if (interaction.target_character_id) {
 				// 특정 캐릭터
-				const character = get(characterStore).data[interaction.target_character_id as CharacterId];
+				const character = getCharacter(interaction.target_character_id as CharacterId);
 				if (character) templateMap.set(character.id, character);
 			} else {
 				// 기본 인터랙션: 모든 캐릭터
-				Object.values(get(characterStore).data).forEach((c) => templateMap.set(c.id, c));
+				getAllCharacters().forEach((c) => templateMap.set(c.id, c));
 			}
 		}
 	}
@@ -253,24 +242,22 @@ function interactionsToTemplates(
 /**
  * 다음 액션을 조회합니다.
  */
-function getNextAction(
+function getNextBehaviorAction(
 	action: BehaviorAction,
 	isNeedAction: boolean
 ): (NeedBehaviorAction | ConditionBehaviorAction) | undefined {
-	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
+	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
 
 	if (isNeedAction) {
 		const needAction = action as NeedBehaviorAction;
 		if (!needAction.next_need_behavior_action_id) return undefined;
-		return get(needBehaviorActionStore).data[
-			needAction.next_need_behavior_action_id as NeedBehaviorActionId
-		];
+		return getNeedBehaviorAction(needAction.next_need_behavior_action_id as NeedBehaviorActionId);
 	} else {
 		const conditionAction = action as ConditionBehaviorAction;
 		if (!conditionAction.next_condition_behavior_action_id) return undefined;
-		return get(conditionBehaviorActionStore).data[
+		return getConditionBehaviorAction(
 			conditionAction.next_condition_behavior_action_id as ConditionBehaviorActionId
-		];
+		);
 	}
 }
 
@@ -278,20 +265,20 @@ function getNextAction(
  * 모든 엔티티 템플릿을 반환합니다.
  */
 function getAllEntityTemplates(): EntityTemplate[] {
-	const { buildingStore } = useBuilding();
-	const { itemStore } = useItem();
-	const { characterStore } = useCharacter();
+	const { getAllBuildings, getAllBuildingInteractions, getAllConditionFulfillments, getBuilding, getBuildingInteraction, getConditionFulfillment } = useBuilding();
+	const { getAllItems, getAllItemInteractions, getItem, getItemInteraction } = useItem();
+	const { getAllCharacters, getAllCharacterInteractions, getAllNeedFulfillments, getCharacter, getCharacterInteraction, getNeedFulfillment } = useCharacter();
 
 	const templates: EntityTemplate[] = [];
 
 	// 모든 건물
-	templates.push(...Object.values(get(buildingStore).data));
+	templates.push(...getAllBuildings());
 
 	// 모든 아이템
-	templates.push(...Object.values(get(itemStore).data));
+	templates.push(...getAllItems());
 
 	// 모든 캐릭터
-	templates.push(...Object.values(get(characterStore).data));
+	templates.push(...getAllCharacters());
 
 	return templates;
 }

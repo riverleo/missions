@@ -10,6 +10,8 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 export default function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const {
 		getAllNeedBehaviors,
+		getAllNeedBehaviorActions,
+		getAllConditionBehaviorActions,
 		needBehaviorActionStore,
 		conditionBehaviorActionStore,
 		behaviorPriorityStore,
@@ -78,10 +80,10 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 	// 4. root action 찾기
 	const actions =
 		selected.type === 'need'
-			? Object.values(get(needBehaviorActionStore).data).filter(
+			? getAllNeedBehaviorActions().filter(
 					(a) => a.behavior_id === selected.behaviorId && a.root
 				)
-			: Object.values(get(conditionBehaviorActionStore).data).filter(
+			: getAllConditionBehaviorActions().filter(
 					(a) => a.condition_behavior_id === selected.behaviorId && a.root
 				);
 
@@ -92,10 +94,10 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 	}
 
 	// 5. currentBehaviorId 설정 및 시작 tick 기록
-	entity.currentBehaviorId = BehaviorIdUtils.create(
+	entity.currentBehaviorTargetId = BehaviorIdUtils.create(
 		selected.type,
 		selected.behaviorId,
 		rootAction.id
 	);
-	entity.actionStartTick = tick;
+	entity.behaviorActionStartTick = tick;
 }

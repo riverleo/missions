@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -25,7 +24,7 @@ export default function executeInteractAction(
 	currentTick: number
 ): void {
 	const { getBuildingInteraction, getBuildingInteractionActions } = useBuilding();
-	const { getItem, getItemInteraction, getItemInteractionActions, itemInteractionStore } = useItem();
+	const { getItem, getItemInteraction, getItemInteractionActions, getAllItemInteractions, itemInteractionStore } = useItem();
 	const { getCharacterInteraction, getCharacterInteractionActions, getNeedFulfillment } =
 		useCharacter();
 	const { getWorldItem, worldItemStore } = useWorld();
@@ -119,7 +118,7 @@ export default function executeInteractAction(
 
 			if (item) {
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
-				const itemInteractions = Object.values(get(itemInteractionStore).data);
+				const itemInteractions = getAllItemInteractions();
 				interaction = itemInteractions.find((i) => i.item_id === item.id);
 				console.log('[executeInteract] Found item interaction for auto type:', interaction?.id);
 			}

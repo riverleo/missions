@@ -25,8 +25,8 @@ export class WorldItemEntity extends Entity {
 		super(worldContext, 'item', worldId, worldItemId);
 
 		// 스토어에서 데이터 조회
-		const { worldItemStore } = this.worldHook;
-		const worldItem = get(worldItemStore).data[worldItemId];
+		const { getWorldItem, worldItemStore } = this.worldHook;
+		const worldItem = getWorldItem(worldItemId);
 		const item = this.item;
 
 		if (!worldItem) {
@@ -56,13 +56,13 @@ export class WorldItemEntity extends Entity {
 	}
 
 	get item(): Item {
-		const { worldItemStore } = this.worldHook;
-		const { itemStore } = this.itemHook;
+		const { getWorldItem, worldItemStore } = this.worldHook;
+		const { getItem, itemStore } = this.itemHook;
 
-		const worldItem = get(worldItemStore).data[this.instanceId];
+		const worldItem = getWorldItem(this.instanceId);
 		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
 
-		const item = get(itemStore).data[worldItem.item_id];
+		const item = getItem(worldItem.item_id);
 		if (!item) throw new Error(`Item not found for id ${worldItem.item_id}`);
 
 		return item;

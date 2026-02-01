@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
 import type { TileCellKey } from '$lib/types';
 import { useWorld } from '$lib/hooks/use-world';
@@ -8,22 +7,22 @@ import { WorldItemEntity } from '../entities/world-item-entity';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export function initializeEntities(worldContext: WorldContext) {
-	const { worldCharacterStore, worldBuildingStore, worldItemStore, worldTileMapStore } = useWorld();
+	const { worldTileMapStore, worldBuildingStore, worldCharacterStore, worldItemStore, getAllWorldBuildings, getAllWorldCharacters, getAllWorldItems, getWorldTileMap } = useWorld();
 
 	// 현재 worldId에 해당하는 데이터만 필터링
-	const characters = Object.values(get(worldCharacterStore).data).filter(
+	const characters = getAllWorldCharacters().filter(
 		(c) => c.world_id === worldContext.worldId
 	);
-	const buildings = Object.values(get(worldBuildingStore).data).filter(
+	const buildings = getAllWorldBuildings().filter(
 		(b) => b.world_id === worldContext.worldId
 	);
-	const items = Object.values(get(worldItemStore).data).filter(
+	const items = getAllWorldItems().filter(
 		(i) =>
 			i.world_id === worldContext.worldId &&
 			i.world_building_id === null &&
 			i.world_character_id === null
 	);
-	const worldTileMap = get(worldTileMapStore).data[worldContext.worldId];
+	const worldTileMap = getWorldTileMap(worldContext.worldId);
 
 	// 캐릭터 엔티티 생성
 	for (const character of characters) {

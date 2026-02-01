@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 
@@ -41,8 +40,8 @@ export default function checkActionCompletion(
 		const isNeedAction = 'need_id' in action;
 
 		if (isNeedAction) {
-			const { needBehaviorStore } = useBehavior();
-			const behavior = Object.values(get(needBehaviorStore).data).find(
+			const { getAllNeedBehaviors } = useBehavior();
+			const behavior = getAllNeedBehaviors().find(
 				(b) => b.need_id === action.need_id
 			);
 			if (!behavior) return false;
@@ -60,7 +59,7 @@ export default function checkActionCompletion(
 
 	// IDLE: idle_duration_ticks 경과 확인
 	if (action.type === 'idle') {
-		return currentTick - entity.actionStartTick >= action.idle_duration_ticks;
+		return currentTick - entity.behaviorActionStartTick >= action.idle_duration_ticks;
 	}
 
 	return false;

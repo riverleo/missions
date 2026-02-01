@@ -197,26 +197,26 @@ function createItemStore() {
 
 	// Getter functions
 	function getItem(id: string): Item | undefined {
-		return get(itemStore).data[id as ItemId];
+		return getItem(id as ItemId);
 	}
 
 	function getItemStates(itemId: string): ItemState[] | undefined {
-		return get(itemStateStore).data[itemId as ItemId];
+		return getItemStates(itemId as ItemId);
 	}
 
 	function getItemInteraction(id: string): ItemInteraction | undefined {
-		return get(itemInteractionStore).data[id as ItemInteractionId];
+		return getItemInteraction(id as ItemInteractionId);
 	}
 
 	function getItemInteractionActions(
 		itemInteractionId: string
 	): ItemInteractionAction[] | undefined {
-		return get(itemInteractionActionStore).data[itemInteractionId as ItemInteractionId];
+		return getItemInteractionActions(itemInteractionId as ItemInteractionId);
 	}
 
 	// GetAll functions
 	function getAllItems(): Item[] {
-		return Object.values(get(itemStore).data);
+		return getAllItems();
 	}
 
 	function getAllItemStates(): Record<ItemId, ItemState[]> {
@@ -224,7 +224,7 @@ function createItemStore() {
 	}
 
 	function getAllItemInteractions(): ItemInteraction[] {
-		return Object.values(get(itemInteractionStore).data);
+		return getAllItemInteractions();
 	}
 
 	function getAllItemInteractionActions(): Record<ItemInteractionId, ItemInteractionAction[]> {

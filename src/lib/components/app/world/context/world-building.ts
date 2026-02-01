@@ -32,7 +32,7 @@ export async function createWorldBuilding(
 	> &
 		Pick<WorldBuildingInsert, 'id' | 'created_at' | 'created_at_tick'>
 ) {
-	const { worldBuildingStore } = useWorld();
+	const { worldBuildingStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
@@ -47,9 +47,9 @@ export async function createWorldBuilding(
 	if (isTestWorld) {
 		// TEST 환경: 클라이언트에서 UUID 생성
 		const worldBuildingId = crypto.randomUUID() as WorldBuildingId;
-		const { worldBuildingConditionStore } = useWorld();
-		const { buildingConditionStore, conditionStore } = useBuilding();
-		const buildingConditions = Object.values(get(buildingConditionStore).data).filter(
+		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const { buildingConditionStore, conditionStore, getAllBuildingConditions } = useBuilding();
+		const buildingConditions = getAllBuildingConditions().filter(
 			(bc) => bc.building_id === insert.building_id
 		);
 		const conditions = get(conditionStore).data;
@@ -117,8 +117,8 @@ export async function createWorldBuilding(
 		const worldBuildingId = insertResult.id;
 
 		// WorldBuildingCondition insert
-		const { buildingConditionStore, conditionStore } = useBuilding();
-		const buildingConditions = Object.values(get(buildingConditionStore).data).filter(
+		const { buildingConditionStore, conditionStore, getAllBuildingConditions } = useBuilding();
+		const buildingConditions = getAllBuildingConditions().filter(
 			(bc) => bc.building_id === insert.building_id
 		);
 
@@ -173,8 +173,8 @@ export async function createWorldBuilding(
 
 	// TEST 환경에서는 스토어에서 conditions를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
 	if (isTestWorld) {
-		const { worldBuildingConditionStore } = useWorld();
-		const buildingConditions = Object.values(get(worldBuildingConditionStore).data).filter(
+		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const buildingConditions = getAllWorldBuildingConditions().filter(
 			(condition) => condition.world_building_id === worldBuilding.id
 		);
 		entity.worldBuildingConditions = {};
@@ -190,8 +190,8 @@ export async function deleteWorldBuilding(
 	worldBuildingId: WorldBuildingId,
 	worldContext?: WorldContext
 ) {
-	const { worldBuildingStore, worldBuildingConditionStore } = useWorld();
-	const worldBuilding = get(worldBuildingStore).data[worldBuildingId];
+	const { worldBuildingStore, worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+	const worldBuilding = getWorldBuilding(worldBuildingId);
 	if (!worldBuilding) return;
 
 	const isTestWorld = worldBuilding.world_id === TEST_WORLD_ID;

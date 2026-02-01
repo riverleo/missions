@@ -36,7 +36,7 @@ export async function createWorldItem(
 			| 'rotation'
 		>
 ) {
-	const { worldItemStore } = useWorld();
+	const { worldItemStore, getWorldItem } = useWorld();
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
@@ -102,8 +102,8 @@ export async function createWorldItem(
 }
 
 export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
-	const { worldItemStore } = useWorld();
-	const worldItem = get(worldItemStore).data[worldItemId];
+	const { worldItemStore, getWorldItem } = useWorld();
+	const worldItem = getWorldItem(worldItemId);
 	if (!worldItem) return;
 
 	const isTestWorld = worldItem.world_id === TEST_WORLD_ID;

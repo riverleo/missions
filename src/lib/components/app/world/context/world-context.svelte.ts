@@ -72,10 +72,10 @@ export class WorldContext {
 	}
 
 	get terrain(): Terrain | undefined {
-		const { worldStore } = useWorld();
+		const { worldStore, getWorld } = useWorld();
 		const { terrainStore } = useTerrain();
 
-		const world = get(worldStore).data[this.worldId];
+		const world = getWorld(this.worldId);
 		if (!world?.terrain_id) return undefined;
 		return get(terrainStore).data[world.terrain_id];
 	}
@@ -103,7 +103,7 @@ export class WorldContext {
 
 	// Matter.js mousedown 처리
 	private handleMouseDown = (event: Matter.IEvent<Matter.MouseConstraint>) => {
-		const { setSelectedEntityId } = useWorld();
+		const { setSelectedEntityId, getWorld } = useWorld();
 
 		// 마우스 위치에서 모든 body 찾기 (건물 포함)
 		if (!this.mouseConstraint?.mouse) return;
@@ -137,7 +137,7 @@ export class WorldContext {
 
 	// canvas mouseup 처리
 	private handleCanvasMouseUp = (e: MouseEvent) => {
-		const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
+		const { setSelectedEntityId, selectedEntityIdStore, getWorld } = useWorld();
 
 		if (!this.mouseDownScreenPosition) return;
 

@@ -9,10 +9,10 @@ export default function transitionToNextAction(
 	action: any,
 	currentTick: number
 ): void {
-	if (!entity.currentBehaviorId) return;
+	if (!entity.currentBehaviorTargetId) return;
 
-	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
-	const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
+	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorTargetId);
+	const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorTargetId);
 
 	// 현재 액션 완료 시 path 클리어 (타겟은 유지)
 	entity.path = [];
@@ -25,11 +25,11 @@ export default function transitionToNextAction(
 
 	if (nextActionId) {
 		// 다음 액션으로 전환
-		entity.currentBehaviorId = BehaviorIdUtils.create(type, behaviorId, nextActionId);
-		entity.actionStartTick = currentTick;
+		entity.currentBehaviorTargetId = BehaviorIdUtils.create(type, behaviorId, nextActionId);
+		entity.behaviorActionStartTick = currentTick;
 	} else {
 		// 다음 액션이 없으면 행동 종료
-		entity.currentBehaviorId = undefined;
-		entity.actionStartTick = 0;
+		entity.currentBehaviorTargetId = undefined;
+		entity.behaviorActionStartTick = 0;
 	}
 }

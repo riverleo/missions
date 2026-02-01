@@ -77,13 +77,13 @@
 
 	// 현재 행동 정보
 	const currentBehaviorInfo = $derived.by(() => {
-		if (!entity.currentBehaviorId) return undefined;
+		if (!entity.currentBehaviorTargetId) return undefined;
 
-		const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
+		const { type } = BehaviorIdUtils.parse(entity.currentBehaviorTargetId);
 
 		if (type === 'need') {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
 
 			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
 			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
@@ -120,11 +120,12 @@
 				actionLabel,
 			};
 		} else {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
 
 			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
-			const action = $conditionBehaviorActionStore.data[behaviorActionId as ConditionBehaviorActionId];
+			const action =
+				$conditionBehaviorActionStore.data[behaviorActionId as ConditionBehaviorActionId];
 
 			if (!action) return undefined;
 

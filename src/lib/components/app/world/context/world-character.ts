@@ -34,7 +34,7 @@ export async function createWorldCharacter(
 	> &
 		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
 ) {
-	const { worldCharacterStore } = useWorld();
+	const { worldCharacterStore, getAllWorldCharacterNeeds, getWorldCharacter } = useWorld();
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const isTestWorld = worldContext.worldId === TEST_WORLD_ID;
 
@@ -49,9 +49,9 @@ export async function createWorldCharacter(
 	if (isTestWorld) {
 		// TEST 환경: 클라이언트에서 UUID 생성
 		const worldCharacterId = crypto.randomUUID() as WorldCharacterId;
-		const { worldCharacterNeedStore } = useWorld();
-		const { characterNeedStore, needStore } = useCharacter();
-		const characterNeeds = Object.values(get(characterNeedStore).data).filter(
+		const { worldCharacterNeedStore, getAllWorldCharacterNeeds, getWorldCharacter } = useWorld();
+		const { characterNeedStore, needStore, getAllCharacterNeeds } = useCharacter();
+		const characterNeeds = getAllCharacterNeeds().filter(
 			(cn) => cn.character_id === insert.character_id
 		);
 		const needs = get(needStore).data;
@@ -117,8 +117,8 @@ export async function createWorldCharacter(
 		const worldCharacterId = insertResult.id;
 
 		// WorldCharacterNeed insert
-		const { characterNeedStore, needStore } = useCharacter();
-		const characterNeeds = Object.values(get(characterNeedStore).data).filter(
+		const { characterNeedStore, needStore, getAllCharacterNeeds } = useCharacter();
+		const characterNeeds = getAllCharacterNeeds().filter(
 			(cn) => cn.character_id === insert.character_id
 		);
 
@@ -172,8 +172,8 @@ export async function createWorldCharacter(
 
 	// TEST 환경에서는 스토어에서 needs를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
 	if (isTestWorld) {
-		const { worldCharacterNeedStore } = useWorld();
-		const characterNeeds = Object.values(get(worldCharacterNeedStore).data).filter(
+		const { worldCharacterNeedStore, getAllWorldCharacterNeeds, getWorldCharacter } = useWorld();
+		const characterNeeds = getAllWorldCharacterNeeds().filter(
 			(need) => need.world_character_id === worldCharacter.id
 		);
 		entity.worldCharacterNeeds = {};
@@ -189,8 +189,8 @@ export async function deleteWorldCharacter(
 	worldCharacterId: WorldCharacterId,
 	worldContext?: WorldContext
 ) {
-	const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
-	const worldCharacter = get(worldCharacterStore).data[worldCharacterId];
+	const { worldCharacterStore, worldCharacterNeedStore, getAllWorldCharacterNeeds, getWorldCharacter } = useWorld();
+	const worldCharacter = getWorldCharacter(worldCharacterId);
 	if (!worldCharacter) return;
 
 	const isTestWorld = worldCharacter.world_id === TEST_WORLD_ID;
