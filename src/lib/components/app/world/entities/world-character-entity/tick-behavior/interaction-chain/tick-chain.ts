@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -18,27 +17,26 @@ export default function tickInteractionAction(
 	interaction: any,
 	currentTick: number
 ): boolean {
+	const { getBuildingInteractionActions } = useBuilding();
+	const { getItemInteractionActions } = useItem();
+	const { getCharacterInteractionActions } = useCharacter();
+
 	if (!entity.currentInteractionActionId) return false;
-
-	const { buildingInteractionActionStore } = useBuilding();
-	const { itemInteractionActionStore } = useItem();
-	const { characterInteractionActionStore } = useCharacter();
-
 	// 현재 InteractionAction 가져오기
 	let currentAction: any = undefined;
 	if (interaction.building_id !== undefined) {
-		const actions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId];
+		const actions = getBuildingInteractionActions(interaction.id as BuildingInteractionId);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}
 	} else if (interaction.item_id !== undefined) {
-		const actions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId];
+		const actions = getItemInteractionActions(interaction.id as ItemInteractionId);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}
 	} else if (interaction.target_character_id !== undefined) {
 		const actions =
-			get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId];
+			getCharacterInteractionActions(interaction.id as CharacterInteractionId);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}

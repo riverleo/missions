@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -18,29 +17,26 @@ export default function startInteractionChain(
 	interaction: any,
 	currentTick: number
 ): boolean {
-	const { buildingInteractionActionStore } = useBuilding();
-	const { itemInteractionActionStore } = useItem();
-	const { characterInteractionActionStore } = useCharacter();
+	const { getBuildingInteractionActions } = useBuilding();
+	const { getItemInteractionActions } = useItem();
+	const { getCharacterInteractionActions } = useCharacter();
 
 	// Interaction 타입별로 InteractionAction 가져오기
 	let interactionActions: any[] = [];
 	if (interaction.id && interaction.building_id !== undefined) {
 		// BuildingInteraction: store.data[interactionId]에 actions 배열이 저장됨
-		const actions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId];
+		const actions = getBuildingInteractionActions(interaction.id as BuildingInteractionId);
 		interactionActions = actions || [];
 		console.log('[startInteractionChain] Building interaction actions:', interactionActions.length);
 	} else if (interaction.id && interaction.item_id !== undefined) {
 		// ItemInteraction
-		const storeData = get(itemInteractionActionStore).data;
-		console.log('[startInteractionChain] Item interaction ID:', interaction.id);
-		console.log('[startInteractionChain] ItemInteractionActionStore keys:', Object.keys(storeData));
-		const actions = storeData[interaction.id as ItemInteractionId];
-		console.log('[startInteractionChain] Found actions:', actions);
+		const actions = getItemInteractionActions(interaction.id as ItemInteractionId);
+		console.log('[startInteractionChain] Item interaction actions:', actions?.length || 0);
 		interactionActions = actions || [];
 	} else if (interaction.id && interaction.target_character_id !== undefined) {
 		// CharacterInteraction
 		const actions =
-			get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId];
+			getCharacterInteractionActions(interaction.id as CharacterInteractionId);
 		interactionActions = actions || [];
 		console.log('[startInteractionChain] Character interaction actions:', interactionActions.length);
 	}

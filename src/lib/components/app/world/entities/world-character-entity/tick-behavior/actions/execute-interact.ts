@@ -24,6 +24,12 @@ export default function executeInteractAction(
 	action: any,
 	currentTick: number
 ): void {
+	const { getBuildingInteraction, getBuildingInteractionActions } = useBuilding();
+	const { getItem, getItemInteraction, getItemInteractionActions, itemInteractionStore } = useItem();
+	const { getCharacterInteraction, getCharacterInteractionActions, getNeedFulfillment } =
+		useCharacter();
+	const { getWorldItem, worldItemStore } = useWorld();
+
 	if (!entity.currentTargetEntityId) {
 		return;
 	}
@@ -68,10 +74,6 @@ export default function executeInteractAction(
 	}
 
 	// 타겟에 도착: InteractionAction 체인 시작 또는 실행
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
-
 	console.log('[executeInteract] Action:', {
 		building_interaction_id: action.building_interaction_id,
 		item_interaction_id: action.item_interaction_id,
@@ -80,10 +82,8 @@ export default function executeInteractAction(
 
 	// 아이템 타겟인 경우 자동 줍기/사용 판단
 	let autoInteractType: 'item_pick' | 'item_use' | undefined;
-	if (targetEntity?.type === 'item' || isHeldItem) {
-		const { worldItemStore } = useWorld();
-		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
-		const worldItem = get(worldItemStore).data[worldItemId];
+	if (targetEntity?.type === 'item' || isHeldItem) {		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+		const worldItem = getWorldItem(worldItemId);
 
 		if (worldItem) {
 			const isInWorld = worldItem.world_building_id === null && worldItem.world_character_id === null;
@@ -103,23 +103,19 @@ export default function executeInteractAction(
 	let interaction: any = undefined;
 	if (action.building_interaction_id) {
 		interaction =
-			get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+			getBuildingInteraction(action.building_interaction_id as BuildingInteractionId);
 	} else if (action.item_interaction_id) {
-		interaction = get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+		interaction = getItemInteraction(action.item_interaction_id as ItemInteractionId);
 	} else if (action.character_interaction_id) {
 		interaction =
-			get(characterInteractionStore).data[action.character_interaction_id as CharacterInteractionId];
+			getCharacterInteraction(action.character_interaction_id as CharacterInteractionId);
 	}
 
 	// 2. autoInteractType이 있으면 타겟 아이템의 ItemInteraction 찾기
-	if (!interaction && autoInteractType && (targetEntity?.type === 'item' || isHeldItem)) {
-		const { worldItemStore } = useWorld();
-		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
-		const worldItem = get(worldItemStore).data[worldItemId];
+	if (!interaction && autoInteractType && (targetEntity?.type === 'item' || isHeldItem)) {		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+		const worldItem = getWorldItem(worldItemId);
 
-		if (worldItem) {
-			const { itemStore } = useItem();
-			const item = get(itemStore).data[worldItem.item_id];
+		if (worldItem) {			const item = getItem(worldItem.item_id);
 
 			if (item) {
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
@@ -151,17 +147,13 @@ export default function executeInteractAction(
 	let interactionCompleted = false;
 	if (interaction) {
 		// InteractionAction 가져오기
-		const { buildingInteractionActionStore } = useBuilding();
-		const { itemInteractionActionStore } = useItem();
-		const { characterInteractionActionStore } = useCharacter();
-
 		let interactionActions: any[] = [];
 		if (interaction.building_id !== undefined) {
-			interactionActions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId] || [];
+			interactionActions = getBuildingInteractionActions(interaction.id as BuildingInteractionId) || [];
 		} else if (interaction.item_id !== undefined) {
-			interactionActions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId] || [];
+			interactionActions = getItemInteractionActions(interaction.id as ItemInteractionId) || [];
 		} else if (interaction.target_character_id !== undefined) {
-			interactionActions = get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId] || [];
+			interactionActions = getCharacterInteractionActions(interaction.id as CharacterInteractionId) || [];
 		}
 
 		if (interactionActions.length > 0) {
@@ -175,9 +167,7 @@ export default function executeInteractAction(
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (interactType === 'item_pick') {
 					console.log('[executeInteract] Executing item_pick on start');
-					if (targetEntity?.type === 'item' || isHeldItem) {
-						const { worldItemStore } = useWorld();
-						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+					if (targetEntity?.type === 'item' || isHeldItem) {						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 						// 아이템 줍기: heldWorldItemIds에 추가
 						if (!entity.heldWorldItemIds.includes(worldItemId)) {
@@ -191,7 +181,7 @@ export default function executeInteractAction(
 						}
 
 						// worldItem.world_character_id 업데이트
-						const worldItem = get(worldItemStore).data[worldItemId];
+						const worldItem = getWorldItem(worldItemId);
 						if (worldItem) {
 							worldItemStore.update((state) => ({
 								...state,
@@ -229,12 +219,10 @@ export default function executeInteractAction(
 
 			if (interactType === 'item_use') {
 				console.log('[executeInteract] Executing item_use on completion');
-				if (targetEntity?.type === 'item' || isHeldItem) {
-					const { worldItemStore } = useWorld();
-					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				if (targetEntity?.type === 'item' || isHeldItem) {					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					// 월드에 있는 아이템이면 먼저 줍기
-					const worldItem = get(worldItemStore).data[worldItemId];
+					const worldItem = getWorldItem(worldItemId);
 					if (worldItem && worldItem.world_building_id === null && worldItem.world_character_id === null) {
 						// 줍기
 						if (!entity.heldWorldItemIds.includes(worldItemId)) {
@@ -281,9 +269,7 @@ export default function executeInteractAction(
 			// item_pick/use 실행
 			if (interactType === 'item_pick') {
 				console.log('[executeInteract] Executing item_pick');
-				if (targetEntity?.type === 'item' || isHeldItem) {
-					const { worldItemStore } = useWorld();
-					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				if (targetEntity?.type === 'item' || isHeldItem) {					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					// 아이템 줍기: heldWorldItemIds에 추가
 					if (!entity.heldWorldItemIds.includes(worldItemId)) {
@@ -297,7 +283,7 @@ export default function executeInteractAction(
 					}
 
 					// worldItem.world_character_id 업데이트
-					const worldItem = get(worldItemStore).data[worldItemId];
+					const worldItem = getWorldItem(worldItemId);
 					if (worldItem) {
 						worldItemStore.update((state) => ({
 							...state,
@@ -317,12 +303,10 @@ export default function executeInteractAction(
 				}
 			} else if (interactType === 'item_use') {
 				console.log('[executeInteract] Executing item_use');
-				if (targetEntity?.type === 'item' || isHeldItem) {
-					const { worldItemStore } = useWorld();
-					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				if (targetEntity?.type === 'item' || isHeldItem) {					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					// 월드에 있는 아이템이면 먼저 줍기
-					const worldItem = get(worldItemStore).data[worldItemId];
+					const worldItem = getWorldItem(worldItemId);
 					if (worldItem && worldItem.world_building_id === null && worldItem.world_character_id === null) {
 						// 줍기
 						if (!entity.heldWorldItemIds.includes(worldItemId)) {
@@ -371,9 +355,7 @@ export default function executeInteractAction(
 
 	// 매 틱마다 increase_per_tick 적용 (once 상호작용도 체인 실행 중 욕구 충족)
 	const isNeedAction = 'need_id' in action;
-	if (isNeedAction && action.need_fulfillment_id) {
-		const { needFulfillmentStore } = useCharacter();
-		const fulfillment = get(needFulfillmentStore).data[action.need_fulfillment_id as NeedFulfillmentId];
+	if (isNeedAction && action.need_fulfillment_id) {		const fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
 
 		if (fulfillment && fulfillment.increase_per_tick) {
 			const needId = action.need_id;

@@ -25,14 +25,18 @@ export default function executeFulfillAction(
 	action: any,
 	currentTick: number
 ): void {
+	const { getBuildingInteraction, getBuildingInteractionActions } = useBuilding();
+	const { getItem, getItemInteraction, getItemInteractionActions, itemInteractionStore } = useItem();
+	const { getCharacterInteraction, getCharacterInteractionActions, getNeedFulfillment, needFulfillmentStore } =
+		useCharacter();
+	const { getWorldItem, worldItemStore } = useWorld();
+
 	// Fulfillment와 Interaction 가져오기 (타겟 확인 전에 먼저 가져옴)
 	const isNeedAction = 'need_id' in action;
 	let fulfillment: any = undefined;
 
-	if (isNeedAction) {
-		const { needFulfillmentStore } = useCharacter();
-		if (action.need_fulfillment_id) {
-			fulfillment = get(needFulfillmentStore).data[action.need_fulfillment_id as NeedFulfillmentId];
+	if (isNeedAction) {		if (action.need_fulfillment_id) {
+			fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
 		} else {
 			// 자동 탐색: need_id로 필터링
 			const fulfillments = Object.values(get(needFulfillmentStore).data).filter(
@@ -85,10 +89,8 @@ export default function executeFulfillAction(
 
 	// 아이템 타겟인 경우 자동 줍기/사용 판단
 	let autoInteractType: 'item_pick' | 'item_use' | undefined;
-	if (targetEntity?.type === 'item' || isHeldItem) {
-		const { worldItemStore } = useWorld();
-		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
-		const worldItem = get(worldItemStore).data[worldItemId];
+	if (targetEntity?.type === 'item' || isHeldItem) {		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+		const worldItem = getWorldItem(worldItemId);
 
 		if (worldItem) {
 			const isInWorld = worldItem.world_building_id === null && worldItem.world_character_id === null;
@@ -105,10 +107,6 @@ export default function executeFulfillAction(
 	}
 
 	// 1. Interaction 가져오기 (Fulfillment에 명시된 경우)
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
-
 	console.log('[executeFulfill] Fulfillment:', {
 		building_interaction_id: fulfillment.building_interaction_id,
 		item_interaction_id: fulfillment.item_interaction_id,
@@ -118,28 +116,24 @@ export default function executeFulfillAction(
 	let interaction: any = undefined;
 	if (fulfillment.building_interaction_id) {
 		interaction =
-			get(buildingInteractionStore).data[
+			getBuildingInteraction(
 				fulfillment.building_interaction_id as BuildingInteractionId
-			];
+			);
 	} else if (fulfillment.item_interaction_id) {
 		interaction =
-			get(itemInteractionStore).data[fulfillment.item_interaction_id as ItemInteractionId];
+			getItemInteraction(fulfillment.item_interaction_id as ItemInteractionId);
 	} else if (fulfillment.character_interaction_id) {
 		interaction =
-			get(characterInteractionStore).data[
+			getCharacterInteraction(
 				fulfillment.character_interaction_id as CharacterInteractionId
-			];
+			);
 	}
 
 	// 2. autoInteractType이 있으면 타겟 아이템의 ItemInteraction 찾기
-	if (!interaction && autoInteractType && (targetEntity?.type === 'item' || isHeldItem)) {
-		const { worldItemStore } = useWorld();
-		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
-		const worldItem = get(worldItemStore).data[worldItemId];
+	if (!interaction && autoInteractType && (targetEntity?.type === 'item' || isHeldItem)) {		const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+		const worldItem = getWorldItem(worldItemId);
 
-		if (worldItem) {
-			const { itemStore } = useItem();
-			const item = get(itemStore).data[worldItem.item_id];
+		if (worldItem) {			const item = getItem(worldItem.item_id);
 
 			if (item) {
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
@@ -193,17 +187,13 @@ export default function executeFulfillAction(
 	let interactionCompleted = false;
 	if (interaction) {
 		// InteractionAction 가져오기
-		const { buildingInteractionActionStore } = useBuilding();
-		const { itemInteractionActionStore } = useItem();
-		const { characterInteractionActionStore } = useCharacter();
-
 		let interactionActions: any[] = [];
 		if (interaction.building_id !== undefined) {
-			interactionActions = get(buildingInteractionActionStore).data[interaction.id as BuildingInteractionId] || [];
+			interactionActions = getBuildingInteractionActions(interaction.id as BuildingInteractionId) || [];
 		} else if (interaction.item_id !== undefined) {
-			interactionActions = get(itemInteractionActionStore).data[interaction.id as ItemInteractionId] || [];
+			interactionActions = getItemInteractionActions(interaction.id as ItemInteractionId) || [];
 		} else if (interaction.target_character_id !== undefined) {
-			interactionActions = get(characterInteractionActionStore).data[interaction.id as CharacterInteractionId] || [];
+			interactionActions = getCharacterInteractionActions(interaction.id as CharacterInteractionId) || [];
 		}
 
 		if (interactionActions.length > 0) {
@@ -217,9 +207,7 @@ export default function executeFulfillAction(
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (repeatInteractType === 'item_pick') {
 					console.log('[executeFulfill] Executing item_pick on start');
-					if (!entity.heldWorldItemIds.includes((targetEntity?.instanceId || targetInstanceId) as WorldItemId)) {
-						const { worldItemStore } = useWorld();
-						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+					if (!entity.heldWorldItemIds.includes((targetEntity?.instanceId || targetInstanceId) as WorldItemId)) {						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 						entity.heldWorldItemIds.push(worldItemId);
 						console.log('[executeFulfill] Picked up item:', worldItemId);
@@ -230,7 +218,7 @@ export default function executeFulfillAction(
 						}
 
 						// worldItem.world_character_id 업데이트
-						const worldItem = get(worldItemStore).data[worldItemId];
+						const worldItem = getWorldItem(worldItemId);
 						if (worldItem) {
 							worldItemStore.update((state) => ({
 								...state,
@@ -262,9 +250,7 @@ export default function executeFulfillAction(
 
 			// duration 완료 - item_use는 여기서 실행
 			if (repeatInteractType === 'item_use') {
-				console.log('[executeFulfill] Executing item_use on completion');
-				const { worldItemStore } = useWorld();
-				const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				console.log('[executeFulfill] Executing item_use on completion');				const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 				// 이미 들고 있는 아이템 사용 (소비)
 				const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
@@ -282,9 +268,7 @@ export default function executeFulfillAction(
 
 			// item_pick/use 매 틱마다 실행
 			if (repeatInteractType === 'item_pick') {
-				if (targetEntity?.type === 'item' || isHeldItem) {
-					const { worldItemStore } = useWorld();
-					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				if (targetEntity?.type === 'item' || isHeldItem) {					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					if (!entity.heldWorldItemIds.includes(worldItemId)) {
 						entity.heldWorldItemIds.push(worldItemId);
@@ -296,7 +280,7 @@ export default function executeFulfillAction(
 						}
 
 						// worldItem.world_character_id 업데이트
-						const worldItem = get(worldItemStore).data[worldItemId];
+						const worldItem = getWorldItem(worldItemId);
 						if (worldItem) {
 							worldItemStore.update((state) => ({
 								...state,
@@ -313,9 +297,7 @@ export default function executeFulfillAction(
 					}
 				}
 			} else if (repeatInteractType === 'item_use') {
-				if (targetEntity?.type === 'item' || isHeldItem) {
-					const { worldItemStore } = useWorld();
-					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
+				if (targetEntity?.type === 'item' || isHeldItem) {					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					const itemIndex = entity.heldWorldItemIds.indexOf(worldItemId);
 					if (itemIndex !== -1) {

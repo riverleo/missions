@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -26,10 +25,10 @@ export default function searchTargetAndSetPath(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): void {
 	const { getInteractableEntityTemplates } = useBehavior();
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
-	const { worldBuildingStore, worldItemStore, worldCharacterStore } = useWorld();
+	const { getBuildingInteraction } = useBuilding();
+	const { getItemInteraction } = useItem();
+	const { getCharacterInteraction } = useCharacter();
+	const { getWorldBuilding, getWorldItem, getWorldCharacter } = useWorld();
 	const worldEntities = Object.values(entity.worldContext.entities);
 
 	let targetEntity: any = undefined;
@@ -37,8 +36,9 @@ export default function searchTargetAndSetPath(
 	if (action.target_selection_method === 'explicit') {
 		// explicit: Interaction ID를 통해 타겟 엔티티 찾기
 		if (action.building_interaction_id) {
-			const interaction =
-				get(buildingInteractionStore).data[action.building_interaction_id as BuildingInteractionId];
+			const interaction = getBuildingInteraction(
+				action.building_interaction_id as BuildingInteractionId
+			);
 			if (interaction) {
 				if (!interaction.building_id) {
 					// 기본 인터렉션 (NULL building_id): 모든 건물 중 가장 가까운 것 선택
@@ -55,14 +55,13 @@ export default function searchTargetAndSetPath(
 					// 특정 건물 인터렉션
 					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'building') return false;
-						const worldBuilding = get(worldBuildingStore).data[e.instanceId as WorldBuildingId];
+						const worldBuilding = getWorldBuilding(e.instanceId as WorldBuildingId);
 						return worldBuilding && worldBuilding.building_id === interaction.building_id;
 					});
 				}
 			}
 		} else if (action.item_interaction_id) {
-			const interaction =
-				get(itemInteractionStore).data[action.item_interaction_id as ItemInteractionId];
+			const interaction = getItemInteraction(action.item_interaction_id as ItemInteractionId);
 			if (interaction) {
 				if (!interaction.item_id) {
 					// 기본 인터렉션 (NULL item_id): 모든 아이템 중 가장 가까운 것 선택
@@ -79,20 +78,19 @@ export default function searchTargetAndSetPath(
 					// 특정 아이템 인터렉션
 					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'item') return false;
-						const worldItem = get(worldItemStore).data[e.instanceId as WorldItemId];
+						const worldItem = getWorldItem(e.instanceId as WorldItemId);
 						return worldItem && worldItem.item_id === interaction.item_id;
 					});
 				}
 			}
 		} else if (action.character_interaction_id) {
-			const interaction =
-				get(characterInteractionStore).data[
-					action.character_interaction_id as CharacterInteractionId
-				];
+			const interaction = getCharacterInteraction(
+				action.character_interaction_id as CharacterInteractionId
+			);
 			if (interaction) {
 				targetEntity = worldEntities.find((e) => {
 					if (e.type !== 'character') return false;
-					const worldCharacter = get(worldCharacterStore).data[e.instanceId as WorldCharacterId];
+					const worldCharacter = getWorldCharacter(e.instanceId as WorldCharacterId);
 					return worldCharacter && worldCharacter.character_id === interaction.target_character_id;
 				});
 			}
@@ -109,7 +107,7 @@ export default function searchTargetAndSetPath(
 
 		// 1. 먼저 들고 있는 아이템 확인
 		for (const heldItemId of entity.heldWorldItemIds) {
-			const worldItem = get(worldItemStore).data[heldItemId];
+			const worldItem = getWorldItem(heldItemId);
 			if (worldItem && templateIds.has(worldItem.item_id)) {
 				// 들고 있는 아이템이 적합한 대상이면 선택
 				const heldItemEntityId = EntityIdUtils.createId('item', entity.worldContext.worldId, heldItemId);
@@ -122,13 +120,13 @@ export default function searchTargetAndSetPath(
 		// 2. 템플릿에 해당하는 월드 엔티티 찾기
 		const candidateEntities = worldEntities.filter((e) => {
 			if (e.type === 'building') {
-				const worldBuilding = get(worldBuildingStore).data[e.instanceId as WorldBuildingId];
+				const worldBuilding = getWorldBuilding(e.instanceId as WorldBuildingId);
 				return worldBuilding && templateIds.has(worldBuilding.building_id);
 			} else if (e.type === 'item') {
-				const worldItem = get(worldItemStore).data[e.instanceId as WorldItemId];
+				const worldItem = getWorldItem(e.instanceId as WorldItemId);
 				return worldItem && templateIds.has(worldItem.item_id);
 			} else if (e.type === 'character') {
-				const worldCharacter = get(worldCharacterStore).data[e.instanceId as WorldCharacterId];
+				const worldCharacter = getWorldCharacter(e.instanceId as WorldCharacterId);
 				return worldCharacter && templateIds.has(worldCharacter.character_id);
 			}
 			return false;

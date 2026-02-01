@@ -1,4 +1,3 @@
-import { get } from 'svelte/store';
 import type {
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
@@ -27,7 +26,7 @@ import selectNewBehavior from './selection/select-behavior';
  * 캐릭터의 행동을 tick마다 처리
  */
 export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
-	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
+	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
 
 	// 현재 행동 액션이 없으면 새로운 행동 선택
 	if (!entity.currentBehaviorId) {
@@ -41,8 +40,8 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
 	const action =
 		type === 'need'
-			? get(needBehaviorActionStore).data[actionId as NeedBehaviorActionId]
-			: get(conditionBehaviorActionStore).data[actionId as ConditionBehaviorActionId];
+			? getNeedBehaviorAction(actionId as NeedBehaviorActionId)
+			: getConditionBehaviorAction(actionId as ConditionBehaviorActionId);
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
@@ -106,29 +105,29 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boolean {
 	if (!entity.currentTargetEntityId) return false;
 
-	const { buildingInteractionStore } = useBuilding();
-	const { itemInteractionStore } = useItem();
-	const { characterInteractionStore } = useCharacter();
-	const { worldBuildingStore, worldItemStore, worldCharacterStore } = useWorld();
+	const { getBuildingInteraction } = useBuilding();
+	const { getItemInteraction } = useItem();
+	const { getCharacterInteraction } = useCharacter();
+	const { getWorldBuilding, getWorldItem, getWorldCharacter } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
 	const { type: targetType, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
 	let targetTemplateId: string | undefined;
 
 	if (targetType === 'building') {
-		const worldBuilding = get(worldBuildingStore).data[instanceId as WorldBuildingId];
+		const worldBuilding = getWorldBuilding(instanceId as WorldBuildingId);
 		targetTemplateId = worldBuilding?.building_id;
 	} else if (targetType === 'item') {
-		const worldItem = get(worldItemStore).data[instanceId as WorldItemId];
+		const worldItem = getWorldItem(instanceId as WorldItemId);
 		targetTemplateId = worldItem?.item_id;
 	} else if (targetType === 'character') {
-		const worldCharacter = get(worldCharacterStore).data[instanceId as WorldCharacterId];
+		const worldCharacter = getWorldCharacter(instanceId as WorldCharacterId);
 		targetTemplateId = worldCharacter?.character_id;
 	}
 
 	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
 	if (action.building_interaction_id) {
-		const interaction = get(buildingInteractionStore).data[action.building_interaction_id];
+		const interaction = getBuildingInteraction(action.building_interaction_id);
 		if (!interaction) return true; // interaction 없으면 클리어
 
 		// 타입이 다르면 클리어
@@ -142,7 +141,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boole
 		// 기본 인터랙션(NULL)이면 모든 건물이 대상이므로 유지
 		return false;
 	} else if (action.item_interaction_id) {
-		const interaction = get(itemInteractionStore).data[action.item_interaction_id];
+		const interaction = getItemInteraction(action.item_interaction_id);
 		if (!interaction) return true;
 
 		if (targetType !== 'item') return true;
@@ -153,7 +152,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boole
 
 		return false;
 	} else if (action.character_interaction_id) {
-		const interaction = get(characterInteractionStore).data[action.character_interaction_id];
+		const interaction = getCharacterInteraction(action.character_interaction_id);
 		if (!interaction) return true;
 
 		if (targetType !== 'character') return true;
