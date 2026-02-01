@@ -9,11 +9,7 @@ import type {
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
-import { useBuilding } from '$lib/hooks/use-building';
-import { useItem } from '$lib/hooks/use-item';
-import { useCharacter } from '$lib/hooks/use-character';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import searchTargetAndSetPath from './search-target';
 import executeGoAction from './actions/execute-go';
 import executeInteractAction from './actions/execute-interact';
@@ -109,55 +105,40 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 function checkIfTargetMismatch(this: WorldCharacterEntity, action: BehaviorAction): boolean {
 	if (!this.currentTargetEntityId) return false;
 
-	const { getBuildingInteraction } = useBuilding();
-	const { getItemInteraction } = useItem();
-	const { getCharacterInteraction } = useCharacter();
-	const { getEntityInstance, getEntityTemplateCandidateId } = useWorld();
+	const { getEntityInstance, getEntityTemplateCandidateId, getInteraction } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
 	const entityInstance = getEntityInstance(this.currentTargetEntityId);
-	const targetTemplateId = entityInstance ? getEntityTemplateCandidateId(entityInstance) : undefined;
-	const entityType = entityInstance?.entityType;
+	if (!entityInstance) return false;
 
-	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
-	if (action.building_interaction_id) {
-		const interaction = getBuildingInteraction(action.building_interaction_id);
-		if (!interaction) return true; // interaction 없으면 클리어
+	const targetTemplateId = getEntityTemplateCandidateId(entityInstance);
+	const entityType = entityInstance.entityType;
 
-		// 타입이 다르면 클리어
-		if (entityType !== 'building') return true;
-
-		// 특정 건물 지정 시 템플릿 ID가 다르면 클리어
-		if (interaction.building_id && interaction.building_id !== targetTemplateId) {
-			return true;
-		}
-
-		// 기본 인터랙션(NULL)이면 모든 건물이 대상이므로 유지
-		return false;
-	} else if (action.item_interaction_id) {
-		const interaction = getItemInteraction(action.item_interaction_id);
-		if (!interaction) return true;
-
-		if (entityType !== 'item') return true;
-
-		if (interaction.item_id && interaction.item_id !== targetTemplateId) {
-			return true;
-		}
-
-		return false;
-	} else if (action.character_interaction_id) {
-		const interaction = getCharacterInteraction(action.character_interaction_id);
-		if (!interaction) return true;
-
-		if (entityType !== 'character') return true;
-
-		if (interaction.target_character_id && interaction.target_character_id !== targetTemplateId) {
-			return true;
-		}
-
+	// action의 interaction 가져오기
+	const interaction = getInteraction(action);
+	if (!interaction) {
+		// interaction이 없으면 search 모드이므로 타겟 유지
 		return false;
 	}
 
-	// interaction ID가 없으면 search 모드이므로 타겟 유지
+	// 타입이 다르면 클리어
+	if (entityType !== interaction.interactionType) return true;
+
+	// 특정 엔티티 지정 시 템플릿 ID 확인
+	if (interaction.interactionType === 'building') {
+		if (interaction.building_id && interaction.building_id !== targetTemplateId) {
+			return true;
+		}
+	} else if (interaction.interactionType === 'item') {
+		if (interaction.item_id && interaction.item_id !== targetTemplateId) {
+			return true;
+		}
+	} else if (interaction.interactionType === 'character') {
+		if (interaction.target_character_id && interaction.target_character_id !== targetTemplateId) {
+			return true;
+		}
+	}
+
+	// 기본 인터랙션(NULL)이면 모든 해당 타입 엔티티가 대상이므로 유지
 	return false;
 }

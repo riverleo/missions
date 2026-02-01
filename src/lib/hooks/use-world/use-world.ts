@@ -1,6 +1,10 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
+import { useBuilding } from '$lib/hooks/use-building';
+import { useItem } from '$lib/hooks/use-item';
+import { useCharacter } from '$lib/hooks/use-character';
 import type {
 	RecordFetchState,
 	World,
@@ -20,6 +24,8 @@ import type {
 	EntityType,
 	EntityInstance,
 	EntityTemplateCandidateId,
+	BehaviorAction,
+	Interaction,
 } from '$lib/types';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
@@ -172,6 +178,27 @@ function createWorldStore() {
 		} else {
 			return entityInstance.id;
 		}
+	}
+
+	/**
+	 * BehaviorAction으로부터 Interaction을 반환
+	 */
+	function getInteraction(action: BehaviorAction): Interaction | undefined {
+		const { getBuildingInteraction } = useBuilding();
+		const { getItemInteraction } = useItem();
+		const { getCharacterInteraction } = useCharacter();
+
+		if (action.building_interaction_id) {
+			const interaction = getBuildingInteraction(action.building_interaction_id);
+			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
+		} else if (action.item_interaction_id) {
+			const interaction = getItemInteraction(action.item_interaction_id);
+			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
+		} else if (action.character_interaction_id) {
+			const interaction = getCharacterInteraction(action.character_interaction_id);
+			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
+		}
+		return undefined;
 	}
 
 	async function fetch() {
@@ -350,6 +377,7 @@ function createWorldStore() {
 		getAllWorldTileMaps,
 		getEntityInstance,
 		getEntityTemplateCandidateId,
+		getInteraction,
 	};
 }
 
