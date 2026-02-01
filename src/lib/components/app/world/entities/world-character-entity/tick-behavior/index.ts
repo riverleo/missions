@@ -112,22 +112,12 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAct
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
-	const { getWorldBuilding, getWorldItem, getWorldCharacter } = useWorld();
+	const { getWorldEntity, getTemplateId } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
-	const { type: targetType, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
-	let targetTemplateId: string | undefined;
-
-	if (targetType === 'building') {
-		const worldBuilding = getWorldBuilding(instanceId);
-		targetTemplateId = worldBuilding?.building_id;
-	} else if (targetType === 'item') {
-		const worldItem = getWorldItem(instanceId);
-		targetTemplateId = worldItem?.item_id;
-	} else if (targetType === 'character') {
-		const worldCharacter = getWorldCharacter(instanceId);
-		targetTemplateId = worldCharacter?.character_id;
-	}
+	const { type: entityType, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
+	const worldEntity = getWorldEntity(entityType, instanceId);
+	const targetTemplateId = worldEntity ? getTemplateId(worldEntity) : undefined;
 
 	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
 	if (action.building_interaction_id) {
@@ -135,7 +125,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAct
 		if (!interaction) return true; // interaction 없으면 클리어
 
 		// 타입이 다르면 클리어
-		if (targetType !== 'building') return true;
+		if (entityType !== 'building') return true;
 
 		// 특정 건물 지정 시 템플릿 ID가 다르면 클리어
 		if (interaction.building_id && interaction.building_id !== targetTemplateId) {
@@ -148,7 +138,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAct
 		const interaction = getItemInteraction(action.item_interaction_id);
 		if (!interaction) return true;
 
-		if (targetType !== 'item') return true;
+		if (entityType !== 'item') return true;
 
 		if (interaction.item_id && interaction.item_id !== targetTemplateId) {
 			return true;
@@ -159,7 +149,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAct
 		const interaction = getCharacterInteraction(action.character_interaction_id);
 		if (!interaction) return true;
 
-		if (targetType !== 'character') return true;
+		if (entityType !== 'character') return true;
 
 		if (interaction.target_character_id && interaction.target_character_id !== targetTemplateId) {
 			return true;

@@ -16,6 +16,10 @@ import type {
 	WorldBuildingConditionId,
 	WorldItemId,
 	EntityId,
+	EntityType,
+	BuildingId,
+	ItemId,
+	CharacterId,
 } from '$lib/types';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
@@ -134,6 +138,38 @@ function createWorldStore() {
 
 	function getAllWorldTileMaps(): WorldTileMap[] {
 		return Object.values(get(worldTileMapStore).data);
+	}
+
+	/**
+	 * EntityType에 따라 해당하는 WorldEntity를 반환
+	 */
+	function getWorldEntity(
+		entityType: EntityType,
+		instanceId: string
+	): WorldBuilding | WorldItem | WorldCharacter | undefined {
+		if (entityType === 'building') {
+			return getWorldBuilding(instanceId);
+		} else if (entityType === 'item') {
+			return getWorldItem(instanceId);
+		} else if (entityType === 'character') {
+			return getWorldCharacter(instanceId);
+		}
+		return undefined;
+	}
+
+	/**
+	 * WorldEntity로부터 템플릿 ID를 추출
+	 */
+	function getTemplateId(
+		worldEntity: WorldBuilding | WorldItem | WorldCharacter
+	): BuildingId | ItemId | CharacterId {
+		if ('building_id' in worldEntity) {
+			return worldEntity.building_id;
+		} else if ('item_id' in worldEntity) {
+			return worldEntity.item_id;
+		} else {
+			return worldEntity.character_id;
+		}
 	}
 
 	async function fetch() {
@@ -313,6 +349,8 @@ function createWorldStore() {
 		getAllWorldBuildingConditions,
 		getAllWorldItems,
 		getAllWorldTileMaps,
+		getWorldEntity,
+		getTemplateId,
 	};
 }
 
