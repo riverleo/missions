@@ -34,13 +34,11 @@ export default function startInteractionChain(
 		interactionId = interaction.id;
 		const actions = getBuildingInteractionActions(interaction.id);
 		interactionActions = actions || [];
-		console.log('[startInteractionChain] Building interaction actions:', interactionActions.length);
 	} else if (interaction.id && interaction.item_id !== undefined) {
 		// ItemInteraction
 		interactionType = 'item';
 		interactionId = interaction.id;
 		const actions = getItemInteractionActions(interaction.id);
-		console.log('[startInteractionChain] Item interaction actions:', actions?.length || 0);
 		interactionActions = actions || [];
 	} else if (interaction.id && interaction.target_character_id !== undefined) {
 		// CharacterInteraction
@@ -49,21 +47,16 @@ export default function startInteractionChain(
 		const actions =
 			getCharacterInteractionActions(interaction.id);
 		interactionActions = actions || [];
-		console.log('[startInteractionChain] Character interaction actions:', interactionActions.length);
 	} else {
-		console.error('[startInteractionChain] Unknown interaction type');
 		return false;
 	}
 
 	// root action 찾기
-	console.log('[startInteractionChain] All actions:', interactionActions.map(a => ({ id: a.id, root: a.root, order: a.order })));
 	const rootAction = interactionActions.find((a) => a.root);
 	if (!rootAction) {
-		console.log('[startInteractionChain] No root InteractionAction found for interaction:', interaction.id);
 		// root가 없으면 order가 가장 낮은 것을 사용
 		if (interactionActions.length > 0) {
 			const firstAction = interactionActions.sort((a, b) => a.order - b.order)[0];
-			console.log('[startInteractionChain] Using first action by order:', firstAction.id);
 			entity.currentInteractionTargetId = InteractionIdUtils.create(
 				interactionType,
 				interactionId as any,
@@ -82,6 +75,5 @@ export default function startInteractionChain(
 		rootAction.id
 	);
 	entity.interactionTargetStartTick = currentTick;
-	console.log('[startInteractionChain] Started chain with root action:', rootAction.id);
 	return true;
 }

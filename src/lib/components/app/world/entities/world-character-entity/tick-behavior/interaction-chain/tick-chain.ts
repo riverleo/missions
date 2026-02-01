@@ -50,7 +50,6 @@ export default function tickInteractionAction(
 	}
 
 	if (!currentAction) {
-		console.error('CurrentInteractionAction not found:', entity.currentInteractionTargetId);
 		entity.currentInteractionTargetId = undefined;
 		return true;
 	}

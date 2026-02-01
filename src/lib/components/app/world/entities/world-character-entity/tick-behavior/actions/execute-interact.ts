@@ -82,11 +82,6 @@ export default function executeInteractAction(
 	}
 
 	// 타겟에 도착: InteractionAction 체인 시작 또는 실행
-	console.log('[executeInteract] Action:', {
-		building_interaction_id: action.building_interaction_id,
-		item_interaction_id: action.item_interaction_id,
-		character_interaction_id: action.character_interaction_id,
-	});
 
 	// 아이템 타겟인 경우 자동 줍기/사용 판단
 	let autoInteractType: 'item_pick' | 'item_use' | undefined;
@@ -132,29 +127,19 @@ export default function executeInteractAction(
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
 				const itemInteractions = getAllItemInteractions();
 				interaction = itemInteractions.find((i) => i.item_id === item.id);
-				console.log('[executeInteract] Found item interaction for auto type:', interaction?.id);
 			}
 		}
 	}
-
-	console.log(
-		'[executeInteract] Interaction found:',
-		!!interaction,
-		'autoInteractType:',
-		autoInteractType
-	);
 
 	// 3. interaction_type 결정 (autoInteractType 우선)
 	let interactType: string | undefined;
 	if (autoInteractType) {
 		interactType = autoInteractType;
-		console.log('[executeInteract] Using autoInteractType:', interactType);
 	} else if (interaction) {
 		if (!interaction.once_interaction_type) {
 			return;
 		}
 		interactType = interaction.once_interaction_type;
-		console.log('[executeInteract] Using interaction.once_interaction_type:', interactType);
 	} else {
 		return;
 	}
@@ -192,26 +177,15 @@ export default function executeInteractAction(
 					firstAction.id
 				);
 				entity.interactionTargetStartTick = currentTick;
-				console.log(
-					'[executeInteract] Set currentInteractionTargetId:',
-					entity.currentInteractionTargetId
-				);
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (interactType === 'item_pick') {
-					console.log('[executeInteract] Executing item_pick on start');
 					if (targetEntity?.type === 'item' || isHeldItem) {
 						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 						// 아이템 줍기: heldWorldItemIds에 추가
 						if (!entity.heldWorldItemIds.includes(worldItemId)) {
 							entity.heldWorldItemIds.push(worldItemId);
-							console.log(
-								'[executeInteract] Picked up item:',
-								worldItemId,
-								'held count:',
-								entity.heldWorldItemIds.length
-							);
 						}
 
 						// 바디만 월드에서 제거 (targetEntity가 있는 경우만)
@@ -248,22 +222,14 @@ export default function executeInteractAction(
 			const currentAction = interactionActions.find((a) => a.id === interactionActionId);
 			if (currentAction && currentAction.duration_ticks) {
 				const elapsed = currentTick - entity.interactionTargetStartTick;
-				console.log(
-					'[executeInteract] Checking duration:',
-					elapsed,
-					'/',
-					currentAction.duration_ticks
-				);
 				if (elapsed < currentAction.duration_ticks) {
 					return;
 				}
 			}
 
 			// duration 완료 - item_use는 여기서 실행
-			console.log('[executeInteract] InteractionAction completed');
 
 			if (interactType === 'item_use') {
-				console.log('[executeInteract] Executing item_use on completion');
 				if (targetEntity?.type === 'item' || isHeldItem) {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
@@ -303,12 +269,6 @@ export default function executeInteractAction(
 					if (itemIndex !== -1) {
 						entity.heldWorldItemIds.splice(itemIndex, 1);
 						entity.worldContext.deleteWorldItem(worldItemId);
-						console.log(
-							'[executeInteract] Used item:',
-							worldItemId,
-							'held count:',
-							entity.heldWorldItemIds.length
-						);
 					}
 
 					// 타겟 클리어
@@ -319,23 +279,15 @@ export default function executeInteractAction(
 			interactionCompleted = true;
 		} else {
 			// InteractionAction이 없으면 바로 실행하고 완료
-			console.log('[executeInteract] No InteractionAction, executing immediately');
 
 			// item_pick/use 실행
 			if (interactType === 'item_pick') {
-				console.log('[executeInteract] Executing item_pick');
 				if (targetEntity?.type === 'item' || isHeldItem) {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					// 아이템 줍기: heldWorldItemIds에 추가
 					if (!entity.heldWorldItemIds.includes(worldItemId)) {
 						entity.heldWorldItemIds.push(worldItemId);
-						console.log(
-							'[executeInteract] Picked up item:',
-							worldItemId,
-							'held count:',
-							entity.heldWorldItemIds.length
-						);
 					}
 
 					// 바디만 월드에서 제거 (targetEntity가 있는 경우만)
@@ -363,7 +315,6 @@ export default function executeInteractAction(
 					entity.currentTargetEntityId = undefined;
 				}
 			} else if (interactType === 'item_use') {
-				console.log('[executeInteract] Executing item_use');
 				if (targetEntity?.type === 'item' || isHeldItem) {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
@@ -403,12 +354,6 @@ export default function executeInteractAction(
 					if (itemIndex !== -1) {
 						entity.heldWorldItemIds.splice(itemIndex, 1);
 						entity.worldContext.deleteWorldItem(worldItemId);
-						console.log(
-							'[executeInteract] Used item:',
-							worldItemId,
-							'held count:',
-							entity.heldWorldItemIds.length
-						);
 					}
 
 					// 타겟 클리어
@@ -420,7 +365,6 @@ export default function executeInteractAction(
 		}
 	} else {
 		// interaction이 없으면 체인 없이 바로 완료
-		console.log('[executeInteract] No interaction, completing immediately');
 		interactionCompleted = true;
 	}
 
@@ -450,7 +394,6 @@ export default function executeInteractAction(
 	}
 
 	// InteractionAction 완료: 상태 초기화
-	console.log('[executeInteract] Clearing currentInteractionTargetId');
 	entity.currentInteractionTargetId = undefined;
 	entity.interactionTargetStartTick = 0;
 }

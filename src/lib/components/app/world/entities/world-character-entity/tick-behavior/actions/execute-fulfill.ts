@@ -75,7 +75,6 @@ export default function executeFulfillAction(
 	}
 
 	if (!fulfillment) {
-		console.error('Fulfillment not found for action:', action);
 		return;
 	}
 
@@ -128,11 +127,6 @@ export default function executeFulfillAction(
 	}
 
 	// 1. Interaction 가져오기 (Fulfillment에 명시된 경우)
-	console.log('[executeFulfill] Fulfillment:', {
-		building_interaction_id: fulfillment.building_interaction_id,
-		item_interaction_id: fulfillment.item_interaction_id,
-		character_interaction_id: fulfillment.character_interaction_id,
-	});
 
 	let interaction: BuildingInteraction | ItemInteraction | CharacterInteraction | undefined =
 		undefined;
@@ -160,29 +154,19 @@ export default function executeFulfillAction(
 				// 아이템의 기본 ItemInteraction 찾기 (item_id가 일치하는 것)
 				const itemInteractions = getAllItemInteractions();
 				interaction = itemInteractions.find((i) => i.item_id === item.id);
-				console.log('[executeFulfill] Found item interaction for auto type:', interaction?.id);
 			}
 		}
 	}
-
-	console.log(
-		'[executeFulfill] Interaction found:',
-		!!interaction,
-		'autoInteractType:',
-		autoInteractType
-	);
 
 	// 3. interaction_type 결정 (autoInteractType 우선)
 	let repeatInteractType: string | undefined;
 	if (autoInteractType) {
 		repeatInteractType = autoInteractType;
-		console.log('[executeFulfill] Using autoInteractType:', repeatInteractType);
 	} else if (interaction) {
 		if (!interaction.repeat_interaction_type) {
 			return;
 		}
 		repeatInteractType = interaction.repeat_interaction_type;
-		console.log('[executeFulfill] Using interaction.repeat_interaction_type:', repeatInteractType);
 	} else {
 		return;
 	}
@@ -242,14 +226,9 @@ export default function executeFulfillAction(
 					firstAction.id
 				);
 				entity.interactionTargetStartTick = currentTick;
-				console.log(
-					'[executeFulfill] Set currentInteractionTargetId:',
-					entity.currentInteractionTargetId
-				);
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (repeatInteractType === 'item_pick') {
-					console.log('[executeFulfill] Executing item_pick on start');
 					if (
 						!entity.heldWorldItemIds.includes(
 							(targetEntity?.instanceId || targetInstanceId) as WorldItemId
@@ -258,7 +237,6 @@ export default function executeFulfillAction(
 						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 						entity.heldWorldItemIds.push(worldItemId);
-						console.log('[executeFulfill] Picked up item:', worldItemId);
 
 						// 바디만 월드에서 제거
 						if (targetEntity) {
@@ -292,19 +270,12 @@ export default function executeFulfillAction(
 			if (currentAction && currentAction.duration_ticks) {
 				const elapsed = currentTick - entity.interactionTargetStartTick;
 				if (elapsed < currentAction.duration_ticks) {
-					console.log(
-						'[executeFulfill] Action in progress:',
-						elapsed,
-						'/',
-						currentAction.duration_ticks
-					);
 					return;
 				}
 			}
 
 			// duration 완료 - item_use는 여기서 실행
 			if (repeatInteractType === 'item_use') {
-				console.log('[executeFulfill] Executing item_use on completion');
 				const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 				// 이미 들고 있는 아이템 사용 (소비)
@@ -312,14 +283,12 @@ export default function executeFulfillAction(
 				if (itemIndex !== -1) {
 					entity.heldWorldItemIds.splice(itemIndex, 1);
 					entity.worldContext.deleteWorldItem(worldItemId);
-					console.log('[executeFulfill] Used item:', worldItemId);
 				}
 			}
 
 			interactionCompleted = true;
 		} else {
 			// InteractionAction이 없으면 매 틱마다 실행
-			console.log('[executeFulfill] No InteractionAction, executing every tick');
 
 			// item_pick/use 매 틱마다 실행
 			if (repeatInteractType === 'item_pick') {
@@ -328,7 +297,6 @@ export default function executeFulfillAction(
 
 					if (!entity.heldWorldItemIds.includes(worldItemId)) {
 						entity.heldWorldItemIds.push(worldItemId);
-						console.log('[executeFulfill] Picked up item (no action):', worldItemId);
 
 						// 바디만 월드에서 제거
 						if (targetEntity) {
@@ -360,7 +328,6 @@ export default function executeFulfillAction(
 					if (itemIndex !== -1) {
 						entity.heldWorldItemIds.splice(itemIndex, 1);
 						entity.worldContext.deleteWorldItem(worldItemId);
-						console.log('[executeFulfill] Used item (no action):', worldItemId);
 					}
 				}
 			}
@@ -369,7 +336,6 @@ export default function executeFulfillAction(
 		}
 	} else {
 		// interaction이 없으면 체인 없이 매 틱마다 실행
-		console.log('[executeFulfill] No interaction, executing every tick');
 		interactionCompleted = true;
 	}
 
@@ -394,7 +360,6 @@ export default function executeFulfillAction(
 
 	// repeat_interaction_type: InteractionAction 완료 시 초기화 (다음 틱에서 다시 시작)
 	if (interactionCompleted) {
-		console.log('[executeFulfill] InteractionAction completed, clearing for next repeat');
 		entity.currentInteractionTargetId = undefined;
 		entity.interactionTargetStartTick = 0;
 	}
