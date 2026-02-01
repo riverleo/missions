@@ -143,7 +143,7 @@ function createWorldStore() {
 	/**
 	 * EntityType에 따라 해당하는 WorldEntity를 반환
 	 */
-	function getWorldEntity(
+	function getEntity(
 		entityType: EntityType,
 		instanceId: string
 	): WorldBuilding | WorldItem | WorldCharacter | undefined {
@@ -349,7 +349,7 @@ function createWorldStore() {
 		getAllWorldBuildingConditions,
 		getAllWorldItems,
 		getAllWorldTileMaps,
-		getWorldEntity,
+		getEntity,
 		getTemplateId,
 	};
 }
