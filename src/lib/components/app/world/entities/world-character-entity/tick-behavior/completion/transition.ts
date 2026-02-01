@@ -1,3 +1,4 @@
+import type { BehaviorAction } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
@@ -6,7 +7,7 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
  */
 export default function transitionToNextAction(
 	entity: WorldCharacterEntity,
-	action: any,
+	action: BehaviorAction,
 	currentTick: number
 ): void {
 	if (!entity.currentBehaviorTargetId) return;
@@ -19,7 +20,7 @@ export default function transitionToNextAction(
 
 	// 다음 액션 ID 가져오기
 	const nextActionId =
-		type === 'need'
+		'next_need_behavior_action_id' in action
 			? action.next_need_behavior_action_id
 			: action.next_condition_behavior_action_id;
 

@@ -2,8 +2,18 @@ import type {
 	BuildingInteractionId,
 	CharacterInteractionId,
 	ConditionFulfillmentId,
+	NeedFulfillmentId,
 	WorldItemId,
 	InteractionType,
+	BehaviorAction,
+	BuildingInteraction,
+	ItemInteraction,
+	CharacterInteraction,
+	BuildingInteractionAction,
+	ItemInteractionAction,
+	CharacterInteractionAction,
+	NeedFulfillment,
+	ConditionFulfillment,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
@@ -19,7 +29,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  */
 export default function executeFulfillAction(
 	entity: WorldCharacterEntity,
-	action: any,
+	action: BehaviorAction,
 	currentTick: number
 ): void {
 	const {
@@ -40,11 +50,11 @@ export default function executeFulfillAction(
 
 	// Fulfillment와 Interaction 가져오기 (타겟 확인 전에 먼저 가져옴)
 	const isNeedAction = 'need_id' in action;
-	let fulfillment: any = undefined;
+	let fulfillment: NeedFulfillment | ConditionFulfillment | undefined = undefined;
 
 	if (isNeedAction) {
 		if (action.need_fulfillment_id) {
-			fulfillment = getNeedFulfillment(action.need_fulfillment_id);
+			fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
 		} else {
 			// 자동 탐색: need_id로 필터링
 			const fulfillments = getAllNeedFulfillments().filter((f) => f.need_id === action.need_id);
@@ -124,7 +134,8 @@ export default function executeFulfillAction(
 		character_interaction_id: fulfillment.character_interaction_id,
 	});
 
-	let interaction: any = undefined;
+	let interaction: BuildingInteraction | ItemInteraction | CharacterInteraction | undefined =
+		undefined;
 	if (fulfillment.building_interaction_id) {
 		interaction = getBuildingInteraction(
 			fulfillment.building_interaction_id as BuildingInteractionId
@@ -203,14 +214,17 @@ export default function executeFulfillAction(
 	if (interaction) {
 		// Interaction 타입 판별
 		let interactionType: InteractionType;
-		let interactionActions: any[] = [];
-		if (interaction.building_id !== undefined) {
+		let interactionActions:
+			| BuildingInteractionAction[]
+			| ItemInteractionAction[]
+			| CharacterInteractionAction[] = [];
+		if ('building_id' in interaction) {
 			interactionType = 'building';
 			interactionActions = getBuildingInteractionActions(interaction.id) || [];
-		} else if (interaction.item_id !== undefined) {
+		} else if ('item_id' in interaction) {
 			interactionType = 'item';
 			interactionActions = getItemInteractionActions(interaction.id) || [];
-		} else if (interaction.target_character_id !== undefined) {
+		} else if ('target_character_id' in interaction) {
 			interactionType = 'character';
 			interactionActions = getCharacterInteractionActions(interaction.id) || [];
 		} else {
@@ -221,6 +235,7 @@ export default function executeFulfillAction(
 			// InteractionAction이 있으면 첫 번째 것 사용
 			if (!entity.currentInteractionTargetId) {
 				const firstAction = interactionActions[0];
+				if (!firstAction) return;
 				entity.currentInteractionTargetId = InteractionIdUtils.create(
 					interactionType,
 					interaction.id as any,

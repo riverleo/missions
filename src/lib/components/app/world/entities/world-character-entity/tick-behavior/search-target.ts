@@ -9,6 +9,7 @@ import type {
 	ConditionBehaviorAction,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
+import type { Entity } from '../../entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
@@ -16,6 +17,7 @@ import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
 import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**
  * 대상 탐색 및 경로 설정 (target_selection_method에 따라)
@@ -31,7 +33,7 @@ export default function searchTargetAndSetPath(
 	const { getWorldBuilding, getWorldItem, getWorldCharacter } = useWorld();
 	const worldEntities = Object.values(entity.worldContext.entities);
 
-	let targetEntity: any = undefined;
+	let targetEntity: Entity | undefined = undefined;
 
 	if (action.target_selection_method === 'explicit') {
 		// explicit: Interaction ID를 통해 타겟 엔티티 찾기
@@ -100,10 +102,8 @@ export default function searchTargetAndSetPath(
 		action.target_selection_method === 'search_or_continue'
 	) {
 		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
-		const templates =
-			'need_id' in action
-				? getInteractableEntityTemplates(action)
-				: getInteractableEntityTemplates(action);
+		const behaviorAction = BehaviorIdUtils.to(action);
+		const templates = getInteractableEntityTemplates(behaviorAction);
 
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));

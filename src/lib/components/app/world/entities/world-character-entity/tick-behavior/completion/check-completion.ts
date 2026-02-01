@@ -1,3 +1,4 @@
+import type { BehaviorAction } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 
@@ -6,7 +7,7 @@ import { useBehavior } from '$lib/hooks/use-behavior';
  */
 export default function checkActionCompletion(
 	entity: WorldCharacterEntity,
-	action: any,
+	action: BehaviorAction,
 	currentTick: number
 ): boolean {
 	// GO: path가 비면 완료

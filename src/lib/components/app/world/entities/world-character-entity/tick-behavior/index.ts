@@ -4,6 +4,7 @@ import type {
 	WorldBuildingId,
 	WorldItemId,
 	WorldCharacterId,
+	BehaviorAction,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
@@ -38,16 +39,19 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorTargetId);
 
 	const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
-	const action =
+	const plainAction =
 		type === 'need'
 			? getNeedBehaviorAction(behaviorActionId)
 			: getConditionBehaviorAction(behaviorActionId);
 
-	if (!action) {
+	if (!plainAction) {
 		// 액션을 찾을 수 없으면 행동 종료
 		entity.currentBehaviorTargetId = undefined;
 		return;
 	}
+
+	// Plain union을 discriminated union으로 변환
+	const action = BehaviorIdUtils.to(plainAction);
 
 	// 1. 액션 시작 시점: target_selection_method에 따라 타겟 클리어 여부 결정
 	if (entity.behaviorActionStartTick === tick) {
@@ -102,7 +106,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 /**
  * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
  */
-function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boolean {
+function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAction): boolean {
 	if (!entity.currentTargetEntityId) return false;
 
 	const { getBuildingInteraction } = useBuilding();

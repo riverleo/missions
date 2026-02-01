@@ -35,6 +35,7 @@
 	import { useItem } from '$lib/hooks/use-item';
 	import { createConditionBehaviorActionNodeId } from '$lib/utils/flow-id';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -60,7 +61,7 @@
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
-		return getInteractableEntityTemplates(changes);
+		return getInteractableEntityTemplates(BehaviorIdUtils.to(changes));
 	});
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
