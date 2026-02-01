@@ -9,14 +9,14 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
  */
 export default function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const {
-		needBehaviorStore,
+		getAllNeedBehaviors,
 		needBehaviorActionStore,
 		conditionBehaviorActionStore,
 		behaviorPriorityStore,
 	} = useBehavior();
 
 	// 1. 후보 need behaviors 찾기 (threshold 이하인 욕구)
-	const candidateNeedBehaviors = Object.values(get(needBehaviorStore).data).filter((behavior) => {
+	const candidateNeedBehaviors = getAllNeedBehaviors().filter((behavior) => {
 		const need = entity.worldCharacterNeeds[behavior.need_id];
 		if (!need) {
 			return false;

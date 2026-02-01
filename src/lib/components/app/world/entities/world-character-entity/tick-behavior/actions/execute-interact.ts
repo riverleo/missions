@@ -103,12 +103,12 @@ export default function executeInteractAction(
 	let interaction: any = undefined;
 	if (action.building_interaction_id) {
 		interaction =
-			getBuildingInteraction(action.building_interaction_id as BuildingInteractionId);
+			getBuildingInteraction(action.building_interaction_id);
 	} else if (action.item_interaction_id) {
-		interaction = getItemInteraction(action.item_interaction_id as ItemInteractionId);
+		interaction = getItemInteraction(action.item_interaction_id);
 	} else if (action.character_interaction_id) {
 		interaction =
-			getCharacterInteraction(action.character_interaction_id as CharacterInteractionId);
+			getCharacterInteraction(action.character_interaction_id);
 	}
 
 	// 2. autoInteractType이 있으면 타겟 아이템의 ItemInteraction 찾기
@@ -149,11 +149,11 @@ export default function executeInteractAction(
 		// InteractionAction 가져오기
 		let interactionActions: any[] = [];
 		if (interaction.building_id !== undefined) {
-			interactionActions = getBuildingInteractionActions(interaction.id as BuildingInteractionId) || [];
+			interactionActions = getBuildingInteractionActions(interaction.id) || [];
 		} else if (interaction.item_id !== undefined) {
-			interactionActions = getItemInteractionActions(interaction.id as ItemInteractionId) || [];
+			interactionActions = getItemInteractionActions(interaction.id) || [];
 		} else if (interaction.target_character_id !== undefined) {
-			interactionActions = getCharacterInteractionActions(interaction.id as CharacterInteractionId) || [];
+			interactionActions = getCharacterInteractionActions(interaction.id) || [];
 		}
 
 		if (interactionActions.length > 0) {
@@ -355,7 +355,7 @@ export default function executeInteractAction(
 
 	// 매 틱마다 increase_per_tick 적용 (once 상호작용도 체인 실행 중 욕구 충족)
 	const isNeedAction = 'need_id' in action;
-	if (isNeedAction && action.need_fulfillment_id) {		const fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
+	if (isNeedAction && action.need_fulfillment_id) {		const fulfillment = getNeedFulfillment(action.need_fulfillment_id);
 
 		if (fulfillment && fulfillment.increase_per_tick) {
 			const needId = action.need_id;

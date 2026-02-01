@@ -40,8 +40,8 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
 	const action =
 		type === 'need'
-			? getNeedBehaviorAction(actionId as NeedBehaviorActionId)
-			: getConditionBehaviorAction(actionId as ConditionBehaviorActionId);
+			? getNeedBehaviorAction(actionId)
+			: getConditionBehaviorAction(actionId);
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
@@ -115,13 +115,13 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: any): boole
 	let targetTemplateId: string | undefined;
 
 	if (targetType === 'building') {
-		const worldBuilding = getWorldBuilding(instanceId as WorldBuildingId);
+		const worldBuilding = getWorldBuilding(instanceId);
 		targetTemplateId = worldBuilding?.building_id;
 	} else if (targetType === 'item') {
-		const worldItem = getWorldItem(instanceId as WorldItemId);
+		const worldItem = getWorldItem(instanceId);
 		targetTemplateId = worldItem?.item_id;
 	} else if (targetType === 'character') {
-		const worldCharacter = getWorldCharacter(instanceId as WorldCharacterId);
+		const worldCharacter = getWorldCharacter(instanceId);
 		targetTemplateId = worldCharacter?.character_id;
 	}
 

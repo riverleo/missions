@@ -21,6 +21,8 @@ import type {
 	Item,
 	Character,
 	Building,
+	NeedBehaviorAction,
+	ConditionBehaviorAction,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -60,6 +62,7 @@ export type BehaviorType = 'need' | 'condition';
 // Union types for behavior IDs
 export type BehaviorTemplateId = NeedBehaviorId | ConditionBehaviorId;
 export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
+export type BehaviorAction = NeedBehaviorAction | ConditionBehaviorAction;
 
 // Runtime-only behavior ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
 export type BehaviorId =

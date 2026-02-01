@@ -36,7 +36,7 @@ export default function executeFulfillAction(
 	let fulfillment: any = undefined;
 
 	if (isNeedAction) {		if (action.need_fulfillment_id) {
-			fulfillment = getNeedFulfillment(action.need_fulfillment_id as NeedFulfillmentId);
+			fulfillment = getNeedFulfillment(action.need_fulfillment_id);
 		} else {
 			// 자동 탐색: need_id로 필터링
 			const fulfillments = Object.values(get(needFulfillmentStore).data).filter(
@@ -121,7 +121,7 @@ export default function executeFulfillAction(
 			);
 	} else if (fulfillment.item_interaction_id) {
 		interaction =
-			getItemInteraction(fulfillment.item_interaction_id as ItemInteractionId);
+			getItemInteraction(fulfillment.item_interaction_id);
 	} else if (fulfillment.character_interaction_id) {
 		interaction =
 			getCharacterInteraction(
@@ -189,11 +189,11 @@ export default function executeFulfillAction(
 		// InteractionAction 가져오기
 		let interactionActions: any[] = [];
 		if (interaction.building_id !== undefined) {
-			interactionActions = getBuildingInteractionActions(interaction.id as BuildingInteractionId) || [];
+			interactionActions = getBuildingInteractionActions(interaction.id) || [];
 		} else if (interaction.item_id !== undefined) {
-			interactionActions = getItemInteractionActions(interaction.id as ItemInteractionId) || [];
+			interactionActions = getItemInteractionActions(interaction.id) || [];
 		} else if (interaction.target_character_id !== undefined) {
-			interactionActions = getCharacterInteractionActions(interaction.id as CharacterInteractionId) || [];
+			interactionActions = getCharacterInteractionActions(interaction.id) || [];
 		}
 
 		if (interactionActions.length > 0) {

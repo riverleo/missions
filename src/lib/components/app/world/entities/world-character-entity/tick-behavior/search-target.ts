@@ -55,13 +55,13 @@ export default function searchTargetAndSetPath(
 					// 특정 건물 인터렉션
 					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'building') return false;
-						const worldBuilding = getWorldBuilding(e.instanceId as WorldBuildingId);
+						const worldBuilding = getWorldBuilding(e.instanceId);
 						return worldBuilding && worldBuilding.building_id === interaction.building_id;
 					});
 				}
 			}
 		} else if (action.item_interaction_id) {
-			const interaction = getItemInteraction(action.item_interaction_id as ItemInteractionId);
+			const interaction = getItemInteraction(action.item_interaction_id);
 			if (interaction) {
 				if (!interaction.item_id) {
 					// 기본 인터렉션 (NULL item_id): 모든 아이템 중 가장 가까운 것 선택
@@ -78,7 +78,7 @@ export default function searchTargetAndSetPath(
 					// 특정 아이템 인터렉션
 					targetEntity = worldEntities.find((e) => {
 						if (e.type !== 'item') return false;
-						const worldItem = getWorldItem(e.instanceId as WorldItemId);
+						const worldItem = getWorldItem(e.instanceId);
 						return worldItem && worldItem.item_id === interaction.item_id;
 					});
 				}
@@ -90,7 +90,7 @@ export default function searchTargetAndSetPath(
 			if (interaction) {
 				targetEntity = worldEntities.find((e) => {
 					if (e.type !== 'character') return false;
-					const worldCharacter = getWorldCharacter(e.instanceId as WorldCharacterId);
+					const worldCharacter = getWorldCharacter(e.instanceId);
 					return worldCharacter && worldCharacter.character_id === interaction.target_character_id;
 				});
 			}
@@ -120,13 +120,13 @@ export default function searchTargetAndSetPath(
 		// 2. 템플릿에 해당하는 월드 엔티티 찾기
 		const candidateEntities = worldEntities.filter((e) => {
 			if (e.type === 'building') {
-				const worldBuilding = getWorldBuilding(e.instanceId as WorldBuildingId);
+				const worldBuilding = getWorldBuilding(e.instanceId);
 				return worldBuilding && templateIds.has(worldBuilding.building_id);
 			} else if (e.type === 'item') {
-				const worldItem = getWorldItem(e.instanceId as WorldItemId);
+				const worldItem = getWorldItem(e.instanceId);
 				return worldItem && templateIds.has(worldItem.item_id);
 			} else if (e.type === 'character') {
-				const worldCharacter = getWorldCharacter(e.instanceId as WorldCharacterId);
+				const worldCharacter = getWorldCharacter(e.instanceId);
 				return worldCharacter && templateIds.has(worldCharacter.character_id);
 			}
 			return false;

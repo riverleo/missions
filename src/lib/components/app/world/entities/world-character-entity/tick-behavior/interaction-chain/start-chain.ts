@@ -25,18 +25,18 @@ export default function startInteractionChain(
 	let interactionActions: any[] = [];
 	if (interaction.id && interaction.building_id !== undefined) {
 		// BuildingInteraction: store.data[interactionId]에 actions 배열이 저장됨
-		const actions = getBuildingInteractionActions(interaction.id as BuildingInteractionId);
+		const actions = getBuildingInteractionActions(interaction.id);
 		interactionActions = actions || [];
 		console.log('[startInteractionChain] Building interaction actions:', interactionActions.length);
 	} else if (interaction.id && interaction.item_id !== undefined) {
 		// ItemInteraction
-		const actions = getItemInteractionActions(interaction.id as ItemInteractionId);
+		const actions = getItemInteractionActions(interaction.id);
 		console.log('[startInteractionChain] Item interaction actions:', actions?.length || 0);
 		interactionActions = actions || [];
 	} else if (interaction.id && interaction.target_character_id !== undefined) {
 		// CharacterInteraction
 		const actions =
-			getCharacterInteractionActions(interaction.id as CharacterInteractionId);
+			getCharacterInteractionActions(interaction.id);
 		interactionActions = actions || [];
 		console.log('[startInteractionChain] Character interaction actions:', interactionActions.length);
 	}

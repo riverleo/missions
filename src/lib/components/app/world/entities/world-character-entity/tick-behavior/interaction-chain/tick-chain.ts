@@ -25,18 +25,18 @@ export default function tickInteractionAction(
 	// 현재 InteractionAction 가져오기
 	let currentAction: any = undefined;
 	if (interaction.building_id !== undefined) {
-		const actions = getBuildingInteractionActions(interaction.id as BuildingInteractionId);
+		const actions = getBuildingInteractionActions(interaction.id);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}
 	} else if (interaction.item_id !== undefined) {
-		const actions = getItemInteractionActions(interaction.id as ItemInteractionId);
+		const actions = getItemInteractionActions(interaction.id);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}
 	} else if (interaction.target_character_id !== undefined) {
 		const actions =
-			getCharacterInteractionActions(interaction.id as CharacterInteractionId);
+			getCharacterInteractionActions(interaction.id);
 		if (actions) {
 			currentAction = actions.find((a) => a.id === entity.currentInteractionActionId);
 		}
