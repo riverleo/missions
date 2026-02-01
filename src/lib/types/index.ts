@@ -274,6 +274,8 @@ export type {
 	AppPayload,
 	BehaviorId,
 	BehaviorType,
+	BehaviorTemplateId,
+	BehaviorActionId,
 	EntityId,
 	EntityType,
 	EntityTemplateId,

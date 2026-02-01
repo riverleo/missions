@@ -1,6 +1,8 @@
 import type {
 	BehaviorId,
 	BehaviorType,
+	BehaviorTemplateId,
+	BehaviorActionId,
 	NeedBehaviorId,
 	ConditionBehaviorId,
 	NeedBehaviorActionId,
@@ -29,13 +31,13 @@ export const BehaviorIdUtils = {
 	 */
 	parse(behaviorId: BehaviorId): {
 		type: BehaviorType;
-		behaviorId: NeedBehaviorId | ConditionBehaviorId;
-		behaviorActionId: NeedBehaviorActionId | ConditionBehaviorActionId;
+		behaviorId: BehaviorTemplateId;
+		behaviorActionId: BehaviorActionId;
 	} {
 		const parts = behaviorId.split('_');
 		const type = parts[0] as BehaviorType;
-		const parsedBehaviorId = parts[1] as NeedBehaviorId | ConditionBehaviorId;
-		const behaviorActionId = parts[2] as NeedBehaviorActionId | ConditionBehaviorActionId;
+		const parsedBehaviorId = parts[1] as BehaviorTemplateId;
+		const behaviorActionId = parts[2] as BehaviorActionId;
 		return { type, behaviorId: parsedBehaviorId, behaviorActionId: behaviorActionId };
 	},
 
@@ -54,9 +56,9 @@ export const BehaviorIdUtils = {
 	 * @example
 	 * const behaviorId = BehaviorIdUtils.behaviorId(behaviorId);
 	 */
-	behaviorId(behaviorId: BehaviorId): NeedBehaviorId | ConditionBehaviorId {
+	behaviorId(behaviorId: BehaviorId): BehaviorTemplateId {
 		const parts = behaviorId.split('_');
-		return parts[1] as NeedBehaviorId | ConditionBehaviorId;
+		return parts[1] as BehaviorTemplateId;
 	},
 
 	/**
@@ -64,9 +66,9 @@ export const BehaviorIdUtils = {
 	 * @example
 	 * const actionId = BehaviorIdUtils.actionId(behaviorId);
 	 */
-	actionId(behaviorId: BehaviorId): NeedBehaviorActionId | ConditionBehaviorActionId {
+	actionId(behaviorId: BehaviorId): BehaviorActionId {
 		const parts = behaviorId.split('_');
-		return parts[2] as NeedBehaviorActionId | ConditionBehaviorActionId;
+		return parts[2] as BehaviorActionId;
 	},
 
 	/**

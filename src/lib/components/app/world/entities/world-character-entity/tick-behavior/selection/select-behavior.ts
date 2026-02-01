@@ -1,11 +1,5 @@
 import { get } from 'svelte/store';
-import type {
-	NeedBehaviorId,
-	ConditionBehaviorId,
-	ConditionBehavior,
-	NeedBehaviorActionId,
-	ConditionBehaviorActionId,
-} from '$lib/types';
+import type { NeedBehaviorId, ConditionBehaviorId, ConditionBehavior } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
@@ -17,7 +11,6 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 	const {
 		needBehaviorStore,
 		needBehaviorActionStore,
-		conditionBehaviorStore,
 		conditionBehaviorActionStore,
 		behaviorPriorityStore,
 	} = useBehavior();
