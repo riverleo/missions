@@ -82,15 +82,11 @@
 		const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
 
 		if (type === 'need') {
-			const behaviorId = BehaviorIdUtils.behaviorId<NeedBehaviorId>(
-				entity.currentBehaviorId
-			);
-			const actionId = BehaviorIdUtils.actionId<NeedBehaviorActionId>(
-				entity.currentBehaviorId
-			);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
+			const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
 
-			const behavior = $needBehaviorStore.data[behaviorId];
-			const action = $needBehaviorActionStore.data[actionId];
+			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
+			const action = $needBehaviorActionStore.data[actionId as NeedBehaviorActionId];
 
 			if (!action) return undefined;
 
@@ -124,15 +120,11 @@
 				actionLabel,
 			};
 		} else {
-			const behaviorId = BehaviorIdUtils.behaviorId<ConditionBehaviorId>(
-				entity.currentBehaviorId
-			);
-			const actionId = BehaviorIdUtils.actionId<ConditionBehaviorActionId>(
-				entity.currentBehaviorId
-			);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
+			const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
 
-			const behavior = $conditionBehaviorStore.data[behaviorId];
-			const action = $conditionBehaviorActionStore.data[actionId];
+			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
+			const action = $conditionBehaviorActionStore.data[actionId as ConditionBehaviorActionId];
 
 			if (!action) return undefined;
 

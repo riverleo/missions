@@ -50,31 +50,23 @@ export const BehaviorIdUtils = {
 	},
 
 	/**
-	 * BehaviorId에서 behaviorId만 추출 (타입 캐스팅 지원)
+	 * BehaviorId에서 behaviorId만 추출
 	 * @example
 	 * const behaviorId = BehaviorIdUtils.behaviorId(behaviorId);
-	 * const needBehaviorId = BehaviorIdUtils.behaviorId<NeedBehaviorId>(behaviorId);
 	 */
-	behaviorId<T extends NeedBehaviorId | ConditionBehaviorId = NeedBehaviorId | ConditionBehaviorId>(
-		behaviorId: BehaviorId
-	): T {
+	behaviorId(behaviorId: BehaviorId): NeedBehaviorId | ConditionBehaviorId {
 		const parts = behaviorId.split('_');
-		return parts[1] as T;
+		return parts[1] as NeedBehaviorId | ConditionBehaviorId;
 	},
 
 	/**
-	 * BehaviorId에서 actionId만 추출 (타입 캐스팅 지원)
+	 * BehaviorId에서 actionId만 추출
 	 * @example
 	 * const actionId = BehaviorIdUtils.actionId(behaviorId);
-	 * const needActionId = BehaviorIdUtils.actionId<NeedBehaviorActionId>(behaviorId);
 	 */
-	actionId<
-		T extends NeedBehaviorActionId | ConditionBehaviorActionId =
-			| NeedBehaviorActionId
-			| ConditionBehaviorActionId,
-	>(behaviorId: BehaviorId): T {
+	actionId(behaviorId: BehaviorId): NeedBehaviorActionId | ConditionBehaviorActionId {
 		const parts = behaviorId.split('_');
-		return parts[2] as T;
+		return parts[2] as NeedBehaviorActionId | ConditionBehaviorActionId;
 	},
 
 	/**
