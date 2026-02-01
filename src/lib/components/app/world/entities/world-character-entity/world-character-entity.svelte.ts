@@ -8,7 +8,7 @@ import type {
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
-	BehaviorId,
+	BehaviorTargetId,
 	EntityId,
 	BuildingInteractionActionId,
 	ItemInteractionActionId,
@@ -36,7 +36,7 @@ export class WorldCharacterEntity extends Entity {
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemIds = $state<WorldItemId[]>([]);
 	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
-	currentBehaviorId = $state<BehaviorId | undefined>(undefined);
+	currentBehaviorId = $state<BehaviorTargetId | undefined>(undefined);
 	currentTargetEntityId = $state<EntityId | undefined>(undefined);
 	actionStartTick = $state<number>(0);
 	currentInteractionActionId = $state<

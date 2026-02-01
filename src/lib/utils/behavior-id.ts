@@ -1,7 +1,7 @@
 import type {
-	BehaviorId,
+	BehaviorTargetId,
 	BehaviorType,
-	BehaviorTemplateId,
+	BehaviorId,
 	BehaviorActionId,
 	NeedBehaviorId,
 	ConditionBehaviorId,
@@ -11,7 +11,7 @@ import type {
 
 export const BehaviorIdUtils = {
 	/**
-	 * BehaviorId 생성
+	 * BehaviorTargetId 생성
 	 * @example
 	 * BehaviorIdUtils.create('need', needBehaviorId, needBehaviorActionId)
 	 * // "need_{needBehaviorId}_{needBehaviorActionId}"
@@ -20,63 +20,63 @@ export const BehaviorIdUtils = {
 		type: BehaviorType,
 		behaviorId: NeedBehaviorId | ConditionBehaviorId,
 		behaviorActionId: NeedBehaviorActionId | ConditionBehaviorActionId
-	): BehaviorId {
-		return `${type}_${behaviorId}_${behaviorActionId}` as BehaviorId;
+	): BehaviorTargetId {
+		return `${type}_${behaviorId}_${behaviorActionId}` as BehaviorTargetId;
 	},
 
 	/**
-	 * BehaviorId를 파싱하여 타입, behaviorId, actionId를 반환
+	 * BehaviorTargetId를 파싱하여 타입, behaviorId, behaviorActionId를 반환
 	 * @example
-	 * const { type, behaviorId, actionId } = BehaviorIdUtils.parse(behaviorId);
+	 * const { type, behaviorId, behaviorActionId } = BehaviorIdUtils.parse(behaviorTargetId);
 	 */
-	parse(behaviorId: BehaviorId): {
+	parse(behaviorTargetId: BehaviorTargetId): {
 		type: BehaviorType;
-		behaviorId: BehaviorTemplateId;
+		behaviorId: BehaviorId;
 		behaviorActionId: BehaviorActionId;
 	} {
-		const parts = behaviorId.split('_');
+		const parts = behaviorTargetId.split('_');
 		const type = parts[0] as BehaviorType;
-		const parsedBehaviorId = parts[1] as BehaviorTemplateId;
+		const parsedBehaviorId = parts[1] as BehaviorId;
 		const behaviorActionId = parts[2] as BehaviorActionId;
 		return { type, behaviorId: parsedBehaviorId, behaviorActionId: behaviorActionId };
 	},
 
 	/**
-	 * BehaviorId에서 type만 추출
+	 * BehaviorTargetId에서 type만 추출
 	 * @example
-	 * const type = BehaviorIdUtils.type(behaviorId);
+	 * const type = BehaviorIdUtils.type(behaviorTargetId);
 	 */
-	type(behaviorId: BehaviorId): BehaviorType {
-		const parts = behaviorId.split('_');
+	type(behaviorTargetId: BehaviorTargetId): BehaviorType {
+		const parts = behaviorTargetId.split('_');
 		return parts[0] as BehaviorType;
 	},
 
 	/**
-	 * BehaviorId에서 behaviorId만 추출
+	 * BehaviorTargetId에서 behaviorId만 추출
 	 * @example
-	 * const behaviorId = BehaviorIdUtils.behaviorId(behaviorId);
+	 * const behaviorId = BehaviorIdUtils.behaviorId(behaviorTargetId);
 	 */
-	behaviorId(behaviorId: BehaviorId): BehaviorTemplateId {
-		const parts = behaviorId.split('_');
-		return parts[1] as BehaviorTemplateId;
+	behaviorId(behaviorTargetId: BehaviorTargetId): BehaviorId {
+		const parts = behaviorTargetId.split('_');
+		return parts[1] as BehaviorId;
 	},
 
 	/**
-	 * BehaviorId에서 actionId만 추출
+	 * BehaviorTargetId에서 behaviorActionId만 추출
 	 * @example
-	 * const actionId = BehaviorIdUtils.actionId(behaviorId);
+	 * const behaviorActionId = BehaviorIdUtils.behaviorActionId(behaviorTargetId);
 	 */
-	actionId(behaviorId: BehaviorId): BehaviorActionId {
-		const parts = behaviorId.split('_');
+	behaviorActionId(behaviorTargetId: BehaviorTargetId): BehaviorActionId {
+		const parts = behaviorTargetId.split('_');
 		return parts[2] as BehaviorActionId;
 	},
 
 	/**
-	 * BehaviorId가 특정 타입인지 확인
+	 * BehaviorTargetId가 특정 타입인지 확인
 	 * @example
-	 * BehaviorIdUtils.is('need', behaviorId)
+	 * BehaviorIdUtils.is('need', behaviorTargetId)
 	 */
-	is(type: BehaviorType, behaviorId: BehaviorId | undefined): boolean {
-		return behaviorId?.startsWith(`${type}_`) ?? false;
+	is(type: BehaviorType, behaviorTargetId: BehaviorTargetId | undefined): boolean {
+		return behaviorTargetId?.startsWith(`${type}_`) ?? false;
 	},
 };

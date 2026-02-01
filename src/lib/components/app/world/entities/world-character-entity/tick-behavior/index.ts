@@ -37,11 +37,11 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	// 현재 행동 액션 가져오기
 	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
 
-	const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
+	const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
 	const action =
 		type === 'need'
-			? getNeedBehaviorAction(actionId)
-			: getConditionBehaviorAction(actionId);
+			? getNeedBehaviorAction(behaviorActionId)
+			: getConditionBehaviorAction(behaviorActionId);
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료

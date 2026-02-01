@@ -83,10 +83,10 @@
 
 		if (type === 'need') {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
-			const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
 
 			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
-			const action = $needBehaviorActionStore.data[actionId as NeedBehaviorActionId];
+			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
 
 			if (!action) return undefined;
 
@@ -121,10 +121,10 @@
 			};
 		} else {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
-			const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorId);
 
 			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
-			const action = $conditionBehaviorActionStore.data[actionId as ConditionBehaviorActionId];
+			const action = $conditionBehaviorActionStore.data[behaviorActionId as ConditionBehaviorActionId];
 
 			if (!action) return undefined;
 

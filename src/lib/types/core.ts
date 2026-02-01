@@ -21,6 +21,8 @@ import type {
 	Item,
 	Character,
 	Building,
+	NeedBehavior,
+	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
 } from './supabase';
@@ -59,13 +61,14 @@ export interface AppPayload {
 
 export type BehaviorType = 'need' | 'condition';
 
-// Union types for behavior IDs
-export type BehaviorTemplateId = NeedBehaviorId | ConditionBehaviorId;
-export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
+// Union types for behaviors
+export type Behavior = NeedBehavior | ConditionBehavior;
+export type BehaviorId = NeedBehaviorId | ConditionBehaviorId;
 export type BehaviorAction = NeedBehaviorAction | ConditionBehaviorAction;
+export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
 
-// Runtime-only behavior ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
-export type BehaviorId =
+// Runtime-only behavior target ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
+export type BehaviorTargetId =
 	| `need_${NeedBehaviorId}_${NeedBehaviorActionId}`
 	| `condition_${ConditionBehaviorId}_${ConditionBehaviorActionId}`;
 

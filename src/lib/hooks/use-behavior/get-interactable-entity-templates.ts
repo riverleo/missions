@@ -16,6 +16,7 @@ import type {
 	CharacterId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
+	BehaviorAction,
 } from '$lib/types';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
@@ -29,23 +30,21 @@ import { useBehavior } from '../use-behavior';
  * - interact 타입: once_interaction_type이 있는 Interaction의 엔티티 반환
  * - fulfill 타입: fulfillment의 repeat_interaction_type이 있는 Interaction의 엔티티 반환
  *
- * @param action - 행동 액션 (NeedBehaviorAction 또는 ConditionBehaviorAction)
+ * @param behaviorAction - 행동 액션 (NeedBehaviorAction 또는 ConditionBehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
-export function getInteractableEntityTemplates(
-	action: NeedBehaviorAction | ConditionBehaviorAction
-): EntityTemplate[] {
+export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): EntityTemplate[] {
 	// NeedBehaviorAction인지 확인
-	const isNeedAction = 'need_id' in action;
+	const isNeedAction = 'need_id' in behaviorAction;
 
-	if (action.type === 'go') {
+	if (behaviorAction.type === 'go') {
 		// go 타입: search 모드일 때만 대상 반환
-		if (action.target_selection_method !== 'search') {
+		if (behaviorAction.target_selection_method !== 'search') {
 			return [];
 		}
 
 		// 다음 액션 조회
-		const nextAction = getNextAction(action, isNeedAction);
+		const nextAction = getNextAction(behaviorAction, isNeedAction);
 		if (nextAction?.type === 'interact') {
 			// INTERACT 다음에 FULFILL이 있는지 확인
 			const nextNextAction = getNextAction(nextAction, isNeedAction);
@@ -60,12 +59,12 @@ export function getInteractableEntityTemplates(
 			// next가 idle이거나 없으면: 모든 엔티티 반환
 			return getAllEntityTemplates();
 		}
-	} else if (action.type === 'interact') {
+	} else if (behaviorAction.type === 'interact') {
 		// interact 타입: Interaction 직접 참조
-		return getInteractableTemplatesForInteract(action);
-	} else if (action.type === 'fulfill') {
+		return getInteractableTemplatesForInteract(behaviorAction);
+	} else if (behaviorAction.type === 'fulfill') {
 		// fulfill 타입: Fulfillment를 통해 Interaction 참조
-		return getInteractableTemplatesForFulfill(action, isNeedAction);
+		return getInteractableTemplatesForFulfill(behaviorAction, isNeedAction);
 	}
 
 	return [];
@@ -75,7 +74,7 @@ export function getInteractableEntityTemplates(
  * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForInteract(
-	action: NeedBehaviorAction | ConditionBehaviorAction
+	action: BehaviorAction
 ): EntityTemplate[] {
 	const { buildingInteractionStore } = useBuilding();
 	const { itemInteractionStore } = useItem();
@@ -123,7 +122,7 @@ function getInteractableTemplatesForInteract(
  * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForFulfill(
-	action: NeedBehaviorAction | ConditionBehaviorAction,
+	action: BehaviorAction,
 	isNeedAction: boolean
 ): EntityTemplate[] {
 	const { buildingInteractionStore } = useBuilding();
@@ -255,7 +254,7 @@ function interactionsToTemplates(
  * 다음 액션을 조회합니다.
  */
 function getNextAction(
-	action: NeedBehaviorAction | ConditionBehaviorAction,
+	action: BehaviorAction,
 	isNeedAction: boolean
 ): (NeedBehaviorAction | ConditionBehaviorAction) | undefined {
 	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
