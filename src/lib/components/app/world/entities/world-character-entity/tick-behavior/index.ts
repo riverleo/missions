@@ -115,9 +115,9 @@ function checkIfTargetMismatch(this: WorldCharacterEntity, action: BehaviorActio
 	const { getEntityInstance, getEntityTemplateCandidateId } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
-	const { type: entityType, instanceId } = EntityIdUtils.parse(this.currentTargetEntityId);
-	const entityInstance = getEntityInstance(entityType, instanceId);
+	const entityInstance = getEntityInstance(this.currentTargetEntityId);
 	const targetTemplateId = entityInstance ? getEntityTemplateCandidateId(entityInstance) : undefined;
+	const entityType = entityInstance?.entityType;
 
 	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
 	if (action.building_interaction_id) {

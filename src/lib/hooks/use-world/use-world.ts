@@ -141,16 +141,18 @@ function createWorldStore() {
 	}
 
 	/**
-	 * EntityType에 따라 해당하는 EntityInstance를 반환
+	 * EntityId로부터 EntityInstance를 반환
 	 */
-	function getEntityInstance(entityType: EntityType, instanceId: string): EntityInstance | undefined {
-		if (entityType === 'building') {
+	function getEntityInstance(entityId: EntityId): EntityInstance | undefined {
+		const { type, instanceId } = EntityIdUtils.parse(entityId);
+
+		if (type === 'building') {
 			const entity = getWorldBuilding(instanceId);
 			return entity ? EntityIdUtils.to(entity) : undefined;
-		} else if (entityType === 'item') {
+		} else if (type === 'item') {
 			const entity = getWorldItem(instanceId);
 			return entity ? EntityIdUtils.to(entity) : undefined;
-		} else if (entityType === 'character') {
+		} else if (type === 'character') {
 			const entity = getWorldCharacter(instanceId);
 			return entity ? EntityIdUtils.to(entity) : undefined;
 		}
