@@ -64,7 +64,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 			// explicit: interaction의 엔티티 템플릿이 현재 타겟과 다르면 클리어
 			else if (action.target_selection_method === 'explicit') {
 				if (entity.currentTargetEntityId) {
-					const shouldClearTarget = checkIfTargetMismatch(entity, action);
+					const shouldClearTarget = checkIfTargetMismatch.call(entity, action);
 					if (shouldClearTarget) {
 						entity.currentTargetEntityId = undefined;
 						entity.path = [];
@@ -112,12 +112,12 @@ function checkIfTargetMismatch(this: WorldCharacterEntity, action: BehaviorActio
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
-	const { getEntity, getTemplateId } = useWorld();
+	const { getEntity, getEntityTemplateCandidateId } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
 	const { type: entityType, instanceId } = EntityIdUtils.parse(this.currentTargetEntityId);
-	const worldEntity = getEntity(entityType, instanceId);
-	const targetTemplateId = worldEntity ? getTemplateId(worldEntity) : undefined;
+	const entity = getEntity(entityType, instanceId);
+	const targetTemplateId = entity ? getEntityTemplateCandidateId(EntityIdUtils.to(entity)) : undefined;
 
 	// action의 interaction에서 대상 엔티티 타입과 템플릿 ID
 	if (action.building_interaction_id) {

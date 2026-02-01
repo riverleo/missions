@@ -17,9 +17,8 @@ import type {
 	WorldItemId,
 	EntityId,
 	EntityType,
-	BuildingId,
-	ItemId,
-	CharacterId,
+	EntityInstance,
+	EntityTemplateCandidateId,
 } from '$lib/types';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
@@ -158,17 +157,17 @@ function createWorldStore() {
 	}
 
 	/**
-	 * WorldEntity로부터 템플릿 ID를 추출
+	 * EntityInstance로부터 템플릿 ID를 추출
 	 */
-	function getTemplateId(
-		worldEntity: WorldBuilding | WorldItem | WorldCharacter
-	): BuildingId | ItemId | CharacterId {
-		if ('building_id' in worldEntity) {
-			return worldEntity.building_id;
-		} else if ('item_id' in worldEntity) {
-			return worldEntity.item_id;
+	function getEntityTemplateCandidateId(entityInstance: EntityInstance): EntityTemplateCandidateId {
+		if (entityInstance.entityType === 'building') {
+			return entityInstance.building_id;
+		} else if (entityInstance.entityType === 'item') {
+			return entityInstance.item_id;
+		} else if (entityInstance.entityType === 'character') {
+			return entityInstance.character_id;
 		} else {
-			return worldEntity.character_id;
+			return entityInstance.id;
 		}
 	}
 
@@ -269,10 +268,7 @@ function createWorldStore() {
 			);
 
 			// WorldBuildingCondition 데이터 변환
-			const buildingConditionRecord: Record<
-				WorldBuildingConditionId,
-				WorldBuildingCondition
-			> = {};
+			const buildingConditionRecord: Record<WorldBuildingConditionId, WorldBuildingCondition> = {};
 			for (const condition of buildingConditionData ?? []) {
 				buildingConditionRecord[condition.id as WorldBuildingConditionId] =
 					condition as WorldBuildingCondition;
@@ -350,7 +346,7 @@ function createWorldStore() {
 		getAllWorldItems,
 		getAllWorldTileMaps,
 		getEntity,
-		getTemplateId,
+		getEntityTemplateCandidateId,
 	};
 }
 
