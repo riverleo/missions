@@ -106,8 +106,8 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 /**
  * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
  */
-function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAction): boolean {
-	if (!entity.currentTargetEntityId) return false;
+function checkIfTargetMismatch(this: WorldCharacterEntity, action: BehaviorAction): boolean {
+	if (!this.currentTargetEntityId) return false;
 
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
@@ -115,7 +115,7 @@ function checkIfTargetMismatch(entity: WorldCharacterEntity, action: BehaviorAct
 	const { getEntity, getTemplateId } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
-	const { type: entityType, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
+	const { type: entityType, instanceId } = EntityIdUtils.parse(this.currentTargetEntityId);
 	const worldEntity = getEntity(entityType, instanceId);
 	const targetTemplateId = worldEntity ? getTemplateId(worldEntity) : undefined;
 

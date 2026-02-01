@@ -157,7 +157,8 @@ export type EntityTemplate =
 export type EntityInstance =
 	| ({ entityType: 'building' } & WorldBuilding)
 	| ({ entityType: 'character' } & WorldCharacter)
-	| ({ entityType: 'item' } & WorldItem);
+	| ({ entityType: 'item' } & WorldItem)
+	| ({ entityType: 'tile' } & Tile);
 
 // ============================================================
 // World entity types
