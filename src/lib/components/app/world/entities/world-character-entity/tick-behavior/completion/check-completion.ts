@@ -7,16 +7,16 @@ import { useBehavior } from '$lib/hooks/use-behavior';
  */
 export default function checkActionCompletion(
 	entity: WorldCharacterEntity,
-	action: BehaviorAction,
-	currentTick: number
+	behaviorAction: BehaviorAction,
+	tick: number
 ): boolean {
 	// GO: path가 비면 완료
-	if (action.type === 'go') {
+	if (behaviorAction.type === 'go') {
 		return entity.path.length === 0;
 	}
 
 	// INTERACT: InteractionAction 체인이 완료되어야 함
-	if (action.type === 'interact') {
+	if (behaviorAction.type === 'interact') {
 		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
 		if (!entity.currentTargetEntityId) {
 			return !entity.currentInteractionTargetId;
@@ -37,17 +37,15 @@ export default function checkActionCompletion(
 	}
 
 	// FULFILL: 욕구/컨디션 충족 여부 확인
-	if (action.type === 'fulfill') {
-		const isNeedAction = 'need_id' in action;
+	if (behaviorAction.type === 'fulfill') {
+		const isNeedAction = behaviorAction.behaviorType === 'need';
 
 		if (isNeedAction) {
 			const { getAllNeedBehaviors } = useBehavior();
-			const behavior = getAllNeedBehaviors().find(
-				(b) => b.need_id === action.need_id
-			);
+			const behavior = getAllNeedBehaviors().find((b) => b.need_id === behaviorAction.need_id);
 			if (!behavior) return false;
 
-			const need = entity.worldCharacterNeeds[action.need_id];
+			const need = entity.worldCharacterNeeds[behaviorAction.need_id];
 			if (!need) return false;
 
 			// 욕구가 threshold를 넘으면 완료
@@ -59,8 +57,8 @@ export default function checkActionCompletion(
 	}
 
 	// IDLE: idle_duration_ticks 경과 확인
-	if (action.type === 'idle') {
-		return currentTick - entity.behaviorActionStartTick >= action.idle_duration_ticks;
+	if (behaviorAction.type === 'idle') {
+		return tick - entity.behaviorActionStartTick >= behaviorAction.idle_duration_ticks;
 	}
 
 	return false;

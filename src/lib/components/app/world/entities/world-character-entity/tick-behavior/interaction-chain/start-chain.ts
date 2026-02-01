@@ -1,8 +1,8 @@
 import type {
-	BuildingInteractionId,
-	ItemInteractionId,
-	CharacterInteractionId,
-	InteractionType,
+	Interaction,
+	BuildingInteractionAction,
+	ItemInteractionAction,
+	CharacterInteractionAction,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBuilding } from '$lib/hooks/use-building';
@@ -16,36 +16,27 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  */
 export default function startInteractionChain(
 	entity: WorldCharacterEntity,
-	interaction: any,
-	currentTick: number
+	interaction: Interaction,
+	tick: number
 ): boolean {
 	const { getBuildingInteractionActions } = useBuilding();
 	const { getItemInteractionActions } = useItem();
 	const { getCharacterInteractionActions } = useCharacter();
 
-	// Interaction 타입 및 ID 결정
-	let interactionType: InteractionType;
-	let interactionId: string;
-	let interactionActions: any[] = [];
+	// InteractionAction 가져오기
+	let interactionActions:
+		| BuildingInteractionAction[]
+		| ItemInteractionAction[]
+		| CharacterInteractionAction[] = [];
 
-	if (interaction.id && interaction.building_id !== undefined) {
-		// BuildingInteraction: store.data[interactionId]에 actions 배열이 저장됨
-		interactionType = 'building';
-		interactionId = interaction.id;
+	if (interaction.interactionType === 'building') {
 		const actions = getBuildingInteractionActions(interaction.id);
 		interactionActions = actions || [];
-	} else if (interaction.id && interaction.item_id !== undefined) {
-		// ItemInteraction
-		interactionType = 'item';
-		interactionId = interaction.id;
+	} else if (interaction.interactionType === 'item') {
 		const actions = getItemInteractionActions(interaction.id);
 		interactionActions = actions || [];
-	} else if (interaction.id && interaction.target_character_id !== undefined) {
-		// CharacterInteraction
-		interactionType = 'character';
-		interactionId = interaction.id;
-		const actions =
-			getCharacterInteractionActions(interaction.id);
+	} else if (interaction.interactionType === 'character') {
+		const actions = getCharacterInteractionActions(interaction.id);
 		interactionActions = actions || [];
 	} else {
 		return false;
@@ -54,15 +45,16 @@ export default function startInteractionChain(
 	// root action 찾기
 	const rootAction = interactionActions.find((a) => a.root);
 	if (!rootAction) {
-		// root가 없으면 order가 가장 낮은 것을 사용
+		// root가 없으면 첫 번째 액션 사용
 		if (interactionActions.length > 0) {
-			const firstAction = interactionActions.sort((a, b) => a.order - b.order)[0];
+			const firstAction = interactionActions[0];
+			if (!firstAction) return false;
 			entity.currentInteractionTargetId = InteractionIdUtils.create(
-				interactionType,
-				interactionId as any,
+				interaction.interactionType,
+				interaction.id as any,
 				firstAction.id
 			);
-			entity.interactionTargetStartTick = currentTick;
+			entity.interactionTargetStartTick = tick;
 			return true;
 		}
 		return false;
@@ -70,10 +62,10 @@ export default function startInteractionChain(
 
 	// 체인 시작
 	entity.currentInteractionTargetId = InteractionIdUtils.create(
-		interactionType,
-		interactionId as any,
+		interaction.interactionType,
+		interaction.id as any,
 		rootAction.id
 	);
-	entity.interactionTargetStartTick = currentTick;
+	entity.interactionTargetStartTick = tick;
 	return true;
 }

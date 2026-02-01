@@ -102,9 +102,14 @@ export type BehaviorTargetId =
 export type InteractionType = 'building' | 'item' | 'character';
 
 // Union types for interactions
-export type Interaction = BuildingInteraction | ItemInteraction | CharacterInteraction;
 export type InteractionId = BuildingInteractionId | ItemInteractionId | CharacterInteractionId;
 export type InteractionActionId = BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId;
+
+// Discriminated union for interactions
+export type Interaction =
+	| ({ interactionType: 'building' } & BuildingInteraction)
+	| ({ interactionType: 'item' } & ItemInteraction)
+	| ({ interactionType: 'character' } & CharacterInteraction);
 
 // Discriminated union for interaction actions
 export type InteractionAction =

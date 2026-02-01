@@ -17,6 +17,7 @@ import type {
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
 import { useItem } from '../use-item';
@@ -78,26 +79,26 @@ function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): En
 	if (behaviorAction.building_interaction_id) {
 		// 명시적 building interaction
 		const interaction = getBuildingInteraction(behaviorAction.building_interaction_id);
-		if (interaction) interactions.push(interaction);
+		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
 	} else if (behaviorAction.item_interaction_id) {
 		// 명시적 item interaction
 		const interaction = getItemInteraction(behaviorAction.item_interaction_id);
-		if (interaction) interactions.push(interaction);
+		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
 	} else if (behaviorAction.character_interaction_id) {
 		// 명시적 character interaction
 		const interaction = getCharacterInteraction(behaviorAction.character_interaction_id);
-		if (interaction) interactions.push(interaction);
+		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
 	} else {
 		// search: once_interaction_type이 있는 모든 Interactions
-		const buildingInteractions = getAllBuildingInteractions().filter(
-			(i) => i.once_interaction_type !== null
-		);
-		const itemInteractions = getAllItemInteractions().filter(
-			(i) => i.once_interaction_type !== null
-		);
-		const characterInteractions = getAllCharacterInteractions().filter(
-			(i) => i.once_interaction_type !== null
-		);
+		const buildingInteractions = getAllBuildingInteractions()
+			.filter((i) => i.once_interaction_type !== null)
+			.map(InteractionIdUtils.interaction.to);
+		const itemInteractions = getAllItemInteractions()
+			.filter((i) => i.once_interaction_type !== null)
+			.map(InteractionIdUtils.interaction.to);
+		const characterInteractions = getAllCharacterInteractions()
+			.filter((i) => i.once_interaction_type !== null)
+			.map(InteractionIdUtils.interaction.to);
 		interactions.push(...buildingInteractions, ...itemInteractions, ...characterInteractions);
 	}
 
@@ -151,17 +152,17 @@ function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): Ent
 		if (fulfillment.building_interaction_id) {
 			const interaction = getBuildingInteraction(fulfillment.building_interaction_id);
 			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(interaction);
+				interactions.push(InteractionIdUtils.interaction.to(interaction));
 			}
 		} else if (fulfillment.item_interaction_id) {
 			const interaction = getItemInteraction(fulfillment.item_interaction_id);
 			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(interaction);
+				interactions.push(InteractionIdUtils.interaction.to(interaction));
 			}
 		} else if (fulfillment.character_interaction_id) {
 			const interaction = getCharacterInteraction(fulfillment.character_interaction_id);
 			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(interaction);
+				interactions.push(InteractionIdUtils.interaction.to(interaction));
 			}
 		}
 	}
@@ -183,7 +184,7 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 	const templateMap = new Map<string, EntityTemplate>();
 
 	for (const interaction of interactions) {
-		if ('building_id' in interaction) {
+		if (interaction.interactionType === 'building') {
 			// BuildingInteraction
 			if (interaction.building_id) {
 				// 특정 건물
@@ -199,7 +200,7 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 					templateMap.set(b.id, template);
 				});
 			}
-		} else if ('item_id' in interaction) {
+		} else if (interaction.interactionType === 'item') {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
@@ -215,7 +216,7 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 					templateMap.set(i.id, template);
 				});
 			}
-		} else if ('target_character_id' in interaction) {
+		} else if (interaction.interactionType === 'character') {
 			// CharacterInteraction
 			if (interaction.target_character_id) {
 				// 특정 캐릭터

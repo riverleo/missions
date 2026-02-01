@@ -7,8 +7,8 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
  */
 export default function transitionToNextAction(
 	entity: WorldCharacterEntity,
-	action: BehaviorAction,
-	currentTick: number
+	behaviorAction: BehaviorAction,
+	tick: number
 ): void {
 	if (!entity.currentBehaviorTargetId) return;
 
@@ -20,14 +20,14 @@ export default function transitionToNextAction(
 
 	// 다음 액션 ID 가져오기
 	const nextActionId =
-		'next_need_behavior_action_id' in action
-			? action.next_need_behavior_action_id
-			: action.next_condition_behavior_action_id;
+		behaviorAction.behaviorType == 'need'
+			? behaviorAction.next_need_behavior_action_id
+			: behaviorAction.next_condition_behavior_action_id;
 
 	if (nextActionId) {
 		// 다음 액션으로 전환
 		entity.currentBehaviorTargetId = BehaviorIdUtils.create(type, behaviorId, nextActionId);
-		entity.behaviorActionStartTick = currentTick;
+		entity.behaviorActionStartTick = tick;
 	} else {
 		// 다음 액션이 없으면 행동 종료
 		entity.currentBehaviorTargetId = undefined;

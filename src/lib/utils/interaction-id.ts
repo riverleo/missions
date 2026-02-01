@@ -3,6 +3,7 @@ import type {
 	InteractionType,
 	InteractionId,
 	InteractionActionId,
+	Interaction,
 	InteractionAction,
 	BuildingInteractionId,
 	ItemInteractionId,
@@ -10,6 +11,9 @@ import type {
 	BuildingInteractionActionId,
 	ItemInteractionActionId,
 	CharacterInteractionActionId,
+	BuildingInteraction,
+	ItemInteraction,
+	CharacterInteraction,
 	BuildingInteractionAction,
 	ItemInteractionAction,
 	CharacterInteractionAction,
@@ -99,5 +103,25 @@ export const InteractionIdUtils = {
 			return { interactionType: 'item', ...data } as InteractionAction;
 		}
 		return { interactionType: 'character', ...data } as InteractionAction;
+	},
+
+	/**
+	 * Interaction 관련 유틸리티
+	 */
+	interaction: {
+		/**
+		 * Interaction 데이터를 Interaction discriminated union 타입으로 변환
+		 * @example
+		 * const interaction = InteractionIdUtils.interaction.to(buildingInteraction);
+		 */
+		to(data: BuildingInteraction | ItemInteraction | CharacterInteraction): Interaction {
+			if ('building_id' in data) {
+				return { interactionType: 'building', ...data } as Interaction;
+			}
+			if ('item_id' in data) {
+				return { interactionType: 'item', ...data } as Interaction;
+			}
+			return { interactionType: 'character', ...data } as Interaction;
+		},
 	},
 };
