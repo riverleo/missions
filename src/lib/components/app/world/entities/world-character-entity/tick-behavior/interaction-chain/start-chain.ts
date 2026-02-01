@@ -11,12 +11,13 @@ import { useCharacter } from '$lib/hooks/use-character';
 
 /**
  * InteractionAction 체인 시작 (root action 찾아서 설정)
+ * @returns {boolean} 체인이 시작되었는지 여부
  */
 export default function startInteractionChain(
 	entity: WorldCharacterEntity,
 	interaction: any,
 	currentTick: number
-): void {
+): boolean {
 	const { buildingInteractionActionStore } = useBuilding();
 	const { itemInteractionActionStore } = useItem();
 	const { characterInteractionActionStore } = useCharacter();

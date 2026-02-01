@@ -272,7 +272,7 @@ export type {
 	BulkChanges,
 	Supabase,
 	AppPayload,
-	BehaviorActionId,
+	BehaviorId,
 	BehaviorType,
 	EntityId,
 	EntityType,

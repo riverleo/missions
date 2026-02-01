@@ -57,8 +57,8 @@ export interface AppPayload {
 
 export type BehaviorType = 'need' | 'condition';
 
-// Runtime-only behavior action ID: "{behaviorType}_{behaviorId}_{actionId}"
-export type BehaviorActionId =
+// Runtime-only behavior ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
+export type BehaviorId =
 	| `need_${NeedBehaviorId}_${NeedBehaviorActionId}`
 	| `condition_${ConditionBehaviorId}_${ConditionBehaviorActionId}`;
 

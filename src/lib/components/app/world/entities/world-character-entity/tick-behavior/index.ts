@@ -1,5 +1,7 @@
 import { get } from 'svelte/store';
 import type {
+	NeedBehaviorId,
+	ConditionBehaviorId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
 	WorldBuildingId,
@@ -12,7 +14,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
-import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import searchTargetAndSetPath from './search-target';
 import executeGoAction from './actions/execute-go';
@@ -30,15 +32,15 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 	const { needBehaviorActionStore, conditionBehaviorActionStore } = useBehavior();
 
 	// 현재 행동 액션이 없으면 새로운 행동 선택
-	if (!entity.currentBehaviorActionId) {
+	if (!entity.currentBehaviorId) {
 		selectNewBehavior(entity, tick);
 		return;
 	}
 
 	// 현재 행동 액션 가져오기
-	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
+	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
 
-	const actionId = BehaviorActionIdUtils.actionId(entity.currentBehaviorActionId);
+	const actionId = BehaviorIdUtils.actionId(entity.currentBehaviorId);
 	const action =
 		type === 'need'
 			? get(needBehaviorActionStore).data[actionId as NeedBehaviorActionId]
@@ -46,7 +48,7 @@ export function tickBehavior(entity: WorldCharacterEntity, tick: number): void {
 
 	if (!action) {
 		// 액션을 찾을 수 없으면 행동 종료
-		entity.currentBehaviorActionId = undefined;
+		entity.currentBehaviorId = undefined;
 		return;
 	}
 

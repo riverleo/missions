@@ -8,7 +8,7 @@ import type {
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
-	BehaviorActionId,
+	BehaviorId,
 	EntityId,
 	BuildingInteractionActionId,
 	ItemInteractionActionId,
@@ -16,7 +16,7 @@ import type {
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { useWorld } from '$lib/hooks/use-world';
@@ -36,7 +36,7 @@ export class WorldCharacterEntity extends Entity {
 	direction: WorldCharacterEntityDirection = $state('right');
 	heldWorldItemIds = $state<WorldItemId[]>([]);
 	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
-	currentBehaviorActionId = $state<BehaviorActionId | undefined>(undefined);
+	currentBehaviorId = $state<BehaviorId | undefined>(undefined);
 	currentTargetEntityId = $state<EntityId | undefined>(undefined);
 	actionStartTick = $state<number>(0);
 	currentInteractionActionId = $state<

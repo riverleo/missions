@@ -15,7 +15,7 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useItem } from '$lib/hooks/use-item';
 	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { getBehaviorActionLabel } from '$lib/utils/state-label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
@@ -77,16 +77,16 @@
 
 	// 현재 행동 정보
 	const currentBehaviorInfo = $derived.by(() => {
-		if (!entity.currentBehaviorActionId) return undefined;
+		if (!entity.currentBehaviorId) return undefined;
 
-		const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
+		const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
 
 		if (type === 'need') {
-			const behaviorId = BehaviorActionIdUtils.behaviorId<NeedBehaviorId>(
-				entity.currentBehaviorActionId
+			const behaviorId = BehaviorIdUtils.behaviorId<NeedBehaviorId>(
+				entity.currentBehaviorId
 			);
-			const actionId = BehaviorActionIdUtils.actionId<NeedBehaviorActionId>(
-				entity.currentBehaviorActionId
+			const actionId = BehaviorIdUtils.actionId<NeedBehaviorActionId>(
+				entity.currentBehaviorId
 			);
 
 			const behavior = $needBehaviorStore.data[behaviorId];
@@ -124,11 +124,11 @@
 				actionLabel,
 			};
 		} else {
-			const behaviorId = BehaviorActionIdUtils.behaviorId<ConditionBehaviorId>(
-				entity.currentBehaviorActionId
+			const behaviorId = BehaviorIdUtils.behaviorId<ConditionBehaviorId>(
+				entity.currentBehaviorId
 			);
-			const actionId = BehaviorActionIdUtils.actionId<ConditionBehaviorActionId>(
-				entity.currentBehaviorActionId
+			const actionId = BehaviorIdUtils.actionId<ConditionBehaviorActionId>(
+				entity.currentBehaviorId
 			);
 
 			const behavior = $conditionBehaviorStore.data[behaviorId];

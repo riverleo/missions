@@ -8,7 +8,7 @@ import type {
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
-import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**
  * 새로운 행동을 선택 (우선순위 기반)
@@ -98,8 +98,8 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 		return;
 	}
 
-	// 5. currentBehaviorActionId 설정 및 시작 tick 기록
-	entity.currentBehaviorActionId = BehaviorActionIdUtils.create(
+	// 5. currentBehaviorId 설정 및 시작 tick 기록
+	entity.currentBehaviorId = BehaviorIdUtils.create(
 		selected.type,
 		selected.behaviorId,
 		rootAction.id

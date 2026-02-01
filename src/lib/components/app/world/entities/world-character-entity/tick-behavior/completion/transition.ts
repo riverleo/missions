@@ -1,5 +1,5 @@
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
-import { BehaviorActionIdUtils } from '$lib/utils/behavior-action-id';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**
  * 다음 액션으로 전환
@@ -9,10 +9,10 @@ export default function transitionToNextAction(
 	action: any,
 	currentTick: number
 ): void {
-	if (!entity.currentBehaviorActionId) return;
+	if (!entity.currentBehaviorId) return;
 
-	const { type } = BehaviorActionIdUtils.parse(entity.currentBehaviorActionId);
-	const behaviorId = BehaviorActionIdUtils.behaviorId(entity.currentBehaviorActionId);
+	const { type } = BehaviorIdUtils.parse(entity.currentBehaviorId);
+	const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorId);
 
 	// 현재 액션 완료 시 path 클리어 (타겟은 유지)
 	entity.path = [];
@@ -25,11 +25,11 @@ export default function transitionToNextAction(
 
 	if (nextActionId) {
 		// 다음 액션으로 전환
-		entity.currentBehaviorActionId = BehaviorActionIdUtils.create(type, behaviorId, nextActionId);
+		entity.currentBehaviorId = BehaviorIdUtils.create(type, behaviorId, nextActionId);
 		entity.actionStartTick = currentTick;
 	} else {
 		// 다음 액션이 없으면 행동 종료
-		entity.currentBehaviorActionId = undefined;
+		entity.currentBehaviorId = undefined;
 		entity.actionStartTick = 0;
 	}
 }
