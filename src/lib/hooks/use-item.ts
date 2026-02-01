@@ -196,22 +196,39 @@ function createItemStore() {
 	}
 
 	// Getter functions
-	function getItem(id: ItemId): Item | undefined {
-		return get(itemStore).data[id];
+	function getItem(id: string): Item | undefined {
+		return get(itemStore).data[id as ItemId];
 	}
 
-	function getItemStates(itemId: ItemId): ItemState[] | undefined {
-		return get(itemStateStore).data[itemId];
+	function getItemStates(itemId: string): ItemState[] | undefined {
+		return get(itemStateStore).data[itemId as ItemId];
 	}
 
-	function getItemInteraction(id: ItemInteractionId): ItemInteraction | undefined {
-		return get(itemInteractionStore).data[id];
+	function getItemInteraction(id: string): ItemInteraction | undefined {
+		return get(itemInteractionStore).data[id as ItemInteractionId];
 	}
 
 	function getItemInteractionActions(
-		itemInteractionId: ItemInteractionId
+		itemInteractionId: string
 	): ItemInteractionAction[] | undefined {
-		return get(itemInteractionActionStore).data[itemInteractionId];
+		return get(itemInteractionActionStore).data[itemInteractionId as ItemInteractionId];
+	}
+
+	// GetAll functions
+	function getAllItems(): Item[] {
+		return Object.values(get(itemStore).data);
+	}
+
+	function getAllItemStates(): Record<ItemId, ItemState[]> {
+		return get(itemStateStore).data;
+	}
+
+	function getAllItemInteractions(): ItemInteraction[] {
+		return Object.values(get(itemInteractionStore).data);
+	}
+
+	function getAllItemInteractionActions(): Record<ItemInteractionId, ItemInteractionAction[]> {
+		return get(itemInteractionActionStore).data;
 	}
 
 	const admin = {
@@ -512,6 +529,10 @@ function createItemStore() {
 		getItemStates,
 		getItemInteraction,
 		getItemInteractionActions,
+		getAllItems,
+		getAllItemStates,
+		getAllItemInteractions,
+		getAllItemInteractionActions,
 		admin,
 	};
 }

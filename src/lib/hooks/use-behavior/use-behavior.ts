@@ -193,24 +193,45 @@ function createBehaviorStore() {
 	}
 
 	// Getter functions
-	function getBehaviorPriority(id: BehaviorPriorityId): BehaviorPriority | undefined {
-		return get(behaviorPriorityStore).data[id];
+	function getBehaviorPriority(id: string): BehaviorPriority | undefined {
+		return get(behaviorPriorityStore).data[id as BehaviorPriorityId];
 	}
 
-	function getNeedBehavior(id: NeedBehaviorId): NeedBehavior | undefined {
-		return get(needBehaviorStore).data[id];
+	function getNeedBehavior(id: string): NeedBehavior | undefined {
+		return get(needBehaviorStore).data[id as NeedBehaviorId];
 	}
 
-	function getNeedBehaviorAction(id: NeedBehaviorActionId): NeedBehaviorAction | undefined {
-		return get(needBehaviorActionStore).data[id];
+	function getNeedBehaviorAction(id: string): NeedBehaviorAction | undefined {
+		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
 	}
 
-	function getConditionBehavior(id: ConditionBehaviorId): ConditionBehavior | undefined {
-		return get(conditionBehaviorStore).data[id];
+	function getConditionBehavior(id: string): ConditionBehavior | undefined {
+		return get(conditionBehaviorStore).data[id as ConditionBehaviorId];
 	}
 
-	function getConditionBehaviorAction(id: ConditionBehaviorActionId): ConditionBehaviorAction | undefined {
-		return get(conditionBehaviorActionStore).data[id];
+	function getConditionBehaviorAction(id: string): ConditionBehaviorAction | undefined {
+		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
+	}
+
+	// GetAll functions
+	function getAllBehaviorPriorities(): BehaviorPriority[] {
+		return Object.values(get(behaviorPriorityStore).data);
+	}
+
+	function getAllNeedBehaviors(): NeedBehavior[] {
+		return Object.values(get(needBehaviorStore).data);
+	}
+
+	function getAllNeedBehaviorActions(): NeedBehaviorAction[] {
+		return Object.values(get(needBehaviorActionStore).data);
+	}
+
+	function getAllConditionBehaviors(): ConditionBehavior[] {
+		return Object.values(get(conditionBehaviorStore).data);
+	}
+
+	function getAllConditionBehaviorActions(): ConditionBehaviorAction[] {
+		return Object.values(get(conditionBehaviorActionStore).data);
 	}
 
 	const admin = {
@@ -551,6 +572,11 @@ function createBehaviorStore() {
 		getNeedBehaviorAction,
 		getConditionBehavior,
 		getConditionBehaviorAction,
+		getAllBehaviorPriorities,
+		getAllNeedBehaviors,
+		getAllNeedBehaviorActions,
+		getAllConditionBehaviors,
+		getAllConditionBehaviorActions,
 		getBehavior,
 		addBehavior,
 		removeBehavior,

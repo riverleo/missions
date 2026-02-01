@@ -79,34 +79,61 @@ function createWorldStore() {
 	}
 
 	// Getter functions
-	function getWorld(id: WorldId): World | undefined {
-		return get(worldStore).data[id];
+	function getWorld(id: string): World | undefined {
+		return get(worldStore).data[id as WorldId];
 	}
 
-	function getWorldCharacter(id: WorldCharacterId): WorldCharacter | undefined {
-		return get(worldCharacterStore).data[id];
+	function getWorldCharacter(id: string): WorldCharacter | undefined {
+		return get(worldCharacterStore).data[id as WorldCharacterId];
 	}
 
-	function getWorldCharacterNeed(id: WorldCharacterNeedId): WorldCharacterNeed | undefined {
-		return get(worldCharacterNeedStore).data[id];
+	function getWorldCharacterNeed(id: string): WorldCharacterNeed | undefined {
+		return get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
 	}
 
-	function getWorldBuilding(id: WorldBuildingId): WorldBuilding | undefined {
-		return get(worldBuildingStore).data[id];
+	function getWorldBuilding(id: string): WorldBuilding | undefined {
+		return get(worldBuildingStore).data[id as WorldBuildingId];
 	}
 
-	function getWorldBuildingCondition(
-		id: WorldBuildingConditionId
-	): WorldBuildingCondition | undefined {
-		return get(worldBuildingConditionStore).data[id];
+	function getWorldBuildingCondition(id: string): WorldBuildingCondition | undefined {
+		return get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
 	}
 
-	function getWorldItem(id: WorldItemId): WorldItem | undefined {
-		return get(worldItemStore).data[id];
+	function getWorldItem(id: string): WorldItem | undefined {
+		return get(worldItemStore).data[id as WorldItemId];
 	}
 
-	function getWorldTileMap(worldId: WorldId): WorldTileMap | undefined {
-		return get(worldTileMapStore).data[worldId];
+	function getWorldTileMap(worldId: string): WorldTileMap | undefined {
+		return get(worldTileMapStore).data[worldId as WorldId];
+	}
+
+	// GetAll functions
+	function getAllWorlds(): World[] {
+		return Object.values(get(worldStore).data);
+	}
+
+	function getAllWorldCharacters(): WorldCharacter[] {
+		return Object.values(get(worldCharacterStore).data);
+	}
+
+	function getAllWorldCharacterNeeds(): WorldCharacterNeed[] {
+		return Object.values(get(worldCharacterNeedStore).data);
+	}
+
+	function getAllWorldBuildings(): WorldBuilding[] {
+		return Object.values(get(worldBuildingStore).data);
+	}
+
+	function getAllWorldBuildingConditions(): WorldBuildingCondition[] {
+		return Object.values(get(worldBuildingConditionStore).data);
+	}
+
+	function getAllWorldItems(): WorldItem[] {
+		return Object.values(get(worldItemStore).data);
+	}
+
+	function getAllWorldTileMaps(): WorldTileMap[] {
+		return Object.values(get(worldTileMapStore).data);
 	}
 
 	async function fetch() {
@@ -279,6 +306,13 @@ function createWorldStore() {
 		getWorldBuildingCondition,
 		getWorldItem,
 		getWorldTileMap,
+		getAllWorlds,
+		getAllWorldCharacters,
+		getAllWorldCharacterNeeds,
+		getAllWorldBuildings,
+		getAllWorldBuildingConditions,
+		getAllWorldItems,
+		getAllWorldTileMaps,
 	};
 }
 

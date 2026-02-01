@@ -303,42 +303,79 @@ function createCharacterStore() {
 	}
 
 	// Getter functions
-	function getCharacter(id: CharacterId): Character | undefined {
-		return get(characterStore).data[id];
+	function getCharacter(id: string): Character | undefined {
+		return get(characterStore).data[id as CharacterId];
 	}
 
-	function getCharacterFaceStates(characterId: CharacterId): CharacterFaceState[] | undefined {
-		return get(characterFaceStateStore).data[characterId];
+	function getCharacterFaceStates(characterId: string): CharacterFaceState[] | undefined {
+		return get(characterFaceStateStore).data[characterId as CharacterId];
 	}
 
-	function getCharacterInteraction(id: CharacterInteractionId): CharacterInteraction | undefined {
-		return get(characterInteractionStore).data[id];
+	function getCharacterInteraction(id: string): CharacterInteraction | undefined {
+		return get(characterInteractionStore).data[id as CharacterInteractionId];
 	}
 
 	function getCharacterInteractionActions(
-		characterInteractionId: CharacterInteractionId
+		characterInteractionId: string
 	): CharacterInteractionAction[] | undefined {
-		return get(characterInteractionActionStore).data[characterInteractionId];
+		return get(characterInteractionActionStore).data[characterInteractionId as CharacterInteractionId];
 	}
 
-	function getCharacterBody(id: CharacterBodyId): CharacterBody | undefined {
-		return get(characterBodyStore).data[id];
+	function getCharacterBody(id: string): CharacterBody | undefined {
+		return get(characterBodyStore).data[id as CharacterBodyId];
 	}
 
-	function getCharacterBodyStates(bodyId: CharacterBodyId): CharacterBodyState[] | undefined {
-		return get(characterBodyStateStore).data[bodyId];
+	function getCharacterBodyStates(bodyId: string): CharacterBodyState[] | undefined {
+		return get(characterBodyStateStore).data[bodyId as CharacterBodyId];
 	}
 
-	function getNeed(id: NeedId): Need | undefined {
-		return get(needStore).data[id];
+	function getNeed(id: string): Need | undefined {
+		return get(needStore).data[id as NeedId];
 	}
 
-	function getNeedFulfillment(id: NeedFulfillmentId): NeedFulfillment | undefined {
-		return get(needFulfillmentStore).data[id];
+	function getNeedFulfillment(id: string): NeedFulfillment | undefined {
+		return get(needFulfillmentStore).data[id as NeedFulfillmentId];
 	}
 
-	function getCharacterNeed(id: CharacterNeedId): CharacterNeed | undefined {
-		return get(characterNeedStore).data[id];
+	function getCharacterNeed(id: string): CharacterNeed | undefined {
+		return get(characterNeedStore).data[id as CharacterNeedId];
+	}
+
+	// GetAll functions
+	function getAllCharacters(): Character[] {
+		return Object.values(get(characterStore).data);
+	}
+
+	function getAllCharacterFaceStates(): Record<CharacterId, CharacterFaceState[]> {
+		return get(characterFaceStateStore).data;
+	}
+
+	function getAllCharacterInteractions(): CharacterInteraction[] {
+		return Object.values(get(characterInteractionStore).data);
+	}
+
+	function getAllCharacterInteractionActions(): Record<CharacterInteractionId, CharacterInteractionAction[]> {
+		return get(characterInteractionActionStore).data;
+	}
+
+	function getAllCharacterBodies(): CharacterBody[] {
+		return Object.values(get(characterBodyStore).data);
+	}
+
+	function getAllCharacterBodyStates(): Record<CharacterBodyId, CharacterBodyState[]> {
+		return get(characterBodyStateStore).data;
+	}
+
+	function getAllNeeds(): Need[] {
+		return Object.values(get(needStore).data);
+	}
+
+	function getAllNeedFulfillments(): NeedFulfillment[] {
+		return Object.values(get(needFulfillmentStore).data);
+	}
+
+	function getAllCharacterNeeds(): CharacterNeed[] {
+		return Object.values(get(characterNeedStore).data);
 	}
 
 	const admin = {
@@ -964,6 +1001,15 @@ function createCharacterStore() {
 		getNeed,
 		getNeedFulfillment,
 		getCharacterNeed,
+		getAllCharacters,
+		getAllCharacterFaceStates,
+		getAllCharacterInteractions,
+		getAllCharacterInteractionActions,
+		getAllCharacterBodies,
+		getAllCharacterBodyStates,
+		getAllNeeds,
+		getAllNeedFulfillments,
+		getAllCharacterNeeds,
 		admin,
 	};
 }

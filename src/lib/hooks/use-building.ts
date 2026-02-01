@@ -275,42 +275,79 @@ function createBuildingStore() {
 	}
 
 	// Getter functions
-	function getBuilding(id: BuildingId): Building | undefined {
-		return get(buildingStore).data[id];
+	function getBuilding(id: string): Building | undefined {
+		return get(buildingStore).data[id as BuildingId];
 	}
 
-	function getBuildingItem(id: BuildingItemId): BuildingItem | undefined {
-		return get(buildingItemStore).data[id];
+	function getBuildingItem(id: string): BuildingItem | undefined {
+		return get(buildingItemStore).data[id as BuildingItemId];
 	}
 
-	function getBuildingStates(buildingId: BuildingId): BuildingState[] | undefined {
-		return get(buildingStateStore).data[buildingId];
+	function getBuildingStates(buildingId: string): BuildingState[] | undefined {
+		return get(buildingStateStore).data[buildingId as BuildingId];
 	}
 
-	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction | undefined {
-		return get(buildingInteractionStore).data[id];
+	function getBuildingInteraction(id: string): BuildingInteraction | undefined {
+		return get(buildingInteractionStore).data[id as BuildingInteractionId];
 	}
 
 	function getBuildingInteractionActions(
-		buildingInteractionId: BuildingInteractionId
+		buildingInteractionId: string
 	): BuildingInteractionAction[] | undefined {
-		return get(buildingInteractionActionStore).data[buildingInteractionId];
+		return get(buildingInteractionActionStore).data[buildingInteractionId as BuildingInteractionId];
 	}
 
-	function getCondition(id: ConditionId): Condition | undefined {
-		return get(conditionStore).data[id];
+	function getCondition(id: string): Condition | undefined {
+		return get(conditionStore).data[id as ConditionId];
 	}
 
-	function getConditionFulfillment(id: ConditionFulfillmentId): ConditionFulfillment | undefined {
-		return get(conditionFulfillmentStore).data[id];
+	function getConditionFulfillment(id: string): ConditionFulfillment | undefined {
+		return get(conditionFulfillmentStore).data[id as ConditionFulfillmentId];
 	}
 
-	function getBuildingCondition(id: BuildingConditionId): BuildingCondition | undefined {
-		return get(buildingConditionStore).data[id];
+	function getBuildingCondition(id: string): BuildingCondition | undefined {
+		return get(buildingConditionStore).data[id as BuildingConditionId];
 	}
 
-	function getConditionEffect(id: ConditionEffectId): ConditionEffect | undefined {
-		return get(conditionEffectStore).data[id];
+	function getConditionEffect(id: string): ConditionEffect | undefined {
+		return get(conditionEffectStore).data[id as ConditionEffectId];
+	}
+
+	// GetAll functions
+	function getAllBuildings(): Building[] {
+		return Object.values(get(buildingStore).data);
+	}
+
+	function getAllBuildingItems(): BuildingItem[] {
+		return Object.values(get(buildingItemStore).data);
+	}
+
+	function getAllBuildingStates(): Record<BuildingId, BuildingState[]> {
+		return get(buildingStateStore).data;
+	}
+
+	function getAllBuildingInteractions(): BuildingInteraction[] {
+		return Object.values(get(buildingInteractionStore).data);
+	}
+
+	function getAllBuildingInteractionActions(): Record<BuildingInteractionId, BuildingInteractionAction[]> {
+		return get(buildingInteractionActionStore).data;
+	}
+
+	function getAllConditions(): Condition[] {
+		return Object.values(get(conditionStore).data);
+	}
+
+	function getAllConditionFulfillments(): ConditionFulfillment[] {
+		return Object.values(get(conditionFulfillmentStore).data);
+	}
+
+	function getAllBuildingConditions(): BuildingCondition[] {
+		return Object.values(get(buildingConditionStore).data);
+	}
+
+	function getAllConditionEffects(): ConditionEffect[] {
+		return Object.values(get(conditionEffectStore).data);
 	}
 
 	const admin = {
@@ -897,6 +934,15 @@ function createBuildingStore() {
 		getConditionFulfillment,
 		getBuildingCondition,
 		getConditionEffect,
+		getAllBuildings,
+		getAllBuildingItems,
+		getAllBuildingStates,
+		getAllBuildingInteractions,
+		getAllBuildingInteractionActions,
+		getAllConditions,
+		getAllConditionFulfillments,
+		getAllBuildingConditions,
+		getAllConditionEffects,
 		admin,
 	};
 }
