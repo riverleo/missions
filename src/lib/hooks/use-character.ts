@@ -304,7 +304,7 @@ function createCharacterStore() {
 
 	// Getter functions
 	function getCharacter(id: string): Character | undefined {
-		return getCharacter(id as CharacterId);
+		return get(characterStore).data[id as CharacterId];
 	}
 
 	function getCharacterFaceStates(characterId: string): CharacterFaceState[] | undefined {
@@ -312,7 +312,7 @@ function createCharacterStore() {
 	}
 
 	function getCharacterInteraction(id: string): CharacterInteraction | undefined {
-		return getCharacterInteraction(id as CharacterInteractionId);
+		return get(characterInteractionStore).data[id as CharacterInteractionId];
 	}
 
 	function getCharacterInteractionActions(
@@ -322,7 +322,7 @@ function createCharacterStore() {
 	}
 
 	function getCharacterBody(id: string): CharacterBody | undefined {
-		return getCharacterBody(id as CharacterBodyId);
+		return get(characterBodyStore).data[id as CharacterBodyId];
 	}
 
 	function getCharacterBodyStates(bodyId: string): CharacterBodyState[] | undefined {
@@ -330,15 +330,15 @@ function createCharacterStore() {
 	}
 
 	function getNeed(id: string): Need | undefined {
-		return getNeed(id as NeedId);
+		return get(needStore).data[id as NeedId];
 	}
 
 	function getNeedFulfillment(id: string): NeedFulfillment | undefined {
-		return getNeedFulfillment(id as NeedFulfillmentId);
+		return get(needFulfillmentStore).data[id as NeedFulfillmentId];
 	}
 
 	function getCharacterNeed(id: string): CharacterNeed | undefined {
-		return getCharacterNeed(id as CharacterNeedId);
+		return get(characterNeedStore).data[id as CharacterNeedId];
 	}
 
 	// GetAll functions

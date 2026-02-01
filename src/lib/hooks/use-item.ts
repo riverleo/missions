@@ -197,7 +197,7 @@ function createItemStore() {
 
 	// Getter functions
 	function getItem(id: string): Item | undefined {
-		return getItem(id as ItemId);
+		return get(itemStore).data[id as ItemId];
 	}
 
 	function getItemStates(itemId: string): ItemState[] | undefined {
@@ -205,7 +205,7 @@ function createItemStore() {
 	}
 
 	function getItemInteraction(id: string): ItemInteraction | undefined {
-		return getItemInteraction(id as ItemInteractionId);
+		return get(itemInteractionStore).data[id as ItemInteractionId];
 	}
 
 	function getItemInteractionActions(

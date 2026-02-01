@@ -276,11 +276,11 @@ function createBuildingStore() {
 
 	// Getter functions
 	function getBuilding(id: string): Building | undefined {
-		return getBuilding(id as BuildingId);
+		return get(buildingStore).data[id as BuildingId];
 	}
 
 	function getBuildingItem(id: string): BuildingItem | undefined {
-		return getBuildingItem(id as BuildingItemId);
+		return get(buildingItemStore).data[id as BuildingItemId];
 	}
 
 	function getBuildingStates(buildingId: string): BuildingState[] | undefined {
@@ -288,7 +288,7 @@ function createBuildingStore() {
 	}
 
 	function getBuildingInteraction(id: string): BuildingInteraction | undefined {
-		return getBuildingInteraction(id as BuildingInteractionId);
+		return get(buildingInteractionStore).data[id as BuildingInteractionId];
 	}
 
 	function getBuildingInteractionActions(
@@ -298,19 +298,19 @@ function createBuildingStore() {
 	}
 
 	function getCondition(id: string): Condition | undefined {
-		return getCondition(id as ConditionId);
+		return get(conditionStore).data[id as ConditionId];
 	}
 
 	function getConditionFulfillment(id: string): ConditionFulfillment | undefined {
-		return getConditionFulfillment(id as ConditionFulfillmentId);
+		return get(conditionFulfillmentStore).data[id as ConditionFulfillmentId];
 	}
 
 	function getBuildingCondition(id: string): BuildingCondition | undefined {
-		return getBuildingCondition(id as BuildingConditionId);
+		return get(buildingConditionStore).data[id as BuildingConditionId];
 	}
 
 	function getConditionEffect(id: string): ConditionEffect | undefined {
-		return getConditionEffect(id as ConditionEffectId);
+		return get(conditionEffectStore).data[id as ConditionEffectId];
 	}
 
 	// GetAll functions

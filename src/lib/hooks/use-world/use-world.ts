@@ -80,27 +80,27 @@ function createWorldStore() {
 
 	// Getter functions
 	function getWorld(id: string): World | undefined {
-		return getWorld(id as WorldId);
+		return get(worldStore).data[id as WorldId];
 	}
 
 	function getWorldCharacter(id: string): WorldCharacter | undefined {
-		return getWorldCharacter(id as WorldCharacterId);
+		return get(worldCharacterStore).data[id as WorldCharacterId];
 	}
 
 	function getWorldCharacterNeed(id: string): WorldCharacterNeed | undefined {
-		return getWorldCharacterNeed(id as WorldCharacterNeedId);
+		return get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
 	}
 
 	function getWorldBuilding(id: string): WorldBuilding | undefined {
-		return getWorldBuilding(id as WorldBuildingId);
+		return get(worldBuildingStore).data[id as WorldBuildingId];
 	}
 
 	function getWorldBuildingCondition(id: string): WorldBuildingCondition | undefined {
-		return getWorldBuildingCondition(id as WorldBuildingConditionId);
+		return get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
 	}
 
 	function getWorldItem(id: string): WorldItem | undefined {
-		return getWorldItem(id as WorldItemId);
+		return get(worldItemStore).data[id as WorldItemId];
 	}
 
 	function getWorldTileMap(worldId: string): WorldTileMap | undefined {

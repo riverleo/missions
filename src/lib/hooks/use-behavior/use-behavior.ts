@@ -194,23 +194,23 @@ function createBehaviorStore() {
 
 	// Getter functions
 	function getBehaviorPriority(id: string): BehaviorPriority | undefined {
-		return getBehaviorPriority(id as BehaviorPriorityId);
+		return get(behaviorPriorityStore).data[id as BehaviorPriorityId];
 	}
 
 	function getNeedBehavior(id: string): NeedBehavior | undefined {
-		return getNeedBehavior(id as NeedBehaviorId);
+		return get(needBehaviorStore).data[id as NeedBehaviorId];
 	}
 
 	function getNeedBehaviorAction(id: string): NeedBehaviorAction | undefined {
-		return getNeedBehaviorAction(id as NeedBehaviorActionId);
+		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
 	}
 
 	function getConditionBehavior(id: string): ConditionBehavior | undefined {
-		return getConditionBehavior(id as ConditionBehaviorId);
+		return get(conditionBehaviorStore).data[id as ConditionBehaviorId];
 	}
 
 	function getConditionBehaviorAction(id: string): ConditionBehaviorAction | undefined {
-		return getConditionBehaviorAction(id as ConditionBehaviorActionId);
+		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
 	}
 
 	// GetAll functions
