@@ -1,7 +1,10 @@
 import type {
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
-	EntityTemplate,
+	Building,
+	Character,
+	Item,
+	Tile,
 	BuildingInteraction,
 	ItemInteraction,
 	CharacterInteraction,
@@ -15,7 +18,6 @@ import type {
 	CharacterId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
-	BehaviorAction,
 } from '$lib/types';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
@@ -32,7 +34,9 @@ import { useBehavior } from '../use-behavior';
  * @param behaviorAction - 행동 액션 (NeedBehaviorAction 또는 ConditionBehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
-export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): EntityTemplate[] {
+export function getInteractableEntityTemplates(
+	behaviorAction: NeedBehaviorAction | ConditionBehaviorAction
+): (Building | Character | Item | Tile)[] {
 	// NeedBehaviorAction인지 확인
 	const isNeedAction = 'need_id' in behaviorAction;
 
@@ -72,7 +76,9 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
 /**
  * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
-function getInteractableTemplatesForInteract(action: BehaviorAction): EntityTemplate[] {
+function getInteractableTemplatesForInteract(
+	action: NeedBehaviorAction | ConditionBehaviorAction
+): (Building | Character | Item | Tile)[] {
 	const { getBuildingInteraction, getAllBuildingInteractions } = useBuilding();
 	const { getAllItemInteractions, getItemInteraction } = useItem();
 	const { getCharacterInteraction, getAllCharacterInteractions } = useCharacter();
@@ -118,9 +124,9 @@ function getInteractableTemplatesForInteract(action: BehaviorAction): EntityTemp
  * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForFulfill(
-	action: BehaviorAction,
+	action: NeedBehaviorAction | ConditionBehaviorAction,
 	isNeedAction: boolean
-): EntityTemplate[] {
+): (Building | Character | Item | Tile)[] {
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
@@ -194,13 +200,13 @@ function getInteractableTemplatesForFulfill(
  */
 function interactionsToTemplates(
 	interactions: (BuildingInteraction | ItemInteraction | CharacterInteraction)[]
-): EntityTemplate[] {
+): (Building | Character | Item | Tile)[] {
 	const { getBuilding, getAllBuildings } = useBuilding();
 	const { getAllItems, getItem } = useItem();
 	const { getAllCharacters, getCharacter } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
-	const templateMap = new Map<string, EntityTemplate>();
+	const templateMap = new Map<string, Building | Character | Item | Tile>();
 
 	for (const interaction of interactions) {
 		if ('building_id' in interaction) {
@@ -243,7 +249,7 @@ function interactionsToTemplates(
  * 다음 액션을 조회합니다.
  */
 function getNextBehaviorAction(
-	action: BehaviorAction,
+	action: NeedBehaviorAction | ConditionBehaviorAction,
 	isNeedAction: boolean
 ): (NeedBehaviorAction | ConditionBehaviorAction) | undefined {
 	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
@@ -264,12 +270,12 @@ function getNextBehaviorAction(
 /**
  * 모든 엔티티 템플릿을 반환합니다.
  */
-function getAllEntityTemplates(): EntityTemplate[] {
+function getAllEntityTemplates(): (Building | Character | Item | Tile)[] {
 	const { getAllBuildings } = useBuilding();
 	const { getAllItems } = useItem();
 	const { getAllCharacters } = useCharacter();
 
-	const templates: EntityTemplate[] = [];
+	const templates: (Building | Character | Item | Tile)[] = [];
 
 	// 모든 건물
 	templates.push(...getAllBuildings());
