@@ -3,12 +3,16 @@ import type {
 	InteractionType,
 	InteractionId,
 	InteractionActionId,
+	InteractionAction,
 	BuildingInteractionId,
 	ItemInteractionId,
 	CharacterInteractionId,
 	BuildingInteractionActionId,
 	ItemInteractionActionId,
 	CharacterInteractionActionId,
+	BuildingInteractionAction,
+	ItemInteractionAction,
+	CharacterInteractionAction,
 } from '$lib/types';
 
 export const InteractionIdUtils = {
@@ -80,5 +84,20 @@ export const InteractionIdUtils = {
 	 */
 	is(type: InteractionType, interactionTargetId: InteractionTargetId | undefined): boolean {
 		return interactionTargetId?.startsWith(`${type}_`) ?? false;
+	},
+
+	/**
+	 * InteractionAction 데이터를 InteractionAction 타입으로 변환
+	 * @example
+	 * const interactionAction = InteractionIdUtils.to(buildingInteractionAction);
+	 */
+	to(data: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction): InteractionAction {
+		if ('building_interaction_id' in data) {
+			return { interactionType: 'building', ...data } as InteractionAction;
+		}
+		if ('item_interaction_id' in data) {
+			return { interactionType: 'item', ...data } as InteractionAction;
+		}
+		return { interactionType: 'character', ...data } as InteractionAction;
 	},
 };

@@ -5,7 +5,15 @@ import type {
 	EntityInstanceId,
 	EntityTemplateCandidateId,
 	EntityInstance,
+	EntityTemplate,
 	WorldId,
+	WorldBuilding,
+	WorldCharacter,
+	WorldItem,
+	Building,
+	Character,
+	Item,
+	Tile,
 } from '$lib/types';
 
 function createEntityId(type: EntityType, worldId: WorldId, id: EntityInstanceId): EntityId;
@@ -117,6 +125,21 @@ export const EntityIdUtils = {
 	createId: createEntityId,
 
 	/**
+	 * EntityInstance 데이터를 EntityInstance 타입으로 변환
+	 * @example
+	 * const entityInstance = EntityIdUtils.to(worldCharacter);
+	 */
+	to(data: WorldBuilding | WorldCharacter | WorldItem): EntityInstance {
+		if ('building_id' in data) {
+			return { entityType: 'building', ...data } as EntityInstance;
+		}
+		if ('character_id' in data) {
+			return { entityType: 'character', ...data } as EntityInstance;
+		}
+		return { entityType: 'item', ...data } as EntityInstance;
+	},
+
+	/**
 	 * EntityTemplateId 유틸리티
 	 */
 	template: {
@@ -167,6 +190,24 @@ export const EntityIdUtils = {
 		 */
 		or(types: EntityType[], templateId: EntityTemplateId | undefined): boolean {
 			return types.some((type) => this.is(type, templateId));
+		},
+
+		/**
+		 * EntityTemplate 데이터를 EntityTemplate 타입으로 변환
+		 * @example
+		 * const entityTemplate = EntityIdUtils.template.to(building);
+		 */
+		to(data: Building | Character | Item | Tile): EntityTemplate {
+			if ('building_type' in data) {
+				return { entityType: 'building', ...data } as EntityTemplate;
+			}
+			if ('character_type' in data) {
+				return { entityType: 'character', ...data } as EntityTemplate;
+			}
+			if ('item_type' in data) {
+				return { entityType: 'item', ...data } as EntityTemplate;
+			}
+			return { entityType: 'tile', ...data } as EntityTemplate;
 		},
 	},
 };

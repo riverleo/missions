@@ -3,10 +3,13 @@ import type {
 	BehaviorType,
 	BehaviorId,
 	BehaviorActionId,
+	BehaviorAction,
 	NeedBehaviorId,
 	ConditionBehaviorId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
+	NeedBehaviorAction,
+	ConditionBehaviorAction,
 } from '$lib/types';
 
 export const BehaviorIdUtils = {
@@ -78,5 +81,17 @@ export const BehaviorIdUtils = {
 	 */
 	is(type: BehaviorType, behaviorTargetId: BehaviorTargetId | undefined): boolean {
 		return behaviorTargetId?.startsWith(`${type}_`) ?? false;
+	},
+
+	/**
+	 * NeedBehaviorAction 또는 ConditionBehaviorAction을 BehaviorAction 타입으로 변환
+	 * @example
+	 * const behaviorAction = BehaviorIdUtils.to(needBehaviorAction);
+	 */
+	to(data: NeedBehaviorAction | ConditionBehaviorAction): BehaviorAction {
+		if ('need_id' in data) {
+			return { behaviorType: 'need', ...data } as BehaviorAction;
+		}
+		return { behaviorType: 'condition', ...data } as BehaviorAction;
 	},
 };

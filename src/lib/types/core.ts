@@ -76,8 +76,12 @@ export type BehaviorType = 'need' | 'condition';
 // Union types for behaviors
 export type Behavior = NeedBehavior | ConditionBehavior;
 export type BehaviorId = NeedBehaviorId | ConditionBehaviorId;
-export type BehaviorAction = NeedBehaviorAction | ConditionBehaviorAction;
 export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
+
+// Discriminated union for behavior actions
+export type BehaviorAction =
+	| ({ behaviorType: 'need' } & NeedBehaviorAction)
+	| ({ behaviorType: 'condition' } & ConditionBehaviorAction);
 
 // Runtime-only behavior target ID: "{behaviorType}_{behaviorId}_{behaviorActionId}"
 export type BehaviorTargetId =
@@ -90,8 +94,13 @@ export type InteractionType = 'building' | 'item' | 'character';
 // Union types for interactions
 export type Interaction = BuildingInteraction | ItemInteraction | CharacterInteraction;
 export type InteractionId = BuildingInteractionId | ItemInteractionId | CharacterInteractionId;
-export type InteractionAction = BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction;
 export type InteractionActionId = BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId;
+
+// Discriminated union for interaction actions
+export type InteractionAction =
+	| ({ interactionType: 'building' } & BuildingInteractionAction)
+	| ({ interactionType: 'item' } & ItemInteractionAction)
+	| ({ interactionType: 'character' } & CharacterInteractionAction);
 
 // Runtime-only interaction target ID: "{interactionType}_{interactionId}_{interactionActionId}"
 export type InteractionTargetId =
@@ -120,10 +129,20 @@ export type EntityTemplateId =
 	| `tile_${TileId}`;
 
 // Instance types for EntityId and EntityTemplateId
-export type EntityTemplate = Building | Character | Item | Tile;
 export type EntityTemplateCandidateId = BuildingId | CharacterId | ItemId | TileId;
-export type EntityInstance = WorldBuilding | WorldCharacter | WorldItem;
 export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
+
+// Discriminated unions for entity templates and instances
+export type EntityTemplate =
+	| ({ entityType: 'building' } & Building)
+	| ({ entityType: 'character' } & Character)
+	| ({ entityType: 'item' } & Item)
+	| ({ entityType: 'tile' } & Tile);
+
+export type EntityInstance =
+	| ({ entityType: 'building' } & WorldBuilding)
+	| ({ entityType: 'character' } & WorldCharacter)
+	| ({ entityType: 'item' } & WorldItem);
 
 // ============================================================
 // World entity types
