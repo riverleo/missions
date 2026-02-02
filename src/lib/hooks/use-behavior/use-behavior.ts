@@ -298,7 +298,9 @@ function createBehaviorStore() {
 		});
 	}
 
-	function getRootBehaviorAction(behavior: Behavior): BehaviorAction | undefined {
+	function getRootBehaviorAction(behavior: Behavior | undefined): BehaviorAction | undefined {
+		if (behavior === undefined) return;
+
 		if (behavior.behaviorType === 'need') {
 			const needAction = getAllNeedBehaviorActions().find(
 				(action) => action.need_behavior_id === behavior.id && action.root

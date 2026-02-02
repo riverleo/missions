@@ -150,35 +150,69 @@ function createWorldStore() {
 	/**
 	 * EntityId로부터 EntityInstance를 반환
 	 */
-	function getEntityInstance(entityId: EntityId): EntityInstance | undefined {
+	function getEntityInstance(entityId: EntityId): EntityInstance {
 		const { type, instanceId } = EntityIdUtils.parse(entityId);
 
+		let entity: EntityInstance | undefined;
+
 		if (type === 'building') {
-			const entity = getWorldBuilding(instanceId);
-			return entity ? EntityIdUtils.to(entity) : undefined;
+			const worldBuilding = getWorldBuilding(instanceId);
+			entity = worldBuilding ? EntityIdUtils.to(worldBuilding) : undefined;
 		} else if (type === 'item') {
-			const entity = getWorldItem(instanceId);
-			return entity ? EntityIdUtils.to(entity) : undefined;
+			const worldItem = getWorldItem(instanceId);
+			entity = worldItem ? EntityIdUtils.to(worldItem) : undefined;
 		} else if (type === 'character') {
-			const entity = getWorldCharacter(instanceId);
-			return entity ? EntityIdUtils.to(entity) : undefined;
+			const worldCharacter = getWorldCharacter(instanceId);
+			entity = worldCharacter ? EntityIdUtils.to(worldCharacter) : undefined;
 		}
-		return undefined;
+
+		if (!entity) {
+			throw new Error(`Entity not found: ${entityId}`);
+		}
+
+		return entity;
 	}
 
 	/**
-	 * EntityInstance로부터 템플릿 ID를 추출
+	 * EntityId, EntityInstance, 또는 BehaviorAction으로부터 템플릿 ID를 추출
 	 */
-	function getEntitySourceId(entityInstance: EntityInstance): EntitySourceId {
-		if (entityInstance.entityType === 'building') {
-			return entityInstance.building_id;
-		} else if (entityInstance.entityType === 'item') {
-			return entityInstance.item_id;
-		} else if (entityInstance.entityType === 'character') {
-			return entityInstance.character_id;
-		} else {
-			return entityInstance.id;
+	function getEntitySourceId(entityId: EntityId): EntitySourceId;
+	function getEntitySourceId(entityInstance: EntityInstance): EntitySourceId;
+	function getEntitySourceId(behaviorAction: BehaviorAction): EntitySourceId | undefined;
+	function getEntitySourceId(
+		data: EntityId | EntityInstance | BehaviorAction
+	): EntitySourceId | undefined {
+		// EntityId인 경우
+		if (typeof data === 'string') {
+			const entityInstance = getEntityInstance(data);
+			return getEntitySourceId(entityInstance);
 		}
+
+		// EntityInstance인 경우
+		if ('entityType' in data) {
+			if (data.entityType === 'building') {
+				return data.building_id;
+			} else if (data.entityType === 'item') {
+				return data.item_id;
+			} else if (data.entityType === 'character') {
+				return data.character_id;
+			} else {
+				return data.id;
+			}
+		}
+
+		// BehaviorAction인 경우
+		const interaction = getInteraction(data);
+		if (!interaction) return undefined;
+
+		if (interaction.interactionType === 'building') {
+			return interaction.building_id ?? undefined;
+		} else if (interaction.interactionType === 'item') {
+			return interaction.item_id ?? undefined;
+		} else if (interaction.interactionType === 'character') {
+			return interaction.target_character_id ?? undefined;
+		}
+		return undefined;
 	}
 
 	/**

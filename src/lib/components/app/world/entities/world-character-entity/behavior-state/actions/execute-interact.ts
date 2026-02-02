@@ -54,7 +54,7 @@ export default function executeInteractAction(
 			targetEntity.y - worldCharacterEntity.y
 		);
 
-		if (distance >= 100) {
+		if (distance >= 50) {
 			// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
 			if (worldCharacterEntity.behaviorState.path.length === 0) {
 				const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
