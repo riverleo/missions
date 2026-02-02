@@ -118,7 +118,7 @@ export default function searchTargetAndSetPath(
 					worldCharacterEntity.worldContext.worldId,
 					heldItemId
 				);
-				worldCharacterEntity.behaviorState.entityId = heldItemEntityId;
+				worldCharacterEntity.behaviorState.targetEntityId = heldItemEntityId;
 				worldCharacterEntity.behaviorState.path = []; // 들고 있는 아이템은 경로 불필요
 				return; // 검색 종료
 			}
@@ -176,7 +176,7 @@ export default function searchTargetAndSetPath(
 		);
 
 		if (testPath.length > 0) {
-			worldCharacterEntity.behaviorState.entityId = targetEntity.id;
+			worldCharacterEntity.behaviorState.targetEntityId = targetEntity.id;
 			worldCharacterEntity.behaviorState.path = testPath;
 		}
 	}

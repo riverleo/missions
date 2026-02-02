@@ -18,12 +18,12 @@ export default function checkActionCompletion(
 	// INTERACT: InteractionAction 체인이 완료되어야 함
 	if (behaviorAction.type === 'interact') {
 		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
-		if (!worldCharacterEntity.behaviorState.entityId) {
+		if (!worldCharacterEntity.behaviorState.targetEntityId) {
 			return !worldCharacterEntity.behaviorState.interactionTargetId;
 		}
 
 		const targetEntity =
-			worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.entityId];
+			worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.targetEntityId];
 		// 타겟 엔티티가 없으면: 이미 완료됨 (아이템을 주워서 엔티티 제거된 경우)
 		if (!targetEntity) {
 			return !worldCharacterEntity.behaviorState.interactionTargetId;

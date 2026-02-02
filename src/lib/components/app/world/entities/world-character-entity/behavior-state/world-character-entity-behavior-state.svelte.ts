@@ -30,15 +30,15 @@ export class WorldCharacterEntityBehaviorState {
 	/** 캐릭터 방향 */
 	direction = $state<WorldCharacterEntityDirection>('right');
 	/** 현재 타겟 엔티티 ID */
-	entityId = $state<EntityId | undefined>(undefined);
+	targetEntityId = $state<EntityId | undefined>();
 	/** 현재 행동 타겟 ID */
-	behaviorTargetId = $state<BehaviorTargetId | undefined>(undefined);
+	behaviorTargetId = $state<BehaviorTargetId | undefined>();
 	/** 행동 타겟 시작 틱 */
-	behaviorTargetStartTick = $state<number | undefined>(undefined);
+	behaviorTargetStartTick = $state<number | undefined>();
 	/** 현재 인터랙션 타겟 ID */
-	interactionTargetId = $state<InteractionTargetId | undefined>(undefined);
+	interactionTargetId = $state<InteractionTargetId | undefined>();
 	/** 인터랙션 시작 틱 */
-	interactionStartTick = $state<number | undefined>(undefined);
+	interactionStartTick = $state<number | undefined>();
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
@@ -50,7 +50,7 @@ export class WorldCharacterEntityBehaviorState {
 	clear(): void {
 		this.path = [];
 		this.direction = 'right';
-		this.entityId = undefined;
+		this.targetEntityId = undefined;
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
 		this.interactionTargetId = undefined;
@@ -160,15 +160,15 @@ export class WorldCharacterEntityBehaviorState {
 			) {
 				// search: 무조건 새로 탐색
 				if (behaviorAction.target_selection_method === 'search') {
-					this.entityId = undefined;
+					this.targetEntityId = undefined;
 					this.path = [];
 				}
 				// explicit: interaction의 엔티티 템플릿이 현재 타겟과 다르면 클리어
 				else if (behaviorAction.target_selection_method === 'explicit') {
-					if (this.entityId) {
+					if (this.targetEntityId) {
 						const shouldClearTarget = this.checkIfTargetMismatch(behaviorAction);
 						if (shouldClearTarget) {
-							this.entityId = undefined;
+							this.targetEntityId = undefined;
 							this.path = [];
 						}
 					}
@@ -183,7 +183,7 @@ export class WorldCharacterEntityBehaviorState {
 				behaviorAction.type === 'interact' ||
 				behaviorAction.type === 'fulfill') &&
 			this.path.length === 0 &&
-			!this.entityId
+			!this.targetEntityId
 		) {
 			searchTargetAndSetPath(this.worldCharacterEntity, behaviorAction);
 			return; // 경로 설정 후 다음 tick에서 실행
@@ -211,12 +211,12 @@ export class WorldCharacterEntityBehaviorState {
 	 * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
 	 */
 	private checkIfTargetMismatch(behaviorAction: BehaviorAction): boolean {
-		if (!this.entityId) return false;
+		if (!this.targetEntityId) return false;
 
 		const { getEntityInstance, getEntityTemplateCandidateId, getInteraction } = useWorld();
 
 		// 현재 타겟의 엔티티 타입과 템플릿 ID
-		const entityInstance = getEntityInstance(this.entityId);
+		const entityInstance = getEntityInstance(this.targetEntityId);
 		if (!entityInstance) return false;
 
 		const targetTemplateId = getEntityTemplateCandidateId(entityInstance);

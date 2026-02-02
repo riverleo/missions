@@ -82,14 +82,14 @@ export default function executeFulfillAction(
 	}
 
 	// 타겟 엔티티 확인
-	if (!worldCharacterEntity.behaviorState.entityId) {
+	if (!worldCharacterEntity.behaviorState.targetEntityId) {
 		return;
 	}
 
 	const targetEntity =
-		worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.entityId];
+		worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.targetEntityId];
 	const { type: targetType, instanceId: targetInstanceId } = EntityIdUtils.parse(
-		worldCharacterEntity.behaviorState.entityId
+		worldCharacterEntity.behaviorState.targetEntityId
 	);
 
 	// 타겟 엔티티가 없는 경우: 들고 있는 아이템일 수 있음 (이미 주워서 월드에서 제거됨)
@@ -103,7 +103,7 @@ export default function executeFulfillAction(
 			isHeldItem = true;
 		} else {
 			// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-			worldCharacterEntity.behaviorState.entityId = undefined;
+			worldCharacterEntity.behaviorState.targetEntityId = undefined;
 			worldCharacterEntity.behaviorState.path = [];
 			return;
 		}
@@ -196,7 +196,7 @@ export default function executeFulfillAction(
 					worldCharacterEntity.behaviorState.path = testPath;
 				} else {
 					// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
-					worldCharacterEntity.behaviorState.entityId = undefined;
+					worldCharacterEntity.behaviorState.targetEntityId = undefined;
 				}
 			}
 			return;

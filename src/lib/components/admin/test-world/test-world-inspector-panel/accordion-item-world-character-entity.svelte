@@ -51,9 +51,9 @@
 
 	// 현재 대상 이름
 	const currentTargetName = $derived.by(() => {
-		if (!entity.behaviorState.entityId) return undefined;
+		if (!entity.behaviorState.targetEntityId) return undefined;
 
-		const { type, instanceId } = EntityIdUtils.parse(entity.behaviorState.entityId);
+		const { type, instanceId } = EntityIdUtils.parse(entity.behaviorState.targetEntityId);
 
 		if (type === 'building') {
 			const worldBuilding = $worldBuildingStore.data[instanceId as WorldBuildingId];
