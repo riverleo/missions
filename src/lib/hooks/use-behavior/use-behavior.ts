@@ -1,11 +1,14 @@
 import { get, writable, type Readable } from 'svelte/store';
 import { produce } from 'immer';
+import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import type {
 	RecordFetchState,
 	BehaviorPriority,
 	BehaviorPriorityInsert,
 	BehaviorPriorityUpdate,
 	BehaviorPriorityId,
+	Behavior,
+	BehaviorAction,
 	NeedBehavior,
 	NeedBehaviorInsert,
 	NeedBehaviorUpdate,
@@ -24,9 +27,10 @@ import type {
 	ConditionBehaviorActionId,
 	ScenarioId,
 	WorldCharacterId,
+	BehaviorTargetId,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
-import type { Behavior } from '$lib/components/app/world/behaviors';
+import type { Behavior as WorldBehavior } from '$lib/components/app/world/behaviors';
 import { getInteractableEntityTemplates } from './get-interactable-entity-templates';
 
 type BehaviorPriorityDialogState =
@@ -48,7 +52,7 @@ type ConditionBehaviorDialogState =
 	| undefined;
 
 // Runtime behavior instance management
-const behaviorInstanceMap = new Map<WorldCharacterId, Behavior[]>();
+const behaviorInstanceMap = new Map<WorldCharacterId, WorldBehavior[]>();
 
 let instance: ReturnType<typeof createBehaviorStore> | null = null;
 
@@ -148,9 +152,13 @@ function createBehaviorStore() {
 				conditionBehaviorRecord[item.id as ConditionBehaviorId] = item as ConditionBehavior;
 			}
 
-			const conditionBehaviorActionRecord: Record<ConditionBehaviorActionId, ConditionBehaviorAction> = {};
+			const conditionBehaviorActionRecord: Record<
+				ConditionBehaviorActionId,
+				ConditionBehaviorAction
+			> = {};
 			for (const item of conditionBehaviorActionsResult.data ?? []) {
-				conditionBehaviorActionRecord[item.id as ConditionBehaviorActionId] = item as ConditionBehaviorAction;
+				conditionBehaviorActionRecord[item.id as ConditionBehaviorActionId] =
+					item as ConditionBehaviorAction;
 			}
 
 			behaviorPriorityStore.set({ status: 'success', data: priorityRecord });
@@ -213,6 +221,18 @@ function createBehaviorStore() {
 		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
 	}
 
+	function getBehaviorAction(behaviorTargetId: BehaviorTargetId): BehaviorAction | undefined {
+		const { type } = BehaviorIdUtils.parse(behaviorTargetId);
+		const behaviorActionId = BehaviorIdUtils.behaviorActionId(behaviorTargetId);
+
+		const plainAction =
+			type === 'need'
+				? getNeedBehaviorAction(behaviorActionId)
+				: getConditionBehaviorAction(behaviorActionId);
+
+		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
+	}
+
 	// GetAll functions
 	function getAllBehaviorPriorities(): BehaviorPriority[] {
 		return Object.values(get(behaviorPriorityStore).data);
@@ -234,9 +254,28 @@ function createBehaviorStore() {
 		return Object.values(get(conditionBehaviorActionStore).data);
 	}
 
+	function getAllBehaviors(): Behavior[] {
+		const needBehaviors = getAllNeedBehaviors().map((b) => BehaviorIdUtils.behavior.to(b));
+		const conditionBehaviors = getAllConditionBehaviors().map((b) =>
+			BehaviorIdUtils.behavior.to(b)
+		);
+		return [...needBehaviors, ...conditionBehaviors];
+	}
+
+	function getAllBehaviorActions(): BehaviorAction[] {
+		const needBehaviorActions = getAllNeedBehaviorActions().map((a) => BehaviorIdUtils.to(a));
+		const conditionBehaviorActions = getAllConditionBehaviorActions().map((a) =>
+			BehaviorIdUtils.to(a)
+		);
+		return [...needBehaviorActions, ...conditionBehaviorActions];
+	}
+
 	const admin = {
 		// BehaviorPriority CRUD
-		async createBehaviorPriority(scenarioId: ScenarioId, priority: Omit<BehaviorPriorityInsert, 'scenario_id'>) {
+		async createBehaviorPriority(
+			scenarioId: ScenarioId,
+			priority: Omit<BehaviorPriorityInsert, 'scenario_id'>
+		) {
 			const result = await supabase
 				.from('behavior_priorities')
 				.insert({ ...priority, scenario_id: scenarioId })
@@ -290,7 +329,10 @@ function createBehaviorStore() {
 		},
 
 		// NeedBehavior CRUD
-		async createNeedBehavior(scenarioId: ScenarioId, behavior: Omit<NeedBehaviorInsert, 'scenario_id'>) {
+		async createNeedBehavior(
+			scenarioId: ScenarioId,
+			behavior: Omit<NeedBehaviorInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('need_behaviors')
 				.insert({ ...behavior, scenario_id: scenarioId })
@@ -346,7 +388,10 @@ function createBehaviorStore() {
 		},
 
 		// NeedBehaviorAction CRUD
-		async createNeedBehaviorAction(scenarioId: ScenarioId, action: Omit<NeedBehaviorActionInsert, 'scenario_id'>) {
+		async createNeedBehaviorAction(
+			scenarioId: ScenarioId,
+			action: Omit<NeedBehaviorActionInsert, 'scenario_id'>
+		) {
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
 			const existingActions = getAllNeedBehaviorActions();
 			const isFirstAction = !existingActions.some((a) => a.behavior_id === action.behavior_id);
@@ -395,7 +440,10 @@ function createBehaviorStore() {
 		},
 
 		// ConditionBehavior CRUD
-		async createConditionBehavior(scenarioId: ScenarioId, behavior: Omit<ConditionBehaviorInsert, 'scenario_id'>) {
+		async createConditionBehavior(
+			scenarioId: ScenarioId,
+			behavior: Omit<ConditionBehaviorInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('condition_behaviors')
 				.insert({ ...behavior, scenario_id: scenarioId })
@@ -512,7 +560,7 @@ function createBehaviorStore() {
 	};
 
 	// Runtime behavior instance management
-	function getBehavior(worldCharacterId: WorldCharacterId): Behavior | undefined {
+	function getBehavior(worldCharacterId: WorldCharacterId): WorldBehavior | undefined {
 		const behaviors = behaviorInstanceMap.get(worldCharacterId);
 		if (!behaviors || behaviors.length === 0) {
 			return undefined;
@@ -524,7 +572,7 @@ function createBehaviorStore() {
 		);
 	}
 
-	function addBehavior(worldCharacterId: WorldCharacterId, behavior: Behavior): void {
+	function addBehavior(worldCharacterId: WorldCharacterId, behavior: WorldBehavior): void {
 		const behaviors = behaviorInstanceMap.get(worldCharacterId) ?? [];
 		behaviors.push(behavior);
 		behaviorInstanceMap.set(worldCharacterId, behaviors);
@@ -558,7 +606,8 @@ function createBehaviorStore() {
 		>,
 		behaviorPriorityDialogStore,
 		needBehaviorDialogStore: needBehaviorDialogStore as Readable<NeedBehaviorDialogState>,
-		conditionBehaviorDialogStore: conditionBehaviorDialogStore as Readable<ConditionBehaviorDialogState>,
+		conditionBehaviorDialogStore:
+			conditionBehaviorDialogStore as Readable<ConditionBehaviorDialogState>,
 		init,
 		fetch,
 		openBehaviorPriorityDialog,
@@ -572,11 +621,14 @@ function createBehaviorStore() {
 		getNeedBehaviorAction,
 		getConditionBehavior,
 		getConditionBehaviorAction,
+		getBehaviorAction,
 		getAllBehaviorPriorities,
 		getAllNeedBehaviors,
 		getAllNeedBehaviorActions,
 		getAllConditionBehaviors,
 		getAllConditionBehaviorActions,
+		getAllBehaviors,
+		getAllBehaviorActions,
 		getBehavior,
 		addBehavior,
 		removeBehavior,

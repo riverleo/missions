@@ -174,7 +174,10 @@ function createCharacterStore() {
 				characterNeedsResult,
 			] = await Promise.all([
 				supabase.from('characters').select('*, character_face_states(*)').order('name'),
-				supabase.from('character_interactions').select('*, character_interaction_actions(*)').order('created_at'),
+				supabase
+					.from('character_interactions')
+					.select('*, character_interaction_actions(*)')
+					.order('created_at'),
 				supabase.from('character_bodies').select('*, character_body_states(*)').order('name'),
 				supabase.from('needs').select('*').order('name'),
 				supabase.from('need_fulfillments').select('*'),
@@ -241,8 +244,16 @@ function createCharacterStore() {
 
 			characterStore.set({ status: 'success', data: characterRecord, error: undefined });
 			characterFaceStateStore.set({ status: 'success', data: faceStateRecord, error: undefined });
-			characterInteractionStore.set({ status: 'success', data: interactionRecord, error: undefined });
-			characterInteractionActionStore.set({ status: 'success', data: actionRecord, error: undefined });
+			characterInteractionStore.set({
+				status: 'success',
+				data: interactionRecord,
+				error: undefined,
+			});
+			characterInteractionActionStore.set({
+				status: 'success',
+				data: actionRecord,
+				error: undefined,
+			});
 			characterBodyStore.set({ status: 'success', data: bodyRecord, error: undefined });
 			characterBodyStateStore.set({ status: 'success', data: bodyStateRecord, error: undefined });
 			needStore.set({ status: 'success', data: needRecord });
@@ -354,7 +365,10 @@ function createCharacterStore() {
 		return Object.values(get(characterInteractionStore).data);
 	}
 
-	function getAllCharacterInteractionActions(): Record<CharacterInteractionId, CharacterInteractionAction[]> {
+	function getAllCharacterInteractionActions(): Record<
+		CharacterInteractionId,
+		CharacterInteractionAction[]
+	> {
 		return get(characterInteractionActionStore).data;
 	}
 
@@ -523,7 +537,10 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterInteraction(scenarioId: ScenarioId, interaction: Omit<CharacterInteractionInsert, 'scenario_id'>) {
+		async createCharacterInteraction(
+			scenarioId: ScenarioId,
+			interaction: Omit<CharacterInteractionInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('character_interactions')
 				.insert({
@@ -676,7 +693,10 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterBody(scenarioId: ScenarioId, body: Omit<CharacterBodyInsert, 'scenario_id'>) {
+		async createCharacterBody(
+			scenarioId: ScenarioId,
+			body: Omit<CharacterBodyInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('character_bodies')
 				.insert({

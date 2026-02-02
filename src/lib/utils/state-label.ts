@@ -153,18 +153,20 @@ export function getCharacterRepeatInteractionTypeOptions(): {
 }
 
 // Backward compatibility - 구버전 함수명 유지 (once/repeat 모두 합쳐서 반환)
-export function getBehaviorInteractTypeLabel(type: OnceInteractionType | RepeatInteractionType): string {
+export function getBehaviorInteractTypeLabel(
+	type: OnceInteractionType | RepeatInteractionType
+): string {
 	if (type in onceInteractionTypeLabels) {
 		return onceInteractionTypeLabels[type as OnceInteractionType];
 	}
 	return repeatInteractionTypeLabels[type as RepeatInteractionType];
 }
 
-export function getBehaviorInteractTypeOptions(): { value: OnceInteractionType | RepeatInteractionType; label: string }[] {
-	return [
-		...getOnceInteractionTypeOptions(),
-		...getRepeatInteractionTypeOptions(),
-	];
+export function getBehaviorInteractTypeOptions(): {
+	value: OnceInteractionType | RepeatInteractionType;
+	label: string;
+}[] {
+	return [...getOnceInteractionTypeOptions(), ...getRepeatInteractionTypeOptions()];
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {
@@ -252,4 +254,3 @@ export function getBehaviorActionLabel(params: {
 
 	return action.type;
 }
-

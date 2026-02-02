@@ -99,7 +99,6 @@
 		await admin.removeBuildingInteractionAction(actionId, buildingInteractionId);
 	}
 
-
 	function getBodyStateLabel(type: string) {
 		const labels: Record<string, string> = {
 			idle: '대기',

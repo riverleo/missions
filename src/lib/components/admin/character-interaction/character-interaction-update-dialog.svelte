@@ -48,7 +48,9 @@
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(
-		targetCharacterId === undefined ? '기본 (모든 캐릭터)' : selectedTargetCharacter?.name ?? '대상 캐릭터 선택'
+		targetCharacterId === undefined
+			? '기본 (모든 캐릭터)'
+			: (selectedTargetCharacter?.name ?? '대상 캐릭터 선택')
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');

@@ -56,9 +56,9 @@
 	const rootAction = $derived(actions.find((a) => a.root));
 
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>(
-		(interaction.once_interaction_type ||
-			interaction.repeat_interaction_type ||
-			'item_use') as OnceInteractionType | RepeatInteractionType
+		(interaction.once_interaction_type || interaction.repeat_interaction_type || 'item_use') as
+			| OnceInteractionType
+			| RepeatInteractionType
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
@@ -226,11 +226,7 @@
 								/>
 								<span class="text-sm font-medium">Root</span>
 							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								onclick={() => removeAction(action.id)}
-							>
+							<Button variant="ghost" size="sm" onclick={() => removeAction(action.id)}>
 								<IconTrash class="size-4" />
 							</Button>
 						</div>

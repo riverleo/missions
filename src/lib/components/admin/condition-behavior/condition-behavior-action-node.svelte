@@ -34,8 +34,8 @@
 			const interaction = $buildingInteractionStore.data[action.building_interaction_id];
 			if (!interaction) return undefined;
 			const building = $buildingStore.data[interaction.building_id];
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			return {
 				target: `"${building?.name ?? '건물'}" 건물`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
@@ -45,8 +45,8 @@
 			const interaction = $itemInteractionStore.data[action.item_interaction_id];
 			if (!interaction) return undefined;
 			const item = $itemStore.data[interaction.item_id];
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			return {
 				target: `"${item?.name ?? '아이템'}" 아이템`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
@@ -56,8 +56,8 @@
 			const interaction = $characterInteractionStore.data[action.character_interaction_id];
 			if (!interaction) return undefined;
 			const character = $characterStore.data[interaction.target_character_id];
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			return {
 				target: `"${character?.name ?? '캐릭터'}" 캐릭터`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
@@ -112,20 +112,25 @@
 				? (() => {
 						if (fulfillment.building_interaction_id) {
 							const interaction =
-								$buildingInteractionStore.data[fulfillment.building_interaction_id as BuildingInteractionId];
+								$buildingInteractionStore.data[
+									fulfillment.building_interaction_id as BuildingInteractionId
+								];
 							const building = interaction
 								? $buildingStore.data[interaction.building_id]
 								: undefined;
 							return building?.name ?? '건물';
 						}
 						if (fulfillment.item_interaction_id) {
-							const interaction = $itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
+							const interaction =
+								$itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
 							const item = interaction ? $itemStore.data[interaction.item_id] : undefined;
 							return item?.name ?? '아이템';
 						}
 						if (fulfillment.character_interaction_id) {
 							const interaction =
-								$characterInteractionStore.data[fulfillment.character_interaction_id as CharacterInteractionId];
+								$characterInteractionStore.data[
+									fulfillment.character_interaction_id as CharacterInteractionId
+								];
 							const character = interaction
 								? $characterStore.data[interaction.target_character_id]
 								: undefined;

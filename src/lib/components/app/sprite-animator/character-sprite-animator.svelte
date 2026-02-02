@@ -55,7 +55,8 @@
 		...restProps
 	}: Props = $props();
 
-	const { characterStore, characterFaceStateStore, characterBodyStore, characterBodyStateStore } = useCharacter();
+	const { characterStore, characterFaceStateStore, characterBodyStore, characterBodyStateStore } =
+		useCharacter();
 
 	const character = $derived($characterStore.data[characterId]);
 	const scale = $derived(character?.scale ?? 1);
@@ -63,7 +64,9 @@
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
-	const bodyStates = $derived(characterBody ? ($characterBodyStateStore.data[characterBody.id] ?? []) : []);
+	const bodyStates = $derived(
+		characterBody ? ($characterBodyStateStore.data[characterBody.id] ?? []) : []
+	);
 	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
 
 	const faceStates = $derived($characterFaceStateStore.data[characterId] ?? []);

@@ -37,7 +37,8 @@
 
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
-	const { buildingInteractionStore, buildingInteractionActionStore, buildingStore, admin } = useBuilding();
+	const { buildingInteractionStore, buildingInteractionActionStore, buildingStore, admin } =
+		useBuilding();
 	const { characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
@@ -301,7 +302,10 @@
 										characterId={previewCharacter.id}
 										characterBodyStateType={changes.character_body_state_type}
 										characterFaceStateType={changes.character_face_state_type}
-										characterOffset={{ x: changes.character_offset_x, y: changes.character_offset_y }}
+										characterOffset={{
+											x: changes.character_offset_x,
+											y: changes.character_offset_y,
+										}}
 										characterScale={changes.character_scale}
 										characterRotation={changes.character_rotation}
 										resolution={2}

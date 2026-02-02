@@ -114,7 +114,6 @@
 					),
 				]);
 			}
-
 		} catch (error) {
 			console.error('Failed to update narrative node:', error);
 		} finally {

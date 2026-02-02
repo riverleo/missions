@@ -24,11 +24,7 @@
 	import BuildingInteractionActionNode from './building-interaction-action-node.svelte';
 	import BuildingInteractionActionPanel from './building-interaction-action-panel.svelte';
 	import BuildingInteractionActionNodePanel from './building-interaction-action-node-panel.svelte';
-	import type {
-		BuildingInteractionId,
-		BuildingInteractionActionId,
-		ScenarioId,
-	} from '$lib/types';
+	import type { BuildingInteractionId, BuildingInteractionActionId, ScenarioId } from '$lib/types';
 
 	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useBuilding();
 
@@ -40,9 +36,7 @@
 		buildingInteractionId ? $buildingInteractionStore.data[buildingInteractionId] : undefined
 	);
 	const actions = $derived(
-		buildingInteractionId
-			? ($buildingInteractionActionStore.data[buildingInteractionId] ?? [])
-			: []
+		buildingInteractionId ? ($buildingInteractionActionStore.data[buildingInteractionId] ?? []) : []
 	);
 
 	const flowNodes = useNodes();
@@ -157,9 +151,13 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {
-				root: false,
-			});
+			const newAction = await admin.createBuildingInteractionAction(
+				scenarioId,
+				buildingInteractionId,
+				{
+					root: false,
+				}
+			);
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
 			await admin.updateBuildingInteractionAction(
@@ -264,7 +262,9 @@
 		// 다음 액션 엣지
 		actions.forEach((action) => {
 			if (action.next_building_interaction_action_id) {
-				const targetAction = actions.find((a) => a.id === action.next_building_interaction_action_id);
+				const targetAction = actions.find(
+					(a) => a.id === action.next_building_interaction_action_id
+				);
 				if (targetAction) {
 					newEdges.push({
 						id: `${createBuildingInteractionActionNodeId(action)}-next-${createBuildingInteractionActionNodeId(targetAction)}`,

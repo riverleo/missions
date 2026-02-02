@@ -25,13 +25,35 @@ export const InteractionIdUtils = {
 	 * @example
 	 * InteractionIdUtils.create('building', buildingInteractionId, buildingInteractionActionId)
 	 * // "building_{buildingInteractionId}_{buildingInteractionActionId}"
+	 *
+	 * InteractionIdUtils.create(interactionAction)
+	 * // InteractionAction 객체로부터 생성
 	 */
 	create(
-		type: InteractionType,
-		interactionId: BuildingInteractionId | ItemInteractionId | CharacterInteractionId,
-		interactionActionId: BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId
+		typeOrAction: InteractionType | InteractionAction,
+		interactionId?: BuildingInteractionId | ItemInteractionId | CharacterInteractionId,
+		interactionActionId?:
+			| BuildingInteractionActionId
+			| ItemInteractionActionId
+			| CharacterInteractionActionId
 	): InteractionTargetId {
-		return `${type}_${interactionId}_${interactionActionId}` as InteractionTargetId;
+		// InteractionAction 객체로 호출된 경우
+		if (typeof typeOrAction === 'object') {
+			const action = typeOrAction;
+			const type = action.interactionType;
+			const actionId = action.id;
+
+			if (action.interactionType === 'building') {
+				return `${type}_${action.building_interaction_id}_${actionId}` as InteractionTargetId;
+			} else if (action.interactionType === 'item') {
+				return `${type}_${action.item_interaction_id}_${actionId}` as InteractionTargetId;
+			} else {
+				return `${type}_${action.character_interaction_id}_${actionId}` as InteractionTargetId;
+			}
+		}
+
+		// 기존 방식: 개별 파라미터로 호출된 경우
+		return `${typeOrAction}_${interactionId}_${interactionActionId}` as InteractionTargetId;
 	},
 
 	/**
@@ -91,21 +113,6 @@ export const InteractionIdUtils = {
 	},
 
 	/**
-	 * InteractionAction 데이터를 InteractionAction 타입으로 변환
-	 * @example
-	 * const interactionAction = InteractionIdUtils.to(buildingInteractionAction);
-	 */
-	to(data: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction): InteractionAction {
-		if ('building_interaction_id' in data) {
-			return { interactionType: 'building', ...data } as InteractionAction;
-		}
-		if ('item_interaction_id' in data) {
-			return { interactionType: 'item', ...data } as InteractionAction;
-		}
-		return { interactionType: 'character', ...data } as InteractionAction;
-	},
-
-	/**
 	 * Interaction 관련 유틸리티
 	 */
 	interaction: {
@@ -122,6 +129,28 @@ export const InteractionIdUtils = {
 				return { interactionType: 'item', ...data } as Interaction;
 			}
 			return { interactionType: 'character', ...data } as Interaction;
+		},
+	},
+
+	/**
+	 * InteractionAction 관련 유틸리티
+	 */
+	interactionAction: {
+		/**
+		 * InteractionAction 데이터를 InteractionAction discriminated union 타입으로 변환
+		 * @example
+		 * const interactionAction = InteractionIdUtils.interactionAction.to(buildingInteractionAction);
+		 */
+		to(
+			data: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction
+		): InteractionAction {
+			if ('building_interaction_id' in data) {
+				return { interactionType: 'building', ...data } as InteractionAction;
+			}
+			if ('item_interaction_id' in data) {
+				return { interactionType: 'item', ...data } as InteractionAction;
+			}
+			return { interactionType: 'character', ...data } as InteractionAction;
 		},
 	},
 };

@@ -1,9 +1,5 @@
 import type { BeforeUpdateEvent } from '../context';
-import type {
-	WorldCharacterId,
-	NeedBehaviorId,
-	ConditionBehaviorId,
-} from '$lib/types';
+import type { WorldCharacterId, NeedBehaviorId, ConditionBehaviorId } from '$lib/types';
 
 export abstract class Behavior {
 	readonly id: NeedBehaviorId | ConditionBehaviorId;

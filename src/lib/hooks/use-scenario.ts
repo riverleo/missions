@@ -138,11 +138,49 @@ function createScenarioStore() {
 
 				const { fetch: fetchQuest } = useQuest();
 				const { fetch: fetchChapter } = useChapter();
-				const { fetch: fetchTerrain, fetchTiles, fetchTileStates, fetchTerrainTiles } = useTerrain();
-				const { fetch: fetchCharacter, getAllCharacterBodies, getAllCharacterInteractions, getAllCharacterNeeds, getAllCharacters, getAllNeedFulfillments, getAllNeeds, getCharacterBodyStates, getCharacterFaceStates, getCharacterInteractionActions } = useCharacter();
-				const { fetch: fetchBuilding, getAllBuildingConditions, getAllBuildingInteractions, getAllBuildings, getAllConditionEffects, getAllConditionFulfillments, getAllConditions, getBuildingInteractionActions, getBuildingStates } = useBuilding();
-				const { fetch: fetchBehavior, getAllBehaviorPriorities, getAllConditionBehaviors, getAllNeedBehaviorActions, getAllNeedBehaviors } = useBehavior();
-				const { fetch: fetchItem, getAllItemInteractions, getAllItems, getItemInteractionActions, getItemStates } = useItem();
+				const {
+					fetch: fetchTerrain,
+					fetchTiles,
+					fetchTileStates,
+					fetchTerrainTiles,
+				} = useTerrain();
+				const {
+					fetch: fetchCharacter,
+					getAllCharacterBodies,
+					getAllCharacterInteractions,
+					getAllCharacterNeeds,
+					getAllCharacters,
+					getAllNeedFulfillments,
+					getAllNeeds,
+					getCharacterBodyStates,
+					getCharacterFaceStates,
+					getCharacterInteractionActions,
+				} = useCharacter();
+				const {
+					fetch: fetchBuilding,
+					getAllBuildingConditions,
+					getAllBuildingInteractions,
+					getAllBuildings,
+					getAllConditionEffects,
+					getAllConditionFulfillments,
+					getAllConditions,
+					getBuildingInteractionActions,
+					getBuildingStates,
+				} = useBuilding();
+				const {
+					fetch: fetchBehavior,
+					getAllBehaviorPriorities,
+					getAllConditionBehaviors,
+					getAllNeedBehaviorActions,
+					getAllNeedBehaviors,
+				} = useBehavior();
+				const {
+					fetch: fetchItem,
+					getAllItemInteractions,
+					getAllItems,
+					getItemInteractionActions,
+					getItemStates,
+				} = useItem();
 				const { fetch: fetchWorld } = useWorld();
 
 				await Promise.all([
@@ -249,11 +287,66 @@ function createScenarioStore() {
 		async createScenarioSnapshot(scenarioId: ScenarioId, name: string, description: string = '') {
 			// Collect all master data for the scenario
 			const { terrainStore, tileStore, tileStateStore, terrainTileStore } = useTerrain();
-			const { characterNeedStore, needStore, needFulfillmentStore, characterInteractionStore, characterFaceStateStore, characterBodyStateStore, characterInteractionActionStore, characterBodyStore, characterStore, getAllCharacterBodies, getAllCharacterInteractions, getAllCharacterNeeds, getAllCharacters, getAllNeedFulfillments, getAllNeeds, getCharacterBodyStates, getCharacterFaceStates, getCharacterInteractionActions } = useCharacter();
-			const { buildingItemStore, buildingInteractionActionStore, buildingStore, conditionFulfillmentStore, conditionEffectStore, buildingStateStore, buildingConditionStore, conditionStore, buildingInteractionStore, getAllBuildingConditions, getAllBuildingInteractions, getAllBuildings, getAllConditionEffects, getAllConditionFulfillments, getAllConditions, getBuildingInteractionActions, getBuildingStates } = useBuilding();
-			const { itemInteractionStore, itemInteractionActionStore, itemStateStore, itemStore, getAllItemInteractions, getAllItems, getItemInteractionActions, getItemStates } =
-				useItem();
-			const { needBehaviorActionStore, needBehaviorStore, conditionBehaviorStore, conditionBehaviorActionStore, behaviorPriorityStore, getAllBehaviorPriorities, getAllConditionBehaviors, getAllNeedBehaviorActions, getAllNeedBehaviors } = useBehavior();
+			const {
+				characterNeedStore,
+				needStore,
+				needFulfillmentStore,
+				characterInteractionStore,
+				characterFaceStateStore,
+				characterBodyStateStore,
+				characterInteractionActionStore,
+				characterBodyStore,
+				characterStore,
+				getAllCharacterBodies,
+				getAllCharacterInteractions,
+				getAllCharacterNeeds,
+				getAllCharacters,
+				getAllNeedFulfillments,
+				getAllNeeds,
+				getCharacterBodyStates,
+				getCharacterFaceStates,
+				getCharacterInteractionActions,
+			} = useCharacter();
+			const {
+				buildingItemStore,
+				buildingInteractionActionStore,
+				buildingStore,
+				conditionFulfillmentStore,
+				conditionEffectStore,
+				buildingStateStore,
+				buildingConditionStore,
+				conditionStore,
+				buildingInteractionStore,
+				getAllBuildingConditions,
+				getAllBuildingInteractions,
+				getAllBuildings,
+				getAllConditionEffects,
+				getAllConditionFulfillments,
+				getAllConditions,
+				getBuildingInteractionActions,
+				getBuildingStates,
+			} = useBuilding();
+			const {
+				itemInteractionStore,
+				itemInteractionActionStore,
+				itemStateStore,
+				itemStore,
+				getAllItemInteractions,
+				getAllItems,
+				getItemInteractionActions,
+				getItemStates,
+			} = useItem();
+			const {
+				needBehaviorActionStore,
+				needBehaviorStore,
+				conditionBehaviorStore,
+				conditionBehaviorActionStore,
+				behaviorPriorityStore,
+				getAllBehaviorPriorities,
+				getAllConditionBehaviors,
+				getAllNeedBehaviorActions,
+				getAllNeedBehaviors,
+			} = useBehavior();
 			const { questStore, questBranchStore } = useQuest();
 			const { chapterStore } = useChapter();
 			const {
@@ -275,9 +368,7 @@ function createScenarioStore() {
 			);
 
 			// Character related
-			const characters = getAllCharacters().filter(
-				(c) => c.scenario_id === scenarioId
-			);
+			const characters = getAllCharacters().filter((c) => c.scenario_id === scenarioId);
 			const characterNeeds = getAllCharacterNeeds().filter((cn) =>
 				characters.some((c) => c.id === cn.character_id)
 			);
@@ -298,15 +389,11 @@ function createScenarioStore() {
 			);
 
 			// Building related
-			const buildings = getAllBuildings().filter(
-				(b) => b.scenario_id === scenarioId
-			);
+			const buildings = getAllBuildings().filter((b) => b.scenario_id === scenarioId);
 			const buildingConditions = getAllBuildingConditions().filter((bc) =>
 				buildings.some((b) => b.id === bc.building_id)
 			);
-			const buildingStates = buildings.flatMap((b) =>
-				Object.values(getBuildingStates(b.id) ?? [])
-			);
+			const buildingStates = buildings.flatMap((b) => Object.values(getBuildingStates(b.id) ?? []));
 			const buildingInteractions = getAllBuildingInteractions().filter(
 				(bi) => bi.scenario_id === scenarioId
 			);
@@ -316,9 +403,7 @@ function createScenarioStore() {
 
 			// Item related
 			const items = getAllItems().filter((i) => i.scenario_id === scenarioId);
-			const itemStates = items.flatMap((i) =>
-				Object.values(getItemStates(i.id) ?? [])
-			);
+			const itemStates = items.flatMap((i) => Object.values(getItemStates(i.id) ?? []));
 			const itemInteractions = getAllItemInteractions().filter(
 				(ii) => ii.scenario_id === scenarioId
 			);
@@ -339,11 +424,9 @@ function createScenarioStore() {
 			);
 
 			// Condition related
-			const conditions = getAllConditions().filter(
-				(c) => c.scenario_id === scenarioId
-			);
-			const conditionFulfillments = getAllConditionFulfillments().filter(
-				(cf) => conditions.some((c) => c.id === cf.condition_id)
+			const conditions = getAllConditions().filter((c) => c.scenario_id === scenarioId);
+			const conditionFulfillments = getAllConditionFulfillments().filter((cf) =>
+				conditions.some((c) => c.id === cf.condition_id)
 			);
 			const conditionEffects = getAllConditionEffects().filter((ce) =>
 				conditions.some((c) => c.id === ce.condition_id)
@@ -351,9 +434,9 @@ function createScenarioStore() {
 			const conditionBehaviors = getAllConditionBehaviors().filter(
 				(cb) => cb.scenario_id === scenarioId
 			);
-			const conditionBehaviorActions = Object.values(
-				get(conditionBehaviorActionStore).data
-			).filter((cba) => conditionBehaviors.some((cb) => cb.id === cba.condition_behavior_id));
+			const conditionBehaviorActions = Object.values(get(conditionBehaviorActionStore).data).filter(
+				(cba) => conditionBehaviors.some((cb) => cb.id === cba.condition_behavior_id)
+			);
 
 			// Behavior priorities
 			const behaviorPriorities = getAllBehaviorPriorities().filter(
@@ -361,7 +444,9 @@ function createScenarioStore() {
 			);
 
 			// Quest related
-			const quests = Object.values(get(questStore).data).filter((q) => q.scenario_id === scenarioId);
+			const quests = Object.values(get(questStore).data).filter(
+				(q) => q.scenario_id === scenarioId
+			);
 			const questBranches = Object.values(get(questBranchStore).data).filter((qb) =>
 				quests.some((q) => q.id === qb.quest_id)
 			);
@@ -378,8 +463,8 @@ function createScenarioStore() {
 			const narrativeNodes = Object.values(get(narrativeNodeStore).data).filter((nn) =>
 				narratives.some((n) => n.id === nn.narrative_id)
 			);
-			const narrativeNodeChoices = Object.values(get(narrativeNodeChoiceStore).data).filter(
-				(nnc) => narrativeNodes.some((nn) => nn.id === nnc.narrative_node_id)
+			const narrativeNodeChoices = Object.values(get(narrativeNodeChoiceStore).data).filter((nnc) =>
+				narrativeNodes.some((nn) => nn.id === nnc.narrative_node_id)
 			);
 			const narrativeDiceRolls = Object.values(get(narrativeDiceRollStore).data).filter((ndr) =>
 				narratives.some((n) => n.id === ndr.narrative_id)

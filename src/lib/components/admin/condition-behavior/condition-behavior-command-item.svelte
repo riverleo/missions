@@ -72,12 +72,14 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
+						onclick={() =>
+							openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
+						onclick={() =>
+							openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>
@@ -110,12 +112,14 @@
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="end">
 					<DropdownMenuItem
-						onclick={() => openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
+						onclick={() =>
+							openConditionBehaviorDialog({ type: 'update', conditionBehaviorId: behavior.id })}
 					>
 						수정
 					</DropdownMenuItem>
 					<DropdownMenuItem
-						onclick={() => openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
+						onclick={() =>
+							openConditionBehaviorDialog({ type: 'delete', conditionBehaviorId: behavior.id })}
 					>
 						삭제
 					</DropdownMenuItem>

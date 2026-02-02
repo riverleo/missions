@@ -90,12 +90,14 @@
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
-										onclick={() => openNeedBehaviorDialog({ type: 'update', needBehaviorId: behavior.id })}
+										onclick={() =>
+											openNeedBehaviorDialog({ type: 'update', needBehaviorId: behavior.id })}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
-										onclick={() => openNeedBehaviorDialog({ type: 'delete', needBehaviorId: behavior.id })}
+										onclick={() =>
+											openNeedBehaviorDialog({ type: 'delete', needBehaviorId: behavior.id })}
 									>
 										삭제
 									</DropdownMenuItem>

@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import type { NeedBehaviorId, ConditionBehaviorId, ConditionBehavior } from '$lib/types';
+import type { Behavior } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
@@ -7,62 +7,38 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 /**
  * 새로운 행동을 선택 (우선순위 기반)
  */
-export default function selectNewBehavior(entity: WorldCharacterEntity, tick: number): void {
-	const {
-		getAllNeedBehaviors,
-		getAllNeedBehaviorActions,
-		getAllConditionBehaviorActions,
-		behaviorPriorityStore,
-	} = useBehavior();
+export default function selectNewBehavior(
+	worldCharacterEntity: WorldCharacterEntity,
+	tick: number
+): void {
+	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore } = useBehavior();
 
-	// 1. 후보 need behaviors 찾기 (threshold 이하인 욕구)
-	const candidateNeedBehaviors = getAllNeedBehaviors().filter((behavior) => {
-		const need = entity.worldCharacterNeeds[behavior.need_id];
-		if (!need) {
+	// 1. 후보 behaviors 찾기
+	const candidateBehaviors = getAllBehaviors().filter((behavior) => {
+		if (behavior.behaviorType === 'need') {
+			const need = worldCharacterEntity.worldCharacterNeeds[behavior.need_id];
+			if (!need) return false;
+			// 욕구 레벨이 threshold 이하이면 발동
+			return need.value <= behavior.need_threshold;
+		} else {
+			// TODO: 컨디션 조건 체크 로직 (나중에 구현)
 			return false;
 		}
-
-		// 욕구 레벨이 threshold 이하이면 발동
-		const meetsThreshold = need.value <= behavior.need_threshold;
-		return meetsThreshold;
 	});
 
-	// 2. 후보 condition behaviors 찾기
-	// TODO: 컨디션 조건 체크 로직 (나중에 구현)
-	const candidateConditionBehaviors: ConditionBehavior[] = [];
-
-	// 3. 우선순위에 따라 정렬
-	const allCandidates: Array<
-		| { type: 'need'; behaviorId: NeedBehaviorId }
-		| { type: 'condition'; behaviorId: ConditionBehaviorId }
-	> = [
-		...candidateNeedBehaviors.map((behavior) => ({
-			type: 'need' as const,
-			behaviorId: behavior.id,
-		})),
-		...candidateConditionBehaviors.map((behavior) => ({
-			type: 'condition' as const,
-			behaviorId: behavior.id,
-		})),
-	];
-
-	if (allCandidates.length === 0) {
+	if (candidateBehaviors.length === 0) {
 		// 후보가 없으면 종료
 		return;
 	}
 
-	// BehaviorPriority에서 우선순위 가져오기
+	// 2. 우선순위에 따라 정렬
 	const priorities = get(behaviorPriorityStore).data;
-	const sortedCandidates = allCandidates.sort((a, b) => {
+	const sortedCandidates = candidateBehaviors.sort((a, b) => {
 		const priorityA = Object.values(priorities).find((p) =>
-			a.type === 'need'
-				? p.need_behavior_id === a.behaviorId
-				: p.condition_behavior_id === a.behaviorId
+			a.behaviorType === 'need' ? p.need_behavior_id === a.id : p.condition_behavior_id === a.id
 		);
 		const priorityB = Object.values(priorities).find((p) =>
-			b.type === 'need'
-				? p.need_behavior_id === b.behaviorId
-				: p.condition_behavior_id === b.behaviorId
+			b.behaviorType === 'need' ? p.need_behavior_id === b.id : p.condition_behavior_id === b.id
 		);
 
 		const valA = priorityA?.priority ?? 0;
@@ -72,28 +48,36 @@ export default function selectNewBehavior(entity: WorldCharacterEntity, tick: nu
 		return valB - valA;
 	});
 
-	const selected = sortedCandidates[0];
-	if (!selected) return;
+	const selectedBehavior = sortedCandidates[0];
+	if (!selectedBehavior) return;
 
-	// 4. root action 찾기
-	const actions =
-		selected.type === 'need'
-			? getAllNeedBehaviorActions().filter((a) => a.behavior_id === selected.behaviorId && a.root)
-			: getAllConditionBehaviorActions().filter(
-					(a) => a.condition_behavior_id === selected.behaviorId && a.root
-				);
+	// 3. root action 찾기
+	const allBehaviorActions = getAllBehaviorActions();
+	const rootAction = allBehaviorActions.find((action) => {
+		if (selectedBehavior.behaviorType === 'need') {
+			return (
+				action.behaviorType === 'need' && action.behavior_id === selectedBehavior.id && action.root
+			);
+		} else {
+			return (
+				action.behaviorType === 'condition' &&
+				action.condition_behavior_id === selectedBehavior.id &&
+				action.root
+			);
+		}
+	});
 
-	const rootAction = actions[0];
 	if (!rootAction) {
 		// root action이 없으면 종료
 		return;
 	}
 
-	// 5. currentBehaviorId 설정 및 시작 tick 기록
-	entity.currentBehaviorTargetId = BehaviorIdUtils.create(
-		selected.type,
-		selected.behaviorId,
-		rootAction.id
+	// 4. currentBehaviorId 설정 및 시작 tick 기록
+	const actionId = rootAction.behaviorType === 'need' ? rootAction.id : rootAction.id;
+	worldCharacterEntity.currentBehaviorTargetId = BehaviorIdUtils.create(
+		selectedBehavior.behaviorType,
+		selectedBehavior.id,
+		actionId
 	);
-	entity.behaviorActionStartTick = tick;
+	worldCharacterEntity.behaviorActionStartTick = tick;
 }

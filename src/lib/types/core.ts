@@ -78,10 +78,14 @@ export interface AppPayload {
 export type BehaviorType = 'need' | 'condition';
 
 // Union types for behaviors
-export type Behavior = NeedBehavior | ConditionBehavior;
 export type BehaviorId = NeedBehaviorId | ConditionBehaviorId;
 export type BehaviorActionId = NeedBehaviorActionId | ConditionBehaviorActionId;
 export type FulfillmentId = NeedFulfillmentId | ConditionFulfillmentId;
+
+// Discriminated union for behaviors
+export type Behavior =
+	| ({ behaviorType: 'need' } & NeedBehavior)
+	| ({ behaviorType: 'condition' } & ConditionBehavior);
 
 // Discriminated union for behavior actions
 export type BehaviorAction =
@@ -103,7 +107,10 @@ export type InteractionType = 'building' | 'item' | 'character';
 
 // Union types for interactions
 export type InteractionId = BuildingInteractionId | ItemInteractionId | CharacterInteractionId;
-export type InteractionActionId = BuildingInteractionActionId | ItemInteractionActionId | CharacterInteractionActionId;
+export type InteractionActionId =
+	| BuildingInteractionActionId
+	| ItemInteractionActionId
+	| CharacterInteractionActionId;
 
 // Discriminated union for interactions
 export type Interaction =

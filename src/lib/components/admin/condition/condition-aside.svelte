@@ -59,7 +59,10 @@
 								disabled={!currentConditionId}
 								onclick={() =>
 									currentConditionId &&
-									openConditionDialog({ type: 'update', conditionId: currentConditionId as ConditionId })}
+									openConditionDialog({
+										type: 'update',
+										conditionId: currentConditionId as ConditionId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +83,10 @@
 							disabled={!currentConditionId}
 							onclick={() =>
 								currentConditionId &&
-								openConditionDialog({ type: 'delete', conditionId: currentConditionId as ConditionId })}
+								openConditionDialog({
+									type: 'delete',
+									conditionId: currentConditionId as ConditionId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>

@@ -1,8 +1,4 @@
-import type {
-	Fulfillment,
-	NeedFulfillment,
-	ConditionFulfillment,
-} from '$lib/types';
+import type { Fulfillment, NeedFulfillment, ConditionFulfillment } from '$lib/types';
 
 export const FulfillmentIdUtils = {
 	/**

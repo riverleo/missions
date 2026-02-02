@@ -35,13 +35,20 @@
 		BuildingStateType,
 	} from '$lib/types';
 
-	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
+	const {
+		conditionBehaviorStore,
+		conditionBehaviorDialogStore,
+		closeConditionBehaviorDialog,
+		admin,
+	} = useBehavior();
 	const { conditionStore } = useBuilding();
 	const { characterStore } = useCharacter();
 
 	const open = $derived($conditionBehaviorDialogStore?.type === 'update');
 	const behaviorId = $derived(
-		$conditionBehaviorDialogStore?.type === 'update' ? $conditionBehaviorDialogStore.conditionBehaviorId : undefined
+		$conditionBehaviorDialogStore?.type === 'update'
+			? $conditionBehaviorDialogStore.conditionBehaviorId
+			: undefined
 	);
 	const currentBehavior = $derived(
 		behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined

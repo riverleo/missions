@@ -55,11 +55,23 @@
 		// InteractionTargetId 파싱
 		const { interactionActionId } = InteractionIdUtils.parse(entity.currentInteractionTargetId);
 		console.log('[CharacterRenderer] Looking for InteractionAction:', interactionActionId);
-		console.log('[CharacterRenderer] ItemInteractionActionStore keys:', Object.keys($itemInteractionActionStore.data));
+		console.log(
+			'[CharacterRenderer] ItemInteractionActionStore keys:',
+			Object.keys($itemInteractionActionStore.data)
+		);
 
 		// ItemInteractionAction 조회
 		for (const [interactionId, actions] of Object.entries($itemInteractionActionStore.data)) {
-			console.log(`[CharacterRenderer] Checking interaction ${interactionId}, actions:`, actions.map(a => ({ id: a.id, offset_x: a.item_offset_x, offset_y: a.item_offset_y, scale: a.item_scale, rotation: a.item_rotation })));
+			console.log(
+				`[CharacterRenderer] Checking interaction ${interactionId}, actions:`,
+				actions.map((a) => ({
+					id: a.id,
+					offset_x: a.item_offset_x,
+					offset_y: a.item_offset_y,
+					scale: a.item_scale,
+					rotation: a.item_rotation,
+				}))
+			);
 			const action = actions.find((a) => a.id === interactionActionId);
 			if (action) {
 				console.log('[CharacterRenderer] Found action:', {

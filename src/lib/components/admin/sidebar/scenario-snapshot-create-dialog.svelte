@@ -8,7 +8,11 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { InputGroup, Input as InputGroupInput, Addon as InputGroupAddon } from '$lib/components/ui/input-group';
+	import {
+		InputGroup,
+		Input as InputGroupInput,
+		Addon as InputGroupAddon,
+	} from '$lib/components/ui/input-group';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { IconHeading, IconFileText } from '@tabler/icons-svelte';
 	import { useScenario } from '$lib/hooks/use-scenario';
@@ -16,7 +20,11 @@
 	const { admin, scenarioSnapshotDialogStore, closeScenarioSnapshotDialog } = useScenario();
 
 	const open = $derived($scenarioSnapshotDialogStore?.type === 'create');
-	const scenarioId = $derived($scenarioSnapshotDialogStore?.type === 'create' ? $scenarioSnapshotDialogStore.scenarioId : undefined);
+	const scenarioId = $derived(
+		$scenarioSnapshotDialogStore?.type === 'create'
+			? $scenarioSnapshotDialogStore.scenarioId
+			: undefined
+	);
 
 	let name = $state('');
 	let description = $state('');
@@ -60,8 +68,8 @@
 		<DialogHeader>
 			<DialogTitle>스냅샷 생성</DialogTitle>
 			<DialogDescription>
-				현재 시나리오의 모든 마스터 데이터를 스냅샷으로 저장합니다.
-				스냅샷은 생성 후 수정하거나 삭제할 수 없습니다.
+				현재 시나리오의 모든 마스터 데이터를 스냅샷으로 저장합니다. 스냅샷은 생성 후 수정하거나
+				삭제할 수 없습니다.
 			</DialogDescription>
 		</DialogHeader>
 		<form {onsubmit} class="space-y-6">

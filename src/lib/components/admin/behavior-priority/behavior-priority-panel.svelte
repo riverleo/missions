@@ -22,7 +22,9 @@
 			// updated와 deleted를 동시에 처리
 			await Promise.all([
 				...changes.updated.map((priority) =>
-					admin.updateBehaviorPriority(priority.id as BehaviorPriorityId, { priority: priority.priority })
+					admin.updateBehaviorPriority(priority.id as BehaviorPriorityId, {
+						priority: priority.priority,
+					})
 				),
 				...changes.deleted.map((id) => admin.removeBehaviorPriority(id as BehaviorPriorityId)),
 			]);

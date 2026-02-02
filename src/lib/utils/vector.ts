@@ -153,8 +153,7 @@ function snapPixelByCell(pixel: number, size: number): number {
 		// 짝수: 커서와 가까운 셀 경계를 기준으로 배치
 		const leftBoundary = index * CELL_SIZE;
 		const rightBoundary = (index + 1) * CELL_SIZE;
-		const closerBoundaryIndex =
-			pixel - leftBoundary < rightBoundary - pixel ? index : index + 1;
+		const closerBoundaryIndex = pixel - leftBoundary < rightBoundary - pixel ? index : index + 1;
 		return (closerBoundaryIndex - size / 2) * CELL_SIZE;
 	}
 }

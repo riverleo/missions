@@ -14,12 +14,19 @@
 	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 
-	const { conditionBehaviorStore, conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
+	const {
+		conditionBehaviorStore,
+		conditionBehaviorDialogStore,
+		closeConditionBehaviorDialog,
+		admin,
+	} = useBehavior();
 	const { conditionStore } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
-		$conditionBehaviorDialogStore?.type === 'delete' ? $conditionBehaviorDialogStore.conditionBehaviorId : undefined
+		$conditionBehaviorDialogStore?.type === 'delete'
+			? $conditionBehaviorDialogStore.conditionBehaviorId
+			: undefined
 	);
 	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
 	const condition = $derived(
@@ -66,7 +73,9 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeConditionBehaviorDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeConditionBehaviorDialog()}>
+					취소
+				</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

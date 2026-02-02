@@ -105,7 +105,7 @@
 					sourceHandle: 'next',
 					target: connection.target,
 					targetHandle: 'target',
-					
+
 					deletable: true,
 				},
 			];
@@ -247,7 +247,7 @@
 						sourceHandle: 'next',
 						target: createActionNodeId(targetAction),
 						targetHandle: 'target',
-						
+
 						deletable: true,
 					});
 				}

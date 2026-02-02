@@ -3,11 +3,14 @@ import type {
 	BehaviorType,
 	BehaviorId,
 	BehaviorActionId,
+	Behavior,
 	BehaviorAction,
 	NeedBehaviorId,
 	ConditionBehaviorId,
 	NeedBehaviorActionId,
 	ConditionBehaviorActionId,
+	NeedBehavior,
+	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
 } from '$lib/types';
@@ -93,5 +96,22 @@ export const BehaviorIdUtils = {
 			return { behaviorType: 'need', ...data } as BehaviorAction;
 		}
 		return { behaviorType: 'condition', ...data } as BehaviorAction;
+	},
+
+	/**
+	 * Behavior 관련 유틸리티
+	 */
+	behavior: {
+		/**
+		 * NeedBehavior 또는 ConditionBehavior를 Behavior 타입으로 변환
+		 * @example
+		 * const behavior = BehaviorIdUtils.behavior.to(needBehavior);
+		 */
+		to(data: NeedBehavior | ConditionBehavior): Behavior {
+			if ('need_id' in data) {
+				return { behaviorType: 'need', ...data } as Behavior;
+			}
+			return { behaviorType: 'condition', ...data } as Behavior;
+		},
 	},
 };

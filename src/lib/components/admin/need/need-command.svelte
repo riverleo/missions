@@ -63,7 +63,9 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openNeedDialog({ type: 'delete', needId: need.id })}>
+								<DropdownMenuItem
+									onclick={() => openNeedDialog({ type: 'delete', needId: need.id })}
+								>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

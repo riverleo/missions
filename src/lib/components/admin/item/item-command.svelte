@@ -63,10 +63,14 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openItemDialog({ type: 'update', itemId: item.id })}>
+								<DropdownMenuItem
+									onclick={() => openItemDialog({ type: 'update', itemId: item.id })}
+								>
 									수정
 								</DropdownMenuItem>
-								<DropdownMenuItem onclick={() => openItemDialog({ type: 'delete', itemId: item.id })}>
+								<DropdownMenuItem
+									onclick={() => openItemDialog({ type: 'delete', itemId: item.id })}
+								>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

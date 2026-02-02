@@ -46,7 +46,6 @@
 			}))
 			.filter((g) => g.interactions.length > 0);
 	});
-
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -62,22 +61,15 @@
 						{@const character = interaction.character_id
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
-						{@const interactionType = (interaction.once_interaction_type || interaction.repeat_interaction_type)!}
+						{@const interactionType = (interaction.once_interaction_type ||
+							interaction.repeat_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
-						<CommandLinkItem
-							{href}
-							class="group pr-1"
-						>
-							<IconCheck
-								class={cn(
-									'mr-2 size-4',
-									isSelected ? 'opacity-100' : 'opacity-0'
-								)}
-							/>
+						<CommandLinkItem {href} class="group pr-1">
+							<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 							<span class="flex-1 truncate">{label}</span>
 							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
@@ -127,22 +119,15 @@
 						{@const character = interaction.character_id
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
-						{@const interactionType = (interaction.once_interaction_type || interaction.repeat_interaction_type)!}
+						{@const interactionType = (interaction.once_interaction_type ||
+							interaction.repeat_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
-						<CommandLinkItem
-							{href}
-							class="group pr-1"
-						>
-							<IconCheck
-								class={cn(
-									'mr-2 size-4',
-									isSelected ? 'opacity-100' : 'opacity-0'
-								)}
-							/>
+						<CommandLinkItem {href} class="group pr-1">
+							<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 							<span class="flex-1 truncate">{label}</span>
 							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>

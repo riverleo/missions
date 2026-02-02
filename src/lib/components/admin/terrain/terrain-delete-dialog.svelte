@@ -18,7 +18,9 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($terrainDialogStore?.type === 'delete');
-	const terrainId = $derived($terrainDialogStore?.type === 'delete' ? $terrainDialogStore.terrainId : undefined);
+	const terrainId = $derived(
+		$terrainDialogStore?.type === 'delete' ? $terrainDialogStore.terrainId : undefined
+	);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {

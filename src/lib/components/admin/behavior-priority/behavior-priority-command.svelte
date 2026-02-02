@@ -70,8 +70,7 @@
 	});
 
 	const hasAnyBehaviors = $derived(
-		behaviorsWithoutPriority().need.length > 0 ||
-			behaviorsWithoutPriority().condition.length > 0
+		behaviorsWithoutPriority().need.length > 0 || behaviorsWithoutPriority().condition.length > 0
 	);
 
 	let searchValue = $state('');

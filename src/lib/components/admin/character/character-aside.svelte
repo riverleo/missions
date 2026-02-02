@@ -59,7 +59,10 @@
 								disabled={!currentCharacterId}
 								onclick={() =>
 									currentCharacterId &&
-									openCharacterDialog({ type: 'update', characterId: currentCharacterId as CharacterId })}
+									openCharacterDialog({
+										type: 'update',
+										characterId: currentCharacterId as CharacterId,
+									})}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -80,7 +83,10 @@
 							disabled={!currentCharacterId}
 							onclick={() =>
 								currentCharacterId &&
-								openCharacterDialog({ type: 'delete', characterId: currentCharacterId as CharacterId })}
+								openCharacterDialog({
+									type: 'delete',
+									characterId: currentCharacterId as CharacterId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>

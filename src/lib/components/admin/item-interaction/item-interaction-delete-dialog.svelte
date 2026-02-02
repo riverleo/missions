@@ -18,7 +18,9 @@
 
 	const open = $derived($itemInteractionDialogStore?.type === 'delete');
 	const itemInteractionId = $derived(
-		$itemInteractionDialogStore?.type === 'delete' ? $itemInteractionDialogStore.itemInteractionId : undefined
+		$itemInteractionDialogStore?.type === 'delete'
+			? $itemInteractionDialogStore.itemInteractionId
+			: undefined
 	);
 
 	let isSubmitting = $state(false);

@@ -29,13 +29,16 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 
-	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
+	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } =
+		useBehavior();
 	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
 
 	const open = $derived($needBehaviorDialogStore?.type === 'update');
 	const needBehaviorId = $derived(
-		$needBehaviorDialogStore?.type === 'update' ? $needBehaviorDialogStore.needBehaviorId : undefined
+		$needBehaviorDialogStore?.type === 'update'
+			? $needBehaviorDialogStore.needBehaviorId
+			: undefined
 	);
 	const currentBehavior = $derived(
 		needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined

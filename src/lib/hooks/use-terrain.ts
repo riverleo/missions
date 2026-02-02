@@ -82,10 +82,7 @@ function createTerrainStore() {
 		terrainStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('terrains')
-				.select('*')
-				.order('display_order');
+			const { data, error } = await supabase.from('terrains').select('*').order('display_order');
 
 			if (error) throw error;
 
@@ -125,9 +122,7 @@ function createTerrainStore() {
 		tileStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('tiles')
-				.select('*');
+			const { data, error } = await supabase.from('tiles').select('*');
 
 			if (error) throw error;
 
@@ -159,9 +154,7 @@ function createTerrainStore() {
 		tileStateStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('tile_states')
-				.select('*');
+			const { data, error } = await supabase.from('tile_states').select('*');
 
 			if (error) throw error;
 
@@ -197,9 +190,7 @@ function createTerrainStore() {
 		terrainTileStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
-			const { data, error } = await supabase
-				.from('terrains_tiles')
-				.select('*');
+			const { data, error } = await supabase.from('terrains_tiles').select('*');
 
 			if (error) throw error;
 
@@ -412,7 +403,10 @@ function createTerrainStore() {
 		},
 
 		// TerrainTile CRUD operations
-		async createTerrainTile(scenarioId: ScenarioId, terrainTile: Omit<TerrainTileInsert, 'scenario_id'>) {
+		async createTerrainTile(
+			scenarioId: ScenarioId,
+			terrainTile: Omit<TerrainTileInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('terrains_tiles')
 				.insert({

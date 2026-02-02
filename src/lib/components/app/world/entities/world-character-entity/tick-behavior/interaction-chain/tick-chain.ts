@@ -15,7 +15,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  * @returns 체인이 완료되었으면 true, 아직 실행 중이면 false
  */
 export default function tickInteractionAction(
-	entity: WorldCharacterEntity,
+	this: WorldCharacterEntity,
 	interaction: Interaction,
 	tick: number
 ): boolean {
@@ -23,11 +23,11 @@ export default function tickInteractionAction(
 	const { getItemInteractionActions } = useItem();
 	const { getCharacterInteractionActions } = useCharacter();
 
-	if (!entity.currentInteractionTargetId) return false;
+	if (!this.currentInteractionTargetId) return false;
 
 	// InteractionTargetId 파싱
 	const { type, interactionId, interactionActionId } = InteractionIdUtils.parse(
-		entity.currentInteractionTargetId
+		this.currentInteractionTargetId
 	);
 
 	// 현재 InteractionAction 가져오기
@@ -54,12 +54,12 @@ export default function tickInteractionAction(
 	}
 
 	if (!currentAction) {
-		entity.currentInteractionTargetId = undefined;
+		this.currentInteractionTargetId = undefined;
 		return true;
 	}
 
 	// duration_ticks 경과 확인
-	const elapsed = tick - entity.interactionTargetStartTick;
+	const elapsed = tick - this.interactionTargetStartTick;
 	if (elapsed < currentAction.duration_ticks) {
 		return false; // 아직 실행 중
 	}
@@ -73,12 +73,12 @@ export default function tickInteractionAction(
 				: currentAction.next_character_interaction_action_id;
 
 	if (nextActionId) {
-		entity.currentInteractionTargetId = InteractionIdUtils.create(
+		this.currentInteractionTargetId = InteractionIdUtils.create(
 			type,
 			interactionId as any,
 			nextActionId
 		);
-		entity.interactionTargetStartTick = tick;
+		this.interactionTargetStartTick = tick;
 		return false; // 체인 계속 진행
 	}
 

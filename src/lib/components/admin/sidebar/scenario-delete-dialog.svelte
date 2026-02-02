@@ -35,7 +35,9 @@
 			.then(() => {
 				closeScenarioDialog();
 				// 삭제된 시나리오가 현재 선택된 시나리오인 경우 첫 번째 시나리오로 이동
-				const remainingScenarios = Object.values($scenarioStore.data).filter((s) => s.id !== scenarioId);
+				const remainingScenarios = Object.values($scenarioStore.data).filter(
+					(s) => s.id !== scenarioId
+				);
 				const nextScenario = remainingScenarios[0];
 				if (scenarioId === currentScenarioId && nextScenario) {
 					goto(`/admin/scenarios/${nextScenario.id}/quests`);

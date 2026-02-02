@@ -21,7 +21,9 @@
 	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 
 	const open = $derived($needDialogStore?.type === 'update');
-	const needId = $derived($needDialogStore?.type === 'update' ? $needDialogStore.needId : undefined);
+	const needId = $derived(
+		$needDialogStore?.type === 'update' ? $needDialogStore.needId : undefined
+	);
 	const currentNeed = $derived(needId ? $needStore.data[needId] : undefined);
 
 	let name = $state('');

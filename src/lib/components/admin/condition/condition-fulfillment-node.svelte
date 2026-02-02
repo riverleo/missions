@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { ConditionFulfillment, BuildingInteractionId, ItemInteractionId, CharacterInteractionId } from '$lib/types';
+	import type {
+		ConditionFulfillment,
+		BuildingInteractionId,
+		ItemInteractionId,
+		CharacterInteractionId,
+	} from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { useBuilding } from '$lib/hooks/use-building';
 	import { useCharacter } from '$lib/hooks/use-character';
@@ -24,28 +29,38 @@
 	const typeLabel = $derived(() => {
 		// Interaction 기반
 		if (fulfillment.building_interaction_id) {
-			const interaction = $buildingInteractionStore.data[fulfillment.building_interaction_id as BuildingInteractionId];
+			const interaction =
+				$buildingInteractionStore.data[
+					fulfillment.building_interaction_id as BuildingInteractionId
+				];
 			if (interaction) {
 				const building = $buildingStore.data[interaction.building_id];
-				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const interactionType =
+					interaction.once_interaction_type || interaction.repeat_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${building?.name ?? '건물'} ${behaviorLabel}`;
 			}
 		}
 		if (fulfillment.item_interaction_id) {
-			const interaction = $itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
+			const interaction =
+				$itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
 			if (interaction) {
 				const item = $itemStore.data[interaction.item_id];
-				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const interactionType =
+					interaction.once_interaction_type || interaction.repeat_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${item?.name ?? '아이템'} ${behaviorLabel}`;
 			}
 		}
 		if (fulfillment.character_interaction_id) {
-			const interaction = $characterInteractionStore.data[fulfillment.character_interaction_id as CharacterInteractionId];
+			const interaction =
+				$characterInteractionStore.data[
+					fulfillment.character_interaction_id as CharacterInteractionId
+				];
 			if (interaction) {
 				const character = $characterStore.data[interaction.target_character_id];
-				const interactionType = interaction.once_interaction_type || interaction.repeat_interaction_type;
+				const interactionType =
+					interaction.once_interaction_type || interaction.repeat_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${character?.name ?? '캐릭터'} ${behaviorLabel}`;
 			}

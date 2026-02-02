@@ -14,7 +14,9 @@
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 
 	const open = $derived($questDialogStore?.type === 'publish');
-	const questId = $derived($questDialogStore?.type === 'publish' ? $questDialogStore.questId : undefined);
+	const questId = $derived(
+		$questDialogStore?.type === 'publish' ? $questDialogStore.questId : undefined
+	);
 	const currentQuest = $derived(questId ? $questStore.data?.[questId] : undefined);
 	const isPublished = $derived(currentQuest?.status === 'published');
 

@@ -59,7 +59,8 @@
 								size="icon"
 								disabled={!currentItemId}
 								onclick={() =>
-									currentItemId && openItemDialog({ type: 'update', itemId: currentItemId as ItemId })}
+									currentItemId &&
+									openItemDialog({ type: 'update', itemId: currentItemId as ItemId })}
 							>
 								<IconEditCircle class="size-4" />
 							</Button>
@@ -79,7 +80,8 @@
 							size="icon"
 							disabled={!currentItemId}
 							onclick={() =>
-								currentItemId && openItemDialog({ type: 'delete', itemId: currentItemId as ItemId })}
+								currentItemId &&
+								openItemDialog({ type: 'delete', itemId: currentItemId as ItemId })}
 						>
 							<IconTrash class="size-4" />
 						</Button>

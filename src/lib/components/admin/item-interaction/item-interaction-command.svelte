@@ -22,12 +22,7 @@
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type {
-		ScenarioId,
-		ItemId,
-		CharacterId,
-		ItemInteraction,
-	} from '$lib/types';
+	import type { ScenarioId, ItemId, CharacterId, ItemInteraction } from '$lib/types';
 
 	const { itemStore, itemInteractionStore, openItemInteractionDialog } = useItem();
 	const { characterStore } = useCharacter();
@@ -66,22 +61,15 @@
 						{@const character = interaction.character_id
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
-						{@const interactionType = (interaction.once_interaction_type || interaction.repeat_interaction_type)!}
+						{@const interactionType = (interaction.once_interaction_type ||
+							interaction.repeat_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}
-						<CommandLinkItem
-							{href}
-							class="group pr-1"
-						>
-							<IconCheck
-								class={cn(
-									'mr-2 size-4',
-									isSelected ? 'opacity-100' : 'opacity-0'
-								)}
-							/>
+						<CommandLinkItem {href} class="group pr-1">
+							<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 							<span class="flex-1 truncate">{label}</span>
 							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
@@ -131,22 +119,15 @@
 						{@const character = interaction.character_id
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
-						{@const interactionType = (interaction.once_interaction_type || interaction.repeat_interaction_type)!}
+						{@const interactionType = (interaction.once_interaction_type ||
+							interaction.repeat_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}
-						<CommandLinkItem
-							{href}
-							class="group pr-1"
-						>
-							<IconCheck
-								class={cn(
-									'mr-2 size-4',
-									isSelected ? 'opacity-100' : 'opacity-0'
-								)}
-							/>
+						<CommandLinkItem {href} class="group pr-1">
+							<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 							<span class="flex-1 truncate">{label}</span>
 							<CommandShortcut>{shortId}</CommandShortcut>
 							<DropdownMenu>
@@ -166,13 +147,19 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openItemInteractionDialog({ type: 'update', itemInteractionId: interaction.id })}
+											openItemInteractionDialog({
+												type: 'update',
+												itemInteractionId: interaction.id,
+											})}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openItemInteractionDialog({ type: 'delete', itemInteractionId: interaction.id })}
+											openItemInteractionDialog({
+												type: 'delete',
+												itemInteractionId: interaction.id,
+											})}
 									>
 										삭제
 									</DropdownMenuItem>

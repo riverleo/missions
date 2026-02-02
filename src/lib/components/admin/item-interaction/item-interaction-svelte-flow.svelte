@@ -24,25 +24,17 @@
 	import ItemInteractionActionNode from './item-interaction-action-node.svelte';
 	import ItemInteractionActionPanel from './item-interaction-action-panel.svelte';
 	import ItemInteractionActionNodePanel from './item-interaction-action-node-panel.svelte';
-	import type {
-		ItemInteractionId,
-		ItemInteractionActionId,
-		ScenarioId,
-	} from '$lib/types';
+	import type { ItemInteractionId, ItemInteractionActionId, ScenarioId } from '$lib/types';
 
 	const { itemInteractionStore, itemInteractionActionStore, admin } = useItem();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const itemInteractionId = $derived(
-		page.params.itemInteractionId as ItemInteractionId
-	);
+	const itemInteractionId = $derived(page.params.itemInteractionId as ItemInteractionId);
 	const interaction = $derived(
 		itemInteractionId ? $itemInteractionStore.data[itemInteractionId] : undefined
 	);
 	const actions = $derived(
-		itemInteractionId
-			? ($itemInteractionActionStore.data[itemInteractionId] ?? [])
-			: []
+		itemInteractionId ? ($itemInteractionActionStore.data[itemInteractionId] ?? []) : []
 	);
 
 	const flowNodes = useNodes();

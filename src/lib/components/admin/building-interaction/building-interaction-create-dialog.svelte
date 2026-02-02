@@ -51,7 +51,7 @@
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(
-		buildingId === undefined ? '기본 (모든 건물)' : selectedBuilding?.name ?? '건물 선택'
+		buildingId === undefined ? '기본 (모든 건물)' : (selectedBuilding?.name ?? '건물 선택')
 	);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');

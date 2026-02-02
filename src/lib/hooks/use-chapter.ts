@@ -56,7 +56,10 @@ function createChapterStore() {
 		}
 	}
 
-	async function createChapter(scenarioId: ScenarioId, chapter: Omit<ChapterInsert, 'scenario_id'>) {
+	async function createChapter(
+		scenarioId: ScenarioId,
+		chapter: Omit<ChapterInsert, 'scenario_id'>
+	) {
 		const { data, error } = await supabase
 			.from('chapters')
 			.insert({

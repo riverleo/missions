@@ -38,7 +38,9 @@
 	const { chapterStore } = useChapter();
 
 	const open = $derived($questDialogStore?.type === 'update');
-	const questId = $derived($questDialogStore?.type === 'update' ? $questDialogStore.questId : undefined);
+	const questId = $derived(
+		$questDialogStore?.type === 'update' ? $questDialogStore.questId : undefined
+	);
 	const currentQuest = $derived(questId ? $questStore.data?.[questId] : undefined);
 	const chapters = $derived(Object.values($chapterStore.data));
 

@@ -13,11 +13,14 @@
 	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { ScenarioId } from '$lib/types';
 
-	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
+	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } =
+		useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needBehaviorId = $derived(
-		$needBehaviorDialogStore?.type === 'delete' ? $needBehaviorDialogStore.needBehaviorId : undefined
+		$needBehaviorDialogStore?.type === 'delete'
+			? $needBehaviorDialogStore.needBehaviorId
+			: undefined
 	);
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
 	const open = $derived($needBehaviorDialogStore?.type === 'delete');
@@ -61,7 +64,9 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeNeedBehaviorDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeNeedBehaviorDialog()}>
+					취소
+				</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? '삭제 중...' : '삭제하기'}
 				</Button>

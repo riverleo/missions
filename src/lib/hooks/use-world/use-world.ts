@@ -26,6 +26,7 @@ import type {
 	EntityTemplateCandidateId,
 	BehaviorAction,
 	Interaction,
+	InteractionAction,
 } from '$lib/types';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
@@ -199,6 +200,27 @@ function createWorldStore() {
 			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
 		}
 		return undefined;
+	}
+
+	/**
+	 * Interaction으로부터 InteractionAction 배열을 반환
+	 */
+	function getInteractionActions(interaction: Interaction): InteractionAction[] {
+		const { getBuildingInteractionActions } = useBuilding();
+		const { getItemInteractionActions } = useItem();
+		const { getCharacterInteractionActions } = useCharacter();
+
+		if (interaction.interactionType === 'building') {
+			const actions = getBuildingInteractionActions(interaction.id) || [];
+			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
+		} else if (interaction.interactionType === 'item') {
+			const actions = getItemInteractionActions(interaction.id) || [];
+			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
+		} else if (interaction.interactionType === 'character') {
+			const actions = getCharacterInteractionActions(interaction.id) || [];
+			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
+		}
+		return [];
 	}
 
 	async function fetch() {
@@ -378,6 +400,7 @@ function createWorldStore() {
 		getEntityInstance,
 		getEntityTemplateCandidateId,
 		getInteraction,
+		getInteractionActions,
 	};
 }
 

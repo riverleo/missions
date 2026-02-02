@@ -21,13 +21,10 @@
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type {
-		ScenarioId,
-		CharacterId,
-		CharacterInteraction,
-	} from '$lib/types';
+	import type { ScenarioId, CharacterId, CharacterInteraction } from '$lib/types';
 
-	const { characterStore, characterInteractionStore, openCharacterInteractionDialog } = useCharacter();
+	const { characterStore, characterInteractionStore, openCharacterInteractionDialog } =
+		useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.characterInteractionId);
 
@@ -36,7 +33,9 @@
 	});
 
 	const interactionsGroupedByTargetCharacter = $derived(() => {
-		const interactions = Object.values($characterInteractionStore.data).filter((i) => i.target_character_id);
+		const interactions = Object.values($characterInteractionStore.data).filter(
+			(i) => i.target_character_id
+		);
 		const grouped = group(interactions, (i) => i.target_character_id);
 		const characters = Object.values($characterStore.data);
 		const sortedCharacters = alphabetical(characters, (c) => c.name);
@@ -54,8 +53,8 @@
 			? $characterStore.data[interaction.character_id as CharacterId]
 			: undefined;
 
-		const interactionType =
-			(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+		const interactionType = (interaction.once_interaction_type ||
+			interaction.repeat_interaction_type)!;
 		const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 		const characterName = character ? character.name : '모든 캐릭터';
 
@@ -102,13 +101,19 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openCharacterInteractionDialog({ type: 'update', characterInteractionId: interaction.id })}
+											openCharacterInteractionDialog({
+												type: 'update',
+												characterInteractionId: interaction.id,
+											})}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openCharacterInteractionDialog({ type: 'delete', characterInteractionId: interaction.id })}
+											openCharacterInteractionDialog({
+												type: 'delete',
+												characterInteractionId: interaction.id,
+											})}
 									>
 										삭제
 									</DropdownMenuItem>
@@ -152,13 +157,19 @@
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem
 										onclick={() =>
-											openCharacterInteractionDialog({ type: 'update', characterInteractionId: interaction.id })}
+											openCharacterInteractionDialog({
+												type: 'update',
+												characterInteractionId: interaction.id,
+											})}
 									>
 										수정
 									</DropdownMenuItem>
 									<DropdownMenuItem
 										onclick={() =>
-											openCharacterInteractionDialog({ type: 'delete', characterInteractionId: interaction.id })}
+											openCharacterInteractionDialog({
+												type: 'delete',
+												characterInteractionId: interaction.id,
+											})}
 									>
 										삭제
 									</DropdownMenuItem>

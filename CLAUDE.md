@@ -293,6 +293,7 @@ const data = result.data as Building;
 **IMPORTANT: Prefer direct database inspection over console logs**
 
 When debugging data issues:
+
 1. ✅ **First**: Check database directly with `psql`
 2. ❌ **Avoid**: Adding console.log statements before verifying data state
 3. ✅ **Then**: Add logs only if needed for runtime behavior
@@ -329,6 +330,7 @@ psql postgresql://postgres:postgres@localhost:54322/postgres -c "
 ```
 
 **When to use psql:**
+
 - Verifying data exists in database
 - Checking foreign key relationships
 - Understanding why queries return empty results

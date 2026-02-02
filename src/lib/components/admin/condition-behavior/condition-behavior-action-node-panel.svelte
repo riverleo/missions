@@ -55,7 +55,9 @@
 	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
 	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
 	const fulfillments = $derived<ConditionFulfillment[]>(
-		Object.values($conditionFulfillmentStore.data).filter((f) => f.condition_id === action?.condition_id)
+		Object.values($conditionFulfillmentStore.data).filter(
+			(f) => f.condition_id === action?.condition_id
+		)
 	);
 
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
@@ -174,7 +176,11 @@
 		if (!changes || !value) return;
 
 		// "building:id" 또는 "search" 형식 파싱
-		if (value.startsWith('building:') || value.startsWith('item:') || value.startsWith('character:')) {
+		if (
+			value.startsWith('building:') ||
+			value.startsWith('item:') ||
+			value.startsWith('character:')
+		) {
 			const [entityType, entityId] = value.split(':');
 
 			changes.target_selection_method = 'explicit';
@@ -244,7 +250,9 @@
 		if (!action) return;
 
 		flowNodes.update((ns) =>
-			ns.map((n) => (n.id === createConditionBehaviorActionNodeId(action) ? { ...n, selected: false } : n))
+			ns.map((n) =>
+				n.id === createConditionBehaviorActionNodeId(action) ? { ...n, selected: false } : n
+			)
 		);
 	}
 </script>
@@ -373,14 +381,13 @@
 									<SelectContent>
 										<SelectItem value="">자동 선택</SelectItem>
 										{#each fulfillments as fulfillment (fulfillment.id)}
-											{@const interaction =
-												fulfillment.building_interaction_id
-													? buildingInteractions.find(
-															(i) => i.id === fulfillment.building_interaction_id
-														)
-													: fulfillment.item_interaction_id
-														? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
-														: undefined}
+											{@const interaction = fulfillment.building_interaction_id
+												? buildingInteractions.find(
+														(i) => i.id === fulfillment.building_interaction_id
+													)
+												: fulfillment.item_interaction_id
+													? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
+													: undefined}
 											{@const entity =
 												interaction && 'building_id' in interaction
 													? $buildingStore.data[interaction.building_id]

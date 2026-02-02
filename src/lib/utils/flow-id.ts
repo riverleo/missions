@@ -281,7 +281,6 @@ export function isConditionBehaviorActionNextEdgeId(edgeId: string): boolean {
 	return edgeId.includes('-next-');
 }
 
-
 // Building Node
 export function createBuildingNodeId(building: Building): string {
 	return `building-${building.id}`;
@@ -454,9 +453,7 @@ export function isInteractionNextEdgeId(edgeId: string): boolean {
 // ============================================
 
 // Building Interaction Action Node
-export function createBuildingInteractionActionNodeId(
-	action: BuildingInteractionAction
-): string {
+export function createBuildingInteractionActionNodeId(action: BuildingInteractionAction): string {
 	return `building-interaction-action-${action.id}`;
 }
 
@@ -485,9 +482,7 @@ export function isBuildingInteractionActionNextEdgeId(edgeId: string): boolean {
 // ============================================
 
 // Character Interaction Action Node
-export function createCharacterInteractionActionNodeId(
-	action: CharacterInteractionAction
-): string {
+export function createCharacterInteractionActionNodeId(action: CharacterInteractionAction): string {
 	return `character-interaction-action-${action.id}`;
 }
 
@@ -516,9 +511,7 @@ export function isCharacterInteractionActionNextEdgeId(edgeId: string): boolean 
 // ============================================
 
 // Item Interaction Action Node
-export function createItemInteractionActionNodeId(
-	action: ItemInteractionAction
-): string {
+export function createItemInteractionActionNodeId(action: ItemInteractionAction): string {
 	return `item-interaction-action-${action.id}`;
 }
 

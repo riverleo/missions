@@ -23,7 +23,7 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
  * 대상 탐색 및 경로 설정 (target_selection_method에 따라)
  */
 export default function searchTargetAndSetPath(
-	entity: WorldCharacterEntity,
+	worldCharacterEntity: WorldCharacterEntity,
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): void {
 	const { getInteractableEntityTemplates } = useBehavior();
@@ -31,7 +31,7 @@ export default function searchTargetAndSetPath(
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
 	const { getWorldBuilding, getWorldItem, getWorldCharacter } = useWorld();
-	const worldEntities = Object.values(entity.worldContext.entities);
+	const worldEntities = Object.values(worldCharacterEntity.worldContext.entities);
 
 	let targetEntity: Entity | undefined = undefined;
 
@@ -47,8 +47,8 @@ export default function searchTargetAndSetPath(
 					const buildingEntities = worldEntities.filter((e) => e.type === 'building');
 					if (buildingEntities.length > 0) {
 						const sortedBuildings = buildingEntities.sort((a, b) => {
-							const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
-							const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+							const distA = Math.hypot(a.x - worldCharacterEntity.x, a.y - worldCharacterEntity.y);
+							const distB = Math.hypot(b.x - worldCharacterEntity.x, b.y - worldCharacterEntity.y);
 							return distA - distB;
 						});
 						targetEntity = sortedBuildings[0];
@@ -70,8 +70,8 @@ export default function searchTargetAndSetPath(
 					const itemEntities = worldEntities.filter((e) => e.type === 'item');
 					if (itemEntities.length > 0) {
 						const sortedItems = itemEntities.sort((a, b) => {
-							const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
-							const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+							const distA = Math.hypot(a.x - worldCharacterEntity.x, a.y - worldCharacterEntity.y);
+							const distB = Math.hypot(b.x - worldCharacterEntity.x, b.y - worldCharacterEntity.y);
 							return distA - distB;
 						});
 						targetEntity = sortedItems[0];
@@ -109,13 +109,17 @@ export default function searchTargetAndSetPath(
 		const templateIds = new Set(templates.map((t) => t.id));
 
 		// 1. 먼저 들고 있는 아이템 확인
-		for (const heldItemId of entity.heldWorldItemIds) {
+		for (const heldItemId of worldCharacterEntity.heldWorldItemIds) {
 			const worldItem = getWorldItem(heldItemId);
 			if (worldItem && templateIds.has(worldItem.item_id)) {
 				// 들고 있는 아이템이 적합한 대상이면 선택
-				const heldItemEntityId = EntityIdUtils.createId('item', entity.worldContext.worldId, heldItemId);
-				entity.currentTargetEntityId = heldItemEntityId;
-				entity.path = []; // 들고 있는 아이템은 경로 불필요
+				const heldItemEntityId = EntityIdUtils.createId(
+					'item',
+					worldCharacterEntity.worldContext.worldId,
+					heldItemId
+				);
+				worldCharacterEntity.currentTargetEntityId = heldItemEntityId;
+				worldCharacterEntity.path = []; // 들고 있는 아이템은 경로 불필요
 				return; // 검색 종료
 			}
 		}
@@ -139,16 +143,19 @@ export default function searchTargetAndSetPath(
 		if (candidateEntities.length > 0) {
 			// 거리순으로 정렬
 			const sortedCandidates = candidateEntities.sort((a, b) => {
-				const distA = Math.hypot(a.x - entity.x, a.y - entity.y);
-				const distB = Math.hypot(b.x - entity.x, b.y - entity.y);
+				const distA = Math.hypot(a.x - worldCharacterEntity.x, a.y - worldCharacterEntity.y);
+				const distB = Math.hypot(b.x - worldCharacterEntity.x, b.y - worldCharacterEntity.y);
 				return distA - distB;
 			});
 
 			// 경로를 찾을 수 있는 첫 번째 타겟 선택
 			for (const candidate of sortedCandidates) {
-				const fromPos = vectorUtils.createVector(entity.body.position.x, entity.body.position.y);
+				const fromPos = vectorUtils.createVector(
+					worldCharacterEntity.body.position.x,
+					worldCharacterEntity.body.position.y
+				);
 				const toPos = vectorUtils.createVector(candidate.x, candidate.y);
-				const testPath = entity.worldContext.pathfinder.findPath(fromPos, toPos);
+				const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(fromPos, toPos);
 				if (testPath.length > 0) {
 					targetEntity = candidate;
 					break;
@@ -160,14 +167,17 @@ export default function searchTargetAndSetPath(
 	// 대상을 찾았으면 경로 확인 후 타겟 설정
 	if (targetEntity) {
 		// 경로를 찾을 수 있는지 확인
-		const testPath = entity.worldContext.pathfinder.findPath(
-			vectorUtils.createVector(entity.body.position.x, entity.body.position.y),
+		const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
+			vectorUtils.createVector(
+				worldCharacterEntity.body.position.x,
+				worldCharacterEntity.body.position.y
+			),
 			vectorUtils.createVector(targetEntity.x, targetEntity.y)
 		);
 
 		if (testPath.length > 0) {
-			entity.currentTargetEntityId = targetEntity.id;
-			entity.path = testPath;
+			worldCharacterEntity.currentTargetEntityId = targetEntity.id;
+			worldCharacterEntity.path = testPath;
 		}
 	}
 }

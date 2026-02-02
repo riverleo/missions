@@ -174,7 +174,11 @@
 		if (!changes || !value) return;
 
 		// "building:id" 또는 "search" 형식 파싱
-		if (value.startsWith('building:') || value.startsWith('item:') || value.startsWith('character:')) {
+		if (
+			value.startsWith('building:') ||
+			value.startsWith('item:') ||
+			value.startsWith('character:')
+		) {
 			const [entityType, entityId] = value.split(':');
 
 			changes.target_selection_method = 'explicit';
@@ -373,14 +377,13 @@
 									<SelectContent>
 										<SelectItem value="">자동 선택</SelectItem>
 										{#each fulfillments as fulfillment (fulfillment.id)}
-											{@const interaction =
-												fulfillment.building_interaction_id
-													? buildingInteractions.find(
-															(i) => i.id === fulfillment.building_interaction_id
-														)
-													: fulfillment.item_interaction_id
-														? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
-														: undefined}
+											{@const interaction = fulfillment.building_interaction_id
+												? buildingInteractions.find(
+														(i) => i.id === fulfillment.building_interaction_id
+													)
+												: fulfillment.item_interaction_id
+													? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
+													: undefined}
 											{@const entity =
 												interaction && 'building_id' in interaction
 													? $buildingStore.data[interaction.building_id]

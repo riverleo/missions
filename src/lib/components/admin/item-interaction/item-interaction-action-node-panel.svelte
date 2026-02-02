@@ -45,7 +45,7 @@
 
 	// 아이템 상태 가져오기
 	const itemStates = $derived(
-		interaction?.item_id ? $itemStateStore.data[interaction.item_id] ?? [] : []
+		interaction?.item_id ? ($itemStateStore.data[interaction.item_id] ?? []) : []
 	);
 	const heldItemState = $derived(itemStates[0]); // 첫 번째 state 사용
 
@@ -287,7 +287,7 @@
 										characterId={previewCharacter.id}
 										bodyStateType={changes.character_body_state_type}
 										faceStateType={changes.character_face_state_type}
-										heldItemState={heldItemState}
+										{heldItemState}
 										heldItemOffset={{ x: changes.item_offset_x, y: changes.item_offset_y }}
 										heldItemScale={changes.item_scale}
 										heldItemRotation={changes.item_rotation}

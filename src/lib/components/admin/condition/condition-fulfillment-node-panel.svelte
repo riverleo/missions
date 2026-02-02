@@ -47,7 +47,6 @@
 	let changes = $state<ConditionFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
 
-
 	const selectedTargetLabel = $derived.by(() => {
 		if (changes?.fulfillment_type === 'building' && changes?.building_interaction_id) {
 			const interaction = buildingInteractions.find(
@@ -124,7 +123,6 @@
 			changes.building_interaction_id = id as BuildingInteractionId | null;
 		}
 	}
-
 
 	const targetOptions = $derived.by(() => {
 		if (changes?.fulfillment_type === 'building') {

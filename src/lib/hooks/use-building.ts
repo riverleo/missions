@@ -161,7 +161,10 @@ function createBuildingStore() {
 			] = await Promise.all([
 				supabase.from('buildings').select('*, building_states(*)').order('name'),
 				supabase.from('building_items').select('*'),
-				supabase.from('building_interactions').select('*, building_interaction_actions(*)').order('created_at'),
+				supabase
+					.from('building_interactions')
+					.select('*, building_interaction_actions(*)')
+					.order('created_at'),
 				supabase.from('conditions').select('*').order('name'),
 				supabase.from('condition_fulfillments').select('*'),
 				supabase.from('building_conditions').select('*'),
@@ -230,8 +233,16 @@ function createBuildingStore() {
 			buildingStore.set({ status: 'success', data: buildingRecord, error: undefined });
 			buildingItemStore.set({ status: 'success', data: buildingItemRecord, error: undefined });
 			buildingStateStore.set({ status: 'success', data: stateRecord, error: undefined });
-			buildingInteractionStore.set({ status: 'success', data: interactionRecord, error: undefined });
-			buildingInteractionActionStore.set({ status: 'success', data: actionRecord, error: undefined });
+			buildingInteractionStore.set({
+				status: 'success',
+				data: interactionRecord,
+				error: undefined,
+			});
+			buildingInteractionActionStore.set({
+				status: 'success',
+				data: actionRecord,
+				error: undefined,
+			});
 			conditionStore.set({ status: 'success', data: conditionRecord });
 			conditionFulfillmentStore.set({ status: 'success', data: fulfillmentRecord });
 			buildingConditionStore.set({ status: 'success', data: buildingConditionRecord });
@@ -330,7 +341,10 @@ function createBuildingStore() {
 		return Object.values(get(buildingInteractionStore).data);
 	}
 
-	function getAllBuildingInteractionActions(): Record<BuildingInteractionId, BuildingInteractionAction[]> {
+	function getAllBuildingInteractionActions(): Record<
+		BuildingInteractionId,
+		BuildingInteractionAction[]
+	> {
 		return get(buildingInteractionActionStore).data;
 	}
 
@@ -537,7 +551,10 @@ function createBuildingStore() {
 			);
 		},
 
-		async createBuildingInteraction(scenarioId: ScenarioId, interaction: Omit<BuildingInteractionInsert, 'scenario_id'>) {
+		async createBuildingInteraction(
+			scenarioId: ScenarioId,
+			interaction: Omit<BuildingInteractionInsert, 'scenario_id'>
+		) {
 			const { data, error } = await supabase
 				.from('building_interactions')
 				.insert({
@@ -610,7 +627,8 @@ function createBuildingStore() {
 		) {
 			// Get building_id from interaction (nullable for default interactions)
 			const buildingInteractionStoreValue = get(buildingInteractionStore);
-			const buildingId = buildingInteractionStoreValue.data[buildingInteractionId]?.building_id || null;
+			const buildingId =
+				buildingInteractionStoreValue.data[buildingInteractionId]?.building_id || null;
 
 			const { data, error } = await supabase
 				.from('building_interaction_actions')
@@ -893,7 +911,9 @@ function createBuildingStore() {
 
 	return {
 		buildingStore: buildingStore as Readable<RecordFetchState<BuildingId, Building>>,
-		buildingItemStore: buildingItemStore as Readable<RecordFetchState<BuildingItemId, BuildingItem>>,
+		buildingItemStore: buildingItemStore as Readable<
+			RecordFetchState<BuildingItemId, BuildingItem>
+		>,
 		buildingStateStore: buildingStateStore as Readable<
 			RecordFetchState<BuildingId, BuildingState[]>
 		>,

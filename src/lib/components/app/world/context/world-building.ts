@@ -47,7 +47,8 @@ export async function createWorldBuilding(
 	if (isTestWorld) {
 		// TEST 환경: 클라이언트에서 UUID 생성
 		const worldBuildingId = crypto.randomUUID() as WorldBuildingId;
-		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } =
+			useWorld();
 		const { buildingConditionStore, conditionStore, getAllBuildingConditions } = useBuilding();
 		const buildingConditions = getAllBuildingConditions().filter(
 			(bc) => bc.building_id === insert.building_id
@@ -173,7 +174,8 @@ export async function createWorldBuilding(
 
 	// TEST 환경에서는 스토어에서 conditions를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
 	if (isTestWorld) {
-		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } =
+			useWorld();
 		const buildingConditions = getAllWorldBuildingConditions().filter(
 			(condition) => condition.world_building_id === worldBuilding.id
 		);
@@ -190,7 +192,12 @@ export async function deleteWorldBuilding(
 	worldBuildingId: WorldBuildingId,
 	worldContext?: WorldContext
 ) {
-	const { worldBuildingStore, worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
+	const {
+		worldBuildingStore,
+		worldBuildingConditionStore,
+		getAllWorldBuildingConditions,
+		getWorldBuilding,
+	} = useWorld();
 	const worldBuilding = getWorldBuilding(worldBuildingId);
 	if (!worldBuilding) return;
 
@@ -202,10 +209,7 @@ export async function deleteWorldBuilding(
 		const deletedAt = new Date().toISOString();
 
 		const [buildingResult, conditionsResult] = await Promise.all([
-			supabase
-				.from('world_buildings')
-				.update({ deleted_at: deletedAt })
-				.eq('id', worldBuildingId),
+			supabase.from('world_buildings').update({ deleted_at: deletedAt }).eq('id', worldBuildingId),
 			supabase
 				.from('world_building_conditions')
 				.update({ deleted_at: deletedAt })

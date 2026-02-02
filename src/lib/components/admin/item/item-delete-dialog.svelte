@@ -18,7 +18,9 @@
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($itemDialogStore?.type === 'delete');
-	const itemId = $derived($itemDialogStore?.type === 'delete' ? $itemDialogStore.itemId : undefined);
+	const itemId = $derived(
+		$itemDialogStore?.type === 'delete' ? $itemDialogStore.itemId : undefined
+	);
 
 	function onOpenChange(value: boolean) {
 		if (!value) {

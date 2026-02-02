@@ -61,7 +61,10 @@
 							disabled={!currentBodyId}
 							onclick={() =>
 								currentBodyId &&
-								openCharacterBodyDialog({ type: 'delete', bodyId: currentBodyId as CharacterBodyId })}
+								openCharacterBodyDialog({
+									type: 'delete',
+									bodyId: currentBodyId as CharacterBodyId,
+								})}
 						>
 							<IconTrash class="size-4" />
 						</Button>

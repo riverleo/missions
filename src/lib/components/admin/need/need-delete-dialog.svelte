@@ -16,7 +16,9 @@
 	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const needId = $derived($needDialogStore?.type === 'delete' ? $needDialogStore.needId : undefined);
+	const needId = $derived(
+		$needDialogStore?.type === 'delete' ? $needDialogStore.needId : undefined
+	);
 	const need = $derived(needId ? $needStore.data[needId] : undefined);
 	const open = $derived($needDialogStore?.type === 'delete');
 

@@ -63,7 +63,9 @@
 								{/snippet}
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onclick={() => openCharacterBodyDialog({ type: 'delete', bodyId: body.id })}>
+								<DropdownMenuItem
+									onclick={() => openCharacterBodyDialog({ type: 'delete', bodyId: body.id })}
+								>
 									삭제
 								</DropdownMenuItem>
 							</DropdownMenuContent>

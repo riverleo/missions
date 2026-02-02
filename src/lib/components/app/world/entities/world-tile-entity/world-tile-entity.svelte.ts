@@ -23,7 +23,12 @@ export class WorldTileEntity extends Entity {
 		return EntityIdUtils.instanceId<TileCellKey>(this.id);
 	}
 
-	constructor(worldContext: WorldContext, worldId: WorldId, tileCellKey: TileCellKey, tileId: TileId) {
+	constructor(
+		worldContext: WorldContext,
+		worldId: WorldId,
+		tileCellKey: TileCellKey,
+		tileId: TileId
+	) {
 		super(worldContext, 'tile', worldId, tileCellKey);
 		this.tileId = tileId;
 

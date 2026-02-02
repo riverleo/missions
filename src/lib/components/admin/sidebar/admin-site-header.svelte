@@ -83,8 +83,8 @@
 			const character = interaction.character_id
 				? $characterStore.data?.[interaction.character_id]
 				: undefined;
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 			const characterName = character ? character.name : '모든 캐릭터';
 			return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
@@ -96,8 +96,8 @@
 			const character = interaction.character_id
 				? $characterStore.data?.[interaction.character_id]
 				: undefined;
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 			const characterName = character ? character.name : '모든 캐릭터';
 			return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
@@ -109,8 +109,8 @@
 			const character = interaction.character_id
 				? $characterStore.data?.[interaction.character_id]
 				: undefined;
-			const interactionType =
-				(interaction.once_interaction_type || interaction.repeat_interaction_type)!;
+			const interactionType = (interaction.once_interaction_type ||
+				interaction.repeat_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 			const characterName = character ? character.name : '모든 캐릭터';
 			return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;

@@ -15,7 +15,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  * @returns {boolean} 체인이 시작되었는지 여부
  */
 export default function startInteractionChain(
-	entity: WorldCharacterEntity,
+	this: WorldCharacterEntity,
 	interaction: Interaction,
 	tick: number
 ): boolean {
@@ -49,23 +49,23 @@ export default function startInteractionChain(
 		if (interactionActions.length > 0) {
 			const firstAction = interactionActions[0];
 			if (!firstAction) return false;
-			entity.currentInteractionTargetId = InteractionIdUtils.create(
+			this.currentInteractionTargetId = InteractionIdUtils.create(
 				interaction.interactionType,
 				interaction.id as any,
 				firstAction.id
 			);
-			entity.interactionTargetStartTick = tick;
+			this.interactionTargetStartTick = tick;
 			return true;
 		}
 		return false;
 	}
 
 	// 체인 시작
-	entity.currentInteractionTargetId = InteractionIdUtils.create(
+	this.currentInteractionTargetId = InteractionIdUtils.create(
 		interaction.interactionType,
 		interaction.id as any,
 		rootAction.id
 	);
-	entity.interactionTargetStartTick = tick;
+	this.interactionTargetStartTick = tick;
 	return true;
 }

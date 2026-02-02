@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
-	import type {
-		BuildingInteraction,
-		BuildingInteractionId,
-	} from '$lib/types';
+	import type { BuildingInteraction, BuildingInteractionId } from '$lib/types';
 	import { Panel } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
