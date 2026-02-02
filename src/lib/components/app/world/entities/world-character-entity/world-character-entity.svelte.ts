@@ -23,7 +23,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	heldItemIds = $state<WorldItemId[]>([]);
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
-	behaviorState = new WorldCharacterEntityBehaviorState();
+	behaviorState: WorldCharacterEntityBehaviorState;
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -31,6 +31,8 @@ export class WorldCharacterEntity extends Entity {
 
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
+
+		this.behaviorState = new WorldCharacterEntityBehaviorState(this);
 
 		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
@@ -120,12 +122,12 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override update(event: BeforeUpdateEvent): void {
-		this.behaviorState.update(this, event);
+		this.behaviorState.update(event);
 	}
 
 	tick(tick: number): void {
 		tickWorldCharacterNeeds(this, tick);
-		this.behaviorState.tick(this, tick);
+		this.behaviorState.tick(tick);
 	}
 
 	moveTo(targetX: number, targetY: number): void {

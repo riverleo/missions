@@ -23,6 +23,8 @@ const { Body } = Matter;
  * 언제 시작했는지 등의 정보를 저장하고 관리합니다.
  */
 export class WorldCharacterEntityBehaviorState {
+	private worldCharacterEntity: WorldCharacterEntity;
+
 	/** 이동 경로 */
 	path = $state<Vector[]>([]);
 	/** 캐릭터 방향 */
@@ -37,6 +39,10 @@ export class WorldCharacterEntityBehaviorState {
 	interactionTargetId = $state<InteractionTargetId | undefined>(undefined);
 	/** 인터랙션 시작 틱 */
 	interactionStartTick = $state<number | undefined>(undefined);
+
+	constructor(worldCharacterEntity: WorldCharacterEntity) {
+		this.worldCharacterEntity = worldCharacterEntity;
+	}
 
 	/**
 	 * 모든 상태를 초기화합니다.
@@ -54,22 +60,22 @@ export class WorldCharacterEntityBehaviorState {
 	/**
 	 * 경로를 따라 이동
 	 */
-	update(worldCharacterEntity: WorldCharacterEntity, event: BeforeUpdateEvent): void {
+	update(event: BeforeUpdateEvent): void {
 		if (this.path.length === 0) {
 			// path가 없으면 dynamic으로 전환 (중력 적용)
-			Body.setStatic(worldCharacterEntity.body, false);
+			Body.setStatic(this.worldCharacterEntity.body, false);
 			return;
 		}
 
 		// path가 있으면 static으로 전환 (path 기반 이동)
-		Body.setStatic(worldCharacterEntity.body, true);
+		Body.setStatic(this.worldCharacterEntity.body, true);
 
 		const targetPoint = this.path[0];
 		if (!targetPoint) {
 			return;
 		}
 
-		const currentVector = worldCharacterEntity.body.position;
+		const currentVector = this.worldCharacterEntity.body.position;
 		const delta = event.delta;
 		const deltaSeconds = delta / 1000;
 
@@ -121,18 +127,18 @@ export class WorldCharacterEntityBehaviorState {
 			}
 		}
 
-		Body.setPosition(worldCharacterEntity.body, { x: newX, y: newY });
+		Body.setPosition(this.worldCharacterEntity.body, { x: newX, y: newY });
 	}
 
 	/**
 	 * 캐릭터의 행동을 tick마다 처리합니다.
 	 */
-	tick(worldCharacterEntity: WorldCharacterEntity, tick: number): void {
+	tick(tick: number): void {
 		const { getBehaviorAction } = useBehavior();
 
 		// 현재 행동 액션이 없으면 새로운 행동 선택
 		if (!this.behaviorTargetId) {
-			selectNewBehavior(worldCharacterEntity, tick);
+			selectNewBehavior(this.worldCharacterEntity, tick);
 			return;
 		}
 
@@ -160,10 +166,7 @@ export class WorldCharacterEntityBehaviorState {
 				// explicit: interaction의 엔티티 템플릿이 현재 타겟과 다르면 클리어
 				else if (behaviorAction.target_selection_method === 'explicit') {
 					if (this.entityId) {
-						const shouldClearTarget = this.checkIfTargetMismatch(
-							worldCharacterEntity,
-							behaviorAction
-						);
+						const shouldClearTarget = this.checkIfTargetMismatch(behaviorAction);
 						if (shouldClearTarget) {
 							this.entityId = undefined;
 							this.path = [];
@@ -182,35 +185,32 @@ export class WorldCharacterEntityBehaviorState {
 			this.path.length === 0 &&
 			!this.entityId
 		) {
-			searchTargetAndSetPath(worldCharacterEntity, behaviorAction);
+			searchTargetAndSetPath(this.worldCharacterEntity, behaviorAction);
 			return; // 경로 설정 후 다음 tick에서 실행
 		}
 
 		// 3. 행동 실행
 		if (behaviorAction.type === 'go') {
-			executeGoAction(worldCharacterEntity, behaviorAction);
+			executeGoAction(this.worldCharacterEntity, behaviorAction);
 		} else if (behaviorAction.type === 'interact') {
-			executeInteractAction(worldCharacterEntity, behaviorAction, tick);
+			executeInteractAction(this.worldCharacterEntity, behaviorAction, tick);
 		} else if (behaviorAction.type === 'fulfill') {
-			executeFulfillAction(worldCharacterEntity, behaviorAction, tick);
+			executeFulfillAction(this.worldCharacterEntity, behaviorAction, tick);
 		} else if (behaviorAction.type === 'idle') {
-			executeIdleAction(worldCharacterEntity, behaviorAction);
+			executeIdleAction(this.worldCharacterEntity, behaviorAction);
 		}
 
 		// 4. Do until behavior_completion_type: 완료 조건 확인
-		const isCompleted = checkActionCompletion(worldCharacterEntity, behaviorAction, tick);
+		const isCompleted = checkActionCompletion(this.worldCharacterEntity, behaviorAction, tick);
 		if (isCompleted) {
-			transitionToNextAction(worldCharacterEntity, behaviorAction, tick);
+			transitionToNextAction(this.worldCharacterEntity, behaviorAction, tick);
 		}
 	}
 
 	/**
 	 * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
 	 */
-	private checkIfTargetMismatch(
-		worldCharacterEntity: WorldCharacterEntity,
-		behaviorAction: BehaviorAction
-	): boolean {
+	private checkIfTargetMismatch(behaviorAction: BehaviorAction): boolean {
 		if (!this.entityId) return false;
 
 		const { getEntityInstance, getEntityTemplateCandidateId, getInteraction } = useWorld();
