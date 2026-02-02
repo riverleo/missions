@@ -29,8 +29,20 @@ export class WorldCharacterEntityBehaviorState {
 	/** 인터랙션 시작 틱 */
 	interactionStartTick = $state<number | undefined>();
 
+	/**
+	 * 경로를 따라 이동
+	 */
+	update: (event: BeforeUpdateEvent) => void;
+
+	/**
+	 * 캐릭터의 행동을 tick마다 처리합니다.
+	 */
+	tick: (tickNumber: number) => void;
+
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
+		this.update = update.bind(this);
+		this.tick = tick.bind(this);
 	}
 
 	/**
@@ -44,19 +56,5 @@ export class WorldCharacterEntityBehaviorState {
 		this.behaviorTargetStartTick = undefined;
 		this.interactionTargetId = undefined;
 		this.interactionStartTick = undefined;
-	}
-
-	/**
-	 * 경로를 따라 이동
-	 */
-	update(event: BeforeUpdateEvent): void {
-		update.call(this, event);
-	}
-
-	/**
-	 * 캐릭터의 행동을 tick마다 처리합니다.
-	 */
-	tick(tickNumber: number): void {
-		tick.call(this, tickNumber);
 	}
 }
