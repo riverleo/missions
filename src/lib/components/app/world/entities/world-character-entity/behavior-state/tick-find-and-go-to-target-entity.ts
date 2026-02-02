@@ -45,13 +45,13 @@ export default function tickFindAndGoToTargetEntity(
 		const interaction = getInteraction(behaviorAction);
 		if (interaction) {
 			const actionEntitySourceId = getEntitySourceId(behaviorAction);
-			if (actionEntitySourceId) {
-				targetEntity = entities.find((e) => {
-					if (e.type !== interaction.interactionType) return false;
-					const entitySourceId = getEntitySourceId(e.id);
-					return entitySourceId === actionEntitySourceId;
-				});
+			if (!actionEntitySourceId) {
+				throw new Error(
+					`Explicit target selection requires entity source but none found for behaviorAction: ${behaviorAction.id}`
+				);
 			}
+
+			targetEntity = entities.find((e) => getEntitySourceId(e.id) === actionEntitySourceId);
 		}
 	} else if (
 		behaviorAction.target_selection_method === 'search' ||
