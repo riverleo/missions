@@ -9,7 +9,6 @@ import executeFulfillAction from './actions/execute-fulfill';
 import executeIdleAction from './actions/execute-idle';
 import checkActionCompletion from './completion/check-completion';
 import transitionToNextAction from './completion/transition';
-import selectNewBehavior from './selection/select-behavior';
 
 /**
  * 캐릭터의 행동을 tick마다 처리합니다.
@@ -19,9 +18,11 @@ export default function tick(this: WorldCharacterEntityBehaviorState, tick: numb
 
 	// 현재 행동 액션이 없으면 새로운 행동 선택
 	if (!this.behaviorTargetId) {
-		selectNewBehavior(this.worldCharacterEntity, tick);
-		return;
+		if (this.findAndSetBehavior(tick) === undefined) return;
 	}
+
+	// behaviorTargetId가 설정되었는지 확인
+	if (!this.behaviorTargetId) return;
 
 	// 현재 행동 액션 가져오기
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);

@@ -1,22 +1,22 @@
 import { get } from 'svelte/store';
-import type { Behavior } from '$lib/types';
-import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
+import type { BehaviorTargetId } from '$lib/types';
+import type { WorldCharacterEntityBehaviorState } from '../world-character-entity-behavior-state.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**
  * 새로운 행동을 선택 (우선순위 기반)
  */
-export default function selectNewBehavior(
-	worldCharacterEntity: WorldCharacterEntity,
+export default function findAndSetBehavior(
+	this: WorldCharacterEntityBehaviorState,
 	tick: number
-): void {
+): BehaviorTargetId | undefined {
 	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore } = useBehavior();
 
 	// 1. 후보 behaviors 찾기
 	const candidateBehaviors = getAllBehaviors().filter((behavior) => {
 		if (behavior.behaviorType === 'need') {
-			const need = worldCharacterEntity.needs[behavior.need_id];
+			const need = this.worldCharacterEntity.needs[behavior.need_id];
 			if (!need) return false;
 			// 욕구 레벨이 threshold 이하이면 발동
 			return need.value <= behavior.need_threshold;
@@ -28,7 +28,7 @@ export default function selectNewBehavior(
 
 	if (candidateBehaviors.length === 0) {
 		// 후보가 없으면 종료
-		return;
+		return undefined;
 	}
 
 	// 2. 우선순위에 따라 정렬
@@ -49,7 +49,7 @@ export default function selectNewBehavior(
 	});
 
 	const selectedBehavior = sortedCandidates[0];
-	if (!selectedBehavior) return;
+	if (!selectedBehavior) return undefined;
 
 	// 3. root action 찾기
 	const allBehaviorActions = getAllBehaviorActions();
@@ -69,15 +69,17 @@ export default function selectNewBehavior(
 
 	if (!rootAction) {
 		// root action이 없으면 종료
-		return;
+		return undefined;
 	}
 
 	// 4. currentBehaviorId 설정 및 시작 tick 기록
 	const actionId = rootAction.behaviorType === 'need' ? rootAction.id : rootAction.id;
-	worldCharacterEntity.behaviorState.behaviorTargetId = BehaviorIdUtils.create(
+	this.behaviorTargetId = BehaviorIdUtils.create(
 		selectedBehavior.behaviorType,
 		selectedBehavior.id,
 		actionId
 	);
-	worldCharacterEntity.behaviorState.behaviorTargetStartTick = tick;
+	this.behaviorTargetStartTick = tick;
+
+	return this.behaviorTargetId;
 }

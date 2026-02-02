@@ -5,6 +5,7 @@ import type { WorldCharacterEntityDirection } from '../index';
 import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
 import tick from './tick';
+import findAndSetBehavior from './selection/find-and-set-behavior';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -14,35 +15,23 @@ import tick from './tick';
 export class WorldCharacterEntityBehaviorState {
 	worldCharacterEntity: WorldCharacterEntity;
 
-	/** 이동 경로 */
 	path = $state<Vector[]>([]);
-	/** 캐릭터 방향 */
 	direction = $state<WorldCharacterEntityDirection>('right');
-	/** 현재 타겟 엔티티 ID */
 	targetEntityId = $state<EntityId | undefined>();
-	/** 현재 행동 타겟 ID */
 	behaviorTargetId = $state<BehaviorTargetId | undefined>();
-	/** 행동 타겟 시작 틱 */
 	behaviorTargetStartTick = $state<number | undefined>();
-	/** 현재 인터랙션 타겟 ID */
 	interactionTargetId = $state<InteractionTargetId | undefined>();
-	/** 인터랙션 시작 틱 */
 	interactionStartTick = $state<number | undefined>();
 
-	/**
-	 * 경로를 따라 이동
-	 */
 	update: (event: BeforeUpdateEvent) => void;
-
-	/**
-	 * 캐릭터의 행동을 tick마다 처리합니다.
-	 */
 	tick: (tickNumber: number) => void;
+	findAndSetBehavior: (tick: number) => BehaviorTargetId | undefined;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
 		this.update = update.bind(this);
 		this.tick = tick.bind(this);
+		this.findAndSetBehavior = findAndSetBehavior.bind(this);
 	}
 
 	/**
