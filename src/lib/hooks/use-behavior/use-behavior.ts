@@ -221,7 +221,11 @@ function createBehaviorStore() {
 		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
 	}
 
-	function getBehaviorAction(behaviorTargetId: BehaviorTargetId): BehaviorAction | undefined {
+	function getBehaviorAction(
+		behaviorTargetId: BehaviorTargetId | undefined
+	): BehaviorAction | undefined {
+		if (!behaviorTargetId) return undefined;
+
 		const { type } = BehaviorIdUtils.parse(behaviorTargetId);
 		const behaviorActionId = BehaviorIdUtils.behaviorActionId(behaviorTargetId);
 

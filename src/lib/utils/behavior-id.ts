@@ -21,12 +21,26 @@ export const BehaviorIdUtils = {
 	 * @example
 	 * BehaviorIdUtils.create('need', needBehaviorId, needBehaviorActionId)
 	 * // "need_{needBehaviorId}_{needBehaviorActionId}"
+	 *
+	 * @example
+	 * BehaviorIdUtils.create(behavior, behaviorActionId)
+	 * // behavior 객체에서 behaviorType과 id를 추출하여 생성
 	 */
 	create(
-		type: BehaviorType,
-		behaviorId: NeedBehaviorId | ConditionBehaviorId,
-		behaviorActionId: NeedBehaviorActionId | ConditionBehaviorActionId
+		typeOrBehavior: BehaviorType | Behavior,
+		behaviorIdOrActionId: NeedBehaviorId | ConditionBehaviorId | NeedBehaviorActionId | ConditionBehaviorActionId,
+		behaviorActionId?: NeedBehaviorActionId | ConditionBehaviorActionId
 	): BehaviorTargetId {
+		// Behavior 객체가 전달된 경우
+		if (typeof typeOrBehavior === 'object') {
+			const behavior = typeOrBehavior;
+			const actionId = behaviorIdOrActionId as NeedBehaviorActionId | ConditionBehaviorActionId;
+			return `${behavior.behaviorType}_${behavior.id}_${actionId}` as BehaviorTargetId;
+		}
+
+		// 개별 파라미터가 전달된 경우
+		const type = typeOrBehavior;
+		const behaviorId = behaviorIdOrActionId as NeedBehaviorId | ConditionBehaviorId;
 		return `${type}_${behaviorId}_${behaviorActionId}` as BehaviorTargetId;
 	},
 

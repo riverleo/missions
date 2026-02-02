@@ -1,15 +1,12 @@
 import { get } from 'svelte/store';
-import type { WorldCharacterEntityBehaviorState } from '../world-character-entity-behavior-state.svelte';
+import type { WorldCharacterEntityBehaviorState } from './world-character-entity-behavior-state.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**
  * 새로운 행동을 선택 (우선순위 기반)
  */
-export default function findAndSetBehavior(
-	this: WorldCharacterEntityBehaviorState,
-	tick: number
-): boolean {
+export default function initialize(this: WorldCharacterEntityBehaviorState, tick: number): boolean {
 	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore, getBehaviorAction } =
 		useBehavior();
 
@@ -85,11 +82,7 @@ export default function findAndSetBehavior(
 
 	// 4. currentBehaviorId 설정 및 시작 tick 기록
 	const actionId = rootAction.behaviorType === 'need' ? rootAction.id : rootAction.id;
-	this.behaviorTargetId = BehaviorIdUtils.create(
-		selectedBehavior.behaviorType,
-		selectedBehavior.id,
-		actionId
-	);
+	this.behaviorTargetId = BehaviorIdUtils.create(selectedBehavior, actionId);
 	this.behaviorTargetStartTick = tick;
 
 	// 5. 생성된 BehaviorAction 유효성 검증

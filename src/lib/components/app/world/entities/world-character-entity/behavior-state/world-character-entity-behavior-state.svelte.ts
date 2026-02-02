@@ -5,7 +5,7 @@ import type { WorldCharacterEntityDirection } from '../index';
 import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
 import tick from './tick';
-import findAndSetBehavior from './selection/find-and-set-behavior';
+import initialize from './tick-initialize';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -25,13 +25,13 @@ export class WorldCharacterEntityBehaviorState {
 
 	update: (event: BeforeUpdateEvent) => void;
 	tick: (tickNumber: number) => void;
-	findAndSetBehavior: (tick: number) => boolean;
+	initialize: (tick: number) => boolean;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
 		this.update = update.bind(this);
 		this.tick = tick.bind(this);
-		this.findAndSetBehavior = findAndSetBehavior.bind(this);
+		this.initialize = initialize.bind(this);
 	}
 
 	/**
