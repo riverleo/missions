@@ -13,8 +13,13 @@ import type {
 /**
  * Vector 브랜드 타입 생성
  */
-function createVector(x: number, y: number): Vector {
-	return { x, y } as Vector;
+function createVector(x: number, y: number): Vector;
+function createVector(obj: { x: number; y: number }): Vector;
+function createVector(xOrObj: number | { x: number; y: number }, y?: number): Vector {
+	if (typeof xOrObj === 'number') {
+		return { x: xOrObj, y: y! } as Vector;
+	}
+	return { x: xOrObj.x, y: xOrObj.y } as Vector;
 }
 
 /**
@@ -224,6 +229,27 @@ function getOverlappingCells(cellsA: Cell[], cellsB: Cell[]): Cell[] {
 }
 
 /**
+ * 주어진 벡터와 가장 가까운 벡터를 찾기
+ */
+function findClosest<T extends Vector>(from: Vector, targets: T[]): T | undefined {
+	if (targets.length === 0) return undefined;
+
+	let closest = targets[0]!;
+	let minDist = Math.hypot(closest.x - from.x, closest.y - from.y);
+
+	for (let i = 1; i < targets.length; i++) {
+		const target = targets[i]!;
+		const dist = Math.hypot(target.x - from.x, target.y - from.y);
+		if (dist < minDist) {
+			minDist = dist;
+			closest = target;
+		}
+	}
+
+	return closest;
+}
+
+/**
  * 픽셀 좌표를 셀로 변환
  */
 function vectorToCell(vector: Vector): Cell {
@@ -278,4 +304,6 @@ export const vectorUtils = {
 	// 셀 배열 생성
 	createCells,
 	getOverlappingCells,
+	// 벡터 연산
+	findClosest,
 };

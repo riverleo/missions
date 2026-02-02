@@ -4,7 +4,6 @@ import { produce } from 'immer';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
 import { useWorld } from '$lib/hooks/use-world';
-import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
@@ -58,11 +57,8 @@ export default function executeInteractAction(
 			// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
 			if (worldCharacterEntity.behaviorState.path.length === 0) {
 				const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
-					vectorUtils.createVector(
-						worldCharacterEntity.body.position.x,
-						worldCharacterEntity.body.position.y
-					),
-					vectorUtils.createVector(targetEntity.x, targetEntity.y)
+					worldCharacterEntity,
+					targetEntity
 				);
 				if (testPath.length > 0) {
 					worldCharacterEntity.behaviorState.path = testPath;

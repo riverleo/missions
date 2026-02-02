@@ -247,7 +247,7 @@ export type Database = {
       }
       building_interactions: {
         Row: {
-          building_id: string | null
+          building_id: string
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -261,7 +261,7 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          building_id?: string | null
+          building_id: string
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -275,7 +275,7 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          building_id?: string | null
+          building_id?: string
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -801,7 +801,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
-          target_character_id: string | null
+          target_character_id: string
         }
         Insert: {
           character_id?: string | null
@@ -815,7 +815,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
-          target_character_id?: string | null
+          target_character_id: string
         }
         Update: {
           character_id?: string | null
@@ -829,7 +829,7 @@ export type Database = {
             | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id?: string
-          target_character_id?: string | null
+          target_character_id?: string
         }
         Relationships: [
           {
@@ -1482,7 +1482,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
-          item_id: string | null
+          item_id: string
           once_interaction_type:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
@@ -1496,7 +1496,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_id?: string | null
+          item_id: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
@@ -1510,7 +1510,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
-          item_id?: string | null
+          item_id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null

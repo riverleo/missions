@@ -50,9 +50,7 @@
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
-	const selectedBuildingName = $derived(
-		buildingId === undefined ? '기본 (모든 건물)' : (selectedBuilding?.name ?? '건물 선택')
-	);
+	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
@@ -82,6 +80,7 @@
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (isSubmitting) return;
+		if (!buildingId) return;
 
 		isSubmitting = true;
 
@@ -90,7 +89,7 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
-				building_id: buildingId || null,
+				building_id: buildingId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 				character_id: characterId || null,
@@ -120,7 +119,6 @@
 							{selectedBuildingName}
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">기본 (모든 건물)</SelectItem>
 							{#each buildings as building (building.id)}
 								<SelectItem value={building.id}>{building.name}</SelectItem>
 							{/each}
@@ -159,7 +157,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !buildingId}>
 					{isSubmitting ? '생성 중...' : '생성'}
 				</Button>
 			</DialogFooter>

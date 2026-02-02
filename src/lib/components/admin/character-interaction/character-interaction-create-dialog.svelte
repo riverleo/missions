@@ -46,11 +46,7 @@
 	const allOptions = [...onceOptions, ...repeatOptions];
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
-	const selectedTargetCharacterName = $derived(
-		targetCharacterId === undefined
-			? '기본 (모든 캐릭터)'
-			: (selectedTargetCharacter?.name ?? '대상 캐릭터 선택')
-	);
+	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedBehaviorLabel = $derived(
@@ -80,6 +76,7 @@
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (isSubmitting) return;
+		if (!targetCharacterId) return;
 
 		isSubmitting = true;
 
@@ -87,7 +84,7 @@
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
-				target_character_id: targetCharacterId || null,
+				target_character_id: targetCharacterId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
 				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
 				character_id: characterId || null,
@@ -117,7 +114,6 @@
 							{selectedTargetCharacterName}
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">기본 (모든 캐릭터)</SelectItem>
 							{#each characters as character (character.id)}
 								<SelectItem value={character.id}>{character.name}</SelectItem>
 							{/each}
@@ -153,7 +149,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !targetCharacterId}>
 					{isSubmitting ? '생성 중...' : '생성'}
 				</Button>
 			</DialogFooter>

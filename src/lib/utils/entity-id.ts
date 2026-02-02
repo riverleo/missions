@@ -17,21 +17,21 @@ import type {
 } from '$lib/types';
 
 function createEntityId(type: EntityType, worldId: WorldId, id: EntityInstanceId): EntityId;
-function createEntityId(candidate: EntityInstance): EntityId;
+function createEntityId(entityInstance: EntityInstance): EntityId;
 function createEntityId(
-	candidate: EntityType | EntityInstance,
+	entityInstanceOrType: EntityType | EntityInstance,
 	worldId?: WorldId,
 	id?: EntityInstanceId
 ): EntityId {
-	if (typeof candidate === 'string') {
+	if (typeof entityInstanceOrType === 'string') {
 		if (!worldId || !id) {
 			throw new Error('worldId and id are required when creating EntityId from type');
 		}
-		return `${candidate}_${worldId}_${id}` as EntityId;
+		return `${entityInstanceOrType}_${worldId}_${id}` as EntityId;
 	}
 
 	// 객체로부터 EntityId 생성
-	const entity = candidate;
+	const entity = entityInstanceOrType;
 	let type: EntityType;
 
 	// 타입을 구별하기 위해 고유한 속성을 확인

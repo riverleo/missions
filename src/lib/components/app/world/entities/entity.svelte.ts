@@ -1,6 +1,13 @@
 import Matter from 'matter-js';
 import type { BeforeUpdateEvent, WorldContext } from '../context';
-import type { EntityId, EntityInstanceId, ColliderType, WorldId, EntityType } from '$lib/types';
+import type {
+	EntityId,
+	EntityInstanceId,
+	ColliderType,
+	WorldId,
+	EntityType,
+	Vector,
+} from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 
 const { Composite, Bodies } = Matter;
@@ -11,6 +18,7 @@ export abstract class Entity {
 	abstract readonly body: any;
 
 	readonly worldContext: WorldContext;
+	readonly __brand!: 'Vector';
 
 	x = $state(0);
 	y = $state(0);
