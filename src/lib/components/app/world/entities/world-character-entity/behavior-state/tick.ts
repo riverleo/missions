@@ -19,14 +19,9 @@ export default function tick(this: WorldCharacterEntityBehaviorState, tick: numb
 	// 행동 선택 및 확인
 	if (!this.findAndSetBehavior(tick)) return;
 
-	// 현재 행동 액션 가져오기 (findAndSetBehavior가 값을 반환했으므로 behaviorTargetId는 확실히 존재)
+	// behaviorTargetId가 확실히 설정되었으므로 행동 액션 가져오기
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId!);
-
-	if (!behaviorAction) {
-		// 액션을 찾을 수 없으면 행동 종료
-		this.behaviorTargetId = undefined;
-		return;
-	}
+	if (!behaviorAction) return; // findAndSetBehavior에서 검증했지만 타입 안전성을 위한 체크
 
 	// 1. 액션 시작 시점: target_selection_method에 따라 타겟 클리어 여부 결정
 	if (this.behaviorTargetStartTick === tick) {

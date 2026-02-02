@@ -10,12 +10,19 @@ export default function findAndSetBehavior(
 	this: WorldCharacterEntityBehaviorState,
 	tick: number
 ): boolean {
-	// 이미 행동이 설정되어 있으면 true 반환
+	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore, getBehaviorAction } =
+		useBehavior();
+
+	// 이미 행동이 설정되어 있으면 유효성 검증
 	if (this.behaviorTargetId) {
+		const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+		if (!behaviorAction) {
+			// 액션을 찾을 수 없으면 행동 종료
+			this.behaviorTargetId = undefined;
+			return false;
+		}
 		return true;
 	}
-
-	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore } = useBehavior();
 
 	// 1. 후보 behaviors 찾기
 	const candidateBehaviors = getAllBehaviors().filter((behavior) => {
@@ -84,6 +91,14 @@ export default function findAndSetBehavior(
 		actionId
 	);
 	this.behaviorTargetStartTick = tick;
+
+	// 5. 생성된 BehaviorAction 유효성 검증
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	if (!behaviorAction) {
+		// 액션을 찾을 수 없으면 행동 종료
+		this.behaviorTargetId = undefined;
+		return false;
+	}
 
 	return true;
 }
