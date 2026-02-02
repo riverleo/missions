@@ -166,10 +166,10 @@ export class WorldContext {
 				}
 				// 엔티티 배치 (cursor가 있으면)
 				else if (this.blueprint.cursor) {
-					const { entityTemplateId } = this.blueprint.cursor;
+					const { entitySourceTargetId } = this.blueprint.cursor;
 
 					// 타일 배치는 두 번의 클릭 필요
-					if (EntityIdUtils.template.is('tile', entityTemplateId)) {
+					if (EntityIdUtils.source.is('tile', entitySourceTargetId)) {
 						if (!this.blueprint.cursor.start) {
 							// 첫 번째 클릭: 시작점 저장
 							this.blueprint.setCursorStart(this.blueprint.cursor.current);

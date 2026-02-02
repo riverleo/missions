@@ -144,18 +144,18 @@ export type EntityType = 'character' | 'building' | 'item' | 'tile';
 
 // Entity Template ID (템플릿 선택용, worldId 없음)
 // Format: type_templateId
-export type EntityTemplateId =
+export type EntitySourceTargetId =
 	| `character_${CharacterId}`
 	| `building_${BuildingId}`
 	| `item_${ItemId}`
 	| `tile_${TileId}`;
 
-// Instance types for EntityId and EntityTemplateId
-export type EntityTemplateCandidateId = BuildingId | CharacterId | ItemId | TileId;
+// Instance types for EntityId and EntitySourceTargetId
+export type EntitySourceId = BuildingId | CharacterId | ItemId | TileId;
 export type EntityInstanceId = WorldBuildingId | WorldCharacterId | WorldItemId | TileCellKey;
 
 // Discriminated unions for entity templates and instances
-export type EntityTemplate =
+export type EntitySource =
 	| ({ entityType: 'building' } & Building)
 	| ({ entityType: 'character' } & Character)
 	| ({ entityType: 'item' } & Item)
@@ -180,7 +180,7 @@ export interface BeforeUpdateEvent {
 }
 
 export interface WorldBlueprintCursor {
-	entityTemplateId: EntityTemplateId;
+	entitySourceTargetId: EntitySourceTargetId;
 	current: Vector;
 	start?: Vector;
 	type: 'tile' | 'cell';

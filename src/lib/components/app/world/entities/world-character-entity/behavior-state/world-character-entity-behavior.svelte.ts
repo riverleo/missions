@@ -36,16 +36,23 @@ export class WorldCharacterEntityBehavior {
 	}
 
 	/**
-	 * 모든 상태를 초기화합니다.
+	 * 타겟 엔티티와 경로를 초기화합니다.
 	 */
-	clear(): void {
+	clearTargetEntity(): void {
 		this.path = [];
 		this.direction = 'right';
 		this.targetEntityId = undefined;
+	}
+
+	/**
+	 * 모든 상태를 초기화합니다.
+	 */
+	clear(): void {
+		this.clearTargetEntity();
+		this.behaviors = [];
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
 		this.interactionTargetId = undefined;
 		this.interactionStartTick = undefined;
-		this.behaviors = [];
 	}
 }

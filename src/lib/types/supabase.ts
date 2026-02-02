@@ -79,9 +79,9 @@ export type ScenarioSnapshotId = Brand<string, 'ScenarioSnapshotId'>;
 export type {
 	EntityId,
 	EntityType,
-	EntityTemplateId,
+	EntitySourceTargetId,
 	EntityInstanceId,
-	EntityTemplateCandidateId,
+	EntitySourceId,
 	EntityInstance,
 } from './core';
 

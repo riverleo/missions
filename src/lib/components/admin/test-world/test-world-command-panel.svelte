@@ -70,11 +70,11 @@
 		{#if characters.length > 0}
 			<CommandGroup heading="캐릭터">
 				{#each characters as character (character.id)}
-					{@const templateId = EntityIdUtils.template.create('character', character.id)}
+					{@const templateId = EntityIdUtils.source.create('character', character.id)}
 					<CommandItem
 						onSelect={() =>
 							worldContext?.blueprint.setCursor(
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? undefined
 									: templateId
 							)}
@@ -82,7 +82,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -97,11 +97,11 @@
 		{#if buildings.length > 0}
 			<CommandGroup heading="건물">
 				{#each buildings as building (building.id)}
-					{@const templateId = EntityIdUtils.template.create('building', building.id)}
+					{@const templateId = EntityIdUtils.source.create('building', building.id)}
 					<CommandItem
 						onSelect={() =>
 							worldContext?.blueprint.setCursor(
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? undefined
 									: templateId
 							)}
@@ -109,7 +109,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -124,11 +124,11 @@
 		{#if items.length > 0}
 			<CommandGroup heading="아이템">
 				{#each items as item (item.id)}
-					{@const templateId = EntityIdUtils.template.create('item', item.id)}
+					{@const templateId = EntityIdUtils.source.create('item', item.id)}
 					<CommandItem
 						onSelect={() =>
 							worldContext?.blueprint.setCursor(
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? undefined
 									: templateId
 							)}
@@ -136,7 +136,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}
@@ -151,11 +151,11 @@
 		{#if tiles.length > 0}
 			<CommandGroup heading="타일">
 				{#each tiles as tile (tile.id)}
-					{@const templateId = EntityIdUtils.template.create('tile', tile.id)}
+					{@const templateId = EntityIdUtils.source.create('tile', tile.id)}
 					<CommandItem
 						onSelect={() =>
 							worldContext?.blueprint.setCursor(
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? undefined
 									: templateId
 							)}
@@ -163,7 +163,7 @@
 						<IconCheck
 							class={cn(
 								'mr-2 size-4',
-								templateId === worldContext?.blueprint.cursor?.entityTemplateId
+								templateId === worldContext?.blueprint.cursor?.entitySourceTargetId
 									? 'opacity-100'
 									: 'opacity-0'
 							)}

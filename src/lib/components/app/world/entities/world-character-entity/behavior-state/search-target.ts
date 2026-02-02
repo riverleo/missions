@@ -26,7 +26,7 @@ export default function searchTargetAndSetPath(
 	worldCharacterEntity: WorldCharacterEntity,
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): void {
-	const { getInteractableEntityTemplates } = useBehavior();
+	const { getInteractableEntitySources } = useBehavior();
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
@@ -103,7 +103,7 @@ export default function searchTargetAndSetPath(
 	) {
 		// search: 상호작용 가능한 대상 중 가장 가까운 것 선택
 		const behaviorAction = BehaviorIdUtils.to(action);
-		const templates = getInteractableEntityTemplates(behaviorAction);
+		const templates = getInteractableEntitySources(behaviorAction);
 
 		// 템플릿 ID 집합
 		const templateIds = new Set(templates.map((t) => t.id));

@@ -45,7 +45,7 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorActionStore, getInteractableEntityTemplates, admin } = useBehavior();
+	const { needBehaviorActionStore, getInteractableEntitySources, admin } = useBehavior();
 	const { buildingStore, buildingInteractionStore } = useBuilding();
 	const { characterStore, characterInteractionStore, needFulfillmentStore } = useCharacter();
 	const { itemStore, itemInteractionStore } = useItem();
@@ -61,7 +61,7 @@
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
-		return getInteractableEntityTemplates(BehaviorIdUtils.to(changes));
+		return getInteractableEntitySources(BehaviorIdUtils.to(changes));
 	});
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [

@@ -31,16 +31,14 @@ export default function tick(this: WorldCharacterEntityBehavior, tick: number): 
 		) {
 			// search: 무조건 새로 탐색
 			if (behaviorAction.target_selection_method === 'search') {
-				this.targetEntityId = undefined;
-				this.path = [];
+				this.clearTargetEntity();
 			}
 			// explicit: interaction의 엔티티 템플릿이 현재 타겟과 다르면 클리어
 			else if (behaviorAction.target_selection_method === 'explicit') {
 				if (this.targetEntityId) {
 					const shouldClearTarget = checkIfTargetMismatch.call(this, behaviorAction);
 					if (shouldClearTarget) {
-						this.targetEntityId = undefined;
-						this.path = [];
+						this.clearTargetEntity();
 					}
 				}
 			}
@@ -87,13 +85,13 @@ function checkIfTargetMismatch(
 ): boolean {
 	if (!this.targetEntityId) return false;
 
-	const { getEntityInstance, getEntityTemplateCandidateId, getInteraction } = useWorld();
+	const { getEntityInstance, getEntitySourceId, getInteraction } = useWorld();
 
 	// 현재 타겟의 엔티티 타입과 템플릿 ID
 	const entityInstance = getEntityInstance(this.targetEntityId);
 	if (!entityInstance) return false;
 
-	const targetTemplateId = getEntityTemplateCandidateId(entityInstance);
+	const targetTemplateId = getEntitySourceId(entityInstance);
 	const entityType = entityInstance.entityType;
 
 	// action의 interaction 가져오기

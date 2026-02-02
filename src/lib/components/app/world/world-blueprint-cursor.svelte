@@ -13,7 +13,7 @@
 	const world = useWorldContext();
 	const { buildingStore: buildingStore } = useBuilding();
 
-	const entityTemplateId = $derived(world.blueprint.cursor?.entityTemplateId);
+	const entitySourceTargetId = $derived(world.blueprint.cursor?.entitySourceTargetId);
 	const tileCells = $derived(
 		Array.from(world.blueprint.cursor?.tileCellKeys ?? []).map((key) =>
 			vectorUtils.createTileCell(key)
@@ -21,25 +21,26 @@
 	);
 
 	const building = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('building', entityTemplateId))
+		if (!entitySourceTargetId || !EntityIdUtils.source.is('building', entitySourceTargetId))
 			return undefined;
-		const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
+		const { value: buildingId } = EntityIdUtils.source.parse<BuildingId>(entitySourceTargetId);
 		return $buildingStore.data[buildingId];
 	});
 
-	const isTile = $derived(EntityIdUtils.template.is('tile', entityTemplateId));
-	const isCharacter = $derived(EntityIdUtils.template.is('character', entityTemplateId));
-	const isItem = $derived(EntityIdUtils.template.is('item', entityTemplateId));
+	const isTile = $derived(EntityIdUtils.source.is('tile', entitySourceTargetId));
+	const isCharacter = $derived(EntityIdUtils.source.is('character', entitySourceTargetId));
+	const isItem = $derived(EntityIdUtils.source.is('item', entitySourceTargetId));
 
 	const characterId = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('character', entityTemplateId))
+		if (!entitySourceTargetId || !EntityIdUtils.source.is('character', entitySourceTargetId))
 			return undefined;
-		return EntityIdUtils.template.id<CharacterId>(entityTemplateId);
+		return EntityIdUtils.source.id<CharacterId>(entitySourceTargetId);
 	});
 
 	const itemId = $derived.by(() => {
-		if (!entityTemplateId || !EntityIdUtils.template.is('item', entityTemplateId)) return undefined;
-		return EntityIdUtils.template.id<ItemId>(entityTemplateId);
+		if (!entitySourceTargetId || !EntityIdUtils.source.is('item', entitySourceTargetId))
+			return undefined;
+		return EntityIdUtils.source.id<ItemId>(entitySourceTargetId);
 	});
 
 	// gridType에 따라 크기 단위 결정

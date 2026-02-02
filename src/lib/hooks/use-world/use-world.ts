@@ -23,7 +23,7 @@ import type {
 	EntityId,
 	EntityType,
 	EntityInstance,
-	EntityTemplateCandidateId,
+	EntitySourceId,
 	BehaviorAction,
 	Interaction,
 	InteractionAction,
@@ -169,7 +169,7 @@ function createWorldStore() {
 	/**
 	 * EntityInstance로부터 템플릿 ID를 추출
 	 */
-	function getEntityTemplateCandidateId(entityInstance: EntityInstance): EntityTemplateCandidateId {
+	function getEntitySourceId(entityInstance: EntityInstance): EntitySourceId {
 		if (entityInstance.entityType === 'building') {
 			return entityInstance.building_id;
 		} else if (entityInstance.entityType === 'item') {
@@ -398,7 +398,7 @@ function createWorldStore() {
 		getAllWorldItems,
 		getAllWorldTileMaps,
 		getEntityInstance,
-		getEntityTemplateCandidateId,
+		getEntitySourceId,
 		getInteraction,
 		getInteractionActions,
 	};

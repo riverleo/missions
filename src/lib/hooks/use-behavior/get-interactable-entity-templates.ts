@@ -5,7 +5,7 @@ import type {
 	CharacterInteractionId,
 	Fulfillment,
 	Interaction,
-	EntityTemplate,
+	EntitySource,
 	NeedFulfillmentId,
 	ConditionFulfillmentId,
 	BuildingId,
@@ -33,7 +33,7 @@ import { useBehavior } from '../use-behavior';
  * @param behaviorAction - 행동 액션 (BehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
-export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): EntityTemplate[] {
+export function getInteractableEntitySources(behaviorAction: BehaviorAction): EntitySource[] {
 	if (behaviorAction.type === 'go') {
 		// go 타입: search 모드일 때만 대상 반환
 		if (behaviorAction.target_selection_method !== 'search') {
@@ -53,7 +53,7 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
 		}
 
 		// next가 idle이거나 없으면: 모든 엔티티 반환
-		return getAllEntityTemplates();
+		return getAllEntitySources();
 	} else if (behaviorAction.type === 'interact') {
 		// interact 타입: Interaction 직접 참조
 		return getInteractableTemplatesForInteract(behaviorAction);
@@ -68,7 +68,7 @@ export function getInteractableEntityTemplates(behaviorAction: BehaviorAction): 
 /**
  * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
-function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): EntityTemplate[] {
+function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): EntitySource[] {
 	const { getBuildingInteraction, getAllBuildingInteractions } = useBuilding();
 	const { getAllItemInteractions, getItemInteraction } = useItem();
 	const { getCharacterInteraction, getAllCharacterInteractions } = useCharacter();
@@ -109,7 +109,7 @@ function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): En
 /**
  * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
-function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): EntityTemplate[] {
+function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): EntitySource[] {
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
@@ -172,16 +172,16 @@ function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): Ent
 }
 
 /**
- * Interaction 배열을 EntityTemplate 배열로 변환합니다.
+ * Interaction 배열을 EntitySource 배열로 변환합니다.
  * 기본 인터랙션(NULL entity_id)의 경우 모든 해당 타입 엔티티를 반환합니다.
  */
-function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] {
+function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 	const { getBuilding, getAllBuildings } = useBuilding();
 	const { getAllItems, getItem } = useItem();
 	const { getAllCharacters, getCharacter } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
-	const templateMap = new Map<string, EntityTemplate>();
+	const templateMap = new Map<string, EntitySource>();
 
 	for (const interaction of interactions) {
 		if (interaction.interactionType === 'building') {
@@ -190,13 +190,13 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 				// 특정 건물
 				const building = getBuilding(interaction.building_id);
 				if (building) {
-					const template = EntityIdUtils.template.to(building);
+					const template = EntityIdUtils.source.to(building);
 					templateMap.set(building.id, template);
 				}
 			} else {
 				// 기본 인터랙션: 모든 건물
 				getAllBuildings().forEach((b) => {
-					const template = EntityIdUtils.template.to(b);
+					const template = EntityIdUtils.source.to(b);
 					templateMap.set(b.id, template);
 				});
 			}
@@ -206,13 +206,13 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 				// 특정 아이템
 				const item = getItem(interaction.item_id);
 				if (item) {
-					const template = EntityIdUtils.template.to(item);
+					const template = EntityIdUtils.source.to(item);
 					templateMap.set(item.id, template);
 				}
 			} else {
 				// 기본 인터랙션: 모든 아이템
 				getAllItems().forEach((i) => {
-					const template = EntityIdUtils.template.to(i);
+					const template = EntityIdUtils.source.to(i);
 					templateMap.set(i.id, template);
 				});
 			}
@@ -222,13 +222,13 @@ function interactionsToTemplates(interactions: Interaction[]): EntityTemplate[] 
 				// 특정 캐릭터
 				const character = getCharacter(interaction.target_character_id);
 				if (character) {
-					const template = EntityIdUtils.template.to(character);
+					const template = EntityIdUtils.source.to(character);
 					templateMap.set(character.id, template);
 				}
 			} else {
 				// 기본 인터랙션: 모든 캐릭터
 				getAllCharacters().forEach((c) => {
-					const template = EntityIdUtils.template.to(c);
+					const template = EntityIdUtils.source.to(c);
 					templateMap.set(c.id, template);
 				});
 			}
@@ -258,21 +258,21 @@ function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction |
 /**
  * 모든 엔티티 템플릿을 반환합니다.
  */
-function getAllEntityTemplates(): EntityTemplate[] {
+function getAllEntitySources(): EntitySource[] {
 	const { getAllBuildings } = useBuilding();
 	const { getAllItems } = useItem();
 	const { getAllCharacters } = useCharacter();
 
-	const templates: EntityTemplate[] = [];
+	const templates: EntitySource[] = [];
 
 	// 모든 건물
-	templates.push(...getAllBuildings().map(EntityIdUtils.template.to));
+	templates.push(...getAllBuildings().map(EntityIdUtils.source.to));
 
 	// 모든 아이템
-	templates.push(...getAllItems().map(EntityIdUtils.template.to));
+	templates.push(...getAllItems().map(EntityIdUtils.source.to));
 
 	// 모든 캐릭터
-	templates.push(...getAllCharacters().map(EntityIdUtils.template.to));
+	templates.push(...getAllCharacters().map(EntityIdUtils.source.to));
 
 	return templates;
 }

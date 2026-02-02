@@ -7,7 +7,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS, MAX_TILE_PLACABLE_COUNT } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldBlueprintCursor } from './index';
-import type { BuildingId, CharacterId, ItemId, TileId, EntityTemplateId } from '$lib/types';
+import type { BuildingId, CharacterId, ItemId, TileId, EntitySourceTargetId } from '$lib/types';
 import type { Vector, Cell, ScreenVector, TileCell, TileCellKey } from '$lib/types/vector';
 import type { WorldTileEntity } from '../entities/world-tile-entity';
 
@@ -23,10 +23,10 @@ export class WorldContextBlueprint {
 	/**
 	 * 엔티티 템플릿 선택
 	 */
-	setCursor(entityTemplateId: EntityTemplateId | undefined) {
+	setCursor(entitySourceTargetId: EntitySourceTargetId | undefined) {
 		const { selectedEntityIdStore } = useWorld();
 
-		if (entityTemplateId === undefined) {
+		if (entitySourceTargetId === undefined) {
 			this.cursor = undefined;
 			return;
 		}
@@ -35,9 +35,9 @@ export class WorldContextBlueprint {
 		selectedEntityIdStore.update((state) => ({ ...state, entityId: undefined }));
 
 		// cursor 초기화 (type은 updateCursor에서 설정)
-		const { type } = EntityIdUtils.template.parse(entityTemplateId);
+		const { type } = EntityIdUtils.source.parse(entitySourceTargetId);
 		this.cursor = {
-			entityTemplateId,
+			entitySourceTargetId,
 			current: { x: 0, y: 0 } as Vector,
 			start: undefined,
 			type: type === 'tile' ? 'tile' : 'cell',
@@ -61,8 +61,8 @@ export class WorldContextBlueprint {
 			return;
 		}
 
-		const { entityTemplateId } = this.cursor;
-		const { type, value: id } = EntityIdUtils.template.parse(entityTemplateId);
+		const { entitySourceTargetId } = this.cursor;
+		const { type, value: id } = EntityIdUtils.source.parse(entitySourceTargetId);
 
 		// type별로 스냅 위치 계산 (중복 체크를 위해)
 		let vector: Vector;
@@ -119,7 +119,7 @@ export class WorldContextBlueprint {
 			return [];
 		}
 
-		const { entityTemplateId, current } = this.cursor;
+		const { entitySourceTargetId, current } = this.cursor;
 		const { x, y } = current;
 
 		// 스토어 값들을 한 번만 조회
@@ -135,10 +135,10 @@ export class WorldContextBlueprint {
 		let targetMaxCol: number;
 		let targetMinRow: number;
 		let targetMaxRow: number;
-		const isBuilding = EntityIdUtils.template.is('building', entityTemplateId);
+		const isBuilding = EntityIdUtils.source.is('building', entitySourceTargetId);
 
 		if (isBuilding) {
-			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
+			const { value: buildingId } = EntityIdUtils.source.parse<BuildingId>(entitySourceTargetId);
 			const building = buildingStoreData[buildingId];
 			if (!building) return [];
 			// 픽셀 좌표를 셀로 변환
@@ -147,7 +147,7 @@ export class WorldContextBlueprint {
 			targetMaxCol = cell.col + building.cell_cols - 1;
 			targetMinRow = cell.row;
 			targetMaxRow = cell.row + building.cell_rows - 1;
-		} else if (EntityIdUtils.template.is('tile', entityTemplateId)) {
+		} else if (EntityIdUtils.source.is('tile', entitySourceTargetId)) {
 			// 타일은 직사각형 영역이므로 캐시된 bounds 사용 (calculateTileCells에서 이미 계산됨)
 			if (!this.cursor.tileBounds) return [];
 
@@ -203,7 +203,7 @@ export class WorldContextBlueprint {
 		// 건물인 경우 바닥이 타일이나 바닥 경계와 맞닿아있는지 확인
 		let unsupported = false;
 		if (isBuilding) {
-			const { value: buildingId } = EntityIdUtils.template.parse<BuildingId>(entityTemplateId);
+			const { value: buildingId } = EntityIdUtils.source.parse<BuildingId>(entitySourceTargetId);
 			const building = buildingStoreData[buildingId];
 			if (building) {
 				// 건물의 가장 아래 행 (픽셀 좌표)
@@ -413,9 +413,9 @@ export class WorldContextBlueprint {
 	cursorToEntities() {
 		if (!this.cursor) return;
 
-		const { entityTemplateId, current } = this.cursor;
+		const { entitySourceTargetId, current } = this.cursor;
 		const { x, y } = current;
-		const { type } = EntityIdUtils.template.parse(entityTemplateId);
+		const { type } = EntityIdUtils.source.parse(entitySourceTargetId);
 
 		if (type === 'building') {
 			// 겹치는 셀이 있으면 배치하지 않음
@@ -423,7 +423,7 @@ export class WorldContextBlueprint {
 			// 픽셀 좌표를 셀로 변환
 			const cell = vectorUtils.vectorToCell(current);
 			this.context.createWorldBuilding({
-				building_id: EntityIdUtils.template.id<BuildingId>(entityTemplateId),
+				building_id: EntityIdUtils.source.id<BuildingId>(entitySourceTargetId),
 				cell_x: cell.col,
 				cell_y: cell.row,
 			});
@@ -431,7 +431,7 @@ export class WorldContextBlueprint {
 			// 겹치는 셀이 있으면 배치하지 않음
 			if (!this.placable) return;
 			// 타일 셀 좌표들 계산 (start가 있으면 범위, 없으면 단일)
-			const tileId = EntityIdUtils.template.id<TileId>(entityTemplateId);
+			const tileId = EntityIdUtils.source.id<TileId>(entitySourceTargetId);
 			const tiles: Record<TileCellKey, TileId> = {};
 			for (const tileCellKey of this.cursor.tileCellKeys) {
 				tiles[tileCellKey] = tileId;
@@ -441,13 +441,13 @@ export class WorldContextBlueprint {
 		} else if (type === 'character') {
 			// current는 이미 픽셀 좌표
 			this.context.createWorldCharacter({
-				character_id: EntityIdUtils.template.id<CharacterId>(entityTemplateId),
+				character_id: EntityIdUtils.source.id<CharacterId>(entitySourceTargetId),
 				x: x + CELL_SIZE / 2,
 				y: y + CELL_SIZE / 2,
 			});
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
-			const itemId = EntityIdUtils.template.id<ItemId>(entityTemplateId);
+			const itemId = EntityIdUtils.source.id<ItemId>(entitySourceTargetId);
 			const { itemStore, getItem } = useItem();
 			const item = getItem(itemId);
 
