@@ -1,5 +1,4 @@
 import Matter from 'matter-js';
-import { get } from 'svelte/store';
 import { produce } from 'immer';
 import type {
 	WorldId,
@@ -8,11 +7,8 @@ import type {
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
-	BehaviorTargetId,
-	InteractionTargetId,
-	EntityId,
 } from '$lib/types';
-import type { Vector } from '$lib/types/vector';
+import { WorldCharacterEntityBehaviorState } from './behavior-state';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
@@ -20,23 +16,14 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useCharacter } from '$lib/hooks/use-character';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
-import type { WorldCharacterEntityDirection } from './index';
-import { updateMove } from './update-move';
 import { tickWorldCharacterNeeds } from './tick-world-character-needs';
-import { tickBehavior } from './tick-behavior/index';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
 	body: Matter.Body;
-	path: Vector[] = $state([]);
-	direction: WorldCharacterEntityDirection = $state('right');
-	heldWorldItemIds = $state<WorldItemId[]>([]);
-	worldCharacterNeeds: Record<NeedId, WorldCharacterNeed> = $state({});
-	currentTargetEntityId = $state<EntityId | undefined>(undefined);
-	currentBehaviorTargetId = $state<BehaviorTargetId | undefined>(undefined);
-	behaviorActionStartTick = $state<number>(0);
-	currentInteractionTargetId = $state<InteractionTargetId | undefined>(undefined);
-	interactionTargetStartTick = $state<number>(0);
+	heldItemIds = $state<WorldItemId[]>([]);
+	needs: Record<NeedId, WorldCharacterNeed> = $state({});
+	behaviorState = new WorldCharacterEntityBehaviorState();
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -56,7 +43,7 @@ export class WorldCharacterEntity extends Entity {
 		}
 
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
-		this.heldWorldItemIds = getAllWorldItems()
+		this.heldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
 			.map((item) => item.id);
 
@@ -64,9 +51,9 @@ export class WorldCharacterEntity extends Entity {
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
-		this.worldCharacterNeeds = {};
+		this.needs = {};
 		for (const need of characterNeeds) {
-			this.worldCharacterNeeds[need.need_id] = { ...need };
+			this.needs[need.need_id] = { ...need };
 		}
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
@@ -122,7 +109,7 @@ export class WorldCharacterEntity extends Entity {
 		// needs 저장
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
-				for (const need of Object.values(this.worldCharacterNeeds)) {
+				for (const need of Object.values(this.needs)) {
 					const storeNeed = draft.data[need.id];
 					if (storeNeed) {
 						storeNeed.value = need.value;
@@ -133,17 +120,17 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override update(event: BeforeUpdateEvent): void {
-		updateMove(this, event);
+		this.behaviorState.update(this, event);
 	}
 
 	tick(tick: number): void {
 		tickWorldCharacterNeeds(this, tick);
-		tickBehavior(this, tick);
+		this.behaviorState.tick(this, tick);
 	}
 
 	moveTo(targetX: number, targetY: number): void {
 		// pathfinder로 경로 계산
-		this.path = this.worldContext.pathfinder.findPath(
+		this.behaviorState.path = this.worldContext.pathfinder.findPath(
 			vectorUtils.createVector(this.body.position.x, this.body.position.y),
 			vectorUtils.createVector(targetX, targetY)
 		);

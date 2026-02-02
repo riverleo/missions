@@ -16,7 +16,7 @@ export default function selectNewBehavior(
 	// 1. 후보 behaviors 찾기
 	const candidateBehaviors = getAllBehaviors().filter((behavior) => {
 		if (behavior.behaviorType === 'need') {
-			const need = worldCharacterEntity.worldCharacterNeeds[behavior.need_id];
+			const need = worldCharacterEntity.needs[behavior.need_id];
 			if (!need) return false;
 			// 욕구 레벨이 threshold 이하이면 발동
 			return need.value <= behavior.need_threshold;
@@ -74,10 +74,10 @@ export default function selectNewBehavior(
 
 	// 4. currentBehaviorId 설정 및 시작 tick 기록
 	const actionId = rootAction.behaviorType === 'need' ? rootAction.id : rootAction.id;
-	worldCharacterEntity.currentBehaviorTargetId = BehaviorIdUtils.create(
+	worldCharacterEntity.behaviorState.behaviorTargetId = BehaviorIdUtils.create(
 		selectedBehavior.behaviorType,
 		selectedBehavior.id,
 		actionId
 	);
-	worldCharacterEntity.behaviorActionStartTick = tick;
+	worldCharacterEntity.behaviorState.behaviorTargetStartTick = tick;
 }

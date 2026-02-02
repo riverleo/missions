@@ -47,13 +47,13 @@
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
-	const needs = $derived(Object.values(entity.worldCharacterNeeds));
+	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
 	const currentTargetName = $derived.by(() => {
-		if (!entity.currentTargetEntityId) return undefined;
+		if (!entity.behaviorState.entityId) return undefined;
 
-		const { type, instanceId } = EntityIdUtils.parse(entity.currentTargetEntityId);
+		const { type, instanceId } = EntityIdUtils.parse(entity.behaviorState.entityId);
 
 		if (type === 'building') {
 			const worldBuilding = $worldBuildingStore.data[instanceId as WorldBuildingId];
@@ -77,13 +77,15 @@
 
 	// 현재 행동 정보
 	const currentBehaviorInfo = $derived.by(() => {
-		if (!entity.currentBehaviorTargetId) return undefined;
+		if (!entity.behaviorState.behaviorTargetId) return undefined;
 
-		const { type } = BehaviorIdUtils.parse(entity.currentBehaviorTargetId);
+		const { type } = BehaviorIdUtils.parse(entity.behaviorState.behaviorTargetId);
 
 		if (type === 'need') {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.behaviorState.behaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(
+				entity.behaviorState.behaviorTargetId
+			);
 
 			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
 			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
@@ -120,8 +122,10 @@
 				actionLabel,
 			};
 		} else {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.currentBehaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.currentBehaviorTargetId);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.behaviorState.behaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(
+				entity.behaviorState.behaviorTargetId
+			);
 
 			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
 			const action =
@@ -197,8 +201,8 @@
 			{currentTargetName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="들고 있는 아이템">
-			{#if entity.heldWorldItemIds.length > 0}
-				{entity.heldWorldItemIds.length}개
+			{#if entity.heldItemIds.length > 0}
+				{entity.heldItemIds.length}개
 			{:else}
 				없음
 			{/if}

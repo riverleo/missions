@@ -176,9 +176,9 @@ export async function createWorldCharacter(
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
 			(need) => need.world_character_id === worldCharacter.id
 		);
-		entity.worldCharacterNeeds = {};
+		entity.needs = {};
 		for (const need of characterNeeds) {
-			entity.worldCharacterNeeds[need.need_id] = { ...need };
+			entity.needs[need.need_id] = { ...need };
 		}
 	}
 

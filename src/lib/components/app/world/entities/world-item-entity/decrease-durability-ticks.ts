@@ -20,9 +20,9 @@ export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 				) as WorldCharacterEntity | undefined;
 
 				if (characterEntity) {
-					const index = characterEntity.heldWorldItemIds.indexOf(entity.instanceId);
+					const index = characterEntity.heldItemIds.indexOf(entity.instanceId);
 					if (index !== -1) {
-						characterEntity.heldWorldItemIds.splice(index, 1);
+						characterEntity.heldItemIds.splice(index, 1);
 					}
 				}
 			}

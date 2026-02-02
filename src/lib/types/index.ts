@@ -298,6 +298,9 @@ export type {
 	Boundaries,
 } from './core';
 
+// Re-export behavior state
+export { WorldCharacterEntityBehaviorState } from '../components/app/world/entities/world-character-entity/behavior-state/world-character-entity-behavior-state.svelte';
+
 // Re-export specific Enums for convenience
 export type {
 	PublishStatus,

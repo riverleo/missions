@@ -109,7 +109,7 @@ export default function searchTargetAndSetPath(
 		const templateIds = new Set(templates.map((t) => t.id));
 
 		// 1. 먼저 들고 있는 아이템 확인
-		for (const heldItemId of worldCharacterEntity.heldWorldItemIds) {
+		for (const heldItemId of worldCharacterEntity.heldItemIds) {
 			const worldItem = getWorldItem(heldItemId);
 			if (worldItem && templateIds.has(worldItem.item_id)) {
 				// 들고 있는 아이템이 적합한 대상이면 선택
@@ -118,8 +118,8 @@ export default function searchTargetAndSetPath(
 					worldCharacterEntity.worldContext.worldId,
 					heldItemId
 				);
-				worldCharacterEntity.currentTargetEntityId = heldItemEntityId;
-				worldCharacterEntity.path = []; // 들고 있는 아이템은 경로 불필요
+				worldCharacterEntity.behaviorState.entityId = heldItemEntityId;
+				worldCharacterEntity.behaviorState.path = []; // 들고 있는 아이템은 경로 불필요
 				return; // 검색 종료
 			}
 		}
@@ -176,8 +176,8 @@ export default function searchTargetAndSetPath(
 		);
 
 		if (testPath.length > 0) {
-			worldCharacterEntity.currentTargetEntityId = targetEntity.id;
-			worldCharacterEntity.path = testPath;
+			worldCharacterEntity.behaviorState.entityId = targetEntity.id;
+			worldCharacterEntity.behaviorState.path = testPath;
 		}
 	}
 }

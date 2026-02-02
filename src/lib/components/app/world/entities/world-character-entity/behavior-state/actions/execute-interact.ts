@@ -20,14 +20,14 @@ export default function executeInteractAction(
 	const { getNeedFulfillment } = useCharacter();
 	const { getWorldItem, worldItemStore, getInteraction, getInteractionActions } = useWorld();
 
-	if (!worldCharacterEntity.currentTargetEntityId) {
+	if (!worldCharacterEntity.behaviorState.entityId) {
 		return;
 	}
 
 	const targetEntity =
-		worldCharacterEntity.worldContext.entities[worldCharacterEntity.currentTargetEntityId];
+		worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.entityId];
 	const { type: targetType, instanceId: targetInstanceId } = EntityIdUtils.parse(
-		worldCharacterEntity.currentTargetEntityId
+		worldCharacterEntity.behaviorState.entityId
 	);
 
 	// 타겟 엔티티가 없는 경우: 들고 있는 아이템일 수 있음
@@ -36,13 +36,13 @@ export default function executeInteractAction(
 		// 아이템이고 들고 있는 경우: 계속 진행 (사용하기 위해)
 		if (
 			targetType === 'item' &&
-			worldCharacterEntity.heldWorldItemIds.includes(targetInstanceId as WorldItemId)
+			worldCharacterEntity.heldItemIds.includes(targetInstanceId as WorldItemId)
 		) {
 			isHeldItem = true;
 		} else {
 			// 타겟이 사라졌으면 타겟 클리어하고 재탐색
-			worldCharacterEntity.currentTargetEntityId = undefined;
-			worldCharacterEntity.path = [];
+			worldCharacterEntity.behaviorState.entityId = undefined;
+			worldCharacterEntity.behaviorState.path = [];
 			return;
 		}
 	}
@@ -56,7 +56,7 @@ export default function executeInteractAction(
 
 		if (distance >= 100) {
 			// 아직 도착하지 않았으면, path가 없다면 다시 경로 설정
-			if (worldCharacterEntity.path.length === 0) {
+			if (worldCharacterEntity.behaviorState.path.length === 0) {
 				const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
 					vectorUtils.createVector(
 						worldCharacterEntity.body.position.x,
@@ -65,10 +65,10 @@ export default function executeInteractAction(
 					vectorUtils.createVector(targetEntity.x, targetEntity.y)
 				);
 				if (testPath.length > 0) {
-					worldCharacterEntity.path = testPath;
+					worldCharacterEntity.behaviorState.path = testPath;
 				} else {
 					// 경로를 찾을 수 없으면 타겟 클리어 (다음 tick에서 재탐색)
-					worldCharacterEntity.currentTargetEntityId = undefined;
+					worldCharacterEntity.behaviorState.entityId = undefined;
 				}
 			}
 			return;
@@ -86,7 +86,7 @@ export default function executeInteractAction(
 		if (worldItem) {
 			const isInWorld =
 				worldItem.world_building_id === null && worldItem.world_character_id === null;
-			const isHeld = worldCharacterEntity.heldWorldItemIds.includes(worldItemId);
+			const isHeld = worldCharacterEntity.heldItemIds.includes(worldItemId);
 
 			if (isInWorld && !isHeld) {
 				// 월드에 존재하고 들고 있지 않음 → 줍기
@@ -140,11 +140,12 @@ export default function executeInteractAction(
 
 		if (interactionActions.length > 0) {
 			// InteractionAction이 있으면 첫 번째 것 사용
-			if (!worldCharacterEntity.currentInteractionTargetId) {
+			if (!worldCharacterEntity.behaviorState.interactionTargetId) {
 				const firstAction = interactionActions[0];
 				if (!firstAction) return;
-				worldCharacterEntity.currentInteractionTargetId = InteractionIdUtils.create(firstAction);
-				worldCharacterEntity.interactionTargetStartTick = tick;
+				worldCharacterEntity.behaviorState.interactionTargetId =
+					InteractionIdUtils.create(firstAction);
+				worldCharacterEntity.behaviorState.interactionStartTick = tick;
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (interactType === 'item_pick') {
@@ -152,8 +153,8 @@ export default function executeInteractAction(
 						const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 						// 아이템 줍기: heldWorldItemIds에 추가
-						if (!worldCharacterEntity.heldWorldItemIds.includes(worldItemId)) {
-							worldCharacterEntity.heldWorldItemIds.push(worldItemId);
+						if (!worldCharacterEntity.heldItemIds.includes(worldItemId)) {
+							worldCharacterEntity.heldItemIds.push(worldItemId);
 						}
 
 						// 바디만 월드에서 제거 (targetEntity가 있는 경우만)
@@ -176,7 +177,7 @@ export default function executeInteractAction(
 						}
 
 						// 타겟 클리어
-						worldCharacterEntity.currentTargetEntityId = undefined;
+						worldCharacterEntity.behaviorState.entityId = undefined;
 					}
 				}
 
@@ -185,11 +186,11 @@ export default function executeInteractAction(
 
 			// duration_ticks 확인
 			const { interactionActionId } = InteractionIdUtils.parse(
-				worldCharacterEntity.currentInteractionTargetId
+				worldCharacterEntity.behaviorState.interactionTargetId
 			);
 			const currentAction = interactionActions.find((a) => a.id === interactionActionId);
 			if (currentAction && currentAction.duration_ticks) {
-				const elapsed = tick - worldCharacterEntity.interactionTargetStartTick;
+				const elapsed = tick - (worldCharacterEntity.behaviorState.interactionStartTick ?? 0);
 				if (elapsed < currentAction.duration_ticks) {
 					return;
 				}
@@ -209,8 +210,8 @@ export default function executeInteractAction(
 						worldItem.world_character_id === null
 					) {
 						// 줍기
-						if (!worldCharacterEntity.heldWorldItemIds.includes(worldItemId)) {
-							worldCharacterEntity.heldWorldItemIds.push(worldItemId);
+						if (!worldCharacterEntity.heldItemIds.includes(worldItemId)) {
+							worldCharacterEntity.heldItemIds.push(worldItemId);
 						}
 
 						// 바디 제거 (targetEntity가 있는 경우만)
@@ -231,14 +232,14 @@ export default function executeInteractAction(
 					}
 
 					// 아이템 사용 (소비)
-					const itemIndex = worldCharacterEntity.heldWorldItemIds.indexOf(worldItemId);
+					const itemIndex = worldCharacterEntity.heldItemIds.indexOf(worldItemId);
 					if (itemIndex !== -1) {
-						worldCharacterEntity.heldWorldItemIds.splice(itemIndex, 1);
+						worldCharacterEntity.heldItemIds.splice(itemIndex, 1);
 						worldCharacterEntity.worldContext.deleteWorldItem(worldItemId);
 					}
 
 					// 타겟 클리어
-					worldCharacterEntity.currentTargetEntityId = undefined;
+					worldCharacterEntity.behaviorState.entityId = undefined;
 				}
 			}
 
@@ -252,8 +253,8 @@ export default function executeInteractAction(
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 
 					// 아이템 줍기: heldWorldItemIds에 추가
-					if (!worldCharacterEntity.heldWorldItemIds.includes(worldItemId)) {
-						worldCharacterEntity.heldWorldItemIds.push(worldItemId);
+					if (!worldCharacterEntity.heldItemIds.includes(worldItemId)) {
+						worldCharacterEntity.heldItemIds.push(worldItemId);
 					}
 
 					// 바디만 월드에서 제거 (targetEntity가 있는 경우만)
@@ -276,7 +277,7 @@ export default function executeInteractAction(
 					}
 
 					// 타겟 클리어
-					worldCharacterEntity.currentTargetEntityId = undefined;
+					worldCharacterEntity.behaviorState.entityId = undefined;
 				}
 			} else if (interactType === 'item_use') {
 				if (targetEntity?.type === 'item' || isHeldItem) {
@@ -290,8 +291,8 @@ export default function executeInteractAction(
 						worldItem.world_character_id === null
 					) {
 						// 줍기
-						if (!worldCharacterEntity.heldWorldItemIds.includes(worldItemId)) {
-							worldCharacterEntity.heldWorldItemIds.push(worldItemId);
+						if (!worldCharacterEntity.heldItemIds.includes(worldItemId)) {
+							worldCharacterEntity.heldItemIds.push(worldItemId);
 						}
 
 						// 바디 제거 (targetEntity가 있는 경우만)
@@ -312,14 +313,14 @@ export default function executeInteractAction(
 					}
 
 					// 아이템 사용 (소비)
-					const itemIndex = worldCharacterEntity.heldWorldItemIds.indexOf(worldItemId);
+					const itemIndex = worldCharacterEntity.heldItemIds.indexOf(worldItemId);
 					if (itemIndex !== -1) {
-						worldCharacterEntity.heldWorldItemIds.splice(itemIndex, 1);
+						worldCharacterEntity.heldItemIds.splice(itemIndex, 1);
 						worldCharacterEntity.worldContext.deleteWorldItem(worldItemId);
 					}
 
 					// 타겟 클리어
-					worldCharacterEntity.currentTargetEntityId = undefined;
+					worldCharacterEntity.behaviorState.entityId = undefined;
 				}
 			}
 
@@ -337,10 +338,10 @@ export default function executeInteractAction(
 
 		if (fulfillment && fulfillment.increase_per_tick) {
 			const needId = behaviorAction.need_id;
-			const currentNeed = worldCharacterEntity.worldCharacterNeeds[needId];
+			const currentNeed = worldCharacterEntity.needs[needId];
 			if (currentNeed) {
 				const newValue = Math.min(100, currentNeed.value + fulfillment.increase_per_tick);
-				worldCharacterEntity.worldCharacterNeeds[needId] = {
+				worldCharacterEntity.needs[needId] = {
 					...currentNeed,
 					value: newValue,
 				};
@@ -353,6 +354,6 @@ export default function executeInteractAction(
 	}
 
 	// InteractionAction 완료: 상태 초기화
-	worldCharacterEntity.currentInteractionTargetId = undefined;
-	worldCharacterEntity.interactionTargetStartTick = 0;
+	worldCharacterEntity.behaviorState.interactionTargetId = undefined;
+	worldCharacterEntity.behaviorState.interactionStartTick = 0;
 }

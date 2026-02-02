@@ -12,21 +12,21 @@ export default function checkActionCompletion(
 ): boolean {
 	// GO: path가 비면 완료
 	if (behaviorAction.type === 'go') {
-		return worldCharacterEntity.path.length === 0;
+		return worldCharacterEntity.behaviorState.path.length === 0;
 	}
 
 	// INTERACT: InteractionAction 체인이 완료되어야 함
 	if (behaviorAction.type === 'interact') {
 		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
-		if (!worldCharacterEntity.currentTargetEntityId) {
-			return !worldCharacterEntity.currentInteractionTargetId;
+		if (!worldCharacterEntity.behaviorState.entityId) {
+			return !worldCharacterEntity.behaviorState.interactionTargetId;
 		}
 
 		const targetEntity =
-			worldCharacterEntity.worldContext.entities[worldCharacterEntity.currentTargetEntityId];
+			worldCharacterEntity.worldContext.entities[worldCharacterEntity.behaviorState.entityId];
 		// 타겟 엔티티가 없으면: 이미 완료됨 (아이템을 주워서 엔티티 제거된 경우)
 		if (!targetEntity) {
-			return !worldCharacterEntity.currentInteractionTargetId;
+			return !worldCharacterEntity.behaviorState.interactionTargetId;
 		}
 
 		const distance = Math.hypot(
@@ -37,7 +37,7 @@ export default function checkActionCompletion(
 
 		// once_interaction_type: InteractionAction 체인이 완료되었는지 확인
 		// currentInteractionTargetId가 undefined이면 체인 완료
-		return !worldCharacterEntity.currentInteractionTargetId;
+		return !worldCharacterEntity.behaviorState.interactionTargetId;
 	}
 
 	// FULFILL: 욕구/컨디션 충족 여부 확인
@@ -49,7 +49,7 @@ export default function checkActionCompletion(
 			const behavior = getAllNeedBehaviors().find((b) => b.need_id === behaviorAction.need_id);
 			if (!behavior) return false;
 
-			const need = worldCharacterEntity.worldCharacterNeeds[behaviorAction.need_id];
+			const need = worldCharacterEntity.needs[behaviorAction.need_id];
 			if (!need) return false;
 
 			// 욕구가 threshold를 넘으면 완료
@@ -63,7 +63,8 @@ export default function checkActionCompletion(
 	// IDLE: idle_duration_ticks 경과 확인
 	if (behaviorAction.type === 'idle') {
 		return (
-			tick - worldCharacterEntity.behaviorActionStartTick >= behaviorAction.idle_duration_ticks
+			tick - (worldCharacterEntity.behaviorState.behaviorTargetStartTick ?? 0) >=
+			behaviorAction.idle_duration_ticks
 		);
 	}
 

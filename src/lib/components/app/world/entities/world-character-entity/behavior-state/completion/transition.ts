@@ -10,13 +10,13 @@ export default function transitionToNextAction(
 	behaviorAction: BehaviorAction,
 	tick: number
 ): void {
-	if (!worldCharacterEntity.currentBehaviorTargetId) return;
+	if (!worldCharacterEntity.behaviorState.behaviorTargetId) return;
 
-	const { type } = BehaviorIdUtils.parse(worldCharacterEntity.currentBehaviorTargetId);
-	const behaviorId = BehaviorIdUtils.behaviorId(worldCharacterEntity.currentBehaviorTargetId);
+	const { type } = BehaviorIdUtils.parse(worldCharacterEntity.behaviorState.behaviorTargetId);
+	const behaviorId = BehaviorIdUtils.behaviorId(worldCharacterEntity.behaviorState.behaviorTargetId);
 
 	// 현재 액션 완료 시 path 클리어 (타겟은 유지)
-	worldCharacterEntity.path = [];
+	worldCharacterEntity.behaviorState.path = [];
 
 	// 다음 액션 ID 가져오기
 	const nextActionId =
@@ -26,15 +26,15 @@ export default function transitionToNextAction(
 
 	if (nextActionId) {
 		// 다음 액션으로 전환
-		worldCharacterEntity.currentBehaviorTargetId = BehaviorIdUtils.create(
+		worldCharacterEntity.behaviorState.behaviorTargetId = BehaviorIdUtils.create(
 			type,
 			behaviorId,
 			nextActionId
 		);
-		worldCharacterEntity.behaviorActionStartTick = tick;
+		worldCharacterEntity.behaviorState.behaviorTargetStartTick = tick;
 	} else {
 		// 다음 액션이 없으면 행동 종료
-		worldCharacterEntity.currentBehaviorTargetId = undefined;
-		worldCharacterEntity.behaviorActionStartTick = 0;
+		worldCharacterEntity.behaviorState.behaviorTargetId = undefined;
+		worldCharacterEntity.behaviorState.behaviorTargetStartTick = 0;
 	}
 }

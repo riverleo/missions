@@ -8,7 +8,7 @@ export function tickWorldCharacterNeeds(entity: WorldCharacterEntity, tick: numb
 	const needs = get(needStore).data;
 	const characterNeeds = get(characterNeedStore).data;
 
-	for (const worldCharacterNeed of Object.values(entity.worldCharacterNeeds)) {
+	for (const worldCharacterNeed of Object.values(entity.needs)) {
 		const need = needs[worldCharacterNeed.need_id];
 		if (!need) continue;
 
