@@ -19,6 +19,10 @@ export const BehaviorIdUtils = {
 	/**
 	 * BehaviorTargetId 생성
 	 * @example
+	 * BehaviorIdUtils.create(behaviorAction)
+	 * // behaviorAction 객체에서 모든 정보를 추출하여 생성
+	 *
+	 * @example
 	 * BehaviorIdUtils.create('need', needBehaviorId, needBehaviorActionId)
 	 * // "need_{needBehaviorId}_{needBehaviorActionId}"
 	 *
@@ -31,8 +35,8 @@ export const BehaviorIdUtils = {
 	 * // behavior와 behaviorAction 객체에서 필요한 정보를 추출하여 생성
 	 */
 	create(
-		typeOrBehavior: BehaviorType | Behavior,
-		behaviorIdOrActionIdOrAction:
+		typeOrBehaviorOrAction: BehaviorType | Behavior | BehaviorAction,
+		behaviorIdOrActionIdOrAction?:
 			| NeedBehaviorId
 			| ConditionBehaviorId
 			| NeedBehaviorActionId
@@ -40,9 +44,24 @@ export const BehaviorIdUtils = {
 			| BehaviorAction,
 		behaviorActionId?: NeedBehaviorActionId | ConditionBehaviorActionId
 	): BehaviorTargetId {
+		// BehaviorAction 객체만 전달된 경우 (가장 간단한 케이스)
+		if (
+			typeof typeOrBehaviorOrAction === 'object' &&
+			'behaviorType' in typeOrBehaviorOrAction &&
+			'id' in typeOrBehaviorOrAction &&
+			behaviorIdOrActionIdOrAction === undefined
+		) {
+			const behaviorAction = typeOrBehaviorOrAction as BehaviorAction;
+			const behaviorId =
+				behaviorAction.behaviorType === 'need'
+					? (behaviorAction as NeedBehaviorAction).need_behavior_id
+					: (behaviorAction as ConditionBehaviorAction).condition_behavior_id;
+			return `${behaviorAction.behaviorType}_${behaviorId}_${behaviorAction.id}` as BehaviorTargetId;
+		}
+
 		// Behavior 객체가 전달된 경우
-		if (typeof typeOrBehavior === 'object') {
-			const behavior = typeOrBehavior;
+		if (typeof typeOrBehaviorOrAction === 'object' && 'id' in typeOrBehaviorOrAction) {
+			const behavior = typeOrBehaviorOrAction as Behavior;
 
 			// 두 번째 파라미터가 BehaviorAction 객체인 경우
 			if (
@@ -61,7 +80,7 @@ export const BehaviorIdUtils = {
 		}
 
 		// 개별 파라미터가 전달된 경우
-		const type = typeOrBehavior;
+		const type = typeOrBehaviorOrAction as BehaviorType;
 		const behaviorId = behaviorIdOrActionIdOrAction as NeedBehaviorId | ConditionBehaviorId;
 		return `${type}_${behaviorId}_${behaviorActionId}` as BehaviorTargetId;
 	},
