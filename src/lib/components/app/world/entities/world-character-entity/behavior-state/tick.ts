@@ -16,16 +16,11 @@ import transitionToNextAction from './completion/transition';
 export default function tick(this: WorldCharacterEntityBehaviorState, tick: number): void {
 	const { getBehaviorAction } = useBehavior();
 
-	// 현재 행동 액션이 없으면 새로운 행동 선택
-	if (!this.behaviorTargetId) {
-		if (this.findAndSetBehavior(tick) === undefined) return;
-	}
+	// 행동 선택 및 확인
+	if (!this.findAndSetBehavior(tick)) return;
 
-	// behaviorTargetId가 설정되었는지 확인
-	if (!this.behaviorTargetId) return;
-
-	// 현재 행동 액션 가져오기
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	// 현재 행동 액션 가져오기 (findAndSetBehavior가 값을 반환했으므로 behaviorTargetId는 확실히 존재)
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId!);
 
 	if (!behaviorAction) {
 		// 액션을 찾을 수 없으면 행동 종료

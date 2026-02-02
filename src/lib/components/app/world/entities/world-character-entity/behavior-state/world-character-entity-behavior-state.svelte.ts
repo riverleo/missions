@@ -25,7 +25,7 @@ export class WorldCharacterEntityBehaviorState {
 
 	update: (event: BeforeUpdateEvent) => void;
 	tick: (tickNumber: number) => void;
-	findAndSetBehavior: (tick: number) => BehaviorTargetId | undefined;
+	findAndSetBehavior: (tick: number) => boolean;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;

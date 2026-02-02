@@ -1,5 +1,4 @@
 import { get } from 'svelte/store';
-import type { BehaviorTargetId } from '$lib/types';
 import type { WorldCharacterEntityBehaviorState } from '../world-character-entity-behavior-state.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
@@ -10,7 +9,12 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 export default function findAndSetBehavior(
 	this: WorldCharacterEntityBehaviorState,
 	tick: number
-): BehaviorTargetId | undefined {
+): boolean {
+	// 이미 행동이 설정되어 있으면 true 반환
+	if (this.behaviorTargetId) {
+		return true;
+	}
+
 	const { getAllBehaviors, getAllBehaviorActions, behaviorPriorityStore } = useBehavior();
 
 	// 1. 후보 behaviors 찾기
@@ -28,7 +32,7 @@ export default function findAndSetBehavior(
 
 	if (candidateBehaviors.length === 0) {
 		// 후보가 없으면 종료
-		return undefined;
+		return false;
 	}
 
 	// 2. 우선순위에 따라 정렬
@@ -49,7 +53,7 @@ export default function findAndSetBehavior(
 	});
 
 	const selectedBehavior = sortedCandidates[0];
-	if (!selectedBehavior) return undefined;
+	if (!selectedBehavior) return false;
 
 	// 3. root action 찾기
 	const allBehaviorActions = getAllBehaviorActions();
@@ -69,7 +73,7 @@ export default function findAndSetBehavior(
 
 	if (!rootAction) {
 		// root action이 없으면 종료
-		return undefined;
+		return false;
 	}
 
 	// 4. currentBehaviorId 설정 및 시작 tick 기록
@@ -81,5 +85,5 @@ export default function findAndSetBehavior(
 	);
 	this.behaviorTargetStartTick = tick;
 
-	return this.behaviorTargetId;
+	return true;
 }
