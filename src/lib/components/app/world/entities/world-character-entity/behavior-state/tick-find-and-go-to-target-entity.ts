@@ -39,58 +39,40 @@ export default function tickFindAndGoToTargetEntity(
 		}
 	}
 
-	let targetEntity: Entity | undefined = undefined;
+	let candidateEntities: Entity[] = [];
 
 	if (behaviorAction.target_selection_method === 'explicit') {
 		const interaction = getInteraction(behaviorAction);
 		if (interaction) {
-			const actionEntitySourceId = getEntitySourceId(behaviorAction);
-			if (!actionEntitySourceId) {
+			const entitySourceId = getEntitySourceId(behaviorAction);
+			if (!entitySourceId) {
 				throw new Error(
 					`Explicit target selection requires entity source but none found for behaviorAction: ${behaviorAction.id}`
 				);
 			}
 
-			targetEntity = entities.find((e) => getEntitySourceId(e.id) === actionEntitySourceId);
+			candidateEntities = entities.filter((e) => e.sourceId === entitySourceId);
 		}
 	} else if (
 		behaviorAction.target_selection_method === 'search' ||
 		behaviorAction.target_selection_method === 'search_or_continue'
 	) {
-		const candidateEntities = entities.filter((e) => {
-			const entitySourceId = getEntitySourceId(e.id);
-			return interactableEntitySourceIds.has(entitySourceId);
-		});
-
-		if (candidateEntities.length > 0) {
-			const sortedCandidates = candidateEntities.sort((a, b) => {
-				const distA = Math.hypot(a.x - worldCharacterEntity.x, a.y - worldCharacterEntity.y);
-				const distB = Math.hypot(b.x - worldCharacterEntity.x, b.y - worldCharacterEntity.y);
-				return distA - distB;
-			});
-
-			for (const candidate of sortedCandidates) {
-				const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
-					worldCharacterEntity,
-					candidate
-				);
-				if (testPath.length > 0) {
-					targetEntity = candidate;
-					break;
-				}
-			}
-		}
+		candidateEntities = entities.filter((e) => interactableEntitySourceIds.has(e.sourceId));
 	}
 
-	if (targetEntity) {
-		const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
-			worldCharacterEntity,
-			targetEntity
-		);
+	if (candidateEntities.length > 0) {
+		const sortedCandidates = vectorUtils.sortByDistance(worldCharacterEntity, candidateEntities);
 
-		if (testPath.length > 0) {
-			this.targetEntityId = targetEntity.id;
-			this.path = testPath;
+		for (const candidate of sortedCandidates) {
+			const testPath = worldCharacterEntity.worldContext.pathfinder.findPath(
+				worldCharacterEntity,
+				candidate
+			);
+			if (testPath.length > 0) {
+				this.targetEntityId = candidate.id;
+				this.path = testPath;
+				return false;
+			}
 		}
 	}
 

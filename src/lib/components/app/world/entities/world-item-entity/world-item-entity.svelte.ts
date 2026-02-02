@@ -21,6 +21,10 @@ export class WorldItemEntity extends Entity {
 		return EntityIdUtils.instanceId<WorldItemId>(this.id);
 	}
 
+	get sourceId() {
+		return this.item.id;
+	}
+
 	constructor(worldContext: WorldContext, worldId: WorldId, worldItemId: WorldItemId) {
 		super(worldContext, 'item', worldId, worldItemId);
 

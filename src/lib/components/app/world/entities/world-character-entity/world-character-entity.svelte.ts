@@ -29,6 +29,13 @@ export class WorldCharacterEntity extends Entity {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
 	}
 
+	get sourceId() {
+		const { getWorldCharacter } = useWorld();
+		const worldCharacter = getWorldCharacter(this.instanceId);
+		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
+		return worldCharacter.character_id;
+	}
+
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 

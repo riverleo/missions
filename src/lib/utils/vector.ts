@@ -229,24 +229,14 @@ function getOverlappingCells(cellsA: Cell[], cellsB: Cell[]): Cell[] {
 }
 
 /**
- * 주어진 벡터와 가장 가까운 벡터를 찾기
+ * 주어진 벡터로부터의 거리순으로 벡터 배열 정렬
  */
-function findClosest<T extends Vector>(from: Vector, targets: T[]): T | undefined {
-	if (targets.length === 0) return undefined;
-
-	let closest = targets[0]!;
-	let minDist = Math.hypot(closest.x - from.x, closest.y - from.y);
-
-	for (let i = 1; i < targets.length; i++) {
-		const target = targets[i]!;
-		const dist = Math.hypot(target.x - from.x, target.y - from.y);
-		if (dist < minDist) {
-			minDist = dist;
-			closest = target;
-		}
-	}
-
-	return closest;
+function sortByDistance<T extends Vector>(from: Vector, targets: T[]): T[] {
+	return targets.sort((a, b) => {
+		const distA = Math.hypot(a.x - from.x, a.y - from.y);
+		const distB = Math.hypot(b.x - from.x, b.y - from.y);
+		return distA - distB;
+	});
 }
 
 /**
@@ -305,5 +295,5 @@ export const vectorUtils = {
 	createCells,
 	getOverlappingCells,
 	// 벡터 연산
-	findClosest,
+	sortByDistance,
 };

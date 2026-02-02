@@ -7,6 +7,7 @@ import type {
 	WorldId,
 	EntityType,
 	Vector,
+	EntitySourceId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 
@@ -48,6 +49,8 @@ export abstract class Entity {
 	get instanceId(): EntityInstanceId {
 		return EntityIdUtils.instanceId(this.id);
 	}
+
+	abstract get sourceId(): EntitySourceId;
 
 	updatePosition(): void {
 		const newX = this.body.position.x;

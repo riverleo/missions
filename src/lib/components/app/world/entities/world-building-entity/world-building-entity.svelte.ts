@@ -24,6 +24,10 @@ export class WorldBuildingEntity extends Entity {
 		return EntityIdUtils.instanceId<WorldBuildingId>(this.id);
 	}
 
+	get sourceId() {
+		return this.building.id;
+	}
+
 	constructor(worldContext: WorldContext, worldId: WorldId, worldBuildingId: WorldBuildingId) {
 		super(worldContext, 'building', worldId, worldBuildingId);
 
