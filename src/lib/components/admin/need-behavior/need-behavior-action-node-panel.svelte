@@ -212,7 +212,7 @@
 		if (!changes || isUpdating) return;
 
 		const actionId = changes.id;
-		const behaviorId = changes.behavior_id;
+		const behaviorId = changes.need_behavior_id;
 		isUpdating = true;
 
 		try {
@@ -220,7 +220,7 @@
 			if (changes.root) {
 				const allActions = Object.values($needBehaviorActionStore.data);
 				const otherRootActions = allActions.filter(
-					(a) => a.behavior_id === behaviorId && a.id !== actionId && a.root
+					(a) => a.need_behavior_id === behaviorId && a.id !== actionId && a.root
 				);
 				await Promise.all(
 					otherRootActions.map((a) => admin.updateNeedBehaviorAction(a.id, { root: false }))

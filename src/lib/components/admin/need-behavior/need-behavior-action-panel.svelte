@@ -43,7 +43,7 @@
 		try {
 			await admin.createNeedBehaviorAction(scenarioId, {
 				need_id: behavior.need_id,
-				behavior_id: behavior.id,
+				need_behavior_id: behavior.id,
 				type: 'idle',
 			});
 		} catch (error) {

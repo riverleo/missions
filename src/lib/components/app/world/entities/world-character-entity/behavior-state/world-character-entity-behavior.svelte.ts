@@ -1,18 +1,18 @@
-import type { EntityId, BehaviorTargetId, InteractionTargetId } from '$lib/types';
+import type { EntityId, BehaviorTargetId, InteractionTargetId, Behavior } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type { WorldCharacterEntityDirection } from '../index';
 import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
 import tick from './tick';
-import initialize from './tick-initialize';
+import tickInitialize from './tick-initialize';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
  * 캐릭터가 어떤 행동을 실행 중인지, 어떤 타겟을 대상으로 하는지,
  * 언제 시작했는지 등의 정보를 저장하고 관리합니다.
  */
-export class WorldCharacterEntityBehaviorState {
+export class WorldCharacterEntityBehavior {
 	worldCharacterEntity: WorldCharacterEntity;
 
 	path = $state<Vector[]>([]);
@@ -22,16 +22,17 @@ export class WorldCharacterEntityBehaviorState {
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
 	interactionStartTick = $state<number | undefined>();
+	behaviors = $state<Behavior[]>([]);
 
 	update: (event: BeforeUpdateEvent) => void;
 	tick: (tickNumber: number) => void;
-	initialize: (tick: number) => boolean;
+	tickInitialize: (tick: number) => boolean;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
 		this.update = update.bind(this);
 		this.tick = tick.bind(this);
-		this.initialize = initialize.bind(this);
+		this.tickInitialize = tickInitialize.bind(this);
 	}
 
 	/**
@@ -45,5 +46,6 @@ export class WorldCharacterEntityBehaviorState {
 		this.behaviorTargetStartTick = undefined;
 		this.interactionTargetId = undefined;
 		this.interactionStartTick = undefined;
+		this.behaviors = [];
 	}
 }

@@ -1,5 +1,5 @@
 import type { BehaviorAction } from '$lib/types';
-import type { WorldCharacterEntityBehaviorState } from './world-character-entity-behavior-state.svelte';
+import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
 import { useWorld } from '$lib/hooks/use-world';
 import searchTargetAndSetPath from './search-target';
@@ -13,11 +13,11 @@ import transitionToNextAction from './completion/transition';
 /**
  * 캐릭터의 행동을 tick마다 처리합니다.
  */
-export default function tick(this: WorldCharacterEntityBehaviorState, tick: number): void {
+export default function tick(this: WorldCharacterEntityBehavior, tick: number): void {
 	const { getBehaviorAction } = useBehavior();
 
 	// 행동 선택 및 확인
-	if (!this.initialize(tick)) return;
+	if (!this.tickInitialize(tick)) return;
 
 	// behaviorTargetId가 확실히 설정되었으므로 행동 액션 가져오기
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId)!;
@@ -82,7 +82,7 @@ export default function tick(this: WorldCharacterEntityBehaviorState, tick: numb
  * explicit 타겟 선택 시 현재 타겟이 interaction의 대상과 다른지 확인
  */
 function checkIfTargetMismatch(
-	this: WorldCharacterEntityBehaviorState,
+	this: WorldCharacterEntityBehavior,
 	behaviorAction: BehaviorAction
 ): boolean {
 	if (!this.targetEntityId) return false;

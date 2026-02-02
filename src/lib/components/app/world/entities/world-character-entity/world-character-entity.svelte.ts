@@ -8,7 +8,7 @@ import type {
 	WorldCharacterNeed,
 	NeedId,
 } from '$lib/types';
-import { WorldCharacterEntityBehaviorState } from './behavior-state';
+import { WorldCharacterEntityBehavior } from './behavior-state';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
@@ -23,7 +23,7 @@ export class WorldCharacterEntity extends Entity {
 	body: Matter.Body;
 	heldItemIds = $state<WorldItemId[]>([]);
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
-	behaviorState: WorldCharacterEntityBehaviorState;
+	behaviorState: WorldCharacterEntityBehavior;
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -32,7 +32,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		this.behaviorState = new WorldCharacterEntityBehaviorState(this);
+		this.behaviorState = new WorldCharacterEntityBehavior(this);
 
 		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);

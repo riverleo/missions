@@ -63,7 +63,7 @@ create table need_behavior_actions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   need_id uuid not null references needs(id) on delete cascade,
-  behavior_id uuid not null references need_behaviors(id) on delete cascade,
+  need_behavior_id uuid not null references need_behaviors(id) on delete cascade,
   type behavior_action_type not null default 'idle'::behavior_action_type,
   root boolean not null default false,
 

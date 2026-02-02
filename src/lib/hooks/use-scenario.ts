@@ -420,7 +420,7 @@ function createScenarioStore() {
 				needs.some((n) => n.id === nb.need_id)
 			);
 			const needBehaviorActions = getAllNeedBehaviorActions().filter((nba) =>
-				needBehaviors.some((nb) => nb.id === nba.behavior_id)
+				needBehaviors.some((nb) => nb.id === nba.need_behavior_id)
 			);
 
 			// Condition related

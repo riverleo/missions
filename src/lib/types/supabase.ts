@@ -1398,7 +1398,7 @@ export type NeedBehaviorAction = BehaviorAction &
 		| 'id'
 		| 'scenario_id'
 		| 'need_id'
-		| 'behavior_id'
+		| 'need_behavior_id'
 		| 'building_interaction_id'
 		| 'item_interaction_id'
 		| 'character_interaction_id'
@@ -1410,7 +1410,7 @@ export type NeedBehaviorAction = BehaviorAction &
 		id: NeedBehaviorActionId;
 		scenario_id: ScenarioId;
 		need_id: NeedId;
-		behavior_id: NeedBehaviorId;
+		need_behavior_id: NeedBehaviorId;
 		need_fulfillment_id: NeedFulfillmentId | null;
 		building_interaction_id: BuildingInteractionId | null;
 		item_interaction_id: ItemInteractionId | null;
@@ -1422,7 +1422,7 @@ export type NeedBehaviorActionInsert = Omit<
 	NeedBehaviorActionInsertRow,
 	| 'scenario_id'
 	| 'need_id'
-	| 'behavior_id'
+	| 'need_behavior_id'
 	| 'building_interaction_id'
 	| 'item_interaction_id'
 	| 'character_interaction_id'
@@ -1430,7 +1430,7 @@ export type NeedBehaviorActionInsert = Omit<
 > & {
 	scenario_id: ScenarioId;
 	need_id: NeedId;
-	behavior_id: NeedBehaviorId;
+	need_behavior_id: NeedBehaviorId;
 	need_fulfillment_id?: NeedFulfillmentId | null;
 	building_interaction_id?: BuildingInteractionId | null;
 	item_interaction_id?: ItemInteractionId | null;
@@ -1443,7 +1443,7 @@ export type NeedBehaviorActionUpdate = Omit<
 	| 'id'
 	| 'scenario_id'
 	| 'need_id'
-	| 'behavior_id'
+	| 'need_behavior_id'
 	| 'building_interaction_id'
 	| 'item_interaction_id'
 	| 'character_interaction_id'
@@ -1452,7 +1452,7 @@ export type NeedBehaviorActionUpdate = Omit<
 	id?: NeedBehaviorActionId;
 	scenario_id?: ScenarioId;
 	need_id?: NeedId;
-	behavior_id?: NeedBehaviorId;
+	need_behavior_id?: NeedBehaviorId;
 	need_fulfillment_id?: NeedFulfillmentId | null;
 	building_interaction_id?: BuildingInteractionId | null;
 	item_interaction_id?: ItemInteractionId | null;

@@ -31,7 +31,7 @@
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
 	const actions = $derived(
 		needBehaviorId
-			? Object.values($needBehaviorActionStore.data).filter((a) => a.behavior_id === needBehaviorId)
+			? Object.values($needBehaviorActionStore.data).filter((a) => a.need_behavior_id === needBehaviorId)
 			: []
 	);
 
@@ -145,7 +145,7 @@
 			// 새 액션 생성
 			const newAction = await admin.createNeedBehaviorAction(scenarioId, {
 				need_id: behavior.need_id,
-				behavior_id: behavior.id,
+				need_behavior_id: behavior.id,
 				type: 'idle',
 			});
 

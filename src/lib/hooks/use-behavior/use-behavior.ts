@@ -28,6 +28,7 @@ import type {
 	ScenarioId,
 	WorldCharacterId,
 	BehaviorTargetId,
+	WorldCharacterEntityBehavior,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
 import type { Behavior as WorldBehavior } from '$lib/components/app/world/behaviors';
@@ -259,19 +260,56 @@ function createBehaviorStore() {
 	}
 
 	function getAllBehaviors(): Behavior[] {
-		const needBehaviors = getAllNeedBehaviors().map((b) => BehaviorIdUtils.behavior.to(b));
-		const conditionBehaviors = getAllConditionBehaviors().map((b) =>
-			BehaviorIdUtils.behavior.to(b)
-		);
+		const needBehaviors = getAllNeedBehaviors().map(BehaviorIdUtils.behavior.to);
+		const conditionBehaviors = getAllConditionBehaviors().map(BehaviorIdUtils.behavior.to);
 		return [...needBehaviors, ...conditionBehaviors];
 	}
 
-	function getAllBehaviorActions(): BehaviorAction[] {
-		const needBehaviorActions = getAllNeedBehaviorActions().map((a) => BehaviorIdUtils.to(a));
-		const conditionBehaviorActions = getAllConditionBehaviorActions().map((a) =>
-			BehaviorIdUtils.to(a)
-		);
-		return [...needBehaviorActions, ...conditionBehaviorActions];
+	function getAllUsableBehaviors(
+		worldCharacterEntityBehavior: WorldCharacterEntityBehavior
+	): Behavior[] {
+		const priorities = get(behaviorPriorityStore).data;
+
+		const candidateBehaviors = getAllBehaviors().filter((behavior) => {
+			if (behavior.behaviorType === 'need') {
+				const need = worldCharacterEntityBehavior.worldCharacterEntity.needs[behavior.need_id];
+				if (!need) return false;
+				// 욕구 레벨이 threshold 이하이면 발동
+				return need.value <= behavior.need_threshold;
+			} else {
+				// TODO: 컨디션 조건 체크 로직 (나중에 구현)
+				return false;
+			}
+		});
+
+		return candidateBehaviors.sort((a, b) => {
+			const priorityA = Object.values(priorities).find((p) =>
+				a.behaviorType === 'need' ? p.need_behavior_id === a.id : p.condition_behavior_id === a.id
+			);
+			const priorityB = Object.values(priorities).find((p) =>
+				b.behaviorType === 'need' ? p.need_behavior_id === b.id : p.condition_behavior_id === b.id
+			);
+
+			const valA = priorityA?.priority ?? 0;
+			const valB = priorityB?.priority ?? 0;
+
+			// 높은 우선순위가 먼저 오도록 내림차순 정렬
+			return valB - valA;
+		});
+	}
+
+	function getRootBehaviorAction(behavior: Behavior): BehaviorAction | undefined {
+		if (behavior.behaviorType === 'need') {
+			const needAction = getAllNeedBehaviorActions().find(
+				(action) => action.need_behavior_id === behavior.id && action.root
+			);
+			return needAction ? BehaviorIdUtils.to(needAction) : undefined;
+		} else {
+			const conditionAction = getAllConditionBehaviorActions().find(
+				(action) => action.condition_behavior_id === behavior.id && action.root
+			);
+			return conditionAction ? BehaviorIdUtils.to(conditionAction) : undefined;
+		}
 	}
 
 	const admin = {
@@ -383,7 +421,7 @@ function createBehaviorStore() {
 			needBehaviorActionStore.update((state) =>
 				produce(state, (draft) => {
 					for (const actionId of Object.keys(draft.data) as NeedBehaviorActionId[]) {
-						if (draft.data[actionId]?.behavior_id === id) {
+						if (draft.data[actionId]?.need_behavior_id === id) {
 							delete draft.data[actionId];
 						}
 					}
@@ -398,7 +436,9 @@ function createBehaviorStore() {
 		) {
 			// 해당 behavior에 첫 번째 액션이면 자동으로 root로 설정
 			const existingActions = getAllNeedBehaviorActions();
-			const isFirstAction = !existingActions.some((a) => a.behavior_id === action.behavior_id);
+			const isFirstAction = !existingActions.some(
+				(a) => a.need_behavior_id === action.need_behavior_id
+			);
 
 			const { data, error } = await supabase
 				.from('need_behavior_actions')
@@ -632,7 +672,8 @@ function createBehaviorStore() {
 		getAllConditionBehaviors,
 		getAllConditionBehaviorActions,
 		getAllBehaviors,
-		getAllBehaviorActions,
+		getAllUsableBehaviors,
+		getRootBehaviorAction,
 		getBehavior,
 		addBehavior,
 		removeBehavior,

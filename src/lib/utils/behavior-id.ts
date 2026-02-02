@@ -25,22 +25,44 @@ export const BehaviorIdUtils = {
 	 * @example
 	 * BehaviorIdUtils.create(behavior, behaviorActionId)
 	 * // behavior 객체에서 behaviorType과 id를 추출하여 생성
+	 *
+	 * @example
+	 * BehaviorIdUtils.create(behavior, behaviorAction)
+	 * // behavior와 behaviorAction 객체에서 필요한 정보를 추출하여 생성
 	 */
 	create(
 		typeOrBehavior: BehaviorType | Behavior,
-		behaviorIdOrActionId: NeedBehaviorId | ConditionBehaviorId | NeedBehaviorActionId | ConditionBehaviorActionId,
+		behaviorIdOrActionIdOrAction:
+			| NeedBehaviorId
+			| ConditionBehaviorId
+			| NeedBehaviorActionId
+			| ConditionBehaviorActionId
+			| BehaviorAction,
 		behaviorActionId?: NeedBehaviorActionId | ConditionBehaviorActionId
 	): BehaviorTargetId {
 		// Behavior 객체가 전달된 경우
 		if (typeof typeOrBehavior === 'object') {
 			const behavior = typeOrBehavior;
-			const actionId = behaviorIdOrActionId as NeedBehaviorActionId | ConditionBehaviorActionId;
+
+			// 두 번째 파라미터가 BehaviorAction 객체인 경우
+			if (
+				typeof behaviorIdOrActionIdOrAction === 'object' &&
+				'id' in behaviorIdOrActionIdOrAction
+			) {
+				const behaviorAction = behaviorIdOrActionIdOrAction;
+				return `${behavior.behaviorType}_${behavior.id}_${behaviorAction.id}` as BehaviorTargetId;
+			}
+
+			// 두 번째 파라미터가 actionId인 경우
+			const actionId = behaviorIdOrActionIdOrAction as
+				| NeedBehaviorActionId
+				| ConditionBehaviorActionId;
 			return `${behavior.behaviorType}_${behavior.id}_${actionId}` as BehaviorTargetId;
 		}
 
 		// 개별 파라미터가 전달된 경우
 		const type = typeOrBehavior;
-		const behaviorId = behaviorIdOrActionId as NeedBehaviorId | ConditionBehaviorId;
+		const behaviorId = behaviorIdOrActionIdOrAction as NeedBehaviorId | ConditionBehaviorId;
 		return `${type}_${behaviorId}_${behaviorActionId}` as BehaviorTargetId;
 	},
 

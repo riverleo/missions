@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import type { WorldCharacterEntityBehaviorState } from './world-character-entity-behavior-state.svelte';
+import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { BeforeUpdateEvent } from '../../../context';
 
 const { Body } = Matter;
@@ -8,7 +8,7 @@ const { Body } = Matter;
  * 경로를 따라 이동
  */
 export default function update(
-	this: WorldCharacterEntityBehaviorState,
+	this: WorldCharacterEntityBehavior,
 	event: BeforeUpdateEvent
 ): void {
 	if (this.path.length === 0) {
