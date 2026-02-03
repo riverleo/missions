@@ -51,6 +51,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
 				safeSetWalkableAt(pathfinder, true, vectorUtils.createCell(cellX + dx, cellY - 2));
+				safeSetWalkableAt(pathfinder, true, vectorUtils.createCell(cellX + dx, cellY - 1));
 			}
 
 			// 좌측 끝 또는 우측 끝에만 아래 walkable 설정
@@ -137,6 +138,7 @@ export const cell = {
 		const bottomCells: Cell[] = [];
 		for (let x = 0; x < pathfinder.cols; x++) {
 			bottomCells.push(vectorUtils.createCell(x, bottomTopRow - 2));
+			bottomCells.push(vectorUtils.createCell(x, bottomTopRow - 1));
 		}
 		safeSetWalkableAt(pathfinder, true, ...bottomCells);
 	},
