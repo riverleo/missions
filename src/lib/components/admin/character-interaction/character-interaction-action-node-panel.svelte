@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useCharacter, useInteraction } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		CharacterInteractionAction,
@@ -35,8 +35,8 @@
 
 	let { action, characterInteractionId, hasParent = false }: Props = $props();
 
-	const { characterStore, characterInteractionStore, characterInteractionActionStore, admin } =
-		useCharacter();
+	const { characterStore } = useCharacter();
+	const { characterInteractionStore, characterInteractionActionStore, admin } = useInteraction();
 	const flowNodes = useNodes();
 
 	const interaction = $derived($characterInteractionStore.data[characterInteractionId]);
@@ -139,12 +139,12 @@
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) =>
-						admin.updateCharacterInteractionAction(a.id, characterInteractionId, { root: false })
+						admin.updateCharacterInteractionAction(a.id, { root: false })
 					)
 				);
 			}
 
-			await admin.updateCharacterInteractionAction(actionId, characterInteractionId, {
+			await admin.updateCharacterInteractionAction(actionId, {
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				target_character_body_state_type: changes.target_character_body_state_type,

@@ -1,4 +1,4 @@
-import { useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
+import { useBuilding, useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
 import type {
 	BuildingInteractionId,
 	CharacterInteractionId,
@@ -31,19 +31,23 @@ export default function executeFulfillAction(
 	currentTick: number
 ): void {
 	const {
-		getBuildingInteraction,
-		getBuildingInteractionActions,
 		getConditionFulfillment,
 		getAllConditionFulfillments,
 	} = useBuilding();
-	const { getItem, getItemInteraction, getItemInteractionActions, getAllItemInteractions } =
-		useItem();
+	const { getItem } = useItem();
 	const {
-		getCharacterInteraction,
-		getCharacterInteractionActions,
 		getNeedFulfillment,
 		getAllNeedFulfillments,
 	} = useCharacter();
+	const {
+		getBuildingInteraction,
+		getBuildingInteractionActions,
+		getItemInteraction,
+		getItemInteractionActions,
+		getAllItemInteractions,
+		getCharacterInteraction,
+		getCharacterInteractionActions,
+	} = useInteraction();
 	const { getWorldItem, worldItemStore } = useWorld();
 
 	// Fulfillment와 Interaction 가져오기 (타겟 확인 전에 먼저 가져옴)

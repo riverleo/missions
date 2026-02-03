@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter, useItem } from '$lib/hooks';
+	import { useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -23,8 +23,9 @@
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, ItemId, CharacterId, ItemInteraction } from '$lib/types';
 
-	const { itemStore, itemInteractionStore, openItemInteractionDialog } = useItem();
+	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();
+	const { itemInteractionStore, openItemInteractionDialog } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.itemInteractionId);
 

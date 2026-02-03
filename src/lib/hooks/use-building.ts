@@ -1,7 +1,6 @@
 import { writable, derived, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
-	Database,
 	RecordFetchState,
 	Building,
 	BuildingInsert,
@@ -12,11 +11,6 @@ import type {
 	BuildingState,
 	BuildingStateInsert,
 	BuildingStateUpdate,
-	BuildingInteraction,
-	BuildingInteractionInsert,
-	BuildingInteractionUpdate,
-	BuildingInteractionAction,
-	BuildingInteractionActionInsert,
 	BuildingInteractionActionUpdate,
 	Condition,
 	ConditionInsert,
@@ -290,7 +284,6 @@ function createBuildingStore() {
 		return get(allBuildingStatesStore);
 	}
 
-
 	function getAllConditions(): Condition[] {
 		return get(allConditionsStore);
 	}
@@ -515,8 +508,6 @@ function createBuildingStore() {
 			return interaction.admin.removeBuildingInteractionAction(actionId);
 		},
 
-
-
 		// Condition CRUD
 		async createCondition(scenarioId: ScenarioId, condition: Omit<ConditionInsert, 'scenario_id'>) {
 			const { data, error } = await supabase
@@ -732,11 +723,7 @@ function createBuildingStore() {
 		buildingStateStore: buildingStateStore as Readable<
 			RecordFetchState<BuildingId, BuildingState[]>
 		>,
-		// Re-export from useInteraction
-		buildingInteractionStore: interaction.buildingInteractionStore,
-		buildingInteractionActionStore: interaction.buildingInteractionActionStore,
 		buildingDialogStore: buildingDialogStore as Readable<BuildingDialogState>,
-		buildingInteractionDialogStore: interaction.buildingInteractionDialogStore,
 		conditionStore: conditionStore as Readable<RecordFetchState<ConditionId, Condition>>,
 		conditionFulfillmentStore: conditionFulfillmentStore as Readable<
 			RecordFetchState<ConditionFulfillmentId, ConditionFulfillment>
@@ -751,9 +738,6 @@ function createBuildingStore() {
 		allBuildingsStore,
 		allBuildingItemsStore,
 		allBuildingStatesStore,
-		// Re-export from useInteraction
-		allBuildingInteractionsStore: interaction.allBuildingInteractionsStore,
-		allBuildingInteractionActionsStore: interaction.buildingInteractionActionStore,
 		allConditionsStore,
 		allConditionFulfillmentsStore,
 		allBuildingConditionsStore,
@@ -762,17 +746,11 @@ function createBuildingStore() {
 		fetch,
 		openBuildingDialog,
 		closeBuildingDialog,
-		// Re-export from useInteraction
-		openBuildingInteractionDialog: interaction.openBuildingInteractionDialog,
-		closeBuildingInteractionDialog: interaction.closeBuildingInteractionDialog,
 		openConditionDialog,
 		closeConditionDialog,
 		getBuilding,
 		getBuildingItem,
 		getBuildingStates,
-		// Re-export from useInteraction
-		getBuildingInteraction: interaction.getBuildingInteraction,
-		getBuildingInteractionActions: interaction.getBuildingInteractionActions,
 		getCondition,
 		getConditionFulfillment,
 		getBuildingCondition,
@@ -780,10 +758,6 @@ function createBuildingStore() {
 		getAllBuildings,
 		getAllBuildingItems,
 		getAllBuildingStates,
-		// Re-export from useInteraction
-		getAllBuildingInteractions: interaction.getAllBuildingInteractions,
-		getAllBuildingInteractionActions: (id: BuildingInteractionId) =>
-			interaction.getBuildingInteractionActions(id),
 		getAllConditions,
 		getAllConditionFulfillments,
 		getAllBuildingConditions,

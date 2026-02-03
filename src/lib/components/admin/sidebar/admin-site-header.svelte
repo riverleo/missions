@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useChapter, useCharacter, useItem, useNarrative, useQuest, useScenario, useTerrain } from '$lib/hooks';
+	import { useBehavior, useBuilding, useChapter, useCharacter, useInteraction, useItem, useNarrative, useQuest, useScenario, useTerrain } from '$lib/hooks';
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
 	import {
 		Breadcrumb,
@@ -36,11 +36,12 @@
 	const { questStore } = useQuest();
 	const { narrativeStore } = useNarrative();
 	const { terrainStore } = useTerrain();
-	const { characterStore, characterBodyStore, needStore, characterInteractionStore } =
-		useCharacter();
-	const { buildingStore, conditionStore, buildingInteractionStore } = useBuilding();
+	const { characterStore, characterBodyStore, needStore } = useCharacter();
+	const { buildingStore, conditionStore } = useBuilding();
 	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
-	const { itemStore, itemInteractionStore } = useItem();
+	const { itemStore } = useItem();
+	const { buildingInteractionStore, itemInteractionStore, characterInteractionStore } =
+		useInteraction();
 
 	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
 		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정

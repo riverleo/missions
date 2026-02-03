@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter, useItem } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		NeedFulfillment,
@@ -37,10 +37,11 @@
 
 	let { fulfillment }: Props = $props();
 
-	const { admin } = useCharacter();
-	const { buildingStore, buildingInteractionStore } = useBuilding();
-	const { characterStore, characterInteractionStore } = useCharacter();
-	const { itemStore, itemInteractionStore } = useItem();
+	const { admin, characterStore } = useCharacter();
+	const { buildingStore } = useBuilding();
+	const { itemStore } = useItem();
+	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
+		useInteraction();
 	const flowNodes = useNodes();
 
 	const buildings = $derived(Object.values($buildingStore.data));

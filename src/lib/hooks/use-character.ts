@@ -781,9 +781,6 @@ function createCharacterStore() {
 		characterFaceStateStore: characterFaceStateStore as Readable<
 			RecordFetchState<CharacterId, CharacterFaceState[]>
 		>,
-		// Re-export from useInteraction
-		characterInteractionStore: interaction.characterInteractionStore,
-		characterInteractionActionStore: interaction.characterInteractionActionStore,
 		characterBodyStore: characterBodyStore as Readable<
 			RecordFetchState<CharacterBodyId, CharacterBody>
 		>,
@@ -793,8 +790,6 @@ function createCharacterStore() {
 		characterDialogStore: characterDialogStore as Readable<CharacterDialogState>,
 		characterFaceStateDialogStore:
 			characterFaceStateDialogStore as Readable<CharacterFaceStateDialogState>,
-		// Re-export from useInteraction
-		characterInteractionDialogStore: interaction.characterInteractionDialogStore,
 		characterBodyDialogStore: characterBodyDialogStore as Readable<CharacterBodyDialogState>,
 		needStore: needStore as Readable<RecordFetchState<NeedId, Need>>,
 		needFulfillmentStore: needFulfillmentStore as Readable<
@@ -806,9 +801,6 @@ function createCharacterStore() {
 		needDialogStore: needDialogStore as Readable<NeedDialogState>,
 		allCharactersStore,
 		allCharacterFaceStatesStore,
-		// Re-export from useInteraction
-		allCharacterInteractionsStore: interaction.allCharacterInteractionsStore,
-		allCharacterInteractionActionsStore: interaction.characterInteractionActionStore,
 		allCharacterBodiesStore,
 		allCharacterBodyStatesStore,
 		allNeedsStore,
@@ -820,18 +812,12 @@ function createCharacterStore() {
 		closeCharacterDialog,
 		openCharacterFaceStateDialog,
 		closeCharacterFaceStateDialog,
-		// Re-export from useInteraction
-		openCharacterInteractionDialog: interaction.openCharacterInteractionDialog,
-		closeCharacterInteractionDialog: interaction.closeCharacterInteractionDialog,
 		openCharacterBodyDialog,
 		closeCharacterBodyDialog,
 		openNeedDialog,
 		closeNeedDialog,
 		getCharacter,
 		getCharacterFaceStates,
-		// Re-export from useInteraction
-		getCharacterInteraction: interaction.getCharacterInteraction,
-		getCharacterInteractionActions: interaction.getCharacterInteractionActions,
 		getCharacterBody,
 		getCharacterBodyStates,
 		getNeed,
@@ -839,10 +825,6 @@ function createCharacterStore() {
 		getCharacterNeed,
 		getAllCharacters,
 		getAllCharacterFaceStates,
-		// Re-export from useInteraction
-		getAllCharacterInteractions: interaction.getAllCharacterInteractions,
-		getAllCharacterInteractionActions: (id: CharacterInteractionId) =>
-			interaction.getCharacterInteractionActions(id),
 		getAllCharacterBodies,
 		getAllCharacterBodyStates,
 		getAllNeeds,

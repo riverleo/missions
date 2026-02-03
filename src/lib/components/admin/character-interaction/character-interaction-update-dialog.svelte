@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useCharacter, useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -17,13 +17,13 @@
 	import { alphabetical } from 'radash';
 	import type { CharacterId, OnceInteractionType, RepeatInteractionType } from '$lib/types';
 
+	const { characterStore } = useCharacter();
 	const {
-		characterStore,
 		characterInteractionStore,
 		characterInteractionDialogStore,
 		closeCharacterInteractionDialog,
 		admin,
-	} = useCharacter();
+	} = useInteraction();
 
 	const open = $derived($characterInteractionDialogStore?.type === 'update');
 	const characterInteractionId = $derived(

@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
 
-	const { characterInteractionStore } = useCharacter();
+	const { characterInteractionStore } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	$effect(() => {

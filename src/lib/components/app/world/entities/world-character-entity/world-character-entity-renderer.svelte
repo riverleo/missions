@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter, useItem, useWorld } from '$lib/hooks';
+	import { useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
 	import type { ItemInteractionId, WorldItemId } from '$lib/types';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
@@ -14,7 +14,8 @@
 
 	const { characterStore, characterBodyStore } = useCharacter();
 	const { worldCharacterStore, worldItemStore, selectedEntityIdStore } = useWorld();
-	const { itemStore, itemStateStore, itemInteractionActionStore } = useItem();
+	const { itemStore, itemStateStore } = useItem();
+	const { itemInteractionActionStore } = useInteraction();
 
 	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
 	const character = $derived(

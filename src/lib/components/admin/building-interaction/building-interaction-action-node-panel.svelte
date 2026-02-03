@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		BuildingInteractionAction,
@@ -36,8 +36,8 @@
 
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
-	const { buildingInteractionStore, buildingInteractionActionStore, buildingStore, admin } =
-		useBuilding();
+	const { buildingStore } = useBuilding();
+	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useInteraction();
 	const { characterStore } = useCharacter();
 	const flowNodes = useNodes();
 
@@ -137,13 +137,11 @@
 				const allActions = $buildingInteractionActionStore.data[buildingInteractionId] ?? [];
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
-					otherRootActions.map((a) =>
-						admin.updateBuildingInteractionAction(a.id, buildingInteractionId, { root: false })
-					)
+					otherRootActions.map((a) => admin.updateBuildingInteractionAction(a.id, { root: false }))
 				);
 			}
 
-			await admin.updateBuildingInteractionAction(actionId, buildingInteractionId, {
+			await admin.updateBuildingInteractionAction(actionId, {
 				character_body_state_type: changes.character_body_state_type,
 				character_face_state_type: changes.character_face_state_type,
 				character_offset_x: changes.character_offset_x,

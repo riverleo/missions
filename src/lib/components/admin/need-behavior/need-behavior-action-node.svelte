@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter, useItem } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import type {
 		NeedBehaviorAction,
 		BuildingInteractionId,
@@ -23,9 +23,11 @@
 	const { data, id, selected = false }: Props = $props();
 	const action = $derived(data.action);
 
-	const { buildingStore, buildingInteractionStore } = useBuilding();
-	const { characterStore, characterInteractionStore, needFulfillmentStore } = useCharacter();
-	const { itemStore, itemInteractionStore } = useItem();
+	const { buildingStore } = useBuilding();
+	const { characterStore, needFulfillmentStore } = useCharacter();
+	const { itemStore } = useItem();
+	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
+		useInteraction();
 
 	const interactionInfo = $derived(() => {
 		if (action.building_interaction_id) {

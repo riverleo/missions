@@ -5,6 +5,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { useBuilding } from '$lib/hooks/use-building';
 import { useItem } from '$lib/hooks/use-item';
 import { useCharacter } from '$lib/hooks/use-character';
+import { useInteraction } from '$lib/hooks/use-interaction';
 import type {
 	RecordFetchState,
 	World,
@@ -218,19 +219,15 @@ function createWorldStore() {
 	 * BehaviorAction으로부터 Interaction을 반환
 	 */
 	function getInteraction(action: BehaviorAction): Interaction | undefined {
-		const { getBuildingInteraction } = useBuilding();
-		const { getItemInteraction } = useItem();
-		const { getCharacterInteraction } = useCharacter();
+		const { getInteraction: getInteractionById } = useInteraction();
 
-		if (action.building_interaction_id) {
-			const interaction = getBuildingInteraction(action.building_interaction_id);
-			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
-		} else if (action.item_interaction_id) {
-			const interaction = getItemInteraction(action.item_interaction_id);
-			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
-		} else if (action.character_interaction_id) {
-			const interaction = getCharacterInteraction(action.character_interaction_id);
-			return interaction ? InteractionIdUtils.interaction.to(interaction) : undefined;
+		const interactionId =
+			action.building_interaction_id ||
+			action.item_interaction_id ||
+			action.character_interaction_id;
+
+		if (interactionId) {
+			return getInteractionById(interactionId);
 		}
 		return undefined;
 	}
@@ -239,9 +236,7 @@ function createWorldStore() {
 	 * Interaction으로부터 InteractionAction 배열을 반환
 	 */
 	function getInteractionActions(interaction: Interaction): InteractionAction[] {
-		const { getBuildingInteractionActions } = useBuilding();
-		const { getItemInteractionActions } = useItem();
-		const { getCharacterInteractionActions } = useCharacter();
+		const { getBuildingInteractionActions, getItemInteractionActions, getCharacterInteractionActions } = useInteraction();
 
 		if (interaction.interactionType === 'building') {
 			const actions = getBuildingInteractionActions(interaction.id) || [];

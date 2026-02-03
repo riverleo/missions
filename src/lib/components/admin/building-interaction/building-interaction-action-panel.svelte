@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import type { BuildingInteraction, BuildingInteractionId } from '$lib/types';
@@ -17,7 +17,7 @@
 
 	let { interaction, buildingInteractionId, onlayout }: Props = $props();
 
-	const { buildingInteractionActionStore, admin } = useBuilding();
+	const { buildingInteractionActionStore, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter, useItem } from '$lib/hooks';
+	import { useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -43,7 +43,8 @@
 
 	let { interaction, itemInteractionId }: Props = $props();
 
-	const { itemStore, itemInteractionActionStore, openItemInteractionDialog, admin } = useItem();
+	const { itemStore } = useItem();
+	const { itemInteractionActionStore, openItemInteractionDialog, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
@@ -52,7 +53,7 @@
 	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
 	const characters = $derived(Object.values($characterStore.data));
 
-	const rootAction = $derived(actions.find((a) => a.root));
+	const rootAction = $derived(actions.find((a: ItemInteractionAction) => a.root));
 
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>(
 		(interaction.once_interaction_type || interaction.repeat_interaction_type || 'item_use') as
@@ -90,11 +91,11 @@
 		actionId: ItemInteractionActionId,
 		updates: Partial<ItemInteractionAction>
 	) {
-		await admin.updateItemInteractionAction(actionId, itemInteractionId, updates);
+		await admin.updateItemInteractionAction(actionId, updates);
 	}
 
 	async function removeAction(actionId: ItemInteractionActionId) {
-		await admin.removeItemInteractionAction(actionId, itemInteractionId);
+		await admin.removeItemInteractionAction(actionId);
 	}
 
 	function getBodyStateLabel(type: string) {

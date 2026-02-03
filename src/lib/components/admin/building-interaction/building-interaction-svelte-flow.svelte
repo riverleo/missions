@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -26,7 +26,7 @@
 	import BuildingInteractionActionNodePanel from './building-interaction-action-node-panel.svelte';
 	import type { BuildingInteractionId, BuildingInteractionActionId, ScenarioId } from '$lib/types';
 
-	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useBuilding();
+	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const buildingInteractionId = $derived(
@@ -97,13 +97,9 @@
 			const sourceId = parseBuildingInteractionActionNodeId(connection.source);
 			const targetId = parseBuildingInteractionActionNodeId(connection.target);
 
-			await admin.updateBuildingInteractionAction(
-				sourceId as BuildingInteractionActionId,
-				buildingInteractionId,
-				{
-					next_building_interaction_action_id: targetId as BuildingInteractionActionId,
-				}
-			);
+			await admin.updateBuildingInteractionAction(sourceId as BuildingInteractionActionId, {
+				next_building_interaction_action_id: targetId as BuildingInteractionActionId,
+			});
 
 			edges = [
 				...edges,
@@ -160,13 +156,9 @@
 			);
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
-			await admin.updateBuildingInteractionAction(
-				fromActionId as BuildingInteractionActionId,
-				buildingInteractionId,
-				{
-					next_building_interaction_action_id: newAction.id,
-				}
-			);
+			await admin.updateBuildingInteractionAction(fromActionId as BuildingInteractionActionId, {
+				next_building_interaction_action_id: newAction.id,
+			});
 
 			skipConvertEffect = false;
 			await tick();
@@ -196,23 +188,16 @@
 			for (const edge of edgesToDelete) {
 				const sourceId = parseBuildingInteractionActionNodeId(edge.source);
 
-				await admin.updateBuildingInteractionAction(
-					sourceId as BuildingInteractionActionId,
-					buildingInteractionId,
-					{
-						next_building_interaction_action_id: null,
-					}
-				);
+				await admin.updateBuildingInteractionAction(sourceId as BuildingInteractionActionId, {
+					next_building_interaction_action_id: null,
+				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseBuildingInteractionActionNodeId(node.id);
-					await admin.removeBuildingInteractionAction(
-						actionId as BuildingInteractionActionId,
-						buildingInteractionId
-					);
+					await admin.removeBuildingInteractionAction(actionId as BuildingInteractionActionId);
 				}
 			}
 

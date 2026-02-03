@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useItem } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -26,7 +26,7 @@
 	import ItemInteractionActionNodePanel from './item-interaction-action-node-panel.svelte';
 	import type { ItemInteractionId, ItemInteractionActionId, ScenarioId } from '$lib/types';
 
-	const { itemInteractionStore, itemInteractionActionStore, admin } = useItem();
+	const { itemInteractionStore, itemInteractionActionStore, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const itemInteractionId = $derived(page.params.itemInteractionId as ItemInteractionId);
@@ -95,10 +95,7 @@
 			const sourceId = parseItemInteractionActionNodeId(connection.source);
 			const targetId = parseItemInteractionActionNodeId(connection.target);
 
-			await admin.updateItemInteractionAction(
-				sourceId as ItemInteractionActionId,
-				itemInteractionId,
-				{
+			await admin.updateItemInteractionAction(sourceId as ItemInteractionActionId, {
 					next_item_interaction_action_id: targetId as ItemInteractionActionId,
 				}
 			);
@@ -154,10 +151,7 @@
 			});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
-			await admin.updateItemInteractionAction(
-				fromActionId as ItemInteractionActionId,
-				itemInteractionId,
-				{
+			await admin.updateItemInteractionAction(fromActionId as ItemInteractionActionId, {
 					next_item_interaction_action_id: newAction.id,
 				}
 			);
@@ -190,23 +184,16 @@
 			for (const edge of edgesToDelete) {
 				const sourceId = parseItemInteractionActionNodeId(edge.source);
 
-				await admin.updateItemInteractionAction(
-					sourceId as ItemInteractionActionId,
-					itemInteractionId,
-					{
-						next_item_interaction_action_id: null,
-					}
-				);
+				await admin.updateItemInteractionAction(sourceId as ItemInteractionActionId, {
+					next_item_interaction_action_id: null,
+				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseItemInteractionActionNodeId(node.id);
-					await admin.removeItemInteractionAction(
-						actionId as ItemInteractionActionId,
-						itemInteractionId
-					);
+					await admin.removeItemInteractionAction(actionId as ItemInteractionActionId);
 				}
 			}
 

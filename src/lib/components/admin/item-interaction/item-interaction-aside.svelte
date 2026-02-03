@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useItem } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -12,7 +12,7 @@
 	import ItemInteractionUpdateDialog from './item-interaction-update-dialog.svelte';
 	import ItemInteractionDeleteDialog from './item-interaction-delete-dialog.svelte';
 
-	const { openItemInteractionDialog } = useItem();
+	const { openItemInteractionDialog } = useInteraction();
 	const currentInteractionId = $derived(page.params.itemInteractionId);
 
 	let toggleValue = $state<string[]>(['list']);

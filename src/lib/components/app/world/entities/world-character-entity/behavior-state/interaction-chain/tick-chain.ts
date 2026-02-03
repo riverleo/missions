@@ -1,4 +1,4 @@
-import { useBuilding, useCharacter, useItem } from '$lib/hooks';
+import { useInteraction } from '$lib/hooks';
 import type {
 	Interaction,
 	BuildingInteractionAction,
@@ -17,9 +17,7 @@ export default function tickInteractionAction(
 	interaction: Interaction,
 	tick: number
 ): boolean {
-	const { getBuildingInteractionActions } = useBuilding();
-	const { getItemInteractionActions } = useItem();
-	const { getCharacterInteractionActions } = useCharacter();
+	const { getBuildingInteractionActions, getItemInteractionActions, getCharacterInteractionActions } = useInteraction();
 
 	if (!this.behavior.interactionTargetId) return false;
 

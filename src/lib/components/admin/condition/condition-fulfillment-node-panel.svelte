@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		ConditionFulfillment,
@@ -26,8 +26,9 @@
 
 	let { fulfillment }: Props = $props();
 
-	const { buildingStore, buildingInteractionStore, admin } = useBuilding();
+	const { buildingStore, admin } = useBuilding();
 	const { characterStore } = useCharacter();
+	const { buildingInteractionStore } = useInteraction();
 	const flowNodes = useNodes();
 
 	const buildings = $derived(Object.values($buildingStore.data));

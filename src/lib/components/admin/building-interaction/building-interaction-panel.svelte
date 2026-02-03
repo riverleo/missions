@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -43,9 +43,10 @@
 
 	let { interaction, buildingInteractionId }: Props = $props();
 
-	const { buildingStore, buildingInteractionActionStore, openBuildingInteractionDialog, admin } =
-		useBuilding();
+	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
+	const { buildingInteractionActionStore, openBuildingInteractionDialog, admin } =
+		useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
@@ -91,11 +92,11 @@
 		actionId: BuildingInteractionActionId,
 		updates: Partial<BuildingInteractionAction>
 	) {
-		await admin.updateBuildingInteractionAction(actionId, buildingInteractionId, updates);
+		await admin.updateBuildingInteractionAction(actionId, updates);
 	}
 
 	async function removeAction(actionId: BuildingInteractionActionId) {
-		await admin.removeBuildingInteractionAction(actionId, buildingInteractionId);
+		await admin.removeBuildingInteractionAction(actionId);
 	}
 
 	function getBodyStateLabel(type: string) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -32,7 +32,7 @@
 		ScenarioId,
 	} from '$lib/types';
 
-	const { characterInteractionStore, characterInteractionActionStore, admin } = useCharacter();
+	const { characterInteractionStore, characterInteractionActionStore, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const characterInteractionId = $derived(
@@ -111,10 +111,7 @@
 			const sourceId = parseCharacterInteractionActionNodeId(connection.source);
 			const targetId = parseCharacterInteractionActionNodeId(connection.target);
 
-			await admin.updateCharacterInteractionAction(
-				sourceId as CharacterInteractionActionId,
-				characterInteractionId,
-				{
+			await admin.updateCharacterInteractionAction(sourceId as CharacterInteractionActionId, {
 					next_character_interaction_action_id: targetId as CharacterInteractionActionId,
 				}
 			);
@@ -174,10 +171,7 @@
 			);
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
-			await admin.updateCharacterInteractionAction(
-				fromActionId as CharacterInteractionActionId,
-				characterInteractionId,
-				{
+			await admin.updateCharacterInteractionAction(fromActionId as CharacterInteractionActionId, {
 					next_character_interaction_action_id: newAction.id,
 				}
 			);
@@ -210,23 +204,16 @@
 			for (const edge of edgesToDelete) {
 				const sourceId = parseCharacterInteractionActionNodeId(edge.source);
 
-				await admin.updateCharacterInteractionAction(
-					sourceId as CharacterInteractionActionId,
-					characterInteractionId,
-					{
-						next_character_interaction_action_id: null,
-					}
-				);
+				await admin.updateCharacterInteractionAction(sourceId as CharacterInteractionActionId, {
+					next_character_interaction_action_id: null,
+				});
 			}
 
 			// 노드 삭제 처리
 			for (const node of nodesToDelete) {
 				if (node.type === 'action') {
 					const actionId = parseCharacterInteractionActionNodeId(node.id);
-					await admin.removeCharacterInteractionAction(
-						actionId as CharacterInteractionActionId,
-						characterInteractionId
-					);
+					await admin.removeCharacterInteractionAction(actionId as CharacterInteractionActionId);
 				}
 			}
 

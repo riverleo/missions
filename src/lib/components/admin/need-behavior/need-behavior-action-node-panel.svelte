@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem } from '$lib/hooks';
+	import { useBehavior, useBuilding, useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		NeedBehaviorAction,
@@ -43,9 +43,11 @@
 	let { action, hasParent = false }: Props = $props();
 
 	const { needBehaviorActionStore, searchEntitySources, admin } = useBehavior();
-	const { buildingStore, buildingInteractionStore } = useBuilding();
-	const { characterStore, characterInteractionStore, needFulfillmentStore } = useCharacter();
-	const { itemStore, itemInteractionStore } = useItem();
+	const { buildingStore } = useBuilding();
+	const { characterStore, needFulfillmentStore } = useCharacter();
+	const { itemStore } = useItem();
+	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
+		useInteraction();
 	const flowNodes = useNodes();
 
 	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));

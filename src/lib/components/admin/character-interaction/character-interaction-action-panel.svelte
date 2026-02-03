@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import type { CharacterInteraction, CharacterInteractionId } from '$lib/types';
@@ -17,7 +17,7 @@
 
 	let { interaction, characterInteractionId, onlayout }: Props = $props();
 
-	const { characterInteractionActionStore, admin } = useCharacter();
+	const { characterInteractionActionStore, admin } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	let isLayouting = $state(false);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -14,7 +14,7 @@
 	import type { ScenarioId } from '$lib/types';
 
 	const { characterInteractionDialogStore, closeCharacterInteractionDialog, admin } =
-		useCharacter();
+		useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($characterInteractionDialogStore?.type === 'delete');

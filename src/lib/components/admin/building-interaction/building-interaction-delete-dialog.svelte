@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -17,7 +17,7 @@
 		buildingInteractionDialogStore: buildingInteractionDialogStore,
 		closeBuildingInteractionDialog,
 		admin,
-	} = useBuilding();
+	} = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const open = $derived($buildingInteractionDialogStore?.type === 'delete');

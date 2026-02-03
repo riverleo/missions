@@ -1,4 +1,4 @@
-import { useCharacter, useItem, useWorld } from '$lib/hooks';
+import { useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
 import type { WorldItemId, BehaviorAction, Interaction } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { produce } from 'immer';
@@ -15,7 +15,8 @@ export default function executeOnceAction(
 	behaviorAction: BehaviorAction,
 	tick: number
 ): void {
-	const { getItem, getAllItemInteractions } = useItem();
+	const { getItem } = useItem();
+	const { getAllItemInteractions } = useInteraction();
 	const { getNeedFulfillment } = useCharacter();
 	const { getWorldItem, worldItemStore, getInteraction, getInteractionActions } = useWorld();
 

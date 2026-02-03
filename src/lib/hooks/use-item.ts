@@ -306,37 +306,20 @@ function createItemStore() {
 	return {
 		itemStore: itemStore as Readable<RecordFetchState<ItemId, Item>>,
 		itemStateStore: itemStateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
-		// Re-export from useInteraction
-		itemInteractionStore: interaction.itemInteractionStore,
-		itemInteractionActionStore: interaction.itemInteractionActionStore,
 		itemDialogStore: itemDialogStore as Readable<ItemDialogState>,
 		itemStateDialogStore: itemStateDialogStore as Readable<ItemStateDialogState>,
-		// Re-export from useInteraction
-		itemInteractionDialogStore: interaction.itemInteractionDialogStore,
 		allItemsStore,
 		allItemStatesStore,
-		// Re-export from useInteraction
-		allItemInteractionsStore: interaction.allItemInteractionsStore,
-		allItemInteractionActionsStore: interaction.itemInteractionActionStore,
 		init,
 		fetch,
 		openItemDialog,
 		closeItemDialog,
 		openStateDialog,
 		closeStateDialog,
-		// Re-export from useInteraction
-		openItemInteractionDialog: interaction.openItemInteractionDialog,
-		closeItemInteractionDialog: interaction.closeItemInteractionDialog,
 		getItem,
 		getItemStates,
-		// Re-export from useInteraction
-		getItemInteraction: interaction.getItemInteraction,
-		getItemInteractionActions: interaction.getItemInteractionActions,
 		getAllItems,
 		getAllItemStates,
-		// Re-export from useInteraction
-		getAllItemInteractions: interaction.getAllItemInteractions,
-		getAllItemInteractionActions: (id: ItemInteractionId) => interaction.getItemInteractionActions(id),
 		admin,
 	};
 }

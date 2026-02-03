@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter, useItem } from '$lib/hooks';
+	import { useCharacter, useInteraction, useItem } from '$lib/hooks';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
@@ -25,13 +25,13 @@
 		ScenarioId,
 	} from '$lib/types';
 
+	const { itemStore } = useItem();
+	const { characterStore } = useCharacter();
 	const {
-		itemStore,
 		itemInteractionDialogStore: itemInteractionDialogStore,
 		closeItemInteractionDialog,
 		admin,
-	} = useItem();
-	const { characterStore } = useCharacter();
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const open = $derived($itemInteractionDialogStore?.type === 'create');

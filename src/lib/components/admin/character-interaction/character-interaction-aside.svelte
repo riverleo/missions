@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -12,7 +12,7 @@
 	import CharacterInteractionUpdateDialog from './character-interaction-update-dialog.svelte';
 	import CharacterInteractionDeleteDialog from './character-interaction-delete-dialog.svelte';
 
-	const { openCharacterInteractionDialog } = useCharacter();
+	const { openCharacterInteractionDialog } = useInteraction();
 	const currentInteractionId = $derived(page.params.characterInteractionId);
 
 	let toggleValue = $state<string[]>(['list']);

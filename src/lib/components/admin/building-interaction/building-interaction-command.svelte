@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -23,8 +23,9 @@
 	import type { ScenarioId, BuildingId, CharacterId, BuildingInteraction } from '$lib/types';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
-	const { buildingStore, buildingInteractionStore, openBuildingInteractionDialog } = useBuilding();
+	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
+	const { buildingInteractionStore, openBuildingInteractionDialog } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.buildingInteractionId);
 

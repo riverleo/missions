@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
+	import { useBehavior, useBuilding, useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import type {
@@ -30,8 +30,9 @@
 
 	const { worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
 	const { characterStore, needStore } = useCharacter();
-	const { buildingStore, buildingInteractionStore } = useBuilding();
-	const { itemStore, itemInteractionStore } = useItem();
+	const { buildingStore } = useBuilding();
+	const { itemStore } = useItem();
+	const { buildingInteractionStore, itemInteractionStore } = useInteraction();
 	const {
 		needBehaviorStore,
 		needBehaviorActionStore,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -22,14 +22,14 @@
 		RepeatInteractionType,
 	} from '$lib/types';
 
+	const { buildingStore } = useBuilding();
+	const { characterStore } = useCharacter();
 	const {
-		buildingStore,
 		buildingInteractionStore,
 		buildingInteractionDialogStore,
 		closeBuildingInteractionDialog,
 		admin,
-	} = useBuilding();
-	const { characterStore } = useCharacter();
+	} = useInteraction();
 
 	const open = $derived($buildingInteractionDialogStore?.type === 'update');
 	const buildingInteractionId = $derived(
