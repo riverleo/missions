@@ -7,6 +7,7 @@ import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
 import { useBehavior } from './use-behavior';
 import { useItem } from './use-item';
+import { useInteraction } from './use-interaction';
 import { useWorld } from './use-world';
 
 /**
@@ -22,5 +23,6 @@ export function init() {
 	useBuilding().init();
 	useBehavior().init();
 	useItem().init();
+	useInteraction().init();
 	useWorld().init();
 }

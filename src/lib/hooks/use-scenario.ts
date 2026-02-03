@@ -145,45 +145,11 @@ function createScenarioStore() {
 					fetchTileStates,
 					fetchTerrainTiles,
 				} = useTerrain();
-				const {
-					fetch: fetchCharacter,
-					getAllCharacterBodies,
-					getAllCharacterNeeds,
-					getAllCharacters,
-					getAllNeedFulfillments,
-					getAllNeeds,
-					getCharacterBodyStates,
-					getCharacterFaceStates,
-				} = useCharacter();
-				const {
-					fetch: fetchBuilding,
-					getAllBuildingConditions,
-					getAllBuildings,
-					getAllConditionEffects,
-					getAllConditionFulfillments,
-					getAllConditions,
-					getBuildingStates,
-				} = useBuilding();
-				const {
-					fetch: fetchBehavior,
-					getAllBehaviorPriorities,
-					getAllConditionBehaviors,
-					getAllNeedBehaviorActions,
-					getAllNeedBehaviors,
-				} = useBehavior();
-				const {
-					fetch: fetchItem,
-					getAllItems,
-					getItemStates,
-				} = useItem();
-				const {
-					getAllCharacterInteractions,
-					getCharacterInteractionActions,
-					getAllBuildingInteractions,
-					getBuildingInteractionActions,
-					getAllItemInteractions,
-					getItemInteractionActions,
-				} = useInteraction();
+				const { fetch: fetchCharacter } = useCharacter();
+				const { fetch: fetchBuilding } = useBuilding();
+				const { fetch: fetchBehavior } = useBehavior();
+				const { fetch: fetchItem } = useItem();
+				const { fetch: fetchInteraction } = useInteraction();
 				const { fetch: fetchWorld } = useWorld();
 
 				await Promise.all([
@@ -197,6 +163,7 @@ function createScenarioStore() {
 					fetchBuilding(),
 					fetchBehavior(),
 					fetchItem(),
+					fetchInteraction(),
 					fetchWorld(),
 				]);
 
@@ -291,13 +258,6 @@ function createScenarioStore() {
 			// Collect all master data for the scenario
 			const { terrainStore, tileStore, tileStateStore, terrainTileStore } = useTerrain();
 			const {
-				characterNeedStore,
-				needStore,
-				needFulfillmentStore,
-				characterFaceStateStore,
-				characterBodyStateStore,
-				characterBodyStore,
-				characterStore,
 				getAllCharacterBodies,
 				getAllCharacterNeeds,
 				getAllCharacters,
@@ -307,13 +267,6 @@ function createScenarioStore() {
 				getCharacterFaceStates,
 			} = useCharacter();
 			const {
-				buildingItemStore,
-				buildingStore,
-				conditionFulfillmentStore,
-				conditionEffectStore,
-				buildingStateStore,
-				buildingConditionStore,
-				conditionStore,
 				getAllBuildingConditions,
 				getAllBuildings,
 				getAllConditionEffects,
@@ -321,19 +274,8 @@ function createScenarioStore() {
 				getAllConditions,
 				getBuildingStates,
 			} = useBuilding();
+			const { getAllItems, getItemStates } = useItem();
 			const {
-				itemStateStore,
-				itemStore,
-				getAllItems,
-				getItemStates,
-			} = useItem();
-			const {
-				characterInteractionStore,
-				characterInteractionActionStore,
-				buildingInteractionStore,
-				buildingInteractionActionStore,
-				itemInteractionStore,
-				itemInteractionActionStore,
 				getAllCharacterInteractions,
 				getCharacterInteractionActions,
 				getAllBuildingInteractions,
@@ -342,11 +284,7 @@ function createScenarioStore() {
 				getItemInteractionActions,
 			} = useInteraction();
 			const {
-				needBehaviorActionStore,
-				needBehaviorStore,
-				conditionBehaviorStore,
 				conditionBehaviorActionStore,
-				behaviorPriorityStore,
 				getAllBehaviorPriorities,
 				getAllConditionBehaviors,
 				getAllNeedBehaviorActions,
