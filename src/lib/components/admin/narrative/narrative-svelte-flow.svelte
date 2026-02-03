@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -13,7 +14,6 @@
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodeNode from './narrative-node-node.svelte';
 	import NarrativeDiceRollNode from './narrative-dice-roll-node.svelte';
 	import NarrativeActionPanel from './narrative-action-panel.svelte';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { CharacterId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -6,7 +7,6 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterCommand from './character-command.svelte';
 	import CharacterCreateDialog from './character-create-dialog.svelte';
 	import CharacterUpdateDialog from './character-update-dialog.svelte';

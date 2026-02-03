@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { useWorld } from '$lib/hooks/use-world';
-	import { useCurrent } from '$lib/hooks/use-current';
+	import { useCurrent, useWorld } from '$lib/hooks';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';

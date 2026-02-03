@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -15,7 +16,6 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import type { TileStateId, TileId } from '$lib/types';
 	import { IconMathEqualLower, IconMathLower, IconVariable } from '@tabler/icons-svelte';
 

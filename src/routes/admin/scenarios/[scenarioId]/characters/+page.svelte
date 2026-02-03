@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ScenarioId } from '$lib/types';
 
 	const { characterStore } = useCharacter();

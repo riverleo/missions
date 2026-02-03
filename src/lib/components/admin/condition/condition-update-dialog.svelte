@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -16,7 +17,6 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 
 	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 

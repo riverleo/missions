@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { page } from '$app/state';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import TileStateItemGroup from '$lib/components/admin/tile/tile-state-item-group.svelte';
 	import type { TileId } from '$lib/types';
 

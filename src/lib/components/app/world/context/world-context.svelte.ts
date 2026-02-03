@@ -1,3 +1,4 @@
+import { useCurrent, useTerrain, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { Unsubscriber } from 'svelte/store';
@@ -16,9 +17,6 @@ import type {
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
-import { useWorld } from '$lib/hooks/use-world';
-import { useTerrain } from '$lib/hooks/use-terrain';
-import { useCurrent } from '$lib/hooks/use-current';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
 import { WorldCharacterEntity } from '../entities/world-character-entity';

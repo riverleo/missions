@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
@@ -13,7 +14,6 @@
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import {
 		createTerrainNodeId,
 		parseTerrainNodeId,

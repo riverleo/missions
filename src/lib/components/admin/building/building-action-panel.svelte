@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import type { Building } from '$lib/types';
 	import {
 		InputGroup,
@@ -9,7 +10,6 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconGridDots, IconX, IconShape } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
 		building: Building;

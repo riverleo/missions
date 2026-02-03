@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { useScenario } from '$lib/hooks/use-scenario';
 	import type { ScenarioId } from '$lib/types';
 
 	let { children } = $props();

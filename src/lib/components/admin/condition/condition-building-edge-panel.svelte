@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { Panel, useEdges } from '@xyflow/svelte';
 	import type { BuildingCondition, BuildingId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
@@ -12,7 +13,6 @@
 	} from '$lib/components/ui/input-group';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { clone } from 'radash';
 
 	interface Props {

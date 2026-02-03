@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { useTerrain, useWorld, useWorldContext } from '$lib/hooks';
 	import { CELL_SIZE, TILE_SIZE } from '$lib/constants';
-	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import WorldBlueprintCursor from './world-blueprint-cursor.svelte';
 
 	const world = useWorldContext();

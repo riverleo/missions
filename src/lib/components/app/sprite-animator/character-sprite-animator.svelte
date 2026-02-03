@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type {
 		CharacterId,
 		CharacterBodyStateType,
@@ -10,7 +11,6 @@
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import Self from './character-sprite-animator.svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { cn } from '$lib/utils';
 
 	const OUTLINE_WIDTH = 10;

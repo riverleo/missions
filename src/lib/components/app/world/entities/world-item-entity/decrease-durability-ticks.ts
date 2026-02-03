@@ -1,6 +1,6 @@
+import { useWorld } from '$lib/hooks';
 import type { WorldItemEntity } from './world-item-entity.svelte';
 import type { WorldCharacterEntity } from '../world-character-entity';
-import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 
 export function decreaseDurabilityTicks(entity: WorldItemEntity): void {

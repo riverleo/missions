@@ -1,6 +1,7 @@
-import { writable, get, type Readable } from 'svelte/store';
+import { writable, derived, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
+	Database,
 	RecordFetchState,
 	Item,
 	ItemInsert,
@@ -69,6 +70,17 @@ function createItemStore() {
 	const itemDialogStore = writable<ItemDialogState>(undefined);
 	const itemStateDialogStore = writable<ItemStateDialogState>(undefined);
 	const itemInteractionDialogStore = writable<ItemInteractionDialogState>(undefined);
+
+	// Derived stores for computed values
+	const allItemsStore = derived(itemStore, ($store) => Object.values($store.data));
+
+	const allItemStatesStore = derived(itemStateStore, ($store) => $store.data);
+
+	const allItemInteractionsStore = derived(itemInteractionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allItemInteractionActionsStore = derived(itemInteractionActionStore, ($store) => $store.data);
 
 	const itemUiStore = writable({
 		showBodyPreview: false,
@@ -216,19 +228,19 @@ function createItemStore() {
 
 	// GetAll functions
 	function getAllItems(): Item[] {
-		return Object.values(get(itemStore).data);
+		return get(allItemsStore);
 	}
 
 	function getAllItemStates(): Record<ItemId, ItemState[]> {
-		return get(itemStateStore).data;
+		return get(allItemStatesStore);
 	}
 
 	function getAllItemInteractions(): ItemInteraction[] {
-		return Object.values(get(itemInteractionStore).data);
+		return get(allItemInteractionsStore);
 	}
 
 	function getAllItemInteractionActions(): Record<ItemInteractionId, ItemInteractionAction[]> {
-		return get(itemInteractionActionStore).data;
+		return get(allItemInteractionActionsStore);
 	}
 
 	const admin = {
@@ -366,9 +378,9 @@ function createItemStore() {
 			const { data, error } = await supabase
 				.from('item_interactions')
 				.insert({
-					...interaction,
 					scenario_id: scenarioId,
-				})
+					...interaction,
+				} as Database['public']['Tables']['item_interactions']['Insert'])
 				.select('*')
 				.single<ItemInteraction>();
 
@@ -517,6 +529,10 @@ function createItemStore() {
 		itemDialogStore: itemDialogStore as Readable<ItemDialogState>,
 		itemStateDialogStore: itemStateDialogStore as Readable<ItemStateDialogState>,
 		itemInteractionDialogStore: itemInteractionDialogStore as Readable<ItemInteractionDialogState>,
+		allItemsStore,
+		allItemStatesStore,
+		allItemInteractionsStore,
+		allItemInteractionActionsStore,
 		init,
 		fetch,
 		openItemDialog,

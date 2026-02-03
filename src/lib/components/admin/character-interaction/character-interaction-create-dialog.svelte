@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
@@ -11,7 +12,6 @@
 	} from '$lib/components/ui/dialog';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		getCharacterOnceInteractionTypeOptions,
 		getCharacterRepeatInteractionTypeOptions,

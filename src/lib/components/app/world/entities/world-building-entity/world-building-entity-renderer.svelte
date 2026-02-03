@@ -1,8 +1,7 @@
 <script lang="ts">
+	import { useBuilding, useWorld } from '$lib/hooks';
 	import type { WorldBuildingEntity } from './world-building-entity.svelte';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useWorld } from '$lib/hooks/use-world';
 
 	interface Props {
 		entity: WorldBuildingEntity;

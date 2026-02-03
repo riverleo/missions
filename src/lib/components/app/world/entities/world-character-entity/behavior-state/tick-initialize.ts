@@ -1,5 +1,5 @@
+import { useBehavior } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import { useBehavior } from '$lib/hooks/use-behavior';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
 /**

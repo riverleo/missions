@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter, useItem, useTerrain, useWorldTest } from '$lib/hooks';
 	import {
 		Command,
 		CommandInput,
@@ -10,12 +11,7 @@
 	import { IconCheck, IconMap } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useItem } from '$lib/hooks/use-item';
-	import { useWorldTest } from '$lib/hooks/use-world';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
 	import type { WorldContext } from '$lib/components/app/world/context';

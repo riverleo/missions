@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -14,7 +15,6 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 
 	const {
 		tileStore,

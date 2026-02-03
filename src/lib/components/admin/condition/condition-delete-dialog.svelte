@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -10,7 +11,6 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 
 	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();

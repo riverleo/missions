@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconDice, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { ScenarioId, NarrativeId } from '$lib/types';

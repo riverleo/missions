@@ -1,6 +1,6 @@
+import { useBehavior } from '$lib/hooks';
 import type { BehaviorAction } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
-import { useBehavior } from '$lib/hooks/use-behavior';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
 

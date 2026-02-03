@@ -1,8 +1,6 @@
+import { useBuilding, useItem, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import { vectorUtils } from '$lib/utils/vector';
-import { useBuilding } from '$lib/hooks/use-building';
-import { useWorld } from '$lib/hooks/use-world';
-import { useItem } from '$lib/hooks/use-item';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CELL_SIZE, TILE_SIZE, BOUNDARY_THICKNESS, MAX_TILE_PLACABLE_COUNT } from '$lib/constants';
 import type { WorldContext } from './world-context.svelte';

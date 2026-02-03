@@ -1,3 +1,4 @@
+import { useBuilding, useCurrent, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
@@ -8,10 +9,7 @@ import type {
 	WorldBuildingConditionId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { useWorld } from '$lib/hooks/use-world';
-import { useCurrent } from '$lib/hooks/use-current';
-import { useApp } from '$lib/hooks/use-app.svelte';
-import { useBuilding } from '$lib/hooks/use-building';
+import { useApp } from '$lib/hooks';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { TEST_WORLD_ID } from '$lib/constants';
 

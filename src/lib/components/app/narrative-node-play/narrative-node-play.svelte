@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useNarrative } from '$lib/hooks/use-narrative';
+	import { useNarrative } from '$lib/hooks';
 	import NarrativeNodePlayContent from './narrative-node-play-content.svelte';
 	import NarrativeNodePlayDiceRoll from './narrative-node-play-dice-roll.svelte';
 

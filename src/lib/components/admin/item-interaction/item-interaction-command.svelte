@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter, useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -17,8 +18,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useItem } from '$lib/hooks/use-item';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';

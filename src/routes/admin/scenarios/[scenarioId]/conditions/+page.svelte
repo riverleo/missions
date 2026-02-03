@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import type { ScenarioId } from '$lib/types';
 	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { Character, CharacterBodyStateType } from '$lib/types';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
@@ -9,7 +10,6 @@
 		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel } from '$lib/utils/state-label';
 
 	interface Props {

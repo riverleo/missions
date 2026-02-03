@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -17,8 +18,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { page } from '$app/state';
 	import { sort } from 'radash';

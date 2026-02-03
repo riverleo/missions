@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useChapter, useQuest } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -16,8 +17,6 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest';
-	import { useChapter } from '$lib/hooks/use-chapter';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import { group, sort } from 'radash';

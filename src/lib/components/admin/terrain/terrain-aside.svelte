@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import type { TerrainId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -6,7 +7,6 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import TerrainCommand from './terrain-command.svelte';
 	import TerrainCreateDialog from './terrain-create-dialog.svelte';
 	import TerrainDeleteDialog from './terrain-delete-dialog.svelte';

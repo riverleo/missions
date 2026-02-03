@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import type {
@@ -10,11 +11,6 @@
 		WorldItemId,
 		WorldCharacterId,
 	} from '$lib/types';
-	import { useWorld } from '$lib/hooks/use-world';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useItem } from '$lib/hooks/use-item';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { getBehaviorActionLabel } from '$lib/utils/state-label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';

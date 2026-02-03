@@ -1,6 +1,6 @@
+import { useWorld } from '$lib/hooks';
 import type { WorldContext } from './world-context.svelte';
 import type { TileCellKey } from '$lib/types';
-import { useWorld } from '$lib/hooks/use-world';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 import { WorldItemEntity } from '../entities/world-item-entity';

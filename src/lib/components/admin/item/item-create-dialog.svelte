@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -15,7 +16,6 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
-	import { useItem } from '$lib/hooks/use-item';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';

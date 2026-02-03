@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		BuildingInteractionAction,
@@ -22,8 +23,6 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Separator } from '$lib/components/ui/separator';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { createBuildingInteractionActionNodeId } from '$lib/utils/flow-id';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import { clone } from 'radash';

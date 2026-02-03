@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import type { Terrain } from '$lib/types';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useBuilding, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -24,9 +25,6 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
 	import type {
 		ConditionId,

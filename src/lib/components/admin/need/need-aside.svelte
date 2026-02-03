@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -6,7 +7,6 @@
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import type { NeedId } from '$lib/types';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import NeedCommand from './need-command.svelte';
 	import NeedCreateDialog from './need-create-dialog.svelte';
 	import NeedUpdateDialog from './need-update-dialog.svelte';

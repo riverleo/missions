@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { useWorld, setWorldContext } from '$lib/hooks';
 	import type { Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import type { WorldId } from '$lib/types';
 	import { WORLD_WIDTH, WORLD_HEIGHT } from '$lib/constants';
-	import { setWorldContext, useWorld } from '$lib/hooks/use-world';
 	import { WorldContext } from './context';
 	import type { Camera } from './camera.svelte';
 	import WorldRenderer from './world-renderer.svelte';

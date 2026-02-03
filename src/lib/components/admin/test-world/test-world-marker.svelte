@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { useWorldTest, useWorld } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
+	import { useTerrain, useWorld, useWorldTest } from '$lib/hooks';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import type { WorldContext } from '$lib/components/app/world/context';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type {
 		CharacterBodyStateType,
 		CharacterFaceStateType,
@@ -12,7 +13,6 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
 	import {

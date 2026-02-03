@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -12,7 +13,6 @@
 		IconEyeClosed,
 	} from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useQuest } from '$lib/hooks/use-quest';
 	import type { QuestId } from '$lib/types';
 	import QuestCommand from './quest-command.svelte';
 	import QuestCreateDialog from './quest-create-dialog.svelte';

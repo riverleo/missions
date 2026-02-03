@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { useWorldContext } from '$lib/hooks';
 	import type { TileCellKey, WorldId } from '$lib/types';
 	import { TILE_SIZE } from '$lib/constants';
 	import { calculate } from '$lib/utils/bitmask';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import { vectorUtils } from '$lib/utils/vector';
-	import { useWorldContext } from '$lib/hooks/use-world';
 	import QuarterTileCell from './quarter-tile-cell.svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 

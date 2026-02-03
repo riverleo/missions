@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useWorldTest } from '$lib/hooks/use-world';
+	import { useWorldTest } from '$lib/hooks';
 	import {
 		Menubar,
 		MenubarMenu,

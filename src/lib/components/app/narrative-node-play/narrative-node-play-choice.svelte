@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { cn } from '$lib/utils';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindStackEvent, type StackId } from '$lib/shortcut/store';
 	import { isArrowUp, isArrowDown, isEnterOrSpace } from '$lib/shortcut/utils';
 

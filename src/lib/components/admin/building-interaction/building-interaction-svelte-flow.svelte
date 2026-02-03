@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -14,7 +15,6 @@
 	import { mode } from 'mode-watcher';
 	import { tick, untrack } from 'svelte';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import {
 		createBuildingInteractionActionNodeId,
 		parseBuildingInteractionActionNodeId,

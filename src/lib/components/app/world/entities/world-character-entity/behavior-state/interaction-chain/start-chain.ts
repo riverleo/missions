@@ -1,3 +1,4 @@
+import { useBuilding, useCharacter, useItem } from '$lib/hooks';
 import type {
 	Interaction,
 	BuildingInteractionAction,
@@ -5,9 +6,6 @@ import type {
 	CharacterInteractionAction,
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
-import { useBuilding } from '$lib/hooks/use-building';
-import { useItem } from '$lib/hooks/use-item';
-import { useCharacter } from '$lib/hooks/use-character';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
 /**

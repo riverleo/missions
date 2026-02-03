@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { useItem, useWorld } from '$lib/hooks';
 	import type { WorldItemEntity } from './world-item-entity.svelte';
-	import { useItem } from '$lib/hooks/use-item';
-	import { useWorld } from '$lib/hooks/use-world';
 	import { ItemSpriteAnimator } from '$lib/components/app/sprite-animator';
 
 	interface Props {

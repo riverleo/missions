@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import type { BuildingStateType, BuildingId, BuildingState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { CELL_SIZE } from '$lib/constants';
 	import { getBuildingStateLabel } from '$lib/utils/state-label';

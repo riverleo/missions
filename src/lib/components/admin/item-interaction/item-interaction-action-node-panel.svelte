@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter, useItem } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		ItemInteractionAction,
@@ -21,8 +22,6 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Separator } from '$lib/components/ui/separator';
-	import { useItem } from '$lib/hooks/use-item';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { createItemInteractionActionNodeId } from '$lib/utils/flow-id';
 	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import { clone } from 'radash';

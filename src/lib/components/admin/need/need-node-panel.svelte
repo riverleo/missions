@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Need } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
@@ -11,7 +12,6 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';

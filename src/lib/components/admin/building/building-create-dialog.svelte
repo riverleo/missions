@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -16,8 +17,6 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useItem } from '$lib/hooks/use-item';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId, ItemId } from '$lib/types';

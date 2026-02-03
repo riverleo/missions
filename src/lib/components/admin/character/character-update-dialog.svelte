@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -16,7 +17,6 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import type { CharacterBodyId } from '$lib/types';
 
 	const { characterStore, admin, characterDialogStore, closeCharacterDialog, characterBodyStore } =

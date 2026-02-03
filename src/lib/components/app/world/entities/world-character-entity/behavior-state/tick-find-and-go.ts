@@ -1,7 +1,6 @@
+import { useBehavior, useWorld } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { Entity } from '../../entity.svelte';
-import { useBehavior } from '$lib/hooks/use-behavior';
-import { useWorld } from '$lib/hooks/use-world';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
@@ -77,10 +76,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 				(e) => e.sourceId === entitySourceId && e.id !== this.worldCharacterEntity.id
 			);
 		}
-	} else if (
-		behaviorAction.target_selection_method === 'search' ||
-		behaviorAction.target_selection_method === 'search_or_continue'
-	) {
+	} else if (behaviorAction.target_selection_method === 'search') {
 		candidateEntities = entities.filter(
 			(e) => entitySourceIds.has(e.sourceId) && e.id !== this.worldCharacterEntity.id
 		);

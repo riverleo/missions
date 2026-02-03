@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -15,7 +16,6 @@
 	} from '$lib/components/ui/input-group';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { IconHeading, IconFileText } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { admin, scenarioSnapshotDialogStore, closeScenarioSnapshotDialog } = useScenario();
 

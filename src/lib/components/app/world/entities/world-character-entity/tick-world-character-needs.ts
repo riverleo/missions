@@ -1,5 +1,5 @@
+import { useCharacter } from '$lib/hooks';
 import { get } from 'svelte/store';
-import { useCharacter } from '$lib/hooks/use-character';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 
 export function tickWorldCharacterNeeds(entity: WorldCharacterEntity, tick: number): void {

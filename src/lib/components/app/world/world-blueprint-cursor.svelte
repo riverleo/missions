@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { useWorldContext } from '$lib/hooks/use-world';
-	import { useBuilding } from '$lib/hooks/use-building';
+	import { useBuilding, useWorldContext } from '$lib/hooks';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import { vectorUtils } from '$lib/utils/vector';
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { Avatar, AvatarFallback } from '$lib/components/ui/avatar';
 	import {
 		DropdownMenu,
@@ -12,7 +13,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '$lib/components/ui/sidebar';
 	import { IconSelector, IconCheck, IconPlus } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
 	import type { ScenarioId } from '$lib/types';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';

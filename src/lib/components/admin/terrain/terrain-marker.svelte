@@ -1,9 +1,8 @@
 <script lang="ts">
+	import { useTerrain, useWorldContext } from '$lib/hooks';
 	import type { Terrain } from '$lib/types';
-	import { useWorldContext } from '$lib/hooks/use-world';
 	import { IconNorthStar } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 
 	interface Props {
 		terrain: Terrain;

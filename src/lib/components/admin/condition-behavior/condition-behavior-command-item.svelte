@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useBuilding, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { CommandLinkItem, CommandItem, CommandShortcut } from '$lib/components/ui/command';
 	import {
@@ -9,9 +10,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import type { ConditionBehavior, CharacterId } from '$lib/types';
 
 	interface Props {

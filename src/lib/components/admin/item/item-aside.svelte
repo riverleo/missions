@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import type { ItemId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -6,7 +7,6 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useItem } from '$lib/hooks/use-item';
 	import ItemCommand from './item-command.svelte';
 	import ItemCreateDialog from './item-create-dialog.svelte';
 	import ItemUpdateDialog from './item-update-dialog.svelte';

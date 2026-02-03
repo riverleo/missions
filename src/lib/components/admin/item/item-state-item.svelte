@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import type { ItemStateType } from '$lib/types';
 	import type { ItemId, ItemState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
-	import { useItem } from '$lib/hooks/use-item';
 	import { getItemStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 

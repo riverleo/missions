@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -9,7 +10,6 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { getBezierPath, BaseEdge, EdgeLabel } from '@xyflow/svelte';
 	import type { Position } from '@xyflow/svelte';
 	import type { BuildingCondition } from '$lib/types';
-	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
 		id: string;

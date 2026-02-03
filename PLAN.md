@@ -1,5 +1,12 @@
 # Cleanup: Remove search_or_continue & Simplify behavior_action_type comments
 
+## 진행 상태
+- ✅ Task 1: search_or_continue 제거 (완료)
+- ✅ Task 2: behavior_action_type 주석 단순화 (완료)
+- ✅ Task 3: searchEntitySources 리팩토링 (완료)
+- ✅ Task 4: 훅 함수를 Store Derived로 리팩토링 (완료)
+- ✅ Task 5: useInteraction 훅 생성 (완료)
+
 ## 목표
 1. `target_selection_method` enum에서 `search_or_continue` 값 제거
 2. `behavior_action_type` enum의 주석 단순화

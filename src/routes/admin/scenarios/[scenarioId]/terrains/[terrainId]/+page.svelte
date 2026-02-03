@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { page } from '$app/state';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import TerrainActionPanel from '$lib/components/admin/terrain/terrain-action-panel.svelte';
 	import TerrainPreview from '$lib/components/admin/terrain/terrain-preview.svelte';

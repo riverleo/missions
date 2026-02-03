@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import type { ConditionBehaviorId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -6,7 +7,6 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import ConditionBehaviorCommand from './condition-behavior-command.svelte';
 	import ConditionBehaviorCreateDialog from './condition-behavior-create-dialog.svelte';
 	import ConditionBehaviorUpdateDialog from './condition-behavior-update-dialog.svelte';

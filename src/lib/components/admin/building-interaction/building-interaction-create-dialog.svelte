@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter } from '$lib/hooks';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/components/ui/button';
@@ -11,8 +12,6 @@
 	} from '$lib/components/ui/dialog';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		getBuildingOnceInteractionTypeOptions,
 		getBuildingRepeatInteractionTypeOptions,

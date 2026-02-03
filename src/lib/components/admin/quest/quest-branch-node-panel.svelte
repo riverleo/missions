@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { QuestBranch } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
-	import { useQuest } from '$lib/hooks/use-quest';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';

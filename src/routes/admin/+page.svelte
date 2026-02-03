@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { goto } from '$app/navigation';
-	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { scenarioStore } = useScenario();
 

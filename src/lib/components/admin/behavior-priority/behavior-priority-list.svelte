@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import { dndzone } from 'svelte-dnd-action';
 	import { flip } from 'svelte/animate';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { BehaviorPriority, BulkChanges } from '$lib/types';
 	import BehaviorPriorityListItem from './behavior-priority-list-item.svelte';
 	import { isEqual, clone, sort } from 'radash';

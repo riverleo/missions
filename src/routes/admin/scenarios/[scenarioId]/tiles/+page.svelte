@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import type { ScenarioId } from '$lib/types';
 
 	const { tileStore } = useTerrain();

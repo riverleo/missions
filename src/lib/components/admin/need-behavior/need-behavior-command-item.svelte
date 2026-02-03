@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { CommandLinkItem, CommandItem, CommandShortcut } from '$lib/components/ui/command';
 	import {
@@ -9,8 +10,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
 	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
 

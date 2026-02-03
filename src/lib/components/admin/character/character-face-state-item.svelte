@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { CharacterFaceStateType, CharacterId, CharacterFaceState } from '$lib/types';
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 

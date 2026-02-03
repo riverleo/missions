@@ -1,10 +1,8 @@
 <script lang="ts">
+	import { useCharacter, useItem, useWorld } from '$lib/hooks';
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
 	import type { ItemInteractionId, WorldItemId } from '$lib/types';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useWorld } from '$lib/hooks/use-world';
-	import { useItem } from '$lib/hooks/use-item';
 	import { InteractionIdUtils } from '$lib/utils/interaction-id';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
 

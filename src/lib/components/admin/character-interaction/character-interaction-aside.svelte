@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import type { CharacterInteractionId } from '$lib/types';
 	import CharacterInteractionCommand from './character-interaction-command.svelte';
 	import CharacterInteractionCreateDialog from './character-interaction-create-dialog.svelte';

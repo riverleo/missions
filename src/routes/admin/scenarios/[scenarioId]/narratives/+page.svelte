@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useNarrative } from '$lib/hooks/use-narrative/use-narrative';
 	import type { ScenarioId } from '$lib/types';
 	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
 

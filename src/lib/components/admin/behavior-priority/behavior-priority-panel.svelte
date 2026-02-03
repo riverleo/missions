@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import BehaviorPriorityList from './behavior-priority-list.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import type { BehaviorPriority, BehaviorPriorityId, BulkChanges } from '$lib/types';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 
 	const { admin } = useBehavior();
 

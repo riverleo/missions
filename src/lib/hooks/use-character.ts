@@ -1,6 +1,7 @@
-import { writable, get, type Readable } from 'svelte/store';
+import { writable, derived, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
+	Database,
 	RecordFetchState,
 	Character,
 	CharacterInsert,
@@ -137,6 +138,36 @@ function createCharacterStore() {
 	});
 
 	const needDialogStore = writable<NeedDialogState>(undefined);
+
+	// Derived stores for computed values
+	const allCharactersStore = derived(characterStore, ($store) => Object.values($store.data));
+
+	const allCharacterFaceStatesStore = derived(characterFaceStateStore, ($store) => $store.data);
+
+	const allCharacterInteractionsStore = derived(characterInteractionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allCharacterInteractionActionsStore = derived(
+		characterInteractionActionStore,
+		($store) => $store.data
+	);
+
+	const allCharacterBodiesStore = derived(characterBodyStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allCharacterBodyStatesStore = derived(characterBodyStateStore, ($store) => $store.data);
+
+	const allNeedsStore = derived(needStore, ($store) => Object.values($store.data));
+
+	const allNeedFulfillmentsStore = derived(needFulfillmentStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allCharacterNeedsStore = derived(characterNeedStore, ($store) =>
+		Object.values($store.data)
+	);
 
 	const characterUiStore = writable<{
 		previewBodyStateType: CharacterBodyStateType;
@@ -354,42 +385,42 @@ function createCharacterStore() {
 
 	// GetAll functions
 	function getAllCharacters(): Character[] {
-		return Object.values(get(characterStore).data);
+		return get(allCharactersStore);
 	}
 
 	function getAllCharacterFaceStates(): Record<CharacterId, CharacterFaceState[]> {
-		return get(characterFaceStateStore).data;
+		return get(allCharacterFaceStatesStore);
 	}
 
 	function getAllCharacterInteractions(): CharacterInteraction[] {
-		return Object.values(get(characterInteractionStore).data);
+		return get(allCharacterInteractionsStore);
 	}
 
 	function getAllCharacterInteractionActions(): Record<
 		CharacterInteractionId,
 		CharacterInteractionAction[]
 	> {
-		return get(characterInteractionActionStore).data;
+		return get(allCharacterInteractionActionsStore);
 	}
 
 	function getAllCharacterBodies(): CharacterBody[] {
-		return Object.values(get(characterBodyStore).data);
+		return get(allCharacterBodiesStore);
 	}
 
 	function getAllCharacterBodyStates(): Record<CharacterBodyId, CharacterBodyState[]> {
-		return get(characterBodyStateStore).data;
+		return get(allCharacterBodyStatesStore);
 	}
 
 	function getAllNeeds(): Need[] {
-		return Object.values(get(needStore).data);
+		return get(allNeedsStore);
 	}
 
 	function getAllNeedFulfillments(): NeedFulfillment[] {
-		return Object.values(get(needFulfillmentStore).data);
+		return get(allNeedFulfillmentsStore);
 	}
 
 	function getAllCharacterNeeds(): CharacterNeed[] {
-		return Object.values(get(characterNeedStore).data);
+		return get(allCharacterNeedsStore);
 	}
 
 	const admin = {
@@ -544,9 +575,9 @@ function createCharacterStore() {
 			const { data, error } = await supabase
 				.from('character_interactions')
 				.insert({
-					...interaction,
 					scenario_id: scenarioId,
-				})
+					...interaction,
+				} as Database['public']['Tables']['character_interactions']['Insert'])
 				.select('*')
 				.single<CharacterInteraction>();
 
@@ -1000,6 +1031,15 @@ function createCharacterStore() {
 			RecordFetchState<CharacterNeedId, CharacterNeed>
 		>,
 		needDialogStore: needDialogStore as Readable<NeedDialogState>,
+		allCharactersStore,
+		allCharacterFaceStatesStore,
+		allCharacterInteractionsStore,
+		allCharacterInteractionActionsStore,
+		allCharacterBodiesStore,
+		allCharacterBodyStatesStore,
+		allNeedsStore,
+		allNeedFulfillmentsStore,
+		allCharacterNeedsStore,
 		init,
 		fetch,
 		openCharacterDialog,

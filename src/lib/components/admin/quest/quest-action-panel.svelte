@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Node, Edge } from '@xyflow/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest';
 	import { page } from '$app/state';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { QuestBranch } from '$lib/types';

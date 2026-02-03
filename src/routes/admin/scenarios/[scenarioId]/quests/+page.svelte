@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useQuest } from '$lib/hooks/use-quest';
 	import type { ScenarioId } from '$lib/types';
 	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
 

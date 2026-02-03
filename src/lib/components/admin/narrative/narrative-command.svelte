@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -16,7 +17,6 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
 	import type { ScenarioId } from '$lib/types';

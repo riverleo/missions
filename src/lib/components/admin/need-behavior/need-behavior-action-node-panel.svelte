@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useBuilding, useCharacter, useItem } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		NeedBehaviorAction,
@@ -29,10 +30,6 @@
 		SelectLabel,
 	} from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useItem } from '$lib/hooks/use-item';
 	import { createActionNodeId } from '$lib/utils/flow-id';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
@@ -79,7 +76,6 @@
 		if (!changes) return '타깃 결정 방법';
 		const c = changes; // Explicitly narrow type
 		if (c.target_selection_method === 'search') return '새로운 탐색 대상';
-		if (c.target_selection_method === 'search_or_continue') return '기존 선택 대상';
 		if (c.target_selection_method === 'explicit') {
 			// Interaction 이름 표시
 			if (c.building_interaction_id) {
@@ -118,7 +114,6 @@
 	const selectedTargetValue = $derived.by(() => {
 		if (!changes) return undefined;
 		if (changes.target_selection_method === 'search') return 'search';
-		if (changes.target_selection_method === 'search_or_continue') return 'search_or_continue';
 		if (changes.target_selection_method === 'explicit') {
 			if (changes.building_interaction_id) return `building:${changes.building_interaction_id}`;
 			if (changes.item_interaction_id) return `item:${changes.item_interaction_id}`;
@@ -253,7 +248,6 @@
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="search">새로운 탐색 대상</SelectItem>
-										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
 
 										{#if buildingInteractions.length > 0}
 											<SelectGroup>
@@ -318,7 +312,6 @@
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="search">새로운 탐색 대상</SelectItem>
-										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
 
 										{#if buildingInteractions.length > 0}
 											<SelectGroup>

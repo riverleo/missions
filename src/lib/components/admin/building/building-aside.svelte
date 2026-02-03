@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import type { BuildingId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -6,7 +7,6 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingCommand from './building-command.svelte';
 	import BuildingCreateDialog from './building-create-dialog.svelte';
 	import BuildingUpdateDialog from './building-update-dialog.svelte';

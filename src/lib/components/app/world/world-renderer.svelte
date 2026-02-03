@@ -1,11 +1,10 @@
 <script lang="ts">
+	import { useTerrain, useWorld, useWorldContext } from '$lib/hooks';
 	import { onMount, type Snippet } from 'svelte';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import 'pathseg';
 	import { vectorUtils } from '$lib/utils/vector';
-	import { useWorldContext, useWorld } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import {
 		WorldCharacterEntityRenderer,

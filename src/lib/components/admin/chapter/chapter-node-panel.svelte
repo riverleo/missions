@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useChapter } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { Chapter } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
-	import { useChapter } from '$lib/hooks/use-chapter';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
 

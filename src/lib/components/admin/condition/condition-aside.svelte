@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
@@ -6,7 +7,6 @@
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import type { ConditionId } from '$lib/types';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import ConditionCommand from './condition-command.svelte';
 	import ConditionCreateDialog from './condition-create-dialog.svelte';
 	import ConditionUpdateDialog from './condition-update-dialog.svelte';

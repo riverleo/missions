@@ -227,8 +227,6 @@ export function getBehaviorActionLabel(params: {
 	let target: string | undefined;
 	if (action.target_selection_method === 'search') {
 		target = '새로운 탐색 대상';
-	} else if (action.target_selection_method === 'search_or_continue') {
-		target = '기존 선택 대상';
 	} else if (action.target_selection_method === 'explicit') {
 		if (buildingName) {
 			target = buildingName;

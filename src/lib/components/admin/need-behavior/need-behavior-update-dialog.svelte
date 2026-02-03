@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -22,8 +23,6 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { alphabetical } from 'radash';
 	import type { NeedId, CharacterId, CharacterFaceStateType } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';

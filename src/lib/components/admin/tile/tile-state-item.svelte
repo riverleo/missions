@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import type { TileStateType } from '$lib/types';
@@ -6,7 +7,6 @@
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { getTileStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 

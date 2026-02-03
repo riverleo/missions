@@ -1,8 +1,7 @@
 <script lang="ts">
+	import { useTerrain, useWorld } from '$lib/hooks';
 	import type { WorldTileEntity } from '$lib/components/app/world/entities/world-tile-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import { useWorld } from '$lib/hooks/use-world';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';

@@ -1,3 +1,4 @@
+import { useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
 import type {
 	BuildingInteractionId,
 	CharacterInteractionId,
@@ -16,10 +17,6 @@ import type {
 } from '$lib/types';
 import type { WorldCharacterEntity } from '../../world-character-entity.svelte';
 import { produce } from 'immer';
-import { useBuilding } from '$lib/hooks/use-building';
-import { useItem } from '$lib/hooks/use-item';
-import { useCharacter } from '$lib/hooks/use-character';
-import { useWorld } from '$lib/hooks/use-world';
 import { vectorUtils } from '$lib/utils/vector';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';

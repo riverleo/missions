@@ -1,3 +1,4 @@
+import { useCharacter, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
 import { produce } from 'immer';
 import type {
@@ -14,8 +15,6 @@ import { WorldCharacterEntityBehavior } from './behavior-state';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
-import { useWorld } from '$lib/hooks/use-world';
-import { useCharacter } from '$lib/hooks/use-character';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import { tickWorldCharacterNeeds } from './tick-world-character-needs';

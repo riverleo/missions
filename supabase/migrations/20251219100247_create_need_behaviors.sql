@@ -1,15 +1,14 @@
 -- behavior_action_type enum (액션의 종류)
 create type behavior_action_type as enum (
-  'once',       -- 건물/아이템/캐릭터와 상호작용 (once)
-  'fulfill',    -- 욕구/컨디션 충족 (repeat)
+  'once',       -- 상호작용
+  'fulfill',    -- 욕구충족
   'idle'        -- 대기
 );
 
 -- target_selection_method enum (타깃 선택 방법)
 create type target_selection_method as enum (
   'explicit',          -- 지정된 대상
-  'search',            -- 액션 시작 시 새로 탐색
-  'search_or_continue' -- 액션 시작 시 기존 대상이 있으면 사용, 없으면 탐색
+  'search'             -- 액션 시작 시 새로 탐색
 );
 
 

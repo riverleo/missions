@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import type { Terrain } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
@@ -17,8 +18,7 @@
 		IconMapPin,
 		IconMapPinOff,
 	} from '@tabler/icons-svelte';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 	import { uploadGameAsset } from '$lib/utils/storage.svelte';
 
 	interface Props {

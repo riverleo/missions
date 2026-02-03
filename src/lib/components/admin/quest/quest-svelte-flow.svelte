@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import {
 		SvelteFlow,
 		Controls,
@@ -17,7 +18,6 @@
 	import QuestBranchNode from './quest-branch-node.svelte';
 	import QuestActionPanel from './quest-action-panel.svelte';
 	import QuestBranchNodePanel from './quest-branch-node-panel.svelte';
-	import { useQuest } from '$lib/hooks/use-quest';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';

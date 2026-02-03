@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { ConditionEffect } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { Separator } from '$lib/components/ui/separator';
 
 	interface Props {

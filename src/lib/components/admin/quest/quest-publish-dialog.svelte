@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useQuest } from '$lib/hooks';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -9,7 +10,6 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useQuest } from '$lib/hooks/use-quest';
 
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 

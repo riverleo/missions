@@ -1,5 +1,5 @@
+import { useBuilding } from '$lib/hooks';
 import { get } from 'svelte/store';
-import { useBuilding } from '$lib/hooks/use-building';
 import type { WorldBuildingEntity } from './world-building-entity.svelte';
 
 export function decreaseConditions(entity: WorldBuildingEntity): void {

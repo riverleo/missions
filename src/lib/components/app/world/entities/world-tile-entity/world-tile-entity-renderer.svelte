@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useWorld } from '$lib/hooks';
 	import type { WorldTileEntity } from './world-tile-entity.svelte';
 	import { TILE_SIZE } from '$lib/constants';
-	import { useWorld } from '$lib/hooks/use-world';
 	import QuarterTile from '$lib/components/app/world/tiles/quarter-tile.svelte';
 
 	interface Props {

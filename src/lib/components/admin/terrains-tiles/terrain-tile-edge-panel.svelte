@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useTerrain } from '$lib/hooks';
 	import { Panel, useEdges } from '@xyflow/svelte';
 	import type { TerrainTile } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
@@ -9,7 +10,6 @@
 		InputGroupAddon,
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
-	import { useTerrain } from '$lib/hooks/use-terrain';
 	import { createTerrainTileEdgeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
 

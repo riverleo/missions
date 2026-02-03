@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -18,8 +19,6 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		getBehaviorInteractTypeLabel,
 		getOnceInteractionTypeOptions,

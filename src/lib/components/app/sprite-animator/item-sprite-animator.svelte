@@ -1,9 +1,9 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import type { ItemId, ItemStateType, LoopType } from '$lib/types';
 	import type { HTMLAttributes } from 'svelte/elements';
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
-	import { useItem } from '$lib/hooks/use-item';
 	import { cn } from '$lib/utils';
 
 	const OUTLINE_WIDTH = 10;

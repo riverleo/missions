@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type {
 		CharacterInteractionAction,
@@ -21,7 +22,6 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Separator } from '$lib/components/ui/separator';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import { createCharacterInteractionActionNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';

@@ -1,10 +1,9 @@
+import { useCurrent, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
 import type { WorldItem, WorldItemId, WorldItemInsert, UserId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { useWorld } from '$lib/hooks/use-world';
-import { useCurrent } from '$lib/hooks/use-current';
-import { useApp } from '$lib/hooks/use-app.svelte';
+import { useApp } from '$lib/hooks';
 import { WorldItemEntity } from '../entities/world-item-entity';
 import { TEST_USER_ID, TEST_WORLD_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 

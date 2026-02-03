@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
@@ -15,7 +16,6 @@
 	import { mode } from 'mode-watcher';
 	import { tick, untrack } from 'svelte';
 	import { page } from '$app/state';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { createActionNodeId, parseActionNodeId, isActionNextEdgeId } from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';

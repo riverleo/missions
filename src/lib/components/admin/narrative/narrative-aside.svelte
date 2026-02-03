@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEditCircle, IconInputSearch, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import type { NarrativeId } from '$lib/types';
 	import NarrativeCommand from './narrative-command.svelte';
 	import NarrativeCreateDialog from './narrative-create-dialog.svelte';

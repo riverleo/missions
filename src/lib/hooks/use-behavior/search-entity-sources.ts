@@ -1,10 +1,10 @@
 import type { BehaviorAction, Fulfillment, Interaction, EntitySource } from '$lib/types';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
 import { useItem } from '../use-item';
+import { useInteraction } from '../use-interaction';
 
 /**
  * 액션의 타입과 Interaction 참조에 따라 상호작용 가능한 엔티티 템플릿 목록을 반환합니다.
@@ -31,25 +31,20 @@ export function searchEntitySources(behaviorAction: BehaviorAction): EntitySourc
  * once 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySource[] {
-	const { getBuildingInteraction } = useBuilding();
-	const { getItemInteraction } = useItem();
-	const { getCharacterInteraction } = useCharacter();
+	const { getInteraction } = useInteraction();
 
 	const interactions: Interaction[] = [];
 
 	// 1. Interaction 목록 가져오기
-	if (behaviorAction.building_interaction_id) {
-		// 명시적 building interaction
-		const interaction = getBuildingInteraction(behaviorAction.building_interaction_id);
-		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
-	} else if (behaviorAction.item_interaction_id) {
-		// 명시적 item interaction
-		const interaction = getItemInteraction(behaviorAction.item_interaction_id);
-		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
-	} else if (behaviorAction.character_interaction_id) {
-		// 명시적 character interaction
-		const interaction = getCharacterInteraction(behaviorAction.character_interaction_id);
-		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
+	const interactionId =
+		behaviorAction.building_interaction_id ||
+		behaviorAction.item_interaction_id ||
+		behaviorAction.character_interaction_id;
+
+	if (interactionId) {
+		// 명시적 interaction
+		const interaction = getInteraction(interactionId);
+		if (interaction) interactions.push(interaction);
 	} else {
 		// search: 현재 need/condition의 fulfillment에서 once_interaction_type이 있는 interaction 반환
 		const fulfillmentInteractions = getInteractions(behaviorAction, 'once');
@@ -68,9 +63,7 @@ function getInteractions(
 	behaviorAction: BehaviorAction,
 	actionType: 'once' | 'fulfill'
 ): Interaction[] {
-	const { getBuildingInteraction } = useBuilding();
-	const { getItemInteraction } = useItem();
-	const { getCharacterInteraction } = useCharacter();
+	const { getInteraction } = useInteraction();
 
 	// 1. Fulfillment 가져오기
 	let fulfillments: Fulfillment[] = [];
@@ -107,39 +100,20 @@ function getInteractions(
 	const interactions: Interaction[] = [];
 
 	for (const fulfillment of fulfillments) {
-		if (fulfillment.building_interaction_id) {
-			const interaction = getBuildingInteraction(fulfillment.building_interaction_id);
+		const interactionId =
+			fulfillment.building_interaction_id ||
+			fulfillment.item_interaction_id ||
+			fulfillment.character_interaction_id;
+
+		if (interactionId) {
+			const interaction = getInteraction(interactionId);
 			if (interaction) {
 				const hasCorrectType =
 					actionType === 'once'
 						? interaction.once_interaction_type !== null
 						: interaction.repeat_interaction_type !== null;
 				if (hasCorrectType) {
-					interactions.push(InteractionIdUtils.interaction.to(interaction));
-				}
-			}
-		}
-		if (fulfillment.item_interaction_id) {
-			const interaction = getItemInteraction(fulfillment.item_interaction_id);
-			if (interaction) {
-				const hasCorrectType =
-					actionType === 'once'
-						? interaction.once_interaction_type !== null
-						: interaction.repeat_interaction_type !== null;
-				if (hasCorrectType) {
-					interactions.push(InteractionIdUtils.interaction.to(interaction));
-				}
-			}
-		}
-		if (fulfillment.character_interaction_id) {
-			const interaction = getCharacterInteraction(fulfillment.character_interaction_id);
-			if (interaction) {
-				const hasCorrectType =
-					actionType === 'once'
-						? interaction.once_interaction_type !== null
-						: interaction.repeat_interaction_type !== null;
-				if (hasCorrectType) {
-					interactions.push(InteractionIdUtils.interaction.to(interaction));
+					interactions.push(interaction);
 				}
 			}
 		}

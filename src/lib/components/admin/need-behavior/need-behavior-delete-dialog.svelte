@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -10,7 +11,6 @@
 	} from '$lib/components/ui/dialog';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { ScenarioId } from '$lib/types';
 
 	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } =

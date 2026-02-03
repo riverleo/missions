@@ -1,4 +1,4 @@
-import { get, writable, type Readable } from 'svelte/store';
+import { get, writable, derived, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import type {
@@ -90,6 +90,36 @@ function createBehaviorStore() {
 		status: 'idle',
 		data: {},
 	});
+
+	// Derived stores for computed values
+	const allBehaviorPrioritiesStore = derived(behaviorPriorityStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allNeedBehaviorsStore = derived(needBehaviorStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allNeedBehaviorActionsStore = derived(needBehaviorActionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allConditionBehaviorsStore = derived(conditionBehaviorStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allConditionBehaviorActionsStore = derived(conditionBehaviorActionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allBehaviorsStore = derived(
+		[needBehaviorStore, conditionBehaviorStore],
+		([$need, $condition]) => {
+			const needBehaviors = Object.values($need.data).map(BehaviorIdUtils.behavior.to);
+			const conditionBehaviors = Object.values($condition.data).map(BehaviorIdUtils.behavior.to);
+			return [...needBehaviors, ...conditionBehaviors];
+		}
+	);
 
 	const behaviorPriorityDialogStore = writable<BehaviorPriorityDialogState>(undefined);
 	const needBehaviorDialogStore = writable<NeedBehaviorDialogState>(undefined);
@@ -240,29 +270,27 @@ function createBehaviorStore() {
 
 	// GetAll functions
 	function getAllBehaviorPriorities(): BehaviorPriority[] {
-		return Object.values(get(behaviorPriorityStore).data);
+		return get(allBehaviorPrioritiesStore);
 	}
 
 	function getAllNeedBehaviors(): NeedBehavior[] {
-		return Object.values(get(needBehaviorStore).data);
+		return get(allNeedBehaviorsStore);
 	}
 
 	function getAllNeedBehaviorActions(): NeedBehaviorAction[] {
-		return Object.values(get(needBehaviorActionStore).data);
+		return get(allNeedBehaviorActionsStore);
 	}
 
 	function getAllConditionBehaviors(): ConditionBehavior[] {
-		return Object.values(get(conditionBehaviorStore).data);
+		return get(allConditionBehaviorsStore);
 	}
 
 	function getAllConditionBehaviorActions(): ConditionBehaviorAction[] {
-		return Object.values(get(conditionBehaviorActionStore).data);
+		return get(allConditionBehaviorActionsStore);
 	}
 
 	function getAllBehaviors(): Behavior[] {
-		const needBehaviors = getAllNeedBehaviors().map(BehaviorIdUtils.behavior.to);
-		const conditionBehaviors = getAllConditionBehaviors().map(BehaviorIdUtils.behavior.to);
-		return [...needBehaviors, ...conditionBehaviors];
+		return get(allBehaviorsStore);
 	}
 
 	function getAllUsableBehaviors(
@@ -650,6 +678,12 @@ function createBehaviorStore() {
 		conditionBehaviorActionStore: conditionBehaviorActionStore as Readable<
 			RecordFetchState<ConditionBehaviorActionId, ConditionBehaviorAction>
 		>,
+		allBehaviorPrioritiesStore,
+		allNeedBehaviorsStore,
+		allNeedBehaviorActionsStore,
+		allConditionBehaviorsStore,
+		allConditionBehaviorActionsStore,
+		allBehaviorsStore,
 		behaviorPriorityDialogStore,
 		needBehaviorDialogStore: needBehaviorDialogStore as Readable<NeedBehaviorDialogState>,
 		conditionBehaviorDialogStore:

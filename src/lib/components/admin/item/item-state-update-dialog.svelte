@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -15,7 +16,6 @@
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useItem } from '$lib/hooks/use-item';
 	import type { ItemStateId, ItemId } from '$lib/types';
 
 	const { itemStore, itemStateStore, admin, itemStateDialogStore, closeStateDialog } = useItem();

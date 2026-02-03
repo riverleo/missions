@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import { page } from '$app/state';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import CharacterPanel from '$lib/components/admin/character/character-action-panel.svelte';
 	import CharacterFaceStateItemGroup from '$lib/components/admin/character/character-face-state-item-group.svelte';
 	import type { CharacterId } from '$lib/types';

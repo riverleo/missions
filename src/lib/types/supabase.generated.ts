@@ -3649,7 +3649,7 @@ export type Database = {
         | "building_clean"
         | "character_hug"
         | "building_use"
-      target_selection_method: "explicit" | "search" | "search_or_continue"
+      target_selection_method: "explicit" | "search"
       tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
     }
@@ -3812,7 +3812,7 @@ export const Constants = {
         "character_hug",
         "building_use",
       ],
-      target_selection_method: ["explicit", "search", "search_or_continue"],
+      target_selection_method: ["explicit", "search"],
       tile_state_type: ["idle", "damaged_1", "damaged_2"],
       user_role_type: ["admin"],
     },

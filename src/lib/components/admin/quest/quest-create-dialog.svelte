@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useChapter, useQuest } from '$lib/hooks';
 	import type { QuestType } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import {
@@ -31,8 +32,6 @@
 		IconCategory,
 		IconSortDescending,
 	} from '@tabler/icons-svelte';
-	import { useQuest } from '$lib/hooks/use-quest';
-	import { useChapter } from '$lib/hooks/use-chapter';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ChapterId, ScenarioId } from '$lib/types';

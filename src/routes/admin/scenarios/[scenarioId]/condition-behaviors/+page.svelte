@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useBehavior } from '$lib/hooks/use-behavior/use-behavior';
 	import type { ScenarioId } from '$lib/types';
 	import { Empty, EmptyContent, EmptyTitle, EmptyDescription } from '$lib/components/ui/empty';
 

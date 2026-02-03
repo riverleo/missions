@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconPlus, IconEditCircle, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import type { NeedBehaviorId } from '$lib/types';
 	import NeedBehaviorCommand from './need-behavior-command.svelte';
 	import NeedBehaviorCreateDialog from './need-behavior-create-dialog.svelte';

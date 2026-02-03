@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import type { CharacterInteraction, CharacterInteractionId } from '$lib/types';
@@ -7,7 +8,6 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconLayoutDistributeHorizontal, IconPlus } from '@tabler/icons-svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 
 	interface Props {
 		interaction: CharacterInteraction | undefined;

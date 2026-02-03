@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { bindStackEvent, activateStack, type StackId } from '$lib/shortcut/store';
 	import { isEnterOrSpace } from '$lib/shortcut/utils';
 

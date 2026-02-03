@@ -1,10 +1,9 @@
+import { useItem, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
 import { get } from 'svelte/store';
 import type { WorldItemId, Item, WorldId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_ITEM } from '$lib/constants';
-import { useWorld } from '$lib/hooks/use-world';
-import { useItem } from '$lib/hooks/use-item';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import { decreaseDurabilityTicks } from './decrease-durability-ticks';

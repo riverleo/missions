@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useChapter } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { Panel, useNodes } from '@xyflow/svelte';
@@ -7,7 +8,6 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconPlus, IconLayoutDistributeVertical } from '@tabler/icons-svelte';
-	import { useChapter } from '$lib/hooks/use-chapter';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import type { Chapter } from '$lib/types';
 

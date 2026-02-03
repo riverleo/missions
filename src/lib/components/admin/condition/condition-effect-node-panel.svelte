@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { ConditionEffect, CharacterId, NeedId } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
@@ -13,8 +14,6 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { clone } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
 

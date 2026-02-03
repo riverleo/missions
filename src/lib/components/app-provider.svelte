@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { AppPayload } from '$lib/types';
 	import type { Snippet } from 'svelte';
-	import { setAppContext } from '$lib/hooks/use-app.svelte';
+	import { setAppContext } from '$lib/hooks';
 	import { init } from '$lib/hooks/init';
 
 	const { data, children }: { data: AppPayload; children: Snippet } = $props();

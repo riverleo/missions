@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { onMount } from 'svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodePlayText from './narrative-node-play-text.svelte';
 	import NarrativeNodePlayChoice from './narrative-node-play-choice.svelte';
 	import { activateStack, type StackId } from '$lib/shortcut/store';

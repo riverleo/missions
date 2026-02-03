@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { ToggleGroup, ToggleGroupItem } from '$lib/components/ui/toggle-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconInputSearch, IconEditCircle, IconPlus, IconTrash } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import type { BuildingInteractionId } from '$lib/types';
 	import BuildingInteractionCommand from './building-interaction-command.svelte';
 	import BuildingInteractionCreateDialog from './building-interaction-create-dialog.svelte';

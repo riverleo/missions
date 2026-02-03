@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior } from '$lib/hooks';
 	import { dndzone } from 'svelte-dnd-action';
 	import {
 		Command,
@@ -7,7 +8,6 @@
 		CommandEmpty,
 		CommandGroup,
 	} from '$lib/components/ui/command';
-	import { useBehavior } from '$lib/hooks/use-behavior';
 	import { page } from '$app/state';
 	import type { ScenarioId, NeedBehavior, ConditionBehavior } from '$lib/types';
 	import NeedBehaviorCommandItem from '../need-behavior/need-behavior-command-item.svelte';

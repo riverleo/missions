@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Dialog,
@@ -22,8 +23,6 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconChevronDown, IconHeading } from '@tabler/icons-svelte';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';

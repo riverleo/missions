@@ -1,6 +1,7 @@
-import { writable, get, type Readable } from 'svelte/store';
+import { writable, derived, get, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import type {
+	Database,
 	RecordFetchState,
 	Building,
 	BuildingInsert,
@@ -125,6 +126,36 @@ function createBuildingStore() {
 	});
 
 	const conditionDialogStore = writable<ConditionDialogState>(undefined);
+
+	// Derived stores for computed values
+	const allBuildingsStore = derived(buildingStore, ($store) => Object.values($store.data));
+
+	const allBuildingItemsStore = derived(buildingItemStore, ($store) => Object.values($store.data));
+
+	const allBuildingStatesStore = derived(buildingStateStore, ($store) => $store.data);
+
+	const allBuildingInteractionsStore = derived(buildingInteractionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allBuildingInteractionActionsStore = derived(
+		buildingInteractionActionStore,
+		($store) => $store.data
+	);
+
+	const allConditionsStore = derived(conditionStore, ($store) => Object.values($store.data));
+
+	const allConditionFulfillmentsStore = derived(conditionFulfillmentStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allBuildingConditionsStore = derived(buildingConditionStore, ($store) =>
+		Object.values($store.data)
+	);
+
+	const allConditionEffectsStore = derived(conditionEffectStore, ($store) =>
+		Object.values($store.data)
+	);
 
 	const uiStore = writable({
 		showBodyPreview: false,
@@ -326,42 +357,42 @@ function createBuildingStore() {
 
 	// GetAll functions
 	function getAllBuildings(): Building[] {
-		return Object.values(get(buildingStore).data);
+		return get(allBuildingsStore);
 	}
 
 	function getAllBuildingItems(): BuildingItem[] {
-		return Object.values(get(buildingItemStore).data);
+		return get(allBuildingItemsStore);
 	}
 
 	function getAllBuildingStates(): Record<BuildingId, BuildingState[]> {
-		return get(buildingStateStore).data;
+		return get(allBuildingStatesStore);
 	}
 
 	function getAllBuildingInteractions(): BuildingInteraction[] {
-		return Object.values(get(buildingInteractionStore).data);
+		return get(allBuildingInteractionsStore);
 	}
 
 	function getAllBuildingInteractionActions(): Record<
 		BuildingInteractionId,
 		BuildingInteractionAction[]
 	> {
-		return get(buildingInteractionActionStore).data;
+		return get(allBuildingInteractionActionsStore);
 	}
 
 	function getAllConditions(): Condition[] {
-		return Object.values(get(conditionStore).data);
+		return get(allConditionsStore);
 	}
 
 	function getAllConditionFulfillments(): ConditionFulfillment[] {
-		return Object.values(get(conditionFulfillmentStore).data);
+		return get(allConditionFulfillmentsStore);
 	}
 
 	function getAllBuildingConditions(): BuildingCondition[] {
-		return Object.values(get(buildingConditionStore).data);
+		return get(allBuildingConditionsStore);
 	}
 
 	function getAllConditionEffects(): ConditionEffect[] {
-		return Object.values(get(conditionEffectStore).data);
+		return get(allConditionEffectsStore);
 	}
 
 	const admin = {
@@ -558,9 +589,9 @@ function createBuildingStore() {
 			const { data, error } = await supabase
 				.from('building_interactions')
 				.insert({
-					...interaction,
 					scenario_id: scenarioId,
-				})
+					...interaction,
+				} as Database['public']['Tables']['building_interactions']['Insert'])
 				.select('*')
 				.single<BuildingInteraction>();
 
@@ -937,6 +968,15 @@ function createBuildingStore() {
 			RecordFetchState<ConditionEffectId, ConditionEffect>
 		>,
 		conditionDialogStore: conditionDialogStore as Readable<ConditionDialogState>,
+		allBuildingsStore,
+		allBuildingItemsStore,
+		allBuildingStatesStore,
+		allBuildingInteractionsStore,
+		allBuildingInteractionActionsStore,
+		allConditionsStore,
+		allConditionFulfillmentsStore,
+		allBuildingConditionsStore,
+		allConditionEffectsStore,
 		init,
 		fetch,
 		openBuildingDialog,

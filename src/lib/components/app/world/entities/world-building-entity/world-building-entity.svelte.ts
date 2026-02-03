@@ -1,3 +1,4 @@
+import { useBuilding, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
 import { produce } from 'immer';
 import type {
@@ -9,8 +10,6 @@ import type {
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BUILDING, CATEGORY_TILE, CELL_SIZE } from '$lib/constants';
-import { useWorld } from '$lib/hooks/use-world';
-import { useBuilding } from '$lib/hooks/use-building';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import { decreaseConditions } from './decrease-conditions';

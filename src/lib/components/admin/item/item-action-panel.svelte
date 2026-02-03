@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import type { Item, ColliderType } from '$lib/types';
 	import {
 		InputGroup,
@@ -15,7 +16,6 @@
 		DropdownMenuRadioItem,
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { useItem } from '$lib/hooks/use-item';
 	import { IconEye, IconEyeOff, IconShape, IconX } from '@tabler/icons-svelte';
 	import { getColliderTypeLabel } from '$lib/utils/state-label';
 

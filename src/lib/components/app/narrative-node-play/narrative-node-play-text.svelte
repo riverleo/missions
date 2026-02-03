@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useNarrative } from '$lib/hooks/use-narrative';
+	import { useNarrative } from '$lib/hooks';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import { Kbd } from '$lib/components/ui/kbd';
 	import { bindStackEvent, type StackId } from '$lib/shortcut/store';

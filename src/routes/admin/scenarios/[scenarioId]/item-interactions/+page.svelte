@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { useItem } from '$lib/hooks/use-item';
 	import type { ScenarioId } from '$lib/types';
 
 	const { itemInteractionStore } = useItem();

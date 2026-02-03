@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useChapter } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
@@ -18,7 +19,6 @@
 	import ChapterNode from './chapter-node.svelte';
 	import ChapterActionPanel from './chapter-action-panel.svelte';
 	import ChapterNodePanel from './chapter-node-panel.svelte';
-	import { useChapter } from '$lib/hooks/use-chapter';
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';

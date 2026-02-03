@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBehavior, useBuilding, useChapter, useCharacter, useItem, useNarrative, useQuest, useScenario, useTerrain } from '$lib/hooks';
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
 	import {
 		Breadcrumb,
@@ -9,15 +10,6 @@
 		BreadcrumbSeparator,
 	} from '$lib/components/ui/breadcrumb';
 	import { page } from '$app/state';
-	import { useScenario } from '$lib/hooks/use-scenario';
-	import { useChapter } from '$lib/hooks/use-chapter';
-	import { useQuest } from '$lib/hooks/use-quest';
-	import { useNarrative } from '$lib/hooks/use-narrative';
-	import { useTerrain } from '$lib/hooks/use-terrain';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useBehavior } from '$lib/hooks/use-behavior';
-	import { useItem } from '$lib/hooks/use-item';
 	import type {
 		ScenarioId,
 		ChapterId,

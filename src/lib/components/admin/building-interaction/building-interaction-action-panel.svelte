@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import type { BuildingInteraction, BuildingInteractionId } from '$lib/types';
@@ -7,7 +8,6 @@
 	import { ButtonGroup } from '$lib/components/ui/button-group';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconLayoutDistributeHorizontal, IconPlus } from '@tabler/icons-svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 
 	interface Props {
 		interaction: BuildingInteraction | undefined;

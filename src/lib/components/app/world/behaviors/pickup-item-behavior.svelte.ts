@@ -1,6 +1,6 @@
+import { useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import { Behavior } from './behavior.svelte';
-import { useWorld } from '$lib/hooks/use-world';
 import type {
 	WorldCharacterId,
 	WorldItemId,

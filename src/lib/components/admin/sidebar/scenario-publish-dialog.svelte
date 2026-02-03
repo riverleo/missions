@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import {
 		AlertDialog,
 		AlertDialogAction,
@@ -9,7 +10,6 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { useScenario } from '$lib/hooks/use-scenario';
 
 	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 

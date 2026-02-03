@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter, useItem } from '$lib/hooks';
 	import type {
 		NeedFulfillment,
 		BuildingInteractionId,
@@ -6,9 +7,6 @@
 		CharacterInteractionId,
 	} from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useItem } from '$lib/hooks/use-item';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import type {
 		BuildingId,
 		BuildingStateType,
@@ -11,7 +12,6 @@
 	import { SpriteAnimator } from './sprite-animator.svelte';
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import CharacterSpriteAnimator from './character-sprite-animator.svelte';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import { cn } from '$lib/utils';
 
 	interface Props extends HTMLAttributes<HTMLDivElement> {

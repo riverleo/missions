@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import type { NarrativeNode } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 
 	interface Props {
 		data: {

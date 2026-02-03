@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { Panel, useNodes } from '@xyflow/svelte';
 	import type { NarrativeDiceRoll, DiceRollAction } from '$lib/types';
 	import {
@@ -14,7 +15,6 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconDice5, IconInfoCircle } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 	import { tick } from 'svelte';
 

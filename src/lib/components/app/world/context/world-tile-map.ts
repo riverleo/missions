@@ -1,9 +1,9 @@
+import { useWorld } from '$lib/hooks';
 import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type { TileId, WorldId, WorldTileMap, WorldTileMapInsert, TileCellKey } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { useWorld } from '$lib/hooks/use-world';
-import { useApp } from '$lib/hooks/use-app.svelte';
+import { useApp } from '$lib/hooks';
 import { TEST_WORLD_ID } from '$lib/constants';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 

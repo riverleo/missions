@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario, useWorldTest } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -7,8 +8,6 @@
 	import TestWorldMarker from './test-world-marker.svelte';
 	import TestWorldPopoverHeader from './test-world-popover-header.svelte';
 	import TestWorldInspectorPanel from './test-world-inspector-panel';
-	import { useWorldTest } from '$lib/hooks/use-world';
-	import { useScenario } from '$lib/hooks/use-scenario';
 	import { vectorUtils } from '$lib/utils/vector';
 	import { WORLD_WIDTH, WORLD_HEIGHT, TEST_WORLD_ID } from '$lib/constants';
 	import type { WorldContext } from '$lib/components/app/world/context';

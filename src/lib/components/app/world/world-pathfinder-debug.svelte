@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useWorldContext } from '$lib/hooks/use-world';
+	import { useWorldContext } from '$lib/hooks';
 	import { CELL_SIZE } from '$lib/constants';
 	import { vectorUtils } from '$lib/utils/vector';
 

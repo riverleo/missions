@@ -1,8 +1,7 @@
 <script lang="ts">
+	import { useCurrent, usePlayer } from '$lib/hooks';
 	import type { UserId } from '$lib/types';
-	import { useCurrent } from '$lib/hooks/use-current';
-	import { usePlayer } from '$lib/hooks/use-player';
-	import { useApp } from '$lib/hooks/use-app.svelte';
+	import { useApp } from '$lib/hooks';
 
 	const { supabase } = useApp();
 	const { userStore: user, roleStore: role } = useCurrent();

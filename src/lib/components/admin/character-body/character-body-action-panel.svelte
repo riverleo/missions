@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { CharacterBody, ColliderType } from '$lib/types';
 	import {
 		InputGroup,
@@ -16,7 +17,6 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEye, IconEyeOff, IconHeading, IconX, IconShape } from '@tabler/icons-svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import { getColliderTypeLabel } from '$lib/utils/state-label';
 
 	interface Props {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useBuilding, useCharacter, useItem } from '$lib/hooks';
 	import type {
 		ConditionBehaviorAction,
 		BuildingInteractionId,
@@ -9,9 +10,6 @@
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
-	import { useBuilding } from '$lib/hooks/use-building';
-	import { useCharacter } from '$lib/hooks/use-character';
-	import { useItem } from '$lib/hooks/use-item';
 
 	interface Props {
 		data: {
@@ -71,9 +69,6 @@
 		// 명시적 대상이 없을 때 target_selection_method에 따라 레이블 생성
 		if (action.target_selection_method === 'search') {
 			return '새로운 탐색 대상';
-		}
-		if (action.target_selection_method === 'search_or_continue') {
-			return '기존 선택 대상';
 		}
 		return undefined;
 	});

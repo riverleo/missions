@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useCharacter } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
@@ -14,7 +15,6 @@
 	import { mode } from 'mode-watcher';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
-	import { useCharacter } from '$lib/hooks/use-character';
 	import {
 		createCharacterNodeId,
 		parseCharacterNodeId,

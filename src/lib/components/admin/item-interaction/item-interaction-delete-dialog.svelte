@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
@@ -10,7 +11,6 @@
 		DialogHeader,
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
-	import { useItem } from '$lib/hooks/use-item';
 	import type { ScenarioId } from '$lib/types';
 
 	const { itemInteractionDialogStore, closeItemInteractionDialog, admin } = useItem();

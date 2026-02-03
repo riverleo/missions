@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useNarrative } from '$lib/hooks';
 	import { Panel, useNodes, useEdges } from '@xyflow/svelte';
 	import type {
 		NarrativeNode,
@@ -23,7 +24,6 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import { IconCircleDashedNumber1, IconHeading } from '@tabler/icons-svelte';
-	import { useNarrative } from '$lib/hooks/use-narrative';
 	import NarrativeNodeChoicesSection from './narrative-node-choices-section.svelte';
 	import { createNarrativeNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';

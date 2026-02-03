@@ -1,3 +1,4 @@
+import { useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type {
 	World,
@@ -8,7 +9,6 @@ import type {
 	WorldItemId,
 } from '$lib/types';
 import type { WorldContext } from './world-context.svelte';
-import { useWorld } from '$lib/hooks/use-world';
 import { TEST_USER_ID, TEST_PLAYER_ID, TEST_SCENARIO_ID } from '$lib/constants';
 import { createWorldTileMap, deleteWorldTileMap } from './world-tile-map';
 import { deleteWorldCharacter } from './world-character';

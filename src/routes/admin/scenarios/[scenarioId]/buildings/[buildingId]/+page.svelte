@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useBuilding } from '$lib/hooks';
 	import { page } from '$app/state';
-	import { useBuilding } from '$lib/hooks/use-building';
 	import BuildingPanel from '$lib/components/admin/building/building-action-panel.svelte';
 	import BuildingStateItemGroup from '$lib/components/admin/building/building-state-item-group.svelte';
 	import type { BuildingId } from '$lib/types';

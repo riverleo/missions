@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { useItem } from '$lib/hooks';
 	import { page } from '$app/state';
-	import { useItem } from '$lib/hooks/use-item';
 	import ItemStateItemGroup from '$lib/components/admin/item/item-state-item-group.svelte';
 	import ItemActionPanel from '$lib/components/admin/item/item-action-panel.svelte';
 	import type { ItemId } from '$lib/types';
