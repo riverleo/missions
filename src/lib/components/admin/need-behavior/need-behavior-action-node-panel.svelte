@@ -50,9 +50,15 @@
 		useInteraction();
 	const flowNodes = useNodes();
 
-	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
-	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
-	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
+	const buildingInteractions = $derived(
+		Object.values($buildingInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
+	const itemInteractions = $derived(
+		Object.values($itemInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
+	const characterInteractions = $derived(
+		Object.values($characterInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
 
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
@@ -61,8 +67,8 @@
 	});
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
-		{ value: 'once', label: '상호작용 (1회)' },
-		{ value: 'fulfill', label: '욕구 충족 (반복)' },
+		{ value: 'once', label: '한번 실행' },
+		{ value: 'fulfill', label: '반복 실행' },
 		{ value: 'idle', label: '대기' },
 	];
 

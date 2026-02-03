@@ -13,9 +13,16 @@
 	import {
 		getItemOnceInteractionTypeOptions,
 		getItemFulfillInteractionTypeOptions,
+		getItemSystemInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { CharacterId, ItemId, OnceInteractionType, FulfillInteractionType } from '$lib/types';
+	import type {
+		CharacterId,
+		ItemId,
+		OnceInteractionType,
+		FulfillInteractionType,
+		SystemInteractionType,
+	} from '$lib/types';
 
 	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();
@@ -40,18 +47,19 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let itemId = $state<ItemId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('item_use');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>(
+		'item_use'
+	);
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getItemOnceInteractionTypeOptions();
 	const fulfillOptions = getItemFulfillInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions];
+	const systemOptions = getItemSystemInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
-	const selectedItemName = $derived(
-		itemId === '' ? '기본 (모든 아이템)' : (selectedItem?.name ?? '아이템 선택')
-	);
+	const selectedItemName = $derived(selectedItem?.name ?? '아이템 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
@@ -65,6 +73,7 @@
 			interactionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
+				(interaction.system_interaction_type as SystemInteractionType | null) ||
 				'item_use';
 			characterId = interaction.character_id || undefined;
 		}
@@ -76,7 +85,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
 		}
 	}
 
@@ -92,18 +101,21 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!itemInteractionId || isSubmitting) return;
+		if (!itemInteractionId || !itemId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
-			// Check if it's once or repeat type
+			// Determine interaction type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
+			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
+			const isSystem = systemOptions.some((o) => o.value === interactionType);
 
 			await admin.updateItemInteraction(itemInteractionId, {
-				item_id: itemId || undefined,
+				item_id: itemId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
+				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
+				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
 				character_id: characterId || undefined,
 			});
 
@@ -130,7 +142,6 @@
 							{selectedItemName}
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">기본 (모든 아이템)</SelectItem>
 							{#each items as item (item.id)}
 								<SelectItem value={item.id}>{item.name}</SelectItem>
 							{/each}
@@ -169,7 +180,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !itemId}>
 					{isSubmitting ? '수정 중...' : '수정'}
 				</Button>
 			</DialogFooter>

@@ -12,6 +12,7 @@ import type {
 	BehaviorActionType,
 	OnceInteractionType,
 	FulfillInteractionType,
+	SystemInteractionType,
 } from '$lib/types';
 import { josa } from './josa';
 
@@ -56,6 +57,10 @@ const fulfillInteractionTypeLabels: Record<FulfillInteractionType, string> = {
 	character_hug: '캐릭터 포옹',
 };
 
+const systemInteractionTypeLabels: Record<SystemInteractionType, string> = {
+	item_pick: '아이템 줍기',
+};
+
 export function getColliderTypeLabel(type: ColliderType): string {
 	return colliderTypeLabels[type];
 }
@@ -97,15 +102,29 @@ export function getFulfillInteractionTypeOptions(): {
 	}));
 }
 
+export function getSystemInteractionTypeLabel(type: SystemInteractionType): string {
+	return systemInteractionTypeLabels[type];
+}
+
+export function getSystemInteractionTypeOptions(): {
+	value: SystemInteractionType;
+	label: string;
+}[] {
+	return Object.entries(systemInteractionTypeLabels).map(([value, label]) => ({
+		value: value as SystemInteractionType,
+		label,
+	}));
+}
+
 // Building interaction type options
 export function getBuildingOnceInteractionTypeOptions(): {
 	value: OnceInteractionType;
 	label: string;
 }[] {
 	return [
-		{ value: 'building_use', label: `${onceInteractionTypeLabels.building_use} (1회)` },
-		{ value: 'building_construct', label: `${onceInteractionTypeLabels.building_construct} (1회)` },
-		{ value: 'building_demolish', label: `${onceInteractionTypeLabels.building_demolish} (1회)` },
+		{ value: 'building_use', label: onceInteractionTypeLabels.building_use },
+		{ value: 'building_construct', label: onceInteractionTypeLabels.building_construct },
+		{ value: 'building_demolish', label: onceInteractionTypeLabels.building_demolish },
 	];
 }
 
@@ -114,9 +133,16 @@ export function getBuildingFulfillInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_repair', label: `${fulfillInteractionTypeLabels.building_repair} (반복)` },
-		{ value: 'building_clean', label: `${fulfillInteractionTypeLabels.building_clean} (반복)` },
+		{ value: 'building_repair', label: fulfillInteractionTypeLabels.building_repair },
+		{ value: 'building_clean', label: fulfillInteractionTypeLabels.building_clean },
 	];
+}
+
+export function getBuildingSystemInteractionTypeOptions(): {
+	value: SystemInteractionType;
+	label: string;
+}[] {
+	return [];
 }
 
 // Item interaction type options
@@ -125,7 +151,7 @@ export function getItemOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'item_use', label: `${onceInteractionTypeLabels.item_use} (1회)` },
+		{ value: 'item_use', label: onceInteractionTypeLabels.item_use },
 	];
 }
 
@@ -134,6 +160,15 @@ export function getItemFulfillInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [];
+}
+
+export function getItemSystemInteractionTypeOptions(): {
+	value: SystemInteractionType;
+	label: string;
+}[] {
+	return [
+		{ value: 'item_pick', label: systemInteractionTypeLabels.item_pick },
+	];
 }
 
 // Character interaction type options
@@ -148,15 +183,25 @@ export function getCharacterFulfillInteractionTypeOptions(): {
 	value: FulfillInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'character_hug', label: `${fulfillInteractionTypeLabels.character_hug} (반복)` }];
+	return [{ value: 'character_hug', label: fulfillInteractionTypeLabels.character_hug }];
 }
 
-// Backward compatibility - 구버전 함수명 유지 (once/fulfill 모두 합쳐서 반환)
+export function getCharacterSystemInteractionTypeOptions(): {
+	value: SystemInteractionType;
+	label: string;
+}[] {
+	return [];
+}
+
+// Backward compatibility - 구버전 함수명 유지 (once/fulfill/system 모두 합쳐서 반환)
 export function getBehaviorInteractTypeLabel(
-	type: OnceInteractionType | FulfillInteractionType
+	type: OnceInteractionType | FulfillInteractionType | SystemInteractionType
 ): string {
 	if (type in onceInteractionTypeLabels) {
 		return onceInteractionTypeLabels[type as OnceInteractionType];
+	}
+	if (type in systemInteractionTypeLabels) {
+		return systemInteractionTypeLabels[type as SystemInteractionType];
 	}
 	return fulfillInteractionTypeLabels[type as FulfillInteractionType];
 }

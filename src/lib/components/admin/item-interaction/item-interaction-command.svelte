@@ -62,7 +62,8 @@
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
 						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type)!}
+							interaction.fulfill_interaction_type ||
+							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
@@ -120,7 +121,8 @@
 							? $characterStore.data[interaction.character_id as CharacterId]
 							: undefined}
 						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type)!}
+							interaction.fulfill_interaction_type ||
+							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : '모든 캐릭터'}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}

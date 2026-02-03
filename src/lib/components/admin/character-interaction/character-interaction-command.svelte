@@ -54,7 +54,8 @@
 			: undefined;
 
 		const interactionType = (interaction.once_interaction_type ||
-			interaction.fulfill_interaction_type)!;
+			interaction.fulfill_interaction_type ||
+			interaction.system_interaction_type)!;
 		const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
 		const characterName = character ? character.name : '모든 캐릭터';
 

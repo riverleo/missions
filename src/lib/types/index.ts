@@ -239,6 +239,7 @@ export type {
 	ItemStateType,
 	OnceInteractionType,
 	FulfillInteractionType,
+	SystemInteractionType,
 	ConditionFulfillmentType,
 	NarrativeNodeType,
 	BehaviorActionType,

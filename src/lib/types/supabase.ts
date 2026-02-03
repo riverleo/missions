@@ -107,6 +107,7 @@ export type PlayerScenarioStatus = Enums<'player_scenario_status'>;
 export type DiceRollAction = Enums<'dice_roll_action'>;
 export type OnceInteractionType = Enums<'once_interaction_type'>;
 export type FulfillInteractionType = Enums<'fulfill_interaction_type'>;
+export type SystemInteractionType = Enums<'system_interaction_type'>;
 export type ConditionFulfillmentType = Enums<'condition_fulfillment_type'>;
 export type NarrativeNodeType = Enums<'narrative_node_type'>;
 export type BehaviorActionType = Enums<'behavior_action_type'>;

@@ -15,6 +15,7 @@
 	import {
 		getBuildingOnceInteractionTypeOptions,
 		getBuildingFulfillInteractionTypeOptions,
+		getBuildingSystemInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -22,6 +23,7 @@
 		CharacterId,
 		OnceInteractionType,
 		FulfillInteractionType,
+		SystemInteractionType,
 		ScenarioId,
 	} from '$lib/types';
 
@@ -40,13 +42,14 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<BuildingId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('building_use');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>('building_use');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getBuildingOnceInteractionTypeOptions();
 	const fulfillOptions = getBuildingFulfillInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions];
+	const systemOptions = getBuildingSystemInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
@@ -62,7 +65,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
 		}
 	}
 
@@ -84,13 +87,16 @@
 		isSubmitting = true;
 
 		try {
-			// Check if it's once or repeat type
+			// Determine interaction type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
+			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
+			const isSystem = systemOptions.some((o) => o.value === interactionType);
 
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
 				building_id: buildingId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
+				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
+				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
 				character_id: characterId || null,
 			});
 

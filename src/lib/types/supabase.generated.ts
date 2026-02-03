@@ -259,6 +259,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id: string
+          system_interaction_type:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Insert: {
           building_id: string
@@ -273,6 +276,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Update: {
           building_id?: string
@@ -287,6 +293,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id?: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Relationships: [
           {
@@ -801,6 +810,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id: string
+          system_interaction_type:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
           target_character_id: string
         }
         Insert: {
@@ -815,6 +827,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
           target_character_id: string
         }
         Update: {
@@ -829,6 +844,9 @@ export type Database = {
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
           scenario_id?: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
           target_character_id?: string
         }
         Relationships: [

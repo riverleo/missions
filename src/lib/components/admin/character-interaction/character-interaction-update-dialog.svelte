@@ -13,9 +13,15 @@
 	import {
 		getCharacterOnceInteractionTypeOptions,
 		getCharacterFulfillInteractionTypeOptions,
+		getCharacterSystemInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { CharacterId, OnceInteractionType, FulfillInteractionType } from '$lib/types';
+	import type {
+		CharacterId,
+		OnceInteractionType,
+		FulfillInteractionType,
+		SystemInteractionType,
+	} from '$lib/types';
 
 	const { characterStore } = useCharacter();
 	const {
@@ -38,20 +44,19 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let targetCharacterId = $state<CharacterId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('character_hug');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>(
+		'character_hug'
+	);
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getCharacterOnceInteractionTypeOptions();
 	const fulfillOptions = getCharacterFulfillInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions];
+	const systemOptions = getCharacterSystemInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
-	const selectedTargetCharacterName = $derived(
-		targetCharacterId === undefined
-			? '기본 (모든 캐릭터)'
-			: (selectedTargetCharacter?.name ?? '대상 캐릭터 선택')
-	);
+	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedBehaviorLabel = $derived(
@@ -65,6 +70,7 @@
 			interactionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
+				(interaction.system_interaction_type as SystemInteractionType | null) ||
 				'character_hug';
 			characterId = interaction.character_id || undefined;
 		}
@@ -76,7 +82,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
 		}
 	}
 
@@ -92,17 +98,21 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!characterInteractionId || isSubmitting) return;
+		if (!characterInteractionId || !targetCharacterId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
+			// Determine interaction type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
+			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
+			const isSystem = systemOptions.some((o) => o.value === interactionType);
 
 			await admin.updateCharacterInteraction(characterInteractionId, {
-				target_character_id: targetCharacterId || undefined,
+				target_character_id: targetCharacterId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
+				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
+				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
 				character_id: characterId || undefined,
 			});
 
@@ -129,7 +139,6 @@
 							{selectedTargetCharacterName}
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">기본 (모든 캐릭터)</SelectItem>
 							{#each characters as character (character.id)}
 								<SelectItem value={character.id}>{character.name}</SelectItem>
 							{/each}
@@ -165,7 +174,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !targetCharacterId}>
 					{isSubmitting ? '수정 중...' : '수정'}
 				</Button>
 			</DialogFooter>

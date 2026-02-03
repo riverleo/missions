@@ -13,6 +13,7 @@
 	import {
 		getBuildingOnceInteractionTypeOptions,
 		getBuildingFulfillInteractionTypeOptions,
+		getBuildingSystemInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -20,6 +21,7 @@
 		CharacterId,
 		OnceInteractionType,
 		FulfillInteractionType,
+		SystemInteractionType,
 	} from '$lib/types';
 
 	const { buildingStore } = useBuilding();
@@ -45,18 +47,19 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<BuildingId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('building_use');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>(
+		'building_use'
+	);
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getBuildingOnceInteractionTypeOptions();
 	const fulfillOptions = getBuildingFulfillInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions];
+	const systemOptions = getBuildingSystemInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
-	const selectedBuildingName = $derived(
-		buildingId === undefined ? '기본 (모든 건물)' : (selectedBuilding?.name ?? '건물 선택')
-	);
+	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
@@ -70,6 +73,7 @@
 			interactionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
+				(interaction.system_interaction_type as SystemInteractionType | null) ||
 				'building_use';
 			characterId = interaction.character_id || undefined;
 		}
@@ -81,7 +85,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
 		}
 	}
 
@@ -97,18 +101,21 @@
 
 	async function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		if (!buildingInteractionId || isSubmitting) return;
+		if (!buildingInteractionId || !buildingId || isSubmitting) return;
 
 		isSubmitting = true;
 
 		try {
-			// Check if it's once or repeat type
+			// Determine interaction type
 			const isOnce = onceOptions.some((o) => o.value === interactionType);
+			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
+			const isSystem = systemOptions.some((o) => o.value === interactionType);
 
 			await admin.updateBuildingInteraction(buildingInteractionId, {
-				building_id: buildingId || undefined,
+				building_id: buildingId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
+				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
+				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
 				character_id: characterId || undefined,
 			});
 
@@ -135,7 +142,6 @@
 							{selectedBuildingName}
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">기본 (모든 건물)</SelectItem>
 							{#each buildings as building (building.id)}
 								<SelectItem value={building.id}>{building.name}</SelectItem>
 							{/each}
@@ -174,7 +180,7 @@
 			</div>
 
 			<DialogFooter>
-				<Button type="submit" disabled={isSubmitting}>
+				<Button type="submit" disabled={isSubmitting || !buildingId}>
 					{isSubmitting ? '수정 중...' : '수정'}
 				</Button>
 			</DialogFooter>
