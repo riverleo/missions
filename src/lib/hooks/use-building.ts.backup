@@ -290,6 +290,16 @@ function createBuildingStore() {
 		return get(allBuildingStatesStore);
 	}
 
+	function getAllBuildingInteractions(): BuildingInteraction[] {
+		return get(allBuildingInteractionsStore);
+	}
+
+	function getAllBuildingInteractionActions(): Record<
+		BuildingInteractionId,
+		BuildingInteractionAction[]
+	> {
+		return get(allBuildingInteractionActionsStore);
+	}
 
 	function getAllConditions(): Condition[] {
 		return get(allConditionsStore);
@@ -494,28 +504,156 @@ function createBuildingStore() {
 			);
 		},
 
-		// Building Interaction CRUD - delegated to useInteraction
-		createBuildingInteraction: interaction.admin.createBuildingInteraction,
-		updateBuildingInteraction: interaction.admin.updateBuildingInteraction,
-		removeBuildingInteraction: interaction.admin.removeBuildingInteraction,
-		createBuildingInteractionAction: interaction.admin.createBuildingInteractionAction,
-		// Wrapper to maintain old signature (actionId, buildingInteractionId, updates) -> (actionId, updates)
+		async createBuildingInteraction(
+			scenarioId: ScenarioId,
+			interaction: Omit<BuildingInteractionInsert, 'scenario_id'>
+		) {
+			const { data, error } = await supabase
+				.from('building_interactions')
+				.insert({
+					scenario_id: scenarioId,
+					...interaction,
+				} as Database['public']['Tables']['building_interactions']['Insert'])
+				.select('*')
+				.single<BuildingInteraction>();
+
+			if (error) throw error;
+
+			buildingInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as BuildingInteractionId] = data;
+				})
+			);
+
+			buildingInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[data.id as BuildingInteractionId] = [];
+				})
+			);
+
+			return data;
+		},
+
+		async updateBuildingInteraction(id: BuildingInteractionId, updates: BuildingInteractionUpdate) {
+			const { error } = await supabase.from('building_interactions').update(updates).eq('id', id);
+
+			if (error) throw error;
+
+			buildingInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data?.[id]) {
+						Object.assign(draft.data[id], updates);
+					}
+				})
+			);
+		},
+
+		async removeBuildingInteraction(id: BuildingInteractionId) {
+			const { error } = await supabase.from('building_interactions').delete().eq('id', id);
+
+			if (error) throw error;
+
+			buildingInteractionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+
+			buildingInteractionActionStore.update((state) =>
+				produce(state, (draft) => {
+					if (draft.data) {
+						delete draft.data[id];
+					}
+				})
+			);
+		},
+
+		async createBuildingInteractionAction(
+			scenarioId: ScenarioId,
+			buildingInteractionId: BuildingInteractionId,
+			action: Omit<
+				BuildingInteractionActionInsert,
+				'scenario_id' | 'building_id' | 'building_interaction_id'
+			>
+		) {
+			// Get building_id from interaction (nullable for default interactions)
+			const buildingInteractionStoreValue = get(buildingInteractionStore);
+			const buildingId =
+				buildingInteractionStoreValue.data[buildingInteractionId]?.building_id || null;
+
+			const { data, error } = await supabase
+				.from('building_interaction_actions')
+				.insert({
+					...action,
+					scenario_id: scenarioId,
+					building_id: buildingId,
+					building_interaction_id: buildingInteractionId,
+				})
+				.select()
+				.single<BuildingInteractionAction>();
+
+			if (error) throw error;
+
+			buildingInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					if (draft.data[buildingInteractionId]) {
+						draft.data[buildingInteractionId].push(data);
+					} else {
+						draft.data[buildingInteractionId] = [data];
+					}
+				})
+			);
+
+			return data;
+		},
+
 		async updateBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
-			_buildingInteractionId: BuildingInteractionId, // ignored, kept for compatibility
+			buildingInteractionId: BuildingInteractionId,
 			updates: BuildingInteractionActionUpdate
 		) {
-			return interaction.admin.updateBuildingInteractionAction(actionId, updates);
+			const { error } = await supabase
+				.from('building_interaction_actions')
+				.update(updates)
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			buildingInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[buildingInteractionId];
+					if (actions) {
+						const action = actions.find((a) => a.id === actionId);
+						if (action) {
+							Object.assign(action, updates);
+						}
+					}
+				})
+			);
 		},
-		// Wrapper to maintain old signature (actionId, buildingInteractionId) -> (actionId)
+
 		async removeBuildingInteractionAction(
 			actionId: BuildingInteractionActionId,
-			_buildingInteractionId: BuildingInteractionId // ignored, kept for compatibility
+			buildingInteractionId: BuildingInteractionId
 		) {
-			return interaction.admin.removeBuildingInteractionAction(actionId);
+			const { error } = await supabase
+				.from('building_interaction_actions')
+				.delete()
+				.eq('id', actionId);
+
+			if (error) throw error;
+
+			buildingInteractionActionStore.update((s) =>
+				produce(s, (draft) => {
+					const actions = draft.data[buildingInteractionId];
+					if (actions) {
+						draft.data[buildingInteractionId] = actions.filter((a) => a.id !== actionId);
+					}
+				})
+			);
 		},
-
-
 
 		// Condition CRUD
 		async createCondition(scenarioId: ScenarioId, condition: Omit<ConditionInsert, 'scenario_id'>) {

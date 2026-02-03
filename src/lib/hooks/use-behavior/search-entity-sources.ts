@@ -1,10 +1,7 @@
 import type { BehaviorAction, Fulfillment, Interaction, EntitySource } from '$lib/types';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { useBuilding } from '../use-building';
-import { useCharacter } from '../use-character';
-import { useItem } from '../use-item';
-import { useInteraction } from '../use-interaction';
+import { useBuilding, useCharacter, useInteraction, useItem } from '$lib/hooks';
 
 /**
  * 액션의 타입과 Interaction 참조에 따라 상호작용 가능한 엔티티 템플릿 목록을 반환합니다.
