@@ -59,7 +59,7 @@
 	let interactionType = $state<OnceInteractionType | RepeatInteractionType>(
 		(interaction.once_interaction_type ||
 			interaction.repeat_interaction_type ||
-			'building_execute') as OnceInteractionType | RepeatInteractionType
+			'building_use') as OnceInteractionType | RepeatInteractionType
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
 

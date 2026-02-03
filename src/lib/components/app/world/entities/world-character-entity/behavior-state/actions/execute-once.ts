@@ -8,9 +8,9 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
 /**
- * INTERACT 행동 실행 (상호작용 - once_interaction_type)
+ * ONCE 행동 실행 (상호작용 - once_interaction_type)
  */
-export default function executeInteractAction(
+export default function executeOnceAction(
 	worldCharacterEntity: WorldCharacterEntity,
 	behaviorAction: BehaviorAction,
 	tick: number

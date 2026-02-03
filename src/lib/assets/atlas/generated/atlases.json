@@ -1,122 +1,122 @@
 {
-	"test": {
-		"name": "test",
-		"type": "sprite",
-		"frameWidth": 70,
-		"frameHeight": 80,
-		"columns": 3,
-		"rows": 3,
-		"frameCount": 7,
-		"step": 1,
-		"faceOffsets": [
-			{
-				"x": -15,
-				"y": -25
-			},
-			{
-				"x": -11,
-				"y": -25
-			},
-			{
-				"x": -15,
-				"y": -20
-			},
-			{
-				"x": -19,
-				"y": -15
-			},
-			{
-				"x": -14,
-				"y": -21
-			},
-			{
-				"x": -15,
-				"y": -28
-			},
-			{
-				"x": -15,
-				"y": -30
-			}
-		],
-		"handOffsets": [
-			{
-				"x": 18,
-				"y": -10
-			},
-			{
-				"x": 18,
-				"y": -3
-			},
-			{
-				"x": 16,
-				"y": 1
-			},
-			{
-				"x": 6,
-				"y": 6
-			},
-			{
-				"x": -14,
-				"y": 4
-			},
-			{
-				"x": -30,
-				"y": -9
-			},
-			{
-				"x": -30,
-				"y": -26
-			}
-		]
-	},
-	"test2": {
-		"name": "test2",
-		"type": "sprite",
-		"frameWidth": 70,
-		"frameHeight": 80,
-		"columns": 3,
-		"rows": 3,
-		"frameCount": 7,
-		"step": 1,
-		"faceOffsets": [
-			{
-				"x": -15,
-				"y": -25
-			},
-			{
-				"x": -11,
-				"y": -25
-			},
-			{
-				"x": -15,
-				"y": -20
-			},
-			{
-				"x": -19,
-				"y": -15
-			},
-			{
-				"x": -14,
-				"y": -21
-			},
-			{
-				"x": -15,
-				"y": -28
-			},
-			{
-				"x": -15,
-				"y": -30
-			}
-		]
-	},
-	"tile-sample": {
-		"name": "tile-sample",
-		"type": "tileset",
-		"frameWidth": 18,
-		"frameHeight": 18,
-		"frameCount": 48,
-		"columns": 12,
-		"rows": 4,
-		"step": 4
-	}
+  "test": {
+    "name": "test",
+    "type": "sprite",
+    "frameWidth": 70,
+    "frameHeight": 80,
+    "columns": 3,
+    "rows": 3,
+    "frameCount": 7,
+    "step": 1,
+    "faceOffsets": [
+      {
+        "x": -15,
+        "y": -25
+      },
+      {
+        "x": -11,
+        "y": -25
+      },
+      {
+        "x": -15,
+        "y": -20
+      },
+      {
+        "x": -19,
+        "y": -15
+      },
+      {
+        "x": -14,
+        "y": -21
+      },
+      {
+        "x": -15,
+        "y": -28
+      },
+      {
+        "x": -15,
+        "y": -30
+      }
+    ],
+    "handOffsets": [
+      {
+        "x": 18,
+        "y": -10
+      },
+      {
+        "x": 18,
+        "y": -3
+      },
+      {
+        "x": 16,
+        "y": 1
+      },
+      {
+        "x": 6,
+        "y": 6
+      },
+      {
+        "x": -14,
+        "y": 4
+      },
+      {
+        "x": -30,
+        "y": -9
+      },
+      {
+        "x": -30,
+        "y": -26
+      }
+    ]
+  },
+  "test2": {
+    "name": "test2",
+    "type": "sprite",
+    "frameWidth": 70,
+    "frameHeight": 80,
+    "columns": 3,
+    "rows": 3,
+    "frameCount": 7,
+    "step": 1,
+    "faceOffsets": [
+      {
+        "x": -15,
+        "y": -25
+      },
+      {
+        "x": -11,
+        "y": -25
+      },
+      {
+        "x": -15,
+        "y": -20
+      },
+      {
+        "x": -19,
+        "y": -15
+      },
+      {
+        "x": -14,
+        "y": -21
+      },
+      {
+        "x": -15,
+        "y": -28
+      },
+      {
+        "x": -15,
+        "y": -30
+      }
+    ]
+  },
+  "tile-sample": {
+    "name": "tile-sample",
+    "type": "tileset",
+    "frameWidth": 18,
+    "frameHeight": 18,
+    "frameCount": 48,
+    "columns": 12,
+    "rows": 4,
+    "step": 4
+  }
 }

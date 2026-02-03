@@ -45,7 +45,7 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 const onceInteractionTypeLabels: Record<OnceInteractionType, string> = {
 	item_pick: '아이템 줍기',
 	item_use: '아이템 사용',
-	building_execute: '건물 사용',
+	building_use: '건물 사용',
 	building_construct: '건물 건설',
 	building_demolish: '건물 철거',
 };
@@ -53,6 +53,7 @@ const onceInteractionTypeLabels: Record<OnceInteractionType, string> = {
 const repeatInteractionTypeLabels: Record<RepeatInteractionType, string> = {
 	building_repair: '건물 수리',
 	building_clean: '건물 청소',
+	building_use: '건물 사용',
 	character_hug: '캐릭터 포옹',
 };
 
@@ -103,7 +104,7 @@ export function getBuildingOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_execute', label: `${onceInteractionTypeLabels.building_execute} (1회)` },
+		{ value: 'building_use', label: `${onceInteractionTypeLabels.building_use} (1회)` },
 		{ value: 'building_construct', label: `${onceInteractionTypeLabels.building_construct} (1회)` },
 		{ value: 'building_demolish', label: `${onceInteractionTypeLabels.building_demolish} (1회)` },
 	];
@@ -236,11 +237,7 @@ export function getBehaviorActionLabel(params: {
 		}
 	}
 
-	if (action.type === 'go') {
-		return target ? `${josa(target, '으로로')} 이동` : '이동';
-	}
-
-	if (action.type === 'interact') {
+	if (action.type === 'once') {
 		return target ? `${josa(target, '와과')} 상호작용` : '상호작용';
 	}
 

@@ -8,7 +8,7 @@ create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 create type once_interaction_type as enum (
   'item_pick',
   'item_use',
-  'building_execute',
+  'building_use',
   'building_construct',
   'building_demolish'
 );
@@ -16,6 +16,7 @@ create type once_interaction_type as enum (
 create type repeat_interaction_type as enum (
   'building_repair',
   'building_clean',
+  'building_use',
   'character_hug'
 );
 

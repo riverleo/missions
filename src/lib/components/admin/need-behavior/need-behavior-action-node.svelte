@@ -86,16 +86,7 @@
 		const target = targetLabel();
 		const behaviorLabel = behaviorTypeLabel();
 
-		if (action.type === 'go') {
-			if (behaviorLabel && target) {
-				return `${josa(behaviorLabel, '을를')} 위해 ${josa(target, '으로로')} 이동`;
-			}
-			if (behaviorLabel) {
-				return `${josa(behaviorLabel, '을를')} 위해 이동`;
-			}
-			return target ? `${josa(target, '으로로')} 이동` : '자동 이동';
-		}
-		if (action.type === 'interact') {
+		if (action.type === 'once') {
 			if (behaviorLabel && target) {
 				return `${josa(target, '을를')} ${behaviorLabel}`;
 			}

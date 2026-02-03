@@ -3621,7 +3621,7 @@ export type Database = {
       is_world_owner: { Args: { wid: string }; Returns: boolean }
     }
     Enums: {
-      behavior_action_type: "go" | "interact" | "fulfill" | "idle"
+      behavior_action_type: "once" | "fulfill" | "idle"
       building_state_type: "idle" | "damaged" | "planning" | "constructing"
       character_body_state_type: "idle" | "walk" | "run" | "jump" | "pick"
       character_face_state_type: "idle" | "happy" | "sad" | "angry"
@@ -3636,7 +3636,7 @@ export type Database = {
       once_interaction_type:
         | "item_pick"
         | "item_use"
-        | "building_execute"
+        | "building_use"
         | "building_construct"
         | "building_demolish"
       player_chapter_status: "in_progress" | "completed"
@@ -3648,6 +3648,7 @@ export type Database = {
         | "building_repair"
         | "building_clean"
         | "character_hug"
+        | "building_use"
       target_selection_method: "explicit" | "search" | "search_or_continue"
       tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
@@ -3781,7 +3782,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      behavior_action_type: ["go", "interact", "fulfill", "idle"],
+      behavior_action_type: ["once", "fulfill", "idle"],
       building_state_type: ["idle", "damaged", "planning", "constructing"],
       character_body_state_type: ["idle", "walk", "run", "jump", "pick"],
       character_face_state_type: ["idle", "happy", "sad", "angry"],
@@ -3796,7 +3797,7 @@ export const Constants = {
       once_interaction_type: [
         "item_pick",
         "item_use",
-        "building_execute",
+        "building_use",
         "building_construct",
         "building_demolish",
       ],
@@ -3809,6 +3810,7 @@ export const Constants = {
         "building_repair",
         "building_clean",
         "character_hug",
+        "building_use",
       ],
       target_selection_method: ["explicit", "search", "search_or_continue"],
       tile_state_type: ["idle", "damaged_1", "damaged_2"],

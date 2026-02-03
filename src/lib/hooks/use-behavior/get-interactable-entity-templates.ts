@@ -1,61 +1,23 @@
-import type {
-	BehaviorAction,
-	BuildingInteractionId,
-	ItemInteractionId,
-	CharacterInteractionId,
-	Fulfillment,
-	Interaction,
-	EntitySource,
-	NeedFulfillmentId,
-	ConditionFulfillmentId,
-	BuildingId,
-	ItemId,
-	CharacterId,
-	NeedBehaviorActionId,
-	ConditionBehaviorActionId,
-} from '$lib/types';
+import type { BehaviorAction, Fulfillment, Interaction, EntitySource } from '$lib/types';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { useBuilding } from '../use-building';
 import { useCharacter } from '../use-character';
 import { useItem } from '../use-item';
-import { useBehavior } from '../use-behavior';
 
 /**
  * 액션의 타입과 Interaction 참조에 따라 상호작용 가능한 엔티티 템플릿 목록을 반환합니다.
  *
- * - go 타입: 다음 액션에 따라 결정 (interact/fulfill → 해당 대상, idle/없음 → 모든 엔티티)
- * - interact 타입: once_interaction_type이 있는 Interaction의 엔티티 반환
+ * - once 타입: once_interaction_type이 있는 Interaction의 엔티티 반환
  * - fulfill 타입: fulfillment의 repeat_interaction_type이 있는 Interaction의 엔티티 반환
  *
  * @param behaviorAction - 행동 액션 (BehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
 export function getInteractableEntitySources(behaviorAction: BehaviorAction): EntitySource[] {
-	if (behaviorAction.type === 'go') {
-		// go 타입: search 모드일 때만 대상 반환
-		if (behaviorAction.target_selection_method !== 'search') {
-			return [];
-		}
-
-		// 다음 액션 조회
-		const nextAction = getNextBehaviorAction(behaviorAction);
-		if (nextAction?.type === 'interact') {
-			const nextNextAction = getNextBehaviorAction(nextAction);
-			if (nextNextAction?.type === 'fulfill') {
-				return getInteractableTemplatesForFulfill(nextNextAction);
-			}
-			return getInteractableTemplatesForInteract(nextAction);
-		} else if (nextAction?.type === 'fulfill') {
-			return getInteractableTemplatesForFulfill(nextAction);
-		}
-
-		// next가 idle이거나 없으면: 모든 엔티티 반환
-		return getAllEntitySources();
-	} else if (behaviorAction.type === 'interact') {
-		// interact 타입: Interaction 직접 참조
+	if (behaviorAction.type === 'once') {
+		// once 타입: Interaction 직접 참조
 		return getInteractableTemplatesForInteract(behaviorAction);
 	} else if (behaviorAction.type === 'fulfill') {
 		// fulfill 타입: Fulfillment를 통해 Interaction 참조
@@ -66,7 +28,7 @@ export function getInteractableEntitySources(behaviorAction: BehaviorAction): En
 }
 
 /**
- * interact 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
+ * once 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): EntitySource[] {
 	const { getBuildingInteraction, getAllBuildingInteractions } = useBuilding();
@@ -236,43 +198,4 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 	}
 
 	return Array.from(templateMap.values());
-}
-
-/**
- * 다음 액션을 조회합니다.
- */
-function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction | undefined {
-	const { getNeedBehaviorAction, getConditionBehaviorAction } = useBehavior();
-
-	if ('need_id' in behaviorAction) {
-		if (!behaviorAction.next_need_behavior_action_id) return undefined;
-		const nextAction = getNeedBehaviorAction(behaviorAction.next_need_behavior_action_id);
-		return nextAction ? BehaviorIdUtils.to(nextAction) : undefined;
-	} else {
-		if (!behaviorAction.next_condition_behavior_action_id) return undefined;
-		const nextAction = getConditionBehaviorAction(behaviorAction.next_condition_behavior_action_id);
-		return nextAction ? BehaviorIdUtils.to(nextAction) : undefined;
-	}
-}
-
-/**
- * 모든 엔티티 템플릿을 반환합니다.
- */
-function getAllEntitySources(): EntitySource[] {
-	const { getAllBuildings } = useBuilding();
-	const { getAllItems } = useItem();
-	const { getAllCharacters } = useCharacter();
-
-	const templates: EntitySource[] = [];
-
-	// 모든 건물
-	templates.push(...getAllBuildings().map(EntityIdUtils.source.to));
-
-	// 모든 아이템
-	templates.push(...getAllItems().map(EntityIdUtils.source.to));
-
-	// 모든 캐릭터
-	templates.push(...getAllCharacters().map(EntityIdUtils.source.to));
-
-	return templates;
 }

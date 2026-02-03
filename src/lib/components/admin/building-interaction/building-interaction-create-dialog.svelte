@@ -41,7 +41,7 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<BuildingId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('building_execute');
+	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('building_use');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 

@@ -51,13 +51,17 @@ export default function tickFindAndGoToTargetEntity(
 				);
 			}
 
-			candidateEntities = entities.filter((e) => e.sourceId === entitySourceId);
+			candidateEntities = entities.filter(
+			(e) => e.sourceId === entitySourceId && e.id !== worldCharacterEntity.id
+		);
 		}
 	} else if (
 		behaviorAction.target_selection_method === 'search' ||
 		behaviorAction.target_selection_method === 'search_or_continue'
 	) {
-		candidateEntities = entities.filter((e) => interactableEntitySourceIds.has(e.sourceId));
+		candidateEntities = entities.filter(
+		(e) => interactableEntitySourceIds.has(e.sourceId) && e.id !== worldCharacterEntity.id
+	);
 	}
 
 	if (candidateEntities.length > 0) {

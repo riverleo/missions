@@ -1,7 +1,6 @@
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import { useBehavior } from '$lib/hooks/use-behavior';
-import executeGoAction from './actions/execute-go';
-import executeInteractAction from './actions/execute-interact';
+import executeOnceAction from './actions/execute-once';
 import executeFulfillAction from './actions/execute-fulfill';
 import executeIdleAction from './actions/execute-idle';
 import checkActionCompletion from './completion/check-completion';
@@ -19,10 +18,8 @@ export default function tick(this: WorldCharacterEntityBehavior, tick: number): 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId)!;
 
 	// 1. 행동 실행
-	if (behaviorAction.type === 'go') {
-		executeGoAction(this.worldCharacterEntity, behaviorAction);
-	} else if (behaviorAction.type === 'interact') {
-		executeInteractAction(this.worldCharacterEntity, behaviorAction, tick);
+	if (behaviorAction.type === 'once') {
+		executeOnceAction(this.worldCharacterEntity, behaviorAction, tick);
 	} else if (behaviorAction.type === 'fulfill') {
 		executeFulfillAction(this.worldCharacterEntity, behaviorAction, tick);
 	} else if (behaviorAction.type === 'idle') {

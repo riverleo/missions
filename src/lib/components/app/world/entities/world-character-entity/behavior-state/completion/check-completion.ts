@@ -10,13 +10,8 @@ export default function checkActionCompletion(
 	behaviorAction: BehaviorAction,
 	tick: number
 ): boolean {
-	// GO: path가 비면 완료
-	if (behaviorAction.type === 'go') {
-		return worldCharacterEntity.behaviorState.path.length === 0;
-	}
-
-	// INTERACT: InteractionAction 체인이 완료되어야 함
-	if (behaviorAction.type === 'interact') {
+	// ONCE: InteractionAction 체인이 완료되어야 함
+	if (behaviorAction.type === 'once') {
 		// 타겟이 없으면: 이미 완료됨 (아이템을 주워서 타겟 클리어된 경우)
 		if (!worldCharacterEntity.behaviorState.targetEntityId) {
 			return !worldCharacterEntity.behaviorState.interactionTargetId;

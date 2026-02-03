@@ -67,9 +67,8 @@
 	});
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
-		{ value: 'go', label: '이동' },
-		{ value: 'interact', label: '상호작용 (1회)' },
-		{ value: 'fulfill', label: '욕구 충족 (반복)' },
+		{ value: 'once', label: '상호작용 (1회)' },
+		{ value: 'fulfill', label: '컨디션 충족 (반복)' },
 		{ value: 'idle', label: '대기' },
 	];
 
@@ -279,7 +278,7 @@
 						</ButtonGroup>
 
 						<!-- interact 타입: Interaction 선택 -->
-						{#if changes.type === 'interact' || changes.type === 'go'}
+						{#if changes.type === 'once'}
 							<ButtonGroup class="w-full">
 								<ButtonGroupText>대상</ButtonGroupText>
 								<Select
@@ -404,7 +403,7 @@
 						{/if}
 
 						<!-- search 모드일 때 검색 가능한 대상 표시 -->
-						{#if (changes.type === 'go' || changes.type === 'interact' || changes.type === 'fulfill') && changes.target_selection_method === 'search'}
+						{#if (changes.type === 'once' || changes.type === 'fulfill') && changes.target_selection_method === 'search'}
 							<div class="px-2 text-right text-xs">
 								{#if interactableEntityTemplates.length > 0}
 									<div class="text-xs">

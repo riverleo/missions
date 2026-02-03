@@ -1,7 +1,6 @@
 -- behavior_action_type enum (액션의 종류)
 create type behavior_action_type as enum (
-  'go',         -- 건물/아이템/캐릭터로 이동
-  'interact',   -- 건물/아이템/캐릭터와 상호작용 (once)
+  'once',       -- 건물/아이템/캐릭터와 상호작용 (once)
   'fulfill',    -- 욕구/컨디션 충족 (repeat)
   'idle'        -- 대기
 );
