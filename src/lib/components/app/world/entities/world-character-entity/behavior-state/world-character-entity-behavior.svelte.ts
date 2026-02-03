@@ -4,6 +4,8 @@ import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type { WorldCharacterEntityDirection } from '../index';
 import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
+import updateMove from './update-move';
+import updateDirection from './update-direction';
 import tick from './tick';
 import tickInitialize from './tick-initialize';
 import tickFindAndGo from './tick-find-and-go';
@@ -26,6 +28,8 @@ export class WorldCharacterEntityBehavior {
 	behaviors = $state<Behavior[]>([]);
 
 	update: (event: BeforeUpdateEvent) => void;
+	updateMove: (event: BeforeUpdateEvent) => void;
+	updateDirection: () => void;
 	tick: (tickNumber: number) => void;
 	tickInitialize: (tick: number) => boolean;
 	tickFindAndGo: (tick: number) => boolean;
@@ -33,6 +37,8 @@ export class WorldCharacterEntityBehavior {
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
 		this.update = update.bind(this);
+		this.updateMove = updateMove.bind(this);
+		this.updateDirection = updateDirection.bind(this);
 		this.tick = tick.bind(this);
 		this.tickInitialize = tickInitialize.bind(this);
 		this.tickFindAndGo = tickFindAndGo.bind(this);
