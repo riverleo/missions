@@ -23,7 +23,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 
 /**
- * FULFILL 행동 실행 (욕구/컨디션 충족 - repeat_interaction_type)
+ * FULFILL 행동 실행 (욕구/컨디션 충족 - fulfill_interaction_type)
  */
 export default function executeFulfillAction(
 	worldCharacterEntity: WorldCharacterEntity,
@@ -178,14 +178,14 @@ export default function executeFulfillAction(
 	}
 
 	// 3. interaction_type 결정 (autoInteractType 우선)
-	let repeatInteractType: string | undefined;
+	let fulfillInteractType: string | undefined;
 	if (autoInteractType) {
-		repeatInteractType = autoInteractType;
+		fulfillInteractType = autoInteractType;
 	} else if (interaction) {
-		if (!interaction.repeat_interaction_type) {
+		if (!interaction.fulfill_interaction_type) {
 			return;
 		}
-		repeatInteractType = interaction.repeat_interaction_type;
+		fulfillInteractType = interaction.fulfill_interaction_type;
 	} else {
 		return;
 	}
@@ -250,7 +250,7 @@ export default function executeFulfillAction(
 				worldCharacterEntity.behavior.interactionStartTick = currentTick;
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
-				if (repeatInteractType === 'item_pick') {
+				if (fulfillInteractType === 'item_pick') {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 					const itemEntityId = EntityIdUtils.createId(
 						'item',
@@ -298,7 +298,7 @@ export default function executeFulfillAction(
 			}
 
 			// duration 완료 - item_use는 여기서 실행
-			if (repeatInteractType === 'item_use') {
+			if (fulfillInteractType === 'item_use') {
 				const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 				const itemEntityId = EntityIdUtils.createId(
 					'item',
@@ -319,7 +319,7 @@ export default function executeFulfillAction(
 			// InteractionAction이 없으면 매 틱마다 실행
 
 			// item_pick/use 매 틱마다 실행
-			if (repeatInteractType === 'item_pick') {
+			if (fulfillInteractType === 'item_pick') {
 				if (targetEntity?.type === 'item' || isHeldItem) {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 					const itemEntityId = EntityIdUtils.createId(
@@ -351,7 +351,7 @@ export default function executeFulfillAction(
 						}
 					}
 				}
-			} else if (repeatInteractType === 'item_use') {
+			} else if (fulfillInteractType === 'item_use') {
 				if (targetEntity?.type === 'item' || isHeldItem) {
 					const worldItemId = (targetEntity?.instanceId || targetInstanceId) as WorldItemId;
 					const itemEntityId = EntityIdUtils.createId(
@@ -394,7 +394,7 @@ export default function executeFulfillAction(
 		// 건물 수리/청소 등 구현 필요
 	}
 
-	// repeat_interaction_type: InteractionAction 완료 시 초기화 (다음 틱에서 다시 시작)
+	// fulfill_interaction_type: InteractionAction 완료 시 초기화 (다음 틱에서 다시 시작)
 	if (interactionCompleted) {
 		worldCharacterEntity.behavior.interactionTargetId = undefined;
 		worldCharacterEntity.behavior.interactionStartTick = 0;

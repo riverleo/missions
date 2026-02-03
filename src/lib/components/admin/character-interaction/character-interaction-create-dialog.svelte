@@ -14,13 +14,13 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
 		getCharacterOnceInteractionTypeOptions,
-		getCharacterRepeatInteractionTypeOptions,
+		getCharacterFulfillInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
 		CharacterId,
 		OnceInteractionType,
-		RepeatInteractionType,
+		FulfillInteractionType,
 		ScenarioId,
 	} from '$lib/types';
 
@@ -37,13 +37,13 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let targetCharacterId = $state<CharacterId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('character_hug');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('character_hug');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getCharacterOnceInteractionTypeOptions();
-	const repeatOptions = getCharacterRepeatInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...repeatOptions];
+	const fulfillOptions = getCharacterFulfillInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions];
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
@@ -59,7 +59,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | RepeatInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType;
 		}
 	}
 
@@ -86,7 +86,7 @@
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
+				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
 				character_id: characterId || null,
 			});
 

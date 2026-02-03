@@ -36,7 +36,7 @@
 			if (interaction) {
 				const building = $buildingStore.data[interaction.building_id];
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${building?.name ?? '건물'} ${behaviorLabel}`;
 			}
@@ -47,7 +47,7 @@
 			if (interaction) {
 				const item = $itemStore.data[interaction.item_id];
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${item?.name ?? '아이템'} ${behaviorLabel}`;
 			}
@@ -60,7 +60,7 @@
 			if (interaction) {
 				const character = $characterStore.data[interaction.target_character_id];
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				return `${character?.name ?? '캐릭터'} ${behaviorLabel}`;
 			}

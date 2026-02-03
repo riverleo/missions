@@ -87,7 +87,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
@@ -103,7 +103,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
@@ -117,7 +117,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
@@ -211,7 +211,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return {
@@ -227,7 +227,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return {
@@ -244,7 +244,7 @@
 					? characters.find((c) => c.id === interaction.character_id)
 					: undefined;
 				const interactionType =
-					interaction.once_interaction_type || interaction.repeat_interaction_type;
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
 				const characterName = character ? character.name : '모든 캐릭터';
 				return {

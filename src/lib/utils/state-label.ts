@@ -11,7 +11,7 @@ import type {
 	ConditionBehaviorAction,
 	BehaviorActionType,
 	OnceInteractionType,
-	RepeatInteractionType,
+	FulfillInteractionType,
 } from '$lib/types';
 import { josa } from './josa';
 
@@ -43,14 +43,13 @@ const buildingStateLabels: Record<BuildingStateType, string> = {
 };
 
 const onceInteractionTypeLabels: Record<OnceInteractionType, string> = {
-	item_pick: '아이템 줍기',
 	item_use: '아이템 사용',
 	building_use: '건물 사용',
 	building_construct: '건물 건설',
 	building_demolish: '건물 철거',
 };
 
-const repeatInteractionTypeLabels: Record<RepeatInteractionType, string> = {
+const fulfillInteractionTypeLabels: Record<FulfillInteractionType, string> = {
 	building_repair: '건물 수리',
 	building_clean: '건물 청소',
 	building_use: '건물 사용',
@@ -84,16 +83,16 @@ export function getOnceInteractionTypeOptions(): { value: OnceInteractionType; l
 	}));
 }
 
-export function getRepeatInteractionTypeLabel(type: RepeatInteractionType): string {
-	return repeatInteractionTypeLabels[type];
+export function getFulfillInteractionTypeLabel(type: FulfillInteractionType): string {
+	return fulfillInteractionTypeLabels[type];
 }
 
-export function getRepeatInteractionTypeOptions(): {
-	value: RepeatInteractionType;
+export function getFulfillInteractionTypeOptions(): {
+	value: FulfillInteractionType;
 	label: string;
 }[] {
-	return Object.entries(repeatInteractionTypeLabels).map(([value, label]) => ({
-		value: value as RepeatInteractionType,
+	return Object.entries(fulfillInteractionTypeLabels).map(([value, label]) => ({
+		value: value as FulfillInteractionType,
 		label,
 	}));
 }
@@ -110,13 +109,13 @@ export function getBuildingOnceInteractionTypeOptions(): {
 	];
 }
 
-export function getBuildingRepeatInteractionTypeOptions(): {
-	value: RepeatInteractionType;
+export function getBuildingFulfillInteractionTypeOptions(): {
+	value: FulfillInteractionType;
 	label: string;
 }[] {
 	return [
-		{ value: 'building_repair', label: `${repeatInteractionTypeLabels.building_repair} (반복)` },
-		{ value: 'building_clean', label: `${repeatInteractionTypeLabels.building_clean} (반복)` },
+		{ value: 'building_repair', label: `${fulfillInteractionTypeLabels.building_repair} (반복)` },
+		{ value: 'building_clean', label: `${fulfillInteractionTypeLabels.building_clean} (반복)` },
 	];
 }
 
@@ -126,13 +125,12 @@ export function getItemOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'item_pick', label: `${onceInteractionTypeLabels.item_pick} (1회)` },
 		{ value: 'item_use', label: `${onceInteractionTypeLabels.item_use} (1회)` },
 	];
 }
 
-export function getItemRepeatInteractionTypeOptions(): {
-	value: RepeatInteractionType;
+export function getItemFulfillInteractionTypeOptions(): {
+	value: FulfillInteractionType;
 	label: string;
 }[] {
 	return [];
@@ -146,28 +144,28 @@ export function getCharacterOnceInteractionTypeOptions(): {
 	return [];
 }
 
-export function getCharacterRepeatInteractionTypeOptions(): {
-	value: RepeatInteractionType;
+export function getCharacterFulfillInteractionTypeOptions(): {
+	value: FulfillInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'character_hug', label: `${repeatInteractionTypeLabels.character_hug} (반복)` }];
+	return [{ value: 'character_hug', label: `${fulfillInteractionTypeLabels.character_hug} (반복)` }];
 }
 
-// Backward compatibility - 구버전 함수명 유지 (once/repeat 모두 합쳐서 반환)
+// Backward compatibility - 구버전 함수명 유지 (once/fulfill 모두 합쳐서 반환)
 export function getBehaviorInteractTypeLabel(
-	type: OnceInteractionType | RepeatInteractionType
+	type: OnceInteractionType | FulfillInteractionType
 ): string {
 	if (type in onceInteractionTypeLabels) {
 		return onceInteractionTypeLabels[type as OnceInteractionType];
 	}
-	return repeatInteractionTypeLabels[type as RepeatInteractionType];
+	return fulfillInteractionTypeLabels[type as FulfillInteractionType];
 }
 
 export function getBehaviorInteractTypeOptions(): {
-	value: OnceInteractionType | RepeatInteractionType;
+	value: OnceInteractionType | FulfillInteractionType;
 	label: string;
 }[] {
-	return [...getOnceInteractionTypeOptions(), ...getRepeatInteractionTypeOptions()];
+	return [...getOnceInteractionTypeOptions(), ...getFulfillInteractionTypeOptions()];
 }
 
 const itemStateLabels: Record<ItemStateType, string> = {

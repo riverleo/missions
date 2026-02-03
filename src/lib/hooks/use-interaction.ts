@@ -133,7 +133,7 @@ function createInteractionStore() {
 	);
 
 	const fulfillInteractionsStore = derived(allInteractionsStore, ($all) =>
-		$all.filter((i) => i.repeat_interaction_type !== null)
+		$all.filter((i) => i.fulfill_interaction_type !== null)
 	);
 
 	// ===== Initialization & Fetch =====

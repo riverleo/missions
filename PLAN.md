@@ -1,15 +1,15 @@
 # Interaction System Refactoring
 
 ## 진행 상태
-- ⏳ Task 1: repeat_interaction_type → fulfill_interaction_type 리네이밍
+- ⏳ Task 1: fulfill_interaction_type → fulfill_interaction_type 리네이밍
 - ⏳ Task 2: item_pick을 once_interaction_type에서 분리
 
 ---
 
-## Task 1: repeat_interaction_type → fulfill_interaction_type 리네이밍
+## Task 1: fulfill_interaction_type → fulfill_interaction_type 리네이밍
 
 ### 목표
-`repeat_interaction_type`을 `fulfill_interaction_type`으로 이름을 변경하여 의미를 명확하게 합니다.
+`fulfill_interaction_type`을 `fulfill_interaction_type`으로 이름을 변경하여 의미를 명확하게 합니다.
 - "repeat"은 반복한다는 행위에 초점
 - "fulfill"은 욕구/컨디션을 충족시킨다는 목적에 초점
 
@@ -18,15 +18,15 @@
 ### 현재 상태
 
 **Database Schema:**
-- `building_interactions.repeat_interaction_type`
-- `item_interactions.repeat_interaction_type`
-- `character_interactions.repeat_interaction_type`
+- `building_interactions.fulfill_interaction_type`
+- `item_interactions.fulfill_interaction_type`
+- `character_interactions.fulfill_interaction_type`
 
 **TypeScript 코드:**
 ```typescript
 // src/lib/hooks/use-interaction.ts
 const fulfillInteractionsStore = derived(allInteractionsStore, ($all) =>
-  $all.filter((i) => i.repeat_interaction_type !== null)
+  $all.filter((i) => i.fulfill_interaction_type !== null)
 );
 ```
 
@@ -44,15 +44,15 @@ pnpm supabase migration new rename_repeat_to_fulfill_interaction_type
 ```sql
 -- Rename columns in building_interactions
 ALTER TABLE building_interactions
-  RENAME COLUMN repeat_interaction_type TO fulfill_interaction_type;
+  RENAME COLUMN fulfill_interaction_type TO fulfill_interaction_type;
 
 -- Rename columns in item_interactions
 ALTER TABLE item_interactions
-  RENAME COLUMN repeat_interaction_type TO fulfill_interaction_type;
+  RENAME COLUMN fulfill_interaction_type TO fulfill_interaction_type;
 
 -- Rename columns in character_interactions
 ALTER TABLE character_interactions
-  RENAME COLUMN repeat_interaction_type TO fulfill_interaction_type;
+  RENAME COLUMN fulfill_interaction_type TO fulfill_interaction_type;
 ```
 
 #### Step 2: 로컬 데이터베이스에 마이그레이션 적용
@@ -75,7 +75,7 @@ pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.gener
 ```typescript
 // Before
 const fulfillInteractionsStore = derived(allInteractionsStore, ($all) =>
-  $all.filter((i) => i.repeat_interaction_type !== null)
+  $all.filter((i) => i.fulfill_interaction_type !== null)
 );
 
 // After
@@ -85,7 +85,7 @@ const fulfillInteractionsStore = derived(allInteractionsStore, ($all) =>
 ```
 
 2. **모든 admin 컴포넌트** (interaction create/update dialogs)
-   - `repeat_interaction_type` 필드명을 `fulfill_interaction_type`으로 변경
+   - `fulfill_interaction_type` 필드명을 `fulfill_interaction_type`으로 변경
    - 라벨/주석 업데이트
 
 3. **src/lib/hooks/use-behavior/search-entity-sources.ts**
@@ -94,7 +94,7 @@ const fulfillInteractionsStore = derived(allInteractionsStore, ($all) =>
 const hasCorrectType =
   actionType === 'once'
     ? interaction.once_interaction_type !== null
-    : interaction.repeat_interaction_type !== null;
+    : interaction.fulfill_interaction_type !== null;
 
 // After
 const hasCorrectType =

@@ -238,7 +238,7 @@ export type {
 	CharacterFaceStateType,
 	ItemStateType,
 	OnceInteractionType,
-	RepeatInteractionType,
+	FulfillInteractionType,
 	ConditionFulfillmentType,
 	NarrativeNodeType,
 	BehaviorActionType,

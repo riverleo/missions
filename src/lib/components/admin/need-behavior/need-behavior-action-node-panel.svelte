@@ -85,7 +85,7 @@
 				if (interaction) {
 					const building = $buildingStore.data[interaction.building_id];
 					const interactionType =
-						interaction.once_interaction_type || interaction.repeat_interaction_type;
+						interaction.once_interaction_type || interaction.fulfill_interaction_type;
 					return `${building?.name ?? '건물'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
 				}
 			}
@@ -94,7 +94,7 @@
 				if (interaction) {
 					const item = $itemStore.data[interaction.item_id];
 					const interactionType =
-						interaction.once_interaction_type || interaction.repeat_interaction_type;
+						interaction.once_interaction_type || interaction.fulfill_interaction_type;
 					return `${item?.name ?? '아이템'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
 				}
 			}
@@ -103,7 +103,7 @@
 				if (interaction) {
 					const character = $characterStore.data[interaction.target_character_id];
 					const interactionType =
-						interaction.once_interaction_type || interaction.repeat_interaction_type;
+						interaction.once_interaction_type || interaction.fulfill_interaction_type;
 					return `${character?.name ?? '캐릭터'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
 				}
 			}
@@ -318,9 +318,9 @@
 										{#if buildingInteractions.length > 0}
 											<SelectGroup>
 												<SelectLabel>건물 상호작용</SelectLabel>
-												{#each buildingInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+												{#each buildingInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
 													{@const building = $buildingStore.data[interaction.building_id]}
-													{@const interactionType = interaction.repeat_interaction_type}
+													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`building:${interaction.id}`}>
 														{building?.name ?? '건물'} - {getBehaviorInteractTypeLabel(
 															interactionType!
@@ -333,9 +333,9 @@
 										{#if itemInteractions.length > 0}
 											<SelectGroup>
 												<SelectLabel>아이템 상호작용</SelectLabel>
-												{#each itemInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+												{#each itemInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
 													{@const item = $itemStore.data[interaction.item_id]}
-													{@const interactionType = interaction.repeat_interaction_type}
+													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`item:${interaction.id}`}>
 														{item?.name ?? '아이템'} - {getBehaviorInteractTypeLabel(
 															interactionType!
@@ -348,9 +348,9 @@
 										{#if characterInteractions.length > 0}
 											<SelectGroup>
 												<SelectLabel>캐릭터 상호작용</SelectLabel>
-												{#each characterInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+												{#each characterInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
 													{@const character = $characterStore.data[interaction.target_character_id]}
-													{@const interactionType = interaction.repeat_interaction_type}
+													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`character:${interaction.id}`}>
 														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeLabel(
 															interactionType!

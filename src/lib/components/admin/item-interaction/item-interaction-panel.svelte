@@ -22,7 +22,7 @@
 	import {
 		getBehaviorInteractTypeLabel,
 		getOnceInteractionTypeOptions,
-		getRepeatInteractionTypeOptions,
+		getFulfillInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import type {
 		ItemInteraction,
@@ -31,7 +31,7 @@
 		ItemInteractionActionId,
 		CharacterId,
 		OnceInteractionType,
-		RepeatInteractionType,
+		FulfillInteractionType,
 		CharacterBodyStateType,
 		CharacterFaceStateType,
 	} from '$lib/types';
@@ -55,16 +55,16 @@
 
 	const rootAction = $derived(actions.find((a: ItemInteractionAction) => a.root));
 
-	let interactionType = $state<OnceInteractionType | RepeatInteractionType>(
-		(interaction.once_interaction_type || interaction.repeat_interaction_type || 'item_use') as
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType>(
+		(interaction.once_interaction_type || interaction.fulfill_interaction_type || 'item_use') as
 			| OnceInteractionType
-			| RepeatInteractionType
+			| FulfillInteractionType
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
 	const onceOptions = getOnceInteractionTypeOptions();
-	const repeatOptions = getRepeatInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...repeatOptions];
+	const fulfillOptions = getFulfillInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions];
 
 	const selectedCharacter = $derived.by(() => {
 		if (!characterId) return null;
@@ -76,7 +76,7 @@
 
 		await admin.updateItemInteraction(itemInteractionId, {
 			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-			repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
+			fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
@@ -152,7 +152,7 @@
 							<DropdownMenuRadioGroup
 								value={interactionType}
 								onValueChange={(value) => {
-									interactionType = value as OnceInteractionType | RepeatInteractionType;
+									interactionType = value as OnceInteractionType | FulfillInteractionType;
 									updateInteraction();
 								}}
 							>

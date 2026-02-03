@@ -12,10 +12,10 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
 		getItemOnceInteractionTypeOptions,
-		getItemRepeatInteractionTypeOptions,
+		getItemFulfillInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
-	import type { CharacterId, ItemId, OnceInteractionType, RepeatInteractionType } from '$lib/types';
+	import type { CharacterId, ItemId, OnceInteractionType, FulfillInteractionType } from '$lib/types';
 
 	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();
@@ -40,13 +40,13 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let itemId = $state<ItemId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('item_use');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('item_use');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getItemOnceInteractionTypeOptions();
-	const repeatOptions = getItemRepeatInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...repeatOptions];
+	const fulfillOptions = getItemFulfillInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions];
 
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
 	const selectedItemName = $derived(
@@ -64,7 +64,7 @@
 			itemId = interaction.item_id;
 			interactionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
-				(interaction.repeat_interaction_type as RepeatInteractionType | null) ||
+				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
 				'item_use';
 			characterId = interaction.character_id || undefined;
 		}
@@ -76,7 +76,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | RepeatInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType;
 		}
 	}
 
@@ -103,7 +103,7 @@
 			await admin.updateItemInteraction(itemInteractionId, {
 				item_id: itemId || undefined,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
+				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
 				character_id: characterId || undefined,
 			});
 

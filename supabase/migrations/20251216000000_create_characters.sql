@@ -4,20 +4,23 @@ create type character_body_state_type as enum ('idle', 'walk', 'run', 'jump', 'p
 -- character_face_state_type enum
 create type character_face_state_type as enum ('idle', 'happy', 'sad', 'angry');
 
--- once/repeat 타입 분리
+-- once/fulfill/system 타입 분리
 create type once_interaction_type as enum (
-  'item_pick',
   'item_use',
   'building_use',
   'building_construct',
   'building_demolish'
 );
 
-create type repeat_interaction_type as enum (
+create type fulfill_interaction_type as enum (
   'building_repair',
   'building_clean',
   'building_use',
   'character_hug'
+);
+
+create type system_interaction_type as enum (
+  'item_pick'
 );
 
 -- loop_type enum

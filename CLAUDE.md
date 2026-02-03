@@ -323,7 +323,7 @@ psql postgresql://postgres:postgres@localhost:54322/postgres -c "SELECT COUNT(*)
 
 # Check relationships
 psql postgresql://postgres:postgres@localhost:54322/postgres -c "
-  SELECT bi.id, b.name, bi.once_interaction_type, bi.repeat_interaction_type
+  SELECT bi.id, b.name, bi.once_interaction_type, bi.fulfill_interaction_type
   FROM building_interactions bi
   JOIN buildings b ON bi.building_id = b.id;
 "

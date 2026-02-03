@@ -251,12 +251,12 @@ export type Database = {
           character_id: string | null
           created_at: string
           created_by: string | null
+          fulfill_interaction_type:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id: string
           once_interaction_type:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
         }
@@ -265,12 +265,12 @@ export type Database = {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
         }
@@ -279,12 +279,12 @@ export type Database = {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id?: string
         }
@@ -793,12 +793,12 @@ export type Database = {
           character_id: string | null
           created_at: string
           created_by: string | null
+          fulfill_interaction_type:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id: string
           once_interaction_type:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
           target_character_id: string
@@ -807,12 +807,12 @@ export type Database = {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id: string
           target_character_id: string
@@ -821,12 +821,12 @@ export type Database = {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
-            | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
             | null
           scenario_id?: string
           target_character_id?: string
@@ -1481,43 +1481,52 @@ export type Database = {
           character_id: string | null
           created_at: string
           created_by: string | null
+          fulfill_interaction_type:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id: string
           item_id: string
           once_interaction_type:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
-          repeat_interaction_type:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
-            | null
           scenario_id: string
+          system_interaction_type:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Insert: {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           item_id: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
-            | null
           scenario_id: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Update: {
           character_id?: string | null
           created_at?: string
           created_by?: string | null
+          fulfill_interaction_type?:
+            | Database["public"]["Enums"]["fulfill_interaction_type"]
+            | null
           id?: string
           item_id?: string
           once_interaction_type?:
             | Database["public"]["Enums"]["once_interaction_type"]
             | null
-          repeat_interaction_type?:
-            | Database["public"]["Enums"]["repeat_interaction_type"]
-            | null
           scenario_id?: string
+          system_interaction_type?:
+            | Database["public"]["Enums"]["system_interaction_type"]
+            | null
         }
         Relationships: [
           {
@@ -3628,13 +3637,17 @@ export type Database = {
       collider_type: "circle" | "rectangle"
       condition_fulfillment_type: "building"
       dice_roll_action: "narrative_node_next" | "narrative_node_done"
+      fulfill_interaction_type:
+        | "building_repair"
+        | "building_clean"
+        | "character_hug"
+        | "building_use"
       item_state_type: "idle" | "broken"
       loop_type: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
       need_fulfillment_task_condition: "completed" | "created"
       need_fulfillment_type: "building" | "character" | "task" | "item"
       once_interaction_type:
-        | "item_pick"
         | "item_use"
         | "building_use"
         | "building_construct"
@@ -3644,11 +3657,7 @@ export type Database = {
       player_scenario_status: "in_progress" | "completed"
       publish_status: "draft" | "published"
       quest_type: "primary" | "secondary"
-      repeat_interaction_type:
-        | "building_repair"
-        | "building_clean"
-        | "character_hug"
-        | "building_use"
+      system_interaction_type: "item_pick"
       target_selection_method: "explicit" | "search"
       tile_state_type: "idle" | "damaged_1" | "damaged_2"
       user_role_type: "admin"
@@ -3789,13 +3798,18 @@ export const Constants = {
       collider_type: ["circle", "rectangle"],
       condition_fulfillment_type: ["building"],
       dice_roll_action: ["narrative_node_next", "narrative_node_done"],
+      fulfill_interaction_type: [
+        "building_repair",
+        "building_clean",
+        "character_hug",
+        "building_use",
+      ],
       item_state_type: ["idle", "broken"],
       loop_type: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],
       need_fulfillment_task_condition: ["completed", "created"],
       need_fulfillment_type: ["building", "character", "task", "item"],
       once_interaction_type: [
-        "item_pick",
         "item_use",
         "building_use",
         "building_construct",
@@ -3806,12 +3820,7 @@ export const Constants = {
       player_scenario_status: ["in_progress", "completed"],
       publish_status: ["draft", "published"],
       quest_type: ["primary", "secondary"],
-      repeat_interaction_type: [
-        "building_repair",
-        "building_clean",
-        "character_hug",
-        "building_use",
-      ],
+      system_interaction_type: ["item_pick"],
       target_selection_method: ["explicit", "search"],
       tile_state_type: ["idle", "damaged_1", "damaged_2"],
       user_role_type: ["admin"],

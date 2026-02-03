@@ -35,7 +35,7 @@
 			if (!interaction) return undefined;
 			const building = $buildingStore.data[interaction.building_id];
 			const interactionType = (interaction.once_interaction_type ||
-				interaction.repeat_interaction_type)!;
+				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${building?.name ?? '건물'}" 건물`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
@@ -46,7 +46,7 @@
 			if (!interaction) return undefined;
 			const item = $itemStore.data[interaction.item_id];
 			const interactionType = (interaction.once_interaction_type ||
-				interaction.repeat_interaction_type)!;
+				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${item?.name ?? '아이템'}" 아이템`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
@@ -57,7 +57,7 @@
 			if (!interaction) return undefined;
 			const character = $characterStore.data[interaction.target_character_id];
 			const interactionType = (interaction.once_interaction_type ||
-				interaction.repeat_interaction_type)!;
+				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${character?.name ?? '캐릭터'}" 캐릭터`,
 				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),

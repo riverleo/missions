@@ -7,7 +7,7 @@ import { useBuilding, useCharacter, useInteraction, useItem } from '$lib/hooks';
  * 액션의 타입과 Interaction 참조에 따라 상호작용 가능한 엔티티 템플릿 목록을 반환합니다.
  *
  * - once 타입: once_interaction_type이 있는 Interaction의 엔티티 반환
- * - fulfill 타입: fulfillment의 repeat_interaction_type이 있는 Interaction의 엔티티 반환
+ * - fulfill 타입: fulfillment의 fulfill_interaction_type이 있는 Interaction의 엔티티 반환
  *
  * @param behaviorAction - 행동 액션 (BehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
@@ -54,7 +54,7 @@ function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySourc
 
 /**
  * BehaviorAction의 need/condition에 연결된 fulfillment의 interaction 목록 반환
- * @param actionType - 'once'면 once_interaction_type이 있는 것만, 'fulfill'이면 repeat_interaction_type이 있는 것만
+ * @param actionType - 'once'면 once_interaction_type이 있는 것만, 'fulfill'이면 fulfill_interaction_type이 있는 것만
  */
 function getInteractions(
 	behaviorAction: BehaviorAction,
@@ -108,7 +108,7 @@ function getInteractions(
 				const hasCorrectType =
 					actionType === 'once'
 						? interaction.once_interaction_type !== null
-						: interaction.repeat_interaction_type !== null;
+						: interaction.fulfill_interaction_type !== null;
 				if (hasCorrectType) {
 					interactions.push(interaction);
 				}
@@ -123,7 +123,7 @@ function getInteractions(
  * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
 function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySource[] {
-	// 1. Fulfillment에서 repeat_interaction_type이 있는 interaction 반환
+	// 1. Fulfillment에서 fulfill_interaction_type이 있는 interaction 반환
 	const interactions = getInteractions(behaviorAction, 'fulfill');
 
 	// 2. Interaction에서 엔티티 템플릿 추출

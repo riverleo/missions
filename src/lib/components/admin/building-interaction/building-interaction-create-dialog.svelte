@@ -14,14 +14,14 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
 		getBuildingOnceInteractionTypeOptions,
-		getBuildingRepeatInteractionTypeOptions,
+		getBuildingFulfillInteractionTypeOptions,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
 		BuildingId,
 		CharacterId,
 		OnceInteractionType,
-		RepeatInteractionType,
+		FulfillInteractionType,
 		ScenarioId,
 	} from '$lib/types';
 
@@ -40,13 +40,13 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<BuildingId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | RepeatInteractionType>('building_use');
+	let interactionType = $state<OnceInteractionType | FulfillInteractionType>('building_use');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const onceOptions = getBuildingOnceInteractionTypeOptions();
-	const repeatOptions = getBuildingRepeatInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...repeatOptions];
+	const fulfillOptions = getBuildingFulfillInteractionTypeOptions();
+	const allOptions = [...onceOptions, ...fulfillOptions];
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
@@ -62,7 +62,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | RepeatInteractionType;
+			interactionType = value as OnceInteractionType | FulfillInteractionType;
 		}
 	}
 
@@ -90,7 +90,7 @@
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
 				building_id: buildingId,
 				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				repeat_interaction_type: isOnce ? null : (interactionType as RepeatInteractionType),
+				fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
 				character_id: characterId || null,
 			});
 
