@@ -45,7 +45,7 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { conditionBehaviorActionStore, getInteractableEntitySources, admin } = useBehavior();
+	const { conditionBehaviorActionStore, searchEntitySources, admin } = useBehavior();
 	const { buildingStore, buildingInteractionStore, conditionFulfillmentStore } = useBuilding();
 	const { characterStore, characterInteractionStore } = useCharacter();
 	const { itemStore, itemInteractionStore } = useItem();
@@ -54,16 +54,11 @@
 	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
 	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
 	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
-	const fulfillments = $derived<ConditionFulfillment[]>(
-		Object.values($conditionFulfillmentStore.data).filter(
-			(f) => f.condition_id === action?.condition_id
-		)
-	);
 
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
-		return getInteractableEntitySources(BehaviorIdUtils.to(changes));
+		return searchEntitySources(BehaviorIdUtils.to(changes));
 	});
 
 	const actionTypes: { value: BehaviorActionType; label: string }[] = [
@@ -117,32 +112,6 @@
 			return '지정된 대상';
 		}
 		return '타깃 결정 방법';
-	});
-
-	const selectedFulfillmentLabel = $derived.by(() => {
-		if (!changes || !changes.condition_fulfillment_id) return '자동 선택';
-		const c = changes; // Explicitly narrow type
-		const fulfillment = fulfillments.find((f) => f.id === c.condition_fulfillment_id);
-		if (!fulfillment) return '자동 선택';
-
-		// Fulfillment의 interaction 정보 표시
-		if (fulfillment.building_interaction_id) {
-			const interaction = buildingInteractions.find(
-				(i) => i.id === fulfillment.building_interaction_id
-			);
-			if (interaction) {
-				const building = $buildingStore.data[interaction.building_id];
-				return building?.name ?? '건물';
-			}
-		}
-		if (fulfillment.item_interaction_id) {
-			const interaction = itemInteractions.find((i) => i.id === fulfillment.item_interaction_id);
-			if (interaction) {
-				const item = $itemStore.data[interaction.item_id];
-				return item?.name ?? '아이템';
-			}
-		}
-		return '자동 선택';
 	});
 
 	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
@@ -201,11 +170,6 @@
 			changes.item_interaction_id = null;
 			changes.character_interaction_id = null;
 		}
-	}
-
-	function onFulfillmentChange(value: string | undefined) {
-		if (!changes) return;
-		changes.condition_fulfillment_id = value ? (value as ConditionFulfillmentId) : null;
 	}
 
 	async function onsubmit(e: SubmitEvent) {
@@ -342,61 +306,66 @@
 							</ButtonGroup>
 						{/if}
 
-						<!-- fulfill 타입: Fulfillment 선택 -->
+						<!-- fulfill 타입: Interaction 선택 -->
 						{#if changes.type === 'fulfill'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상 탐색</ButtonGroupText>
+								<ButtonGroupText>대상</ButtonGroupText>
 								<Select
 									type="single"
-									value={changes.target_selection_method ?? 'search'}
-									onValueChange={(value) => {
-										if (changes && value) {
-											changes.target_selection_method = value as TargetSelectionMethod;
-										}
-									}}
+									value={selectedTargetValue}
+									onValueChange={onTargetMethodChange}
 								>
 									<SelectTrigger class="flex-1">
-										{changes.target_selection_method === 'search'
-											? '새로운 탐색 대상'
-											: '기존 선택 대상'}
+										{selectedTargetMethodLabel}
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value="search">새로운 탐색 대상</SelectItem>
 										<SelectItem value="search_or_continue">기존 선택 대상</SelectItem>
-									</SelectContent>
-								</Select>
-							</ButtonGroup>
 
-							<ButtonGroup class="w-full">
-								<ButtonGroupText>충족 방법</ButtonGroupText>
-								<Select
-									type="single"
-									value={changes.condition_fulfillment_id ?? ''}
-									onValueChange={onFulfillmentChange}
-								>
-									<SelectTrigger class="flex-1">
-										{selectedFulfillmentLabel}
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="">자동 선택</SelectItem>
-										{#each fulfillments as fulfillment (fulfillment.id)}
-											{@const interaction = fulfillment.building_interaction_id
-												? buildingInteractions.find(
-														(i) => i.id === fulfillment.building_interaction_id
-													)
-												: fulfillment.item_interaction_id
-													? itemInteractions.find((i) => i.id === fulfillment.item_interaction_id)
-													: undefined}
-											{@const entity =
-												interaction && 'building_id' in interaction
-													? $buildingStore.data[interaction.building_id]
-													: interaction && 'item_id' in interaction
-														? $itemStore.data[interaction.item_id]
-														: undefined}
-											<SelectItem value={fulfillment.id}>
-												{entity?.name ?? '자동'}
-											</SelectItem>
-										{/each}
+										{#if buildingInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>건물 상호작용</SelectLabel>
+												{#each buildingInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+													{@const building = $buildingStore.data[interaction.building_id]}
+													{@const interactionType = interaction.repeat_interaction_type}
+													<SelectItem value={`building:${interaction.id}`}>
+														{building?.name ?? '건물'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
+
+										{#if itemInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>아이템 상호작용</SelectLabel>
+												{#each itemInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+													{@const item = $itemStore.data[interaction.item_id]}
+													{@const interactionType = interaction.repeat_interaction_type}
+													<SelectItem value={`item:${interaction.id}`}>
+														{item?.name ?? '아이템'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
+
+										{#if characterInteractions.length > 0}
+											<SelectGroup>
+												<SelectLabel>캐릭터 상호작용</SelectLabel>
+												{#each characterInteractions.filter((i) => i.repeat_interaction_type !== null) as interaction (interaction.id)}
+													{@const character = $characterStore.data[interaction.target_character_id]}
+													{@const interactionType = interaction.repeat_interaction_type}
+													<SelectItem value={`character:${interaction.id}`}>
+														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeLabel(
+															interactionType!
+														)}
+													</SelectItem>
+												{/each}
+											</SelectGroup>
+										{/if}
 									</SelectContent>
 								</Select>
 							</ButtonGroup>

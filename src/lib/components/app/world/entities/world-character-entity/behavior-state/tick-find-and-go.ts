@@ -19,7 +19,7 @@ import type { WorldItemId } from '$lib/types';
  */
 export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: number): boolean {
 	const { getInteraction, getEntitySourceId, getWorldItem } = useWorld();
-	const { getBehaviorAction, getInteractableEntitySources } = useBehavior();
+	const { getBehaviorAction, searchEntitySources } = useBehavior();
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId)!;
 
@@ -50,7 +50,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	}
 
 	const entities = Object.values(this.worldCharacterEntity.worldContext.entities);
-	const entitySourceIds = new Set(getInteractableEntitySources(behaviorAction).map((es) => es.id));
+	const entitySourceIds = new Set(searchEntitySources(behaviorAction).map((es) => es.id));
 
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
 		const worldItem = getWorldItem(EntityIdUtils.instanceId<WorldItemId>(heldItemEntityId));

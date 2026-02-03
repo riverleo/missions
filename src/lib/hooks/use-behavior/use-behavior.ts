@@ -32,7 +32,7 @@ import type {
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
 import type { Behavior as WorldBehavior } from '$lib/components/app/world/behaviors';
-import { getInteractableEntitySources } from './get-interactable-entity-templates';
+import { searchEntitySources } from './search-entity-sources';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -680,7 +680,7 @@ function createBehaviorStore() {
 		addBehavior,
 		removeBehavior,
 		clearBehaviors,
-		getInteractableEntitySources,
+		searchEntitySources,
 		admin,
 	};
 }

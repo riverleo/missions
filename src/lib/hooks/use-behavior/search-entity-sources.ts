@@ -15,13 +15,13 @@ import { useItem } from '../use-item';
  * @param behaviorAction - 행동 액션 (BehaviorAction)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
-export function getInteractableEntitySources(behaviorAction: BehaviorAction): EntitySource[] {
+export function searchEntitySources(behaviorAction: BehaviorAction): EntitySource[] {
 	if (behaviorAction.type === 'once') {
 		// once 타입: Interaction 직접 참조
-		return getInteractableTemplatesForInteract(behaviorAction);
+		return searchEntitySourcesForOnce(behaviorAction);
 	} else if (behaviorAction.type === 'fulfill') {
 		// fulfill 타입: Fulfillment를 통해 Interaction 참조
-		return getInteractableTemplatesForFulfill(behaviorAction);
+		return searchEntitySourcesForFulfill(behaviorAction);
 	}
 
 	return [];
@@ -30,10 +30,10 @@ export function getInteractableEntitySources(behaviorAction: BehaviorAction): En
 /**
  * once 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
  */
-function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): EntitySource[] {
-	const { getBuildingInteraction, getAllBuildingInteractions } = useBuilding();
-	const { getAllItemInteractions, getItemInteraction } = useItem();
-	const { getCharacterInteraction, getAllCharacterInteractions } = useCharacter();
+function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySource[] {
+	const { getBuildingInteraction } = useBuilding();
+	const { getItemInteraction } = useItem();
+	const { getCharacterInteraction } = useCharacter();
 
 	const interactions: Interaction[] = [];
 
@@ -51,17 +51,9 @@ function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): En
 		const interaction = getCharacterInteraction(behaviorAction.character_interaction_id);
 		if (interaction) interactions.push(InteractionIdUtils.interaction.to(interaction));
 	} else {
-		// search: once_interaction_type이 있는 모든 Interactions
-		const buildingInteractions = getAllBuildingInteractions()
-			.filter((i) => i.once_interaction_type !== null)
-			.map(InteractionIdUtils.interaction.to);
-		const itemInteractions = getAllItemInteractions()
-			.filter((i) => i.once_interaction_type !== null)
-			.map(InteractionIdUtils.interaction.to);
-		const characterInteractions = getAllCharacterInteractions()
-			.filter((i) => i.once_interaction_type !== null)
-			.map(InteractionIdUtils.interaction.to);
-		interactions.push(...buildingInteractions, ...itemInteractions, ...characterInteractions);
+		// search: 현재 need/condition의 fulfillment에서 once_interaction_type이 있는 interaction 반환
+		const fulfillmentInteractions = getInteractions(behaviorAction, 'once');
+		interactions.push(...fulfillmentInteractions);
 	}
 
 	// 2. Interaction에서 엔티티 템플릿 추출
@@ -69,9 +61,13 @@ function getInteractableTemplatesForInteract(behaviorAction: BehaviorAction): En
 }
 
 /**
- * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
+ * BehaviorAction의 need/condition에 연결된 fulfillment의 interaction 목록 반환
+ * @param actionType - 'once'면 once_interaction_type이 있는 것만, 'fulfill'이면 repeat_interaction_type이 있는 것만
  */
-function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): EntitySource[] {
+function getInteractions(
+	behaviorAction: BehaviorAction,
+	actionType: 'once' | 'fulfill'
+): Interaction[] {
 	const { getBuildingInteraction } = useBuilding();
 	const { getItemInteraction } = useItem();
 	const { getCharacterInteraction } = useCharacter();
@@ -107,29 +103,59 @@ function getInteractableTemplatesForFulfill(behaviorAction: BehaviorAction): Ent
 		}
 	}
 
-	// 2. Fulfillment의 Interaction 가져오기 (repeat_interaction_type만)
+	// 2. Fulfillment의 Interaction 가져오기 (actionType에 맞는 interaction_type만)
 	const interactions: Interaction[] = [];
 
 	for (const fulfillment of fulfillments) {
 		if (fulfillment.building_interaction_id) {
 			const interaction = getBuildingInteraction(fulfillment.building_interaction_id);
-			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(InteractionIdUtils.interaction.to(interaction));
+			if (interaction) {
+				const hasCorrectType =
+					actionType === 'once'
+						? interaction.once_interaction_type !== null
+						: interaction.repeat_interaction_type !== null;
+				if (hasCorrectType) {
+					interactions.push(InteractionIdUtils.interaction.to(interaction));
+				}
 			}
-		} else if (fulfillment.item_interaction_id) {
+		}
+		if (fulfillment.item_interaction_id) {
 			const interaction = getItemInteraction(fulfillment.item_interaction_id);
-			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(InteractionIdUtils.interaction.to(interaction));
+			if (interaction) {
+				const hasCorrectType =
+					actionType === 'once'
+						? interaction.once_interaction_type !== null
+						: interaction.repeat_interaction_type !== null;
+				if (hasCorrectType) {
+					interactions.push(InteractionIdUtils.interaction.to(interaction));
+				}
 			}
-		} else if (fulfillment.character_interaction_id) {
+		}
+		if (fulfillment.character_interaction_id) {
 			const interaction = getCharacterInteraction(fulfillment.character_interaction_id);
-			if (interaction && interaction.repeat_interaction_type) {
-				interactions.push(InteractionIdUtils.interaction.to(interaction));
+			if (interaction) {
+				const hasCorrectType =
+					actionType === 'once'
+						? interaction.once_interaction_type !== null
+						: interaction.repeat_interaction_type !== null;
+				if (hasCorrectType) {
+					interactions.push(InteractionIdUtils.interaction.to(interaction));
+				}
 			}
 		}
 	}
 
-	// 3. Interaction에서 엔티티 템플릿 추출
+	return interactions;
+}
+
+/**
+ * fulfill 타입 액션의 상호작용 가능한 엔티티 템플릿을 반환합니다.
+ */
+function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySource[] {
+	// 1. Fulfillment에서 repeat_interaction_type이 있는 interaction 반환
+	const interactions = getInteractions(behaviorAction, 'fulfill');
+
+	// 2. Interaction에서 엔티티 템플릿 추출
 	return interactionsToTemplates(interactions);
 }
 

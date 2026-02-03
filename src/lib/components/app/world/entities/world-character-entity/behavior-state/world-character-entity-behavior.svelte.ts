@@ -9,6 +9,7 @@ import updateDirection from './update-direction';
 import tick from './tick';
 import tickInitialize from './tick-initialize';
 import tickFindAndGo from './tick-find-and-go';
+import tickBehaviorAction from './tick-behavior-action';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -33,6 +34,7 @@ export class WorldCharacterEntityBehavior {
 	tick: (tickNumber: number) => void;
 	tickInitialize: (tick: number) => boolean;
 	tickFindAndGo: (tick: number) => boolean;
+	tickBehaviorAction: (tick: number) => boolean;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
@@ -42,6 +44,7 @@ export class WorldCharacterEntityBehavior {
 		this.tick = tick.bind(this);
 		this.tickInitialize = tickInitialize.bind(this);
 		this.tickFindAndGo = tickFindAndGo.bind(this);
+		this.tickBehaviorAction = tickBehaviorAction.bind(this);
 	}
 
 	/**
