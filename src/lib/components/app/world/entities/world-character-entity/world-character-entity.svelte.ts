@@ -7,6 +7,8 @@ import type {
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
+	Vector,
+	EntityId,
 } from '$lib/types';
 import { WorldCharacterEntityBehavior } from './behavior-state';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -21,9 +23,9 @@ import { tickWorldCharacterNeeds } from './tick-world-character-needs';
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
 	body: Matter.Body;
-	heldItemIds = $state<WorldItemId[]>([]);
+	heldItemIds = $state<EntityId[]>([]);
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
-	behaviorState: WorldCharacterEntityBehavior;
+	behavior: WorldCharacterEntityBehavior;
 
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
@@ -39,7 +41,7 @@ export class WorldCharacterEntity extends Entity {
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
 		super(worldContext, 'character', worldId, worldCharacterId);
 
-		this.behaviorState = new WorldCharacterEntityBehavior(this);
+		this.behavior = new WorldCharacterEntityBehavior(this);
 
 		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
@@ -54,7 +56,7 @@ export class WorldCharacterEntity extends Entity {
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
 		this.heldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
-			.map((item) => item.id);
+			.map((item) => EntityIdUtils.createId('item', worldId, item.id));
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
@@ -129,19 +131,19 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override update(event: BeforeUpdateEvent): void {
-		this.behaviorState.update(event);
+		this.behavior.update(event);
 	}
 
 	tick(tick: number): void {
 		tickWorldCharacterNeeds(this, tick);
-		this.behaviorState.tick(tick);
+		this.behavior.tick(tick);
 	}
 
-	moveTo(targetX: number, targetY: number): void {
+	moveTo(vector: Vector): void {
 		// pathfinder로 경로 계산
-		this.behaviorState.path = this.worldContext.pathfinder.findPath(
+		this.behavior.path = this.worldContext.pathfinder.findPath(
 			vectorUtils.createVector(this.body.position.x, this.body.position.y),
-			vectorUtils.createVector(targetX, targetY)
+			vector
 		);
 	}
 }

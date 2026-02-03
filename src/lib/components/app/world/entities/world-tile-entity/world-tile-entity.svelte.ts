@@ -23,6 +23,10 @@ export class WorldTileEntity extends Entity {
 		return EntityIdUtils.instanceId<TileCellKey>(this.id);
 	}
 
+	get sourceId() {
+		return this.tileId;
+	}
+
 	constructor(
 		worldContext: WorldContext,
 		worldId: WorldId,

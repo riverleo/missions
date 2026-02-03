@@ -1,6 +1,7 @@
 import type { WorldItemEntity } from './world-item-entity.svelte';
 import type { WorldCharacterEntity } from '../world-character-entity';
 import { useWorld } from '$lib/hooks/use-world';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 
 export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 	// 내구도 감소
@@ -20,7 +21,12 @@ export function decreaseDurabilityTicks(entity: WorldItemEntity): void {
 				) as WorldCharacterEntity | undefined;
 
 				if (characterEntity) {
-					const index = characterEntity.heldItemIds.indexOf(entity.instanceId);
+					const itemEntityId = EntityIdUtils.createId(
+						'item',
+						entity.worldContext.worldId,
+						entity.instanceId
+					);
+					const index = characterEntity.heldItemIds.indexOf(itemEntityId);
 					if (index !== -1) {
 						characterEntity.heldItemIds.splice(index, 1);
 					}

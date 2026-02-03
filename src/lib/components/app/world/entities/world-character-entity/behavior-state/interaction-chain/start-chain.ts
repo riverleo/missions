@@ -49,23 +49,23 @@ export default function startInteractionChain(
 		if (interactionActions.length > 0) {
 			const firstAction = interactionActions[0];
 			if (!firstAction) return false;
-			this.behaviorState.interactionTargetId = InteractionIdUtils.create(
+			this.behavior.interactionTargetId = InteractionIdUtils.create(
 				interaction.interactionType,
 				interaction.id as any,
 				firstAction.id
 			);
-			this.behaviorState.interactionStartTick = tick;
+			this.behavior.interactionStartTick = tick;
 			return true;
 		}
 		return false;
 	}
 
 	// 체인 시작
-	this.behaviorState.interactionTargetId = InteractionIdUtils.create(
+	this.behavior.interactionTargetId = InteractionIdUtils.create(
 		interaction.interactionType,
 		interaction.id as any,
 		rootAction.id
 	);
-	this.behaviorState.interactionStartTick = tick;
+	this.behavior.interactionStartTick = tick;
 	return true;
 }

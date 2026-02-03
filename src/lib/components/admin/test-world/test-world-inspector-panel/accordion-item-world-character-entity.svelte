@@ -51,9 +51,9 @@
 
 	// 현재 대상 이름
 	const currentTargetName = $derived.by(() => {
-		if (!entity.behaviorState.targetEntityId) return undefined;
+		if (!entity.behavior.targetEntityId) return undefined;
 
-		const { type, instanceId } = EntityIdUtils.parse(entity.behaviorState.targetEntityId);
+		const { type, instanceId } = EntityIdUtils.parse(entity.behavior.targetEntityId);
 
 		if (type === 'building') {
 			const worldBuilding = $worldBuildingStore.data[instanceId as WorldBuildingId];
@@ -77,15 +77,13 @@
 
 	// 현재 행동 정보
 	const currentBehaviorInfo = $derived.by(() => {
-		if (!entity.behaviorState.behaviorTargetId) return undefined;
+		if (!entity.behavior.behaviorTargetId) return undefined;
 
-		const { type } = BehaviorIdUtils.parse(entity.behaviorState.behaviorTargetId);
+		const { type } = BehaviorIdUtils.parse(entity.behavior.behaviorTargetId);
 
 		if (type === 'need') {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.behaviorState.behaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(
-				entity.behaviorState.behaviorTargetId
-			);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
 
 			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
 			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
@@ -122,10 +120,8 @@
 				actionLabel,
 			};
 		} else {
-			const behaviorId = BehaviorIdUtils.behaviorId(entity.behaviorState.behaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(
-				entity.behaviorState.behaviorTargetId
-			);
+			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
 
 			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
 			const action =

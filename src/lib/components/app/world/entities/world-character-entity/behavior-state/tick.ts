@@ -12,8 +12,8 @@ import transitionToNextAction from './completion/transition';
 export default function tick(this: WorldCharacterEntityBehavior, tick: number): void {
 	const { getBehaviorAction } = useBehavior();
 
-	if (!this.tickInitialize(tick)) return;
-	if (!this.tickFindAndGoToTargetEntity(tick)) return;
+	if (this.tickInitialize(tick)) return;
+	if (this.tickFindAndGo(tick)) return;
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId)!;
 

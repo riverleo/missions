@@ -21,7 +21,6 @@ import type {
 	WorldBuildingConditionId,
 	WorldItemId,
 	EntityId,
-	EntityType,
 	EntityInstance,
 	EntitySourceId,
 	BehaviorAction,

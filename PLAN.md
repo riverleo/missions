@@ -61,6 +61,50 @@
 
 ---
 
+## 4. tick-find-and-go 도착 판정 로직 추가
+
+**목적**: 타겟까지 도착했는지 명확히 판정하여 불필요한 이동 방지
+
+### 변경 사항
+- `vectorUtils`에 벡터 간 거리 계산 유틸리티 추가
+  - `getDistance(a: Vector, b: Vector): number`
+- `tick-find-and-go`에서 도착 판정 로직 추가
+  - `targetEntityId`가 있고 `path`가 비어있을 때
+  - 타겟과의 거리가 임계값(50) 미만이면 도착으로 판정
+  - 임계값 이상이면 경로 재설정
+
+### 영향 범위
+- [x] vectorUtils에 거리 계산 함수 추가
+- [x] tick-find-and-go.ts 도착 판정 로직 추가
+- [x] 기존 거리 계산 코드를 유틸리티로 교체
+  - check-completion.ts
+  - execute-once.ts
+  - execute-fulfill.ts
+
+---
+
+## 5. heldItemIds를 EntityId로 교체
+
+**목적**: 일관성 있는 ID 타입 사용 (WorldItemId → EntityId)
+
+### 변경 사항
+- `WorldCharacterEntity.heldItemIds` 타입 변경: `WorldItemId[]` → `EntityId[]`
+- 관련 코드 업데이트
+  - EntityId 생성 시 `EntityIdUtils.createId()` 사용
+  - EntityId 파싱 시 `EntityIdUtils.parse()` 사용
+
+### 영향 범위
+- [x] WorldCharacterEntity 타입 변경
+- [x] heldItemIds 사용하는 모든 코드 업데이트
+  - world-character-entity.svelte.ts
+  - world-character-entity-renderer.svelte
+  - tick-find-and-go.ts
+  - execute-once.ts
+  - execute-fulfill.ts
+  - decrease-durability-ticks.ts
+
+---
+
 ## 추가 작업 목록
 
 (여기에 다른 작업들을 추가하세요)

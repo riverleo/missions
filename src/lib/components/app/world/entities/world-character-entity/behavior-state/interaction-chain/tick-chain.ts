@@ -23,11 +23,11 @@ export default function tickInteractionAction(
 	const { getItemInteractionActions } = useItem();
 	const { getCharacterInteractionActions } = useCharacter();
 
-	if (!this.behaviorState.interactionTargetId) return false;
+	if (!this.behavior.interactionTargetId) return false;
 
 	// InteractionTargetId 파싱
 	const { type, interactionId, interactionActionId } = InteractionIdUtils.parse(
-		this.behaviorState.interactionTargetId
+		this.behavior.interactionTargetId
 	);
 
 	// 현재 InteractionAction 가져오기
@@ -54,12 +54,12 @@ export default function tickInteractionAction(
 	}
 
 	if (!currentAction) {
-		this.behaviorState.interactionTargetId = undefined;
+		this.behavior.interactionTargetId = undefined;
 		return true;
 	}
 
 	// duration_ticks 경과 확인
-	const elapsed = tick - (this.behaviorState.interactionStartTick ?? 0);
+	const elapsed = tick - (this.behavior.interactionStartTick ?? 0);
 	if (elapsed < currentAction.duration_ticks) {
 		return false; // 아직 실행 중
 	}
@@ -73,12 +73,12 @@ export default function tickInteractionAction(
 				: currentAction.next_character_interaction_action_id;
 
 	if (nextActionId) {
-		this.behaviorState.interactionTargetId = InteractionIdUtils.create(
+		this.behavior.interactionTargetId = InteractionIdUtils.create(
 			type,
 			interactionId as any,
 			nextActionId
 		);
-		this.behaviorState.interactionStartTick = tick;
+		this.behavior.interactionStartTick = tick;
 		return false; // 체인 계속 진행
 	}
 

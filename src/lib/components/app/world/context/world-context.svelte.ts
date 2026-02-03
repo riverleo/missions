@@ -161,7 +161,7 @@ export class WorldContext {
 				if (EntityIdUtils.is('character', selectedEntityId)) {
 					const entity = this.entities[selectedEntityId!];
 					if (entity && entity.type === 'character') {
-						(entity as WorldCharacterEntity).moveTo(worldPos.x, worldPos.y);
+						(entity as WorldCharacterEntity).moveTo(worldPos);
 					}
 				}
 				// 엔티티 배치 (cursor가 있으면)

@@ -6,7 +6,7 @@ import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
 import tick from './tick';
 import tickInitialize from './tick-initialize';
-import tickFindAndGoToTargetEntity from './tick-find-and-go-to-target-entity';
+import tickFindAndGo from './tick-find-and-go';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -28,14 +28,14 @@ export class WorldCharacterEntityBehavior {
 	update: (event: BeforeUpdateEvent) => void;
 	tick: (tickNumber: number) => void;
 	tickInitialize: (tick: number) => boolean;
-	tickFindAndGoToTargetEntity: (tick: number) => boolean;
+	tickFindAndGo: (tick: number) => boolean;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
 		this.update = update.bind(this);
 		this.tick = tick.bind(this);
 		this.tickInitialize = tickInitialize.bind(this);
-		this.tickFindAndGoToTargetEntity = tickFindAndGoToTargetEntity.bind(this);
+		this.tickFindAndGo = tickFindAndGo.bind(this);
 	}
 
 	/**
