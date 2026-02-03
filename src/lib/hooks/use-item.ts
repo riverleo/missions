@@ -22,6 +22,7 @@ import type {
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
+import { useInteraction } from './use-interaction';
 
 type ItemDialogState =
 	| { type: 'create' }
@@ -31,16 +32,11 @@ type ItemDialogState =
 
 type ItemStateDialogState = { type: 'update'; itemStateId: ItemStateId } | undefined;
 
-type ItemInteractionDialogState =
-	| { type: 'create' }
-	| { type: 'update'; itemInteractionId: ItemInteractionId }
-	| { type: 'delete'; itemInteractionId: ItemInteractionId }
-	| undefined;
-
 let instance: ReturnType<typeof createItemStore> | null = null;
 
 function createItemStore() {
 	const { supabase } = useApp();
+	const interaction = useInteraction();
 
 	const itemStore = writable<RecordFetchState<ItemId, Item>>({
 		status: 'idle',
@@ -53,34 +49,13 @@ function createItemStore() {
 		data: {},
 	});
 
-	// item_interaction_id를 키로 관리
-	const itemInteractionStore = writable<RecordFetchState<ItemInteractionId, ItemInteraction>>({
-		status: 'idle',
-		data: {},
-	});
-
-	// item_interaction_id를 키로, 해당 interaction의 actions 배열을 값으로
-	const itemInteractionActionStore = writable<
-		RecordFetchState<ItemInteractionId, ItemInteractionAction[]>
-	>({
-		status: 'idle',
-		data: {},
-	});
-
 	const itemDialogStore = writable<ItemDialogState>(undefined);
 	const itemStateDialogStore = writable<ItemStateDialogState>(undefined);
-	const itemInteractionDialogStore = writable<ItemInteractionDialogState>(undefined);
 
 	// Derived stores for computed values
 	const allItemsStore = derived(itemStore, ($store) => Object.values($store.data));
 
 	const allItemStatesStore = derived(itemStateStore, ($store) => $store.data);
-
-	const allItemInteractionsStore = derived(itemInteractionStore, ($store) =>
-		Object.values($store.data)
-	);
-
-	const allItemInteractionActionsStore = derived(itemInteractionActionStore, ($store) => $store.data);
 
 	const itemUiStore = writable({
 		showBodyPreview: false,
@@ -98,7 +73,6 @@ function createItemStore() {
 		}
 
 		itemStore.update((state) => ({ ...state, status: 'loading' }));
-		itemInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
 			const { data, error } = await supabase
@@ -117,24 +91,6 @@ function createItemStore() {
 				stateRecord[item.id as ItemId] = (item_states ?? []) as ItemState[];
 			}
 
-			// Item interactions and actions
-			const { data: interactionsData, error: interactionsError } = await supabase
-				.from('item_interactions')
-				.select('*, item_interaction_actions(*)')
-				.order('created_at');
-
-			if (interactionsError) throw interactionsError;
-
-			const interactionRecord: Record<ItemInteractionId, ItemInteraction> = {};
-			const actionRecord: Record<ItemInteractionId, ItemInteractionAction[]> = {};
-
-			for (const item of interactionsData ?? []) {
-				const { item_interaction_actions, ...interaction } = item;
-				interactionRecord[item.id as ItemInteractionId] = interaction as ItemInteraction;
-				actionRecord[item.id as ItemInteractionId] = (item_interaction_actions ??
-					[]) as ItemInteractionAction[];
-			}
-
 			itemStore.set({
 				status: 'success',
 				data: itemRecord,
@@ -146,18 +102,6 @@ function createItemStore() {
 				data: stateRecord,
 				error: undefined,
 			});
-
-			itemInteractionStore.set({
-				status: 'success',
-				data: interactionRecord,
-				error: undefined,
-			});
-
-			itemInteractionActionStore.set({
-				status: 'success',
-				data: actionRecord,
-				error: undefined,
-			});
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			itemStore.set({
@@ -166,16 +110,6 @@ function createItemStore() {
 				error: err,
 			});
 			itemStateStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			itemInteractionStore.set({
-				status: 'error',
-				data: {},
-				error: err,
-			});
-			itemInteractionActionStore.set({
 				status: 'error',
 				data: {},
 				error: err,
@@ -199,14 +133,6 @@ function createItemStore() {
 		itemStateDialogStore.set(undefined);
 	}
 
-	function openItemInteractionDialog(state: NonNullable<ItemInteractionDialogState>) {
-		itemInteractionDialogStore.set(state);
-	}
-
-	function closeItemInteractionDialog() {
-		itemInteractionDialogStore.set(undefined);
-	}
-
 	// Getter functions
 	function getItem(id: string): Item | undefined {
 		return get(itemStore).data[id as ItemId];
@@ -216,16 +142,6 @@ function createItemStore() {
 		return get(itemStateStore).data[itemId as ItemId];
 	}
 
-	function getItemInteraction(id: string): ItemInteraction | undefined {
-		return get(itemInteractionStore).data[id as ItemInteractionId];
-	}
-
-	function getItemInteractionActions(
-		itemInteractionId: string
-	): ItemInteractionAction[] | undefined {
-		return get(itemInteractionActionStore).data[itemInteractionId as ItemInteractionId];
-	}
-
 	// GetAll functions
 	function getAllItems(): Item[] {
 		return get(allItemsStore);
@@ -233,14 +149,6 @@ function createItemStore() {
 
 	function getAllItemStates(): Record<ItemId, ItemState[]> {
 		return get(allItemStatesStore);
-	}
-
-	function getAllItemInteractions(): ItemInteraction[] {
-		return get(allItemInteractionsStore);
-	}
-
-	function getAllItemInteractionActions(): Record<ItemInteractionId, ItemInteractionAction[]> {
-		return get(allItemInteractionActionsStore);
 	}
 
 	const admin = {
@@ -371,184 +279,64 @@ function createItemStore() {
 			);
 		},
 
-		async createItemInteraction(
-			scenarioId: ScenarioId,
-			interaction: Omit<ItemInteractionInsert, 'scenario_id'>
-		) {
-			const { data, error } = await supabase
-				.from('item_interactions')
-				.insert({
-					scenario_id: scenarioId,
-					...interaction,
-				} as Database['public']['Tables']['item_interactions']['Insert'])
-				.select('*')
-				.single<ItemInteraction>();
 
-			if (error) throw error;
-
-			itemInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[data.id as ItemInteractionId] = data;
-				})
-			);
-
-			itemInteractionActionStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[data.id as ItemInteractionId] = [];
-				})
-			);
-
-			return data;
-		},
-
-		async updateItemInteraction(id: ItemInteractionId, updates: ItemInteractionUpdate) {
-			const { error } = await supabase.from('item_interactions').update(updates).eq('id', id);
-
-			if (error) throw error;
-
-			itemInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data?.[id]) {
-						Object.assign(draft.data[id], updates);
-					}
-				})
-			);
-		},
-
-		async removeItemInteraction(id: ItemInteractionId) {
-			const { error } = await supabase.from('item_interactions').delete().eq('id', id);
-
-			if (error) throw error;
-
-			itemInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						delete draft.data[id];
-					}
-				})
-			);
-
-			itemInteractionActionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						delete draft.data[id];
-					}
-				})
-			);
-		},
-
-		async createItemInteractionAction(
-			scenarioId: ScenarioId,
-			itemInteractionId: ItemInteractionId,
-			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
-		) {
-			// Get item_id from interaction (nullable for default interactions)
-			const itemInteractionStoreValue = get(itemInteractionStore);
-			const interaction = itemInteractionStoreValue.data[itemInteractionId];
-			const itemId = interaction?.item_id || null;
-
-			const { data, error } = await supabase
-				.from('item_interaction_actions')
-				.insert({
-					...action,
-					scenario_id: scenarioId,
-					item_id: itemId,
-					item_interaction_id: itemInteractionId,
-				})
-				.select()
-				.single<ItemInteractionAction>();
-
-			if (error) throw error;
-
-			itemInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					if (draft.data[itemInteractionId]) {
-						draft.data[itemInteractionId].push(data);
-					} else {
-						draft.data[itemInteractionId] = [data];
-					}
-				})
-			);
-
-			return data;
-		},
-
+		// Item Interaction CRUD - delegated to useInteraction
+		createItemInteraction: interaction.admin.createItemInteraction,
+		updateItemInteraction: interaction.admin.updateItemInteraction,
+		removeItemInteraction: interaction.admin.removeItemInteraction,
+		createItemInteractionAction: interaction.admin.createItemInteractionAction,
+		// Wrapper to maintain old signature (actionId, itemInteractionId, updates) -> (actionId, updates)
 		async updateItemInteractionAction(
 			actionId: ItemInteractionActionId,
-			itemInteractionId: ItemInteractionId,
+			_itemInteractionId: ItemInteractionId,
 			updates: ItemInteractionActionUpdate
 		) {
-			const { error } = await supabase
-				.from('item_interaction_actions')
-				.update(updates)
-				.eq('id', actionId);
-
-			if (error) throw error;
-
-			itemInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					const actions = draft.data[itemInteractionId];
-					if (actions) {
-						const action = actions.find((a) => a.id === actionId);
-						if (action) {
-							Object.assign(action, updates);
-						}
-					}
-				})
-			);
+			return interaction.admin.updateItemInteractionAction(actionId, updates);
 		},
-
+		// Wrapper to maintain old signature (actionId, itemInteractionId) -> (actionId)
 		async removeItemInteractionAction(
 			actionId: ItemInteractionActionId,
-			itemInteractionId: ItemInteractionId
+			_itemInteractionId: ItemInteractionId
 		) {
-			const { error } = await supabase.from('item_interaction_actions').delete().eq('id', actionId);
-
-			if (error) throw error;
-
-			itemInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					const actions = draft.data[itemInteractionId];
-					if (actions) {
-						draft.data[itemInteractionId] = actions.filter((a) => a.id !== actionId);
-					}
-				})
-			);
+			return interaction.admin.removeItemInteractionAction(actionId);
 		},
+
 	};
 
 	return {
 		itemStore: itemStore as Readable<RecordFetchState<ItemId, Item>>,
 		itemStateStore: itemStateStore as Readable<RecordFetchState<ItemId, ItemState[]>>,
-		itemInteractionStore: itemInteractionStore as Readable<
-			RecordFetchState<ItemInteractionId, ItemInteraction>
-		>,
-		itemInteractionActionStore: itemInteractionActionStore as Readable<
-			RecordFetchState<ItemInteractionId, ItemInteractionAction[]>
-		>,
+		// Re-export from useInteraction
+		itemInteractionStore: interaction.itemInteractionStore,
+		itemInteractionActionStore: interaction.itemInteractionActionStore,
 		itemDialogStore: itemDialogStore as Readable<ItemDialogState>,
 		itemStateDialogStore: itemStateDialogStore as Readable<ItemStateDialogState>,
-		itemInteractionDialogStore: itemInteractionDialogStore as Readable<ItemInteractionDialogState>,
+		// Re-export from useInteraction
+		itemInteractionDialogStore: interaction.itemInteractionDialogStore,
 		allItemsStore,
 		allItemStatesStore,
-		allItemInteractionsStore,
-		allItemInteractionActionsStore,
+		// Re-export from useInteraction
+		allItemInteractionsStore: interaction.allItemInteractionsStore,
+		allItemInteractionActionsStore: interaction.itemInteractionActionStore,
 		init,
 		fetch,
 		openItemDialog,
 		closeItemDialog,
 		openStateDialog,
 		closeStateDialog,
-		openItemInteractionDialog,
-		closeItemInteractionDialog,
+		// Re-export from useInteraction
+		openItemInteractionDialog: interaction.openItemInteractionDialog,
+		closeItemInteractionDialog: interaction.closeItemInteractionDialog,
 		getItem,
 		getItemStates,
-		getItemInteraction,
-		getItemInteractionActions,
+		// Re-export from useInteraction
+		getItemInteraction: interaction.getItemInteraction,
+		getItemInteractionActions: interaction.getItemInteractionActions,
 		getAllItems,
 		getAllItemStates,
-		getAllItemInteractions,
-		getAllItemInteractionActions,
+		// Re-export from useInteraction
+		getAllItemInteractions: interaction.getAllItemInteractions,
+		getAllItemInteractionActions: (id: ItemInteractionId) => interaction.getItemInteractionActions(id),
 		admin,
 	};
 }
