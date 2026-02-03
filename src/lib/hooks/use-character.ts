@@ -43,6 +43,7 @@ import type {
 	ScenarioId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
+import { useInteraction } from './use-interaction';
 
 type CharacterDialogState =
 	| { type: 'create' }
@@ -52,12 +53,6 @@ type CharacterDialogState =
 
 type CharacterFaceStateDialogState =
 	| { type: 'update'; characterFaceStateId: CharacterFaceStateId }
-	| undefined;
-
-type CharacterInteractionDialogState =
-	| { type: 'create' }
-	| { type: 'update'; characterInteractionId: CharacterInteractionId }
-	| { type: 'delete'; characterInteractionId: CharacterInteractionId }
 	| undefined;
 
 type CharacterBodyDialogState =
@@ -75,6 +70,7 @@ let instance: ReturnType<typeof createCharacterStore> | null = null;
 
 function createCharacterStore() {
 	const { supabase } = useApp();
+	const interaction = useInteraction();
 
 	const characterStore = writable<RecordFetchState<CharacterId, Character>>({
 		status: 'idle',
@@ -87,25 +83,8 @@ function createCharacterStore() {
 		data: {},
 	});
 
-	// character_interaction_id를 키로 관리
-	const characterInteractionStore = writable<
-		RecordFetchState<CharacterInteractionId, CharacterInteraction>
-	>({
-		status: 'idle',
-		data: {},
-	});
-
-	// character_interaction_id를 키로, 해당 interaction의 actions 배열을 값으로
-	const characterInteractionActionStore = writable<
-		RecordFetchState<CharacterInteractionId, CharacterInteractionAction[]>
-	>({
-		status: 'idle',
-		data: {},
-	});
-
 	const characterDialogStore = writable<CharacterDialogState>(undefined);
 	const characterFaceStateDialogStore = writable<CharacterFaceStateDialogState>(undefined);
-	const characterInteractionDialogStore = writable<CharacterInteractionDialogState>(undefined);
 
 	const characterBodyStore = writable<RecordFetchState<CharacterBodyId, CharacterBody>>({
 		status: 'idle',
@@ -144,15 +123,6 @@ function createCharacterStore() {
 
 	const allCharacterFaceStatesStore = derived(characterFaceStateStore, ($store) => $store.data);
 
-	const allCharacterInteractionsStore = derived(characterInteractionStore, ($store) =>
-		Object.values($store.data)
-	);
-
-	const allCharacterInteractionActionsStore = derived(
-		characterInteractionActionStore,
-		($store) => $store.data
-	);
-
 	const allCharacterBodiesStore = derived(characterBodyStore, ($store) =>
 		Object.values($store.data)
 	);
@@ -189,7 +159,6 @@ function createCharacterStore() {
 		}
 
 		characterStore.update((state) => ({ ...state, status: 'loading' }));
-		characterInteractionStore.update((state) => ({ ...state, status: 'loading' }));
 		characterBodyStore.update((state) => ({ ...state, status: 'loading' }));
 		needStore.update((state) => ({ ...state, status: 'loading' }));
 		needFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
@@ -198,17 +167,12 @@ function createCharacterStore() {
 		try {
 			const [
 				charactersResult,
-				interactionsResult,
 				bodiesResult,
 				needsResult,
 				fulfillmentsResult,
 				characterNeedsResult,
 			] = await Promise.all([
 				supabase.from('characters').select('*, character_face_states(*)').order('name'),
-				supabase
-					.from('character_interactions')
-					.select('*, character_interaction_actions(*)')
-					.order('created_at'),
 				supabase.from('character_bodies').select('*, character_body_states(*)').order('name'),
 				supabase.from('needs').select('*').order('name'),
 				supabase.from('need_fulfillments').select('*'),
@@ -216,7 +180,6 @@ function createCharacterStore() {
 			]);
 
 			if (charactersResult.error) throw charactersResult.error;
-			if (interactionsResult.error) throw interactionsResult.error;
 			if (bodiesResult.error) throw bodiesResult.error;
 			if (needsResult.error) throw needsResult.error;
 			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
@@ -231,17 +194,6 @@ function createCharacterStore() {
 				characterRecord[item.id as CharacterId] = character as Character;
 				faceStateRecord[item.id as CharacterId] = (character_face_states ??
 					[]) as CharacterFaceState[];
-			}
-
-			// Character interactions and actions
-			const interactionRecord: Record<CharacterInteractionId, CharacterInteraction> = {};
-			const actionRecord: Record<CharacterInteractionId, CharacterInteractionAction[]> = {};
-
-			for (const item of interactionsResult.data ?? []) {
-				const { character_interaction_actions, ...interaction } = item;
-				interactionRecord[item.id as CharacterInteractionId] = interaction as CharacterInteraction;
-				actionRecord[item.id as CharacterInteractionId] = (character_interaction_actions ??
-					[]) as CharacterInteractionAction[];
 			}
 
 			// Character bodies and states
@@ -275,16 +227,6 @@ function createCharacterStore() {
 
 			characterStore.set({ status: 'success', data: characterRecord, error: undefined });
 			characterFaceStateStore.set({ status: 'success', data: faceStateRecord, error: undefined });
-			characterInteractionStore.set({
-				status: 'success',
-				data: interactionRecord,
-				error: undefined,
-			});
-			characterInteractionActionStore.set({
-				status: 'success',
-				data: actionRecord,
-				error: undefined,
-			});
 			characterBodyStore.set({ status: 'success', data: bodyRecord, error: undefined });
 			characterBodyStateStore.set({ status: 'success', data: bodyStateRecord, error: undefined });
 			needStore.set({ status: 'success', data: needRecord });
@@ -294,8 +236,6 @@ function createCharacterStore() {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			characterStore.set({ status: 'error', data: {}, error: err });
 			characterFaceStateStore.set({ status: 'error', data: {}, error: err });
-			characterInteractionStore.set({ status: 'error', data: {}, error: err });
-			characterInteractionActionStore.set({ status: 'error', data: {}, error: err });
 			characterBodyStore.set({ status: 'error', data: {}, error: err });
 			characterBodyStateStore.set({ status: 'error', data: {}, error: err });
 			needStore.set({ status: 'error', data: {}, error: err });
@@ -318,14 +258,6 @@ function createCharacterStore() {
 
 	function closeCharacterFaceStateDialog() {
 		characterFaceStateDialogStore.set(undefined);
-	}
-
-	function openCharacterInteractionDialog(state: NonNullable<CharacterInteractionDialogState>) {
-		characterInteractionDialogStore.set(state);
-	}
-
-	function closeCharacterInteractionDialog() {
-		characterInteractionDialogStore.set(undefined);
 	}
 
 	function openCharacterBodyDialog(state: NonNullable<CharacterBodyDialogState>) {
@@ -351,16 +283,6 @@ function createCharacterStore() {
 
 	function getCharacterFaceStates(characterId: string): CharacterFaceState[] | undefined {
 		return get(characterFaceStateStore).data[characterId as CharacterId];
-	}
-
-	function getCharacterInteraction(id: string): CharacterInteraction | undefined {
-		return get(characterInteractionStore).data[id as CharacterInteractionId];
-	}
-
-	function getCharacterInteractionActions(
-		characterInteractionId: string
-	): CharacterInteractionAction[] | undefined {
-		return getCharacterInteractionActions(characterInteractionId as CharacterInteractionId);
 	}
 
 	function getCharacterBody(id: string): CharacterBody | undefined {
@@ -390,17 +312,6 @@ function createCharacterStore() {
 
 	function getAllCharacterFaceStates(): Record<CharacterId, CharacterFaceState[]> {
 		return get(allCharacterFaceStatesStore);
-	}
-
-	function getAllCharacterInteractions(): CharacterInteraction[] {
-		return get(allCharacterInteractionsStore);
-	}
-
-	function getAllCharacterInteractionActions(): Record<
-		CharacterInteractionId,
-		CharacterInteractionAction[]
-	> {
-		return get(allCharacterInteractionActionsStore);
 	}
 
 	function getAllCharacterBodies(): CharacterBody[] {
@@ -568,160 +479,25 @@ function createCharacterStore() {
 			);
 		},
 
-		async createCharacterInteraction(
-			scenarioId: ScenarioId,
-			interaction: Omit<CharacterInteractionInsert, 'scenario_id'>
-		) {
-			const { data, error } = await supabase
-				.from('character_interactions')
-				.insert({
-					scenario_id: scenarioId,
-					...interaction,
-				} as Database['public']['Tables']['character_interactions']['Insert'])
-				.select('*')
-				.single<CharacterInteraction>();
-
-			if (error) throw error;
-
-			characterInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[data.id as CharacterInteractionId] = data;
-				})
-			);
-
-			characterInteractionActionStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[data.id as CharacterInteractionId] = [];
-				})
-			);
-
-			return data;
-		},
-
-		async updateCharacterInteraction(
-			id: CharacterInteractionId,
-			updates: CharacterInteractionUpdate
-		) {
-			const { error } = await supabase.from('character_interactions').update(updates).eq('id', id);
-
-			if (error) throw error;
-
-			characterInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data?.[id]) {
-						Object.assign(draft.data[id], updates);
-					}
-				})
-			);
-		},
-
-		async removeCharacterInteraction(id: CharacterInteractionId) {
-			const { error } = await supabase.from('character_interactions').delete().eq('id', id);
-
-			if (error) throw error;
-
-			characterInteractionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						delete draft.data[id];
-					}
-				})
-			);
-
-			characterInteractionActionStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data) {
-						delete draft.data[id];
-					}
-				})
-			);
-		},
-
-		async createCharacterInteractionAction(
-			scenarioId: ScenarioId,
-			characterInteractionId: CharacterInteractionId,
-			action: Omit<
-				CharacterInteractionActionInsert,
-				'scenario_id' | 'character_id' | 'target_character_id' | 'character_interaction_id'
-			>
-		) {
-			// Get character_id and target_character_id from interaction (nullable for default interactions)
-			const characterInteractionStoreValue = get(characterInteractionStore);
-			const interaction = characterInteractionStoreValue.data[characterInteractionId];
-			const characterId = interaction?.character_id || null;
-			const targetCharacterId = interaction?.target_character_id || null;
-
-			const { data, error } = await supabase
-				.from('character_interaction_actions')
-				.insert({
-					...action,
-					scenario_id: scenarioId,
-					character_id: characterId,
-					target_character_id: targetCharacterId,
-					character_interaction_id: characterInteractionId,
-				})
-				.select()
-				.single<CharacterInteractionAction>();
-
-			if (error) throw error;
-
-			characterInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					if (draft.data[characterInteractionId]) {
-						draft.data[characterInteractionId].push(data);
-					} else {
-						draft.data[characterInteractionId] = [data];
-					}
-				})
-			);
-
-			return data;
-		},
-
+		// Character Interaction CRUD - delegated to useInteraction
+		createCharacterInteraction: interaction.admin.createCharacterInteraction,
+		updateCharacterInteraction: interaction.admin.updateCharacterInteraction,
+		removeCharacterInteraction: interaction.admin.removeCharacterInteraction,
+		createCharacterInteractionAction: interaction.admin.createCharacterInteractionAction,
+		// Wrapper to maintain old signature (actionId, characterInteractionId, updates) -> (actionId, updates)
 		async updateCharacterInteractionAction(
 			actionId: CharacterInteractionActionId,
-			characterInteractionId: CharacterInteractionId,
+			_characterInteractionId: CharacterInteractionId,
 			updates: CharacterInteractionActionUpdate
 		) {
-			const { error } = await supabase
-				.from('character_interaction_actions')
-				.update(updates)
-				.eq('id', actionId);
-
-			if (error) throw error;
-
-			characterInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					const actions = draft.data[characterInteractionId];
-					if (actions) {
-						const action = actions.find((a) => a.id === actionId);
-						if (action) {
-							Object.assign(action, updates);
-						}
-					}
-				})
-			);
+			return interaction.admin.updateCharacterInteractionAction(actionId, updates);
 		},
-
+		// Wrapper to maintain old signature (actionId, characterInteractionId) -> (actionId)
 		async removeCharacterInteractionAction(
 			actionId: CharacterInteractionActionId,
-			characterInteractionId: CharacterInteractionId
+			_characterInteractionId: CharacterInteractionId
 		) {
-			const { error } = await supabase
-				.from('character_interaction_actions')
-				.delete()
-				.eq('id', actionId);
-
-			if (error) throw error;
-
-			characterInteractionActionStore.update((s) =>
-				produce(s, (draft) => {
-					const actions = draft.data[characterInteractionId];
-					if (actions) {
-						draft.data[characterInteractionId] = actions.filter((a) => a.id !== actionId);
-					}
-				})
-			);
+			return interaction.admin.removeCharacterInteractionAction(actionId);
 		},
 
 		async createCharacterBody(
@@ -1005,12 +781,9 @@ function createCharacterStore() {
 		characterFaceStateStore: characterFaceStateStore as Readable<
 			RecordFetchState<CharacterId, CharacterFaceState[]>
 		>,
-		characterInteractionStore: characterInteractionStore as Readable<
-			RecordFetchState<CharacterInteractionId, CharacterInteraction>
-		>,
-		characterInteractionActionStore: characterInteractionActionStore as Readable<
-			RecordFetchState<CharacterInteractionId, CharacterInteractionAction[]>
-		>,
+		// Re-export from useInteraction
+		characterInteractionStore: interaction.characterInteractionStore,
+		characterInteractionActionStore: interaction.characterInteractionActionStore,
 		characterBodyStore: characterBodyStore as Readable<
 			RecordFetchState<CharacterBodyId, CharacterBody>
 		>,
@@ -1020,8 +793,8 @@ function createCharacterStore() {
 		characterDialogStore: characterDialogStore as Readable<CharacterDialogState>,
 		characterFaceStateDialogStore:
 			characterFaceStateDialogStore as Readable<CharacterFaceStateDialogState>,
-		characterInteractionDialogStore:
-			characterInteractionDialogStore as Readable<CharacterInteractionDialogState>,
+		// Re-export from useInteraction
+		characterInteractionDialogStore: interaction.characterInteractionDialogStore,
 		characterBodyDialogStore: characterBodyDialogStore as Readable<CharacterBodyDialogState>,
 		needStore: needStore as Readable<RecordFetchState<NeedId, Need>>,
 		needFulfillmentStore: needFulfillmentStore as Readable<
@@ -1033,8 +806,9 @@ function createCharacterStore() {
 		needDialogStore: needDialogStore as Readable<NeedDialogState>,
 		allCharactersStore,
 		allCharacterFaceStatesStore,
-		allCharacterInteractionsStore,
-		allCharacterInteractionActionsStore,
+		// Re-export from useInteraction
+		allCharacterInteractionsStore: interaction.allCharacterInteractionsStore,
+		allCharacterInteractionActionsStore: interaction.characterInteractionActionStore,
 		allCharacterBodiesStore,
 		allCharacterBodyStatesStore,
 		allNeedsStore,
@@ -1046,16 +820,18 @@ function createCharacterStore() {
 		closeCharacterDialog,
 		openCharacterFaceStateDialog,
 		closeCharacterFaceStateDialog,
-		openCharacterInteractionDialog,
-		closeCharacterInteractionDialog,
+		// Re-export from useInteraction
+		openCharacterInteractionDialog: interaction.openCharacterInteractionDialog,
+		closeCharacterInteractionDialog: interaction.closeCharacterInteractionDialog,
 		openCharacterBodyDialog,
 		closeCharacterBodyDialog,
 		openNeedDialog,
 		closeNeedDialog,
 		getCharacter,
 		getCharacterFaceStates,
-		getCharacterInteraction,
-		getCharacterInteractionActions,
+		// Re-export from useInteraction
+		getCharacterInteraction: interaction.getCharacterInteraction,
+		getCharacterInteractionActions: interaction.getCharacterInteractionActions,
 		getCharacterBody,
 		getCharacterBodyStates,
 		getNeed,
@@ -1063,8 +839,10 @@ function createCharacterStore() {
 		getCharacterNeed,
 		getAllCharacters,
 		getAllCharacterFaceStates,
-		getAllCharacterInteractions,
-		getAllCharacterInteractionActions,
+		// Re-export from useInteraction
+		getAllCharacterInteractions: interaction.getAllCharacterInteractions,
+		getAllCharacterInteractionActions: (id: CharacterInteractionId) =>
+			interaction.getCharacterInteractionActions(id),
 		getAllCharacterBodies,
 		getAllCharacterBodyStates,
 		getAllNeeds,
