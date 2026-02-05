@@ -2,14 +2,14 @@ import { useBehavior } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
 /**
- * IDLE 행동 처리
+ * idle 타입인 경우 대기 처리
  *
  * idle 행동의 대기 시간(idle_duration_ticks)을 체크합니다.
  * 완료되지 않았으면 return true (대기), 완료되면 return false (다음 행동으로 전환)
  *
  * @returns true: 대기 중, false: 완료 또는 idle이 아님
  */
-export default function tickIdle(this: WorldCharacterEntityBehavior, tick: number): boolean {
+export default function tickWaitIfIdle(this: WorldCharacterEntityBehavior, tick: number): boolean {
 	const { getBehaviorAction } = useBehavior();
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);

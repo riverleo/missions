@@ -4,13 +4,13 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 import type { WorldItemId } from '$lib/types';
 
 /**
- * 시스템 행동 전처리 (아이템 줍기)
+ * 시스템 아이템 줍기인 경우 실행
  *
  * 타겟 엔티티가 아이템이고 아직 들고 있지 않은 경우 줍기 인터렉션을 실행합니다.
  *
  * @returns true: 행동 실행 중단, false: 행동 실행 계속 진행
  */
-export default function tickActionSystemPre(
+export default function tickActionIfSystemItemPick(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {

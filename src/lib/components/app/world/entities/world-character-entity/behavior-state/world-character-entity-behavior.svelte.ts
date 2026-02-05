@@ -7,12 +7,11 @@ import update from './update';
 import updateMove from './update-move';
 import updateDirection from './update-direction';
 import tick from './tick';
-import tickInitialize from './tick-initialize';
-import tickIdle from './tick-idle';
+import tickFindBehaviorTarget from './tick-find-behavior-target';
+import tickWaitIfIdle from './tick-wait-if-idle';
 import tickFindAndGo from './tick-find-and-go';
-import tickActionSystemPre from './tick-action-system-pre';
-import tickActionFulfillItemUse from './tick-action-fulfill-item-use';
-import tickActionSystemPost from './tick-action-system-post';
+import tickActionIfSystemItemPick from './tick-action-if-system-item-pick';
+import tickActionIfOnceItemUse from './tick-action-if-once-item-use';
 import tickNextOrClear from './tick-next-or-clear';
 
 /**
@@ -36,12 +35,11 @@ export class WorldCharacterEntityBehavior {
 	updateMove = updateMove;
 	updateDirection = updateDirection;
 	tick = tick;
-	tickInitialize = tickInitialize;
-	tickIdle = tickIdle;
+	tickFindBehaviorTarget = tickFindBehaviorTarget;
+	tickWaitIfIdle = tickWaitIfIdle;
 	tickFindAndGo = tickFindAndGo;
-	tickActionSystemPre = tickActionSystemPre;
-	tickActionFulfillItemUse = tickActionFulfillItemUse;
-	tickActionSystemPost = tickActionSystemPost;
+	tickActionIfSystemItemPick = tickActionIfSystemItemPick;
+	tickActionIfOnceItemUse = tickActionIfOnceItemUse;
 	tickNextOrClear = tickNextOrClear;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
@@ -53,8 +51,23 @@ export class WorldCharacterEntityBehavior {
 	 */
 	clearTargetEntity(): void {
 		this.path = [];
-		this.direction = 'right';
 		this.targetEntityId = undefined;
+	}
+
+	/**
+	 * 인터렉션 타겟과 시작 틱을 초기화합니다.
+	 */
+	clearInteractionTarget(): void {
+		this.interactionTargetId = undefined;
+		this.interactionTargetStartTick = undefined;
+	}
+
+	/**
+	 * 행동 타겟을 설정합니다.
+	 */
+	setBehaviorTarget(behaviorTargetId: BehaviorTargetId, tick: number): void {
+		this.behaviorTargetId = behaviorTargetId;
+		this.behaviorTargetStartTick = tick;
 	}
 
 	/**
@@ -62,10 +75,8 @@ export class WorldCharacterEntityBehavior {
 	 */
 	clear(): void {
 		this.clearTargetEntity();
-		this.behaviors = [];
+		this.clearInteractionTarget();
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
-		this.interactionTargetId = undefined;
-		this.interactionTargetStartTick = undefined;
 	}
 }

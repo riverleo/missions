@@ -1,30 +1,33 @@
 import { useBehavior, useWorld, useInteraction, useCharacter } from '$lib/hooks';
+import { produce } from 'immer';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import type { WorldItemId, ItemInteractionId, Interaction, ItemInteraction } from '$lib/types';
+import type { Interaction, ItemInteraction, WorldItemId } from '$lib/types';
 
 /**
- * 아이템 사용 인터렉션 (once)
+ * once 타입 아이템 사용인 경우 실행
  *
  * once_interaction_type 아이템 사용 인터렉션을 실행합니다.
- * 사용 인터렉션 진행 중 need_fulfilments를 적용하고, 완료 후 종료합니다.
+ * 사용 인터렉션 진행 중 need_fulfilments를 적용하고, 완료 후 아이템을 제거합니다.
  *
  * @returns true: 진행 중, false: 완료 (다음 행동으로 전환)
  */
-export default function tickActionOnceItemUse(
+export default function tickActionIfOnceItemUse(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getBehaviorAction } = useBehavior();
-	const { getInteraction, getWorldItem } = useWorld();
-	const { getItemInteractionActions, getItemInteraction, getNextInteractionActionId } =
+	const { getBehaviorAction, searchEntitySources } = useBehavior();
+	const { getInteraction, getWorldItem, worldItemStore } = useWorld();
+	const { getItemInteractionActions, getNextInteractionAction, getAllItemInteractions } =
 		useInteraction();
 	const { getAllNeedFulfillments } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
-	if (!behaviorAction) return false;
+	if (!behaviorAction) {
+		throw new Error('[tickActionOnceItemUse] No behaviorAction found');
+	}
 
 	// once 타입만 처리 (아이템 사용)
 	if (behaviorAction.type !== 'once') return false;
@@ -36,22 +39,17 @@ export default function tickActionOnceItemUse(
 		// explicit: 명시적으로 지정된 interaction 사용
 		interaction = getInteraction(behaviorAction);
 	} else if (behaviorAction.target_selection_method === 'search') {
-		// search: fulfillment를 통해 자동 탐색
-		const { getAllNeedFulfillments } = useCharacter();
-		const fulfillments = getAllNeedFulfillments().filter(
-			(f) => 'need_id' in behaviorAction && f.need_id === behaviorAction.need_id
-		);
+		// search: searchEntitySources를 통해 자동 탐색
+		const entitySources = searchEntitySources(behaviorAction);
+		const entitySourceIds = new Set(entitySources.map((es) => es.id));
 
-		// once_interaction_type이 있고 item으로 시작하는 interaction 찾기
-		for (const fulfillment of fulfillments) {
-			if (fulfillment.item_interaction_id) {
-				const foundInteraction = getItemInteraction(fulfillment.item_interaction_id);
-				if (foundInteraction?.once_interaction_type?.startsWith('item')) {
-					interaction = foundInteraction as Interaction;
-					break;
-				}
-			}
-		}
+		// 엔티티 소스 ID와 매칭되는 아이템 인터렉션 찾기
+		const allItemInteractions = getAllItemInteractions();
+		interaction = allItemInteractions.find(
+			(itemInteraction) =>
+				entitySourceIds.has(itemInteraction.item_id) &&
+				itemInteraction.once_interaction_type?.startsWith('item')
+		) as Interaction | undefined;
 	}
 
 	if (!interaction) {
@@ -62,22 +60,24 @@ export default function tickActionOnceItemUse(
 
 	// once_interaction_type 확인 (item만 처리)
 	if (!interaction.once_interaction_type?.startsWith('item')) {
-		return false;
+		throw new Error(
+			`[tickActionOnceItemUse] Interaction is not item type: ${interaction.id} (type: ${interaction.once_interaction_type})`
+		);
 	}
 
 	// 들고 있는 아이템 확인
 	if (worldCharacterEntity.heldItemIds.length === 0) {
-		return false;
+		return true;
 	}
 
 	const lastHeldEntityId =
 		worldCharacterEntity.heldItemIds[worldCharacterEntity.heldItemIds.length - 1];
 	if (!lastHeldEntityId) {
-		return false;
+		return true;
 	}
 
-	const { instanceId } = EntityIdUtils.parse(lastHeldEntityId);
-	const worldItem = getWorldItem(instanceId as WorldItemId);
+	const { instanceId } = EntityIdUtils.parse<WorldItemId>(lastHeldEntityId);
+	const worldItem = getWorldItem(instanceId);
 	if (!worldItem) {
 		console.warn('[tickActionOnceItemUse] worldItem not found, removing from heldItems:', {
 			lastHeldEntityId,
@@ -142,21 +142,35 @@ export default function tickActionOnceItemUse(
 
 		// 다음 인터렉션 액션으로 전환 또는 체인 종료
 		const interactionAction = InteractionIdUtils.interactionAction.to(currentInteractionAction);
-		const nextInteractionActionId = getNextInteractionActionId(interactionAction);
+		const nextInteractionAction = getNextInteractionAction(interactionAction);
 
-		if (nextInteractionActionId) {
+		if (nextInteractionAction) {
 			// 다음 인터렉션으로 전환
-			this.interactionTargetId = InteractionIdUtils.create(
-				'item',
-				itemInteraction.id,
-				nextInteractionActionId as any
-			);
+			this.interactionTargetId = InteractionIdUtils.create(nextInteractionAction);
 			this.interactionTargetStartTick = tick;
 			return true; // 계속 진행
 		} else {
-			// 인터렉션 체인 종료
-			this.interactionTargetId = undefined;
-			this.interactionTargetStartTick = undefined;
+			// 인터렉션 체인 종료 및 아이템 제거
+			this.clearInteractionTarget();
+
+			// 사용한 아이템 제거
+			const removedItemEntityId = worldCharacterEntity.heldItemIds.pop();
+			if (removedItemEntityId) {
+				const { instanceId: removedInstanceId } = EntityIdUtils.parse(removedItemEntityId);
+
+				// 엔티티가 남아있으면 제거 (일반적으로 이미 제거됨)
+				const itemEntity = worldCharacterEntity.worldContext.entities[removedItemEntityId];
+				if (itemEntity) {
+					itemEntity.removeFromWorld();
+				}
+
+				// worldItem을 스토어에서 완전히 제거
+				worldItemStore.update((state) =>
+					produce(state, (draft) => {
+						delete draft.data[removedInstanceId as WorldItemId];
+					})
+				);
+			}
 		}
 	}
 

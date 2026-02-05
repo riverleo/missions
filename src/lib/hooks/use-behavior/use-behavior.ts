@@ -31,7 +31,6 @@ import type {
 	WorldCharacterEntityBehavior,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
-import type { Behavior as WorldBehavior } from '$lib/components/app/world/behaviors';
 import { searchEntitySources } from './search-entity-sources';
 
 type BehaviorPriorityDialogState =
@@ -52,8 +51,8 @@ type ConditionBehaviorDialogState =
 	| { type: 'delete'; conditionBehaviorId: ConditionBehaviorId }
 	| undefined;
 
-// Runtime behavior instance management
-const behaviorInstanceMap = new Map<WorldCharacterId, WorldBehavior[]>();
+// Runtime behavior instance management (DEPRECATED - not used)
+// const behaviorInstanceMap = new Map<WorldCharacterId, WorldCharacterEntityBehavior[]>();
 
 let instance: ReturnType<typeof createBehaviorStore> | null = null;
 
@@ -262,6 +261,22 @@ function createBehaviorStore() {
 			type === 'need'
 				? getNeedBehaviorAction(behaviorActionId)
 				: getConditionBehaviorAction(behaviorActionId);
+
+		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
+	}
+
+	function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction | undefined {
+		const nextActionId =
+			behaviorAction.behaviorType === 'need'
+				? behaviorAction.next_need_behavior_action_id
+				: behaviorAction.next_condition_behavior_action_id;
+
+		if (!nextActionId) return undefined;
+
+		const plainAction =
+			behaviorAction.behaviorType === 'need'
+				? getNeedBehaviorAction(nextActionId)
+				: getConditionBehaviorAction(nextActionId);
 
 		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
 	}
@@ -631,36 +646,36 @@ function createBehaviorStore() {
 		},
 	};
 
-	// Runtime behavior instance management
-	function getBehavior(worldCharacterId: WorldCharacterId): WorldBehavior | undefined {
-		const behaviors = behaviorInstanceMap.get(worldCharacterId);
-		if (!behaviors || behaviors.length === 0) {
-			return undefined;
-		}
+	// Runtime behavior instance management (DEPRECATED - not used)
+	// function getBehavior(worldCharacterId: WorldCharacterId): WorldCharacterEntityBehavior | undefined {
+	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId);
+	// 	if (!behaviors || behaviors.length === 0) {
+	// 		return undefined;
+	// 	}
+	//
+	// 	// 우선도가 가장 높은 행동 반환
+	// 	return behaviors.reduce((prev, current) =>
+	// 		current.getPriority() > prev.getPriority() ? current : prev
+	// 	);
+	// }
+	//
+	// function addBehavior(worldCharacterId: WorldCharacterId, behavior: WorldCharacterEntityBehavior): void {
+	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId) ?? [];
+	// 	behaviors.push(behavior);
+	// 	behaviorInstanceMap.set(worldCharacterId, behaviors);
+	// }
+	//
+	// function removeBehavior(worldCharacterId: WorldCharacterId, behaviorId: string): void {
+	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId);
+	// 	if (!behaviors) return;
+	//
+	// 	const filtered = behaviors.filter((b) => b.id !== behaviorId);
+	// 	behaviorInstanceMap.set(worldCharacterId, filtered);
+	// }
 
-		// 우선도가 가장 높은 행동 반환
-		return behaviors.reduce((prev, current) =>
-			current.getPriority() > prev.getPriority() ? current : prev
-		);
-	}
-
-	function addBehavior(worldCharacterId: WorldCharacterId, behavior: WorldBehavior): void {
-		const behaviors = behaviorInstanceMap.get(worldCharacterId) ?? [];
-		behaviors.push(behavior);
-		behaviorInstanceMap.set(worldCharacterId, behaviors);
-	}
-
-	function removeBehavior(worldCharacterId: WorldCharacterId, behaviorId: string): void {
-		const behaviors = behaviorInstanceMap.get(worldCharacterId);
-		if (!behaviors) return;
-
-		const filtered = behaviors.filter((b) => b.id !== behaviorId);
-		behaviorInstanceMap.set(worldCharacterId, filtered);
-	}
-
-	function clearBehaviors(worldCharacterId: WorldCharacterId): void {
-		behaviorInstanceMap.delete(worldCharacterId);
-	}
+	// function clearBehaviors(worldCharacterId: WorldCharacterId): void {
+	// 	behaviorInstanceMap.delete(worldCharacterId);
+	// }
 
 	return {
 		behaviorPriorityStore,
@@ -700,6 +715,7 @@ function createBehaviorStore() {
 		getConditionBehavior,
 		getConditionBehaviorAction,
 		getBehaviorAction,
+		getNextBehaviorAction,
 		getAllBehaviorPriorities,
 		getAllNeedBehaviors,
 		getAllNeedBehaviorActions,
@@ -708,10 +724,10 @@ function createBehaviorStore() {
 		getAllBehaviors,
 		getAllBehaviorsByPriority,
 		getRootBehaviorAction,
-		getBehavior,
-		addBehavior,
-		removeBehavior,
-		clearBehaviors,
+		// getBehavior,
+		// addBehavior,
+		// removeBehavior,
+		// clearBehaviors,
 		searchEntitySources,
 		admin,
 	};
