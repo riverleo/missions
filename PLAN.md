@@ -10,9 +10,9 @@
 
 ---
 
-## 진행 중인 작업 🚧
+## 완료된 작업 ✅ (계속)
 
-### Phase 2: 인터렉션 체이닝 구현
+### Phase 2: 인터렉션 체이닝 구현 (완료)
 
 #### 현재 상태
 ```typescript
@@ -28,35 +28,34 @@ this.tickCompletion(tick);                       // ⏳ 부분 구현 (인터렉
 
 #### 작업 목록
 
-**1. tickCompletion - 인터렉션 체이닝 로직 구현**
-- [ ] `interactionTargetId`가 있을 때:
+**1. tickCompletion - 인터렉션 체이닝 로직 구현** ✅
+- [x] `interactionTargetId`가 있을 때:
   - 현재 인터렉션 액션의 `duration_ticks` 확인
   - `interactionTargetStartTick` 기준으로 경과 시간 계산
-  - 완료 시 `next_interaction_action_id`로 전환
+  - 완료 시 `next_*_interaction_action_id`로 전환
   - 체인 끝나면 `interactionTargetId = undefined`
-- [ ] 인터렉션 액션 타입별 처리:
-  - `item_pick`: 즉시 완료 (duration 0)
-  - `item_use`, `building_use` 등: duration_ticks 대기
-- [ ] 다음 인터렉션으로 전환 시 `interactionTargetStartTick` 업데이트
+- [x] 인터렉션 액션 타입별 처리:
+  - 타입별로 다른 next 필드 사용 (building/item/character)
+- [x] 다음 인터렉션으로 전환 시 `interactionTargetStartTick` 업데이트
 
-**2. tickActionFulfillItemUse - 아이템 사용 구현**
-- [ ] 인터렉션 체인 시작:
+**2. tickActionFulfillItemUse - 아이템 사용 구현** ✅
+- [x] 인터렉션 체인 시작:
   - 들고 있는 아이템 확인 (heldItems)
-  - 아이템의 interaction 가져오기
-  - 첫 번째 interaction_action으로 `interactionTargetId` 설정
+  - 아이템의 item_interaction_id로 interaction 가져오기
+  - root action으로 `interactionTargetId` 설정
   - `interactionTargetStartTick = tick` 설정
-- [ ] need_fulfilments 실행:
+- [x] need_fulfilments 실행:
   - 매 tick마다 욕구 증가
-  - `increase_per_tick` 값 적용
+  - `increase_per_tick` 값 적용 (max 100)
 - [ ] condition_fulfillments 실행 (향후):
   - 건물 컨디션 증가
 
-**3. tickActionSystemPost - 아이템 제거**
-- [ ] 인터렉션 체인 완료 체크:
+**3. tickActionSystemPost - 아이템 제거** ✅
+- [x] 인터렉션 체인 완료 체크:
   - `interactionTargetId === undefined` 확인
-  - 이전 tick에 인터렉션이 있었는지 추적
-- [ ] 완료 시 아이템 제거:
-  - heldItems에서 제거
+  - fulfill 타입 + item interaction 확인
+- [x] 완료 시 아이템 제거:
+  - heldItems에서 pop
   - worldItem의 world_character_id = null
 
 ---
