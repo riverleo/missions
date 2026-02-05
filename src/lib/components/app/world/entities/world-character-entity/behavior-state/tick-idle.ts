@@ -23,6 +23,6 @@ export default function tickIdle(this: WorldCharacterEntityBehavior, tick: numbe
 		return true; // 아직 대기 중
 	}
 
-	// idle 완료, tickCompletion에서 다음 행동 액션으로 전환
+	// idle 완료, tickNextOrClear에서 다음 행동 액션으로 전환
 	return false;
 }
