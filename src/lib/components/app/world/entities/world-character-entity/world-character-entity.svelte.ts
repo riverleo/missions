@@ -26,6 +26,8 @@ export class WorldCharacterEntity extends Entity {
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
 	behavior: WorldCharacterEntityBehavior;
 
+	tickDecreaseNeeds = tickDecreaseNeeds;
+
 	override get instanceId(): WorldCharacterId {
 		return EntityIdUtils.instanceId<WorldCharacterId>(this.id);
 	}
@@ -132,8 +134,6 @@ export class WorldCharacterEntity extends Entity {
 	override update(event: BeforeUpdateEvent): void {
 		this.behavior.update(event);
 	}
-
-	tickDecreaseNeeds = tickDecreaseNeeds;
 
 	tick(tick: number): void {
 		this.tickDecreaseNeeds(tick);

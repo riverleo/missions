@@ -32,31 +32,20 @@ export class WorldCharacterEntityBehavior {
 	interactionTargetStartTick = $state<number | undefined>();
 	behaviors = $state<Behavior[]>([]);
 
-	update: (event: BeforeUpdateEvent) => void;
-	updateMove: (event: BeforeUpdateEvent) => void;
-	updateDirection: () => void;
-	tick: (tickNumber: number) => void;
-	tickInitialize: (tick: number) => boolean;
-	tickIdle: (tick: number) => boolean;
-	tickFindAndGo: (tick: number) => boolean;
-	tickActionSystemPre: (tick: number) => boolean;
-	tickActionFulfillItemUse: (tick: number) => boolean;
-	tickActionSystemPost: (tick: number) => boolean;
-	tickCompletion: (tick: number) => void;
+	update = update;
+	updateMove = updateMove;
+	updateDirection = updateDirection;
+	tick = tick;
+	tickInitialize = tickInitialize;
+	tickIdle = tickIdle;
+	tickFindAndGo = tickFindAndGo;
+	tickActionSystemPre = tickActionSystemPre;
+	tickActionFulfillItemUse = tickActionFulfillItemUse;
+	tickActionSystemPost = tickActionSystemPost;
+	tickCompletion = tickCompletion;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
-		this.update = update.bind(this);
-		this.updateMove = updateMove.bind(this);
-		this.updateDirection = updateDirection.bind(this);
-		this.tick = tick.bind(this);
-		this.tickInitialize = tickInitialize.bind(this);
-		this.tickIdle = tickIdle.bind(this);
-		this.tickFindAndGo = tickFindAndGo.bind(this);
-		this.tickActionSystemPre = tickActionSystemPre.bind(this);
-		this.tickActionFulfillItemUse = tickActionFulfillItemUse.bind(this);
-		this.tickActionSystemPost = tickActionSystemPost.bind(this);
-		this.tickCompletion = tickCompletion.bind(this);
 	}
 
 	/**
