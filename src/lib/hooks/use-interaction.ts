@@ -353,6 +353,26 @@ function createInteractionStore() {
 		return [];
 	}
 
+	function getNextInteractionActionId(
+		interactionAction:
+			| BuildingInteractionAction
+			| ItemInteractionAction
+			| CharacterInteractionAction
+	):
+		| BuildingInteractionActionId
+		| ItemInteractionActionId
+		| CharacterInteractionActionId
+		| null {
+		if ('next_building_interaction_action_id' in interactionAction) {
+			return interactionAction.next_building_interaction_action_id;
+		} else if ('next_item_interaction_action_id' in interactionAction) {
+			return interactionAction.next_item_interaction_action_id;
+		} else if ('next_character_interaction_action_id' in interactionAction) {
+			return interactionAction.next_character_interaction_action_id;
+		}
+		return null;
+	}
+
 	// ===== Admin CRUD - Building Interactions =====
 	const admin = {
 		// Building Interaction
@@ -851,6 +871,7 @@ function createInteractionStore() {
 		getItemInteractionActions,
 		getCharacterInteractionActions,
 		getInteractionActions,
+		getNextInteractionActionId,
 		// Admin
 		admin,
 	};

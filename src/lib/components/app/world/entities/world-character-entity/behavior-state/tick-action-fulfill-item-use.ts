@@ -18,7 +18,8 @@ export default function tickActionFulfillItemUse(
 ): boolean {
 	const { getBehaviorAction } = useBehavior();
 	const { getInteraction, getWorldItem } = useWorld();
-	const { getItemInteractionActions, getItemInteraction } = useInteraction();
+	const { getItemInteractionActions, getItemInteraction, getNextInteractionActionId } =
+		useInteraction();
 	const { getAllNeedFulfillments } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
@@ -89,10 +90,7 @@ export default function tickActionFulfillItemUse(
 		}
 
 		// 다음 인터렉션 액션으로 전환 또는 체인 종료
-		const nextActionId =
-			'next_item_interaction_action_id' in currentAction
-				? currentAction.next_item_interaction_action_id
-				: null;
+		const nextActionId = getNextInteractionActionId(currentAction);
 
 		if (nextActionId) {
 			// 다음 인터렉션으로 전환

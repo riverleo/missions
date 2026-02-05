@@ -1,4 +1,4 @@
-import { useBehavior, useWorld } from '$lib/hooks';
+import { useBehavior, useWorld, useInteraction } from '$lib/hooks';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
@@ -13,6 +13,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 export default function tickIdle(this: WorldCharacterEntityBehavior, tick: number): boolean {
 	const { getBehaviorAction } = useBehavior();
 	const { getInteraction, getInteractionActions } = useWorld();
+	const { getNextInteractionActionId } = useInteraction();
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return false;
@@ -53,14 +54,7 @@ export default function tickIdle(this: WorldCharacterEntityBehavior, tick: numbe
 		}
 
 		// 다음 인터렉션 액션으로 전환 또는 체인 종료
-		const nextActionId =
-			'next_building_interaction_action_id' in currentAction
-				? currentAction.next_building_interaction_action_id
-				: 'next_item_interaction_action_id' in currentAction
-					? currentAction.next_item_interaction_action_id
-					: 'next_character_interaction_action_id' in currentAction
-						? currentAction.next_character_interaction_action_id
-						: null;
+		const nextActionId = getNextInteractionActionId(currentAction);
 
 		if (nextActionId) {
 			// 다음 인터렉션으로 전환
