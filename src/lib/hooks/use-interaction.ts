@@ -6,6 +6,7 @@ import type {
 	RecordFetchState,
 	Interaction,
 	InteractionId,
+	InteractionActionId,
 	BuildingInteraction,
 	BuildingInteractionId,
 	BuildingInteractionInsert,
@@ -31,6 +32,7 @@ import type {
 	CharacterInteractionActionInsert,
 	CharacterInteractionActionUpdate,
 	ScenarioId,
+	InteractionAction,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 
@@ -200,17 +202,15 @@ function createInteractionStore() {
 
 			// Character interactions and actions
 			const characterInteractionRecord: Record<CharacterInteractionId, CharacterInteraction> = {};
-			const characterActionRecord: Record<
-				CharacterInteractionId,
-				CharacterInteractionAction[]
-			> = {};
+			const characterActionRecord: Record<CharacterInteractionId, CharacterInteractionAction[]> =
+				{};
 
 			for (const item of characterResult.data ?? []) {
 				const { character_interaction_actions, ...interaction } = item;
 				characterInteractionRecord[item.id as CharacterInteractionId] =
 					interaction as CharacterInteraction;
-				characterActionRecord[item.id as CharacterInteractionId] =
-					(character_interaction_actions ?? []) as CharacterInteractionAction[];
+				characterActionRecord[item.id as CharacterInteractionId] = (character_interaction_actions ??
+					[]) as CharacterInteractionAction[];
 			}
 
 			buildingInteractionStore.set({
@@ -320,9 +320,7 @@ function createInteractionStore() {
 		return get(characterInteractionStore).data[id];
 	}
 
-	function getBuildingInteractionActions(
-		id: BuildingInteractionId
-	): BuildingInteractionAction[] {
+	function getBuildingInteractionActions(id: BuildingInteractionId): BuildingInteractionAction[] {
 		return get(buildingInteractionActionStore).data[id] ?? [];
 	}
 
@@ -354,23 +352,16 @@ function createInteractionStore() {
 	}
 
 	function getNextInteractionActionId(
-		interactionAction:
-			| BuildingInteractionAction
-			| ItemInteractionAction
-			| CharacterInteractionAction
-	):
-		| BuildingInteractionActionId
-		| ItemInteractionActionId
-		| CharacterInteractionActionId
-		| null {
+		interactionAction: InteractionAction
+	): InteractionActionId | undefined {
 		if ('next_building_interaction_action_id' in interactionAction) {
-			return interactionAction.next_building_interaction_action_id;
+			return interactionAction.next_building_interaction_action_id ?? undefined;
 		} else if ('next_item_interaction_action_id' in interactionAction) {
-			return interactionAction.next_item_interaction_action_id;
+			return interactionAction.next_item_interaction_action_id ?? undefined;
 		} else if ('next_character_interaction_action_id' in interactionAction) {
-			return interactionAction.next_character_interaction_action_id;
+			return interactionAction.next_character_interaction_action_id ?? undefined;
 		}
-		return null;
+		return undefined;
 	}
 
 	// ===== Admin CRUD - Building Interactions =====
@@ -406,10 +397,7 @@ function createInteractionStore() {
 			return data;
 		},
 
-		async updateBuildingInteraction(
-			id: BuildingInteractionId,
-			updates: BuildingInteractionUpdate
-		) {
+		async updateBuildingInteraction(id: BuildingInteractionId, updates: BuildingInteractionUpdate) {
 			const { error } = await supabase.from('building_interactions').update(updates).eq('id', id);
 
 			if (error) throw error;
@@ -633,7 +621,10 @@ function createInteractionStore() {
 			id: ItemInteractionActionId,
 			updates: ItemInteractionActionUpdate
 		) {
-			const { error } = await supabase.from('item_interaction_actions').update(updates).eq('id', id);
+			const { error } = await supabase
+				.from('item_interaction_actions')
+				.update(updates)
+				.eq('id', id);
 
 			if (error) throw error;
 
@@ -804,10 +795,7 @@ function createInteractionStore() {
 		},
 
 		async removeCharacterInteractionAction(id: CharacterInteractionActionId) {
-			const { error } = await supabase
-				.from('character_interaction_actions')
-				.delete()
-				.eq('id', id);
+			const { error } = await supabase.from('character_interaction_actions').delete().eq('id', id);
 
 			if (error) throw error;
 
