@@ -19,7 +19,7 @@ export default function tickActionFulfillItemUse(
 	const { getBehaviorAction } = useBehavior();
 	const { getInteraction, getWorldItem } = useWorld();
 	const { getItemInteractionActions, getItemInteraction } = useInteraction();
-	const { getNeedFulfillment, getAllNeedFulfillments } = useCharacter();
+	const { getAllNeedFulfillments } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
@@ -37,7 +37,8 @@ export default function tickActionFulfillItemUse(
 	// 들고 있는 아이템 확인
 	if (worldCharacterEntity.heldItemIds.length === 0) return false;
 
-	const lastHeldEntityId = worldCharacterEntity.heldItemIds[worldCharacterEntity.heldItemIds.length - 1];
+	const lastHeldEntityId =
+		worldCharacterEntity.heldItemIds[worldCharacterEntity.heldItemIds.length - 1];
 	if (!lastHeldEntityId) return false;
 
 	const { instanceId } = EntityIdUtils.parse(lastHeldEntityId);
@@ -56,27 +57,60 @@ export default function tickActionFulfillItemUse(
 		if (!rootAction) return false;
 
 		// 첫 번째 액션으로 체인 시작
-		this.interactionTargetId = InteractionIdUtils.create(
-			'item',
-			itemInteraction.id,
-			rootAction.id
-		);
+		this.interactionTargetId = InteractionIdUtils.create('item', itemInteraction.id, rootAction.id);
 		this.interactionTargetStartTick = tick;
 	}
 
-	// 2. need_fulfilments 실행 (매 tick마다 욕구 증가)
-	const needFulfillments = getAllNeedFulfillments().filter(
-		(nf) => nf.item_interaction_id === itemInteraction.id
-	);
+	// 2. 인터렉션 체인 진행 (진행 중이면)
+	if (this.interactionTargetId) {
+		// need_fulfilments 실행 (매 tick마다 욕구 증가)
+		const needFulfillments = getAllNeedFulfillments().filter(
+			(nf) => nf.item_interaction_id === itemInteraction.id
+		);
 
-	for (const needFulfillment of needFulfillments) {
-		const need = worldCharacterEntity.needs[needFulfillment.need_id];
-		if (!need) continue;
+		for (const needFulfillment of needFulfillments) {
+			const need = worldCharacterEntity.needs[needFulfillment.need_id];
+			if (!need) continue;
 
-		// 욕구 증가
-		need.value = Math.min(100, need.value + needFulfillment.increase_per_tick);
+			// 욕구 증가
+			need.value = Math.min(100, need.value + needFulfillment.increase_per_tick);
+		}
+
+		// duration_ticks 경과 확인
+		const { interactionActionId } = InteractionIdUtils.parse(this.interactionTargetId);
+		const actions = getItemInteractionActions(itemInteraction.id);
+		const currentAction = actions.find((a) => a.id === interactionActionId);
+
+		if (!currentAction) return true; // 액션 못 찾으면 대기
+
+		const elapsed = tick - (this.interactionTargetStartTick ?? 0);
+		if (elapsed < currentAction.duration_ticks) {
+			return true; // 아직 실행 중
+		}
+
+		// 다음 인터렉션 액션으로 전환 또는 체인 종료
+		const nextActionId =
+			'next_item_interaction_action_id' in currentAction
+				? currentAction.next_item_interaction_action_id
+				: null;
+
+		if (nextActionId) {
+			// 다음 인터렉션으로 전환
+			this.interactionTargetId = InteractionIdUtils.create(
+				'item',
+				itemInteraction.id,
+				nextActionId as any
+			);
+			this.interactionTargetStartTick = tick;
+			return true; // 계속 진행
+		} else {
+			// 인터렉션 체인 종료
+			this.interactionTargetId = undefined;
+			this.interactionTargetStartTick = undefined;
+			// return false로 tickActionSystemPost에서 아이템 제거
+		}
 	}
 
-	// tickCompletion에서 인터렉션 체인을 진행하므로 return false
+	// 3. 인터렉션 끝났으면 tickActionSystemPost로 (아이템 제거)
 	return false;
 }
