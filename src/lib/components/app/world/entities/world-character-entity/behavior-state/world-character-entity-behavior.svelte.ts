@@ -13,7 +13,7 @@ import tickFindAndGo from './tick-find-and-go';
 import tickActionSystemPre from './tick-action-system-pre';
 import tickActionFulfillItemUse from './tick-action-fulfill-item-use';
 import tickActionSystemPost from './tick-action-system-post';
-import tickCompletion from './tick-completion';
+import tickNextOrClear from './tick-next-or-clear';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -42,7 +42,7 @@ export class WorldCharacterEntityBehavior {
 	tickActionSystemPre = tickActionSystemPre;
 	tickActionFulfillItemUse = tickActionFulfillItemUse;
 	tickActionSystemPost = tickActionSystemPost;
-	tickCompletion = tickCompletion;
+	tickNextOrClear = tickNextOrClear;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
