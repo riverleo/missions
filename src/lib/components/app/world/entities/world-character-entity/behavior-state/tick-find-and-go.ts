@@ -20,6 +20,9 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	const { getInteraction, getEntitySourceId, getWorldItem } = useWorld();
 	const { getBehaviorAction, searchEntitySources } = useBehavior();
 
+	// 인터렉션이 이미 진행 중이면 skip
+	if (this.interactionTargetId) return false;
+
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return false;
 
@@ -50,7 +53,8 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	}
 
 	const entities = Object.values(this.worldCharacterEntity.worldContext.entities);
-	const entitySourceIds = new Set(searchEntitySources(behaviorAction).map((es) => es.id));
+	const entitySources = searchEntitySources(behaviorAction);
+	const entitySourceIds = new Set(entitySources.map((es) => es.id));
 
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
 		const worldItem = getWorldItem(EntityIdUtils.instanceId<WorldItemId>(heldItemEntityId));
@@ -94,5 +98,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 		return true;
 	}
 
-	return true; // 타겟을 찾을 수 없음, 행동 중단
+	// 타겟을 찾을 수 없음 - 행동 종료
+	this.clear();
+	return true;
 }

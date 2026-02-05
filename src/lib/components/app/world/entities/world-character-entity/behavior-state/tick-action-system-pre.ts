@@ -1,6 +1,5 @@
 import { useBehavior, useWorld } from '$lib/hooks';
 import { produce } from 'immer';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { WorldItemId } from '$lib/types';
 
@@ -21,7 +20,7 @@ export default function tickActionSystemPre(
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return false;
 
-	// idle이거나 타겟이 없으면 skip
+	// idle 타입이거나 타겟이 없으면 skip
 	if (behaviorAction.type === 'idle' || !this.targetEntityId) return false;
 
 	const worldCharacterEntity = this.worldCharacterEntity;
@@ -31,19 +30,17 @@ export default function tickActionSystemPre(
 	if (!targetEntity || targetEntity.type !== 'item') return false;
 
 	const worldItemId = targetEntity.instanceId as WorldItemId;
-	const itemEntityId = EntityIdUtils.createId(
-		'item',
-		worldCharacterEntity.worldContext.worldId,
-		worldItemId
-	);
+	const itemEntityId = targetEntity.id;
 
 	// 이미 들고 있으면 skip
-	if (worldCharacterEntity.heldItemIds.includes(itemEntityId)) return false;
+	if (worldCharacterEntity.heldItemIds.includes(itemEntityId)) {
+		return false;
+	}
 
 	// 아이템 줍기
 	worldCharacterEntity.heldItemIds.push(itemEntityId);
 
-	// 바디를 월드에서 제거
+	// 월드에서 제거
 	targetEntity.removeFromWorld();
 
 	// worldItem.world_character_id 업데이트
@@ -60,8 +57,6 @@ export default function tickActionSystemPre(
 		);
 	}
 
-	// 타겟 클리어 (이제 들고 있으므로)
-	this.targetEntityId = undefined;
-
+	// targetEntityId는 tickNextOrClear나 clear()에서 클리어됨
 	return false;
 }
