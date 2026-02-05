@@ -101,7 +101,27 @@ this.tickCompletion(tick);                       // ⏳ 부분 구현 (인터렉
 
 ## 향후 작업 (Phase 3)
 
+### 인터렉션 타입 확장
 - [ ] tickActionFulfillBuildingUse 구현
 - [ ] tickActionFulfillCharacterUse 구현
 - [ ] ONCE 타입 인터렉션 지원
 - [ ] 에러 처리 및 예외 상황 대응
+
+### State 조회 함수 리팩토링
+**목표**: 컴포넌트의 복잡한 state 조회 로직을 훅으로 이동
+
+- [ ] `useItem`에 `getItemState(worldItemId)` 추가
+  - WorldItemId를 받아서 현재 조건에 맞는 ItemState 반환
+  - 조건 판단 로직 포함 (idle, use 등)
+  - world-character-entity-renderer의 heldItemState 로직 단순화
+
+- [ ] `useCharacter`에 `getCharacterState(worldCharacterId)` 추가 (향후)
+  - WorldCharacterId를 받아서 현재 조건에 맞는 CharacterState 반환
+
+- [ ] `useBuilding`에 `getBuildingState(worldBuildingId)` 추가 (향후)
+  - WorldBuildingId를 받아서 현재 조건에 맞는 BuildingState 반환
+
+**이점:**
+- 컴포넌트 코드 간소화
+- State 조회 로직 재사용 가능
+- 일관된 패턴 유지
