@@ -38,9 +38,7 @@ export default function tickNextOrClear(
 		this.behaviorTargetStartTick = tick;
 		this.clearTargetEntity();
 	} else {
-		// 다음 액션이 없으면 행동 종료
-		this.behaviorTargetId = undefined;
-		this.behaviorTargetStartTick = undefined;
-		this.clearTargetEntity();
+		// 다음 액션이 없으면 행동 완전히 종료
+		this.clear();
 	}
 }

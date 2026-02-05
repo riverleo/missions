@@ -13,10 +13,9 @@ export default function tickIdle(this: WorldCharacterEntityBehavior, tick: numbe
 	const { getBehaviorAction } = useBehavior();
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
-	if (!behaviorAction) return false;
 
 	// idle 행동이 아니면 다음 메서드로 진행
-	if (behaviorAction.type !== 'idle') return false;
+	if (behaviorAction?.type !== 'idle') return false;
 
 	// idle_duration_ticks 체크
 	const elapsed = tick - (this.behaviorTargetStartTick ?? 0);

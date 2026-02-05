@@ -96,9 +96,7 @@ function createBehaviorStore() {
 		Object.values($store.data)
 	);
 
-	const allNeedBehaviorsStore = derived(needBehaviorStore, ($store) =>
-		Object.values($store.data)
-	);
+	const allNeedBehaviorsStore = derived(needBehaviorStore, ($store) => Object.values($store.data));
 
 	const allNeedBehaviorActionsStore = derived(needBehaviorActionStore, ($store) =>
 		Object.values($store.data)
@@ -293,12 +291,12 @@ function createBehaviorStore() {
 		return get(allBehaviorsStore);
 	}
 
-	function getAllUsableBehaviors(
+	function getAllBehaviorsByPriority(
 		worldCharacterEntityBehavior: WorldCharacterEntityBehavior
 	): Behavior[] {
 		const priorities = get(behaviorPriorityStore).data;
 
-		const candidateBehaviors = getAllBehaviors().filter((behavior) => {
+		const behaviors = getAllBehaviors().filter((behavior) => {
 			if (behavior.behaviorType === 'need') {
 				const need = worldCharacterEntityBehavior.worldCharacterEntity.needs[behavior.need_id];
 				if (!need) return false;
@@ -310,7 +308,7 @@ function createBehaviorStore() {
 			}
 		});
 
-		return candidateBehaviors.sort((a, b) => {
+		return behaviors.sort((a, b) => {
 			const priorityA = Object.values(priorities).find((p) =>
 				a.behaviorType === 'need' ? p.need_behavior_id === a.id : p.condition_behavior_id === a.id
 			);
@@ -708,7 +706,7 @@ function createBehaviorStore() {
 		getAllConditionBehaviors,
 		getAllConditionBehaviorActions,
 		getAllBehaviors,
-		getAllUsableBehaviors,
+		getAllBehaviorsByPriority,
 		getRootBehaviorAction,
 		getBehavior,
 		addBehavior,

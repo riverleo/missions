@@ -11,11 +11,11 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
  * @returns true: 행동 실행 중단, false: 행동 실행 계속 진행
  */
 export default function tickInitialize(this: WorldCharacterEntityBehavior, tick: number): boolean {
-	const { getAllUsableBehaviors, getRootBehaviorAction } = useBehavior();
+	const { getAllBehaviorsByPriority, getRootBehaviorAction } = useBehavior();
 
 	if (this.behaviorTargetId) return false;
 
-	this.behaviors = getAllUsableBehaviors(this);
+	this.behaviors = getAllBehaviorsByPriority(this);
 	const behaviorAction = getRootBehaviorAction(this.behaviors[0]);
 
 	if (!behaviorAction) return true;
