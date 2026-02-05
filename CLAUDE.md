@@ -1,419 +1,51 @@
-# Coding Agent Guidelines
+# Agent Guidelines
 
-This document provides essential guidelines for AI coding agents working in this repository. A SvelteKit 5 + TypeScript gamified task management application with Matter.js physics engine.
+SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
 
----
+## Critical Rules
 
-## Quick Reference
+### Workflow
+**PLAN.md만 작업**: 문서화된 태스크만 진행. 사용자 언급사항은 PLAN.md에 정리만 (명시적 진행 요청 시에만 구현). 체크리스트 형태 운영.
 
 ### Commands
-
-**Development:**
-
-- `pnpm dev` - Start development server (http://localhost:5173)
-- `pnpm build` - Production build
-- `pnpm preview` - Preview production build
-
-**Code Quality:**
-
-- `pnpm check` - Run svelte-check (type checking)
-- `pnpm check:watch` - Watch mode for type checking
-- `pnpm format` - Format code with Prettier
-- `pnpm lint` - Check code formatting (Prettier)
-
-**Testing:**
-
-- `pnpm test` - Run all E2E tests
-- `pnpm test:e2e` - Run E2E tests explicitly
-- `npx playwright test e2e/demo.test.ts` - Run single test file
-- `npx playwright test --grep "test name"` - Run tests matching pattern
-
-**Storybook:**
-
-- `pnpm storybook` - Start Storybook dev server (port 6006)
-- `pnpm build-storybook` - Build static Storybook
-
-**Supabase:**
-
-- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts` - Generate TypeScript types from local Supabase schema (IMPORTANT: Output file is `supabase.generated.ts`, NOT `database.types.ts`)
-
-### Package Manager
-
-**CRITICAL: Use `pnpm` ONLY. Never use `npm` or `yarn`.**
-
----
-
-## Code Style
-
-### Imports
-
-- ❌ **FORBIDDEN**: `import * as X from 'module'`
-- ✅ **Required**: Explicit named imports
-- ✅ shadcn-svelte: `import { Button } from '$lib/components/ui/button'`
-- ✅ Icons: `@tabler/icons-svelte` with `Icon` prefix (e.g., `IconCheck`, `IconDotsVertical`)
-
-### Formatting (Prettier)
-
-- **Indentation**: Tabs (not spaces)
-- **Quotes**: Single quotes
-- **Line width**: 100 characters
-- **Trailing commas**: ES5
-- **Svelte**: Shorthand enabled, HTML whitespace ignored
-
-### TypeScript Types
-
-**Branded ID Types:**
-
-```typescript
-type Brand<T, B extends string> = T & { readonly __brand: B };
-export type BuildingId = Brand<string, 'BuildingId'>;
-export type WorldBuildingId = Brand<string, 'WorldBuildingId'>;
-```
-
-**Type Rules:**
-
-- ✅ Use `undefined` (NOT `null` except in database)
-- ✅ `noUncheckedIndexedAccess` is enabled - handle optional array access
-- ❌ **ABSOLUTELY FORBIDDEN**: `as any`
-- ✅ Supabase queries: `.single<Type>()` (NOT `as Type` casting)
-
-**Type Casting Patterns (for branded types):**
-
-```typescript
-// Record indexing
-const building = $store.data[id as BuildingId];
-
-// Route params
-const scenarioId = page.params.scenarioId as ScenarioId;
-
-// UUID generation
-const worldId = crypto.randomUUID() as WorldId;
-```
-
-### Naming Conventions
-
-- **Functions**: Match prop/event names (NOT `handleSubmit` → ✅ `onsubmit`)
-- **Domain names**: Be explicit (`branch` → ✅ `questBranch`)
-- **Hooks**: Short for own domain (`fetch`, `create`), prefixed for sub-domains (`createScenarioQuestBranch`)
-
-### Component Patterns
-
-- **Hooks**: Use directly in components (NO prop drilling)
-- **Utilities**: Prefer **Radash** over lodash
-- **Event handlers**: Avoid literal functions in JSX/templates
-- **Logic**: Keep in components, callbacks only pass results
-- **Shared logic**: Extract to separate files when used across multiple components
-
----
-
-## Svelte 5 Specifics
-
-### Runes (Modern API)
-
-✅ **Use these:**
-
-- `$state` - Reactive state
-- `$derived` - Computed values
-- `$effect` - Side effects
-
-❌ **DEPRECATED - Do NOT use:**
-
-- `$app/stores` → ✅ Use `$app/state` instead
-
-### State Management
-
-**External Objects:**
-
-```typescript
-// Use $state.raw() for non-Svelte objects
-const engine = $state.raw(Matter.Engine.create());
-const domElement = $state.raw(document.querySelector('.canvas'));
-```
-
-**Store Updates:**
-
-```typescript
-// Use Immer's produce() for immutable updates
-import { produce } from 'immer';
-
-produce(store, (draft) => {
-	draft.data[id] = newValue;
-});
-```
-
-**Context:**
-
-- Only accessible during component initialization
-- Pass to classes via constructor parameters
-
-**Component Independence:**
-
-- Share state via stores (NOT props)
-- Each component is independent
-
-### Effect Pattern
-
-**Prop Change Detection:**
-
-```typescript
-let prevValue = prop?.value;
-$effect(() => {
-	const current = prop?.value;
-	if (current !== prevValue) {
-		prevValue = current;
-		// Handle change logic here
-	}
-});
-```
-
-**Important**: All reactive values in `$effect` are auto-tracked. For frequently changing values (e.g., mouse coordinates), separate with `$derived` and throttle.
-
----
-
-## Patterns & Best Practices
-
-### Bug Resolution Process
-
-**CRITICAL - Follow this order:**
-
-1. **Root cause analysis** - Understand why the bug exists
-2. **Small test** - Test fix in isolation
-3. **Verify** - Confirm it works
-4. **Full deployment** - Apply to entire codebase
-
-### EntityIdUtils
-
-Utility for working with entity IDs (`$lib/utils/entity-id.ts`):
-
-```typescript
-// Create EntityId
-EntityIdUtils.create(type, worldId, id);
-EntityIdUtils.create(entityInstance); // From object
-
-// Parse EntityId
-const { type, worldId, instanceId } = EntityIdUtils.parse(entityId);
-
-// Type checking
-EntityIdUtils.is('building', entityId); // Single type
-EntityIdUtils.or(['building', 'character'], entityId); // Multiple types
-```
-
-**Pattern**: Cache parsed results with `$derived` for reuse:
-
-```typescript
-const parsed = $derived(EntityIdUtils.parse(entityId));
-```
-
-### RecordFetchState
-
-```typescript
-interface RecordFetchState<K extends string, T> {
-	status: FetchStatus;
-	data: Record<K, T>; // ✅ ALWAYS defined (non-optional)
-	error?: Error;
-}
-```
-
-**Usage**: Access `data` directly (no `?? {}`):
-
-```typescript
-const items = Object.values($store.data); // ✅ Safe
-```
-
-### Utilities
-
-- Prefer **Radash** utilities first
-- Cache computations with `$derived`
-- Centralize constants in `constants.ts`
-
----
-
-## Database
-
-### RLS Policy Naming
-
-- **Format**: Lowercase, plural subjects
-- **Example**: `"anyone can view tiles"`, `"admins can update buildings"`
-
-### Constraints & Indexes
-
-**Naming Prefixes:**
-
-- `uq_` - Unique constraints
-- `fk_` - Foreign keys
-- `idx_` - Indexes
-- `chk_` - Check constraints
-
-**Rules:**
-
-- Enforce data integrity at **DB level** (never bypass in application)
-- Prefer **inline constraints** when creating tables
-- Prefer **DB default values** over explicit application values
-
-### Supabase Queries
-
-```typescript
-// ✅ Type-safe single result
-const { data, error } = await supabase
-	.from('buildings')
-	.select('*')
-	.eq('id', buildingId)
-	.single<Building>();
-
-// ✅ 0 or 1 result
-const { data, error } = await supabase
-	.from('user_roles')
-	.select('*')
-	.eq('user_id', userId)
-	.maybeSingle<UserRole>();
-
-// ❌ FORBIDDEN - No type casting
-const data = result.data as Building;
-```
-
-### Helper Functions
-
-**RLS Checks:**
-
-- `is_admin()` - Check if current user is admin
-- `is_me(user_id)` - Check if user_id matches current user
-- `is_own_player(player_id)` - Check if player belongs to current user
-- `is_world_owner(world_id)` - Check if current user owns world
-
-**Audit:**
-
-- `current_user_role_id()` - Get current user role ID for audit columns
-
-**Triggers:**
-
-- `update_updated_at()` - Auto-update `updated_at` on UPDATE
-
-### Debugging with Database
-
-**IMPORTANT: Prefer direct database inspection over console logs**
-
-When debugging data issues:
-
-1. ✅ **First**: Check database directly with `psql`
-2. ❌ **Avoid**: Adding console.log statements before verifying data state
-3. ✅ **Then**: Add logs only if needed for runtime behavior
-
-**psql Usage:**
-
-```bash
-# Connect to local Supabase database
-psql postgresql://postgres:postgres@localhost:54322/postgres
-
-# Common queries
-\dt                          # List all tables
-\d table_name                # Describe table schema
-SELECT * FROM table_name;    # View all records
-SELECT * FROM table_name WHERE id = 'uuid';  # Specific record
-\q                           # Quit psql
-```
-
-**Quick Inspection Commands:**
-
-```bash
-# Check specific entity
-psql postgresql://postgres:postgres@localhost:54322/postgres -c "SELECT * FROM building_interactions WHERE id = 'uuid';"
-
-# Count records
-psql postgresql://postgres:postgres@localhost:54322/postgres -c "SELECT COUNT(*) FROM building_interactions;"
-
-# Check relationships
-psql postgresql://postgres:postgres@localhost:54322/postgres -c "
-  SELECT bi.id, b.name, bi.once_interaction_type, bi.fulfill_interaction_type
-  FROM building_interactions bi
-  JOIN buildings b ON bi.building_id = b.id;
-"
-```
-
-**When to use psql:**
-
-- Verifying data exists in database
-- Checking foreign key relationships
-- Understanding why queries return empty results
-- Validating migration results
-- Before adding debug logs to code
-
----
-
-## UI Components
-
-### Component Library
-
-**shadcn-svelte (Primary):**
-
-- ✅ Use explicit imports (NO `import * as`)
-- Example: `import { Button } from '$lib/components/ui/button'`
-
-**Labels:**
-
-- ❌ **FORBIDDEN**: `<Label>` component
-- ✅ **Use instead**: `<InputGroupText>` or `<ButtonGroupText>`
-
-**Icons:**
-
-- ✅ From `@tabler/icons-svelte`
-- ✅ Use `Icon` prefix naming
-- ❌ **NO** `class` attribute on icons
-
-**Button/Input Groups:**
-
-- ❌ No styles on internal ButtonGroup/InputGroup elements
-- ❌ No `InputGroup + Select` combo
-- ✅ Use `ButtonGroup + Select` instead
-
-### Admin Page Structure
-
-**Route Pattern:**
-
-```
-/admin/scenarios/[scenarioId]/{domain}/[{domain}Id]/
-```
-
-**Component Types:**
-
-- `aside` - Sidebar navigation
-- `command` - Command palette for entity selection
-- `create-dialog` - Entity creation modal
-- `delete-dialog` - Entity deletion modal
-- `panel` - Main content/action panel
-
-**Hook Pattern:**
-
-- `store` - Domain data store
-- `dialogStore` - Dialog state management
-- `fetch` - Data fetching logic
-- `openDialog/closeDialog` - Dialog control functions
-- `admin.create/update/remove` - CRUD operations
-
----
-
-## Project Context
+- **Dev**: `pnpm dev`, `pnpm build`, `pnpm preview`
+- **Check**: `pnpm check`, `pnpm format`, `pnpm lint`
+- **Supabase**: `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
+- **Package**: pnpm ONLY (no npm/yarn)
+
+### Code Style
+- **Imports**: 명시적 named imports (no `import * as`), shadcn-svelte 개별 import, `@tabler/icons-svelte` Icon 접두사
+- **Format**: Tabs, single quotes, 100 chars, ES5 trailing commas
+- **Types**: `undefined` (no null except DB), no `as any`, branded IDs, `.single<Type>()` for Supabase
+- **Naming**: Functions match props/events (`onsubmit` not `handleSubmit`), explicit domain names
+- **Components**: Hooks 직접 사용 (no prop drilling), Radash 선호, 공유 로직은 별도 파일
+
+### Svelte 5
+- **Runes**: `$state`, `$derived`, `$effect` (no `$app/stores`, use `$app/state`)
+- **External objects**: `$state.raw()` for non-Svelte objects
+- **Updates**: Immer `produce()` for stores
+- **Context**: 초기화 시만 접근, 클래스에는 constructor로 전달
+
+### Database
+- **Naming**: RLS policies lowercase plural, constraints `uq_/fk_/idx_/chk_` prefix
+- **Rules**: DB level integrity, inline constraints, DB defaults
+- **Queries**: `.single<Type>()`, `.maybeSingle<Type>()`, no type casting
+- **Debug**: psql first, console.log second
+
+### UI
+- **shadcn-svelte**: Explicit imports, no `<Label>` (use `<InputGroupText>`), no Icon `class`
+- **Groups**: ButtonGroup + Select (no InputGroup + Select)
+- **Admin**: `/admin/scenarios/[scenarioId]/{domain}/[{domain}Id]/` pattern
+- **Components**: aside, command, create-dialog, delete-dialog, panel
+
+### Patterns
+- **Bug fix**: Root cause → Small test → Verify → Full deployment
+- **EntityIdUtils**: `create()`, `parse()`, `is()`, `or()`, cache with `$derived`
+- **RecordFetchState**: `data` always defined (no `?? {}`)
+- **Utils**: Radash, `$derived` cache, constants.ts
 
 ### Tech Stack
+SvelteKit 2.48+, Svelte 5, TS 5.9+, Tailwind 4.1+, shadcn-svelte, Supabase, Matter.js 0.20, Immer, Radash 12.1+
 
-- **Framework**: SvelteKit 2.48+ with Svelte 5 (runes API)
-- **Language**: TypeScript 5.9+ (strict mode)
-- **Styling**: Tailwind CSS 4.1+
-- **UI**: shadcn-svelte components
-- **Backend**: Supabase (PostgreSQL + Auth + Storage)
-- **Physics**: Matter.js 0.20
-- **State**: Immer for immutable updates
-- **Utils**: Radash 12.1+
-
-### Key Concepts
-
-This is a **gamified task management app** where:
-
-- Users complete missions/tasks to earn coins
-- Coins build structures in a 2D physics world
-- Characters have needs (hunger, fatigue, faith, happiness)
-- Faith increases only through task completion
-- Utility AI system drives character behavior
-
----
-
-**Last Updated**: 2025-01-29
+### App Concept
+Gamified task management: 미션 완료 → 코인 획득 → 건물 건설 → 2D physics world. 캐릭터는 욕구 보유, 건물은 컨디션 보유, Utility AI 행동 시스템.

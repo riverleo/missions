@@ -30,15 +30,9 @@ export default function executeFulfillAction(
 	action: BehaviorAction,
 	currentTick: number
 ): void {
-	const {
-		getConditionFulfillment,
-		getAllConditionFulfillments,
-	} = useBuilding();
+	const { getConditionFulfillment, getAllConditionFulfillments } = useBuilding();
 	const { getItem } = useItem();
-	const {
-		getNeedFulfillment,
-		getAllNeedFulfillments,
-	} = useCharacter();
+	const { getNeedFulfillment, getAllNeedFulfillments } = useCharacter();
 	const {
 		getBuildingInteraction,
 		getBuildingInteractionActions,
@@ -247,7 +241,7 @@ export default function executeFulfillAction(
 					interaction.id as any,
 					firstAction.id
 				);
-				worldCharacterEntity.behavior.interactionStartTick = currentTick;
+				worldCharacterEntity.behavior.interactionTargetStartTick = currentTick;
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (fulfillInteractType === 'item_pick') {
@@ -291,7 +285,8 @@ export default function executeFulfillAction(
 			);
 			const currentAction = interactionActions.find((a) => a.id === interactionActionId);
 			if (currentAction && currentAction.duration_ticks) {
-				const elapsed = currentTick - (worldCharacterEntity.behavior.interactionStartTick ?? 0);
+				const elapsed =
+					currentTick - (worldCharacterEntity.behavior.interactionTargetStartTick ?? 0);
 				if (elapsed < currentAction.duration_ticks) {
 					return;
 				}
@@ -397,6 +392,6 @@ export default function executeFulfillAction(
 	// fulfill_interaction_type: InteractionAction 완료 시 초기화 (다음 틱에서 다시 시작)
 	if (interactionCompleted) {
 		worldCharacterEntity.behavior.interactionTargetId = undefined;
-		worldCharacterEntity.behavior.interactionStartTick = 0;
+		worldCharacterEntity.behavior.interactionTargetStartTick = 0;
 	}
 }

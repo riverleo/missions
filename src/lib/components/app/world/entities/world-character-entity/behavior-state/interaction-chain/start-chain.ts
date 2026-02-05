@@ -17,7 +17,11 @@ export default function startInteractionChain(
 	interaction: Interaction,
 	tick: number
 ): boolean {
-	const { getBuildingInteractionActions, getItemInteractionActions, getCharacterInteractionActions } = useInteraction();
+	const {
+		getBuildingInteractionActions,
+		getItemInteractionActions,
+		getCharacterInteractionActions,
+	} = useInteraction();
 
 	// InteractionAction 가져오기
 	let interactionActions:
@@ -50,7 +54,7 @@ export default function startInteractionChain(
 				interaction.id as any,
 				firstAction.id
 			);
-			this.behavior.interactionStartTick = tick;
+			this.behavior.interactionTargetStartTick = tick;
 			return true;
 		}
 		return false;
@@ -62,6 +66,6 @@ export default function startInteractionChain(
 		interaction.id as any,
 		rootAction.id
 	);
-	this.behavior.interactionStartTick = tick;
+	this.behavior.interactionTargetStartTick = tick;
 	return true;
 }

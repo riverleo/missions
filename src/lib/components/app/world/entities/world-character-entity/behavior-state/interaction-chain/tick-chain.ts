@@ -17,7 +17,11 @@ export default function tickInteractionAction(
 	interaction: Interaction,
 	tick: number
 ): boolean {
-	const { getBuildingInteractionActions, getItemInteractionActions, getCharacterInteractionActions } = useInteraction();
+	const {
+		getBuildingInteractionActions,
+		getItemInteractionActions,
+		getCharacterInteractionActions,
+	} = useInteraction();
 
 	if (!this.behavior.interactionTargetId) return false;
 
@@ -55,7 +59,7 @@ export default function tickInteractionAction(
 	}
 
 	// duration_ticks 경과 확인
-	const elapsed = tick - (this.behavior.interactionStartTick ?? 0);
+	const elapsed = tick - (this.behavior.interactionTargetStartTick ?? 0);
 	if (elapsed < currentAction.duration_ticks) {
 		return false; // 아직 실행 중
 	}
@@ -74,7 +78,7 @@ export default function tickInteractionAction(
 			interactionId as any,
 			nextActionId
 		);
-		this.behavior.interactionStartTick = tick;
+		this.behavior.interactionTargetStartTick = tick;
 		return false; // 체인 계속 진행
 	}
 

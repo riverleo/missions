@@ -25,7 +25,7 @@ export class WorldCharacterEntityBehavior {
 	behaviorTargetId = $state<BehaviorTargetId | undefined>();
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
-	interactionStartTick = $state<number | undefined>();
+	interactionTargetStartTick = $state<number | undefined>();
 	behaviors = $state<Behavior[]>([]);
 
 	update: (event: BeforeUpdateEvent) => void;
@@ -65,6 +65,6 @@ export class WorldCharacterEntityBehavior {
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
 		this.interactionTargetId = undefined;
-		this.interactionStartTick = undefined;
+		this.interactionTargetStartTick = undefined;
 	}
 }

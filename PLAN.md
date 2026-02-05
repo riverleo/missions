@@ -1,381 +1,96 @@
-# System Interaction Type 확장
+# Plan
 
-## 완료된 작업
-- ✅ repeat_interaction_type → fulfill_interaction_type 리네이밍
-- ✅ item_pick을 once_interaction_type에서 분리하여 system_interaction_type으로 이동
-- ✅ useInteraction 훅 초기화 및 데이터 페칭 수정
+## Refactoring
 
----
+### Rename tickWorldCharacterNeeds to tickDecreaseNeedsOrConditions
+- [ ] `src/lib/components/app/world/entities/world-character-entity/tick-world-character-needs.ts` 파일명 및 함수명 변경
+- [ ] `src/lib/components/app/world/entities/world-character-entity/world-character-entity.svelte.ts`에서 import 및 호출 업데이트
 
-## 진행 상태
-- ⏳ Task 1: system_interaction_type을 character_interactions, building_interactions에 추가
-- ⏳ Task 2: Admin UI에서 system_interaction_type 처리
+### Refactor behavior tick flow - 액션 통합 및 플로우 단순화
+**목표**: actions/completion/interaction-chain 디렉토리 제거하고 tick 메서드로 통합
 
----
+#### 핵심 규칙
+1. **tick.ts는 판단 로직 없음**: 모든 판단은 각 `tickXXX` 메서드 내부에서 수행
+2. **반환값 규칙 통일**: 모든 `tickXXX` 메서드는 동일한 반환값 규칙 준수
+   - `true`: 행동 실행 중단 (이후 tick 메서드 실행 안 함)
+   - `false`: 행동 실행 계속 진행 (다음 tick 메서드로 진행)
 
-## Task 1: system_interaction_type을 character_interactions, building_interactions에 추가
-
-### 현재 상태
-
-**item_interactions 테이블만 system_interaction_type 지원:**
-```sql
-create table item_interactions (
-  id uuid primary key default gen_random_uuid(),
-  scenario_id uuid not null references scenarios(id) on delete cascade,
-  item_id uuid not null references items(id) on delete cascade,
-  once_interaction_type once_interaction_type,
-  fulfill_interaction_type fulfill_interaction_type,
-  system_interaction_type system_interaction_type,  -- ✅ 있음
-  character_id uuid references characters(id) on delete set null,
-
-  constraint chk_item_interaction_type_exclusive check (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int +
-    (system_interaction_type IS NOT NULL)::int = 1
-  ),
-  -- ...
-);
-```
-
-**character_interactions와 building_interactions는 2-way만 지원:**
-```sql
-create table character_interactions (
-  -- ...
-  once_interaction_type once_interaction_type,
-  fulfill_interaction_type fulfill_interaction_type,
-  -- system_interaction_type 없음 ❌
-
-  constraint chk_character_interaction_type_exclusive check (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int = 1  -- 2-way만 체크
-  ),
-  -- ...
-);
-```
-
-### 목표
-
-세 가지 interaction 테이블 모두 동일한 구조로 통일:
-- once_interaction_type (유저가 선택 가능, 한 번 실행)
-- fulfill_interaction_type (유저가 선택 가능, 반복 실행하여 욕구/컨디션 충족)
-- system_interaction_type (Admin UI에서 생성 가능, 욕구/컨디션 행동에서는 선택 불가)
-
-### 구현 단계
-
-#### Step 1: Database Schema 수정
-
-**기존 마이그레이션 파일 수정:**
-- `supabase/migrations/20251225000000_create_interactions.sql`
-
-**변경 내용:**
-
-1. character_interactions에 system_interaction_type 컬럼 추가:
-```sql
-create table character_interactions (
-  id uuid primary key default gen_random_uuid(),
-  scenario_id uuid not null references scenarios(id) on delete cascade,
-  character_id uuid not null references characters(id) on delete cascade,
-  once_interaction_type once_interaction_type,
-  fulfill_interaction_type fulfill_interaction_type,
-  system_interaction_type system_interaction_type,  -- 추가
-
-  constraint uq_character_interactions_scenario_character_once unique (scenario_id, character_id, once_interaction_type),
-  constraint uq_character_interactions_scenario_character_fulfill unique (scenario_id, character_id, fulfill_interaction_type),
-  constraint uq_character_interactions_scenario_character_system unique (scenario_id, character_id, system_interaction_type),  -- 추가
-  constraint chk_character_interaction_type_exclusive check (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int +
-    (system_interaction_type IS NOT NULL)::int = 1  -- 3-way 체크로 변경
-  )
-);
-```
-
-2. building_interactions에 system_interaction_type 컬럼 추가:
-```sql
-create table building_interactions (
-  id uuid primary key default gen_random_uuid(),
-  scenario_id uuid not null references scenarios(id) on delete cascade,
-  building_id uuid not null references buildings(id) on delete cascade,
-  once_interaction_type once_interaction_type,
-  fulfill_interaction_type fulfill_interaction_type,
-  system_interaction_type system_interaction_type,  -- 추가
-  character_id uuid references characters(id) on delete set null,
-
-  constraint uq_building_interactions_scenario_building_once unique (scenario_id, building_id, once_interaction_type),
-  constraint uq_building_interactions_scenario_building_fulfill unique (scenario_id, building_id, fulfill_interaction_type),
-  constraint uq_building_interactions_scenario_building_system unique (scenario_id, building_id, system_interaction_type),  -- 추가
-  constraint chk_building_interaction_type_exclusive check (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int +
-    (system_interaction_type IS NOT NULL)::int = 1  -- 3-way 체크로 변경
-  )
-);
-```
-
-#### Step 2: psql로 로컬 데이터베이스 직접 수정
-
-```bash
-psql postgresql://postgres:postgres@localhost:54322/postgres
-```
-
-```sql
--- 1. character_interactions에 system_interaction_type 추가
-ALTER TABLE character_interactions
-  ADD COLUMN system_interaction_type system_interaction_type;
-
--- 2. character_interactions unique constraint 추가
-ALTER TABLE character_interactions
-  ADD CONSTRAINT uq_character_interactions_scenario_character_system
-  UNIQUE (scenario_id, character_id, system_interaction_type);
-
--- 3. character_interactions constraint 업데이트
-ALTER TABLE character_interactions
-  DROP CONSTRAINT chk_character_interaction_type_exclusive;
-
-ALTER TABLE character_interactions
-  ADD CONSTRAINT chk_character_interaction_type_exclusive
-  CHECK (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int +
-    (system_interaction_type IS NOT NULL)::int = 1
-  );
-
--- 4. building_interactions에 system_interaction_type 추가
-ALTER TABLE building_interactions
-  ADD COLUMN system_interaction_type system_interaction_type;
-
--- 5. building_interactions unique constraint 추가
-ALTER TABLE building_interactions
-  ADD CONSTRAINT uq_building_interactions_scenario_building_system
-  UNIQUE (scenario_id, building_id, system_interaction_type);
-
--- 6. building_interactions constraint 업데이트
-ALTER TABLE building_interactions
-  DROP CONSTRAINT chk_building_interaction_type_exclusive;
-
-ALTER TABLE building_interactions
-  ADD CONSTRAINT chk_building_interaction_type_exclusive
-  CHECK (
-    (once_interaction_type IS NOT NULL)::int +
-    (fulfill_interaction_type IS NOT NULL)::int +
-    (system_interaction_type IS NOT NULL)::int = 1
-  );
-```
-
-#### Step 3: TypeScript 타입 재생성
-
-```bash
-pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts
-```
-
-#### Step 4: 검증
-
-```bash
-# TypeScript 체크
-pnpm check
-
-# psql로 스키마 확인
-psql postgresql://postgres:postgres@localhost:54322/postgres -c "\d character_interactions"
-psql postgresql://postgres:postgres@localhost:54322/postgres -c "\d building_interactions"
-```
-
----
-
-## Task 2: Admin UI에서 system_interaction_type 처리
-
-### 현재 상태
-
-Admin UI의 interaction create/update dialogs는 once와 fulfill만 지원:
+#### 새로운 플로우
 ```typescript
-// 예시: item-interactions/create-dialog.svelte
-let interactionType: 'once' | 'fulfill' = $state('once');
+if (this.tickInitialize(tick)) return;
+if (this.tickIdle(tick)) return;
+if (this.tickFindAndGo(tick)) return;
+if (this.tickActionSystemPre(tick)) return;         // 시스템 행동 전처리 (아이템 줍기 등)
+if (this.tickActionFulfillItemUse(tick)) return;    // 아이템 사용 인터렉션
+if (this.tickActionFulfillBuildingUse(tick)) return; // 건물 사용 인터렉션
+if (this.tickActionFulfillCharacterUse(tick)) return; // 캐릭터 사용 인터렉션
+// ... 추가 인터렉션 타입
+if (this.tickActionSystemPost(tick)) return;        // 시스템 행동 후처리 (아이템 놓기 등)
+this.tickCompletion(tick);                          // 항상 실행 (완료 체크 및 전환)
 ```
 
-### 목표
+- 각 tick 메서드는 자신의 인터렉션 타입이 아니면 `false` 반환하여 다음 메서드로 진행
+- `tickCompletion`은 항상 실행되며 반환값 없음 (매 tick마다 완료 조건 체크)
 
-1. **Admin UI에서 system_interaction_type 생성/수정 지원**
-   - interaction create/update dialog에 'system' 옵션 추가
-   - 'once' | 'fulfill' | 'system' 세 가지 중 하나 선택 가능
+#### 작업 목록
+- [ ] `tick-idle.ts` 생성
+  - idle 행동이면 `actions/execute-idle.ts` 로직 실행하고 `true` 반환
+  - idle이 아니면 `false` 반환
 
-2. **욕구/컨디션 행동에서는 system interaction 제외**
-   - behavior action에서 interaction 선택 시 system interaction 필터링
-   - once와 fulfill interaction만 선택 가능
+- [ ] `tick-action-system-pre.ts` 생성
+  - **아이템 줍기 인터렉션 진행**
+  - 타겟 엔티티가 아이템이고 아직 들고 있지 않은 경우
+  - 줍기 인터렉션 실행 → 완료 시:
+    - 아이템 바디 removeFromWorld
+    - 캐릭터 heldItems에 추가
+  - 이미 들고 있으면 skip
 
-### 구현 단계
+- [ ] `tick-action-fulfill-item-use.ts` 생성
+  - **아이템 사용 인터렉션 진행**
+  - `fulfill_interaction_type === 'use_item'`인 경우만 처리
+  - 들고 있는 아이템에 타겟 엔티티가 있을 경우 사용 인터렉션 실행
+  - 사용 인터렉션 진행 중 need_fulfilments, condition_fulfillments 실행
+  - 해당 타입이 아니면 `false` 반환
 
-#### Step 1: 영향받는 컴포넌트 파악
+- [ ] `tick-action-fulfill-building-use.ts` 생성 (향후 구현)
+  - `fulfill_interaction_type === 'use_building'`인 경우 처리
 
-**Admin interaction dialog (생성/수정):**
-1. `src/lib/components/admin/scenarios/[scenarioId]/building-interactions/create-dialog.svelte`
-2. `src/lib/components/admin/scenarios/[scenarioId]/item-interactions/create-dialog.svelte`
-3. `src/lib/components/admin/scenarios/[scenarioId]/character-interactions/create-dialog.svelte`
+- [ ] `tick-action-fulfill-character-use.ts` 생성 (향후 구현)
+  - `fulfill_interaction_type === 'use_character'`인 경우 처리
 
-**Behavior action dialog (interaction 선택):**
-1. `src/lib/components/admin/scenarios/[scenarioId]/need-behavior-actions/create-dialog.svelte`
-2. `src/lib/components/admin/scenarios/[scenarioId]/condition-behavior-actions/create-dialog.svelte`
+- [ ] `tick-action-system-post.ts` 생성
+  - **아이템 제거**
+  - 사용 인터렉션이 완료된 경우 heldItems에서 제거
 
-#### Step 2: Interaction create dialog 수정
+- [ ] `tick-completion.ts` 생성
+  - 반환값 없음 (void), 항상 실행됨
+  - 매 tick마다 2단계 완료 체크:
 
-**변경 전:**
-```typescript
-let interactionType: 'once' | 'fulfill' = $state('once');
-```
+    **1단계: 인터렉션 체인 완료 체크** (`interactionTargetId` 있는 경우)
+    - `interactionTargetStartTick` 기준으로 완료 조건 확인
+    - 완료 시 → 다음 인터렉션 액션으로 전환 (`interactionTargetId` 업데이트)
+    - 인터렉션 체인 끝 → `interactionTargetId = undefined`
 
-**변경 후:**
-```typescript
-let interactionType: 'once' | 'fulfill' | 'system' = $state('once');
-```
+    **2단계: 행동 액션 완료 체크** (인터렉션 체인 없거나 끝난 경우)
+    - `behaviorTargetStartTick` 기준으로 완료 조건 확인:
+      - FULFILL: 욕구/컨디션 충족 여부
+      - IDLE: idle_duration_ticks 경과
+      - ONCE: (인터렉션 체인으로 이미 처리됨)
+    - 완료 시 → 다음 행동 액션으로 전환 (`behaviorTargetId` 업데이트)
+    - 행동 끝 → `behaviorTargetId = undefined`
 
-**수정 파일:**
-- `building-interactions/create-dialog.svelte`
-- `item-interactions/create-dialog.svelte`
-- `character-interactions/create-dialog.svelte`
+  - `completion/check-completion.ts` 로직 통합
+  - `completion/transition.ts` 로직 통합
 
-**UI 변경:**
-```svelte
-<!-- Select 또는 RadioGroup에 'system' 옵션 추가 -->
-<!-- 라벨 변경: "상호작용 (1회)" → "한번 실행", "욕구 충족 (반복)" → "반복 실행" -->
-<Select.Item value="once">한번 실행</Select.Item>
-<Select.Item value="fulfill">반복 실행</Select.Item>
-<Select.Item value="system">시스템</Select.Item>
-```
+- [ ] `tick-find-and-go.ts` 수정
+  - idle 체크 제거 (line 25-26)
 
-**라벨 네이밍 변경:**
-- `once`: "상호작용 (1회)" → "한번 실행"
-- `fulfill`: "욕구 충족 (반복)" → "반복 실행"
-- `system`: "시스템" (새로 추가)
+- [ ] `tick.ts` 수정
+  - 새로운 플로우로 업데이트
 
-#### Step 3: Behavior action dialog 수정
+- [ ] 파일 및 디렉토리 제거
+  - `tick-behavior-action.ts` 삭제
+  - `actions/` 디렉토리 전체 삭제
+  - `completion/` 디렉토리 전체 삭제
+  - `interaction-chain/` 디렉토리 전체 삭제
 
-behavior action에서 interaction을 선택할 때 **system interaction 제외:**
-
-**수정 파일:**
-- `need-behavior-actions/create-dialog.svelte`
-- `condition-behavior-actions/create-dialog.svelte`
-
-**변경 내용:**
-```typescript
-// Before
-const buildingInteractions = $derived(
-  Object.values($buildingInteractionStore.data).filter(...)
-);
-
-// After - system interaction 필터링
-const buildingInteractions = $derived(
-  Object.values($buildingInteractionStore.data)
-    .filter(...)
-    .filter(i => i.system_interaction_type === null)
-);
-
-// 동일하게 item_interaction, character_interaction에도 적용
-const itemInteractions = $derived(
-  Object.values($itemInteractionStore.data)
-    .filter(...)
-    .filter(i => i.system_interaction_type === null)
-);
-
-const characterInteractions = $derived(
-  Object.values($characterInteractionStore.data)
-    .filter(...)
-    .filter(i => i.system_interaction_type === null)
-);
-```
-
-#### Step 4: state-label.ts 유틸리티 확인
-
-`src/lib/utils/state-label.ts`에 system_interaction_type 관련 라벨 함수 추가:
-
-```typescript
-export const systemInteractionTypeLabels: Record<SystemInteractionType, string> = {
-  item_pick: '아이템 줍기',
-};
-
-export function getSystemInteractionTypeLabel(type: SystemInteractionType): string {
-  return systemInteractionTypeLabels[type];
-}
-
-export function getSystemInteractionTypeOptions(): SelectOption<SystemInteractionType>[] {
-  return Object.entries(systemInteractionTypeLabels).map(([value, label]) => ({
-    value: value as SystemInteractionType,
-    label,
-  }));
-}
-```
-
-#### Step 5: Interaction panel 수정 (선택사항)
-
-Panel에서 system interaction을 구분하여 표시:
-
-```typescript
-// 예시: item-interactions/panel.svelte
-const getInteractionTypeLabel = (interaction: ItemInteraction) => {
-  if (interaction.system_interaction_type) return 'System';
-  if (interaction.once_interaction_type) return 'Once';
-  return 'Fulfill';
-};
-
-// 렌더링
-<Badge variant={interaction.system_interaction_type ? 'secondary' : 'default'}>
-  {getInteractionTypeLabel(interaction)}
-</Badge>
-```
-
-#### Step 6: 검증
-
-```bash
-# TypeScript 체크
-pnpm check
-
-# Admin UI 동작 확인
-pnpm dev
-# 1. Interaction 생성 시 'system' 옵션 선택 가능 확인
-# 2. Behavior action 생성 시 system interaction이 목록에서 제외되는지 확인
-```
-
----
-
-## 전체 작업 순서
-
-1. **Task 1**: Database schema 수정 (psql + migration 파일)
-2. **Task 1**: TypeScript 타입 재생성
-3. **Task 2**: Interaction create dialog에 'system' 옵션 추가
-4. **Task 2**: Behavior action dialog에서 system interaction 필터링
-5. **Task 2**: state-label.ts에 system interaction 라벨 추가
-6. **통합 테스트**: 모든 interaction type이 정상 동작하는지 확인
-
----
-
-## 예상 영향 범위
-
-### Task 1
-- **Database**: 2개 테이블 (character_interactions, building_interactions) 스키마 변경
-- **Migration**: 1개 파일 수정 (`20251225000000_create_interactions.sql`)
-- **TypeScript**: 생성된 타입 자동 업데이트 (CharacterInteraction, BuildingInteraction)
-
-### Task 2
-- **Interaction dialogs**: 3개 파일 (building/item/character create-dialog)
-- **Behavior action dialogs**: 2개 파일 (need/condition behavior-actions create-dialog)
-- **Utils**: 1개 파일 (state-label.ts)
-- **Panel** (선택사항): 3개 파일 (building/item/character panel)
-
----
-
-## 참고: 세 가지 Interaction Type
-
-### once_interaction_type
-- **목적**: 한 번만 실행되는 유저 액션
-- **예시**: item_use, building_use, building_construct, building_demolish
-- **Admin UI**: 생성/수정 가능 ✅
-- **Behavior Action**: 선택 가능 ✅
-
-### fulfill_interaction_type
-- **목적**: 욕구/컨디션을 충족시키기 위해 반복 실행
-- **예시**: building_repair, building_clean, building_use, character_hug
-- **Admin UI**: 생성/수정 가능 ✅
-- **Behavior Action**: 선택 가능 ✅
-
-### system_interaction_type
-- **목적**: 시스템 내부 동작 (숨겨진 interaction)
-- **예시**: item_pick (아이템 사용 전 자동으로 줍기)
-- **Admin UI**: 생성/수정 가능 ✅
-- **Behavior Action**: 선택 불가 ❌ (시스템 전용)

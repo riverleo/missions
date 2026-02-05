@@ -152,7 +152,7 @@ export default function executeOnceAction(
 				const firstAction = interactionActions[0];
 				if (!firstAction) return;
 				worldCharacterEntity.behavior.interactionTargetId = InteractionIdUtils.create(firstAction);
-				worldCharacterEntity.behavior.interactionStartTick = tick;
+				worldCharacterEntity.behavior.interactionTargetStartTick = tick;
 
 				// InteractionAction 시작과 동시에 item_pick 실행 (item_use는 duration 완료 후)
 				if (interactType === 'item_pick') {
@@ -202,7 +202,7 @@ export default function executeOnceAction(
 			);
 			const currentAction = interactionActions.find((a) => a.id === interactionActionId);
 			if (currentAction && currentAction.duration_ticks) {
-				const elapsed = tick - (worldCharacterEntity.behavior.interactionStartTick ?? 0);
+				const elapsed = tick - (worldCharacterEntity.behavior.interactionTargetStartTick ?? 0);
 				if (elapsed < currentAction.duration_ticks) {
 					return;
 				}
@@ -382,5 +382,5 @@ export default function executeOnceAction(
 
 	// InteractionAction 완료: 상태 초기화
 	worldCharacterEntity.behavior.interactionTargetId = undefined;
-	worldCharacterEntity.behavior.interactionStartTick = 0;
+	worldCharacterEntity.behavior.interactionTargetStartTick = 0;
 }
