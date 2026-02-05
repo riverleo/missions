@@ -336,6 +336,23 @@ function createInteractionStore() {
 		return get(characterInteractionActionStore).data[id] ?? [];
 	}
 
+	function getInteractionActions(
+		interaction: BuildingInteraction | ItemInteraction | CharacterInteraction
+	): (BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction)[] {
+		if ('building_interaction_id' in interaction) {
+			return getBuildingInteractionActions(
+				interaction.building_interaction_id as BuildingInteractionId
+			);
+		} else if ('item_interaction_id' in interaction) {
+			return getItemInteractionActions(interaction.item_interaction_id as ItemInteractionId);
+		} else if ('character_interaction_id' in interaction) {
+			return getCharacterInteractionActions(
+				interaction.character_interaction_id as CharacterInteractionId
+			);
+		}
+		return [];
+	}
+
 	// ===== Admin CRUD - Building Interactions =====
 	const admin = {
 		// Building Interaction
@@ -833,6 +850,7 @@ function createInteractionStore() {
 		getBuildingInteractionActions,
 		getItemInteractionActions,
 		getCharacterInteractionActions,
+		getInteractionActions,
 		// Admin
 		admin,
 	};

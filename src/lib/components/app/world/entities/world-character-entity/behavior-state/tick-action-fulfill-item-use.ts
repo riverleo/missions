@@ -77,5 +77,6 @@ export default function tickActionFulfillItemUse(
 		need.value = Math.min(100, need.value + needFulfillment.increase_per_tick);
 	}
 
+	// tickCompletion에서 인터렉션 체인을 진행하므로 return false
 	return false;
 }
