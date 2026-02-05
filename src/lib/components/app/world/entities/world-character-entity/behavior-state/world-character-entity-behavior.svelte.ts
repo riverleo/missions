@@ -2,7 +2,6 @@ import type { EntityId, BehaviorTargetId, InteractionTargetId, Behavior } from '
 import type { Vector } from '$lib/types/vector';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type { WorldCharacterEntityDirection } from '../index';
-import type { BeforeUpdateEvent } from '../../../context';
 import update from './update';
 import updateMove from './update-move';
 import updateDirection from './update-direction';
@@ -68,6 +67,14 @@ export class WorldCharacterEntityBehavior {
 	setBehaviorTarget(behaviorTargetId: BehaviorTargetId, tick: number): void {
 		this.behaviorTargetId = behaviorTargetId;
 		this.behaviorTargetStartTick = tick;
+	}
+
+	/**
+	 * 인터렉션 타겟을 설정합니다.
+	 */
+	setInteractionTarget(interactionTargetId: InteractionTargetId, tick: number): void {
+		this.interactionTargetId = interactionTargetId;
+		this.interactionTargetStartTick = tick;
 	}
 
 	/**

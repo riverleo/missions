@@ -104,8 +104,10 @@ export default function tickActionIfOnceItemUse(
 		}
 
 		// 첫 번째 액션으로 체인 시작
-		this.interactionTargetId = InteractionIdUtils.create('item', itemInteraction.id, rootAction.id);
-		this.interactionTargetStartTick = tick;
+		this.setInteractionTarget(
+			InteractionIdUtils.create('item', itemInteraction.id, rootAction.id),
+			tick
+		);
 	}
 
 	// 2. 인터렉션 체인 진행 (진행 중이면)
@@ -146,8 +148,7 @@ export default function tickActionIfOnceItemUse(
 
 		if (nextInteractionAction) {
 			// 다음 인터렉션으로 전환
-			this.interactionTargetId = InteractionIdUtils.create(nextInteractionAction);
-			this.interactionTargetStartTick = tick;
+			this.setInteractionTarget(InteractionIdUtils.create(nextInteractionAction), tick);
 			return true; // 계속 진행
 		} else {
 			// 인터렉션 체인 종료 및 아이템 제거
