@@ -3,11 +3,10 @@ import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
 /**
- * 행동 액션 완료 체크 및 전환
+ * 행동 액션 전환
  *
- * 행동 액션의 완료 여부를 확인하고 다음 행동 액션으로 전환합니다.
- * - IDLE: idle_duration_ticks 경과 확인
- * - FULFILL: need threshold 달성 확인
+ * 현재 행동 액션이 완료되면 다음 행동 액션으로 전환합니다.
+ * 완료 여부는 각 tick 메서드에서 판단하며, 이 메서드는 전환만 수행합니다.
  */
 export default function tickCompletion(
 	this: WorldCharacterEntityBehavior,
@@ -15,39 +14,8 @@ export default function tickCompletion(
 ): void {
 	const { getBehaviorAction } = useBehavior();
 
-	const worldCharacterEntity = this.worldCharacterEntity;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return;
-
-	// 행동 액션 완료 체크
-	let isCompleted = false;
-
-	if (behaviorAction.type === 'fulfill') {
-		// FULFILL: 욕구/컨디션 충족 여부 확인
-		const isNeedAction = behaviorAction.behaviorType === 'need';
-
-		if (isNeedAction) {
-			const { getAllNeedBehaviors } = useBehavior();
-			const behavior = getAllNeedBehaviors().find((b) => b.need_id === behaviorAction.need_id);
-			if (!behavior) return;
-
-			const need = worldCharacterEntity.needs[behaviorAction.need_id];
-			if (!need) return;
-
-			// 욕구가 threshold를 넘으면 완료
-			isCompleted = need.value > behavior.need_threshold;
-		} else {
-			// TODO: Condition 충족 확인
-			isCompleted = false;
-		}
-	} else if (behaviorAction.type === 'idle') {
-		// IDLE: idle_duration_ticks 경과 확인
-		isCompleted =
-			tick - (this.behaviorTargetStartTick ?? 0) >= behaviorAction.idle_duration_ticks;
-	}
-
-	// 완료되지 않았으면 종료
-	if (!isCompleted) return;
 
 	// 다음 행동 액션으로 전환
 	if (!this.behaviorTargetId) return;

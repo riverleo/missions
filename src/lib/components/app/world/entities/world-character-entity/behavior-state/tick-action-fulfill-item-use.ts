@@ -8,15 +8,15 @@ import type { WorldItemId, ItemInteractionId } from '$lib/types';
  * 아이템 사용 인터렉션 (fulfill)
  *
  * fulfill_interaction_type이 아이템 사용인 경우 아이템 사용 인터렉션을 실행합니다.
- * 사용 인터렉션 진행 중 need_fulfilments, condition_fulfillments를 실행합니다.
+ * 사용 인터렉션 진행 중 need_fulfilments를 적용하고, 완료 시 need threshold를 체크합니다.
  *
- * @returns true: 행동 실행 중단, false: 행동 실행 계속 진행
+ * @returns true: 진행 중, false: 완료 (다음 행동으로 전환)
  */
 export default function tickActionFulfillItemUse(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getBehaviorAction } = useBehavior();
+	const { getBehaviorAction, getAllNeedBehaviors } = useBehavior();
 	const { getInteraction, getWorldItem } = useWorld();
 	const { getItemInteractionActions, getItemInteraction, getNextInteractionActionId } =
 		useInteraction();
@@ -90,7 +90,8 @@ export default function tickActionFulfillItemUse(
 		}
 
 		// 다음 인터렉션 액션으로 전환 또는 체인 종료
-		const nextActionId = getNextInteractionActionId(currentAction);
+		const interactionAction = InteractionIdUtils.interactionAction.to(currentAction);
+		const nextActionId = getNextInteractionActionId(interactionAction);
 
 		if (nextActionId) {
 			// 다음 인터렉션으로 전환
@@ -105,10 +106,28 @@ export default function tickActionFulfillItemUse(
 			// 인터렉션 체인 종료
 			this.interactionTargetId = undefined;
 			this.interactionTargetStartTick = undefined;
-			// return false로 tickActionSystemPost에서 아이템 제거
 		}
 	}
 
-	// 3. 인터렉션 끝났으면 tickActionSystemPost로 (아이템 제거)
-	return false;
+	// 3. 인터렉션 끝났으면 need threshold 체크
+	if (!this.interactionTargetId) {
+		// need 행동인지 확인
+		if (behaviorAction.behaviorType !== 'need') return false;
+
+		const behavior = getAllNeedBehaviors().find((b) => b.need_id === behaviorAction.need_id);
+		if (!behavior) return false;
+
+		const need = worldCharacterEntity.needs[behaviorAction.need_id];
+		if (!need) return false;
+
+		// 욕구가 threshold 이하면 계속 진행
+		if (need.value <= behavior.need_threshold) {
+			return true;
+		}
+
+		// 욕구 충족, tickActionSystemPost에서 아이템 제거 후 tickCompletion에서 다음 행동으로
+		return false;
+	}
+
+	return true;
 }
