@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
 	import type { WorldCharacterEntity } from './world-character-entity.svelte';
-	import type { ItemInteractionId, WorldItemId } from '$lib/types';
+	import type {
+		ItemInteractionId,
+		WorldItemId,
+		CharacterBodyStateType,
+		CharacterFaceStateType,
+	} from '$lib/types';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
 	import { InteractionIdUtils } from '$lib/utils/interaction-id';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -85,7 +90,7 @@
 	const opacity = $derived(entity.debug ? 0.6 : 1);
 
 	// bodyStateType 계산
-	const bodyStateType = $derived.by(() => {
+	const bodyStateType = $derived.by((): CharacterBodyStateType => {
 		// 경로가 있으면 walk
 		if (entity.behavior.path.length > 0) return 'walk';
 
@@ -100,7 +105,7 @@
 	});
 
 	// faceStateType 계산
-	const faceStateType = $derived.by(() => {
+	const faceStateType = $derived.by((): CharacterFaceStateType => {
 		// 인터렉션 중이면 interaction 표정
 		if (entity.behavior.interactionTargetId) {
 			// TODO: 인터렉션 타입에 따라 다른 표정 반환
