@@ -2,13 +2,16 @@ import { useCharacter } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 
-export function tickDecreaseNeedsOrConditions(entity: WorldCharacterEntity, tick: number): void {
+/**
+ * 캐릭터의 욕구를 tick마다 감소시킵니다.
+ */
+export default function tickDecreaseNeeds(this: WorldCharacterEntity, tick: number): void {
 	// 모든 needs를 decrease_per_tick * multiplier만큼 감소
 	const { needStore, characterNeedStore } = useCharacter();
 	const needs = get(needStore).data;
 	const characterNeeds = get(characterNeedStore).data;
 
-	for (const worldCharacterNeed of Object.values(entity.needs)) {
+	for (const worldCharacterNeed of Object.values(this.needs)) {
 		const need = needs[worldCharacterNeed.need_id];
 		if (!need) continue;
 

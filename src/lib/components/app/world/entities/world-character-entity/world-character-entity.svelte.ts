@@ -17,7 +17,7 @@ import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
-import { tickDecreaseNeedsOrConditions } from './tick-decrease-needs-or-conditions';
+import tickDecreaseNeeds from './tick-decrease-needs';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -133,8 +133,10 @@ export class WorldCharacterEntity extends Entity {
 		this.behavior.update(event);
 	}
 
+	tickDecreaseNeeds = tickDecreaseNeeds;
+
 	tick(tick: number): void {
-		tickDecreaseNeedsOrConditions(this, tick);
+		this.tickDecreaseNeeds(tick);
 		this.behavior.tick(tick);
 	}
 
