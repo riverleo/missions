@@ -8,8 +8,12 @@ import updateMove from './update-move';
 import updateDirection from './update-direction';
 import tick from './tick';
 import tickInitialize from './tick-initialize';
+import tickIdle from './tick-idle';
 import tickFindAndGo from './tick-find-and-go';
-import tickBehaviorAction from './tick-behavior-action';
+import tickActionSystemPre from './tick-action-system-pre';
+import tickActionFulfillItemUse from './tick-action-fulfill-item-use';
+import tickActionSystemPost from './tick-action-system-post';
+import tickCompletion from './tick-completion';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -33,8 +37,12 @@ export class WorldCharacterEntityBehavior {
 	updateDirection: () => void;
 	tick: (tickNumber: number) => void;
 	tickInitialize: (tick: number) => boolean;
+	tickIdle: (tick: number) => boolean;
 	tickFindAndGo: (tick: number) => boolean;
-	tickBehaviorAction: (tick: number) => boolean;
+	tickActionSystemPre: (tick: number) => boolean;
+	tickActionFulfillItemUse: (tick: number) => boolean;
+	tickActionSystemPost: (tick: number) => boolean;
+	tickCompletion: (tick: number) => void;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
@@ -43,8 +51,12 @@ export class WorldCharacterEntityBehavior {
 		this.updateDirection = updateDirection.bind(this);
 		this.tick = tick.bind(this);
 		this.tickInitialize = tickInitialize.bind(this);
+		this.tickIdle = tickIdle.bind(this);
 		this.tickFindAndGo = tickFindAndGo.bind(this);
-		this.tickBehaviorAction = tickBehaviorAction.bind(this);
+		this.tickActionSystemPre = tickActionSystemPre.bind(this);
+		this.tickActionFulfillItemUse = tickActionFulfillItemUse.bind(this);
+		this.tickActionSystemPost = tickActionSystemPost.bind(this);
+		this.tickCompletion = tickCompletion.bind(this);
 	}
 
 	/**

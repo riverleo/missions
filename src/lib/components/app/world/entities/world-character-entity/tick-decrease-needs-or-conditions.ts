@@ -2,7 +2,7 @@ import { useCharacter } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 
-export function tickWorldCharacterNeeds(entity: WorldCharacterEntity, tick: number): void {
+export function tickDecreaseNeedsOrConditions(entity: WorldCharacterEntity, tick: number): void {
 	// 모든 needs를 decrease_per_tick * multiplier만큼 감소
 	const { needStore, characterNeedStore } = useCharacter();
 	const needs = get(needStore).data;

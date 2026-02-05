@@ -22,9 +22,6 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId)!;
 
-	// idle 행동은 타겟이 필요 없음
-	if (behaviorAction.type === 'idle') return false;
-
 	// 타겟이 있으면 도착 여부 확인
 	if (this.targetEntityId) {
 		const worldCharacterEntity = this.worldCharacterEntity;
