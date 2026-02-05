@@ -21,7 +21,7 @@ export default function tickActionIfOnceItemUse(
 	const { getInteraction, getWorldItem, worldItemStore } = useWorld();
 	const { getItemInteractionActions, getNextInteractionAction, getAllItemInteractions } =
 		useInteraction();
-	const { getAllNeedFulfillments } = useCharacter();
+	const { getAllNeedFulfillments, getNeed } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
@@ -121,8 +121,11 @@ export default function tickActionIfOnceItemUse(
 			const need = worldCharacterEntity.needs[needFulfillment.need_id];
 			if (!need) continue;
 
+			const needDefinition = getNeed(need.need_id);
+			const maxValue = needDefinition?.max_value ?? 100;
+
 			// 욕구 증가
-			need.value = Math.min(100, need.value + needFulfillment.increase_per_tick);
+			need.value = Math.min(maxValue, need.value + needFulfillment.increase_per_tick);
 		}
 
 		// duration_ticks 경과 확인
