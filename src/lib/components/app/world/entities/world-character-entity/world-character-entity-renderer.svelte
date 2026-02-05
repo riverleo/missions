@@ -83,6 +83,33 @@
 
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);
+
+	// bodyStateType 계산
+	const bodyStateType = $derived.by(() => {
+		// 경로가 있으면 walk
+		if (entity.behavior.path.length > 0) return 'walk';
+
+		// 인터렉션 중이면 interaction 상태
+		if (entity.behavior.interactionTargetId) {
+			// TODO: 인터렉션 타입에 따라 다른 상태 반환
+			return 'idle';
+		}
+
+		// 기본값은 idle
+		return 'idle';
+	});
+
+	// faceStateType 계산
+	const faceStateType = $derived.by(() => {
+		// 인터렉션 중이면 interaction 표정
+		if (entity.behavior.interactionTargetId) {
+			// TODO: 인터렉션 타입에 따라 다른 표정 반환
+			return 'idle';
+		}
+
+		// 기본값은 idle
+		return 'idle';
+	});
 </script>
 
 {#if character}
@@ -96,8 +123,8 @@
 	<!-- 캐릭터 스프라이트 -->
 	<CharacterSpriteAnimator
 		characterId={character.id}
-		bodyStateType="idle"
-		faceStateType="idle"
+		{bodyStateType}
+		{faceStateType}
 		{heldItemState}
 		heldItemOffset={heldItemTransform.offset}
 		heldItemScale={heldItemTransform.scale}
