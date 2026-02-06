@@ -4,7 +4,6 @@ import type { Entity } from '../../entity.svelte';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import type { WorldItemId } from '$lib/types';
 
 /**
  * 타겟 엔티티 탐색 및 경로 설정
@@ -57,7 +56,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	const entitySourceIds = new Set(entitySources.map((es) => es.id));
 
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
-		const worldItem = getWorldItem(EntityIdUtils.instanceId<WorldItemId>(heldItemEntityId));
+		const worldItem = getWorldItem(EntityIdUtils.instanceId(heldItemEntityId));
 		if (worldItem && entitySourceIds.has(worldItem.item_id)) {
 			this.targetEntityId = heldItemEntityId;
 			this.path = [];
