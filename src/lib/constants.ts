@@ -11,7 +11,7 @@ export const TILE_CELL_RATIO = TILE_SIZE / CELL_SIZE; // 타일이 차지하는 
 export const MAX_TILE_PLACABLE_COUNT = 50; // 최대 타일 배치 가능 갯수
 
 // 틱 시스템 설정
-export const TICK_INTERVAL = 100; // 1 tick = 100ms
+export const TICK_INTERVAL = 1000; // 1 tick = 1000ms (1초)
 
 // 행동 시스템 설정
 export const TARGET_ARRIVAL_DISTANCE = 50; // 타겟 도착 판정 거리 (픽셀)

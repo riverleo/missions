@@ -24,31 +24,13 @@
 
 	let { worldContext }: Props = $props();
 
-	const { selectedEntityIdStore, setSelectedEntityId } = useWorld();
 	const { tickStore } = useCurrent();
 
 	// WorldContext에서 실시간 엔티티 정보 가져오기
 	const entities = $derived(worldContext ? Object.values(worldContext.entities) : []);
-
-	// 아코디언 value (entityId 기반)
-	const accordionValue = $derived.by(() => {
-		const entityId = $selectedEntityIdStore.entityId;
-		if (!entityId) return 'world';
-
-		return entityId;
-	});
-
-	function onValueChange(value: string | undefined) {
-		if (!value || value === 'world') {
-			setSelectedEntityId(undefined);
-		} else {
-			// value는 EntityId 형태 ("character-{id}", "building-{id}", "item-{id}")
-			setSelectedEntityId(value as EntityId);
-		}
-	}
 </script>
 
-<Accordion type="single" value={accordionValue} {onValueChange} class="px-3 py-1">
+<Accordion type="multiple" class="px-3 py-1">
 	<AccordionItem value="world">
 		<AccordionTrigger class="py-3 text-xs">월드 정보</AccordionTrigger>
 		<AccordionContent class="pb-3">
