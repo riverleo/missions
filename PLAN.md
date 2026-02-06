@@ -226,7 +226,7 @@ export function getDisplayTitle(title: string | undefined | null, id: string): s
 // 복합 라벨 생성 헬퍼
 export function getInteractionLabel(params: {
   characterName?: string;
-  interactionType: OnceInteractionType | FulfillInteractionType | SystemInteractionType;
+  interactionType: InteractionType;
 }): string {
   const { characterName, interactionType } = params;
   const name = characterName || FALLBACK_LABELS.allCharacters;
@@ -249,7 +249,7 @@ export function getInteractionLabel(params: {
 
 ## Phase 0: 공통 타입 정의
 
-### Option<T> 타입 생성
+### core.ts에 공통 타입 추가
 **파일**: `src/lib/types/core.ts`
 
 ```typescript
@@ -258,6 +258,32 @@ export type Option<T = string> = {
   value: T;
   label: string;
 };
+
+// 인터랙션 타입 통합
+export type InteractionType =
+  | OnceInteractionType
+  | FulfillInteractionType
+  | SystemInteractionType;
+```
+
+**InteractionType 사용처:**
+- state-label.ts의 `getBehaviorInteractTypeLabel()` 파라미터 타입
+- 복합 라벨 헬퍼 함수들
+- interaction-command 컴포넌트들의 타입 추론
+
+**변경 예시:**
+```typescript
+// Before
+export function getBehaviorInteractTypeLabel(
+  type: OnceInteractionType | FulfillInteractionType | SystemInteractionType
+): string {
+  // ...
+}
+
+// After
+export function getBehaviorInteractTypeLabel(type: InteractionType): string {
+  // ...
+}
 ```
 
 **현재 사용처** (리팩토링 대상):
@@ -280,9 +306,11 @@ export function getOnceInteractionTypeOptions(): Option<OnceInteractionType>[] {
 
 ## 구현 순서
 
-1. [ ] Phase 0: `src/lib/types/core.ts`에 Option<T> 타입 정의
-2. [ ] state-label.ts의 모든 함수 반환 타입을 Option<T>로 변경
-3. [ ] `src/lib/constants/labels.ts` 파일 생성
+1. [ ] Phase 0-1: `src/lib/types/core.ts`에 Option<T> 타입 정의
+2. [ ] Phase 0-2: `src/lib/types/core.ts`에 InteractionType 유니온 타입 정의
+3. [ ] state-label.ts의 모든 함수 반환 타입을 Option<T>로 변경
+4. [ ] state-label.ts의 getBehaviorInteractTypeLabel 파라미터를 InteractionType으로 변경
+5. [ ] `src/lib/constants/labels.ts` 파일 생성
 2. [ ] Phase 1: ACTION_LABELS, TOGGLE_LABELS 정의
 3. [ ] Phase 2: FORM_LABELS, placeholder 헬퍼 정의
 4. [ ] Phase 3: DOMAIN_LABELS 정의
