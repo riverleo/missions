@@ -41,6 +41,9 @@ import type {
 	BuildingInteractionAction,
 	ItemInteractionAction,
 	CharacterInteractionAction,
+	OnceInteractionType,
+	FulfillInteractionType,
+	SystemInteractionType,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -195,3 +198,19 @@ export interface Boundaries {
 	left: Matter.Body;
 	right: Matter.Body;
 }
+
+// ============================================================
+// UI & Label Types
+// ============================================================
+
+// 라벨 타입 (셀렉트 옵션 등에 사용)
+export type Label<T = string> = {
+	value: T;
+	label: string;
+};
+
+// Behavior 인터랙션 타입 통합
+export type BehaviorInteractionType =
+	| OnceInteractionType
+	| FulfillInteractionType
+	| SystemInteractionType;

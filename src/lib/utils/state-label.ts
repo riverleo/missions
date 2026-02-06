@@ -15,12 +15,12 @@ import type {
 } from '$lib/types';
 import { josa } from './josa';
 
-const colliderTypeLabels: Record<ColliderType, string> = {
+const COLLIDER_TYPE_LABELS: Record<ColliderType, string> = {
 	circle: '원형',
 	rectangle: '사각형',
 };
 
-const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
+const CHARACTER_BODY_STATE_LABELS: Record<CharacterBodyStateType, string> = {
 	idle: '기본',
 	walk: '걷기',
 	run: '달리기',
@@ -28,88 +28,88 @@ const characterBodyStateLabels: Record<CharacterBodyStateType, string> = {
 	pick: '줍기',
 };
 
-const characterFaceStateLabels: Record<CharacterFaceStateType, string> = {
+const CHARACTER_FACE_STATE_LABELS: Record<CharacterFaceStateType, string> = {
 	idle: '기본',
 	happy: '행복',
 	sad: '슬픔',
 	angry: '화남',
 };
 
-const buildingStateLabels: Record<BuildingStateType, string> = {
+const BUILDING_STATE_LABELS: Record<BuildingStateType, string> = {
 	idle: '기본',
 	damaged: '손상됨',
 	planning: '계획 중',
 	constructing: '건설 중',
 };
 
-const onceInteractionTypeLabels: Record<OnceInteractionType, string> = {
+const ONCE_INTERACTION_TYPE_LABELS: Record<OnceInteractionType, string> = {
 	item_use: '아이템 사용',
 	building_use: '건물 사용',
 	building_construct: '건물 건설',
 	building_demolish: '건물 철거',
 };
 
-const fulfillInteractionTypeLabels: Record<FulfillInteractionType, string> = {
+const FULFILL_INTERACTION_TYPE_LABELS: Record<FulfillInteractionType, string> = {
 	building_repair: '건물 수리',
 	building_clean: '건물 청소',
 	building_use: '건물 사용',
 	character_hug: '캐릭터 포옹',
 };
 
-const systemInteractionTypeLabels: Record<SystemInteractionType, string> = {
+const SYSTEM_INTERACTION_TYPE_LABELS: Record<SystemInteractionType, string> = {
 	item_pick: '아이템 줍기',
 };
 
 export function getColliderTypeLabel(type: ColliderType): string {
-	return colliderTypeLabels[type];
+	return COLLIDER_TYPE_LABELS[type];
 }
 
 export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
-	return characterBodyStateLabels[state];
+	return CHARACTER_BODY_STATE_LABELS[state];
 }
 
 export function getCharacterFaceStateLabel(state: CharacterFaceStateType): string {
-	return characterFaceStateLabels[state];
+	return CHARACTER_FACE_STATE_LABELS[state];
 }
 
 export function getBuildingStateLabel(state: BuildingStateType): string {
-	return buildingStateLabels[state];
+	return BUILDING_STATE_LABELS[state];
 }
 
 export function getOnceInteractionTypeLabel(type: OnceInteractionType): string {
-	return onceInteractionTypeLabels[type];
+	return ONCE_INTERACTION_TYPE_LABELS[type];
 }
 
 export function getOnceInteractionTypeOptions(): { value: OnceInteractionType; label: string }[] {
-	return Object.entries(onceInteractionTypeLabels).map(([value, label]) => ({
+	return Object.entries(ONCE_INTERACTION_TYPE_LABELS).map(([value, label]) => ({
 		value: value as OnceInteractionType,
 		label,
 	}));
 }
 
 export function getFulfillInteractionTypeLabel(type: FulfillInteractionType): string {
-	return fulfillInteractionTypeLabels[type];
+	return FULFILL_INTERACTION_TYPE_LABELS[type];
 }
 
 export function getFulfillInteractionTypeOptions(): {
 	value: FulfillInteractionType;
 	label: string;
 }[] {
-	return Object.entries(fulfillInteractionTypeLabels).map(([value, label]) => ({
+	return Object.entries(FULFILL_INTERACTION_TYPE_LABELS).map(([value, label]) => ({
 		value: value as FulfillInteractionType,
 		label,
 	}));
 }
 
 export function getSystemInteractionTypeLabel(type: SystemInteractionType): string {
-	return systemInteractionTypeLabels[type];
+	return SYSTEM_INTERACTION_TYPE_LABELS[type];
 }
 
 export function getSystemInteractionTypeOptions(): {
 	value: SystemInteractionType;
 	label: string;
 }[] {
-	return Object.entries(systemInteractionTypeLabels).map(([value, label]) => ({
+	return Object.entries(SYSTEM_INTERACTION_TYPE_LABELS).map(([value, label]) => ({
 		value: value as SystemInteractionType,
 		label,
 	}));
@@ -121,9 +121,9 @@ export function getBuildingOnceInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_use', label: onceInteractionTypeLabels.building_use },
-		{ value: 'building_construct', label: onceInteractionTypeLabels.building_construct },
-		{ value: 'building_demolish', label: onceInteractionTypeLabels.building_demolish },
+		{ value: 'building_use', label: ONCE_INTERACTION_TYPE_LABELS.building_use },
+		{ value: 'building_construct', label: ONCE_INTERACTION_TYPE_LABELS.building_construct },
+		{ value: 'building_demolish', label: ONCE_INTERACTION_TYPE_LABELS.building_demolish },
 	];
 }
 
@@ -132,8 +132,8 @@ export function getBuildingFulfillInteractionTypeOptions(): {
 	label: string;
 }[] {
 	return [
-		{ value: 'building_repair', label: fulfillInteractionTypeLabels.building_repair },
-		{ value: 'building_clean', label: fulfillInteractionTypeLabels.building_clean },
+		{ value: 'building_repair', label: FULFILL_INTERACTION_TYPE_LABELS.building_repair },
+		{ value: 'building_clean', label: FULFILL_INTERACTION_TYPE_LABELS.building_clean },
 	];
 }
 
@@ -149,7 +149,7 @@ export function getItemOnceInteractionTypeOptions(): {
 	value: OnceInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'item_use', label: onceInteractionTypeLabels.item_use }];
+	return [{ value: 'item_use', label: ONCE_INTERACTION_TYPE_LABELS.item_use }];
 }
 
 export function getItemFulfillInteractionTypeOptions(): {
@@ -163,7 +163,7 @@ export function getItemSystemInteractionTypeOptions(): {
 	value: SystemInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'item_pick', label: systemInteractionTypeLabels.item_pick }];
+	return [{ value: 'item_pick', label: SYSTEM_INTERACTION_TYPE_LABELS.item_pick }];
 }
 
 // Character interaction type options
@@ -178,7 +178,7 @@ export function getCharacterFulfillInteractionTypeOptions(): {
 	value: FulfillInteractionType;
 	label: string;
 }[] {
-	return [{ value: 'character_hug', label: fulfillInteractionTypeLabels.character_hug }];
+	return [{ value: 'character_hug', label: FULFILL_INTERACTION_TYPE_LABELS.character_hug }];
 }
 
 export function getCharacterSystemInteractionTypeOptions(): {
@@ -192,13 +192,13 @@ export function getCharacterSystemInteractionTypeOptions(): {
 export function getBehaviorInteractTypeLabel(
 	type: OnceInteractionType | FulfillInteractionType | SystemInteractionType
 ): string {
-	if (type in onceInteractionTypeLabels) {
-		return onceInteractionTypeLabels[type as OnceInteractionType];
+	if (type in ONCE_INTERACTION_TYPE_LABELS) {
+		return ONCE_INTERACTION_TYPE_LABELS[type as OnceInteractionType];
 	}
-	if (type in systemInteractionTypeLabels) {
-		return systemInteractionTypeLabels[type as SystemInteractionType];
+	if (type in SYSTEM_INTERACTION_TYPE_LABELS) {
+		return SYSTEM_INTERACTION_TYPE_LABELS[type as SystemInteractionType];
 	}
-	return fulfillInteractionTypeLabels[type as FulfillInteractionType];
+	return FULFILL_INTERACTION_TYPE_LABELS[type as FulfillInteractionType];
 }
 
 export function getBehaviorInteractTypeOptions(): {
@@ -208,23 +208,23 @@ export function getBehaviorInteractTypeOptions(): {
 	return [...getOnceInteractionTypeOptions(), ...getFulfillInteractionTypeOptions()];
 }
 
-const itemStateLabels: Record<ItemStateType, string> = {
+const ITEM_STATE_LABELS: Record<ItemStateType, string> = {
 	idle: '기본',
 	broken: '파손',
 };
 
 export function getItemStateLabel(state: ItemStateType): string {
-	return itemStateLabels[state];
+	return ITEM_STATE_LABELS[state];
 }
 
-const tileStateLabels: Record<TileStateType, string> = {
+const TILE_STATE_LABELS: Record<TileStateType, string> = {
 	idle: '기본',
 	damaged_1: '손상 1단계',
 	damaged_2: '손상 2단계',
 };
 
 export function getTileStateLabel(state: TileStateType): string {
-	return tileStateLabels[state];
+	return TILE_STATE_LABELS[state];
 }
 
 // Behavior 라벨 생성 함수들

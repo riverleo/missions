@@ -306,18 +306,178 @@ export function getOnceInteractionTypeOptions(): Option<OnceInteractionType>[] {
 
 ## 구현 순서
 
-1. [ ] Phase 0-1: `src/lib/types/core.ts`에 Option<T> 타입 정의
-2. [ ] Phase 0-2: `src/lib/types/core.ts`에 BehaviorInteractionType 유니온 타입 정의
-3. [ ] state-label.ts의 모든 함수 반환 타입을 Option<T>로 변경
-4. [ ] state-label.ts의 getBehaviorInteractTypeLabel 파라미터를 BehaviorInteractionType으로 변경
-5. [ ] `src/lib/constants/labels.ts` 파일 생성
-2. [ ] Phase 1: ACTION_LABELS, TOGGLE_LABELS 정의
-3. [ ] Phase 2: FORM_LABELS, placeholder 헬퍼 정의
-4. [ ] Phase 3: DOMAIN_LABELS 정의
-5. [ ] Phase 4: state-label.ts 확장
-6. [ ] Phase 5: FALLBACK_LABELS 정의
-7. [ ] 모든 컴포넌트 파일에서 인라인 라벨 → 상수 참조로 교체
-8. [ ] 검증: 개발 서버 실행 및 UI 확인
+### Phase 0: 타입 정의 ✅
+1. [x] `src/lib/types/core.ts`에 Label<T> 타입 정의
+2. [x] `src/lib/types/core.ts`에 BehaviorInteractionType 유니온 타입 정의
+3. [x] state-label.ts의 모든 함수 반환 타입을 Label<T>로 변경
+4. [x] state-label.ts의 getBehaviorInteractTypeLabel 파라미터를 BehaviorInteractionType으로 변경
+5. [x] state-label.ts를 label/label.ts로 이동
+
+### Phase 1-5: 라벨 상수 생성 ✅
+1. [x] `src/lib/utils/label/action.ts`: ACTION_LABELS, TOGGLE_LABELS
+2. [x] `src/lib/utils/label/form.ts`: FORM_LABELS, placeholder 헬퍼
+3. [x] `src/lib/utils/label/domain.ts`: DOMAIN_LABELS
+4. [x] `src/lib/utils/label/fallback.ts`: FALLBACK_LABELS, 복합 라벨 헬퍼
+5. [x] `src/lib/utils/label/index.ts`: 모든 export 통합
+
+### Phase 6: 함수 네이밍 및 구조 리팩토링
+**목적**: Label 타입과 혼동 방지를 위한 명확한 네이밍 + 중복 제거
+
+**A. Labels 객체 통합:**
+```typescript
+// 현재 (3개 분리)
+const onceInteractionTypeLabels: Record<OnceInteractionType, string> = { ... };
+const fulfillInteractionTypeLabels: Record<FulfillInteractionType, string> = { ... };
+const systemInteractionTypeLabels: Record<SystemInteractionType, string> = { ... };
+
+// 변경 (1개 통합)
+const behaviorInteractionTypeLabels: Record<BehaviorInteractionType, string> = {
+  // once
+  item_use: '아이템 사용',
+  building_use: '건물 사용',
+  building_construct: '건물 건설',
+  building_demolish: '건물 철거',
+  // fulfill
+  building_repair: '건물 수리',
+  building_clean: '건물 청소',
+  character_hug: '캐릭터 포옹',
+  // system
+  item_pick: '아이템 줍기',
+};
+```
+
+**B. 네이밍 규칙:**
+- `Label<T>[]` 반환 → `getXxxLabels`
+- `string` 반환 → `getXxxString`
+- 객체 반환 → `getXxxInfo`
+
+**변경 목록 (label/label.ts):**
+
+String 반환 함수:
+- [ ] `getColliderTypeLabel` → `getColliderTypeString`
+- [ ] `getCharacterBodyStateLabel` → `getCharacterBodyStateString`
+- [ ] `getCharacterFaceStateLabel` → `getCharacterFaceStateString`
+- [ ] `getBuildingStateLabel` → `getBuildingStateString`
+- [ ] `getOnceInteractionTypeLabel` → `getOnceInteractionTypeString`
+- [ ] `getFulfillInteractionTypeLabel` → `getFulfillInteractionTypeString`
+- [ ] `getSystemInteractionTypeLabel` → `getSystemInteractionTypeString`
+- [ ] `getBehaviorInteractTypeLabel` → `getBehaviorInteractTypeString`
+- [ ] `getItemStateLabel` → `getItemStateString`
+- [ ] `getTileStateLabel` → `getTileStateString`
+- [ ] `getBehaviorActionLabel` → `getBehaviorActionString`
+
+객체 반환 함수:
+- [ ] `getNeedBehaviorLabel` → `getNeedBehaviorInfo`
+- [ ] `getConditionBehaviorLabel` → `getConditionBehaviorInfo`
+
+Label<T>[] 반환 함수 (Options → Labels):
+- [ ] `getOnceInteractionTypeOptions` → `getOnceInteractionTypeLabels`
+- [ ] `getFulfillInteractionTypeOptions` → `getFulfillInteractionTypeLabels`
+- [ ] `getSystemInteractionTypeOptions` → `getSystemInteractionTypeLabels`
+- [ ] `getBuildingOnceInteractionTypeOptions` → `getBuildingOnceInteractionTypeLabels`
+- [ ] `getBuildingFulfillInteractionTypeOptions` → `getBuildingFulfillInteractionTypeLabels`
+- [ ] `getBuildingSystemInteractionTypeOptions` → `getBuildingSystemInteractionTypeLabels`
+- [ ] `getItemOnceInteractionTypeOptions` → `getItemOnceInteractionTypeLabels`
+- [ ] `getItemFulfillInteractionTypeOptions` → `getItemFulfillInteractionTypeLabels`
+- [ ] `getItemSystemInteractionTypeOptions` → `getItemSystemInteractionTypeLabels`
+- [ ] `getCharacterOnceInteractionTypeOptions` → `getCharacterOnceInteractionTypeLabels`
+- [ ] `getCharacterFulfillInteractionTypeOptions` → `getCharacterFulfillInteractionTypeLabels`
+- [ ] `getCharacterSystemInteractionTypeOptions` → `getCharacterSystemInteractionTypeLabels`
+- [ ] `getBehaviorInteractTypeOptions` → `getBehaviorInteractTypeLabels`
+
+**적용 순서:**
+1. [x] label/label.ts에서 3개의 labels 객체를 behaviorInteractionTypeLabels 하나로 통합
+2. [x] label/label.ts 함수명 변경 (위 목록대로)
+3. [x] fallback.ts의 getInteractionLabel에서 getBehaviorInteractTypeString 사용
+4. [x] 모든 사용처 import/호출 업데이트 (Grep으로 검색 후 일괄 변경)
+
+✅ **Phase 6 완료!** 타입 체크 통과
+
+### Phase 6.5: Label 구조 재정리
+**목적**: 파일 구조 단순화 + 네이밍 컨벤션 통일 + 캡슐화
+
+**A. 파일 통합**
+현재 구조:
+```
+src/lib/utils/label/
+├── action.ts
+├── form.ts
+├── domain.ts
+├── fallback.ts
+├── label.ts
+└── index.ts
+```
+
+변경 구조:
+```
+src/lib/utils/label/
+└── index.ts  (모든 내용 통합)
+```
+
+**B. 내부 상수 네이밍 컨벤션 (UPPERCASE)**
+```typescript
+// 현재
+const colliderTypeLabels: Record<ColliderType, string> = { ... };
+const characterBodyStateLabels: Record<CharacterBodyStateType, string> = { ... };
+const behaviorInteractionTypeLabels: Record<BehaviorInteractionType, string> = { ... };
+
+// 변경
+const COLLIDER_TYPE_LABELS: Record<ColliderType, string> = { ... };
+const CHARACTER_BODY_STATE_LABELS: Record<CharacterBodyStateType, string> = { ... };
+const BEHAVIOR_INTERACTION_TYPE_LABELS: Record<BehaviorInteractionType, string> = { ... };
+const ACTION_LABELS = { ... };
+const TOGGLE_LABELS = { ... };
+const FORM_LABELS = { ... };
+const DOMAIN_LABELS = { ... };
+const FALLBACK_LABELS = { ... };
+```
+
+**C. 캡슐화: 상수 직접 export 금지, getter만 제공**
+
+현재 (직접 export):
+```typescript
+export const ACTION_LABELS = { ... };
+// 사용: ACTION_LABELS.create
+```
+
+변경 옵션 1 (개별 getter):
+```typescript
+const ACTION_LABELS = { ... }; // private
+
+export function getActionLabel(key: keyof typeof ACTION_LABELS): string {
+  return ACTION_LABELS[key];
+}
+// 사용: getActionLabel('create')
+```
+
+변경 옵션 2 (객체 getter):
+```typescript
+const ACTION_LABELS = { ... }; // private
+
+export function getActionLabels() {
+  return ACTION_LABELS;
+}
+// 사용: getActionLabels().create
+```
+
+**질문**: 옵션 1 vs 옵션 2? 또는 다른 방식?
+
+**적용 순서 (단순화 버전):**
+1. [x] state-label.ts의 모든 내부 상수를 UPPERCASE로 변경
+   - colliderTypeLabels → COLLIDER_TYPE_LABELS
+   - characterBodyStateLabels → CHARACTER_BODY_STATE_LABELS
+   - buildingStateLabels → BUILDING_STATE_LABELS
+   - onceInteractionTypeLabels → ONCE_INTERACTION_TYPE_LABELS
+   - fulfillInteractionTypeLabels → FULFILL_INTERACTION_TYPE_LABELS
+   - systemInteractionTypeLabels → SYSTEM_INTERACTION_TYPE_LABELS
+   - itemStateLabels → ITEM_STATE_LABELS
+   - tileStateLabels → TILE_STATE_LABELS
+
+✅ **Phase 6.5 완료!** (파일 통합 및 getter 캡슐화는 보류)
+
+### Phase 7: 인라인 라벨 교체
+- [ ] 모든 컴포넌트 파일에서 인라인 라벨 → 상수 참조로 교체
+- [ ] 검증: 개발 서버 실행 및 UI 확인
 
 ## 예상 효과
 

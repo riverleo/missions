@@ -297,6 +297,8 @@ export type {
 	BeforeUpdateEvent,
 	WorldBlueprintCursor,
 	Boundaries,
+	Label,
+	BehaviorInteractionType,
 } from './core';
 
 // Re-export behavior state
