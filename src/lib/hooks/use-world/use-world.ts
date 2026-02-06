@@ -2,9 +2,6 @@ import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
-import { useBuilding } from '$lib/hooks/use-building';
-import { useItem } from '$lib/hooks/use-item';
-import { useCharacter } from '$lib/hooks/use-character';
 import { useInteraction } from '$lib/hooks/use-interaction';
 import type {
 	RecordFetchState,
@@ -158,7 +155,10 @@ function createWorldStore() {
 		);
 	}
 
-	function updateWorldCharacterNeed(id: WorldCharacterNeedId, update: Partial<WorldCharacterNeed>): void {
+	function updateWorldCharacterNeed(
+		id: WorldCharacterNeedId,
+		update: Partial<WorldCharacterNeed>
+	): void {
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
 				const need = draft.data[id];
@@ -169,7 +169,10 @@ function createWorldStore() {
 		);
 	}
 
-	function updateWorldBuildingCondition(id: WorldBuildingConditionId, update: Partial<WorldBuildingCondition>): void {
+	function updateWorldBuildingCondition(
+		id: WorldBuildingConditionId,
+		update: Partial<WorldBuildingCondition>
+	): void {
 		worldBuildingConditionStore.update((state) =>
 			produce(state, (draft) => {
 				const condition = draft.data[id];
@@ -280,7 +283,11 @@ function createWorldStore() {
 	 * Interaction으로부터 InteractionAction 배열을 반환
 	 */
 	function getInteractionActions(interaction: Interaction): InteractionAction[] {
-		const { getBuildingInteractionActions, getItemInteractionActions, getCharacterInteractionActions } = useInteraction();
+		const {
+			getBuildingInteractionActions,
+			getItemInteractionActions,
+			getCharacterInteractionActions,
+		} = useInteraction();
 
 		if (interaction.interactionType === 'building') {
 			const actions = getBuildingInteractionActions(interaction.id) || [];
