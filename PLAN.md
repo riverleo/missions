@@ -226,11 +226,11 @@ export function getDisplayTitle(title: string | undefined | null, id: string): s
 // 복합 라벨 생성 헬퍼
 export function getInteractionLabel(params: {
   characterName?: string;
-  interactionType: BehaviorInteractionType;
+  behaviorInteractionType: BehaviorInteractionType;
 }): string {
-  const { characterName, interactionType } = params;
+  const { characterName, behaviorInteractionType } = params;
   const name = characterName || FALLBACK_LABELS.allCharacters;
-  return `${name} ${getBehaviorInteractTypeLabel(interactionType)}`;
+  return `${name} ${getBehaviorInteractTypeLabel(behaviorInteractionType)}`;
 }
 ```
 
@@ -243,7 +243,7 @@ export function getInteractionLabel(params: {
 // After
 {@const label = getInteractionLabel({
   characterName: character?.name,
-  interactionType
+  behaviorInteractionType
 })}
 ```
 
