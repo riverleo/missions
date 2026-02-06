@@ -9,7 +9,6 @@ import type {
 	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
-	BehaviorActionType,
 	OnceInteractionType,
 	FulfillInteractionType,
 	SystemInteractionType,
@@ -150,9 +149,7 @@ export function getItemOnceInteractionTypeOptions(): {
 	value: OnceInteractionType;
 	label: string;
 }[] {
-	return [
-		{ value: 'item_use', label: onceInteractionTypeLabels.item_use },
-	];
+	return [{ value: 'item_use', label: onceInteractionTypeLabels.item_use }];
 }
 
 export function getItemFulfillInteractionTypeOptions(): {
@@ -166,9 +163,7 @@ export function getItemSystemInteractionTypeOptions(): {
 	value: SystemInteractionType;
 	label: string;
 }[] {
-	return [
-		{ value: 'item_pick', label: systemInteractionTypeLabels.item_pick },
-	];
+	return [{ value: 'item_pick', label: systemInteractionTypeLabels.item_pick }];
 }
 
 // Character interaction type options
