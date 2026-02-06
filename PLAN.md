@@ -150,13 +150,14 @@ getOrUndefinedXX(id: string): XX | undefined {
   - world-character-entity.svelte.ts: characterBody getter 간소화
   - search-entity-sources.ts: getOrUndefinedCharacter 사용
 
-**Phase 3: use-item.ts**
-- [ ] `getItem()` → throw 추가
-- [ ] `getItemBody()` → throw 추가
-- [ ] `getDurability()` → throw 추가
-- [ ] `getItemDurability()` → throw 추가
-- [ ] 기존 함수명을 `getOrUndefinedXX()`로 rename
-- [ ] entity 사용처에서 throw 로직 제거
+**Phase 3: use-item.ts** ✅
+- [x] `getItem()` → throw 추가
+- [x] 기존 함수 `getOrUndefinedItem()` 추가
+- [x] entity 사용처에서 throw 로직 제거
+  - world-item-entity.svelte.ts: item getter 간소화
+  - search-entity-sources.ts: getOrUndefinedItem 사용
+  - world-context-blueprint.svelte.ts: getOrUndefinedItem 사용
+- Note: ItemBody, Durability, ItemDurability는 별도 테이블이 아님 (초기 조사 오류)
 
 **Phase 4: use-world.ts**
 - [ ] World 인스턴스 getters는 undefined 반환 유지 (현재 패턴 유지)

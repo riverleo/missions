@@ -133,8 +133,15 @@ function createItemStore() {
 		itemStateDialogStore.set(undefined);
 	}
 
-	// Getter functions
-	function getItem(id: string): Item | undefined {
+	// Getter functions - throw if not found (required data)
+	function getItem(id: string): Item {
+		const data = get(itemStore).data[id as ItemId];
+		if (!data) throw new Error(`Item not found: ${id}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found (optional data)
+	function getOrUndefinedItem(id: string): Item | undefined {
 		return get(itemStore).data[id as ItemId];
 	}
 
@@ -317,6 +324,7 @@ function createItemStore() {
 		openStateDialog,
 		closeStateDialog,
 		getItem,
+		getOrUndefinedItem,
 		getItemStates,
 		getAllItems,
 		getAllItemStates,

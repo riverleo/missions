@@ -446,8 +446,8 @@ export class WorldContextBlueprint {
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
 			const itemId = EntityIdUtils.source.id<ItemId>(entitySourceTargetId);
-			const { itemStore, getItem } = useItem();
-			const item = getItem(itemId);
+			const { getOrUndefinedItem } = useItem();
+			const item = getOrUndefinedItem(itemId);
 
 			this.context.createWorldItem({
 				item_id: itemId,

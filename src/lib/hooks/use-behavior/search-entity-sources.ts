@@ -136,7 +136,7 @@ function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySo
  */
 function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 	const { getOrUndefinedBuilding, getAllBuildings } = useBuilding();
-	const { getAllItems, getItem } = useItem();
+	const { getAllItems, getOrUndefinedItem } = useItem();
 	const { getAllCharacters, getOrUndefinedCharacter } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
@@ -163,7 +163,7 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
-				const item = getItem(interaction.item_id);
+				const item = getOrUndefinedItem(interaction.item_id);
 				if (item) {
 					const template = EntityIdUtils.source.to(item);
 					templateMap.set(item.id, template);

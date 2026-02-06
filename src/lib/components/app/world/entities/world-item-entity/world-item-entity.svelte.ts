@@ -63,10 +63,7 @@ export class WorldItemEntity extends Entity {
 		const worldItem = getWorldItem(this.instanceId);
 		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
 
-		const item = getItem(worldItem.item_id);
-		if (!item) throw new Error(`Item not found for id ${worldItem.item_id}`);
-
-		return item;
+		return getItem(worldItem.item_id);
 	}
 
 	save(): void {
