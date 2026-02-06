@@ -135,7 +135,7 @@ function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySo
  * 기본 인터랙션(NULL entity_id)의 경우 모든 해당 타입 엔티티를 반환합니다.
  */
 function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
-	const { getBuilding, getAllBuildings } = useBuilding();
+	const { getOrUndefinedBuilding, getAllBuildings } = useBuilding();
 	const { getAllItems, getItem } = useItem();
 	const { getAllCharacters, getCharacter } = useCharacter();
 
@@ -147,7 +147,7 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 			// BuildingInteraction
 			if (interaction.building_id) {
 				// 특정 건물
-				const building = getBuilding(interaction.building_id);
+				const building = getOrUndefinedBuilding(interaction.building_id);
 				if (building) {
 					const template = EntityIdUtils.source.to(building);
 					templateMap.set(building.id, template);

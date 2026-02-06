@@ -242,8 +242,27 @@ function createBuildingStore() {
 		conditionDialogStore.set(undefined);
 	}
 
-	// Getter functions
-	function getBuilding(id: string): Building | undefined {
+	// Getter functions - throw if not found (required data)
+	function getBuilding(id: string): Building {
+		const data = get(buildingStore).data[id as BuildingId];
+		if (!data) throw new Error(`Building not found: ${id}`);
+		return data;
+	}
+
+	function getCondition(id: string): Condition {
+		const data = get(conditionStore).data[id as ConditionId];
+		if (!data) throw new Error(`Condition not found: ${id}`);
+		return data;
+	}
+
+	function getBuildingCondition(id: string): BuildingCondition {
+		const data = get(buildingConditionStore).data[id as BuildingConditionId];
+		if (!data) throw new Error(`BuildingCondition not found: ${id}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found (optional data)
+	function getOrUndefinedBuilding(id: string): Building | undefined {
 		return get(buildingStore).data[id as BuildingId];
 	}
 
@@ -255,7 +274,7 @@ function createBuildingStore() {
 		return get(buildingStateStore).data[buildingId as BuildingId];
 	}
 
-	function getCondition(id: string): Condition | undefined {
+	function getOrUndefinedCondition(id: string): Condition | undefined {
 		return get(conditionStore).data[id as ConditionId];
 	}
 
@@ -263,7 +282,7 @@ function createBuildingStore() {
 		return get(conditionFulfillmentStore).data[id as ConditionFulfillmentId];
 	}
 
-	function getBuildingCondition(id: string): BuildingCondition | undefined {
+	function getOrUndefinedBuildingCondition(id: string): BuildingCondition | undefined {
 		return get(buildingConditionStore).data[id as BuildingConditionId];
 	}
 
@@ -749,11 +768,14 @@ function createBuildingStore() {
 		openConditionDialog,
 		closeConditionDialog,
 		getBuilding,
+		getOrUndefinedBuilding,
 		getBuildingItem,
 		getBuildingStates,
 		getCondition,
+		getOrUndefinedCondition,
 		getConditionFulfillment,
 		getBuildingCondition,
+		getOrUndefinedBuildingCondition,
 		getConditionEffect,
 		getAllBuildings,
 		getAllBuildingItems,

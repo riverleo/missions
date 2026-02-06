@@ -132,13 +132,15 @@ getOrUndefinedXX(id: string): XX | undefined {
 
 #### 3단계: 구현 계획
 
-**Phase 1: use-building.ts**
-- [ ] `getBuilding()` → throw 추가
-- [ ] `getBuildingBody()` → throw 추가
-- [ ] `getCondition()` → throw 추가
-- [ ] `getBuildingCondition()` → throw 추가
-- [ ] 기존 함수명을 `getOrUndefinedXX()`로 rename
-- [ ] entity 사용처에서 throw 로직 제거
+**Phase 1: use-building.ts** ✅
+- [x] `getBuilding()` → throw 추가
+- [x] `getCondition()` → throw 추가
+- [x] `getBuildingCondition()` → throw 추가
+- [x] 기존 함수 `getOrUndefinedXX()` 추가
+- [x] entity 사용처에서 throw 로직 제거
+  - world-building-entity.svelte.ts: building getter 간소화
+  - search-entity-sources.ts: getOrUndefinedBuilding 사용
+  - world-context-blueprint.svelte.ts: getOrUndefinedBuilding 사용
 
 **Phase 2: use-character.ts**
 - [ ] `getCharacter()` → throw 추가

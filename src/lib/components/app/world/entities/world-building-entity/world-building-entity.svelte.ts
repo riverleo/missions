@@ -76,10 +76,7 @@ export class WorldBuildingEntity extends Entity {
 		const worldBuilding = getWorldBuilding(this.instanceId);
 		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
 
-		const building = getBuilding(worldBuilding.building_id);
-		if (!building) throw new Error(`Building not found for id ${worldBuilding.building_id}`);
-
-		return building;
+		return getBuilding(worldBuilding.building_id);
 	}
 
 	save(): void {

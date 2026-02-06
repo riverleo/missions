@@ -67,8 +67,8 @@ export class WorldContextBlueprint {
 		let cursorType: 'cell' | 'tile';
 
 		if (type === 'building') {
-			const { buildingStore, getBuilding } = useBuilding();
-			const building = getBuilding(id as BuildingId);
+			const { getOrUndefinedBuilding } = useBuilding();
+			const building = getOrUndefinedBuilding(id as BuildingId);
 
 			if (!building) {
 				return;
