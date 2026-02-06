@@ -67,12 +67,8 @@ export class WorldContextBlueprint {
 		let cursorType: 'cell' | 'tile';
 
 		if (type === 'building') {
-			const { getOrUndefinedBuilding } = useBuilding();
-			const building = getOrUndefinedBuilding(id as BuildingId);
-
-			if (!building) {
-				return;
-			}
+			const { getBuilding } = useBuilding();
+			const building = getBuilding(id as BuildingId);
 
 			vector = vectorUtils.snapVectorByCell(worldPos, building.cell_cols, building.cell_rows);
 			cursorType = 'cell';
@@ -446,8 +442,8 @@ export class WorldContextBlueprint {
 		} else if (type === 'item') {
 			// current는 이미 픽셀 좌표
 			const itemId = EntityIdUtils.source.id<ItemId>(entitySourceTargetId);
-			const { getOrUndefinedItem } = useItem();
-			const item = getOrUndefinedItem(itemId);
+			const { getItem } = useItem();
+			const item = getItem(itemId);
 
 			this.context.createWorldItem({
 				item_id: itemId,
@@ -455,7 +451,7 @@ export class WorldContextBlueprint {
 				y: y + CELL_SIZE / 2,
 				world_building_id: null,
 				world_character_id: null,
-				durability_ticks: item?.max_durability_ticks ?? null,
+				durability_ticks: item.max_durability_ticks ?? null,
 			});
 		}
 	}

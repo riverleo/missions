@@ -135,9 +135,9 @@ function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySo
  * 기본 인터랙션(NULL entity_id)의 경우 모든 해당 타입 엔티티를 반환합니다.
  */
 function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
-	const { getOrUndefinedBuilding, getAllBuildings } = useBuilding();
-	const { getAllItems, getOrUndefinedItem } = useItem();
-	const { getAllCharacters, getOrUndefinedCharacter } = useCharacter();
+	const { getBuilding, getAllBuildings } = useBuilding();
+	const { getAllItems, getItem } = useItem();
+	const { getAllCharacters, getCharacter } = useCharacter();
 
 	// ID 기준 중복 제거를 위해 Map 사용
 	const templateMap = new Map<string, EntitySource>();
@@ -147,11 +147,9 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 			// BuildingInteraction
 			if (interaction.building_id) {
 				// 특정 건물
-				const building = getOrUndefinedBuilding(interaction.building_id);
-				if (building) {
-					const template = EntityIdUtils.source.to(building);
-					templateMap.set(building.id, template);
-				}
+				const building = getBuilding(interaction.building_id);
+				const template = EntityIdUtils.source.to(building);
+				templateMap.set(building.id, template);
 			} else {
 				// 기본 인터랙션: 모든 건물
 				getAllBuildings().forEach((b) => {
@@ -163,11 +161,9 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
-				const item = getOrUndefinedItem(interaction.item_id);
-				if (item) {
-					const template = EntityIdUtils.source.to(item);
-					templateMap.set(item.id, template);
-				}
+				const item = getItem(interaction.item_id);
+				const template = EntityIdUtils.source.to(item);
+				templateMap.set(item.id, template);
 			} else {
 				// 기본 인터랙션: 모든 아이템
 				getAllItems().forEach((i) => {
@@ -179,11 +175,9 @@ function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
 			// CharacterInteraction
 			if (interaction.target_character_id) {
 				// 특정 캐릭터
-				const character = getOrUndefinedCharacter(interaction.target_character_id);
-				if (character) {
-					const template = EntityIdUtils.source.to(character);
-					templateMap.set(character.id, template);
-				}
+				const character = getCharacter(interaction.target_character_id);
+				const template = EntityIdUtils.source.to(character);
+				templateMap.set(character.id, template);
 			} else {
 				// 기본 인터랙션: 모든 캐릭터
 				getAllCharacters().forEach((c) => {
