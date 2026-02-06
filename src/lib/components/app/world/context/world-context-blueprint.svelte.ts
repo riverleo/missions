@@ -60,7 +60,7 @@ export class WorldContextBlueprint {
 		}
 
 		const { entitySourceTargetId } = this.cursor;
-		const { type, value: id } = EntityIdUtils.source.parse(entitySourceTargetId);
+		const { type, value: entitySourceId } = EntityIdUtils.source.parse(entitySourceTargetId);
 
 		// type별로 스냅 위치 계산 (중복 체크를 위해)
 		let vector: Vector;
@@ -68,7 +68,7 @@ export class WorldContextBlueprint {
 
 		if (type === 'building') {
 			const { getBuilding } = useBuilding();
-			const building = getBuilding(id as BuildingId);
+			const building = getBuilding(entitySourceId);
 
 			vector = vectorUtils.snapVectorByCell(worldPos, building.cell_cols, building.cell_rows);
 			cursorType = 'cell';
@@ -451,7 +451,7 @@ export class WorldContextBlueprint {
 				y: y + CELL_SIZE / 2,
 				world_building_id: null,
 				world_character_id: null,
-				durability_ticks: item.max_durability_ticks ?? null,
+				durability_ticks: item.max_durability_ticks,
 			});
 		}
 	}
