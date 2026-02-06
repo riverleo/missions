@@ -21,7 +21,7 @@ export default function tickActionIfOnceItemUse(
 	const { getInteraction, getWorldItem, worldItemStore } = useWorld();
 	const { getItemInteractionActions, getNextInteractionAction, getAllItemInteractions } =
 		useInteraction();
-	const { getAllNeedFulfillments, getNeed } = useCharacter();
+	const { getAllNeedFulfillments, getOrUndefinedNeed } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
@@ -121,7 +121,7 @@ export default function tickActionIfOnceItemUse(
 			const need = worldCharacterEntity.needs[needFulfillment.need_id];
 			if (!need) continue;
 
-			const needDefinition = getNeed(need.need_id);
+			const needDefinition = getOrUndefinedNeed(need.need_id);
 			const maxValue = needDefinition?.max_value ?? 100;
 
 			// 욕구 증가

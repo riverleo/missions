@@ -306,7 +306,13 @@ function createCharacterStore() {
 		return get(characterBodyStateStore).data[bodyId as CharacterBodyId];
 	}
 
-	function getNeed(id: string): Need | undefined {
+	function getNeed(id: string): Need {
+		const data = get(needStore).data[id as NeedId];
+		if (!data) throw new Error(`Need not found: ${id}`);
+		return data;
+	}
+
+	function getOrUndefinedNeed(id: string): Need | undefined {
 		return get(needStore).data[id as NeedId];
 	}
 
@@ -836,6 +842,7 @@ function createCharacterStore() {
 		getOrUndefinedCharacterBody,
 		getCharacterBodyStates,
 		getNeed,
+		getOrUndefinedNeed,
 		getNeedFulfillment,
 		getCharacterNeed,
 		getAllCharacters,
