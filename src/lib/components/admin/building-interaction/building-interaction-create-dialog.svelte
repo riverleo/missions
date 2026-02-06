@@ -13,9 +13,10 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
-		getBuildingOnceInteractionTypeOptions,
-		getBuildingFulfillInteractionTypeOptions,
-		getBuildingSystemInteractionTypeOptions,
+		getBehaviorInteractionTypeLabels,
+		isOnceInteractionType,
+		isFulfillInteractionType,
+		isSystemInteractionType,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -26,6 +27,7 @@
 		SystemInteractionType,
 		ScenarioId,
 	} from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
@@ -46,17 +48,14 @@
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
-	const onceOptions = getBuildingOnceInteractionTypeOptions();
-	const fulfillOptions = getBuildingFulfillInteractionTypeOptions();
-	const systemOptions = getBuildingSystemInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
+	const interactionTypeOptions = getBehaviorInteractionTypeLabels('building');
 
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedInteractionLabel = $derived(
-		allOptions.find((o) => o.value === interactionType)?.label ?? '사용'
+		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '사용'
 	);
 
 	function onBuildingChange(value: string | undefined) {
@@ -87,16 +86,13 @@
 		isSubmitting = true;
 
 		try {
-			// Determine interaction type
-			const isOnce = onceOptions.some((o) => o.value === interactionType);
-			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
-			const isSystem = systemOptions.some((o) => o.value === interactionType);
-
 			const interaction = await admin.createBuildingInteraction(scenarioId, {
 				building_id: buildingId,
-				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
-				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
+				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
+				fulfill_interaction_type: isFulfillInteractionType(interactionType)
+					? interactionType
+					: null,
+				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
 				character_id: characterId || null,
 			});
 
@@ -138,7 +134,7 @@
 							{selectedInteractionLabel}
 						</SelectTrigger>
 						<SelectContent>
-							{#each allOptions as option (option.value)}
+							{#each interactionTypeOptions as option (option.value)}
 								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>

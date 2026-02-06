@@ -35,6 +35,7 @@
 		ConditionBehaviorInsert,
 		BuildingStateType,
 	} from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -198,7 +199,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !conditionId || !name.trim()}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

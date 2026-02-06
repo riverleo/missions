@@ -13,6 +13,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { clone } from 'radash';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		characterNeed: CharacterNeed | undefined;
@@ -114,7 +115,7 @@
 							취소
 						</Button>
 						<Button type="submit" disabled={isUpdating}>
-							{isUpdating ? '저장 중...' : '저장'}
+							{isUpdating ? getActionString('saving') : getActionString('save')}
 						</Button>
 					</div>
 				</form>

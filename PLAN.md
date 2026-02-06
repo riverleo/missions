@@ -475,8 +475,35 @@ export function getActionLabels() {
 
 ✅ **Phase 6.5 완료!** (파일 통합 및 getter 캡슐화는 보류)
 
-### Phase 7: 인라인 라벨 교체
-- [ ] 모든 컴포넌트 파일에서 인라인 라벨 → 상수 참조로 교체
+### Phase 7: 인라인 라벨 교체 🔄 진행중
+**작업 내용:**
+1. [x] state-label.ts에 ACTION_LABELS 추가 (create, update, delete, save, cancel, confirm + 하기 variants)
+2. [x] getter 함수명 수정: getActionLabel → getActionString, getFormLabel → getFormString 등
+3. [x] 59개 admin 컴포넌트에서 액션 라벨 교체 (생성 중..., 수정 중..., 삭제 중..., 저장 중...)
+4. [x] 59개 파일에 `import { getActionString } from '$lib/utils/state-label'` 자동 추가
+5. [x] TypeScript 에러 수정 (multi-line import 내 잘못된 import 위치 문제)
+6. [x] 타입 체크 통과 확인
+
+**교체 패턴:**
+```typescript
+// Before
+{isSubmitting ? '생성 중...' : '생성하기'}
+
+// After
+{isSubmitting ? getActionString('creating') : getActionString('createAction')}
+```
+
+**완료된 파일 타입:**
+- create-dialog.svelte (생성 다이얼로그)
+- update-dialog.svelte (수정 다이얼로그)
+- delete-dialog.svelte (삭제 다이얼로그)
+- *-node-panel.svelte (노드 패널 - 저장 버튼)
+- *-edge-panel.svelte (엣지 패널 - 저장 버튼)
+
+**다음 작업:**
+- [ ] Form placeholder 라벨 교체 (이름, 제목, 가로, 세로 등)
+- [ ] Cancel 버튼 라벨 교체 (standalone '취소')
+- [ ] Fallback 라벨 교체 (제목없음, 이름없음 등)
 - [ ] 검증: 개발 서버 실행 및 UI 확인
 
 ## 예상 효과

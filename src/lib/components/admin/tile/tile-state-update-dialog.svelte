@@ -18,6 +18,7 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import type { TileStateId, TileId } from '$lib/types';
 	import { IconMathEqualLower, IconMathLower, IconVariable } from '@tabler/icons-svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { tileStore, tileStateStore, admin, tileStateDialogStore, closeTileStateDialog } =
 		useTerrain();

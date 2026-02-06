@@ -32,6 +32,7 @@
 		IconCategory,
 		IconSortDescending,
 	} from '@tabler/icons-svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 	const { chapterStore } = useChapter();
@@ -169,7 +170,7 @@
 
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '수정 중...' : '수정하기'}
+					{isSubmitting ? getActionString('updating') : getActionString('updateAction')}
 				</Button>
 			</DialogFooter>
 		</form>

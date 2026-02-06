@@ -29,6 +29,7 @@
 	import type { NeedId, ScenarioId, CharacterId, CharacterFaceStateType } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -190,7 +191,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !needId || !name.trim()}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

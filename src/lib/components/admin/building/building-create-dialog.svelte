@@ -20,6 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId, ItemId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
 	const { itemStore } = useItem();
@@ -127,7 +128,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !name.trim()}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

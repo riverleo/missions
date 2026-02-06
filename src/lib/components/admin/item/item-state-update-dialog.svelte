@@ -17,6 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import type { ItemStateId, ItemId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { itemStore, itemStateStore, admin, itemStateDialogStore, closeStateDialog } = useItem();
 

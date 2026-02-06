@@ -17,6 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { itemStore, admin, itemDialogStore, closeItemDialog } = useItem();
 

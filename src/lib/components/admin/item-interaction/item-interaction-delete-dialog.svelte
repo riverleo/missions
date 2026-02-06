@@ -12,6 +12,7 @@
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
 	import type { ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { itemInteractionDialogStore, closeItemInteractionDialog, admin } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

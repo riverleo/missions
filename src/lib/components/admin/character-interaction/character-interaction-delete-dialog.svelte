@@ -12,6 +12,7 @@
 		DialogTitle,
 	} from '$lib/components/ui/dialog';
 	import type { ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { characterInteractionDialogStore, closeCharacterInteractionDialog, admin } =
 		useInteraction();

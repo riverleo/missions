@@ -12,6 +12,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } =
 		useBehavior();
@@ -68,7 +69,7 @@
 					취소
 				</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
-					{isSubmitting ? '삭제 중...' : '삭제하기'}
+					{isSubmitting ? getActionString('deleting') : getActionString('deleteAction')}
 				</Button>
 			</DialogFooter>
 		</form>

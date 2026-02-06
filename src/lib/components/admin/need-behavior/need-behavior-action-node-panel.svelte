@@ -34,6 +34,7 @@
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { clone } from 'radash';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		action: NeedBehaviorAction | undefined;
@@ -431,7 +432,7 @@
 								취소
 							</Button>
 							<Button type="submit" disabled={isUpdating}>
-								{isUpdating ? '저장 중...' : '저장'}
+								{isUpdating ? getActionString('saving') : getActionString('save')}
 							</Button>
 						</div>
 					</div>

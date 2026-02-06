@@ -35,6 +35,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ChapterId, ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { admin, questDialogStore, closeQuestDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -169,7 +170,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

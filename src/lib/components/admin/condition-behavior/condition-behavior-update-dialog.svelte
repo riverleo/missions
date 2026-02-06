@@ -32,6 +32,7 @@
 		ConditionBehaviorUpdate,
 		BuildingStateType,
 	} from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const {
 		conditionBehaviorStore,
@@ -206,7 +207,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !conditionId || !name.trim()}>
-					{isSubmitting ? '수정 중...' : '수정하기'}
+					{isSubmitting ? getActionString('updating') : getActionString('updateAction')}
 				</Button>
 			</DialogFooter>
 		</form>

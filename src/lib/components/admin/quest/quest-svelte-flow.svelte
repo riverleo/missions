@@ -21,6 +21,7 @@
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const questId = $derived(page.params.questId as QuestId);
 	const { questBranchStore, admin } = useQuest();

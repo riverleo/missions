@@ -13,6 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -69,7 +70,7 @@
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

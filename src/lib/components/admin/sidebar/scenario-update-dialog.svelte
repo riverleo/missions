@@ -10,6 +10,7 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 
@@ -65,7 +66,7 @@
 					<InputGroupAddon align="inline-start">
 						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput placeholder="제목" bind:value={title} />
+					<InputGroupInput placeholder={getFormString('title')} bind:value={title} />
 					<InputGroupAddon align="inline-end">
 						<span class="text-xs text-muted-foreground">{title.length}</span>
 					</InputGroupAddon>
@@ -73,7 +74,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '수정 중...' : '수정하기'}
+					{isSubmitting ? getActionString('updating') : getActionString('updateAction')}
 				</Button>
 			</DialogFooter>
 		</form>

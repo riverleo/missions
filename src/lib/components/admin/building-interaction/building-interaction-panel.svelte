@@ -21,8 +21,9 @@
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
 	import {
 		getBehaviorInteractTypeLabel,
-		getOnceInteractionTypeOptions,
-		getFulfillInteractionTypeOptions,
+		getBehaviorInteractionTypeLabels,
+		isOnceInteractionType,
+		isFulfillInteractionType,
 	} from '$lib/utils/state-label';
 	import type {
 		BuildingInteraction,
@@ -63,9 +64,7 @@
 	);
 	let characterId = $state<string>(interaction.character_id ?? '');
 
-	const onceOptions = getOnceInteractionTypeOptions();
-	const fulfillOptions = getFulfillInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions];
+	const interactionTypeOptions = getBehaviorInteractionTypeLabels('building');
 
 	const selectedCharacter = $derived.by(() => {
 		if (!characterId) return null;
@@ -73,11 +72,9 @@
 	});
 
 	async function updateInteraction() {
-		const isOnce = onceOptions.some((o) => o.value === interactionType);
-
 		await admin.updateBuildingInteraction(buildingInteractionId, {
-			once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-			fulfill_interaction_type: isOnce ? null : (interactionType as FulfillInteractionType),
+			once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
+			fulfill_interaction_type: isFulfillInteractionType(interactionType) ? interactionType : null,
 			character_id: characterId ? (characterId as CharacterId) : null,
 		});
 	}
@@ -157,7 +154,7 @@
 									updateInteraction();
 								}}
 							>
-								{#each allOptions as option (option.value)}
+								{#each interactionTypeOptions as option (option.value)}
 									<DropdownMenuRadioItem value={option.value}>
 										{option.label}
 									</DropdownMenuRadioItem>

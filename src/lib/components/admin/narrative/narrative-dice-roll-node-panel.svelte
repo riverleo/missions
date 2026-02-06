@@ -17,6 +17,7 @@
 	import { IconDice5, IconInfoCircle } from '@tabler/icons-svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 	import { tick } from 'svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		narrativeDiceRoll: NarrativeDiceRoll | undefined;
@@ -173,7 +174,7 @@
 						취소
 					</Button>
 					<Button type="submit" disabled={isUpdating}>
-						{isUpdating ? '저장 중...' : '저장'}
+						{isUpdating ? getActionString('saving') : getActionString('save')}
 					</Button>
 				</div>
 			</form>

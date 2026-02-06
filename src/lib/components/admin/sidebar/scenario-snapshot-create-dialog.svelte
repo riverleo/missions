@@ -16,6 +16,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { IconHeading, IconFileText } from '@tabler/icons-svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { admin, scenarioSnapshotDialogStore, closeScenarioSnapshotDialog } = useScenario();
 
@@ -84,7 +85,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting || !name.trim()}>
-					{isSubmitting ? '생성 중...' : '생성하기'}
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
 				</Button>
 			</DialogFooter>
 		</form>

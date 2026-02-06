@@ -10,6 +10,7 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { narrativeStore, admin } = useNarrative();
 	const { store } = admin;
@@ -69,7 +70,7 @@
 			</InputGroup>
 			<DialogFooter class="mt-4">
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '수정 중...' : '수정하기'}
+					{isSubmitting ? getActionString('updating') : getActionString('updateAction')}
 				</Button>
 			</DialogFooter>
 		</form>

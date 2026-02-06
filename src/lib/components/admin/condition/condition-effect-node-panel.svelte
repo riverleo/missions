@@ -16,6 +16,7 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { clone } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		effect: ConditionEffect | undefined;
@@ -190,7 +191,7 @@
 							취소
 						</Button>
 						<Button type="submit" disabled={isUpdating}>
-							{isUpdating ? '저장 중...' : '저장'}
+							{isUpdating ? getActionString('saving') : getActionString('save')}
 						</Button>
 					</div>
 				</form>

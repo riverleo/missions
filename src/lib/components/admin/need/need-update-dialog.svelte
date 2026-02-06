@@ -17,6 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 
@@ -115,7 +116,7 @@
 			</div>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? '수정 중...' : '수정하기'}
+					{isSubmitting ? getActionString('updating') : getActionString('updateAction')}
 				</Button>
 			</DialogFooter>
 		</form>

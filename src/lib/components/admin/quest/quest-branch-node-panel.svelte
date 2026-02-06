@@ -8,6 +8,7 @@
 	import { IconHeading, IconSortDescending } from '@tabler/icons-svelte';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		questBranch: QuestBranch | undefined;
@@ -101,7 +102,7 @@
 							취소
 						</Button>
 						<Button type="submit" disabled={isUpdating}>
-							{isUpdating ? '저장 중...' : '저장'}
+							{isUpdating ? getActionString('saving') : getActionString('save')}
 						</Button>
 					</div>
 				</form>

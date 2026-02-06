@@ -26,6 +26,7 @@
 	import { createCharacterInteractionActionNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
 	import InputGroupText from '$lib/components/ui/input-group/input-group-text.svelte';
+	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		action: CharacterInteractionAction | undefined;
@@ -399,7 +400,7 @@
 								취소
 							</Button>
 							<Button type="submit" disabled={isUpdating}>
-								{isUpdating ? '저장 중...' : '저장'}
+								{isUpdating ? getActionString('saving') : getActionString('save')}
 							</Button>
 						</div>
 					</div>

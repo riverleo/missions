@@ -11,9 +11,10 @@
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import {
-		getCharacterOnceInteractionTypeOptions,
-		getCharacterFulfillInteractionTypeOptions,
-		getCharacterSystemInteractionTypeOptions,
+		getBehaviorInteractionTypeLabels,
+		isOnceInteractionType,
+		isFulfillInteractionType,
+		isSystemInteractionType,
 	} from '$lib/utils/state-label';
 	import { alphabetical } from 'radash';
 	import type {
@@ -22,6 +23,7 @@
 		FulfillInteractionType,
 		SystemInteractionType,
 	} from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { characterStore } = useCharacter();
 	const {
@@ -50,17 +52,14 @@
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
-	const onceOptions = getCharacterOnceInteractionTypeOptions();
-	const fulfillOptions = getCharacterFulfillInteractionTypeOptions();
-	const systemOptions = getCharacterSystemInteractionTypeOptions();
-	const allOptions = [...onceOptions, ...fulfillOptions, ...systemOptions];
+	const interactionTypeOptions = getBehaviorInteractionTypeLabels('character');
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
 	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
 	const selectedBehaviorLabel = $derived(
-		allOptions.find((o) => o.value === interactionType)?.label ?? '포옹'
+		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '포옹'
 	);
 
 	// interaction이 변경될 때 폼 초기화
@@ -103,16 +102,13 @@
 		isSubmitting = true;
 
 		try {
-			// Determine interaction type
-			const isOnce = onceOptions.some((o) => o.value === interactionType);
-			const isFulfill = fulfillOptions.some((o) => o.value === interactionType);
-			const isSystem = systemOptions.some((o) => o.value === interactionType);
-
 			await admin.updateCharacterInteraction(characterInteractionId, {
 				target_character_id: targetCharacterId,
-				once_interaction_type: isOnce ? (interactionType as OnceInteractionType) : null,
-				fulfill_interaction_type: isFulfill ? (interactionType as FulfillInteractionType) : null,
-				system_interaction_type: isSystem ? (interactionType as SystemInteractionType) : null,
+				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
+				fulfill_interaction_type: isFulfillInteractionType(interactionType)
+					? interactionType
+					: null,
+				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
 				character_id: characterId || undefined,
 			});
 
@@ -165,7 +161,7 @@
 							{selectedBehaviorLabel}
 						</SelectTrigger>
 						<SelectContent>
-							{#each allOptions as option (option.value)}
+							{#each interactionTypeOptions as option (option.value)}
 								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>

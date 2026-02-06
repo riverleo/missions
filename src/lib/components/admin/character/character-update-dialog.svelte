@@ -18,6 +18,7 @@
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import type { CharacterBodyId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { characterStore, admin, characterDialogStore, closeCharacterDialog, characterBodyStore } =
 		useCharacter();
