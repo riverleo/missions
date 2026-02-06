@@ -37,7 +37,46 @@
 **엔티티 타입** (신규):
 - building: 건물, character: 캐릭터, item: 아이템
 
-#### 4. 기타
+#### 4. 복합 라벨 생성 패턴 ⚠️ 중요
+
+**패턴 1: 캐릭터명 + 인터랙션 타입** (7개 파일)
+```typescript
+{@const characterName = character ? character.name : '모든 캐릭터'}
+{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+```
+**위치:**
+- building-interaction-command.svelte
+- item-interaction-command.svelte
+- character-interaction-command.svelte
+- need-fulfillment-node-panel.svelte
+- condition-fulfillment-node-panel.svelte
+- condition-effect-node.svelte
+- admin-site-header.svelte
+
+**패턴 2: Fallback with ID** (10+ 파일)
+```typescript
+{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
+{character.name || `이름없음 (${character.id.split('-')[0]})`}
+```
+**위치:**
+- test-world-command-panel.svelte (terrain, character, building, item, tile)
+- need-command.svelte
+- character-command.svelte
+- narrative-command.svelte
+- narrative-node-node.svelte
+- tile-command.svelte
+- 기타 command 컴포넌트들
+
+**패턴 3: 도메인명 + 동작** (interaction-panel, node-panel 등)
+```typescript
+const labels: Record<string, string> = {
+  idle: '대기',
+  walk: '걷기',
+  // ...
+};
+```
+
+#### 5. 기타
 **선택지/드롭다운:**
 - 모두, 모든 캐릭터, 아이템 선택, 대상 캐릭터 선택, 바디 선택, 스프라이트 선택
 
@@ -154,7 +193,7 @@ const publishStatusLabels: Record<PublishStatus, string> = {
 };
 ```
 
-### Phase 5: Fallback 텍스트
+### Phase 5: Fallback 텍스트 & 복합 라벨 헬퍼
 ```typescript
 // 기본값/Fallback 텍스트
 export const FALLBACK_LABELS = {
@@ -167,10 +206,45 @@ export const FALLBACK_LABELS = {
   select: '선택',
 } as const;
 
-// Fallback 헬퍼
+// Fallback 헬퍼 함수
 export function getUntitledLabel(id: string): string {
   return `제목없음 (${id.split('-')[0]})`;
 }
+
+export function getUnnamedLabel(id: string): string {
+  return `이름없음 (${id.split('-')[0]})`;
+}
+
+export function getDisplayName(name: string | undefined | null, id: string): string {
+  return name || getUnnamedLabel(id);
+}
+
+export function getDisplayTitle(title: string | undefined | null, id: string): string {
+  return title || getUntitledLabel(id);
+}
+
+// 복합 라벨 생성 헬퍼
+export function getInteractionLabel(params: {
+  characterName?: string;
+  interactionType: OnceInteractionType | FulfillInteractionType | SystemInteractionType;
+}): string {
+  const { characterName, interactionType } = params;
+  const name = characterName || FALLBACK_LABELS.allCharacters;
+  return `${name} ${getBehaviorInteractTypeLabel(interactionType)}`;
+}
+```
+
+**적용 예시:**
+```typescript
+// Before
+{@const characterName = character ? character.name : '모든 캐릭터'}
+{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+
+// After
+{@const label = getInteractionLabel({
+  characterName: character?.name,
+  interactionType
+})}
 ```
 
 ## Phase 0: 공통 타입 정의
