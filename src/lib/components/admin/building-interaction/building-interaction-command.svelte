@@ -20,7 +20,7 @@
 	import { cn } from '$lib/utils';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId, BuildingId, CharacterId, BuildingInteraction } from '$lib/types';
+	import type { ScenarioId, CharacterId } from '$lib/types';
 	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	const { buildingStore } = useBuilding();

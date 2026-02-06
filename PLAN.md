@@ -226,7 +226,7 @@ export function getDisplayTitle(title: string | undefined | null, id: string): s
 // 복합 라벨 생성 헬퍼
 export function getInteractionLabel(params: {
   characterName?: string;
-  interactionType: InteractionType;
+  interactionType: BehaviorInteractionType;
 }): string {
   const { characterName, interactionType } = params;
   const name = characterName || FALLBACK_LABELS.allCharacters;
@@ -259,14 +259,14 @@ export type Option<T = string> = {
   label: string;
 };
 
-// 인터랙션 타입 통합
-export type InteractionType =
+// Behavior 인터랙션 타입 통합
+export type BehaviorInteractionType =
   | OnceInteractionType
   | FulfillInteractionType
   | SystemInteractionType;
 ```
 
-**InteractionType 사용처:**
+**BehaviorInteractionType 사용처:**
 - state-label.ts의 `getBehaviorInteractTypeLabel()` 파라미터 타입
 - 복합 라벨 헬퍼 함수들
 - interaction-command 컴포넌트들의 타입 추론
@@ -281,7 +281,7 @@ export function getBehaviorInteractTypeLabel(
 }
 
 // After
-export function getBehaviorInteractTypeLabel(type: InteractionType): string {
+export function getBehaviorInteractTypeLabel(type: BehaviorInteractionType): string {
   // ...
 }
 ```
@@ -307,9 +307,9 @@ export function getOnceInteractionTypeOptions(): Option<OnceInteractionType>[] {
 ## 구현 순서
 
 1. [ ] Phase 0-1: `src/lib/types/core.ts`에 Option<T> 타입 정의
-2. [ ] Phase 0-2: `src/lib/types/core.ts`에 InteractionType 유니온 타입 정의
+2. [ ] Phase 0-2: `src/lib/types/core.ts`에 BehaviorInteractionType 유니온 타입 정의
 3. [ ] state-label.ts의 모든 함수 반환 타입을 Option<T>로 변경
-4. [ ] state-label.ts의 getBehaviorInteractTypeLabel 파라미터를 InteractionType으로 변경
+4. [ ] state-label.ts의 getBehaviorInteractTypeLabel 파라미터를 BehaviorInteractionType으로 변경
 5. [ ] `src/lib/constants/labels.ts` 파일 생성
 2. [ ] Phase 1: ACTION_LABELS, TOGGLE_LABELS 정의
 3. [ ] Phase 2: FORM_LABELS, placeholder 헬퍼 정의
