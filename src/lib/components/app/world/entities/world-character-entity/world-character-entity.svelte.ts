@@ -94,14 +94,7 @@ export class WorldCharacterEntity extends Entity {
 		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
 
 		const character = getCharacter(worldCharacter.character_id);
-		if (character === undefined)
-			throw new Error(`Character not found for id ${worldCharacter.character_id}`);
-
-		const characterBody = getCharacterBody(character.character_body_id);
-		if (characterBody === undefined)
-			throw new Error(`CharacterBody not found for id ${character.character_body_id}`);
-
-		return characterBody;
+		return getCharacterBody(character.character_body_id);
 	}
 
 	override save(): void {

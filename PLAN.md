@@ -142,11 +142,13 @@ getOrUndefinedXX(id: string): XX | undefined {
   - search-entity-sources.ts: getOrUndefinedBuilding 사용
   - world-context-blueprint.svelte.ts: getOrUndefinedBuilding 사용
 
-**Phase 2: use-character.ts**
-- [ ] `getCharacter()` → throw 추가
-- [ ] `getCharacterBody()` → throw 추가
-- [ ] 기존 함수명을 `getOrUndefinedXX()`로 rename
-- [ ] entity 사용처에서 throw 로직 제거
+**Phase 2: use-character.ts** ✅
+- [x] `getCharacter()` → throw 추가
+- [x] `getCharacterBody()` → throw 추가
+- [x] 기존 함수 `getOrUndefinedXX()` 추가
+- [x] entity 사용처에서 throw 로직 제거
+  - world-character-entity.svelte.ts: characterBody getter 간소화
+  - search-entity-sources.ts: getOrUndefinedCharacter 사용
 
 **Phase 3: use-item.ts**
 - [ ] `getItem()` → throw 추가

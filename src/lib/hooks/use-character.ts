@@ -276,8 +276,21 @@ function createCharacterStore() {
 		needDialogStore.set(undefined);
 	}
 
-	// Getter functions
-	function getCharacter(id: string): Character | undefined {
+	// Getter functions - throw if not found (required data)
+	function getCharacter(id: string): Character {
+		const data = get(characterStore).data[id as CharacterId];
+		if (!data) throw new Error(`Character not found: ${id}`);
+		return data;
+	}
+
+	function getCharacterBody(id: string): CharacterBody {
+		const data = get(characterBodyStore).data[id as CharacterBodyId];
+		if (!data) throw new Error(`CharacterBody not found: ${id}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found (optional data)
+	function getOrUndefinedCharacter(id: string): Character | undefined {
 		return get(characterStore).data[id as CharacterId];
 	}
 
@@ -285,7 +298,7 @@ function createCharacterStore() {
 		return get(characterFaceStateStore).data[characterId as CharacterId];
 	}
 
-	function getCharacterBody(id: string): CharacterBody | undefined {
+	function getOrUndefinedCharacterBody(id: string): CharacterBody | undefined {
 		return get(characterBodyStore).data[id as CharacterBodyId];
 	}
 
@@ -817,8 +830,10 @@ function createCharacterStore() {
 		openNeedDialog,
 		closeNeedDialog,
 		getCharacter,
+		getOrUndefinedCharacter,
 		getCharacterFaceStates,
 		getCharacterBody,
+		getOrUndefinedCharacterBody,
 		getCharacterBodyStates,
 		getNeed,
 		getNeedFulfillment,
