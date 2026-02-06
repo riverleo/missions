@@ -173,9 +173,42 @@ export function getUntitledLabel(id: string): string {
 }
 ```
 
+## Phase 0: 공통 타입 정의
+
+### Option<T> 타입 생성
+**파일**: `src/lib/types/core.ts`
+
+```typescript
+// 셀렉트 옵션 타입
+export type Option<T = string> = {
+  value: T;
+  label: string;
+};
+```
+
+**현재 사용처** (리팩토링 대상):
+- state-label.ts의 모든 getXXXOptions 함수 반환 타입
+- 각종 dialog/panel의 옵션 배열
+- Command 컴포넌트의 items prop
+
+**변경 예시**:
+```typescript
+// Before
+export function getOnceInteractionTypeOptions(): { value: OnceInteractionType; label: string }[] {
+  // ...
+}
+
+// After
+export function getOnceInteractionTypeOptions(): Option<OnceInteractionType>[] {
+  // ...
+}
+```
+
 ## 구현 순서
 
-1. [ ] `src/lib/constants/labels.ts` 파일 생성
+1. [ ] Phase 0: `src/lib/types/core.ts`에 Option<T> 타입 정의
+2. [ ] state-label.ts의 모든 함수 반환 타입을 Option<T>로 변경
+3. [ ] `src/lib/constants/labels.ts` 파일 생성
 2. [ ] Phase 1: ACTION_LABELS, TOGGLE_LABELS 정의
 3. [ ] Phase 2: FORM_LABELS, placeholder 헬퍼 정의
 4. [ ] Phase 3: DOMAIN_LABELS 정의
