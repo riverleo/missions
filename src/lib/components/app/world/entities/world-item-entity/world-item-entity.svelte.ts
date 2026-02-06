@@ -1,20 +1,18 @@
 import { useItem, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
-import { get } from 'svelte/store';
 import type { WorldItemId, Item, WorldId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_ITEM } from '$lib/constants';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
-import { decreaseDurabilityTicks } from './decrease-durability-ticks';
+import tickDecreaseDurabilities from './tick-decrease-durabilities';
 
 export class WorldItemEntity extends Entity {
 	readonly type = 'item' as const;
 	body: Matter.Body;
 	durabilityTicks = $state<number | undefined>(undefined);
 
-	private worldHook = useWorld();
-	private itemHook = useItem();
+	tickDecreaseDurabilities = tickDecreaseDurabilities;
 
 	override get instanceId(): WorldItemId {
 		return EntityIdUtils.instanceId<WorldItemId>(this.id);
@@ -28,7 +26,7 @@ export class WorldItemEntity extends Entity {
 		super(worldContext, 'item', worldId, worldItemId);
 
 		// 스토어에서 데이터 조회
-		const { getWorldItem, worldItemStore } = this.worldHook;
+		const { getWorldItem } = useWorld();
 		const worldItem = getWorldItem(worldItemId);
 		const item = this.item;
 
@@ -59,8 +57,8 @@ export class WorldItemEntity extends Entity {
 	}
 
 	get item(): Item {
-		const { getWorldItem, worldItemStore } = this.worldHook;
-		const { getItem, itemStore } = this.itemHook;
+		const { getWorldItem } = useWorld();
+		const { getItem } = useItem();
 
 		const worldItem = getWorldItem(this.instanceId);
 		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
@@ -72,25 +70,14 @@ export class WorldItemEntity extends Entity {
 	}
 
 	save(): void {
-		const { worldItemStore } = this.worldHook;
-		const store = get(worldItemStore);
-		const worldItem = store.data[this.instanceId];
+		const { updateWorldItem } = useWorld();
 
-		if (worldItem) {
-			worldItemStore.set({
-				...store,
-				data: {
-					...store.data,
-					[this.instanceId]: {
-						...worldItem,
-						x: this.x,
-						y: this.y,
-						rotation: this.angle,
-						durability_ticks: this.durabilityTicks ?? null,
-					},
-				},
-			});
-		}
+		updateWorldItem(this.instanceId, {
+			x: this.x,
+			y: this.y,
+			rotation: this.angle,
+			durability_ticks: this.durabilityTicks ?? null,
+		});
 	}
 
 	update(_: BeforeUpdateEvent): void {
@@ -98,6 +85,6 @@ export class WorldItemEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		decreaseDurabilityTicks(this);
+		this.tickDecreaseDurabilities(tick);
 	}
 }

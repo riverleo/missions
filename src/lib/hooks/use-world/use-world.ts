@@ -147,6 +147,50 @@ function createWorldStore() {
 		return Object.values(get(worldTileMapStore).data);
 	}
 
+	function updateWorldCharacter(id: WorldCharacterId, update: Partial<WorldCharacter>): void {
+		worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				const worldCharacter = draft.data[id];
+				if (worldCharacter) {
+					Object.assign(worldCharacter, update);
+				}
+			})
+		);
+	}
+
+	function updateWorldCharacterNeed(id: WorldCharacterNeedId, update: Partial<WorldCharacterNeed>): void {
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				const need = draft.data[id];
+				if (need) {
+					Object.assign(need, update);
+				}
+			})
+		);
+	}
+
+	function updateWorldBuildingCondition(id: WorldBuildingConditionId, update: Partial<WorldBuildingCondition>): void {
+		worldBuildingConditionStore.update((state) =>
+			produce(state, (draft) => {
+				const condition = draft.data[id];
+				if (condition) {
+					Object.assign(condition, update);
+				}
+			})
+		);
+	}
+
+	function updateWorldItem(id: WorldItemId, update: Partial<WorldItem>): void {
+		worldItemStore.update((state) =>
+			produce(state, (draft) => {
+				const worldItem = draft.data[id];
+				if (worldItem) {
+					Object.assign(worldItem, update);
+				}
+			})
+		);
+	}
+
 	/**
 	 * EntityId로부터 EntityInstance를 반환
 	 */
@@ -425,6 +469,10 @@ function createWorldStore() {
 		getAllWorldBuildingConditions,
 		getAllWorldItems,
 		getAllWorldTileMaps,
+		updateWorldCharacter,
+		updateWorldCharacterNeed,
+		updateWorldBuildingCondition,
+		updateWorldItem,
 		getEntityInstance,
 		getEntitySourceId,
 		getInteraction,

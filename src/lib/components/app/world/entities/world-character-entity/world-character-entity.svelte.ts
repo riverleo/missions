@@ -1,6 +1,5 @@
 import { useCharacter, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
-import { produce } from 'immer';
 import type {
 	WorldId,
 	WorldCharacterId,
@@ -57,7 +56,7 @@ export class WorldCharacterEntity extends Entity {
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
 		this.heldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
-			.map((item) => EntityIdUtils.createId('item', worldId, item.id));
+			.map((item) => EntityIdUtils.createId(EntityIdUtils.to(item)));
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
@@ -106,29 +105,19 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
+		const { updateWorldCharacter, updateWorldCharacterNeed } = useWorld();
 
-		worldCharacterStore.update((state) =>
-			produce(state, (draft) => {
-				const worldCharacter = draft.data[this.instanceId];
-				if (worldCharacter) {
-					worldCharacter.x = this.x;
-					worldCharacter.y = this.y;
-				}
-			})
-		);
+		updateWorldCharacter(this.instanceId, {
+			x: this.x,
+			y: this.y,
+		});
 
 		// needs 저장
-		worldCharacterNeedStore.update((state) =>
-			produce(state, (draft) => {
-				for (const need of Object.values(this.needs)) {
-					const storeNeed = draft.data[need.id];
-					if (storeNeed) {
-						storeNeed.value = need.value;
-					}
-				}
-			})
-		);
+		for (const need of Object.values(this.needs)) {
+			updateWorldCharacterNeed(need.id, {
+				value: need.value,
+			});
+		}
 	}
 
 	override update(event: BeforeUpdateEvent): void {

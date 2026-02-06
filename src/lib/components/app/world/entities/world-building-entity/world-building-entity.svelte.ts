@@ -1,6 +1,5 @@
 import { useBuilding, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
-import { produce } from 'immer';
 import type {
 	WorldBuildingId,
 	Building,
@@ -12,12 +11,14 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BUILDING, CATEGORY_TILE, CELL_SIZE } from '$lib/constants';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
-import { decreaseConditions } from './decrease-conditions';
+import tickDecreaseConditions from './tick-decrease-conditions';
 
 export class WorldBuildingEntity extends Entity {
 	readonly type = 'building' as const;
 	body: Matter.Body;
 	worldBuildingConditions: Record<ConditionId, WorldBuildingCondition> = $state({});
+
+	tickDecreaseConditions = tickDecreaseConditions;
 
 	override get instanceId(): WorldBuildingId {
 		return EntityIdUtils.instanceId<WorldBuildingId>(this.id);
@@ -31,12 +32,7 @@ export class WorldBuildingEntity extends Entity {
 		super(worldContext, 'building', worldId, worldBuildingId);
 
 		// 스토어에서 데이터 조회
-		const {
-			worldBuildingStore,
-			worldBuildingConditionStore,
-			getAllWorldBuildingConditions,
-			getWorldBuilding,
-		} = useWorld();
+		const { getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
 		const worldBuilding = getWorldBuilding(worldBuildingId);
 		const building = this.building;
 
@@ -74,8 +70,8 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	get building(): Building {
-		const { worldBuildingStore, getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
-		const { buildingStore, getBuilding } = useBuilding();
+		const { getWorldBuilding } = useWorld();
+		const { getBuilding } = useBuilding();
 
 		const worldBuilding = getWorldBuilding(this.instanceId);
 		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
@@ -89,18 +85,13 @@ export class WorldBuildingEntity extends Entity {
 	save(): void {
 		// 건물은 static이므로 위치가 변경되지 않음
 		// conditions 저장
-		const { worldBuildingConditionStore, getAllWorldBuildingConditions, getWorldBuilding } =
-			useWorld();
-		worldBuildingConditionStore.update((state) =>
-			produce(state, (draft) => {
-				for (const condition of Object.values(this.worldBuildingConditions)) {
-					const storeCondition = draft.data[condition.id];
-					if (storeCondition) {
-						storeCondition.value = condition.value;
-					}
-				}
-			})
-		);
+		const { updateWorldBuildingCondition } = useWorld();
+
+		for (const condition of Object.values(this.worldBuildingConditions)) {
+			updateWorldBuildingCondition(condition.id, {
+				value: condition.value,
+			});
+		}
 	}
 
 	update(_: BeforeUpdateEvent): void {
@@ -108,6 +99,6 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		decreaseConditions(this);
+		this.tickDecreaseConditions(tick);
 	}
 }
