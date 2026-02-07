@@ -20,12 +20,12 @@
 	} from '$lib/components/ui/input-group';
 	import { IconPlus, IconTrash, IconX } from '@tabler/icons-svelte';
 	import {
-		getBehaviorInteractTypeLabel,
+		getBehaviorInteractTypeString,
 		getBehaviorInteractionTypeLabels,
 		getFallbackString,
 		isOnceInteractionType,
 		isFulfillInteractionType,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 	import type {
 		Character,
 		CharacterInteraction,
@@ -143,7 +143,7 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{getBehaviorInteractTypeLabel(interactionType)}
+									{getBehaviorInteractTypeString(interactionType)}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>

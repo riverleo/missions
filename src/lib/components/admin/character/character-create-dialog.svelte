@@ -20,7 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { CharacterBodyId, ScenarioId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { admin, characterDialogStore, closeCharacterDialog, characterBodyStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

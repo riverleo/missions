@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { IconEye, IconEyeOff, IconHeading, IconX, IconShape } from '@tabler/icons-svelte';
-	import { getColliderTypeLabel } from '$lib/utils/state-label';
+	import { getColliderTypeString } from '$lib/utils/label';
 
 	interface Props {
 		body: CharacterBody;
@@ -130,7 +130,7 @@
 				<DropdownMenuTrigger>
 					{#snippet child({ props })}
 						<InputGroupButton {...props} variant="ghost">
-							{getColliderTypeLabel(selectedColliderType)}
+							{getColliderTypeString(selectedColliderType)}
 						</InputGroupButton>
 					{/snippet}
 				</DropdownMenuTrigger>
@@ -138,7 +138,7 @@
 					<DropdownMenuRadioGroup bind:value={selectedColliderType}>
 						{#each colliderTypes as type (type)}
 							<DropdownMenuRadioItem value={type}>
-								{getColliderTypeLabel(type)}
+								{getColliderTypeString(type)}
 							</DropdownMenuRadioItem>
 						{/each}
 					</DropdownMenuRadioGroup>

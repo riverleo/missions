@@ -10,7 +10,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
 	import type { BehaviorPriority, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/label';
 
 	interface Props {
 		priority: BehaviorPriority;

@@ -10,7 +10,7 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 

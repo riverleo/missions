@@ -12,7 +12,7 @@
 		WorldCharacterId,
 	} from '$lib/types';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
-	import { getBehaviorActionLabel } from '$lib/utils/state-label';
+	import { getBehaviorActionString } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -105,7 +105,7 @@
 				}
 			}
 
-			const actionLabel = getBehaviorActionLabel({
+			const actionLabel = getBehaviorActionString({
 				action,
 				buildingName,
 				itemName,
@@ -144,7 +144,7 @@
 				}
 			}
 
-			const actionLabel = getBehaviorActionLabel({
+			const actionLabel = getBehaviorActionString({
 				action,
 				buildingName,
 				itemName,

@@ -5,7 +5,7 @@
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
-	import { getDisplayTitle } from '$lib/utils/state-label';
+	import { getDisplayTitle } from '$lib/utils/label';
 
 	interface Props {
 		data: {

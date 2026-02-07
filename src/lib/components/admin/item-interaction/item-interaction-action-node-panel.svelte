@@ -26,7 +26,7 @@
 	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import { clone } from 'radash';
 	import InputGroupText from '$lib/components/ui/input-group/input-group-text.svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		action: ItemInteractionAction | undefined;

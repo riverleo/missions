@@ -10,7 +10,7 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { scenarioStore, admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 

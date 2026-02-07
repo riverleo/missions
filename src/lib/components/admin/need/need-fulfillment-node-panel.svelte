@@ -30,9 +30,9 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import {
 		getFallbackString,
-		getBehaviorInteractTypeLabel,
+		getBehaviorInteractTypeString,
 		getActionString,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -92,7 +92,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -108,7 +108,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -122,7 +122,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -216,7 +216,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
@@ -232,7 +232,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
@@ -249,7 +249,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,

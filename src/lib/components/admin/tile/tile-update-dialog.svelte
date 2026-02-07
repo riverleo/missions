@@ -15,7 +15,7 @@
 		InputGroupText,
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const {
 		tileStore,

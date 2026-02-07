@@ -31,10 +31,10 @@
 	} from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeString } from '$lib/utils/label';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		action: NeedBehaviorAction | undefined;
@@ -93,7 +93,7 @@
 					const building = $buildingStore.data[interaction.building_id];
 					const interactionType =
 						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${building?.name ?? '건물'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+					return `${building?.name ?? '건물'} - ${getBehaviorInteractTypeString(interactionType!)}`;
 				}
 			}
 			if (c.item_interaction_id) {
@@ -102,7 +102,7 @@
 					const item = $itemStore.data[interaction.item_id];
 					const interactionType =
 						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${item?.name ?? '아이템'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+					return `${item?.name ?? '아이템'} - ${getBehaviorInteractTypeString(interactionType!)}`;
 				}
 			}
 			if (c.character_interaction_id) {
@@ -111,7 +111,7 @@
 					const character = $characterStore.data[interaction.target_character_id];
 					const interactionType =
 						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${character?.name ?? '캐릭터'} - ${getBehaviorInteractTypeLabel(interactionType!)}`;
+					return `${character?.name ?? '캐릭터'} - ${getBehaviorInteractTypeString(interactionType!)}`;
 				}
 			}
 			return '지정된 대상';
@@ -265,7 +265,7 @@
 													{@const building = $buildingStore.data[interaction.building_id]}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`building:${interaction.id}`}>
-														{building?.name ?? '건물'} - {getBehaviorInteractTypeLabel(
+														{building?.name ?? '건물'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>
@@ -280,7 +280,7 @@
 													{@const item = $itemStore.data[interaction.item_id]}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`item:${interaction.id}`}>
-														{item?.name ?? '아이템'} - {getBehaviorInteractTypeLabel(
+														{item?.name ?? '아이템'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>
@@ -295,7 +295,7 @@
 													{@const character = $characterStore.data[interaction.target_character_id]}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`character:${interaction.id}`}>
-														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeLabel(
+														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>
@@ -329,7 +329,7 @@
 													{@const building = $buildingStore.data[interaction.building_id]}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`building:${interaction.id}`}>
-														{building?.name ?? '건물'} - {getBehaviorInteractTypeLabel(
+														{building?.name ?? '건물'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>
@@ -344,7 +344,7 @@
 													{@const item = $itemStore.data[interaction.item_id]}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`item:${interaction.id}`}>
-														{item?.name ?? '아이템'} - {getBehaviorInteractTypeLabel(
+														{item?.name ?? '아이템'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>
@@ -359,7 +359,7 @@
 													{@const character = $characterStore.data[interaction.target_character_id]}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`character:${interaction.id}`}>
-														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeLabel(
+														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeString(
 															interactionType!
 														)}
 													</SelectItem>

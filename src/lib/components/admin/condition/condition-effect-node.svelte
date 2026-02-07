@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useCharacter } from '$lib/hooks';
-	import { getFallbackString } from '$lib/utils/state-label';
+	import { getFallbackString } from '$lib/utils/label';
 	import type { ConditionEffect } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { Separator } from '$lib/components/ui/separator';

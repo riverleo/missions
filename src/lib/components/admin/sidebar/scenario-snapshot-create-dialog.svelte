@@ -16,7 +16,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import { IconHeading, IconFileText } from '@tabler/icons-svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { admin, scenarioSnapshotDialogStore, closeScenarioSnapshotDialog } = useScenario();
 

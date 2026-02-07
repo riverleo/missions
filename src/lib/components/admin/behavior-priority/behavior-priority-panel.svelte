@@ -3,7 +3,7 @@
 	import BehaviorPriorityList from './behavior-priority-list.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import type { BehaviorPriority, BehaviorPriorityId, BulkChanges } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { admin } = useBehavior();
 

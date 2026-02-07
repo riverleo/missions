@@ -14,7 +14,7 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		buildingCondition: BuildingCondition | undefined;

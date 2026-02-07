@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { getFallbackString } from '$lib/utils/state-label';
+	import { getFallbackString } from '$lib/utils/label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';

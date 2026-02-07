@@ -37,7 +37,7 @@
 		getActionString,
 		getFormString,
 		getDisplayTitle,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 	const { chapterStore } = useChapter();

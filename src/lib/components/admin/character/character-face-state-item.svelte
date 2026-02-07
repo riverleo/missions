@@ -5,7 +5,7 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import { CharacterSpriteAnimator } from '$lib/components/app/sprite-animator';
-	import { getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import { getCharacterFaceStateString } from '$lib/utils/label';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -52,7 +52,7 @@
 
 <SpriteStateItem
 	{type}
-	label={getCharacterFaceStateLabel(type)}
+	label={getCharacterFaceStateString(type)}
 	spriteState={faceState}
 	{onchange}
 	{ondelete}

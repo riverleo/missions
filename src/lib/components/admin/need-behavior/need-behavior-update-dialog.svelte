@@ -27,7 +27,7 @@
 	import type { NeedId, CharacterId, CharacterFaceStateType } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { getFallbackString, getActionString, getFormString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
 
 	const { needBehaviorStore, needBehaviorDialogStore, closeNeedBehaviorDialog, admin } =
 		useBehavior();

@@ -11,7 +11,7 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/label';
 
 	interface Props {
 		behavior: NeedBehavior;

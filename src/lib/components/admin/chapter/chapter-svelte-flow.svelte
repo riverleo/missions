@@ -22,7 +22,7 @@
 	import { sort } from 'radash';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import { toTreeMap } from '$lib/utils';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { chapterStore, admin } = useChapter();
 

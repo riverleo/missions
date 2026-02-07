@@ -17,7 +17,7 @@
 	import { IconDice5, IconInfoCircle } from '@tabler/icons-svelte';
 	import { createNarrativeDiceRollNodeId } from '$lib/utils/flow-id';
 	import { tick } from 'svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		narrativeDiceRoll: NarrativeDiceRoll | undefined;

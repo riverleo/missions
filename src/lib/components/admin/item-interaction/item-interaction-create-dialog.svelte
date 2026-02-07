@@ -17,7 +17,7 @@
 		isOnceInteractionType,
 		isFulfillInteractionType,
 		isSystemInteractionType,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 	import { alphabetical } from 'radash';
 	import type {
 		CharacterId,
@@ -27,7 +27,7 @@
 		SystemInteractionType,
 		ScenarioId,
 	} from '$lib/types';
-	import { getFallbackString, getActionString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString } from '$lib/utils/label';
 
 	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();

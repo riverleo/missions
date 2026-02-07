@@ -29,7 +29,7 @@
 		NeedBehaviorId,
 	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
-	import { getFallbackString, getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
 
 	const { scenarioStore } = useScenario();
 	const { chapterStore } = useChapter();
@@ -78,7 +78,7 @@
 				: undefined;
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
+			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
 			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 		}
@@ -91,7 +91,7 @@
 				: undefined;
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
+			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
 			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 		}
@@ -104,7 +104,7 @@
 				: undefined;
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
+			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
 			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 		}

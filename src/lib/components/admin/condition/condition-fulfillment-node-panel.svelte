@@ -19,9 +19,9 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import {
 		getFallbackString,
-		getBehaviorInteractTypeLabel,
+		getBehaviorInteractTypeString,
 		getActionString,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 	import { clone } from 'radash';
 
 	interface Props {
@@ -63,7 +63,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -138,7 +138,7 @@
 					: undefined;
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,

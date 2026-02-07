@@ -13,7 +13,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
-	import { getCharacterBodyStateLabel, getCharacterFaceStateLabel } from '$lib/utils/state-label';
+	import { getCharacterBodyStateString, getCharacterFaceStateString } from '$lib/utils/label';
 	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
 	import {
 		DropdownMenu,
@@ -115,7 +115,7 @@
 
 <SpriteStateItem
 	{type}
-	label={getCharacterBodyStateLabel(type)}
+	label={getCharacterBodyStateString(type)}
 	spriteState={bodyState}
 	{onchange}
 	{ondelete}
@@ -145,7 +145,7 @@
 							{#snippet child({ props })}
 								<InputGroupButton {...props} variant="ghost">
 									{bodyState.character_face_state
-										? getCharacterFaceStateLabel(bodyState.character_face_state)
+										? getCharacterFaceStateString(bodyState.character_face_state)
 										: '시스템'}
 									<IconChevronDown class="ml-1 size-3" />
 								</InputGroupButton>
@@ -159,7 +159,7 @@
 								<DropdownMenuRadioItem value="">시스템</DropdownMenuRadioItem>
 								{#each faceStateOptions as faceType (faceType)}
 									<DropdownMenuRadioItem value={faceType}>
-										{getCharacterFaceStateLabel(faceType)}
+										{getCharacterFaceStateString(faceType)}
 									</DropdownMenuRadioItem>
 								{/each}
 							</DropdownMenuRadioGroup>

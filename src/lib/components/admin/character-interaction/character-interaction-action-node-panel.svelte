@@ -26,7 +26,7 @@
 	import { createCharacterInteractionActionNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
 	import InputGroupText from '$lib/components/ui/input-group/input-group-text.svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		action: CharacterInteractionAction | undefined;

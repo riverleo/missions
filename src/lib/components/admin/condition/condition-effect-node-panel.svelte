@@ -16,7 +16,7 @@
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { clone } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		effect: ConditionEffect | undefined;

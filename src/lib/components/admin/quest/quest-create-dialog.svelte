@@ -40,7 +40,7 @@
 		getActionString,
 		getFormString,
 		getDisplayTitle,
-	} from '$lib/utils/state-label';
+	} from '$lib/utils/label';
 
 	const { admin, questDialogStore, closeQuestDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

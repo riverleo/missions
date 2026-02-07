@@ -10,7 +10,7 @@
 	} from '$lib/components/ui/dialog';
 	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const { narrativeStore, admin } = useNarrative();
 	const { store } = admin;

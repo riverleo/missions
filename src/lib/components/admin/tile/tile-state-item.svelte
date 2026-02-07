@@ -7,7 +7,7 @@
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
-	import { getFallbackString, getTileStateLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getTileStateString } from '$lib/utils/label';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -56,7 +56,7 @@
 
 <SpriteStateItem
 	{type}
-	label={getTileStateLabel(type)}
+	label={getTileStateString(type)}
 	spriteState={tileState}
 	{onchange}
 	{ondelete}

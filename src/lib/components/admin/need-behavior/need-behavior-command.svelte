@@ -20,7 +20,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/state-label';
+	import { getNeedBehaviorLabel } from '$lib/utils/label';
 
 	const { needBehaviorStore, openNeedBehaviorDialog } = useBehavior();
 	const { needStore } = useCharacter();

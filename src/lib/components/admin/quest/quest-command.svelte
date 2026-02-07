@@ -19,7 +19,7 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
-	import { getFallbackString, getDisplayTitle } from '$lib/utils/state-label';
+	import { getFallbackString, getDisplayTitle } from '$lib/utils/label';
 	import { group, sort } from 'radash';
 	import type { Quest, ScenarioId, ChapterId } from '$lib/types';
 

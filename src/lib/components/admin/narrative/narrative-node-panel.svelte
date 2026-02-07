@@ -28,7 +28,7 @@
 	import { createNarrativeNodeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
 	import { tick } from 'svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		narrativeNode: NarrativeNode | undefined;

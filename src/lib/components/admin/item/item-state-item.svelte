@@ -6,7 +6,7 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
-	import { getFallbackString, getItemStateLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getItemStateString } from '$lib/utils/label';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -56,7 +56,7 @@
 
 <SpriteStateItem
 	{type}
-	label={getItemStateLabel(type)}
+	label={getItemStateString(type)}
 	spriteState={itemState}
 	{onchange}
 	{ondelete}

@@ -12,7 +12,7 @@
 	} from '$lib/components/ui/input-group';
 	import { createTerrainTileEdgeId } from '$lib/utils/flow-id';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		terrainTile: TerrainTile | undefined;

@@ -20,7 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const { needDialogStore, closeNeedDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

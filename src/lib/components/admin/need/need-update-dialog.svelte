@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
 

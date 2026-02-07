@@ -10,7 +10,7 @@
 		InputGroupText,
 		InputGroupButton,
 	} from '$lib/components/ui/input-group';
-	import { getCharacterBodyStateLabel } from '$lib/utils/state-label';
+	import { getCharacterBodyStateString } from '$lib/utils/label';
 
 	interface Props {
 		character: Character;
@@ -24,7 +24,7 @@
 
 	const uiStore = admin.characterUiStore;
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
-	const selectedBodyStateLabel = $derived(getCharacterBodyStateLabel(previewBodyStateType));
+	const selectedBodyStateLabel = $derived(getCharacterBodyStateString(previewBodyStateType));
 
 	let scale = $state(character.scale.toString());
 
@@ -63,7 +63,7 @@
 			<SelectContent>
 				{#each bodyStateTypes as stateType (stateType)}
 					<SelectItem value={stateType}>
-						{getCharacterBodyStateLabel(stateType)}
+						{getCharacterBodyStateString(stateType)}
 					</SelectItem>
 				{/each}
 			</SelectContent>

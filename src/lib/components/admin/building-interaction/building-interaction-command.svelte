@@ -21,7 +21,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getFallbackString, getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
 
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
@@ -65,7 +65,7 @@
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
@@ -124,7 +124,7 @@
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}

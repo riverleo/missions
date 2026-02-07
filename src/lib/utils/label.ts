@@ -179,19 +179,19 @@ const SYSTEM_INTERACTION_TYPE_LABELS: Record<SystemInteractionType, string> = {
 	item_pick: '아이템 줍기',
 };
 
-export function getColliderTypeLabel(type: ColliderType): string {
+export function getColliderTypeString(type: ColliderType): string {
 	return COLLIDER_TYPE_LABELS[type];
 }
 
-export function getCharacterBodyStateLabel(state: CharacterBodyStateType): string {
+export function getCharacterBodyStateString(state: CharacterBodyStateType): string {
 	return CHARACTER_BODY_STATE_LABELS[state];
 }
 
-export function getCharacterFaceStateLabel(state: CharacterFaceStateType): string {
+export function getCharacterFaceStateString(state: CharacterFaceStateType): string {
 	return CHARACTER_FACE_STATE_LABELS[state];
 }
 
-export function getBuildingStateLabel(state: BuildingStateType): string {
+export function getBuildingStateString(state: BuildingStateType): string {
 	return BUILDING_STATE_LABELS[state];
 }
 
@@ -249,7 +249,7 @@ export function getBehaviorInteractionTypeLabels(
 }
 
 // Backward compatibility - 구버전 함수명 유지 (once/fulfill/system 모두 합쳐서 반환)
-export function getBehaviorInteractTypeLabel(
+export function getBehaviorInteractTypeString(
 	type: OnceInteractionType | FulfillInteractionType | SystemInteractionType
 ): string {
 	if (type in ONCE_INTERACTION_TYPE_LABELS) {
@@ -266,7 +266,7 @@ const ITEM_STATE_LABELS: Record<ItemStateType, string> = {
 	broken: '파손',
 };
 
-export function getItemStateLabel(state: ItemStateType): string {
+export function getItemStateString(state: ItemStateType): string {
 	return ITEM_STATE_LABELS[state];
 }
 
@@ -276,7 +276,7 @@ const TILE_STATE_LABELS: Record<TileStateType, string> = {
 	damaged_2: '손상 2단계',
 };
 
-export function getTileStateLabel(state: TileStateType): string {
+export function getTileStateString(state: TileStateType): string {
 	return TILE_STATE_LABELS[state];
 }
 
@@ -307,7 +307,7 @@ export function getConditionBehaviorLabel(params: {
 }
 
 // Behavior Action 라벨 생성
-export function getBehaviorActionLabel(params: {
+export function getBehaviorActionString(params: {
 	action: NeedBehaviorAction | ConditionBehaviorAction;
 	buildingName?: string;
 	itemName?: string;

@@ -15,7 +15,7 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { goto } from '$app/navigation';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const { admin, scenarioDialogStore, closeScenarioDialog } = useScenario();
 

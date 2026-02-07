@@ -8,7 +8,7 @@
 	import BuildingSpriteAnimator from '$lib/components/app/sprite-animator/building-sprite-animator.svelte';
 	import BuildingTileGrid from './building-tile-grid.svelte';
 	import { CELL_SIZE } from '$lib/constants';
-	import { getBuildingStateLabel } from '$lib/utils/state-label';
+	import { getBuildingStateString } from '$lib/utils/label';
 
 	interface Props {
 		buildingId: BuildingId;
@@ -54,7 +54,7 @@
 
 <SpriteStateItem
 	{type}
-	label={getBuildingStateLabel(type)}
+	label={getBuildingStateString(type)}
 	spriteState={buildingState}
 	{onchange}
 	{ondelete}

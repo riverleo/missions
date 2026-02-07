@@ -22,7 +22,7 @@
 	import { Tooltip } from '$lib/components/ui/tooltip';
 	import TooltipTrigger from '$lib/components/ui/tooltip/tooltip-trigger.svelte';
 	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
-	import { getActionString, getFormString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const { admin, itemDialogStore, closeItemDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

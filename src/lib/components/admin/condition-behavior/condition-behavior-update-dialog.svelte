@@ -32,7 +32,7 @@
 		ConditionBehaviorUpdate,
 		BuildingStateType,
 	} from '$lib/types';
-	import { getFallbackString, getActionString, getFormString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
 
 	const {
 		conditionBehaviorStore,

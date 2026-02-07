@@ -47,7 +47,7 @@
 		NarrativeNodeChoiceId,
 		ScenarioId,
 	} from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const narrativeId = $derived(page.params.narrativeId as NarrativeId);

@@ -9,7 +9,7 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeString } from '$lib/utils/label';
 
 	interface Props {
 		data: {
@@ -38,7 +38,7 @@
 				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${building?.name ?? '건물'}" 건물`,
-				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+				behaviorLabel: getBehaviorInteractTypeString(interactionType),
 			};
 		}
 		if (action.item_interaction_id) {
@@ -49,7 +49,7 @@
 				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${item?.name ?? '아이템'}" 아이템`,
-				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+				behaviorLabel: getBehaviorInteractTypeString(interactionType),
 			};
 		}
 		if (action.character_interaction_id) {
@@ -60,7 +60,7 @@
 				interaction.fulfill_interaction_type)!;
 			return {
 				target: `"${character?.name ?? '캐릭터'}" 캐릭터`,
-				behaviorLabel: getBehaviorInteractTypeLabel(interactionType),
+				behaviorLabel: getBehaviorInteractTypeString(interactionType),
 			};
 		}
 		return undefined;

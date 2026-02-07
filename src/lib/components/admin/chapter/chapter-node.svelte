@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Chapter } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
-	import { getDisplayTitle } from '$lib/utils/state-label';
+	import { getDisplayTitle } from '$lib/utils/label';
 
 	type Props = {
 		data: {

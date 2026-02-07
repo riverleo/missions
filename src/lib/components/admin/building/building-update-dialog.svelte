@@ -19,7 +19,7 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import type { ItemId, ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { buildingStore, buildingItemStore, admin, buildingDialogStore, closeBuildingDialog } =
 		useBuilding();

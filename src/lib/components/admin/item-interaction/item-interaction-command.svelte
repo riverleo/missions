@@ -18,7 +18,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { getFallbackString, getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, ItemId, CharacterId, ItemInteraction } from '$lib/types';
@@ -65,7 +65,7 @@
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}
@@ -124,7 +124,7 @@
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
 						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
+						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}

@@ -18,7 +18,7 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading } from '@tabler/icons-svelte';
 	import type { ScenarioId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { characterBodyDialogStore, closeCharacterBodyDialog, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

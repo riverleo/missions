@@ -11,7 +11,7 @@
 	import { IconCheck, IconMap } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
-	import { getDisplayTitle, getDisplayName } from '$lib/utils/state-label';
+	import { getDisplayTitle, getDisplayName } from '$lib/utils/label';
 	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';

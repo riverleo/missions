@@ -7,7 +7,7 @@
 		CharacterInteractionId,
 	} from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getBehaviorInteractTypeString } from '$lib/utils/label';
 
 	interface Props {
 		data: {
@@ -37,7 +37,7 @@
 				const building = $buildingStore.data[interaction.building_id];
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				return `${building?.name ?? '건물'} ${behaviorLabel}`;
 			}
 		}
@@ -48,7 +48,7 @@
 				const item = $itemStore.data[interaction.item_id];
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				return `${item?.name ?? '아이템'} ${behaviorLabel}`;
 			}
 		}
@@ -61,7 +61,7 @@
 				const character = $characterStore.data[interaction.target_character_id];
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				return `${character?.name ?? '캐릭터'} ${behaviorLabel}`;
 			}
 		}

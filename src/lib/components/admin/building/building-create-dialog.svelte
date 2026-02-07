@@ -20,7 +20,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId, ItemId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString } from '$lib/utils/label';
 
 	const { admin, buildingDialogStore, closeBuildingDialog } = useBuilding();
 	const { itemStore } = useItem();
