@@ -249,9 +249,7 @@ export function getBehaviorInteractionTypeLabels(
 }
 
 // Backward compatibility - 구버전 함수명 유지 (once/fulfill/system 모두 합쳐서 반환)
-export function getBehaviorInteractTypeString(
-	type: OnceInteractionType | FulfillInteractionType | SystemInteractionType
-): string {
+export function getBehaviorInteractTypeString(type: BehaviorInteractionType): string {
 	if (type in ONCE_INTERACTION_TYPE_LABELS) {
 		return ONCE_INTERACTION_TYPE_LABELS[type as OnceInteractionType];
 	}
