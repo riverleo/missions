@@ -11,6 +11,7 @@
 	import { IconCheck, IconMap } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import { EntityIdUtils } from '$lib/utils/entity-id';
+	import { getDisplayTitle, getDisplayName } from '$lib/utils/state-label';
 	import { useApp } from '$lib/hooks';
 	import { getGameAssetUrl } from '$lib/utils/storage.svelte';
 	import { sort, alphabetical } from 'radash';
@@ -57,7 +58,7 @@
 							<IconMap class="mr-2 size-6 text-muted-foreground" />
 						{/if}
 						<span class="flex-1 truncate">
-							{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
+							{getDisplayTitle(terrain.title, terrain.id)}
 						</span>
 					</CommandItem>
 				{/each}
@@ -84,7 +85,7 @@
 							)}
 						/>
 						<span class="flex-1 truncate">
-							{character.name || `이름없음 (${character.id.split('-')[0]})`}
+							{getDisplayName(character.name, character.id)}
 						</span>
 					</CommandItem>
 				{/each}
@@ -111,7 +112,7 @@
 							)}
 						/>
 						<span class="flex-1 truncate">
-							{building.name || `이름없음 (${building.id.split('-')[0]})`}
+							{getDisplayName(building.name, building.id)}
 						</span>
 					</CommandItem>
 				{/each}
@@ -138,7 +139,7 @@
 							)}
 						/>
 						<span class="flex-1 truncate">
-							{item.name || `이름없음 (${item.id.split('-')[0]})`}
+							{getDisplayName(item.name, item.id)}
 						</span>
 					</CommandItem>
 				{/each}
@@ -165,7 +166,7 @@
 							)}
 						/>
 						<span class="flex-1 truncate">
-							{tile.name || `이름없음 (${tile.id.split('-')[0]})`}
+							{getDisplayName(tile.name, tile.id)}
 						</span>
 					</CommandItem>
 				{/each}

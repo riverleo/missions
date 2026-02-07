@@ -17,9 +17,12 @@
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
 	import { Select, SelectContent, SelectItem, SelectTrigger } from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import {
+		getFallbackString,
+		getBehaviorInteractTypeLabel,
+		getActionString,
+	} from '$lib/utils/state-label';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		fulfillment: ConditionFulfillment | undefined;
@@ -61,7 +64,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 			}
 		}
@@ -136,7 +139,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
 					name: `${buildingName} - ${characterName} ${behaviorLabel}`,

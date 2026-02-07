@@ -10,6 +10,7 @@
 		AlertDialogHeader,
 		AlertDialogTitle,
 	} from '$lib/components/ui/alert-dialog';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { questStore, admin, questDialogStore, closeQuestDialog } = useQuest();
 
@@ -56,7 +57,7 @@
 			</AlertDialogDescription>
 		</AlertDialogHeader>
 		<AlertDialogFooter>
-			<AlertDialogCancel>취소</AlertDialogCancel>
+			<AlertDialogCancel>{getActionString("cancel")}</AlertDialogCancel>
 			<AlertDialogAction {onclick}>
 				{isPublished ? '작업중으로 전환' : '공개로 전환'}
 			</AlertDialogAction>

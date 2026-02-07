@@ -35,7 +35,7 @@
 		ConditionBehaviorInsert,
 		BuildingStateType,
 	} from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -63,7 +63,7 @@
 	const selectedCondition = $derived(conditions.find((c) => c.id === conditionId));
 	const selectedConditionName = $derived(selectedCondition?.name ?? '컨디션 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
+	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
 
 	$effect(() => {
 		if (open) {
@@ -135,7 +135,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

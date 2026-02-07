@@ -22,7 +22,7 @@
 	import { Tooltip } from '$lib/components/ui/tooltip';
 	import TooltipTrigger from '$lib/components/ui/tooltip/tooltip-trigger.svelte';
 	import TooltipContent from '$lib/components/ui/tooltip/tooltip-content.svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { admin, itemDialogStore, closeItemDialog } = useItem();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -83,7 +83,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

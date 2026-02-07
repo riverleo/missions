@@ -7,7 +7,7 @@
 	import SpriteStateItem, {
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
-	import { getTileStateLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getTileStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -28,7 +28,7 @@
 	const durabilityPreview = $derived.by(() => {
 		if (!tileState || type === 'idle') return undefined;
 
-		if (!tile?.max_durability) return '최대 내구도 없음';
+		if (!tile?.max_durability) return getFallbackString('noDurability');
 
 		return `내구도 ${tileState.min_durability.toLocaleString()}~${tileState.max_durability.toLocaleString()} 틱 사이`;
 	});

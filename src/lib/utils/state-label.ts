@@ -109,6 +109,28 @@ export function getFallbackString(key: keyof typeof FALLBACK_LABELS): string {
 }
 
 // ============================================================
+// Fallback Helper Functions
+// ============================================================
+
+export function getUntitledWithId(id: string): string {
+	const shortId = id.split('-')[0];
+	return `${FALLBACK_LABELS.untitled} (${shortId})`;
+}
+
+export function getUnnamedWithId(id: string): string {
+	const shortId = id.split('-')[0];
+	return `${FALLBACK_LABELS.unnamed} (${shortId})`;
+}
+
+export function getDisplayTitle(title: string | undefined | null, id: string): string {
+	return title || getUntitledWithId(id);
+}
+
+export function getDisplayName(name: string | undefined | null, id: string): string {
+	return name || getUnnamedWithId(id);
+}
+
+// ============================================================
 // State/Type Labels
 // ============================================================
 

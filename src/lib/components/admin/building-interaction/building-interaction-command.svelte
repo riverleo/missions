@@ -21,7 +21,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
@@ -64,7 +64,7 @@
 						{@const interactionType = (interaction.once_interaction_type ||
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : '모든 캐릭터'}
+						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
@@ -123,7 +123,7 @@
 						{@const interactionType = (interaction.once_interaction_type ||
 							interaction.fulfill_interaction_type ||
 							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : '모든 캐릭터'}
+						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
 						{@const label = `${characterName} ${getBehaviorInteractTypeLabel(interactionType)}`}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}

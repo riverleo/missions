@@ -13,7 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { admin, terrainDialogStore, closeTerrainDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -66,7 +66,7 @@
 				<InputGroupAddon align="inline-start">
 					<IconHeading class="size-4" />
 				</InputGroupAddon>
-				<InputGroupInput placeholder="제목" bind:value={title} />
+				<InputGroupInput placeholder={getFormString("title")} bind:value={title} />
 			</InputGroup>
 			<DialogFooter>
 				<Button type="submit" disabled={isSubmitting}>

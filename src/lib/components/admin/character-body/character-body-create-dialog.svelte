@@ -70,7 +70,7 @@
 				<InputGroupInput placeholder="바디 이름" bind:value={name} />
 			</InputGroup>
 			<DialogFooter class="mt-4">
-				<Button type="button" variant="outline" onclick={() => onOpenChange(false)}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => onOpenChange(false)}>{getActionString("cancel")}</Button>
 				<Button type="submit" disabled={isSubmitting}>
 					{isSubmitting ? '생성 중...' : '생성'}
 				</Button>

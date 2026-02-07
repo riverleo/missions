@@ -24,7 +24,7 @@
 		FulfillInteractionType,
 		SystemInteractionType,
 	} from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString } from '$lib/utils/state-label';
 
 	const { itemStore } = useItem();
 	const { characterStore } = useCharacter();
@@ -60,7 +60,7 @@
 	const selectedItem = $derived(items.find((b) => b.id === itemId));
 	const selectedItemName = $derived(selectedItem?.name ?? '아이템 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
+	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
 	const selectedInteractionLabel = $derived(
 		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '사용'
 	);

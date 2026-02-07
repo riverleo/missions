@@ -35,7 +35,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ChapterId, ScenarioId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import {
+		getFallbackString,
+		getActionString,
+		getFormString,
+		getDisplayTitle,
+	} from '$lib/utils/state-label';
 
 	const { admin, questDialogStore, closeQuestDialog } = useQuest();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -60,13 +65,13 @@
 	});
 
 	function getChapterTitle(chapter: { id: string; title: string }) {
-		return chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
+		return getDisplayTitle(chapter.title, chapter.id);
 	}
 
 	const chapterLabel = $derived.by(() => {
-		if (!chapterId) return '챕터 없음';
+		if (!chapterId) return getFallbackString('noChapter');
 		const chapter = chapters.find((c) => c.id === chapterId);
-		return chapter ? getChapterTitle(chapter) : '챕터 없음';
+		return chapter ? getChapterTitle(chapter) : getFallbackString('noChapter');
 	});
 
 	function getTypeLabel(questType: QuestType) {
@@ -116,7 +121,7 @@
 					<InputGroupAddon align="inline-start">
 						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput placeholder="제목" bind:value={title} />
+					<InputGroupInput placeholder={getFormString("title")} bind:value={title} />
 					<InputGroupAddon align="inline-end">
 						<DropdownMenu>
 							<DropdownMenuTrigger>

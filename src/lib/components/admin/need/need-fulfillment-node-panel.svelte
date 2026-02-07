@@ -28,9 +28,12 @@
 		DropdownMenuRadioItem,
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import {
+		getFallbackString,
+		getBehaviorInteractTypeLabel,
+		getActionString,
+	} from '$lib/utils/state-label';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/state-label';
 
 	interface Props {
 		fulfillment: NeedFulfillment | undefined;
@@ -90,7 +93,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 			}
 		}
@@ -106,7 +109,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 			}
 		}
@@ -120,7 +123,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 			}
 		}
@@ -214,7 +217,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
 					name: `${buildingName} - ${characterName} ${behaviorLabel}`,
@@ -230,7 +233,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
 					name: `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`,
@@ -247,7 +250,7 @@
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeLabel(interactionType) : '';
-				const characterName = character ? character.name : '모든 캐릭터';
+				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return {
 					id: interaction.id,
 					name: `${itemName} - ${characterName} ${behaviorLabel}`,

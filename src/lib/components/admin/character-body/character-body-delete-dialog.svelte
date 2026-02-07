@@ -69,7 +69,7 @@
 			</DialogDescription>
 		</DialogHeader>
 		<DialogFooter>
-			<Button variant="outline" onclick={() => onOpenChange(false)}>취소</Button>
+			<Button variant="outline" onclick={() => onOpenChange(false)}>{getActionString("cancel")}</Button>
 			<Button variant="destructive" onclick={onclickDelete} disabled={isDeleting || !bodyToDelete}>
 				{isDeleting ? '삭제 중...' : '삭제'}
 			</Button>

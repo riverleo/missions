@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { IconHeading } from '@tabler/icons-svelte';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
 
@@ -84,7 +84,7 @@
 					<InputGroupAddon align="inline-start">
 						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<div class="flex gap-1">
 					<InputGroup>

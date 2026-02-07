@@ -19,6 +19,7 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { page } from '$app/state';
 	import { cn } from '$lib/utils';
+	import { getFallbackString, getDisplayTitle } from '$lib/utils/state-label';
 	import { group, sort } from 'radash';
 	import type { Quest, ScenarioId, ChapterId } from '$lib/types';
 
@@ -45,9 +46,9 @@
 
 		return sortedEntries.map(([chapterId, chapterQuests]) => {
 			const chapter = chapterId !== NO_CHAPTER ? chapters[chapterId as ChapterId] : undefined;
-			let chapterTitle = '챕터 없음';
+			let chapterTitle = getFallbackString('noChapter');
 			if (chapter) {
-				chapterTitle = chapter.title || `제목없음 (${chapter.id.split('-')[0]})`;
+				chapterTitle = getDisplayTitle(chapter.title, chapter.id);
 			}
 			return {
 				chapterId,

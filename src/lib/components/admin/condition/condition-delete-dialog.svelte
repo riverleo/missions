@@ -62,7 +62,7 @@
 		</DialogHeader>
 		<form {onsubmit}>
 			<DialogFooter>
-				<Button type="button" variant="outline" onclick={() => closeConditionDialog()}>취소</Button>
+				<Button type="button" variant="outline" onclick={() => closeConditionDialog()}>{getActionString("cancel")}</Button>
 				<Button type="submit" variant="destructive" disabled={isSubmitting}>
 					{isSubmitting ? getActionString('deleting') : getActionString('deleteAction')}
 				</Button>

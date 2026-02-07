@@ -5,6 +5,7 @@
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { sort } from 'radash';
 	import { Separator } from '$lib/components/ui/separator';
+	import { getDisplayTitle } from '$lib/utils/state-label';
 
 	interface Props {
 		data: {
@@ -47,7 +48,7 @@
 				class:text-white={narrativeNode.title}
 				class:text-neutral-500={!narrativeNode.title}
 			>
-				{narrativeNode.title || `제목없음 (${narrativeNode.id.split('-')[0]})`}
+				{getDisplayTitle(narrativeNode.title, narrativeNode.id)}
 			</span>
 		</div>
 

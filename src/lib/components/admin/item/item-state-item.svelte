@@ -6,7 +6,7 @@
 		type SpriteStateChange,
 	} from '$lib/components/admin/sprite-state-item.svelte';
 	import ItemSpriteAnimator from '$lib/components/app/sprite-animator/item-sprite-animator.svelte';
-	import { getItemStateLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getItemStateLabel } from '$lib/utils/state-label';
 	import { Button } from '$lib/components/ui/button';
 
 	interface Props {
@@ -28,7 +28,7 @@
 
 		if (!itemState) return undefined;
 
-		if (!item?.max_durability_ticks) return '최대 내구도 없음';
+		if (!item?.max_durability_ticks) return getFallbackString('noDurability');
 
 		return `내구도 ${itemState.min_durability.toLocaleString()}~${itemState.max_durability.toLocaleString()} 틱 사이`;
 	});

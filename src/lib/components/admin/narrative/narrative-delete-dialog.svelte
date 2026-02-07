@@ -13,6 +13,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
+	import { getActionString } from '$lib/utils/state-label';
 
 	const { admin } = useNarrative();
 	const { store } = admin;
@@ -53,7 +54,7 @@
 			</AlertDialogDescription>
 		</AlertDialogHeader>
 		<AlertDialogFooter>
-			<AlertDialogCancel>취소</AlertDialogCancel>
+			<AlertDialogCancel>{getActionString("cancel")}</AlertDialogCancel>
 			<AlertDialogAction {onclick}>삭제</AlertDialogAction>
 		</AlertDialogFooter>
 	</AlertDialogContent>

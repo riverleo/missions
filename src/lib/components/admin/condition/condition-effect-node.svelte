@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useCharacter } from '$lib/hooks';
+	import { getFallbackString } from '$lib/utils/state-label';
 	import type { ConditionEffect } from '$lib/types';
 	import { Handle, Position } from '@xyflow/svelte';
 	import { Separator } from '$lib/components/ui/separator';
@@ -24,7 +25,7 @@
 	const need = $derived($needStore.data[effect.need_id]);
 
 	const label = $derived.by(() => {
-		const characterName = character ? `${character.name}` : '모든 캐릭터';
+		const characterName = character ? `${character.name}` : getFallbackString('allCharacters');
 		const needName = need?.name ?? '욕구';
 		const changeSign = effect.change_per_tick >= 0 ? '증가' : '감소';
 		return `${characterName} ${needName} ${effect.change_per_tick}씩 ${changeSign}`;

@@ -17,6 +17,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
+	import { getFallbackString } from '$lib/utils/state-label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
@@ -68,7 +69,7 @@
 									{behavior.name}
 								</span>
 								<span class="truncate text-xs text-muted-foreground">
-									{character?.name ?? '모든 캐릭터'} ({condition.name}
+									{character?.name ?? getFallbackString('allCharacters')} ({condition.name}
 									{behavior.condition_threshold} 이하)
 								</span>
 							</div>

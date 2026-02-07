@@ -17,7 +17,7 @@
 	} from '$lib/components/ui/input-group';
 	import { IconHeading, IconClock } from '@tabler/icons-svelte';
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { itemStore, admin, itemDialogStore, closeItemDialog } = useItem();
 
@@ -80,7 +80,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

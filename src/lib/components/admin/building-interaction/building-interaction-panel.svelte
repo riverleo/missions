@@ -22,6 +22,7 @@
 	import {
 		getBehaviorInteractTypeLabel,
 		getBehaviorInteractionTypeLabels,
+		getFallbackString,
 		isOnceInteractionType,
 		isFulfillInteractionType,
 	} from '$lib/utils/state-label';
@@ -171,7 +172,7 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{selectedCharacter?.name ?? '모든 캐릭터'}
+									{selectedCharacter?.name ?? getFallbackString('allCharacters')}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>

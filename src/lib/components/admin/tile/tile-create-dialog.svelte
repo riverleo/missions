@@ -18,7 +18,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import type { ScenarioId } from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { admin, tileDialogStore, closeTileDialog } = useTerrain();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -79,7 +79,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

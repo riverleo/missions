@@ -29,7 +29,7 @@
 	import type { NeedId, ScenarioId, CharacterId, CharacterFaceStateType } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/state-label';
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -57,7 +57,7 @@
 	const selectedNeed = $derived(needs.find((n) => n.id === needId));
 	const selectedNeedName = $derived(selectedNeed?.name ?? '욕구 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
+	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
 
 	$effect(() => {
 		if (open) {
@@ -129,7 +129,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder="이름" bind:value={name} />
+					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

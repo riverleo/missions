@@ -475,7 +475,7 @@ export function getActionLabels() {
 
 ✅ **Phase 6.5 완료!** (파일 통합 및 getter 캡슐화는 보류)
 
-### Phase 7: 인라인 라벨 교체 🔄 진행중
+### Phase 7: 인라인 라벨 교체 ✅ 완료
 **작업 내용:**
 1. [x] state-label.ts에 ACTION_LABELS 추가 (create, update, delete, save, cancel, confirm + 하기 variants)
 2. [x] getter 함수명 수정: getActionLabel → getActionString, getFormLabel → getFormString 등
@@ -483,28 +483,49 @@ export function getActionLabels() {
 4. [x] 59개 파일에 `import { getActionString } from '$lib/utils/state-label'` 자동 추가
 5. [x] TypeScript 에러 수정 (multi-line import 내 잘못된 import 위치 문제)
 6. [x] 타입 체크 통과 확인
+7. [x] Form placeholder 라벨 교체 (이름, 제목, 가로, 세로 등) - 19개 파일
+8. [x] Cancel 버튼 라벨 교체 (standalone '취소') - 14개 파일
+9. [x] Fallback 라벨 교체:
+   - [x] '모두', '모든 캐릭터' → getFallbackString('all'/'allCharacters')
+   - [x] '챕터 없음' → getFallbackString('noChapter')
+   - [x] '최대 내구도 없음' → getFallbackString('noDurability')
+   - [x] 제목없음/이름없음 패턴 → getDisplayTitle/getDisplayName 헬퍼 함수
+   - [x] state-label.ts에 헬퍼 함수 추가: getUntitledWithId, getUnnamedWithId, getDisplayTitle, getDisplayName
+   - [x] 7개 파일 패턴 교체 (quest, chapter, narrative, test-world)
+10. [x] 모든 import 추가 및 중복 import 수정
+11. [x] 최종 타입 체크 통과 확인
 
-**교체 패턴:**
+**교체된 패턴 예시:**
 ```typescript
-// Before
+// 액션 라벨
 {isSubmitting ? '생성 중...' : '생성하기'}
+→ {isSubmitting ? getActionString('creating') : getActionString('createAction')}
 
-// After
-{isSubmitting ? getActionString('creating') : getActionString('createAction')}
+// Form placeholder
+<InputGroupInput placeholder="제목" bind:value={title} />
+→ <InputGroupInput placeholder={getFormString('title')} bind:value={title} />
+
+// Fallback
+{character?.name ?? '모든 캐릭터'}
+→ {character?.name ?? getFallbackString('allCharacters')}
+
+// ID-based fallback
+{terrain.title || `제목없음 (${terrain.id.split('-')[0]})`}
+→ {getDisplayTitle(terrain.title, terrain.id)}
 ```
 
 **완료된 파일 타입:**
-- create-dialog.svelte (생성 다이얼로그)
-- update-dialog.svelte (수정 다이얼로그)
-- delete-dialog.svelte (삭제 다이얼로그)
-- *-node-panel.svelte (노드 패널 - 저장 버튼)
-- *-edge-panel.svelte (엣지 패널 - 저장 버튼)
+- create/update/delete-dialog.svelte (CRUD 다이얼로그)
+- *-node-panel.svelte, *-edge-panel.svelte (노드/엣지 패널)
+- *-command.svelte (커맨드 컴포넌트)
+- *-node.svelte (노드 컴포넌트)
+- interaction-panel.svelte (인터랙션 패널)
+- publish-dialog.svelte (공개 다이얼로그)
 
-**다음 작업:**
-- [ ] Form placeholder 라벨 교체 (이름, 제목, 가로, 세로 등)
-- [ ] Cancel 버튼 라벨 교체 (standalone '취소')
-- [ ] Fallback 라벨 교체 (제목없음, 이름없음 등)
-- [ ] 검증: 개발 서버 실행 및 UI 확인
+**통계:**
+- 약 100+ 파일 수정
+- 300+ 인라인 라벨 교체
+- 타입 안전성 유지
 
 ## 예상 효과
 

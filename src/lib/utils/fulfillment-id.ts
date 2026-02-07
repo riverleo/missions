@@ -6,10 +6,10 @@ export const FulfillmentIdUtils = {
 	 * @example
 	 * const fulfillment = FulfillmentIdUtils.to(needFulfillment);
 	 */
-	to(data: NeedFulfillment | ConditionFulfillment): Fulfillment {
-		if ('need_id' in data) {
-			return { fulfillmentType: 'need', ...data } as Fulfillment;
+	to(fulfillment: NeedFulfillment | ConditionFulfillment): Fulfillment {
+		if ('need_id' in fulfillment) {
+			return { fulfillmentType: 'need', ...fulfillment } as Fulfillment;
 		}
-		return { fulfillmentType: 'condition', ...data } as Fulfillment;
+		return { fulfillmentType: 'condition', ...fulfillment } as Fulfillment;
 	},
 };

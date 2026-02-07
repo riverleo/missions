@@ -29,7 +29,7 @@
 		NeedBehaviorId,
 	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
-	import { getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
+	import { getFallbackString, getBehaviorInteractTypeLabel } from '$lib/utils/state-label';
 
 	const { scenarioStore } = useScenario();
 	const { chapterStore } = useChapter();
@@ -79,7 +79,7 @@
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
-			const characterName = character ? character.name : '모든 캐릭터';
+			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'character-interactions') {
@@ -92,7 +92,7 @@
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
-			const characterName = character ? character.name : '모든 캐릭터';
+			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'item-interactions') {
@@ -105,7 +105,7 @@
 			const interactionType = (interaction.once_interaction_type ||
 				interaction.fulfill_interaction_type)!;
 			const behaviorLabel = getBehaviorInteractTypeLabel(interactionType);
-			const characterName = character ? character.name : '모든 캐릭터';
+			const characterName = character ? character.name : getFallbackString('allCharacters');
 			return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 		}
 		if (prevSegment === 'conditions') {

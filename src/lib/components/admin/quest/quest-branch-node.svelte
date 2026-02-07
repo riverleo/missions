@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { QuestBranch } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
+	import { getDisplayTitle } from '$lib/utils/state-label';
 
 	type Props = {
 		data: {
@@ -30,7 +31,7 @@
 			class:text-white={questBranch.title}
 			class:text-neutral-500={!questBranch.title}
 		>
-			{questBranch.title || `제목없음 (${questBranch.id.split('-')[0]})`}
+			{getDisplayTitle(questBranch.title, questBranch.id)}
 		</div>
 		{#if data.position}
 			<span class="text-xs text-muted-foreground">{data.position}</span>

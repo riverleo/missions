@@ -27,7 +27,7 @@
 		SystemInteractionType,
 		ScenarioId,
 	} from '$lib/types';
-	import { getActionString } from '$lib/utils/state-label';
+	import { getFallbackString, getActionString } from '$lib/utils/state-label';
 
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
@@ -53,7 +53,7 @@
 	const selectedBuilding = $derived(buildings.find((b) => b.id === buildingId));
 	const selectedBuildingName = $derived(selectedBuilding?.name ?? '건물 선택');
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? '모두');
+	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
 	const selectedInteractionLabel = $derived(
 		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '사용'
 	);

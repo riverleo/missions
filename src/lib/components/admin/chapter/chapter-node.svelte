@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Chapter } from '$lib/types';
 	import { Handle, Position, useNodeConnections } from '@xyflow/svelte';
+	import { getDisplayTitle } from '$lib/utils/state-label';
 
 	type Props = {
 		data: {
@@ -31,7 +32,7 @@
 			class:text-neutral-500={!chapter.title}
 			class:text-white={chapter.status !== 'published' && chapter.title}
 		>
-			{chapter.title || `제목없음 (${chapter.id.split('-')[0]})`}
+			{getDisplayTitle(chapter.title, chapter.id)}
 		</div>
 		<span
 			class="text-xs"
