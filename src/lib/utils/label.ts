@@ -17,6 +17,7 @@ import type {
 	Label,
 } from '$lib/types';
 import { josa } from './josa';
+import { useCharacter, useBuilding, useItem, useInteraction } from '$lib/hooks';
 
 // ============================================================
 // Common Labels
@@ -279,35 +280,40 @@ export function getTileStateString(state: TileStateType): string {
 }
 
 // Behavior 라벨 생성 함수들
-export function getNeedBehaviorString(params: {
-	behavior: NeedBehavior;
-	needName?: string;
-	characterName?: string;
-}): string {
-	const { behavior, needName, characterName } = params;
+export function getNeedBehaviorString(behavior: NeedBehavior): string {
+	const { getNeed, getCharacter } = useCharacter();
 	const name = getUnnamedWithId(behavior.id);
-	const char = characterName ?? getFallbackString('allCharacters');
-	const need = needName ?? '욕구';
-	return `${behavior.name || name} - ${char} (${need} ${behavior.need_threshold} 이하)`;
+	const need = behavior.need_id ? getNeed(behavior.need_id).name : '욕구';
+	const character = behavior.character_id
+		? getCharacter(behavior.character_id).name
+		: getFallbackString('allCharacters');
+	return `${behavior.name || name} - ${character} (${need} ${behavior.need_threshold} 이하)`;
 }
 
 // Behavior Action 라벨 생성
-export function getBehaviorActionString(params: {
-	action: NeedBehaviorAction | ConditionBehaviorAction;
-	buildingName?: string;
-	itemName?: string;
-}): string {
-	const { action, buildingName, itemName } = params;
+export function getBehaviorActionString(
+	action: NeedBehaviorAction | ConditionBehaviorAction
+): string {
+	const { getBuilding } = useBuilding();
+	const { getItem } = useItem();
+	const { getCharacter } = useCharacter();
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
+		useInteraction();
 
 	// target 결정
 	let target: string | undefined;
 	if (action.target_selection_method === 'search') {
 		target = '새로운 탐색 대상';
 	} else if (action.target_selection_method === 'explicit') {
-		if (buildingName) {
-			target = buildingName;
-		} else if (itemName) {
-			target = itemName;
+		if (action.building_interaction_id) {
+			const interaction = getBuildingInteraction(action.building_interaction_id);
+			if (interaction) target = getBuilding(interaction.building_id).name;
+		} else if (action.item_interaction_id) {
+			const interaction = getItemInteraction(action.item_interaction_id);
+			if (interaction) target = getItem(interaction.item_id).name;
+		} else if (action.character_interaction_id) {
+			const interaction = getCharacterInteraction(action.character_interaction_id);
+			if (interaction) target = getCharacter(interaction.target_character_id).name;
 		}
 	}
 

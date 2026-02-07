@@ -51,14 +51,7 @@
 			{#each behaviorsGroupedByNeed() as { need, behaviors } (need.id)}
 				<CommandGroup heading={need.name}>
 					{#each behaviors as behavior (behavior.id)}
-						{@const character = behavior.character_id
-							? $characterStore.data[behavior.character_id as CharacterId]
-							: undefined}
-						{@const label = getNeedBehaviorString({
-							behavior,
-							needName: need.name,
-							characterName: character?.name,
-						})}
+						{@const label = getNeedBehaviorString(behavior)}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/need-behaviors/${behavior.id}`}
 							class="group pr-1"

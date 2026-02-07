@@ -57,11 +57,7 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return getNeedBehaviorString({
-				behavior,
-				needName: need?.name,
-				characterName: character?.name,
-			});
+			return getNeedBehaviorString(behavior);
 		} else if (priority.condition_behavior_id) {
 			const behavior = $conditionBehaviorStore.data[priority.condition_behavior_id];
 			if (!behavior) return null;

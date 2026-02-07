@@ -85,31 +85,7 @@
 			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
 			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
 
-			if (!action) return undefined;
-
-			// Get names from interactions
-			let buildingName: string | undefined;
-			let itemName: string | undefined;
-
-			if (action.building_interaction_id) {
-				const interaction = $buildingInteractionStore.data[action.building_interaction_id];
-				if (interaction) {
-					buildingName = $buildingStore.data[interaction.building_id]?.name;
-				}
-			}
-
-			if (action.item_interaction_id) {
-				const interaction = $itemInteractionStore.data[action.item_interaction_id];
-				if (interaction) {
-					itemName = $itemStore.data[interaction.item_id]?.name;
-				}
-			}
-
-			const actionLabel = getBehaviorActionString({
-				action,
-				buildingName,
-				itemName,
-			});
+			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
 
 			return {
 				type: 'need' as const,
@@ -124,31 +100,7 @@
 			const action =
 				$conditionBehaviorActionStore.data[behaviorActionId as ConditionBehaviorActionId];
 
-			if (!action) return undefined;
-
-			// Get names from interactions
-			let buildingName: string | undefined;
-			let itemName: string | undefined;
-
-			if (action.building_interaction_id) {
-				const interaction = $buildingInteractionStore.data[action.building_interaction_id];
-				if (interaction) {
-					buildingName = $buildingStore.data[interaction.building_id]?.name;
-				}
-			}
-
-			if (action.item_interaction_id) {
-				const interaction = $itemInteractionStore.data[action.item_interaction_id];
-				if (interaction) {
-					itemName = $itemStore.data[interaction.item_id]?.name;
-				}
-			}
-
-			const actionLabel = getBehaviorActionString({
-				action,
-				buildingName,
-				itemName,
-			});
+			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
 
 			return {
 				type: 'condition' as const,

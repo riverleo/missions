@@ -33,11 +33,7 @@
 			? $characterStore.data[behavior.character_id as CharacterId]
 			: undefined;
 
-		return getNeedBehaviorString({
-			behavior,
-			needName: need?.name,
-			characterName: character?.name,
-		});
+		return getNeedBehaviorString(behavior);
 	});
 
 	const searchValue = $derived(label());
