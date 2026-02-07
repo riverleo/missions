@@ -11,7 +11,7 @@
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
 	import type { NeedBehavior, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/label';
+	import { getNeedBehaviorString } from '$lib/utils/label';
 
 	interface Props {
 		behavior: NeedBehavior;
@@ -33,24 +33,21 @@
 			? $characterStore.data[behavior.character_id as CharacterId]
 			: undefined;
 
-		return getNeedBehaviorLabel({
+		return getNeedBehaviorString({
 			behavior,
 			needName: need?.name,
 			characterName: character?.name,
 		});
 	});
 
-	const searchValue = $derived(`${label().title} ${label().description}`);
+	const searchValue = $derived(label());
 	const shortId = $derived(behavior.id.split('-')[0]);
 </script>
 
 {#if href}
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">{label().title}</span>
-			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
-		</div>
+						<span class="flex-1 truncate">{label()}</span>
 		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>
@@ -85,10 +82,7 @@
 {:else}
 	<CommandItem value={searchValue} {onclick} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-		<div class="flex flex-1 flex-col truncate">
-			<span class="truncate">{label().title}</span>
-			<span class="truncate text-xs text-muted-foreground">{label().description}</span>
-		</div>
+						<span class="flex-1 truncate">{label()}</span>
 		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>

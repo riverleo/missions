@@ -10,7 +10,11 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
 	import type { BehaviorPriority, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/label';
+	import {
+		getNeedBehaviorString,
+		getFallbackString,
+		getUnnamedWithId,
+	} from '$lib/utils/label';
 
 	interface Props {
 		priority: BehaviorPriority;
@@ -53,7 +57,7 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			return getNeedBehaviorLabel({
+			return getNeedBehaviorString({
 				behavior,
 				needName: need?.name,
 				characterName: character?.name,
@@ -69,14 +73,10 @@
 				? $characterStore.data[behavior.character_id as CharacterId]
 				: undefined;
 
-			const parts = [];
-			if (character) parts.push(character.name);
-			if (condition) parts.push(`${condition.name} ${behavior.condition_threshold} 이하`);
-
-			return {
-				title: behavior.name,
-				description: parts.join(' · '),
-			};
+			const name = getUnnamedWithId(behavior.id);
+			const char = character?.name ?? getFallbackString('allCharacters');
+			const cond = condition?.name ?? '컨디션';
+			return `${behavior.name || name} - ${char} (${cond} ${behavior.condition_threshold} 이하)`;
 		}
 
 		return null;
@@ -95,11 +95,8 @@
 				{behaviorTypeLabel}
 			</Badge>
 		{/if}
-		<span class="truncate">
-			{behaviorInfo?.title}
-		</span>
-		<span class="truncate text-xs text-muted-foreground">
-			{behaviorInfo?.description}
+		<span class="flex-1 truncate">
+			{behaviorInfo}
 		</span>
 		<div class="ml-auto flex items-center gap-1">
 			<Button variant="ghost" size="icon" class="size-6" onclick={onmoveup} disabled={isFirst}>

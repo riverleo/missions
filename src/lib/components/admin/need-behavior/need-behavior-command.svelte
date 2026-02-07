@@ -20,7 +20,7 @@
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getNeedBehaviorLabel } from '$lib/utils/label';
+	import { getNeedBehaviorString } from '$lib/utils/label';
 
 	const { needBehaviorStore, openNeedBehaviorDialog } = useBehavior();
 	const { needStore } = useCharacter();
@@ -54,7 +54,7 @@
 						{@const character = behavior.character_id
 							? $characterStore.data[behavior.character_id as CharacterId]
 							: undefined}
-						{@const label = getNeedBehaviorLabel({
+						{@const label = getNeedBehaviorString({
 							behavior,
 							needName: need.name,
 							characterName: character?.name,
@@ -69,10 +69,7 @@
 									behavior.id === currentBehaviorId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
-							<div class="flex flex-1 flex-col truncate">
-								<span class="truncate">{label.title}</span>
-								<span class="truncate text-xs text-muted-foreground">{label.description}</span>
-							</div>
+						<span class="flex-1 truncate">{label}</span>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}

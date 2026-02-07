@@ -279,29 +279,16 @@ export function getTileStateString(state: TileStateType): string {
 }
 
 // Behavior 라벨 생성 함수들
-export function getNeedBehaviorLabel(params: {
+export function getNeedBehaviorString(params: {
 	behavior: NeedBehavior;
 	needName?: string;
 	characterName?: string;
-}): { title: string; description: string } {
+}): string {
 	const { behavior, needName, characterName } = params;
-	return {
-		title: behavior.name || `이름없음 (${behavior.id.split('-')[0]})`,
-		description: `${characterName ?? '모든 캐릭터'} (${needName ?? '욕구'} ${behavior.need_threshold} 이하)`,
-	};
-}
-
-export function getConditionBehaviorLabel(params: {
-	behavior: ConditionBehavior;
-	buildingName?: string;
-	conditionName?: string;
-	characterName?: string;
-}): { title: string; description: string } {
-	const { behavior, buildingName, conditionName, characterName } = params;
-	return {
-		title: `${buildingName ?? '건물'} 행동`,
-		description: `${characterName ?? '모든 캐릭터'} (${conditionName ?? '컨디션'} ${behavior.condition_threshold} 이하)`,
-	};
+	const name = getUnnamedWithId(behavior.id);
+	const char = characterName ?? getFallbackString('allCharacters');
+	const need = needName ?? '욕구';
+	return `${behavior.name || name} - ${char} (${need} ${behavior.need_threshold} 이하)`;
 }
 
 // Behavior Action 라벨 생성
