@@ -360,7 +360,7 @@ export function getBehaviorActionString(
 // Interaction Helper Functions
 // ============================================================
 
-export function getInteractionTargetName(
+export function getInteractionTargetNameString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string | undefined {
 	const { getBuilding } = useBuilding();
@@ -393,7 +393,7 @@ export function getInteractionTargetName(
 	return undefined;
 }
 
-export function getInteractionBehaviorLabel(
+export function getInteractionBehaviorLabelString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string | undefined {
 	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
@@ -429,7 +429,7 @@ export function getInteractionBehaviorLabel(
 	return undefined;
 }
 
-export function getTargetSelectionMethodLabel(
+export function getTargetSelectionMethodLabelString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string {
 	if (!action.target_selection_method) return '타깃 결정 방법';
@@ -487,7 +487,7 @@ export function getTargetSelectionMethodLabel(
 	return '타깃 결정 방법';
 }
 
-export function getInteractionActionSummary(
+export function getInteractionActionSummaryString(
 	action: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction
 ): string {
 	const duration = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
