@@ -15,6 +15,10 @@ import type {
 	BehaviorInteractionType,
 	InteractionType,
 	Label,
+	BehaviorActionType,
+	BuildingInteractionAction,
+	ItemInteractionAction,
+	CharacterInteractionAction,
 } from '$lib/types';
 import { josa } from './josa';
 import { useCharacter, useBuilding, useItem, useInteraction } from '$lib/hooks';
@@ -73,6 +77,7 @@ const DOMAIN_LABELS = {
 	behavior: '행동',
 	interaction: '인터랙션',
 	world: '월드',
+	task: '할 일',
 } as const;
 
 const FALLBACK_LABELS = {
@@ -279,6 +284,25 @@ export function getTileStateString(state: TileStateType): string {
 	return TILE_STATE_LABELS[state];
 }
 
+const BEHAVIOR_ACTION_TYPE_LABELS: Record<BehaviorActionType, string> = {
+	once: '한번 실행',
+	fulfill: '반복 실행',
+	idle: '대기',
+};
+
+export function getBehaviorActionTypeString(type: BehaviorActionType): string {
+	return BEHAVIOR_ACTION_TYPE_LABELS[type];
+}
+
+const NEED_FULFILLMENT_TASK_CONDITION_LABELS: Record<string, string> = {
+	completed: '완료',
+	created: '생성',
+};
+
+export function getNeedFulfillmentTaskConditionString(condition: string): string {
+	return NEED_FULFILLMENT_TASK_CONDITION_LABELS[condition] ?? condition;
+}
+
 // Behavior 라벨 생성 함수들
 export function getNeedBehaviorString(behavior: NeedBehavior): string {
 	const { getNeed, getCharacter } = useCharacter();
@@ -330,4 +354,145 @@ export function getBehaviorActionString(
 	}
 
 	return action.type;
+}
+
+// ============================================================
+// Interaction Helper Functions
+// ============================================================
+
+export function getInteractionTargetName(
+	action: NeedBehaviorAction | ConditionBehaviorAction
+): string | undefined {
+	const { getBuilding } = useBuilding();
+	const { getItem } = useItem();
+	const { getCharacter } = useCharacter();
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
+		useInteraction();
+
+	if (action.building_interaction_id) {
+		const interaction = getBuildingInteraction(action.building_interaction_id);
+		if (!interaction) return undefined;
+		const building = getBuilding(interaction.building_id);
+		return `"${building.name ?? '건물'}" 건물`;
+	}
+
+	if (action.item_interaction_id) {
+		const interaction = getItemInteraction(action.item_interaction_id);
+		if (!interaction) return undefined;
+		const item = getItem(interaction.item_id);
+		return `"${item.name ?? '아이템'}" 아이템`;
+	}
+
+	if (action.character_interaction_id) {
+		const interaction = getCharacterInteraction(action.character_interaction_id);
+		if (!interaction) return undefined;
+		const character = getCharacter(interaction.target_character_id);
+		return `"${character.name ?? '캐릭터'}" 캐릭터`;
+	}
+
+	return undefined;
+}
+
+export function getInteractionBehaviorLabel(
+	action: NeedBehaviorAction | ConditionBehaviorAction
+): string | undefined {
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
+		useInteraction();
+
+	if (action.building_interaction_id) {
+		const interaction = getBuildingInteraction(action.building_interaction_id);
+		if (!interaction) return undefined;
+		const interactionType =
+			interaction.once_interaction_type || interaction.fulfill_interaction_type;
+		if (!interactionType) return undefined;
+		return getBehaviorInteractTypeString(interactionType);
+	}
+
+	if (action.item_interaction_id) {
+		const interaction = getItemInteraction(action.item_interaction_id);
+		if (!interaction) return undefined;
+		const interactionType =
+			interaction.once_interaction_type || interaction.fulfill_interaction_type;
+		if (!interactionType) return undefined;
+		return getBehaviorInteractTypeString(interactionType);
+	}
+
+	if (action.character_interaction_id) {
+		const interaction = getCharacterInteraction(action.character_interaction_id);
+		if (!interaction) return undefined;
+		const interactionType =
+			interaction.once_interaction_type || interaction.fulfill_interaction_type;
+		if (!interactionType) return undefined;
+		return getBehaviorInteractTypeString(interactionType);
+	}
+
+	return undefined;
+}
+
+export function getTargetSelectionMethodLabel(
+	action: NeedBehaviorAction | ConditionBehaviorAction
+): string {
+	if (!action.target_selection_method) return '타깃 결정 방법';
+
+	if (action.target_selection_method === 'search') {
+		return '새로운 탐색 대상';
+	}
+
+	if (action.target_selection_method === 'explicit') {
+		const { getBuilding } = useBuilding();
+		const { getItem } = useItem();
+		const { getCharacter } = useCharacter();
+		const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
+			useInteraction();
+
+		if (action.building_interaction_id) {
+			const interaction = getBuildingInteraction(action.building_interaction_id);
+			if (interaction) {
+				const building = getBuilding(interaction.building_id);
+				const interactionType =
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
+				if (interactionType) {
+					return `${building.name ?? '건물'} - ${getBehaviorInteractTypeString(interactionType)}`;
+				}
+			}
+		}
+
+		if (action.item_interaction_id) {
+			const interaction = getItemInteraction(action.item_interaction_id);
+			if (interaction) {
+				const item = getItem(interaction.item_id);
+				const interactionType =
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
+				if (interactionType) {
+					return `${item.name ?? '아이템'} - ${getBehaviorInteractTypeString(interactionType)}`;
+				}
+			}
+		}
+
+		if (action.character_interaction_id) {
+			const interaction = getCharacterInteraction(action.character_interaction_id);
+			if (interaction) {
+				const character = getCharacter(interaction.target_character_id);
+				const interactionType =
+					interaction.once_interaction_type || interaction.fulfill_interaction_type;
+				if (interactionType) {
+					return `${character.name ?? '캐릭터'} - ${getBehaviorInteractTypeString(interactionType)}`;
+				}
+			}
+		}
+
+		return '지정된 대상';
+	}
+
+	return '타깃 결정 방법';
+}
+
+export function getInteractionActionSummary(
+	action: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction
+): string {
+	const duration = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
+	const face = `"${getCharacterFaceStateString(action.character_face_state_type)}" 표정으로 `;
+	const body = `"${getCharacterBodyStateString(action.character_body_state_type)}"`;
+
+	return `${duration}${face}${body}`;
 }
