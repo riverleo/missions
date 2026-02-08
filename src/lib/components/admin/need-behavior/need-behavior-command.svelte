@@ -19,12 +19,11 @@
 	import { cn } from '$lib/utils';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId, CharacterId } from '$lib/types';
+	import type { ScenarioId } from '$lib/types';
 	import { getNeedBehaviorString } from '$lib/utils/label';
 
 	const { needBehaviorStore, openNeedBehaviorDialog } = useBehavior();
 	const { needStore } = useCharacter();
-	const { characterStore } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -62,7 +61,7 @@
 									behavior.id === currentBehaviorId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
-						<span class="flex-1 truncate">{label}</span>
+							<span class="flex-1 truncate">{label}</span>
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}

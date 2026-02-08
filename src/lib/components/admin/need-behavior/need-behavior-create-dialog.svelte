@@ -33,8 +33,7 @@
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const { needStore } = useCharacter();
-	const { characterStore } = useCharacter();
+	const { needStore, characterStore } = useCharacter();
 
 	const open = $derived($needBehaviorDialogStore?.type === 'create');
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
@@ -129,7 +128,7 @@
 							<IconHeading />
 						</InputGroupText>
 					</InputGroupAddon>
-					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
+					<InputGroupInput placeholder={getFormString('name')} bind:value={name} />
 				</InputGroup>
 				<InputGroup>
 					<InputGroupAddon align="inline-start">

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useCharacter } from '$lib/hooks';
+	import { useBehavior } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { CommandLinkItem, CommandItem, CommandShortcut } from '$lib/components/ui/command';
 	import {
@@ -10,7 +10,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import type { NeedBehavior, CharacterId } from '$lib/types';
+	import type { NeedBehavior } from '$lib/types';
 	import { getNeedBehaviorString } from '$lib/utils/label';
 
 	interface Props {
@@ -24,26 +24,16 @@
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
 	const { openNeedBehaviorDialog } = useBehavior();
-	const { needStore } = useCharacter();
-	const { characterStore } = useCharacter();
 
-	const label = $derived(() => {
-		const need = behavior.need_id ? $needStore.data[behavior.need_id] : undefined;
-		const character = behavior.character_id
-			? $characterStore.data[behavior.character_id as CharacterId]
-			: undefined;
-
-		return getNeedBehaviorString(behavior);
-	});
-
-	const searchValue = $derived(label());
+	const label = $derived(getNeedBehaviorString(behavior));
+	const searchValue = $derived(label);
 	const shortId = $derived(behavior.id.split('-')[0]);
 </script>
 
 {#if href}
 	<CommandLinkItem {href} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-						<span class="flex-1 truncate">{label()}</span>
+		<span class="flex-1 truncate">{label}</span>
 		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>
@@ -78,7 +68,7 @@
 {:else}
 	<CommandItem value={searchValue} {onclick} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
-						<span class="flex-1 truncate">{label()}</span>
+		<span class="flex-1 truncate">{label}</span>
 		<CommandShortcut>{shortId}</CommandShortcut>
 		{#if showActions}
 			<DropdownMenu>
