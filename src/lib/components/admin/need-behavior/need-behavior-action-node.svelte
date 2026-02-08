@@ -9,7 +9,10 @@
 	import { Handle, Position } from '@xyflow/svelte';
 	import { IconCircleDashedNumber1 } from '@tabler/icons-svelte';
 	import { josa } from '$lib/utils/josa';
-	import { getBehaviorInteractTypeString } from '$lib/utils/label';
+	import {
+		getInteractionTargetNameString,
+		getInteractionBehaviorLabelString,
+	} from '$lib/utils/label';
 
 	interface Props {
 		data: {
@@ -29,45 +32,9 @@
 	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
 		useInteraction();
 
-	const interactionInfo = $derived(() => {
-		if (action.building_interaction_id) {
-			const interaction = $buildingInteractionStore.data[action.building_interaction_id];
-			if (!interaction) return undefined;
-			const building = $buildingStore.data[interaction.building_id];
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			return {
-				target: `"${building?.name ?? '건물'}" 건물`,
-				behaviorLabel: getBehaviorInteractTypeString(interactionType),
-			};
-		}
-		if (action.item_interaction_id) {
-			const interaction = $itemInteractionStore.data[action.item_interaction_id];
-			if (!interaction) return undefined;
-			const item = $itemStore.data[interaction.item_id];
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			return {
-				target: `"${item?.name ?? '아이템'}" 아이템`,
-				behaviorLabel: getBehaviorInteractTypeString(interactionType),
-			};
-		}
-		if (action.character_interaction_id) {
-			const interaction = $characterInteractionStore.data[action.character_interaction_id];
-			if (!interaction) return undefined;
-			const character = $characterStore.data[interaction.target_character_id];
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			return {
-				target: `"${character?.name ?? '캐릭터'}" 캐릭터`,
-				behaviorLabel: getBehaviorInteractTypeString(interactionType),
-			};
-		}
-		return undefined;
-	});
-
-	const targetLabel = $derived(() => {
-		if (interactionInfo()) return interactionInfo()?.target;
+	const targetLabel = $derived.by(() => {
+		const target = getInteractionTargetNameString(action);
+		if (target) return target;
 		// 명시적 대상이 없을 때 target_selection_method에 따라 레이블 생성
 		if (action.target_selection_method === 'search') {
 			return '새로운 탐색 대상';
@@ -75,13 +42,11 @@
 		return undefined;
 	});
 
-	const behaviorTypeLabel = $derived(() => {
-		return interactionInfo()?.behaviorLabel;
-	});
+	const behaviorTypeLabel = $derived(getInteractionBehaviorLabelString(action));
 
-	const typeLabel = $derived(() => {
-		const target = targetLabel();
-		const behaviorLabel = behaviorTypeLabel();
+	const typeLabel = $derived.by(() => {
+		const target = targetLabel;
+		const behaviorLabel = behaviorTypeLabel;
 
 		if (action.type === 'once') {
 			if (behaviorLabel && target) {
@@ -154,7 +119,7 @@
 			{#if action.root}
 				<IconCircleDashedNumber1 class="size-3.5" />
 			{/if}
-			{typeLabel()}
+			{typeLabel}
 		</div>
 	</div>
 
