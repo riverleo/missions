@@ -26,7 +26,6 @@
 	const { openNeedBehaviorDialog } = useBehavior();
 
 	const label = $derived(getNeedBehaviorString(behavior));
-	const searchValue = $derived(label);
 	const shortId = $derived(behavior.id.split('-')[0]);
 </script>
 
@@ -66,7 +65,7 @@
 		{/if}
 	</CommandLinkItem>
 {:else}
-	<CommandItem value={searchValue} {onclick} class="group pr-1">
+	<CommandItem value={label} {onclick} class="group pr-1">
 		<IconCheck class={cn('mr-2 size-4', isSelected ? 'opacity-100' : 'opacity-0')} />
 		<span class="flex-1 truncate">{label}</span>
 		<CommandShortcut>{shortId}</CommandShortcut>

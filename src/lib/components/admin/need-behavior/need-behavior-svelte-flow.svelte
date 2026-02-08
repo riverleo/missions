@@ -9,14 +9,13 @@
 		MiniMap,
 		useNodes,
 		useNodesInitialized,
-		useEdges,
 		useSvelteFlow,
 	} from '@xyflow/svelte';
 	import type { Node, Edge, Connection, OnConnectEnd } from '@xyflow/svelte';
 	import { mode } from 'mode-watcher';
 	import { tick, untrack } from 'svelte';
 	import { page } from '$app/state';
-	import { createActionNodeId, parseActionNodeId, isActionNextEdgeId } from '$lib/utils/flow-id';
+	import { createActionNodeId, parseActionNodeId } from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import NeedBehaviorActionNode from './need-behavior-action-node.svelte';
 	import NeedBehaviorActionPanel from './need-behavior-action-panel.svelte';
@@ -31,12 +30,13 @@
 	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
 	const actions = $derived(
 		needBehaviorId
-			? Object.values($needBehaviorActionStore.data).filter((a) => a.need_behavior_id === needBehaviorId)
+			? Object.values($needBehaviorActionStore.data).filter(
+					(a) => a.need_behavior_id === needBehaviorId
+				)
 			: []
 	);
 
 	const flowNodes = useNodes();
-	const flowEdges = useEdges();
 	const nodesInitialized = useNodesInitialized();
 	const { screenToFlowPosition } = useSvelteFlow();
 
