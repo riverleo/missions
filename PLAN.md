@@ -547,11 +547,154 @@ export function getActionLabels() {
 ## Phase 0: 체계적인 라벨 발견 및 이동 계획
 
 ### 전략
-1. **발견**: components/admin/** 모든 파일 순회하여 라벨 패턴 수집
-2. **분류**: 중복/신규 라벨 구분
+1. **발견**: components/admin/** 모든 파일 순회하여 라벨 패턴 수집 ✅
+2. **분류**: 중복/신규 라벨 구분 (진행중)
 3. **이동**: utils/label.ts에 함수 추가
 4. **교체**: 컴포넌트에서 label.ts 함수 사용
 5. **검증**: 타입 체크 및 동작 확인
+
+### 발견 결과 (Phase 1 완료)
+
+**패턴 1: Character State Labels (중복)**
+- 위치: 12개 파일
+  - building-interaction-action-node.svelte (body, face)
+  - building-interaction-panel.svelte (body, face)
+  - item-interaction-action-node.svelte (body, face)
+  - item-interaction-panel.svelte (body, face)
+  - character-interaction-action-node.svelte (body, face)
+  - character-interaction-panel.svelte (body, face)
+- 문제: `getCharacterBodyStateString`, `getCharacterFaceStateString` 이미 존재하는데 중복 정의
+- 해결: 기존 함수 사용
+
+**패턴 2: BehaviorActionType Labels (신규)**
+- 위치: 2개 파일
+  - need-behavior-action-node-panel.svelte
+  - condition-behavior-action-node-panel.svelte
+- 라벨:
+  - 'once' → '한번 실행'
+  - 'fulfill' → '반복 실행'
+  - 'idle' → '대기'
+- 해결: `getBehaviorActionTypeString(type)` 추가
+
+**패턴 3: Target Selection Method Labels (신규)**
+- 위치: 2개 파일
+  - need-behavior-action-node-panel.svelte (selectedTargetMethodLabel)
+  - condition-behavior-action-node-panel.svelte (selectedTargetMethodLabel)
+- 로직:
+  - 'search' → '새로운 탐색 대상'
+  - 'explicit' + building → '건물명 - 인터랙션타입'
+  - 'explicit' + item → '아이템명 - 인터랙션타입'
+  - 'explicit' + character → '캐릭터명 - 인터랙션타입'
+  - 'explicit' (no specific) → '지정된 대상'
+  - undefined → '타깃 결정 방법'
+- 해결: `getTargetSelectionMethodLabel(action)` 추가
+
+**패턴 4: Fulfillment Type Labels (신규)**
+- 위치: 2개 파일
+  - need-fulfillment-node-panel.svelte
+  - condition-fulfillment-node-panel.svelte
+- 라벨:
+  - 'building' → '건물'
+  - 'character' → '캐릭터'
+  - 'item' → '아이템'
+  - 'task' → '할 일'
+- 문제: DOMAIN_LABELS와 중복 ('building', 'character', 'item')
+- 해결: `getDomainString()` 사용 + 'task' 라벨 추가
+
+**패턴 5: Task Condition Labels (신규)**
+- 위치: 2개 파일
+  - need-fulfillment-node-panel.svelte
+  - condition-fulfillment-node-panel.svelte
+- 라벨:
+  - 'completed' → '완료'
+  - 'created' → '생성'
+- 해결: `getNeedFulfillmentTaskConditionString(condition)` 추가
+
+**패턴 6: Interaction Info (객체 반환 → 분리 필요)**
+- 위치: 2개 파일
+  - need-behavior-action-node.svelte
+  - condition-behavior-action-node.svelte
+- 현재: `interactionInfo = $derived(() => { target, behaviorLabel })`
+- 해결:
+  - `getInteractionTargetName(action): string | undefined`
+  - `getInteractionBehaviorLabel(action): string | undefined`
+
+**패턴 7: Action Summary (복합 라벨)**
+- 위치: 3개 파일
+  - building-interaction-action-node.svelte
+  - item-interaction-action-node.svelte
+  - character-interaction-action-node.svelte
+- 현재: `summary = $derived(() => "${duration}${face}${body}")`
+- 내부에서 bodyStateLabel, faceStateLabel 중복 정의
+- 해결: `getInteractionActionSummary(action): string`
+
+### 파일별 작업 목록
+
+**그룹 1: interaction-action-node (중복 state labels + summary) - 3개**
+- [ ] `building-interaction-action-node.svelte`
+  - bodyStateLabel → `getCharacterBodyStateString()`
+  - faceStateLabel → `getCharacterFaceStateString()`
+  - summary → `getInteractionActionSummary()`
+
+- [ ] `item-interaction-action-node.svelte`
+  - bodyStateLabel → `getCharacterBodyStateString()`
+  - faceStateLabel → `getCharacterFaceStateString()`
+  - summary → `getInteractionActionSummary()`
+
+- [ ] `character-interaction-action-node.svelte`
+  - bodyStateLabel → `getCharacterBodyStateString()`
+  - faceStateLabel → `getCharacterFaceStateString()`
+  - summary → `getInteractionActionSummary()`
+
+**그룹 2: behavior-action-node (interactionInfo 분리) - 2개**
+- [ ] `need-behavior-action-node.svelte`
+  - interactionInfo → getInteractionTargetName() + getInteractionBehaviorLabel()
+
+- [ ] `condition-behavior-action-node.svelte`
+  - interactionInfo → getInteractionTargetName() + getInteractionBehaviorLabel()
+
+**그룹 3: behavior-action-node-panel (actionType + targetMethod) - 2개**
+- [ ] `need-behavior-action-node-panel.svelte`
+  - actionTypes → `getBehaviorActionTypeString()`
+  - selectedTypeLabel → 단순화
+  - selectedTargetMethodLabel → `getTargetSelectionMethodLabel()`
+
+- [ ] `condition-behavior-action-node-panel.svelte`
+  - actionTypes → `getBehaviorActionTypeString()`
+  - selectedTypeLabel → 단순화
+  - selectedTargetMethodLabel → `getTargetSelectionMethodLabel()`
+
+**그룹 4: fulfillment-node-panel (fulfillmentType + taskCondition) - 2개**
+- [ ] `need-fulfillment-node-panel.svelte`
+  - fulfillmentTypeOptions → `getDomainString()` + task 추가
+  - taskConditionOptions → `getNeedFulfillmentTaskConditionString()`
+
+- [ ] `condition-fulfillment-node-panel.svelte`
+  - fulfillmentTypeOptions → `getDomainString()` + task 추가
+  - taskConditionOptions → `getConditionFulfillmentTaskConditionString()`
+
+**그룹 5: interaction-panel (중복 state labels) - 3개**
+- [ ] `building-interaction-panel.svelte`
+- [ ] `item-interaction-panel.svelte`
+- [ ] `character-interaction-panel.svelte`
+
+### 우선순위별 작업 순서
+
+**Phase 2A: label.ts에 함수 추가**
+1. [ ] `getBehaviorActionTypeString(type: BehaviorActionType): string`
+2. [ ] `getTargetSelectionMethodLabel(action: BehaviorAction): string`
+3. [ ] `getInteractionTargetName(action: BehaviorAction): string | undefined`
+4. [ ] `getInteractionBehaviorLabel(action: BehaviorAction): string | undefined`
+5. [ ] `getInteractionActionSummary(action: InteractionAction): string`
+6. [ ] `getNeedFulfillmentTaskConditionString(condition: string): string`
+7. [ ] DOMAIN_LABELS에 'task' 추가
+
+**Phase 2B: 컴포넌트 교체 (총 12개 파일)**
+1. [ ] 그룹 1: interaction-action-node (3개)
+2. [ ] 그룹 2: behavior-action-node (2개)
+3. [ ] 그룹 3: behavior-action-node-panel (2개)
+4. [ ] 그룹 4: fulfillment-node-panel (2개)
+5. [ ] 그룹 5: interaction-panel (3개)
 
 ### Step 1: 라벨 패턴 검색
 
@@ -712,34 +855,36 @@ grep -r "? '.*' :" src/lib/components/admin/ | grep -E "(라벨|Label)"
 4. **가독성**: 컴포넌트 코드가 간결해짐
 5. **재사용성**: 라벨 함수를 다른 곳에서도 사용 가능
 
-## 1단계: $derived.by 변환
+## Phase 2C: $derived 패턴 개선
 
-### 변환 대상 패턴
-`$derived(() => { ... })` 형태에서 함수 바디에 여러 statement가 있는 경우
+### 패턴 1: $derived.by 변환
+`$derived(() => { ... })` → `$derived.by(() => { ... })`
 
-**Before:**
-```svelte
-const value = $derived(() => {
-  if (condition) return 'A';
-  return 'B';
-});
-```
+**적용 파일:**
+- need-behavior-action-node-panel.svelte (selectedTargetMethodLabel)
+- condition-behavior-action-node-panel.svelte (selectedTargetMethodLabel)
 
-**After:**
-```svelte
-const value = $derived.by(() => {
-  if (condition) return 'A';
-  return 'B';
-});
-```
+### 패턴 2: 객체 반환 제거
+`interactionInfo = $derived(() => { return { target, label } })` → 개별 derived
 
-### 작업 순서
-1. [ ] `$derived(() => {` 패턴 검색
-2. [ ] 각 파일 검토하여 함수 바디가 있는 경우 `$derived.by` 변환
-3. [ ] 단순 표현식 (한 줄)은 `$derived(expression)` 유지
-4. [ ] 타입 체크 확인
+**적용 파일:**
+- need-behavior-action-node.svelte
+- condition-behavior-action-node.svelte
 
-## 2단계: 객체 반환 derived를 utils/label.ts 함수로 이동
+### 패턴 3: 함수 반환 제거
+`label = $derived(() => expression)` → `label = $derived(expression)`
+
+**적용 파일:**
+- 모든 interaction-action-node, interaction-panel 파일
+
+## 작업 통계
+
+- **총 파일 수**: 12개
+- **추가할 함수**: 7개
+- **제거할 중복 라벨**: 18개 (body state 6 + face state 6 + 기타 6)
+- **예상 작업 시간**: 2-3시간
+
+## 다음 단계
 
 ### 변환 대상 패턴
 객체를 반환하는 derived 로직을 utils/label.ts의 헬퍼 함수로 추출
