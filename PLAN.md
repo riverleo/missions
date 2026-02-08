@@ -533,3 +533,330 @@ export function getActionLabels() {
 2. **유지보수**: 라벨 변경 시 한 곳만 수정
 3. **재사용성**: 공통 라벨을 여러 곳에서 재사용
 4. **타입 안정성**: 상수로 정의하여 오타 방지
+
+---
+
+# Plan - Derived 패턴 개선 및 라벨 로직 중앙화
+
+## 목표
+
+1. `$derived(() => {...})` → `$derived.by(() => {...})` 변환
+2. 컴포넌트 내 라벨 생성 로직을 utils/label.ts로 이동
+3. 중복된 라벨 정의 제거
+
+## Phase 0: 체계적인 라벨 발견 및 이동 계획
+
+### 전략
+1. **발견**: components/admin/** 모든 파일 순회하여 라벨 패턴 수집
+2. **분류**: 중복/신규 라벨 구분
+3. **이동**: utils/label.ts에 함수 추가
+4. **교체**: 컴포넌트에서 label.ts 함수 사용
+5. **검증**: 타입 체크 및 동작 확인
+
+### Step 1: 라벨 패턴 검색
+
+**검색 대상 파일 패턴:**
+- `*-action-node.svelte`: action 노드 컴포넌트
+- `*-action-node-panel.svelte`: action 패널 컴포넌트
+- `*-node.svelte`: 일반 노드 컴포넌트
+- `*-node-panel.svelte`: 일반 패널 컴포넌트
+- `*-edge.svelte`: 엣지 컴포넌트
+- `*-dialog.svelte`: 다이얼로그 컴포넌트
+- `*-command*.svelte`: 커맨드 컴포넌트
+
+**검색할 패턴:**
+```bash
+# 1. 하드코딩된 라벨 객체
+grep -r "const.*labels.*Record<" src/lib/components/admin/
+
+# 2. derived 라벨
+grep -r "\$derived.*[Ll]abel" src/lib/components/admin/
+
+# 3. 인라인 라벨 매핑
+grep -r "value.*label.*:" src/lib/components/admin/
+
+# 4. 조건부 라벨 생성
+grep -r "? '.*' :" src/lib/components/admin/ | grep -E "(라벨|Label)"
+```
+
+### Step 2: 발견된 라벨 분류 (예시)
+
+**A. 이미 label.ts에 존재 (중복 제거 필요):**
+- [ ] Character body state (idle, walk, run, jump, pick)
+  - 현재: `building/item/character-interaction-action-node.svelte`
+  - 교체: `getCharacterBodyStateString()`
+
+- [ ] Character face state (idle, happy, sad, angry)
+  - 현재: `building/item/character-interaction-action-node.svelte`
+  - 교체: `getCharacterFaceStateString()`
+
+**B. label.ts에 추가 필요:**
+
+1. [ ] **BehaviorActionType labels**
+   ```typescript
+   const BEHAVIOR_ACTION_TYPE_LABELS: Record<BehaviorActionType, string> = {
+     once: '한번 실행',
+     fulfill: '반복 실행',
+     idle: '대기',
+   };
+   export function getBehaviorActionTypeString(type: BehaviorActionType): string;
+   ```
+   - 위치: `need/condition-behavior-action-node-panel.svelte`
+
+2. [ ] **TargetSelectionMethod labels**
+   ```typescript
+   const TARGET_SELECTION_METHOD_LABELS: Record<TargetSelectionMethod, string> = {
+     search: '새로운 탐색 대상',
+     explicit: '지정된 대상',
+   };
+   export function getTargetSelectionMethodString(
+     method: TargetSelectionMethod,
+     action?: BehaviorAction
+   ): string;
+   ```
+   - 위치: `need/condition-behavior-action-node-panel.svelte`
+
+3. [ ] **Interaction target name**
+   ```typescript
+   export function getInteractionTargetName(
+     action: NeedBehaviorAction | ConditionBehaviorAction
+   ): string | undefined;
+   ```
+
+4. [ ] **Interaction with type label** (엔티티명 + 인터랙션 타입)
+   ```typescript
+   export function getInteractionWithTypeLabel(
+     action: NeedBehaviorAction | ConditionBehaviorAction
+   ): string;
+   // 예: "건물 - 건물 사용", "아이템 - 아이템 줍기"
+   ```
+
+5. [ ] **Action summary** (복합 라벨)
+   ```typescript
+   export function getInteractionActionSummary(
+     action: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction
+   ): string;
+   // 예: "5틱 동안 \"행복\" 표정으로 \"걷기\""
+   ```
+
+### Step 3: 파일별 작업 계획
+
+**우선순위 1: action-node 컴포넌트 (6개)**
+- [ ] `building-interaction-action-node.svelte`
+- [ ] `item-interaction-action-node.svelte`
+- [ ] `character-interaction-action-node.svelte`
+- [ ] `need-behavior-action-node.svelte`
+- [ ] `condition-behavior-action-node.svelte`
+
+**우선순위 2: action-panel 컴포넌트 (6개)**
+- [ ] `building-interaction-action-node-panel.svelte`
+- [ ] `item-interaction-action-node-panel.svelte`
+- [ ] `character-interaction-action-node-panel.svelte`
+- [ ] `need-behavior-action-node-panel.svelte`
+- [ ] `condition-behavior-action-node-panel.svelte`
+
+**우선순위 3: 기타 노드/패널 (10개)**
+- [ ] `need-fulfillment-node.svelte` / `need-fulfillment-node-panel.svelte`
+- [ ] `condition-fulfillment-node.svelte` / `condition-fulfillment-node-panel.svelte`
+- [ ] `condition-effect-node.svelte` / `condition-effect-node-panel.svelte`
+- [ ] 기타...
+
+**우선순위 4: dialog, command, edge 컴포넌트 (나머지)**
+
+### Step 4: 작업 흐름
+
+각 파일마다:
+1. 라벨 패턴 식별
+2. 해당 함수가 label.ts에 있는지 확인
+3. 없으면 label.ts에 추가
+4. 컴포넌트에서 함수 호출로 교체
+5. `$derived(() => ...)` → `$derived(...)` 또는 `$derived.by(...)` 변환
+6. import 추가
+
+### Step 5: 검증
+- [ ] `pnpm check` 통과
+- [ ] 각 컴포넌트 UI 동작 확인 (개발 서버)
+
+## 구현 단계
+
+### Phase 1: 발견 및 목록화
+1. [ ] 모든 admin 컴포넌트에서 라벨 패턴 검색
+2. [ ] 발견된 패턴을 카테고리별로 분류
+3. [ ] label.ts에 추가할 함수 목록 작성
+4. [ ] 교체 대상 파일 및 라인 목록 작성
+
+### Phase 2: label.ts 함수 추가
+1. [ ] `BEHAVIOR_ACTION_TYPE_LABELS` 상수 추가
+2. [ ] `getBehaviorActionTypeString()` 함수 추가
+3. [ ] `getTargetSelectionMethodString()` 함수 추가
+4. [ ] `getInteractionTargetName()` 함수 추가
+5. [ ] `getInteractionWithTypeLabel()` 함수 추가
+6. [ ] `getInteractionActionSummary()` 함수 추가
+7. [ ] 타입 체크 확인
+
+### Phase 3: 컴포넌트 교체 (우선순위별)
+1. [ ] action-node 컴포넌트 (6개)
+2. [ ] action-panel 컴포넌트 (6개)
+3. [ ] 기타 node/panel 컴포넌트 (10개)
+4. [ ] dialog, command, edge 컴포넌트 (나머지)
+
+### Phase 4: $derived 패턴 개선
+1. [ ] `$derived(() => {...})` → `$derived.by(() => {...})` 변환
+2. [ ] `$derived(() => expression)` → `$derived(expression)` 변환
+3. [ ] 객체 반환 derived 제거
+
+## 예상 효과
+1. **중앙화**: 모든 라벨 로직이 utils/label.ts에 집중
+2. **일관성**: 동일한 라벨이 모든 곳에서 동일하게 표시
+3. **유지보수**: 라벨 변경 시 한 곳만 수정
+4. **가독성**: 컴포넌트 코드가 간결해짐
+5. **재사용성**: 라벨 함수를 다른 곳에서도 사용 가능
+
+## 1단계: $derived.by 변환
+
+### 변환 대상 패턴
+`$derived(() => { ... })` 형태에서 함수 바디에 여러 statement가 있는 경우
+
+**Before:**
+```svelte
+const value = $derived(() => {
+  if (condition) return 'A';
+  return 'B';
+});
+```
+
+**After:**
+```svelte
+const value = $derived.by(() => {
+  if (condition) return 'A';
+  return 'B';
+});
+```
+
+### 작업 순서
+1. [ ] `$derived(() => {` 패턴 검색
+2. [ ] 각 파일 검토하여 함수 바디가 있는 경우 `$derived.by` 변환
+3. [ ] 단순 표현식 (한 줄)은 `$derived(expression)` 유지
+4. [ ] 타입 체크 확인
+
+## 2단계: 객체 반환 derived를 utils/label.ts 함수로 이동
+
+### 변환 대상 패턴
+객체를 반환하는 derived 로직을 utils/label.ts의 헬퍼 함수로 추출
+
+**Before:**
+```svelte
+const interactionInfo = $derived(() => {
+  if (action.building_interaction_id) {
+    const interaction = $buildingInteractionStore.data[action.building_interaction_id];
+    if (!interaction) return undefined;
+    const building = $buildingStore.data[interaction.building_id];
+    const interactionType = (interaction.once_interaction_type ||
+      interaction.fulfill_interaction_type)!;
+    return {
+      target: `"${building?.name ?? '건물'}" 건물`,
+      behaviorLabel: getBehaviorInteractTypeString(interactionType),
+    };
+  }
+  // ... 유사한 item, character 로직
+  return undefined;
+});
+
+// 사용
+{interactionInfo()?.target}
+{interactionInfo()?.behaviorLabel}
+```
+
+**After (utils/label.ts에 함수 추가):**
+```typescript
+export function getInteractionTarget(
+  action: NeedBehaviorAction | ConditionBehaviorAction
+): string | undefined {
+  const { getBuilding } = useBuilding();
+  const { getItem } = useItem();
+  const { getCharacter } = useCharacter();
+  const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
+
+  if (action.building_interaction_id) {
+    const interaction = getBuildingInteraction(action.building_interaction_id);
+    if (!interaction) return undefined;
+    const building = getBuilding(interaction.building_id);
+    return `"${building.name ?? '건물'}" 건물`;
+  }
+  if (action.item_interaction_id) {
+    const interaction = getItemInteraction(action.item_interaction_id);
+    if (!interaction) return undefined;
+    const item = getItem(interaction.item_id);
+    return `"${item.name ?? '아이템'}" 아이템`;
+  }
+  if (action.character_interaction_id) {
+    const interaction = getCharacterInteraction(action.character_interaction_id);
+    if (!interaction) return undefined;
+    const character = getCharacter(interaction.target_character_id);
+    return `"${character.name ?? '캐릭터'}" 캐릭터`;
+  }
+  return undefined;
+}
+
+export function getInteractionBehaviorLabel(
+  action: NeedBehaviorAction | ConditionBehaviorAction
+): string | undefined {
+  const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
+
+  if (action.building_interaction_id) {
+    const interaction = getBuildingInteraction(action.building_interaction_id);
+    if (!interaction) return undefined;
+    const interactionType = (interaction.once_interaction_type ||
+      interaction.fulfill_interaction_type)!;
+    return getBehaviorInteractTypeString(interactionType);
+  }
+  if (action.item_interaction_id) {
+    const interaction = getItemInteraction(action.item_interaction_id);
+    if (!interaction) return undefined;
+    const interactionType = (interaction.once_interaction_type ||
+      interaction.fulfill_interaction_type)!;
+    return getBehaviorInteractTypeString(interactionType);
+  }
+  if (action.character_interaction_id) {
+    const interaction = getCharacterInteraction(action.character_interaction_id);
+    if (!interaction) return undefined;
+    const interactionType = (interaction.once_interaction_type ||
+      interaction.fulfill_interaction_type)!;
+    return getBehaviorInteractTypeString(interactionType);
+  }
+  return undefined;
+}
+```
+
+**After (컴포넌트):**
+```svelte
+const interactionTarget = $derived(getInteractionTarget(action));
+const interactionBehaviorLabel = $derived(getInteractionBehaviorLabel(action));
+
+// 사용
+{interactionTarget}
+{interactionBehaviorLabel}
+```
+
+### 장점
+- 로직이 utils/label.ts에 중앙화되어 재사용 가능
+- 컴포넌트 코드가 간결해짐
+- 사용처에서 함수 호출 불필요 (`interactionInfo()?.target` → `interactionTarget`)
+- getBehaviorActionString, getNeedBehaviorString과 동일한 패턴 유지
+
+### 작업 순서
+1. [ ] utils/label.ts에 `getInteractionTarget`, `getInteractionBehaviorLabel` 함수 추가
+2. [ ] 객체를 반환하는 `$derived` 패턴 검색
+3. [ ] 컴포넌트에서 utils/label.ts 함수 사용하도록 변경
+4. [ ] 사용처 업데이트 (함수 호출 제거: `interactionInfo()?.target` → `interactionTarget`)
+5. [ ] 타입 체크 확인
+
+## 검색 대상 파일 범위
+- `src/lib/components/admin/**/*.svelte`
+- 특히 *-panel, *-node, *-dialog 패턴 파일들
+
+## 예상 효과
+1. **명확성**: `$derived` vs `$derived.by` 구분으로 의도 명확화
+2. **성능**: 개별 derived로 분리하여 불필요한 재계산 방지
+3. **가독성**: 함수 호출 없이 직접 값 사용
+4. **유지보수**: 각 derived 값의 책임이 명확해짐
