@@ -5,7 +5,9 @@ SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
 ## Critical Rules
 
 ### Workflow
-**PLAN.md만 작업**: 문서화된 태스크만 진행. 사용자 언급사항은 PLAN.md에 정리만 (명시적 진행 요청 시에만 구현). 체크리스트 형태 운영.
+**Plan 기반 작업**: `plans/` 디렉토리의 문서화된 플랜만 진행. 사용자 언급사항은 해당 플랜에 정리만 (명시적 진행 요청 시에만 구현). 체크리스트 형태 운영.
+- **진행 중**: `plans/*.md` - 현재 작업 중인 플랜
+- **완료됨**: `plans/completed/*.md` - 완료된 플랜 (히스토리 보관)
 
 ### Spec-Driven Development
 - **틱 함수 개발**: behavior-state 등 핵심 로직 개발 시 명세(함수 주석 체크리스트) → 테스트 → 구현 순서. 명세 체크박스로 진행 추적.
