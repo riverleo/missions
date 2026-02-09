@@ -18,6 +18,35 @@
 4. **getOrUndefined 함수들의 타입 개선**
    - `string | null | undefined` 허용
 
+## 📐 Label 함수 컨벤션
+
+### ✅ 기본값을 함수 내부에서 관리
+
+**원칙**: 컴포넌트에서 기본값을 하드코딩하지 않고, label 함수가 기본값을 책임진다.
+
+```typescript
+// ✅ Good - 기본값을 함수 내부에서 처리
+export function getBehaviorActionTypeString(
+  action: NeedBehaviorAction | ConditionBehaviorAction | undefined
+): string {
+  if (!action) return '액션 타입';  // 함수가 기본값 관리
+  return BEHAVIOR_ACTION_TYPE_LABELS[action.type];
+}
+
+// 컴포넌트에서 사용
+const label = $derived(getBehaviorActionTypeString(changes));
+
+// ❌ Bad - 컴포넌트에서 기본값 하드코딩
+const label = $derived(
+  changes?.type ? getBehaviorActionTypeString(changes.type) : '액션 타입'
+);
+```
+
+**적용 사항**:
+- 모든 label 함수는 `undefined` 파라미터 허용
+- 기본값(fallback string) 반환 로직 포함
+- 컴포넌트에서 삼항 연산자로 기본값 처리 금지
+
 ## 작업 범위
 
 **사용자가 완료한 영역**: behavior-priority ~ condition
@@ -448,23 +477,41 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 ### Step 1: 기반 작업 (label.ts 함수 추가)
 **목적**: 중복 제거를 위한 공통 함수 먼저 구축
 
+**⚠️ 모든 함수는 컨벤션 준수**: `undefined` 허용 + 기본값 반환
+
 1. [ ] **Labels 함수 추가** (options 배열 대체)
-   - `getCharacterBodyStateLabels()`
-   - `getCharacterFaceStateLabels()`
-   - `getColliderTypeLabels()`
+   ```typescript
+   // 모두 undefined가 아닌 빈 배열 반환
+   getCharacterBodyStateLabels(): Label<CharacterBodyStateType>[]
+   getCharacterFaceStateLabels(): Label<CharacterFaceStateType>[]
+   getColliderTypeLabels(): Label<ColliderType>[]
+   ```
 
 2. [ ] **중복 로직 통합 함수 추가**
-   - `getBehaviorActionString()` 개선 또는 새 함수 - typeLabel 통합용
-   - `getInteractionLabelString()` - interaction command 통합용
-   - `getFulfillmentTargetLabelString()` - selectedTargetLabel 통합용
-   - `getQuestTypeString()`, `getNarrativeNodeTypeString()`
-   - `getBreadcrumbTitleString()` - admin-site-header용
-   - `getEntityTargetNameString()`, `getBehaviorInfoString()` - test-world용
+   ```typescript
+   // typeLabel 통합 - 이미 개선됨: ✅ getBehaviorActionTypeString(action?)
+   // targetMethod 통합 - 이미 개선됨: ✅ getTargetSelectionMethodLabelString(action?)
 
-3. [ ] **getOrUndefined 함수 타입 개선**
+   // 추가 필요:
+   getInteractionLabelString(interaction?, character?): string  // 기본값: '상호작용'
+   getFulfillmentTargetLabelString(fulfillment?): string  // 기본값: '대상 선택...'
+   getQuestTypeString(type?): string  // 기본값: '퀘스트 타입'
+   getNarrativeNodeTypeString(type?): string  // 기본값: '노드 타입'
+   getBreadcrumbTitleString(params?): string  // 기본값: '제목 없음'
+   getEntityTargetNameString(entity?): string  // 기본값: '대상 없음'
+   getBehaviorInfoString(behavior?): string  // 기본값: '행동 정보 없음'
+   ```
+
+3. [ ] **기존 함수들 컨벤션 적용 확인**
+   - `getInteractionTargetNameString()` - undefined 허용 확인
+   - `getInteractionBehaviorLabelString()` - undefined 허용 확인
+   - `getInteractionActionSummaryString()` - undefined 허용 확인
+   - 기타 String suffix 함수들
+
+4. [ ] **getOrUndefined 함수 타입 개선**
    - 모든 getOrUndefined 함수에 `| null | undefined` 추가
 
-4. [ ] 타입 체크 확인
+5. [ ] 타입 체크 확인
 
 ### Step 2: 중복 제거 작업 (우선순위별)
 
