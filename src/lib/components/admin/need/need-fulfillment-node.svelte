@@ -20,21 +20,23 @@
 	const { data, id, selected = false }: Props = $props();
 	const fulfillment = $derived(data.fulfillment);
 
-	const { buildingStore } = useBuilding();
-	const { characterStore } = useCharacter();
-	const { itemStore } = useItem();
-	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
-		useInteraction();
+	const { getOrUndefinedBuilding } = useBuilding();
+	const { getOrUndefinedCharacter } = useCharacter();
+	const { getOrUndefinedItem } = useItem();
+	const {
+		getOrUndefinedBuildingInteraction,
+		getOrUndefinedCharacterInteraction,
+		getOrUndefinedItemInteraction,
+	} = useInteraction();
 
 	const typeLabel = $derived(() => {
 		// Interaction 기반
 		if (fulfillment.building_interaction_id) {
-			const interaction =
-				$buildingInteractionStore.data[
-					fulfillment.building_interaction_id as BuildingInteractionId
-				];
+			const interaction = getOrUndefinedBuildingInteraction(
+				fulfillment.building_interaction_id as BuildingInteractionId
+			);
 			if (interaction) {
-				const building = $buildingStore.data[interaction.building_id];
+				const building = getOrUndefinedBuilding(interaction.building_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
@@ -42,10 +44,11 @@
 			}
 		}
 		if (fulfillment.item_interaction_id) {
-			const interaction =
-				$itemInteractionStore.data[fulfillment.item_interaction_id as ItemInteractionId];
+			const interaction = getOrUndefinedItemInteraction(
+				fulfillment.item_interaction_id as ItemInteractionId
+			);
 			if (interaction) {
-				const item = $itemStore.data[interaction.item_id];
+				const item = getOrUndefinedItem(interaction.item_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
@@ -53,12 +56,11 @@
 			}
 		}
 		if (fulfillment.character_interaction_id) {
-			const interaction =
-				$characterInteractionStore.data[
-					fulfillment.character_interaction_id as CharacterInteractionId
-				];
+			const interaction = getOrUndefinedCharacterInteraction(
+				fulfillment.character_interaction_id as CharacterInteractionId
+			);
 			if (interaction) {
-				const character = $characterStore.data[interaction.target_character_id];
+				const character = getOrUndefinedCharacter(interaction.target_character_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
 				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
