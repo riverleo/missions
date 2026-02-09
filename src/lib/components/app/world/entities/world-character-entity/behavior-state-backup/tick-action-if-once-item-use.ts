@@ -17,7 +17,7 @@ export default function tickActionIfOnceItemUse(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getOrUndefinedBehaviorAction, searchEntitySources } = useBehavior();
+	const { getBehaviorAction, searchEntitySources } = useBehavior();
 	const { getWorldItem, worldItemStore } = useWorld();
 	const {
 		getInteractionByBehaviorAction,
@@ -28,10 +28,10 @@ export default function tickActionIfOnceItemUse(
 	const { getAllNeedFulfillments, getNeed } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
-	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
-	if (!behaviorAction) {
-		throw new Error('[tickActionOnceItemUse] No behaviorAction found');
+	if (!this.behaviorTargetId) {
+		throw new Error('[tickActionOnceItemUse] No behaviorTargetId');
 	}
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
 	// once 타입만 처리 (아이템 사용)
 	if (behaviorAction.type !== 'once') return false;

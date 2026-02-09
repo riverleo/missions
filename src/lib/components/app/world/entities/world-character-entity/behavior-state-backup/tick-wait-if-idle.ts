@@ -10,12 +10,13 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * @returns true: 대기 중, false: 완료 또는 idle이 아님
  */
 export default function tickWaitIfIdle(this: WorldCharacterEntityBehavior, tick: number): boolean {
-	const { getOrUndefinedBehaviorAction } = useBehavior();
+	const { getBehaviorAction } = useBehavior();
 
-	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
+	if (!this.behaviorTargetId) return false;
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
 	// idle 행동이 아니면 다음 메서드로 진행
-	if (behaviorAction?.type !== 'idle') return false;
+	if (behaviorAction.type !== 'idle') return false;
 
 	// idle_duration_ticks 체크
 	const elapsed = tick - (this.behaviorTargetStartTick ?? 0);

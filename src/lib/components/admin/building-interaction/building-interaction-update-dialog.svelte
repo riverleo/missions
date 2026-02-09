@@ -32,7 +32,7 @@
 	const {
 		buildingInteractionDialogStore,
 		closeBuildingInteractionDialog,
-		getOrUndefinedBuildingInteraction,
+		getBuildingInteraction,
 		admin,
 	} = useInteraction();
 
@@ -42,7 +42,9 @@
 			? $buildingInteractionDialogStore.buildingInteractionId
 			: undefined
 	);
-	const interaction = $derived(getOrUndefinedBuildingInteraction(buildingInteractionId));
+	const interaction = $derived(
+		buildingInteractionId ? getBuildingInteraction(buildingInteractionId) : undefined
+	);
 
 	const buildings = $derived(alphabetical(Object.values($buildingStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));

@@ -35,7 +35,7 @@
 		getCharacterFaceStateString,
 	} from '$lib/utils/label';
 
-	const { needBehaviorDialogStore, closeNeedBehaviorDialog, getOrUndefinedNeedBehavior, admin } =
+	const { needBehaviorDialogStore, closeNeedBehaviorDialog, getNeedBehavior, admin } =
 		useBehavior();
 	const { needStore } = useCharacter();
 	const { characterStore } = useCharacter();
@@ -46,7 +46,7 @@
 			? $needBehaviorDialogStore.needBehaviorId
 			: undefined
 	);
-	const currentBehavior = $derived(needBehaviorId ? getOrUndefinedNeedBehavior(needBehaviorId) : undefined);
+	const currentBehavior = $derived(needBehaviorId ? getNeedBehavior(needBehaviorId) : undefined);
 	const needs = $derived(alphabetical(Object.values($needStore.data), (n) => n.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 

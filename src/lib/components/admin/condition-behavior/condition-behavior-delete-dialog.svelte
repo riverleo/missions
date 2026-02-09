@@ -17,7 +17,7 @@
 	const {
 		conditionBehaviorDialogStore,
 		closeConditionBehaviorDialog,
-		getOrUndefinedConditionBehavior,
+		getConditionBehavior,
 		admin,
 	} = useBehavior();
 	const { getOrUndefinedCondition } = useBuilding();
@@ -28,7 +28,7 @@
 			? $conditionBehaviorDialogStore.conditionBehaviorId
 			: undefined
 	);
-	const behavior = $derived(behaviorId ? getOrUndefinedConditionBehavior(behaviorId) : undefined);
+	const behavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
 	const condition = $derived(getOrUndefinedCondition(behavior?.condition_id));
 	const open = $derived($conditionBehaviorDialogStore?.type === 'delete');
 

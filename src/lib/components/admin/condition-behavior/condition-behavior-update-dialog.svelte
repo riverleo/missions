@@ -42,7 +42,7 @@
 	const {
 		conditionBehaviorDialogStore,
 		closeConditionBehaviorDialog,
-		getOrUndefinedConditionBehavior,
+		getConditionBehavior,
 		admin,
 	} = useBehavior();
 	const { conditionStore, getOrUndefinedCondition } = useBuilding();
@@ -54,7 +54,7 @@
 			? $conditionBehaviorDialogStore.conditionBehaviorId
 			: undefined
 	);
-	const currentBehavior = $derived(behaviorId ? getOrUndefinedConditionBehavior(behaviorId) : undefined);
+	const currentBehavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (c) => c.name));
 

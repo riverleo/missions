@@ -19,7 +19,7 @@ vi.mock('$lib/utils/behavior-id', () => ({
 describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', () => {
 	let behavior: WorldCharacterEntityBehavior;
 	let mockWorldCharacterEntity: Partial<WorldCharacterEntity>;
-	let mockGetOrUndefinedBehaviorAction: ReturnType<typeof vi.fn>;
+	let mockGetBehaviorAction: ReturnType<typeof vi.fn>;
 	let mockGetNextBehaviorAction: ReturnType<typeof vi.fn>;
 	const currentTick = 100;
 
@@ -37,12 +37,12 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);
 
 		// Setup useBehavior mock
-		mockGetOrUndefinedBehaviorAction = vi.fn();
+		mockGetBehaviorAction = vi.fn();
 		mockGetNextBehaviorAction = vi.fn();
 
 		const { useBehavior } = await import('$lib/hooks');
 		vi.mocked(useBehavior).mockReturnValue({
-			getOrUndefinedBehaviorAction: mockGetOrUndefinedBehaviorAction,
+			getBehaviorAction: mockGetBehaviorAction,
 			getNextBehaviorAction: mockGetNextBehaviorAction,
 		} as any);
 
@@ -51,58 +51,29 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		vi.spyOn(behavior, 'setBehaviorTarget');
 	});
 
-	it('현재 행동 타깃이 없으면 아무것도 하지 않는다', () => {
+	it('현재 행동 타깃이 없으면 초기화하고 로직을 종료한다', () => {
 		// Given: behaviorTargetId가 없음
 		behavior.behaviorTargetId = undefined;
 
 		// When
 		behavior.tickNextOrClear(currentTick);
 
-		// Then: 아무 동작도 하지 않음
-		expect(mockGetOrUndefinedBehaviorAction).not.toHaveBeenCalled();
-		expect(behavior.clear).not.toHaveBeenCalled();
+		// Then: clear 호출되고 다른 동작은 하지 않음
+		expect(behavior.clear).toHaveBeenCalled();
+		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
 	});
 
-	it('현재 행동 액션을 찾을 수 없으면 아무것도 하지 않는다', () => {
+	it('현재 행동 액션을 찾을 수 없으면 에러가 발생한다', () => {
 		// Given: behaviorTargetId는 있지만 액션을 찾을 수 없음
 		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		mockGetOrUndefinedBehaviorAction.mockReturnValue(undefined);
+		mockGetBehaviorAction.mockImplementation(() => {
+			throw new Error('BehaviorAction not found');
+		});
 
-		// When
-		behavior.tickNextOrClear(currentTick);
-
-		// Then: clear 호출 안 됨
-		expect(mockGetOrUndefinedBehaviorAction).toHaveBeenCalledWith(behavior.behaviorTargetId);
-		expect(behavior.clear).not.toHaveBeenCalled();
-	});
-
-	it('경로를 초기화한다', () => {
-		// Given: 현재 행동 액션이 있고 경로가 설정되어 있음
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		behavior.path = [vectorUtils.createVector(150, 100), vectorUtils.createVector(200, 100)];
-		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
-		mockGetOrUndefinedBehaviorAction.mockReturnValue(mockCurrentAction);
-		mockGetNextBehaviorAction.mockReturnValue(undefined);
-
-		// When
-		behavior.tickNextOrClear(currentTick);
-
-		// Then: 경로가 비워짐
-		expect(behavior.path).toEqual([]);
-	});
-
-	it('다음 행동 액션을 조회한다', () => {
-		// Given: 현재 행동 액션이 있음
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
-		mockGetOrUndefinedBehaviorAction.mockReturnValue(mockCurrentAction);
-		mockGetNextBehaviorAction.mockReturnValue(undefined);
-
-		// When
-		behavior.tickNextOrClear(currentTick);
-
-		// Then: getNextBehaviorAction 호출됨
-		expect(mockGetNextBehaviorAction).toHaveBeenCalledWith(mockCurrentAction);
+		// When & Then: 에러 발생
+		expect(() => {
+			behavior.tickNextOrClear(currentTick);
+		}).toThrow('BehaviorAction not found');
 	});
 
 	it('다음 행동 액션이 있으면 모든 상태를 초기화하고 다음 액션으로 전환한다', () => {
@@ -112,7 +83,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		behavior.interactionTargetId = 'interaction-1' as any;
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
 		const mockNextAction: BehaviorAction = { id: 'action-2' } as BehaviorAction;
-		mockGetOrUndefinedBehaviorAction.mockReturnValue(mockCurrentAction);
+		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
 		mockGetNextBehaviorAction.mockReturnValue(mockNextAction);
 
 		// When
@@ -129,7 +100,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		behavior.targetEntityId = 'entity-1' as any;
 		behavior.interactionTargetId = 'interaction-1' as any;
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
-		mockGetOrUndefinedBehaviorAction.mockReturnValue(mockCurrentAction);
+		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
 		mockGetNextBehaviorAction.mockReturnValue(undefined);
 
 		// When

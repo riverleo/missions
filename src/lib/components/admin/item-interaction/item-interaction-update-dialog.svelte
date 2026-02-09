@@ -31,7 +31,7 @@
 	const {
 		itemInteractionDialogStore,
 		closeItemInteractionDialog,
-		getOrUndefinedItemInteraction,
+		getItemInteraction,
 		admin,
 	} = useInteraction();
 
@@ -41,7 +41,9 @@
 			? $itemInteractionDialogStore.itemInteractionId
 			: undefined
 	);
-	const interaction = $derived(getOrUndefinedItemInteraction(itemInteractionId));
+	const interaction = $derived(
+		itemInteractionId ? getItemInteraction(itemInteractionId) : undefined
+	);
 
 	const items = $derived(alphabetical(Object.values($itemStore.data), (b) => b.name));
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));

@@ -17,14 +17,14 @@ import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
  */
 export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: number): boolean {
 	const { getEntitySourceId, getWorldItem } = useWorld();
-	const { getOrUndefinedBehaviorAction, searchEntitySources } = useBehavior();
+	const { getBehaviorAction, searchEntitySources } = useBehavior();
 	const { getInteractionByBehaviorAction } = useInteraction();
 
 	// 인터렉션이 이미 진행 중이면 skip
 	if (this.interactionTargetId) return false;
 
-	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
-	if (!behaviorAction) return false;
+	if (!this.behaviorTargetId) return false;
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
 	// idle 타입은 타겟이 필요 없으므로 skip
 	if (behaviorAction.type === 'idle') return false;
