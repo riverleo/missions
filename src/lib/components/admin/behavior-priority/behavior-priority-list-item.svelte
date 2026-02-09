@@ -9,7 +9,7 @@
 		DropdownMenuTrigger,
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
-	import type { BehaviorPriority, CharacterId } from '$lib/types';
+	import type { BehaviorPriority } from '$lib/types';
 	import {
 		getNeedBehaviorString,
 		getFallbackString,
@@ -27,10 +27,9 @@
 
 	let { priority, isFirst, isLast, onmoveup, onmovedown, onremove }: Props = $props();
 
-	const { needBehaviorStore, conditionBehaviorStore } = useBehavior();
-	const { needStore } = useCharacter();
-	const { characterStore } = useCharacter();
-	const { conditionStore } = useBuilding();
+	const { getNeedBehavior, getConditionBehavior } = useBehavior();
+	const { getOrUndefinedNeed, getOrUndefinedCharacter } = useCharacter();
+	const { getOrUndefinedCondition } = useBuilding();
 
 	// behavior 타입 구분
 	const behaviorType = $derived.by(() => {
@@ -49,24 +48,24 @@
 	// behavior 정보 가져오기
 	const behaviorInfo = $derived.by(() => {
 		if (priority.need_behavior_id) {
-			const behavior = $needBehaviorStore.data[priority.need_behavior_id];
+			const behavior = getNeedBehavior(priority.need_behavior_id);
 			if (!behavior) return null;
 
-			const need = behavior.need_id ? $needStore.data[behavior.need_id] : undefined;
+			const need = behavior.need_id ? getOrUndefinedNeed(behavior.need_id) : undefined;
 			const character = behavior.character_id
-				? $characterStore.data[behavior.character_id as CharacterId]
+				? getOrUndefinedCharacter(behavior.character_id)
 				: undefined;
 
 			return getNeedBehaviorString(behavior);
 		} else if (priority.condition_behavior_id) {
-			const behavior = $conditionBehaviorStore.data[priority.condition_behavior_id];
+			const behavior = getConditionBehavior(priority.condition_behavior_id);
 			if (!behavior) return null;
 
 			const condition = behavior.condition_id
-				? $conditionStore.data[behavior.condition_id]
+				? getOrUndefinedCondition(behavior.condition_id)
 				: undefined;
 			const character = behavior.character_id
-				? $characterStore.data[behavior.character_id as CharacterId]
+				? getOrUndefinedCharacter(behavior.character_id)
 				: undefined;
 
 			const name = getUnnamedWithId(behavior.id);
