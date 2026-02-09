@@ -50,8 +50,7 @@ export default function tickFindBehaviorTarget(
 	const behaviorAction = getRootBehaviorAction(firstBehavior);
 
 	// 6. behaviorTargetId 설정
-	this.behaviorTargetId = BehaviorIdUtils.create(behaviorAction);
-	this.behaviorTargetStartTick = tick;
+	this.setBehaviorTarget(BehaviorIdUtils.create(behaviorAction), tick);
 
 	return false;
 }

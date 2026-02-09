@@ -19,15 +19,14 @@ import type { WorldCharacterEntity } from './world-character-entity.svelte';
  * - [x] 욕구 값은 최소 0으로 제한된다.
  */
 export default function tickDecreaseNeeds(this: WorldCharacterEntity, tick: number): void {
-	const { getNeed, getOrUndefinedCharacterNeed } = useCharacter();
+	const { getNeed, getCharacterNeed } = useCharacter();
 
 	for (const worldCharacterNeed of Object.values(this.needs)) {
 		const need = getNeed(worldCharacterNeed.need_id);
-		const characterNeed = getOrUndefinedCharacterNeed(
+		const characterNeed = getCharacterNeed(
 			worldCharacterNeed.character_id,
 			worldCharacterNeed.need_id
 		);
-		if (!characterNeed) continue;
 
 		const decreaseAmount = need.decrease_per_tick * characterNeed.decay_multiplier;
 		worldCharacterNeed.value = Math.max(0, worldCharacterNeed.value - decreaseAmount);

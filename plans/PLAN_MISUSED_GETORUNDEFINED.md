@@ -131,7 +131,7 @@ const behavior = $derived(needBehaviorId ? getNeedBehavior(needBehaviorId) : und
 
 **판단**:
 - 디버깅/검사 도구이므로 데이터가 없어도 표시하는 게 나을 수 있음
-- **유지 검토**
+- [x] **유지 결정** - Optional chaining 사용하여 graceful degradation 제공
 
 ### 5. tick-decrease-needs.ts
 
@@ -142,9 +142,9 @@ const characterNeed = getOrUndefinedCharacterNeed(
 );
 ```
 
-**조사 필요**:
-- [ ] character_id, need_id가 필수인지 확인
-- [ ] 필수라면 getCharacterNeed로 변경
+**조사 완료**:
+- [x] character_id, need_id는 필수 (명세에서 "캐릭터 욕구가 없으면 에러가 발생한다"고 명시)
+- [x] getCharacterNeed로 변경하고 continue 제거 (명세와 구현 일치)
 
 ## 작업 순서
 
@@ -152,8 +152,8 @@ const characterNeed = getOrUndefinedCharacterNeed(
 2. [x] **2단계**: Admin 다이얼로그 컴포넌트 (9개) - 삼항 연산자 패턴
 3. [x] **3단계**: label.ts - 필수 관계 분석 후 개선 (4개 수정)
 4. [x] **4단계**: Admin 액션 패널 컴포넌트 - interaction 관계 분석 (12개 수정)
-5. [ ] **5단계**: 기타 케이스 검토
-6. [ ] **6단계**: pnpm check 통과 확인
+5. [x] **5단계**: 기타 케이스 검토 (tick-decrease-needs 수정, Test World Inspector 유지)
+6. [x] **6단계**: pnpm check 통과 확인 ✅
 
 ## 예상 효과
 - 버그를 조기에 발견 (데이터 누락 시 즉시 에러)
