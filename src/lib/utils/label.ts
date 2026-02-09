@@ -395,18 +395,18 @@ export function getConditionBehaviorPriorityLabel(
 	conditionBehaviorId: ConditionBehaviorId
 ): string | null {
 	const { getOrUndefinedConditionBehavior } = useBehavior();
-	const { getOrUndefinedCondition } = useBuilding();
+	const { getCondition } = useBuilding();
 	const { getOrUndefinedCharacter } = useCharacter();
 
 	const behavior = getOrUndefinedConditionBehavior(conditionBehaviorId);
 	if (!behavior) return null;
 
-	const condition = getOrUndefinedCondition(behavior.condition_id);
+	const condition = getCondition(behavior.condition_id);
 	const character = getOrUndefinedCharacter(behavior.character_id);
 
 	const name = getUnnamedWithId(behavior.id);
 	const char = character?.name ?? getFallbackString('allCharacters');
-	const cond = condition?.name ?? '컨디션';
+	const cond = condition.name;
 	return `${behavior.name || name} - ${char} (${cond} ${behavior.condition_threshold} 이하)`;
 }
 
@@ -770,30 +770,30 @@ export function getBreadcrumbTitleString(
 	}
 	if (prevSegment === 'building-interactions') {
 		const { getOrUndefinedBuildingInteraction } = useInteraction();
-		const { getOrUndefinedBuilding } = useBuilding();
+		const { getBuilding } = useBuilding();
 		const interaction = getOrUndefinedBuildingInteraction(id as BuildingInteractionId);
 		if (!interaction) return undefined;
-		const building = getOrUndefinedBuilding(interaction.building_id);
+		const building = getBuilding(interaction.building_id);
 		const label = getInteractionLabelString(interaction);
-		return `${building?.name ?? '건물'} - ${label}`;
+		return `${building.name} - ${label}`;
 	}
 	if (prevSegment === 'character-interactions') {
 		const { getOrUndefinedCharacterInteraction } = useInteraction();
-		const { getOrUndefinedCharacter } = useCharacter();
+		const { getCharacter } = useCharacter();
 		const interaction = getOrUndefinedCharacterInteraction(id as CharacterInteractionId);
 		if (!interaction) return undefined;
-		const targetCharacter = getOrUndefinedCharacter(interaction.target_character_id);
+		const targetCharacter = getCharacter(interaction.target_character_id);
 		const label = getInteractionLabelString(interaction);
-		return `${targetCharacter?.name ?? '캐릭터'} - ${label}`;
+		return `${targetCharacter.name} - ${label}`;
 	}
 	if (prevSegment === 'item-interactions') {
 		const { getOrUndefinedItemInteraction } = useInteraction();
-		const { getOrUndefinedItem } = useItem();
+		const { getItem } = useItem();
 		const interaction = getOrUndefinedItemInteraction(id as ItemInteractionId);
 		if (!interaction) return undefined;
-		const item = getOrUndefinedItem(interaction.item_id);
+		const item = getItem(interaction.item_id);
 		const label = getInteractionLabelString(interaction);
-		return `${item?.name ?? '아이템'} - ${label}`;
+		return `${item.name} - ${label}`;
 	}
 	if (prevSegment === 'conditions') {
 		const { getOrUndefinedCondition } = useBuilding();

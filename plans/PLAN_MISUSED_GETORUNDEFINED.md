@@ -54,9 +54,9 @@ const character = getOrUndefinedCharacter(behavior.character_id);
 - 하지만 getOrUndefined 사용 → 없어도 undefined 반환
 
 **개선 필요 여부**:
-- behavior.condition_id, behavior.character_id가 nullable인지 확인 필요
-- [ ] `label.ts:404` - getCondition(behavior.condition_id)로 변경?
-- [ ] `label.ts:405` - character_id는 nullable이므로 유지
+- behavior.condition_id는 required, character_id는 nullable
+- [x] `label.ts:404` - getCondition(behavior.condition_id)로 변경
+- [x] `label.ts:405` - character_id는 nullable이므로 유지
 
 **케이스 B: Interaction → Building/Item/Character (필수 관계)**
 ```typescript
@@ -68,10 +68,10 @@ const building = getOrUndefinedBuilding(interaction.building_id);
 - interaction이 존재하면 building_id는 필수
 - 하지만 getOrUndefined 사용
 
-**조사 필요**:
-- [ ] `label.ts:661-664` - building_interaction_id 체크
-- [ ] `label.ts:677-682` - character_interaction_id 체크
-- [ ] `label.ts:695-698` - item_interaction_id 체크
+**조사 완료**:
+- [x] `label.ts:776` - building_id는 required, getBuilding 사용
+- [x] `label.ts:785` - target_character_id는 required, getCharacter 사용
+- [x] `label.ts:794` - item_id는 required, getItem 사용
 
 **케이스 C: Optional chaining 사용 (유지 가능)**
 ```typescript
@@ -150,7 +150,7 @@ const characterNeed = getOrUndefinedCharacterNeed(
 
 1. [x] **1단계**: behavior-state 파일들 (5개) - 명확한 케이스 (state 버전은 이미 올바름)
 2. [x] **2단계**: Admin 다이얼로그 컴포넌트 (9개) - 삼항 연산자 패턴
-3. [ ] **3단계**: label.ts - 필수 관계 분석 후 개선
+3. [x] **3단계**: label.ts - 필수 관계 분석 후 개선 (4개 수정)
 4. [ ] **4단계**: Admin 액션 패널 컴포넌트 - interaction 관계 분석
 5. [ ] **5단계**: 기타 케이스 검토
 6. [ ] **6단계**: pnpm check 통과 확인
