@@ -7,6 +7,10 @@ import type {
 	EntityInstance,
 	EntitySource,
 	WorldId,
+	WorldBuildingId,
+	WorldCharacterId,
+	WorldItemId,
+	WorldTileId,
 	WorldBuilding,
 	WorldCharacter,
 	WorldItem,
@@ -52,17 +56,23 @@ export const EntityIdUtils = {
 	/**
 	 * EntityId를 파싱하여 타입, worldId, instanceId를 반환
 	 * @example
-	 * const { worldId, instanceId } = EntityIdUtils.parse<BuildingId>(entityId);
 	 * const { type, worldId, instanceId } = EntityIdUtils.parse(entityId);
+	 * if (type === 'building') {
+	 *   // instanceId는 자동으로 WorldBuildingId 타입으로 좁혀짐
+	 * }
 	 */
-	parse<T extends EntityInstanceId | string = string>(
+	parse(
 		entityId: EntityId
-	): { type: EntityType; worldId: WorldId; instanceId: T } {
+	):
+		| { type: 'building'; worldId: WorldId; instanceId: WorldBuildingId }
+		| { type: 'character'; worldId: WorldId; instanceId: WorldCharacterId }
+		| { type: 'item'; worldId: WorldId; instanceId: WorldItemId }
+		| { type: 'tile'; worldId: WorldId; instanceId: WorldTileId } {
 		const parts = entityId.split('_');
 		const type = parts[0] as EntityType;
 		const worldId = parts[1] as WorldId;
-		const instanceId = parts.slice(2).join('_') as T;
-		return { type, worldId, instanceId };
+		const instanceId = parts.slice(2).join('_');
+		return { type, worldId, instanceId } as any;
 	},
 
 	/**

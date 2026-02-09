@@ -29,10 +29,10 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { getWorldCharacter } = useWorld();
-	const { getOrUndefinedCharacter, getOrUndefinedCharacterByWorldCharacter, getOrUndefinedNeed } =
+	const { getOrUndefinedCharacter, getCharacterByWorldCharacter, getOrUndefinedNeed } =
 		useCharacter();
-	const { getOrUndefinedBuilding, getOrUndefinedBuildingByWorldBuilding } = useBuilding();
-	const { getOrUndefinedItem, getOrUndefinedItemByWorldItem } = useItem();
+	const { getOrUndefinedBuilding, getBuildingByWorldBuilding } = useBuilding();
+	const { getOrUndefinedItem, getItemByWorldItem } = useItem();
 	const { getNeedBehavior, getNeedBehaviorAction, getConditionBehavior, getConditionBehaviorAction } =
 		useBehavior();
 
@@ -49,11 +49,11 @@
 		const { type, instanceId } = EntityIdUtils.parse(entity.behavior.targetEntityId);
 
 		if (type === 'building') {
-			return getOrUndefinedBuildingByWorldBuilding(instanceId as WorldBuildingId)?.name;
+			return getBuildingByWorldBuilding(instanceId).name;
 		} else if (type === 'item') {
-			return getOrUndefinedItemByWorldItem(instanceId as WorldItemId)?.name;
+			return getItemByWorldItem(instanceId).name;
 		} else if (type === 'character') {
-			return getOrUndefinedCharacterByWorldCharacter(instanceId as WorldCharacterId)?.name;
+			return getCharacterByWorldCharacter(instanceId).name;
 		}
 
 		return undefined;
