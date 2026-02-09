@@ -31,10 +31,14 @@
 	} from '$lib/components/ui/select';
 	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
 	import { createActionNodeId } from '$lib/utils/flow-id';
-	import { getBehaviorInteractTypeString } from '$lib/utils/label';
+	import {
+		getBehaviorActionTypeString,
+		getTargetSelectionMethodLabelString,
+		getBehaviorInteractTypeString,
+		getActionString,
+	} from '$lib/utils/label';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { clone } from 'radash';
-	import { getActionString } from '$lib/utils/label';
 
 	interface Props {
 		action: NeedBehaviorAction | undefined;
@@ -67,57 +71,17 @@
 		return searchEntitySources(BehaviorIdUtils.to(changes));
 	});
 
-	const actionTypes: { value: BehaviorActionType; label: string }[] = [
-		{ value: 'once', label: '한번 실행' },
-		{ value: 'fulfill', label: '반복 실행' },
-		{ value: 'idle', label: '대기' },
-	];
-
 	let isUpdating = $state(false);
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
 
 	const selectedTypeLabel = $derived(
-		actionTypes.find((t) => t.value === changes?.type)?.label ?? '액션 타입'
+		changes?.type ? getBehaviorActionTypeString(changes.type) : '액션 타입'
 	);
 
-	const selectedTargetMethodLabel = $derived.by(() => {
-		if (!changes) return '타깃 결정 방법';
-		const c = changes; // Explicitly narrow type
-		if (c.target_selection_method === 'search') return '새로운 탐색 대상';
-		if (c.target_selection_method === 'explicit') {
-			// Interaction 이름 표시
-			if (c.building_interaction_id) {
-				const interaction = buildingInteractions.find((i) => i.id === c.building_interaction_id);
-				if (interaction) {
-					const building = $buildingStore.data[interaction.building_id];
-					const interactionType =
-						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${building?.name ?? '건물'} - ${getBehaviorInteractTypeString(interactionType!)}`;
-				}
-			}
-			if (c.item_interaction_id) {
-				const interaction = itemInteractions.find((i) => i.id === c.item_interaction_id);
-				if (interaction) {
-					const item = $itemStore.data[interaction.item_id];
-					const interactionType =
-						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${item?.name ?? '아이템'} - ${getBehaviorInteractTypeString(interactionType!)}`;
-				}
-			}
-			if (c.character_interaction_id) {
-				const interaction = characterInteractions.find((i) => i.id === c.character_interaction_id);
-				if (interaction) {
-					const character = $characterStore.data[interaction.target_character_id];
-					const interactionType =
-						interaction.once_interaction_type || interaction.fulfill_interaction_type;
-					return `${character?.name ?? '캐릭터'} - ${getBehaviorInteractTypeString(interactionType!)}`;
-				}
-			}
-			return '지정된 대상';
-		}
-		return '타깃 결정 방법';
-	});
+	const selectedTargetMethodLabel = $derived(
+		changes ? getTargetSelectionMethodLabelString(changes) : '타깃 결정 방법'
+	);
 
 	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
 	const selectedTargetValue = $derived.by(() => {
@@ -236,9 +200,9 @@
 									{selectedTypeLabel}
 								</SelectTrigger>
 								<SelectContent>
-									{#each actionTypes as actionType (actionType.value)}
-										<SelectItem value={actionType.value}>{actionType.label}</SelectItem>
-									{/each}
+									<SelectItem value="once">{getBehaviorActionTypeString('once')}</SelectItem>
+									<SelectItem value="fulfill">{getBehaviorActionTypeString('fulfill')}</SelectItem>
+									<SelectItem value="idle">{getBehaviorActionTypeString('idle')}</SelectItem>
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
