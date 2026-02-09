@@ -25,6 +25,8 @@
 		getFallbackString,
 		isOnceInteractionType,
 		isFulfillInteractionType,
+		getCharacterBodyStateString,
+		getCharacterFaceStateString,
 	} from '$lib/utils/label';
 	import type {
 		BuildingInteraction,
@@ -47,8 +49,7 @@
 
 	const { buildingStore } = useBuilding();
 	const { characterStore } = useCharacter();
-	const { buildingInteractionActionStore, openBuildingInteractionDialog, admin } =
-		useInteraction();
+	const { buildingInteractionActionStore, openBuildingInteractionDialog, admin } = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
@@ -95,27 +96,6 @@
 
 	async function removeAction(actionId: BuildingInteractionActionId) {
 		await admin.removeBuildingInteractionAction(actionId);
-	}
-
-	function getBodyStateLabel(type: string) {
-		const labels: Record<string, string> = {
-			idle: '대기',
-			walk: '걷기',
-			run: '달리기',
-			jump: '점프',
-			pick: '줍기',
-		};
-		return labels[type] ?? type;
-	}
-
-	function getFaceStateLabel(type: string) {
-		const labels: Record<string, string> = {
-			idle: '기본',
-			happy: '행복',
-			sad: '슬픔',
-			angry: '화남',
-		};
-		return labels[type] ?? type;
 	}
 </script>
 
@@ -237,7 +217,7 @@
 										<DropdownMenuTrigger>
 											{#snippet child({ props })}
 												<InputGroupButton {...props}>
-													{getBodyStateLabel(action.character_body_state_type)}
+													{getCharacterBodyStateString(action.character_body_state_type)}
 												</InputGroupButton>
 											{/snippet}
 										</DropdownMenuTrigger>
@@ -267,7 +247,7 @@
 										<DropdownMenuTrigger>
 											{#snippet child({ props })}
 												<InputGroupButton {...props}>
-													{getFaceStateLabel(action.character_face_state_type)}
+													{getCharacterFaceStateString(action.character_face_state_type)}
 												</InputGroupButton>
 											{/snippet}
 										</DropdownMenuTrigger>
