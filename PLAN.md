@@ -1,16 +1,81 @@
 # Plan - Admin 컴포넌트 리팩토링
 
-## 목표
+## 🎯 목표
 
-1. **Label 옵션들을 label.ts 또는 constants.ts로 중앙화**
-2. **Store 직접 참조를 getter 함수로 치환**
-3. **변수 네이밍 개선**
-4. **getOrUndefined 함수들의 타입 개선** (string | null | undefined 허용)
+**핵심**: 컴포넌트에 중복된 라벨 함수들을 label.ts로 이동하여 재사용
+
+1. **중복된 라벨 함수를 label.ts로 통합**
+   - 동일한 패턴의 라벨 생성 로직을 하나의 함수로 통합
+   - 예: condition-behavior-action-node와 need-behavior-action-node의 `typeLabel` → `getBehaviorActionString()`
+
+2. **Label 옵션 배열을 label.ts의 Labels 함수로 변환**
+   - 하드코딩된 label options 배열 제거
+   - 예: `bodyStateTypes` → `getCharacterBodyStateLabels()`
+
+3. **Store 직접 참조를 getter 함수로 치환**
+   - `$xxxStore.data[id]` → `getXxx(id)` 패턴
+
+4. **getOrUndefined 함수들의 타입 개선**
+   - `string | null | undefined` 허용
 
 ## 작업 범위
 
 **사용자가 완료한 영역**: behavior-priority ~ condition
 **작업 대상 영역**: condition 이후 ~ 끝까지
+
+## 🔍 주요 중복 패턴
+
+### 패턴 1: typeLabel (동일한 로직)
+**위치**:
+- condition-behavior-action-node.svelte
+- need-behavior-action-node.svelte
+
+**로직**:
+```typescript
+const typeLabel = $derived.by(() => {
+  const target = targetLabel;
+  const behaviorLabel = behaviorTypeLabel;
+
+  if (action.type === 'once') {
+    if (behaviorLabel && target) {
+      return `${josa(target, '을를')} ${behaviorLabel}`;
+    }
+    if (behaviorLabel) {
+      return behaviorLabel;
+    }
+  }
+  // ... fulfill, idle 로직
+});
+```
+
+**통합 방안**: 이미 label.ts에 `getBehaviorActionString()` 존재, 개선 필요
+
+### 패턴 2: selectedBodyStateLabel, selectedFaceStateLabel (반복)
+**위치**:
+- building-interaction-action-node-panel.svelte
+- item-interaction-action-node-panel.svelte
+- character-interaction-action-node-panel.svelte
+- 기타 여러 dialog
+
+**통합 방안**:
+- `getCharacterBodyStateString()` - 이미 존재
+- `getCharacterFaceStateString()` - 이미 존재
+- 직접 사용하도록 변경
+
+### 패턴 3: selectedTargetLabel (복잡한 로직 반복)
+**위치**:
+- need-fulfillment-node-panel.svelte
+- condition-fulfillment-node-panel.svelte
+
+**통합 방안**: `getFulfillmentTargetLabelString(fulfillment)` 추가
+
+### 패턴 4: getInteractionLabel (인라인 반복)
+**위치**:
+- item-interaction-command.svelte
+- character-interaction-command.svelte
+- building-interaction-command.svelte
+
+**통합 방안**: `getInteractionLabelString(interaction, character)` 추가
 
 ## Phase 1: 패턴 분석 및 목록화
 
@@ -90,15 +155,16 @@ getOrUndefinedCharacter(id: CharacterId | null | undefined): Character | undefin
 ### 영역 1: Item & Item Interaction (Priority: High)
 
 #### 1.1. item-interaction-action-node-panel.svelte
-**발견된 패턴**:
-- Label options 배열: `bodyStateTypes`, `faceStateTypes` (lines 69-82)
-- Derived label: `selectedBodyStateLabel`, `selectedFaceStateLabel` (lines 88-95)
+**발견된 중복 패턴**:
+- ❌ Label options 배열: `bodyStateTypes`, `faceStateTypes` (lines 69-82)
+  - 동일 패턴: building-interaction-action-node-panel, character-interaction-action-node-panel
+- ❌ Derived label: `selectedBodyStateLabel`, `selectedFaceStateLabel` (lines 88-95)
+  - 동일 패턴: 여러 interaction-action-node-panel, dialog 파일들
 - Store 직접 참조: `$itemInteractionStore`, `$characterStore`, `$itemStateStore` (lines 44-49)
 
 **작업 항목**:
-- [ ] bodyStateTypes, faceStateTypes를 constants.ts로 이동
-- [ ] selectedBodyStateLabel → `getCharacterBodyStateString()` 사용
-- [ ] selectedFaceStateLabel → `getCharacterFaceStateString()` 사용
+- [ ] bodyStateTypes, faceStateTypes 제거 → `getCharacterBodyStateLabels()`, `getCharacterFaceStateLabels()` 사용
+- [ ] selectedBodyStateLabel, selectedFaceStateLabel 제거 → 직접 `getCharacterBodyStateString()`, `getCharacterFaceStateString()` 사용
 - [ ] Store 직접 참조를 getter로 변경
 
 #### 1.2. item-interaction-command.svelte
@@ -140,6 +206,16 @@ getOrUndefinedCharacter(id: CharacterId | null | undefined): Character | undefin
 ---
 
 ### 영역 3: Need & Need Behavior (Priority: High)
+
+#### 3.0. need-behavior-action-node.svelte ⭐ **중복 패턴**
+**발견된 중복 패턴**:
+- ❌ `typeLabel` 로직 (lines ~40-60)
+  - **동일 패턴**: condition-behavior-action-node.svelte
+  - 완전히 동일한 로직 (targetLabel, behaviorLabel 조합)
+
+**작업 항목**:
+- [ ] typeLabel 로직 제거 → label.ts의 `getBehaviorActionString()` 개선하여 사용
+- [ ] condition-behavior-action-node와 함께 처리
 
 #### 3.1. need-behavior-create-dialog.svelte (PREP.md 언급)
 **발견된 패턴**:
@@ -339,47 +415,102 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 
 ### 3.2: label.ts에 새로운 함수 추가
 
-**추가할 함수 목록**:
-1. [ ] `getCharacterBodyStateLabels(): Label<CharacterBodyStateType>[]`
-2. [ ] `getCharacterFaceStateLabels(): Label<CharacterFaceStateType>[]`
-3. [ ] `getColliderTypeLabels(): Label<ColliderType>[]`
-4. [ ] `getSelectedBodyStateString(type: CharacterBodyStateType | null | undefined): string`
-5. [ ] `getSelectedFaceStateString(type: CharacterFaceStateType | null | undefined): string`
-6. [ ] `getInteractionLabelString(params: {...}): string`
-7. [ ] 기타 필요한 label 함수들
+**중복 제거를 위한 함수**:
 
-### 3.3: constants.ts에 새로운 상수 추가
+1. [ ] **Labels 함수** (options 배열 대체)
+   - `getCharacterBodyStateLabels(): Label<CharacterBodyStateType>[]`
+   - `getCharacterFaceStateLabels(): Label<CharacterFaceStateType>[]`
+   - `getColliderTypeLabels(): Label<ColliderType>[]`
 
-**추가할 상수 목록**:
-1. [ ] `CHARACTER_BODY_STATE_TYPES: CharacterBodyStateType[]`
-2. [ ] `CHARACTER_FACE_STATE_TYPES: CharacterFaceStateType[]`
-3. [ ] `COLLIDER_TYPES: ColliderType[]`
-4. [ ] 기타 필요한 타입 배열
+2. [ ] **Behavior Action Labels** (typeLabel 통합)
+   - `getBehaviorActionString()` 개선 - targetLabel, behaviorLabel 조합 로직 추가
+   - 또는 새로운 `getBehaviorActionLabelString(action, targetLabel?, behaviorLabel?): string`
+
+3. [ ] **Interaction Labels** (getInteractionLabel 통합)
+   - `getInteractionLabelString(interaction, character?): string`
+   - item, building, character interaction에서 공통 사용
+
+4. [ ] **Fulfillment Target Labels** (selectedTargetLabel 통합)
+   - `getFulfillmentTargetLabelString(fulfillment): string`
+   - need/condition fulfillment-node-panel에서 공통 사용
+
+5. [ ] **Quest/Narrative Type Labels** (getTypeLabel 통합)
+   - `getQuestTypeString(type): string`
+   - `getNarrativeNodeTypeString(type): string`
+
+6. [ ] **Entity/Breadcrumb Labels** (복잡한 로직 통합)
+   - `getBreadcrumbTitleString(params): string` - admin-site-header
+   - `getEntityTargetNameString(entity): string` - test-world inspector
+   - `getBehaviorInfoString(behavior): string` - test-world inspector
 
 ## Phase 4: 구현 순서
 
-### Step 1: 기반 작업
-1. [ ] getOrUndefined 함수 타입 개선 (Phase 3.1)
-2. [ ] label.ts에 공통 함수 추가 (Phase 3.2)
-3. [ ] constants.ts에 공통 상수 추가 (Phase 3.3)
+### Step 1: 기반 작업 (label.ts 함수 추가)
+**목적**: 중복 제거를 위한 공통 함수 먼저 구축
+
+1. [ ] **Labels 함수 추가** (options 배열 대체)
+   - `getCharacterBodyStateLabels()`
+   - `getCharacterFaceStateLabels()`
+   - `getColliderTypeLabels()`
+
+2. [ ] **중복 로직 통합 함수 추가**
+   - `getBehaviorActionString()` 개선 또는 새 함수 - typeLabel 통합용
+   - `getInteractionLabelString()` - interaction command 통합용
+   - `getFulfillmentTargetLabelString()` - selectedTargetLabel 통합용
+   - `getQuestTypeString()`, `getNarrativeNodeTypeString()`
+   - `getBreadcrumbTitleString()` - admin-site-header용
+   - `getEntityTargetNameString()`, `getBehaviorInfoString()` - test-world용
+
+3. [ ] **getOrUndefined 함수 타입 개선**
+   - 모든 getOrUndefined 함수에 `| null | undefined` 추가
+
 4. [ ] 타입 체크 확인
 
-### Step 2: 영역별 순차 작업
-1. [ ] 영역 1: Item & Item Interaction
-2. [ ] 영역 2: Narrative
-3. [ ] 영역 3: Need & Need Behavior
-4. [ ] 영역 4: Quest
-5. [ ] 영역 5: Sidebar
-6. [ ] 영역 6: Terrain & Terrain Files
-7. [ ] 영역 7: Test World
-8. [ ] 영역 8: Tile
+### Step 2: 중복 제거 작업 (우선순위별)
 
-**각 영역별 작업 흐름**:
-1. 파일 목록 확인
-2. 패턴별 변경사항 적용
-3. Import 추가/수정
-4. 타입 체크 확인
-5. 커밋
+#### 2.1. High Priority - 동일 패턴 중복 제거
+1. [ ] **typeLabel 통합** (완전 동일)
+   - need-behavior-action-node.svelte
+   - condition-behavior-action-node.svelte
+   - → `getBehaviorActionString()` 사용
+
+2. [ ] **selectedBodyStateLabel, selectedFaceStateLabel 제거** (여러 파일)
+   - item-interaction-action-node-panel.svelte
+   - building-interaction-action-node-panel.svelte (이미 완료?)
+   - character-interaction-action-node-panel.svelte (이미 완료?)
+   - → 직접 `getCharacterBodyStateString()` 사용
+
+3. [ ] **faceStateOptions 배열 제거** (중복)
+   - need-behavior-create-dialog.svelte
+   - need-behavior-update-dialog.svelte
+   - → `getCharacterFaceStateLabels()` 사용
+
+#### 2.2. Medium Priority - 복잡한 로직 통합
+4. [ ] **selectedTargetLabel 통합**
+   - need-fulfillment-node-panel.svelte
+   - condition-fulfillment-node-panel.svelte
+   - → `getFulfillmentTargetLabelString()` 사용
+
+5. [ ] **getInteractionLabel 통합**
+   - item-interaction-command.svelte
+   - character-interaction-command.svelte
+   - building-interaction-command.svelte
+   - → `getInteractionLabelString()` 사용
+
+6. [ ] **admin-site-header 대규모 정리**
+   - 16개 store 직접 참조 → getter
+   - getTitle 로직 → `getBreadcrumbTitleString()`
+
+#### 2.3. Low Priority - Store getter 치환
+7. [ ] 나머지 모든 파일의 store 직접 참조 → getter 변경
+
+**각 작업별 흐름**:
+1. 해당 파일들 수정
+2. 중복 코드 제거
+3. label.ts 함수 사용
+4. Import 추가/수정
+5. 타입 체크 확인
+6. 그룹별 커밋
 
 ## Phase 5: 검증
 
