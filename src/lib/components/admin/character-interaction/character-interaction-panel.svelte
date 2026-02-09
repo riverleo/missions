@@ -52,14 +52,18 @@
 
 	let { interaction, characterInteractionId }: Props = $props();
 
-	const { characterStore, getOrUndefinedCharacter } = useCharacter();
-	const { characterInteractionActionStore, openCharacterInteractionDialog, admin } =
-		useInteraction();
+	const { characterStore, getOrUndefinedCharacter, getCharacter } = useCharacter();
+	const {
+		characterInteractionActionStore,
+		getCharacterInteractionActions,
+		openCharacterInteractionDialog,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const targetCharacter = $derived($characterStore.data[interaction.target_character_id]);
-	const actions = $derived($characterInteractionActionStore.data[characterInteractionId] ?? []);
+	const targetCharacter = $derived(getCharacter(interaction.target_character_id));
+	const actions = $derived(getCharacterInteractionActions(characterInteractionId));
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
