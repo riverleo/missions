@@ -39,17 +39,10 @@ export default function tickFindBehaviorTarget(
 	// 3. 우선순위 정렬된 행동 목록 가져오기
 	this.behaviors = getAllBehaviorsByPriority(this);
 
-	// 4. 첫 번째 행동의 root action 가져오기
+	// 4. 첫 번째 행동의 root action 가져오기 (없으면 getRootBehaviorAction에서 에러 발생)
 	const behaviorAction = getRootBehaviorAction(this.behaviors[0]);
 
-	// 5. root action이 없으면 에러 발생
-	if (!behaviorAction) {
-		throw new Error(
-			`No root action found for behavior: ${this.behaviors[0]?.id ?? 'unknown'}`
-		);
-	}
-
-	// 6. behaviorTargetId 설정
+	// 5. behaviorTargetId 설정
 	this.behaviorTargetId = BehaviorIdUtils.create(behaviorAction);
 	this.behaviorTargetStartTick = tick;
 

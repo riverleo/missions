@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { Behavior, BehaviorAction } from '$lib/types';
+import { vectorUtils } from '$lib/utils/vector';
 
 // Mock useBehavior hook
 vi.mock('$lib/hooks', () => ({
@@ -98,7 +99,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 
 		it('모든 상태를 초기화(clear)한다', () => {
 			// Given: 기존 상태가 남아있음
-			behavior.path = [{ x: 10, y: 20 }];
+			behavior.path = [vectorUtils.createVector(10, 20)];
 			behavior.targetEntityId = 'entity-1' as any;
 			behavior.interactionTargetId = 'interaction-1' as any;
 
@@ -135,7 +136,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 			expect(behavior.behaviorTargetId).toBe('behavior-action-1');
 		});
 
-		it('루트 액션이 설정될 때 behaviorTargetStartTick을 현재 틱으로 설정한다', () => {
+		it('루트 액션이 설정될 때 behaviorTargetStartTick을 현재 틱(useCurrent().getTick())으로 설정한다', () => {
 			// Given
 			const mockBehaviors: Behavior[] = [{ id: 'behavior-1' } as Behavior];
 			const mockRootAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;

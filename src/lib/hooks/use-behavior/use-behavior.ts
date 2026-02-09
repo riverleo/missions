@@ -339,20 +339,30 @@ function createBehaviorStore() {
 		});
 	}
 
-	function getRootBehaviorAction(behavior: Behavior | undefined): BehaviorAction | undefined {
-		if (behavior === undefined) return;
+	function getRootBehaviorAction(behavior: Behavior | undefined): BehaviorAction {
+		if (behavior === undefined) {
+			throw new Error('No behavior provided to getRootBehaviorAction');
+		}
+
+		let rootAction: BehaviorAction | undefined;
 
 		if (behavior.behaviorType === 'need') {
 			const needAction = getAllNeedBehaviorActions().find(
 				(action) => action.need_behavior_id === behavior.id && action.root
 			);
-			return needAction ? BehaviorIdUtils.to(needAction) : undefined;
+			rootAction = needAction ? BehaviorIdUtils.to(needAction) : undefined;
 		} else {
 			const conditionAction = getAllConditionBehaviorActions().find(
 				(action) => action.condition_behavior_id === behavior.id && action.root
 			);
-			return conditionAction ? BehaviorIdUtils.to(conditionAction) : undefined;
+			rootAction = conditionAction ? BehaviorIdUtils.to(conditionAction) : undefined;
 		}
+
+		if (!rootAction) {
+			throw new Error(`No root action found for behavior: ${behavior.id}`);
+		}
+
+		return rootAction;
 	}
 
 	const admin = {

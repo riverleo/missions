@@ -143,6 +143,13 @@ function createCurrentStore() {
 	}
 
 	/**
+	 * 현재 틱 값 가져오기
+	 */
+	function getTick(): number {
+		return get(tickStore);
+	}
+
+	/**
 	 * 틱 값 설정 (테스트 또는 복원용)
 	 */
 	function setTick(tick: number) {
@@ -158,6 +165,7 @@ function createCurrentStore() {
 		init,
 		stopTick,
 		selectPlayer,
+		getTick,
 		setTick,
 	};
 }
