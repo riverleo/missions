@@ -49,9 +49,9 @@
 	let { action, hasParent = false }: Props = $props();
 
 	const { needBehaviorActionStore, searchEntitySources, admin } = useBehavior();
-	const { getOrUndefinedBuilding } = useBuilding();
-	const { getOrUndefinedCharacter, needFulfillmentStore } = useCharacter();
-	const { getOrUndefinedItem } = useItem();
+	const { getBuilding } = useBuilding();
+	const { getCharacter, needFulfillmentStore } = useCharacter();
+	const { getItem } = useItem();
 	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
 		useInteraction();
 	const flowNodes = useNodes();
@@ -222,7 +222,7 @@
 											<SelectGroup>
 												<SelectLabel>건물 상호작용</SelectLabel>
 												{#each buildingInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
-													{@const building = getOrUndefinedBuilding(interaction.building_id)}
+													{@const building = getBuilding(interaction.building_id)}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`building:${interaction.id}`}>
 														{building?.name ?? '건물'} - {getBehaviorInteractTypeString(
@@ -237,7 +237,7 @@
 											<SelectGroup>
 												<SelectLabel>아이템 상호작용</SelectLabel>
 												{#each itemInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
-													{@const item = getOrUndefinedItem(interaction.item_id)}
+													{@const item = getItem(interaction.item_id)}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`item:${interaction.id}`}>
 														{item?.name ?? '아이템'} - {getBehaviorInteractTypeString(
@@ -252,7 +252,7 @@
 											<SelectGroup>
 												<SelectLabel>캐릭터 상호작용</SelectLabel>
 												{#each characterInteractions.filter((i) => i.once_interaction_type !== null) as interaction (interaction.id)}
-													{@const character = getOrUndefinedCharacter(interaction.target_character_id)}
+													{@const character = getCharacter(interaction.target_character_id)}
 													{@const interactionType = interaction.once_interaction_type}
 													<SelectItem value={`character:${interaction.id}`}>
 														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeString(
@@ -286,7 +286,7 @@
 											<SelectGroup>
 												<SelectLabel>건물 상호작용</SelectLabel>
 												{#each buildingInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
-													{@const building = getOrUndefinedBuilding(interaction.building_id)}
+													{@const building = getBuilding(interaction.building_id)}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`building:${interaction.id}`}>
 														{building?.name ?? '건물'} - {getBehaviorInteractTypeString(
@@ -301,7 +301,7 @@
 											<SelectGroup>
 												<SelectLabel>아이템 상호작용</SelectLabel>
 												{#each itemInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
-													{@const item = getOrUndefinedItem(interaction.item_id)}
+													{@const item = getItem(interaction.item_id)}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`item:${interaction.id}`}>
 														{item?.name ?? '아이템'} - {getBehaviorInteractTypeString(
@@ -316,7 +316,7 @@
 											<SelectGroup>
 												<SelectLabel>캐릭터 상호작용</SelectLabel>
 												{#each characterInteractions.filter((i) => i.fulfill_interaction_type !== null) as interaction (interaction.id)}
-													{@const character = getOrUndefinedCharacter(interaction.target_character_id)}
+													{@const character = getCharacter(interaction.target_character_id)}
 													{@const interactionType = interaction.fulfill_interaction_type}
 													<SelectItem value={`character:${interaction.id}`}>
 														{character?.name ?? '캐릭터'} - {getBehaviorInteractTypeString(

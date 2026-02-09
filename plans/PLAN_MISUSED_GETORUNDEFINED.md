@@ -116,11 +116,11 @@ const behavior = $derived(needBehaviorId ? getNeedBehavior(needBehaviorId) : und
 - interaction.building_id가 있으면 building도 있어야 함
 - building_id가 nullable인지 확인 필요
 
-**대상 (조사 필요)**:
-- [ ] `need-behavior-action-node-panel.svelte` (여러 줄)
-- [ ] `condition-behavior-action-node-panel.svelte` (여러 줄)
-- [ ] `building-interaction-action-node-panel.svelte`
-- [ ] `item-interaction-action-node-panel.svelte`
+**대상 (조사 완료)**:
+- [x] `need-behavior-action-node-panel.svelte` (6줄: building_id, item_id, target_character_id)
+- [x] `condition-behavior-action-node-panel.svelte` (6줄: building_id, item_id, target_character_id)
+- [x] `building-interaction-action-node-panel.svelte` - 해당 없음
+- [x] `item-interaction-action-node-panel.svelte` - 해당 없음
 
 ### 4. Test World Inspector - 디버깅 도구
 
@@ -151,7 +151,7 @@ const characterNeed = getOrUndefinedCharacterNeed(
 1. [x] **1단계**: behavior-state 파일들 (5개) - 명확한 케이스 (state 버전은 이미 올바름)
 2. [x] **2단계**: Admin 다이얼로그 컴포넌트 (9개) - 삼항 연산자 패턴
 3. [x] **3단계**: label.ts - 필수 관계 분석 후 개선 (4개 수정)
-4. [ ] **4단계**: Admin 액션 패널 컴포넌트 - interaction 관계 분석
+4. [x] **4단계**: Admin 액션 패널 컴포넌트 - interaction 관계 분석 (12개 수정)
 5. [ ] **5단계**: 기타 케이스 검토
 6. [ ] **6단계**: pnpm check 통과 확인
 
