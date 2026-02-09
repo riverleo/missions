@@ -16,13 +16,18 @@
 	{#if tooltip}
 		<Tooltip>
 			<TooltipTrigger>
-				{#snippet child(props)}
-					<Button {...props} variant="ghost" size="sm" class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
+				{#snippet child({ props })}
+					<Button
+						{...props}
+						variant="ghost"
+						size="sm"
+						class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+					>
 						{label}
 					</Button>
 				{/snippet}
 			</TooltipTrigger>
-			<TooltipContent>
+			<TooltipContent side="left">
 				<div class="flex flex-col gap-1">
 					{#each tooltip as item, index}
 						<div>{index + 1}. {item}</div>
