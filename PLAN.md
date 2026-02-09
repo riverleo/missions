@@ -567,42 +567,61 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
    - ✅ Removed all store and type imports no longer needed
    - ✅ Reduced component from 127 lines to 47 lines
 
-#### 2.3. Low Priority - Store getter 치환
-7. [진행중] 나머지 모든 파일의 store 직접 참조 → getter 변경
+#### 2.3. Low Priority - Store getter 치환 ✅ 완료
+7. [x] 나머지 모든 파일의 store 직접 참조 → getter 변경
 
-**완료된 파일 (17/~50, 72개 교체, 46개 남음, 61% 완료)**:
+**완료 (총 118개 store getter 교체, 100% 완료)**:
+
+**Batch 1 - Test World (15개 교체)**:
 - ✅ accordion-item-world-character-entity.svelte (13)
+- ✅ accordion-item-world-building-entity.svelte (1)
+- ✅ accordion-item-world-tile-entity.svelte (1)
+
+**Batch 2 - Behavior Priority (6개 교체)**:
 - ✅ behavior-priority-list-item.svelte (6)
+
+**Batch 3 - Fulfillment Nodes (12개 교체)**:
 - ✅ need-fulfillment-node.svelte (6)
 - ✅ condition-fulfillment-node.svelte (6)
+
+**Batch 4 - Action Node Panels (22개 교체)**:
 - ✅ need-behavior-action-node-panel.svelte (6)
 - ✅ condition-behavior-action-node-panel.svelte (6)
 - ✅ building-interaction-action-node-panel.svelte (6)
-- ✅ item-interaction-action-node-panel.svelte (4)
-- ✅ character-interaction-action-node-panel.svelte (4)
+- ✅ item-interaction-action-node-panel.svelte (2)
+- ✅ character-interaction-action-node-panel.svelte (2)
+
+**Batch 5 - Interaction Panels & Flows (10개 교체)**:
 - ✅ character-interaction-panel.svelte (2)
 - ✅ item-interaction-panel.svelte (2)
 - ✅ building-interaction-panel.svelte (2)
 - ✅ item-interaction-svelte-flow.svelte (2)
-- ✅ character-interaction-svelte-flow.svelte (2)
-- ✅ building-interaction-svelte-flow.svelte (2)
-- ✅ accordion-item-world-building-entity.svelte (2)
-- ✅ accordion-item-world-tile-entity.svelte (1)
+- ✅ character-interaction-svelte-flow.svelte (1)
+- ✅ building-interaction-svelte-flow.svelte (1)
 
-**남은 store 접근 패턴 (총 ~100개)**:
-- $characterStore.data[ - 20개
-- $buildingStore.data[ - 11개
-- $itemStore.data[ - 10개
-- $conditionStore.data[ - 7개
-- $needStore.data[ - 6개
-- interaction stores - 15개
-- interactionAction stores - 9개
-- 기타 stores - 22개
+**Batch 6 - Remaining Files (53개 교체)**:
+- ✅ Dialogs: create, update, delete dialogs (22개)
+- ✅ Edges: condition edges, terrain-tile edges (4개)
+- ✅ Node panels: fulfillment-node-panel, various action panels (8개)
+- ✅ State items: tile, item, character state items (6개)
+- ✅ Commands & misc: scenario-switcher, test-world-marker 등 (13개)
 
-**우선순위**:
-1. High: interaction action node-panel files (6 occurrences each)
-2. Medium: fulfillment-node files (6 occurrences each)
-3. Low: 나머지 파일들 (1-5 occurrences each)
+**구현 결과**:
+- useCharacter getters로 교체 (character, characterBody, characterFaceStates 등)
+- useBuilding getters로 교체 (building, buildingStates)
+- useItem getters로 교체 (item, itemStates)
+- useInteraction getters로 교체 (itemInteraction, characterInteraction, buildingInteraction 등)
+- useBehavior getters로 교체 (needBehavior, conditionBehavior)
+- useCondition getters로 교체 (condition, conditionEffect)
+- useNeed getters로 교체 (need)
+
+**Pragmatic 수정사항**:
+- useTerrain, useScenario: getOrUndefined 함수 미구현으로 store 접근 유지
+- useBehavior: 기존 get 함수 활용 (이미 undefined 반환)
+- State array getters에 ?? [] fallback 추가
+- Undefined 파라미터 체크 추가
+
+**남은 에러**: 2개 (pre-existing test file issues, 작업과 무관)
 
 **각 작업별 흐름**:
 1. 해당 파일들 수정
