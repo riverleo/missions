@@ -15,12 +15,12 @@
 	import { getActionString } from '$lib/utils/label';
 
 	const {
-		conditionBehaviorStore,
 		conditionBehaviorDialogStore,
 		closeConditionBehaviorDialog,
+		getConditionBehavior,
 		admin,
 	} = useBehavior();
-	const { conditionStore } = useBuilding();
+	const { getOrUndefinedCondition } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(
@@ -28,10 +28,8 @@
 			? $conditionBehaviorDialogStore.conditionBehaviorId
 			: undefined
 	);
-	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
-	const condition = $derived(
-		behavior?.condition_id ? $conditionStore.data[behavior.condition_id] : undefined
-	);
+	const behavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
+	const condition = $derived(getOrUndefinedCondition(behavior?.condition_id));
 	const open = $derived($conditionBehaviorDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);

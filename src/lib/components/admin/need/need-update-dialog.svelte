@@ -19,13 +19,13 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { getActionString, getFormString } from '$lib/utils/label';
 
-	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
+	const { needDialogStore, closeNeedDialog, getOrUndefinedNeed, admin } = useCharacter();
 
 	const open = $derived($needDialogStore?.type === 'update');
 	const needId = $derived(
 		$needDialogStore?.type === 'update' ? $needDialogStore.needId : undefined
 	);
-	const currentNeed = $derived(needId ? $needStore.data[needId] : undefined);
+	const currentNeed = $derived(getOrUndefinedNeed(needId));
 
 	let name = $state('');
 	let maxValue = $state(100);

@@ -20,14 +20,19 @@
 	import type { CharacterBodyId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { characterStore, admin, characterDialogStore, closeCharacterDialog, characterBodyStore } =
-		useCharacter();
+	const {
+		admin,
+		characterDialogStore,
+		closeCharacterDialog,
+		characterBodyStore,
+		getOrUndefinedCharacter,
+	} = useCharacter();
 
 	const open = $derived($characterDialogStore?.type === 'update');
 	const characterId = $derived(
 		$characterDialogStore?.type === 'update' ? $characterDialogStore.characterId : undefined
 	);
-	const character = $derived(characterId ? $characterStore.data[characterId] : undefined);
+	const character = $derived(getOrUndefinedCharacter(characterId));
 	const bodies = $derived(Object.values($characterBodyStore.data));
 
 	let name = $state('');

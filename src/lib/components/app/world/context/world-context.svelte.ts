@@ -318,8 +318,7 @@ export class WorldContext {
 		Runner.run(this.runner, this.engine);
 
 		// 틱 구독 (틱이 변경될 때마다 모든 엔티티의 tick 메서드 호출)
-		const currentHook = useCurrent();
-		this.tickUnsubscriber = currentHook.tickStore.subscribe((currentTick) => {
+		this.tickUnsubscriber = useCurrent().tickStore.subscribe((currentTick) => {
 			this.tickEntities(currentTick);
 		});
 

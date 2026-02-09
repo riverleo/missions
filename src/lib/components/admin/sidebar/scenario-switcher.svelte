@@ -18,7 +18,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 
-	const { scenarioStore, fetch, openScenarioDialog } = useScenario();
+	const { scenarioStore, fetch, openScenarioDialog, } = useScenario();
 
 	const scenarios = $derived(Object.values($scenarioStore.data));
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);

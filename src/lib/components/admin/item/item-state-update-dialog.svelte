@@ -19,7 +19,8 @@
 	import type { ItemStateId, ItemId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { itemStore, itemStateStore, admin, itemStateDialogStore, closeStateDialog } = useItem();
+	const { itemStateStore, admin, itemStateDialogStore, closeStateDialog, getOrUndefinedItem } =
+		useItem();
 
 	const open = $derived($itemStateDialogStore?.type === 'update');
 	const itemStateId = $derived(
@@ -36,7 +37,7 @@
 		return undefined;
 	});
 
-	const item = $derived(itemState ? $itemStore.data[itemState.item_id as ItemId] : undefined);
+	const item = $derived(itemState ? getOrUndefinedItem(itemState.item_id as ItemId) : undefined);
 
 	let minDurability = $state('');
 	let maxDurability = $state('');

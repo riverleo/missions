@@ -29,7 +29,7 @@
 	}: Props = $props();
 
 	const edges = useEdges();
-	const { needStore } = useCharacter();
+	const { getOrUndefinedNeed } = useCharacter();
 
 	const [edgePath, labelX, labelY] = $derived(
 		getBezierPath({
@@ -44,7 +44,7 @@
 
 	const calculatedDecrease = $derived(() => {
 		if (!data?.characterNeed) return 0;
-		const need = $needStore.data[data.characterNeed.need_id];
+		const need = getOrUndefinedNeed(data.characterNeed.need_id);
 		if (!need) return 0;
 		return need.decrease_per_tick * data.characterNeed.decay_multiplier;
 	});

@@ -48,10 +48,10 @@
 	} from '$lib/types';
 
 	const {
-		conditionStore,
 		conditionFulfillmentStore,
 		buildingConditionStore,
 		conditionEffectStore,
+		getOrUndefinedCondition,
 		admin,
 	} = useBuilding();
 
@@ -67,7 +67,7 @@
 	const conditionId = $derived(page.params.conditionId as ConditionId);
 
 	// 데이터 (선택된 컨디션 기준으로 필터링)
-	const condition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
+	const condition = $derived(getOrUndefinedCondition(conditionId));
 	const conditionFulfillments = $derived(
 		Object.values($conditionFulfillmentStore.data).filter((cf) => cf.condition_id === conditionId)
 	);

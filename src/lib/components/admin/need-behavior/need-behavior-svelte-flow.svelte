@@ -22,12 +22,12 @@
 	import NeedBehaviorActionNodePanel from './need-behavior-action-node-panel.svelte';
 	import type { NeedBehaviorId, NeedBehaviorActionId } from '$lib/types';
 
-	const { needBehaviorStore, needBehaviorActionStore, admin } = useBehavior();
+	const { needBehaviorActionStore, getNeedBehavior, admin } = useBehavior();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needBehaviorId = $derived(page.params.behaviorId as NeedBehaviorId);
-	const behavior = $derived(needBehaviorId ? $needBehaviorStore.data[needBehaviorId] : undefined);
+	const behavior = $derived(needBehaviorId ? getNeedBehavior(needBehaviorId) : undefined);
 	const actions = $derived(
 		needBehaviorId
 			? Object.values($needBehaviorActionStore.data).filter(

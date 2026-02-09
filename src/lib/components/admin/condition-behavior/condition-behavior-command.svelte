@@ -24,7 +24,7 @@
 
 	const { conditionBehaviorStore, openConditionBehaviorDialog } = useBehavior();
 	const { conditionStore } = useBuilding();
-	const { characterStore } = useCharacter();
+	const { getOrUndefinedCharacter } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBehaviorId = $derived(page.params.behaviorId);
 
@@ -51,9 +51,7 @@
 			{#each behaviorsGroupedByCondition() as { condition, behaviors } (condition.id)}
 				<CommandGroup heading={condition.name}>
 					{#each behaviors as behavior (behavior.id)}
-						{@const character = behavior.character_id
-							? $characterStore.data[behavior.character_id as CharacterId]
-							: undefined}
+						{@const character = getOrUndefinedCharacter(behavior.character_id as CharacterId)}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/condition-behaviors/${behavior.id}`}
 							class="group pr-1"

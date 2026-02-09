@@ -16,13 +16,10 @@
 	const { data, id, selected = false }: Props = $props();
 	const effect = $derived(data.effect);
 
-	const { characterStore } = useCharacter();
-	const { needStore } = useCharacter();
+	const { getOrUndefinedCharacter, getOrUndefinedNeed } = useCharacter();
 
-	const character = $derived(
-		effect.character_id ? $characterStore.data[effect.character_id] : undefined
-	);
-	const need = $derived($needStore.data[effect.need_id]);
+	const character = $derived(getOrUndefinedCharacter(effect.character_id));
+	const need = $derived(getOrUndefinedNeed(effect.need_id));
 
 	const label = $derived.by(() => {
 		const characterName = character ? `${character.name}` : getFallbackString('allCharacters');

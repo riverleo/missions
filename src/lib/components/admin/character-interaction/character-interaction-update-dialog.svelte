@@ -22,9 +22,9 @@
 
 	const { characterStore } = useCharacter();
 	const {
-		characterInteractionStore,
 		characterInteractionDialogStore,
 		closeCharacterInteractionDialog,
+		getOrUndefinedCharacterInteraction,
 		admin,
 	} = useInteraction();
 
@@ -34,9 +34,7 @@
 			? $characterInteractionDialogStore.characterInteractionId
 			: undefined
 	);
-	const interaction = $derived(
-		characterInteractionId ? $characterInteractionStore.data[characterInteractionId] : undefined
-	);
+	const interaction = $derived(getOrUndefinedCharacterInteraction(characterInteractionId));
 
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 

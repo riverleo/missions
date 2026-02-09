@@ -35,9 +35,9 @@
 	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
 
 	const {
-		conditionBehaviorStore,
 		conditionBehaviorDialogStore,
 		closeConditionBehaviorDialog,
+		getConditionBehavior,
 		admin,
 	} = useBehavior();
 	const { conditionStore } = useBuilding();
@@ -49,9 +49,7 @@
 			? $conditionBehaviorDialogStore.conditionBehaviorId
 			: undefined
 	);
-	const currentBehavior = $derived(
-		behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined
-	);
+	const currentBehavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (c) => c.name));
 

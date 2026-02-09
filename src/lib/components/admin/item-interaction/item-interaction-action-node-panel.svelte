@@ -42,7 +42,7 @@
 
 	let { action, itemInteractionId, hasParent = false }: Props = $props();
 
-	const { itemStateStore } = useItem();
+	const { getItemStates } = useItem();
 	const { characterStore, getOrUndefinedCharacter } = useCharacter();
 	const {
 		itemInteractionStore,
@@ -57,9 +57,7 @@
 	const characters = $derived(Object.values($characterStore.data));
 
 	// 아이템 상태 가져오기
-	const itemStates = $derived(
-		interaction?.item_id ? ($itemStateStore.data[interaction.item_id] ?? []) : []
-	);
+	const itemStates = $derived(interaction?.item_id ? (getItemStates(interaction.item_id) ?? []) : []);
 	const heldItemState = $derived(itemStates[0]); // 첫 번째 state 사용
 
 	// 미리보기용 캐릭터 선택

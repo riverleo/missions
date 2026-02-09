@@ -14,13 +14,13 @@
 	import type { ScenarioId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { needStore, needDialogStore, closeNeedDialog, admin } = useCharacter();
+	const { needDialogStore, closeNeedDialog, getOrUndefinedNeed, admin } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const needId = $derived(
 		$needDialogStore?.type === 'delete' ? $needDialogStore.needId : undefined
 	);
-	const need = $derived(needId ? $needStore.data[needId] : undefined);
+	const need = $derived(getOrUndefinedNeed(needId));
 	const open = $derived($needDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);

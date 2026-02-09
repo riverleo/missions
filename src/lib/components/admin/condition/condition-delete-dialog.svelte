@@ -14,13 +14,13 @@
 	import type { ScenarioId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
+	const { conditionDialogStore, closeConditionDialog, getOrUndefinedCondition, admin } = useBuilding();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const conditionId = $derived(
 		$conditionDialogStore?.type === 'delete' ? $conditionDialogStore.conditionId : undefined
 	);
-	const condition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
+	const condition = $derived(getOrUndefinedCondition(conditionId));
 	const open = $derived($conditionDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);

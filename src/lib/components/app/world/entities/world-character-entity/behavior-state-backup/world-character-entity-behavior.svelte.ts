@@ -7,6 +7,11 @@ import updateMove from './update-move';
 import updateDirection from './update-direction';
 import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
+import tickWaitIfIdle from './tick-wait-if-idle';
+import tickFindAndGo from './tick-find-and-go';
+import tickActionIfSystemItemPick from './tick-action-if-system-item-pick';
+import tickActionIfOnceItemUse from './tick-action-if-once-item-use';
+import tickNextOrClear from './tick-next-or-clear';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -30,6 +35,11 @@ export class WorldCharacterEntityBehavior {
 	updateDirection = updateDirection;
 	tick = tick;
 	tickFindBehaviorTarget = tickFindBehaviorTarget;
+	tickWaitIfIdle = tickWaitIfIdle;
+	tickFindAndGo = tickFindAndGo;
+	tickActionIfSystemItemPick = tickActionIfSystemItemPick;
+	tickActionIfOnceItemUse = tickActionIfOnceItemUse;
+	tickNextOrClear = tickNextOrClear;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;

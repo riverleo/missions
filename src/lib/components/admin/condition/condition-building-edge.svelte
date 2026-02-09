@@ -28,7 +28,7 @@
 		style,
 	}: Props = $props();
 
-	const { conditionStore } = useBuilding();
+	const { getOrUndefinedCondition } = useBuilding();
 
 	const [edgePath, labelX, labelY] = $derived(
 		getBezierPath({
@@ -43,7 +43,7 @@
 
 	const calculatedDecrease = $derived(() => {
 		if (!data?.buildingCondition) return 0;
-		const condition = $conditionStore.data[data.buildingCondition.condition_id];
+		const condition = getOrUndefinedCondition(data.buildingCondition.condition_id);
 		if (!condition) return 0;
 		return condition.decrease_per_tick * data.buildingCondition.decrease_multiplier;
 	});

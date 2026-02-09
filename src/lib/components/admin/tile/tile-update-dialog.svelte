@@ -18,10 +18,10 @@
 	import { getActionString, getFormString } from '$lib/utils/label';
 
 	const {
-		tileStore,
 		admin,
 		tileDialogStore: terrainTileDialogStore,
 		closeTileDialog,
+		tileStore,
 	} = useTerrain();
 
 	const open = $derived($terrainTileDialogStore?.type === 'update');

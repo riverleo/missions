@@ -23,16 +23,12 @@
 	let { behavior, href, isSelected = false, showActions = true, onclick }: Props = $props();
 
 	const { openConditionBehaviorDialog } = useBehavior();
-	const { conditionStore } = useBuilding();
-	const { characterStore } = useCharacter();
+	const { getOrUndefinedCondition } = useBuilding();
+	const { getOrUndefinedCharacter } = useCharacter();
 
 	const description = $derived.by(() => {
-		const condition = behavior.condition_id
-			? $conditionStore.data[behavior.condition_id]
-			: undefined;
-		const character = behavior.character_id
-			? $characterStore.data[behavior.character_id as CharacterId]
-			: undefined;
+		const condition = getOrUndefinedCondition(behavior.condition_id);
+		const character = getOrUndefinedCharacter(behavior.character_id as CharacterId);
 
 		const parts = [];
 		if (character) parts.push(character.name);

@@ -20,7 +20,7 @@
 	import { IconMathEqualLower, IconMathLower, IconVariable } from '@tabler/icons-svelte';
 	import { getActionString } from '$lib/utils/label';
 
-	const { tileStore, tileStateStore, admin, tileStateDialogStore, closeTileStateDialog } =
+	const { tileStateStore, admin, tileStateDialogStore, closeTileStateDialog, tileStore } =
 		useTerrain();
 
 	const open = $derived($tileStateDialogStore?.type === 'update');

@@ -14,7 +14,7 @@
 	import type { ScenarioId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { characterBodyStore, characterBodyDialogStore, closeCharacterBodyDialog, admin } =
+	const { characterBodyDialogStore, closeCharacterBodyDialog, getOrUndefinedCharacterBody, admin } =
 		useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentBodyId = $derived(page.params.bodyId);
@@ -26,7 +26,7 @@
 	);
 	const open = $derived(deleteState?.open ?? false);
 	const bodyToDelete = $derived(
-		deleteState ? $characterBodyStore.data[deleteState.bodyId] : undefined
+		deleteState ? getOrUndefinedCharacterBody(deleteState.bodyId) : undefined
 	);
 
 	let isDeleting = $state(false);

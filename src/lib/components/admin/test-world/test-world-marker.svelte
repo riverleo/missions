@@ -14,7 +14,7 @@
 	const { worldStore } = useWorld();
 	const { terrainStore } = useTerrain();
 
-	// terrain을 terrainStore에서 구독
+	// terrain을 getter에서 가져옴
 	const terrainId = $derived(
 		worldContext ? $worldStore.data[worldContext.worldId]?.terrain_id : undefined
 	);

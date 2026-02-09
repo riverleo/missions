@@ -36,7 +36,7 @@
 	import NeedCharacterEdge from './need-character-edge.svelte';
 	import type { CharacterId, NeedId, NeedFulfillmentId } from '$lib/types';
 
-	const { needStore, needFulfillmentStore, characterNeedStore, admin } = useCharacter();
+	const { needFulfillmentStore, characterNeedStore, getOrUndefinedNeed, admin } = useCharacter();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
@@ -49,7 +49,7 @@
 	const needId = $derived(page.params.needId as NeedId);
 
 	// 데이터 (선택된 욕구 기준으로 필터링)
-	const need = $derived(needId ? $needStore.data[needId] : undefined);
+	const need = $derived(getOrUndefinedNeed(needId));
 	const needFulfillments = $derived(
 		Object.values($needFulfillmentStore.data).filter((nf) => nf.need_id === needId)
 	);

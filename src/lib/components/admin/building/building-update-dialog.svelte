@@ -21,8 +21,13 @@
 	import { page } from '$app/state';
 	import { getActionString } from '$lib/utils/label';
 
-	const { buildingStore, buildingItemStore, admin, buildingDialogStore, closeBuildingDialog } =
-		useBuilding();
+	const {
+		buildingItemStore,
+		admin,
+		buildingDialogStore,
+		closeBuildingDialog,
+		getOrUndefinedBuilding,
+	} = useBuilding();
 	const { itemStore } = useItem();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -30,7 +35,7 @@
 	const buildingId = $derived(
 		$buildingDialogStore?.type === 'update' ? $buildingDialogStore.buildingId : undefined
 	);
-	const building = $derived(buildingId ? $buildingStore.data[buildingId] : undefined);
+	const building = $derived(getOrUndefinedBuilding(buildingId));
 	const items = $derived(Object.values($itemStore.data));
 	const buildingItems = $derived(
 		Object.values($buildingItemStore.data).filter((bi) => bi.building_id === buildingId)

@@ -27,12 +27,12 @@
 	import ConditionBehaviorActionNodePanel from './condition-behavior-action-node-panel.svelte';
 	import type { ConditionBehaviorId, ConditionBehaviorActionId } from '$lib/types';
 
-	const { conditionBehaviorStore, conditionBehaviorActionStore, admin } = useBehavior();
+	const { conditionBehaviorActionStore, getConditionBehavior, admin } = useBehavior();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	const behaviorId = $derived(page.params.behaviorId as ConditionBehaviorId);
-	const behavior = $derived(behaviorId ? $conditionBehaviorStore.data[behaviorId] : undefined);
+	const behavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
 	const actions = $derived(
 		behaviorId
 			? Object.values($conditionBehaviorActionStore.data).filter(

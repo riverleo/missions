@@ -17,11 +17,11 @@
 
 	let { buildingId, type }: Props = $props();
 
-	const { buildingStore, buildingStateStore, admin } = useBuilding();
+	const { getOrUndefinedBuilding, getBuildingStates, admin } = useBuilding();
 	const { uiStore } = admin;
 
-	const building = $derived($buildingStore.data[buildingId]);
-	const buildingStates = $derived($buildingStateStore.data[buildingId] ?? []);
+	const building = $derived(getOrUndefinedBuilding(buildingId));
+	const buildingStates = $derived(getBuildingStates(buildingId) ?? []);
 	const buildingState = $derived(buildingStates.find((s: BuildingState) => s.type === type));
 
 	async function onchange(change: SpriteStateChange) {

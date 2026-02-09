@@ -19,13 +19,13 @@
 	import { Tooltip, TooltipContent, TooltipTrigger } from '$lib/components/ui/tooltip';
 	import { getActionString, getFormString } from '$lib/utils/label';
 
-	const { itemStore, admin, itemDialogStore, closeItemDialog } = useItem();
+	const { admin, itemDialogStore, closeItemDialog, getOrUndefinedItem } = useItem();
 
 	const open = $derived($itemDialogStore?.type === 'update');
 	const itemId = $derived(
 		$itemDialogStore?.type === 'update' ? $itemDialogStore.itemId : undefined
 	);
-	const item = $derived(itemId ? $itemStore.data[itemId] : undefined);
+	const item = $derived(getOrUndefinedItem(itemId));
 
 	let name = $state('');
 	let maxDurabilityTicks = $state<number | undefined>(undefined);
