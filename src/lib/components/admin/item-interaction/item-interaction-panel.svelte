@@ -47,14 +47,19 @@
 
 	let { interaction, itemInteractionId }: Props = $props();
 
-	const { itemStore } = useItem();
-	const { itemInteractionActionStore, openItemInteractionDialog, admin } = useInteraction();
+	const { itemStore, getItem } = useItem();
+	const {
+		itemInteractionActionStore,
+		getItemInteractionActions,
+		openItemInteractionDialog,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();
 
-	const item = $derived($itemStore.data[interaction.item_id]);
-	const actions = $derived($itemInteractionActionStore.data[itemInteractionId] ?? []);
+	const item = $derived(getItem(interaction.item_id));
+	const actions = $derived(getItemInteractionActions(itemInteractionId));
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a: ItemInteractionAction) => a.root));
