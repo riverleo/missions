@@ -634,10 +634,9 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 ## Phase 5: 검증 ✅ 완료
 
 ### 최종 검증 항목
-- [x] `pnpm check` 통과 - ⚠️ 2개 에러 (별도 작업인 behavior-state 관련, admin 리팩토링과 무관)
-  - tick-find-behavior-target.spec.ts: Vector brand 타입 이슈 (test 파일)
-  - behavior-state-backup/tick-find-behavior-target.ts: 인터페이스 불일치 (backup 파일)
-  - 두 에러 모두 PLAN_BEHAVIOR_STATE.md의 작업 범위
+- [x] `pnpm check` 통과 - ✅ 0 errors, 0 warnings
+  - ✅ tick-find-behavior-target.spec.ts: vectorUtils.createVector 사용으로 수정
+  - ✅ behavior-state-backup/tick-find-behavior-target.ts: type assertion으로 수정
 - [x] 모든 label 옵션이 중앙화됨
   - getCharacterBodyStateLabels(), getCharacterFaceStateLabels() 등
   - constants.ts로 타입 배열 이동
