@@ -24,9 +24,37 @@ import type {
 	BuildingInteraction,
 	ItemInteraction,
 	CharacterInteraction,
+	ScenarioId,
+	ChapterId,
+	QuestId,
+	NarrativeId,
+	TerrainId,
+	CharacterId,
+	CharacterBodyId,
+	BuildingId,
+	BuildingInteractionId,
+	CharacterInteractionId,
+	ItemInteractionId,
+	ConditionId,
+	ConditionBehaviorId,
+	ItemId,
+	NeedId,
+	NeedBehaviorId,
 } from '$lib/types';
+import { get } from 'svelte/store';
 import { josa } from './josa';
-import { useCharacter, useBuilding, useItem, useInteraction } from '$lib/hooks';
+import {
+	useCharacter,
+	useBuilding,
+	useItem,
+	useInteraction,
+	useScenario,
+	useChapter,
+	useQuest,
+	useNarrative,
+	useTerrain,
+	useBehavior,
+} from '$lib/hooks';
 
 // ============================================================
 // Common Labels
@@ -665,4 +693,93 @@ export function getInteractionLabelString(
 	const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 	const characterName = character ? character.name : getFallbackString('allCharacters');
 	return `${characterName} ${behaviorLabel}`;
+}
+
+export function getBreadcrumbTitleString(
+	id: string | undefined,
+	prevSegment: string | undefined
+): string | undefined {
+	if (!id) return undefined;
+
+	// Use getter functions or stores where getters aren't available yet
+	if (prevSegment === 'scenarios') {
+		const { scenarioStore } = useScenario();
+		return get(scenarioStore).data?.[id as ScenarioId]?.title;
+	}
+	if (prevSegment === 'chapters') {
+		const { chapterStore } = useChapter();
+		return get(chapterStore).data?.[id as ChapterId]?.title;
+	}
+	if (prevSegment === 'quests') {
+		const { questStore } = useQuest();
+		return get(questStore).data?.[id as QuestId]?.title;
+	}
+	if (prevSegment === 'narratives') {
+		const { narrativeStore } = useNarrative();
+		return get(narrativeStore).data?.[id as NarrativeId]?.title;
+	}
+	if (prevSegment === 'terrains') {
+		const { terrainStore } = useTerrain();
+		return get(terrainStore).data?.[id as TerrainId]?.title;
+	}
+	if (prevSegment === 'characters') {
+		const { getOrUndefinedCharacter } = useCharacter();
+		return getOrUndefinedCharacter(id as CharacterId)?.name;
+	}
+	if (prevSegment === 'character-bodies') {
+		const { getOrUndefinedCharacterBody } = useCharacter();
+		return getOrUndefinedCharacterBody(id as CharacterBodyId)?.name;
+	}
+	if (prevSegment === 'buildings') {
+		const { getOrUndefinedBuilding } = useBuilding();
+		return getOrUndefinedBuilding(id as BuildingId)?.name;
+	}
+	if (prevSegment === 'building-interactions') {
+		const { getOrUndefinedBuildingInteraction } = useInteraction();
+		const { getOrUndefinedBuilding } = useBuilding();
+		const interaction = getOrUndefinedBuildingInteraction(id as BuildingInteractionId);
+		if (!interaction) return undefined;
+		const building = getOrUndefinedBuilding(interaction.building_id);
+		const label = getInteractionLabelString(interaction);
+		return `${building?.name ?? '건물'} - ${label}`;
+	}
+	if (prevSegment === 'character-interactions') {
+		const { getOrUndefinedCharacterInteraction } = useInteraction();
+		const { getOrUndefinedCharacter } = useCharacter();
+		const interaction = getOrUndefinedCharacterInteraction(id as CharacterInteractionId);
+		if (!interaction) return undefined;
+		const targetCharacter = getOrUndefinedCharacter(interaction.target_character_id);
+		const label = getInteractionLabelString(interaction);
+		return `${targetCharacter?.name ?? '캐릭터'} - ${label}`;
+	}
+	if (prevSegment === 'item-interactions') {
+		const { getOrUndefinedItemInteraction } = useInteraction();
+		const { getOrUndefinedItem } = useItem();
+		const interaction = getOrUndefinedItemInteraction(id as ItemInteractionId);
+		if (!interaction) return undefined;
+		const item = getOrUndefinedItem(interaction.item_id);
+		const label = getInteractionLabelString(interaction);
+		return `${item?.name ?? '아이템'} - ${label}`;
+	}
+	if (prevSegment === 'conditions') {
+		const { getOrUndefinedCondition } = useBuilding();
+		return getOrUndefinedCondition(id as ConditionId)?.name;
+	}
+	if (prevSegment === 'condition-behaviors') {
+		const { conditionBehaviorStore } = useBehavior();
+		return get(conditionBehaviorStore).data?.[id as ConditionBehaviorId]?.name;
+	}
+	if (prevSegment === 'items') {
+		const { getOrUndefinedItem } = useItem();
+		return getOrUndefinedItem(id as ItemId)?.name;
+	}
+	if (prevSegment === 'needs') {
+		const { getOrUndefinedNeed } = useCharacter();
+		return getOrUndefinedNeed(id as NeedId)?.name;
+	}
+	if (prevSegment === 'need-behaviors') {
+		const { needBehaviorStore } = useBehavior();
+		return get(needBehaviorStore).data?.[id as NeedBehaviorId]?.name;
+	}
+	return undefined;
 }

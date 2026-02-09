@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useChapter, useCharacter, useInteraction, useItem, useNarrative, useQuest, useScenario, useTerrain } from '$lib/hooks';
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
 	import {
 		Breadcrumb,
@@ -10,121 +9,9 @@
 		BreadcrumbSeparator,
 	} from '$lib/components/ui/breadcrumb';
 	import { page } from '$app/state';
-	import type {
-		ScenarioId,
-		ChapterId,
-		QuestId,
-		NarrativeId,
-		TerrainId,
-		CharacterId,
-		CharacterBodyId,
-		BuildingId,
-		BuildingInteractionId,
-		CharacterInteractionId,
-		ItemInteractionId,
-		ConditionId,
-		ConditionBehaviorId,
-		ItemId,
-		NeedId,
-		NeedBehaviorId,
-	} from '$lib/types';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
-	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
+	import { getBreadcrumbTitleString } from '$lib/utils/label';
 
-	const { scenarioStore } = useScenario();
-	const { chapterStore } = useChapter();
-	const { questStore } = useQuest();
-	const { narrativeStore } = useNarrative();
-	const { terrainStore } = useTerrain();
-	const { characterStore, characterBodyStore, needStore } = useCharacter();
-	const { buildingStore, conditionStore } = useBuilding();
-	const { conditionBehaviorStore, needBehaviorStore } = useBehavior();
-	const { itemStore } = useItem();
-	const { buildingInteractionStore, itemInteractionStore, characterInteractionStore } =
-		useInteraction();
-
-	function getTitle(id: string, prevSegment: string | undefined): string | undefined {
-		// 이전 세그먼트에 따라 어떤 스토어에서 찾을지 결정
-		if (prevSegment === 'scenarios') {
-			return $scenarioStore.data?.[id as ScenarioId]?.title;
-		}
-		if (prevSegment === 'chapters') {
-			return $chapterStore.data?.[id as ChapterId]?.title;
-		}
-		if (prevSegment === 'quests') {
-			return $questStore.data?.[id as QuestId]?.title;
-		}
-		if (prevSegment === 'narratives') {
-			return $narrativeStore.data?.[id as NarrativeId]?.title;
-		}
-		if (prevSegment === 'terrains') {
-			return $terrainStore.data?.[id as TerrainId]?.title;
-		}
-		if (prevSegment === 'characters') {
-			return $characterStore.data?.[id as CharacterId]?.name;
-		}
-		if (prevSegment === 'character-bodies') {
-			return $characterBodyStore.data?.[id as CharacterBodyId]?.name;
-		}
-		if (prevSegment === 'buildings') {
-			return $buildingStore.data?.[id as BuildingId]?.name;
-		}
-		if (prevSegment === 'building-interactions') {
-			const interaction = $buildingInteractionStore.data?.[id as BuildingInteractionId];
-			if (!interaction) return undefined;
-			const building = $buildingStore.data?.[interaction.building_id];
-			const character = interaction.character_id
-				? $characterStore.data?.[interaction.character_id]
-				: undefined;
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
-			const characterName = character ? character.name : getFallbackString('allCharacters');
-			return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
-		}
-		if (prevSegment === 'character-interactions') {
-			const interaction = $characterInteractionStore.data?.[id as CharacterInteractionId];
-			if (!interaction) return undefined;
-			const targetCharacter = $characterStore.data?.[interaction.target_character_id];
-			const character = interaction.character_id
-				? $characterStore.data?.[interaction.character_id]
-				: undefined;
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
-			const characterName = character ? character.name : getFallbackString('allCharacters');
-			return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
-		}
-		if (prevSegment === 'item-interactions') {
-			const interaction = $itemInteractionStore.data?.[id as ItemInteractionId];
-			if (!interaction) return undefined;
-			const item = $itemStore.data?.[interaction.item_id];
-			const character = interaction.character_id
-				? $characterStore.data?.[interaction.character_id]
-				: undefined;
-			const interactionType = (interaction.once_interaction_type ||
-				interaction.fulfill_interaction_type)!;
-			const behaviorLabel = getBehaviorInteractTypeString(interactionType);
-			const characterName = character ? character.name : getFallbackString('allCharacters');
-			return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
-		}
-		if (prevSegment === 'conditions') {
-			return $conditionStore.data?.[id as ConditionId]?.name;
-		}
-		if (prevSegment === 'condition-behaviors') {
-			return $conditionBehaviorStore.data?.[id as ConditionBehaviorId]?.name;
-		}
-		if (prevSegment === 'items') {
-			return $itemStore.data?.[id as ItemId]?.name;
-		}
-		if (prevSegment === 'needs') {
-			return $needStore.data?.[id as NeedId]?.name;
-		}
-		if (prevSegment === 'need-behaviors') {
-			return $needBehaviorStore.data?.[id as NeedBehaviorId]?.name;
-		}
-		return undefined;
-	}
 
 	const breadcrumbs = $derived(() => {
 		const path = page.url.pathname;
@@ -178,7 +65,7 @@
 			// UUID 형태의 ID는 title로 표시
 			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
 				const prevSegment = segments[i - 1];
-				const title = getTitle(segment, prevSegment);
+				const title = getBreadcrumbTitleString(segment, prevSegment);
 				label = title || segment.slice(0, 8);
 			}
 
