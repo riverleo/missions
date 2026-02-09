@@ -552,15 +552,20 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
    - ✅ need-fulfillment-node-panel.svelte: removed selectedTargetLabel $derived, use getFulfillmentTargetLabelString(changes)
    - ✅ condition-fulfillment-node-panel.svelte: same as above
 
-5. [ ] **getInteractionLabel 통합**
-   - item-interaction-command.svelte
-   - character-interaction-command.svelte
-   - building-interaction-command.svelte
-   - → `getInteractionLabelString()` 사용
+5. [x] **getInteractionLabel 통합** ✅
+   - ✅ Added `getInteractionLabelString()` function in label.ts that accepts BuildingInteraction | ItemInteraction | CharacterInteraction
+   - ✅ item-interaction-command.svelte: removed inline pattern, use getInteractionLabelString()
+   - ✅ character-interaction-command.svelte: removed local helper, use getInteractionLabelString()
+   - ✅ building-interaction-command.svelte: removed inline pattern, use getInteractionLabelString()
+   - ✅ Removed unused imports (characterStore, CharacterId) from all 3 files
 
-6. [ ] **admin-site-header 대규모 정리**
-   - 16개 store 직접 참조 → getter
-   - getTitle 로직 → `getBreadcrumbTitleString()`
+6. [x] **admin-site-header 대규모 정리** ✅
+   - ✅ Added `getBreadcrumbTitleString()` function in label.ts with all entity type handling
+   - ✅ Removed 16 store direct references from admin-site-header.svelte
+   - ✅ Removed local getTitle function (80+ lines)
+   - ✅ Reused getInteractionLabelString() for building/character/item interactions
+   - ✅ Removed all store and type imports no longer needed
+   - ✅ Reduced component from 127 lines to 47 lines
 
 #### 2.3. Low Priority - Store getter 치환
 7. [ ] 나머지 모든 파일의 store 직접 참조 → getter 변경
