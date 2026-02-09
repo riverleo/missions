@@ -570,7 +570,7 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 #### 2.3. Low Priority - Store getter 치환
 7. [진행중] 나머지 모든 파일의 store 직접 참조 → getter 변경
 
-**완료된 파일 (12/~50, 63개 교체, 55개 남음)**:
+**완료된 파일 (17/~50, 72개 교체, 46개 남음, 61% 완료)**:
 - ✅ accordion-item-world-character-entity.svelte (13)
 - ✅ behavior-priority-list-item.svelte (6)
 - ✅ need-fulfillment-node.svelte (6)
@@ -583,6 +583,11 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 - ✅ character-interaction-panel.svelte (2)
 - ✅ item-interaction-panel.svelte (2)
 - ✅ building-interaction-panel.svelte (2)
+- ✅ item-interaction-svelte-flow.svelte (2)
+- ✅ character-interaction-svelte-flow.svelte (2)
+- ✅ building-interaction-svelte-flow.svelte (2)
+- ✅ accordion-item-world-building-entity.svelte (2)
+- ✅ accordion-item-world-tile-entity.svelte (1)
 
 **남은 store 접근 패턴 (총 ~100개)**:
 - $characterStore.data[ - 20개
