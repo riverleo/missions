@@ -246,7 +246,7 @@ function createBuildingStore() {
 
 	// Getter functions - throw if not found (required data)
 	function getBuilding(id: string): Building {
-		const data = get(buildingStore).data[id as BuildingId];
+		const data = getOrUndefinedBuilding(id);
 		if (!data) throw new Error(`Building not found: ${id}`);
 		return data;
 	}

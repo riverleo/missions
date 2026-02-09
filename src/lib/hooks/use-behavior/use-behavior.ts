@@ -230,19 +230,19 @@ function createBehaviorStore() {
 
 	// Getter functions - throw if not found
 	function getBehaviorPriority(id: string): BehaviorPriority {
-		const data = get(behaviorPriorityStore).data[id as BehaviorPriorityId];
+		const data = getOrUndefinedBehaviorPriority(id);
 		if (!data) throw new Error(`BehaviorPriority not found: ${id}`);
 		return data;
 	}
 
 	function getNeedBehavior(id: string): NeedBehavior {
-		const data = get(needBehaviorStore).data[id as NeedBehaviorId];
+		const data = getOrUndefinedNeedBehavior(id);
 		if (!data) throw new Error(`NeedBehavior not found: ${id}`);
 		return data;
 	}
 
 	function getNeedBehaviorAction(id: string): NeedBehaviorAction {
-		const data = get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
+		const data = getOrUndefinedNeedBehaviorAction(id);
 		if (!data) throw new Error(`NeedBehaviorAction not found: ${id}`);
 		return data;
 	}
@@ -314,19 +314,7 @@ function createBehaviorStore() {
 	}
 
 	function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction | undefined {
-		const nextActionId =
-			behaviorAction.behaviorType === 'need'
-				? behaviorAction.next_need_behavior_action_id
-				: behaviorAction.next_condition_behavior_action_id;
-
-		if (!nextActionId) return undefined;
-
-		const plainAction =
-			behaviorAction.behaviorType === 'need'
-				? getNeedBehaviorAction(nextActionId)
-				: getConditionBehaviorAction(nextActionId);
-
-		return BehaviorIdUtils.to(plainAction);
+		return getOrUndefinedNextBehaviorAction(behaviorAction);
 	}
 
 	function getOrUndefinedNextBehaviorAction(behaviorAction: BehaviorAction | null | undefined): BehaviorAction | undefined {

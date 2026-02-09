@@ -87,31 +87,31 @@ function createWorldStore() {
 
 	// Getter functions - throw if not found
 	function getWorld(id: string): World {
-		const data = get(worldStore).data[id as WorldId];
+		const data = getOrUndefinedWorld(id);
 		if (!data) throw new Error(`World not found: ${id}`);
 		return data;
 	}
 
 	function getWorldCharacter(id: string): WorldCharacter {
-		const data = get(worldCharacterStore).data[id as WorldCharacterId];
+		const data = getOrUndefinedWorldCharacter(id);
 		if (!data) throw new Error(`WorldCharacter not found: ${id}`);
 		return data;
 	}
 
 	function getWorldCharacterNeed(id: string): WorldCharacterNeed {
-		const data = get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
+		const data = getOrUndefinedWorldCharacterNeed(id);
 		if (!data) throw new Error(`WorldCharacterNeed not found: ${id}`);
 		return data;
 	}
 
 	function getWorldBuilding(id: string): WorldBuilding {
-		const data = get(worldBuildingStore).data[id as WorldBuildingId];
+		const data = getOrUndefinedWorldBuilding(id);
 		if (!data) throw new Error(`WorldBuilding not found: ${id}`);
 		return data;
 	}
 
 	function getWorldBuildingCondition(id: string): WorldBuildingCondition {
-		const data = get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
+		const data = getOrUndefinedWorldBuildingCondition(id);
 		if (!data) throw new Error(`WorldBuildingCondition not found: ${id}`);
 		return data;
 	}

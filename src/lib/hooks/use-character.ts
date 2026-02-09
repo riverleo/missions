@@ -352,23 +352,25 @@ function createCharacterStore() {
 		idOrCharacterId: CharacterNeedId | CharacterId,
 		needId?: NeedId
 	): CharacterNeed {
+		let data: CharacterNeed | undefined;
 		if (needId === undefined) {
 			// id로 조회
-			const data = get(characterNeedStore).data[idOrCharacterId as CharacterNeedId];
-			if (!data) throw new Error(`CharacterNeed not found: ${idOrCharacterId}`);
-			return data;
+			data = getOrUndefinedCharacterNeed(idOrCharacterId as CharacterNeedId);
 		} else {
 			// characterId + needId로 조회
-			const characterNeed = Object.values(get(characterNeedStore).data).find(
-				(cn) => cn.character_id === idOrCharacterId && cn.need_id === needId
-			);
-			if (!characterNeed) {
+			data = getOrUndefinedCharacterNeed(idOrCharacterId as CharacterId, needId);
+		}
+
+		if (!data) {
+			if (needId === undefined) {
+				throw new Error(`CharacterNeed not found: ${idOrCharacterId}`);
+			} else {
 				throw new Error(
 					`CharacterNeed not found for character: ${idOrCharacterId}, need: ${needId}`
 				);
 			}
-			return characterNeed;
 		}
+		return data;
 	}
 
 	// 오버로드 시그니처

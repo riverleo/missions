@@ -313,7 +313,7 @@ function createInteractionStore() {
 	}
 
 	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction {
-		const data = get(buildingInteractionStore).data[id];
+		const data = getOrUndefinedBuildingInteraction(id);
 		if (!data) throw new Error(`BuildingInteraction not found: ${id}`);
 		return data;
 	}
@@ -356,16 +356,11 @@ function createInteractionStore() {
 	 * BehaviorAction으로부터 Interaction을 반환 (throw)
 	 */
 	function getInteractionByBehaviorAction(action: BehaviorAction): Interaction {
-		const interactionId =
-			action.building_interaction_id ||
-			action.item_interaction_id ||
-			action.character_interaction_id;
-
-		if (!interactionId) {
+		const data = getOrUndefinedInteractionByBehaviorAction(action);
+		if (!data) {
 			throw new Error('No interaction ID found in BehaviorAction');
 		}
-
-		return getInteraction(interactionId);
+		return data;
 	}
 
 	/**
