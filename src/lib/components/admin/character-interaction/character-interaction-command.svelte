@@ -18,7 +18,7 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
+	import { getInteractionLabelString } from '$lib/utils/label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
 	import type {
@@ -28,7 +28,7 @@
 		CharacterInteractionId,
 	} from '$lib/types';
 
-	const { characterStore, getAllCharacters, getOrUndefinedCharacter } = useCharacter();
+	const { characterStore, getAllCharacters } = useCharacter();
 	const { openCharacterInteractionDialog, getAllCharacterInteractions } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentCharacterInteractionId = $derived(
@@ -51,18 +51,6 @@
 			}))
 			.filter((g) => g.interactions.length > 0);
 	});
-
-	function getCharacterInteractionLabel(characterInteraction: CharacterInteraction) {
-		const character = getOrUndefinedCharacter(characterInteraction.character_id);
-
-		const interactionType = (characterInteraction.once_interaction_type ||
-			characterInteraction.fulfill_interaction_type ||
-			characterInteraction.system_interaction_type)!;
-		const behaviorInteractionLabel = getBehaviorInteractTypeString(interactionType);
-		const characterName = character ? character.name : getFallbackString('allCharacters');
-
-		return `${characterName} ${behaviorInteractionLabel}`;
-	}
 </script>
 
 <Command class="w-full rounded-lg border shadow-md">
@@ -73,7 +61,7 @@
 			{#if defaultInteractions().length > 0}
 				<CommandGroup heading="기본 (모든 캐릭터)">
 					{#each defaultInteractions() as interaction (interaction.id)}
-						{@const label = getCharacterInteractionLabel(interaction)}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
@@ -129,7 +117,7 @@
 			{#each interactionsGroupedByTargetCharacter() as { targetCharacter, interactions } (targetCharacter.id)}
 				<CommandGroup heading={targetCharacter.name}>
 					{#each interactions as interaction (interaction.id)}
-						{@const label = getCharacterInteractionLabel(interaction)}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}

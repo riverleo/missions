@@ -21,6 +21,9 @@ import type {
 	BehaviorAction,
 	NeedFulfillment,
 	ConditionFulfillment,
+	BuildingInteraction,
+	ItemInteraction,
+	CharacterInteraction,
 } from '$lib/types';
 import { josa } from './josa';
 import { useCharacter, useBuilding, useItem, useInteraction } from '$lib/hooks';
@@ -646,4 +649,20 @@ export function getFulfillmentTargetLabelString(
 	}
 
 	return '상호작용 선택...';
+}
+
+export function getInteractionLabelString(
+	interaction: BuildingInteraction | ItemInteraction | CharacterInteraction | undefined
+): string {
+	if (!interaction) return '상호작용 선택...';
+
+	const { getOrUndefinedCharacter } = useCharacter();
+	const character = getOrUndefinedCharacter(interaction.character_id);
+	const interactionType =
+		interaction.once_interaction_type ||
+		interaction.fulfill_interaction_type ||
+		interaction.system_interaction_type;
+	const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
+	const characterName = character ? character.name : getFallbackString('allCharacters');
+	return `${characterName} ${behaviorLabel}`;
 }

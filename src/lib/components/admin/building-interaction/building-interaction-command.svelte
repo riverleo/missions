@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
+	import { useBuilding, useInteraction } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -20,11 +20,10 @@
 	import { cn } from '$lib/utils';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId, CharacterId } from '$lib/types';
-	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
+	import type { ScenarioId } from '$lib/types';
+	import { getInteractionLabelString } from '$lib/utils/label';
 
 	const { buildingStore } = useBuilding();
-	const { characterStore } = useCharacter();
 	const { buildingInteractionStore, openBuildingInteractionDialog } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.buildingInteractionId);
@@ -58,14 +57,7 @@
 			{#if defaultInteractions().length > 0}
 				<CommandGroup heading="기본 (모든 건물)">
 					{#each defaultInteractions() as interaction (interaction.id)}
-						{@const character = interaction.character_id
-							? $characterStore.data[interaction.character_id as CharacterId]
-							: undefined}
-						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type ||
-							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}
@@ -117,14 +109,7 @@
 			{#each interactionsGroupedByBuilding() as { building, interactions } (building.id)}
 				<CommandGroup heading={building.name}>
 					{#each interactions as interaction (interaction.id)}
-						{@const character = interaction.character_id
-							? $characterStore.data[interaction.character_id as CharacterId]
-							: undefined}
-						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type ||
-							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/building-interactions/${interaction.id}`}

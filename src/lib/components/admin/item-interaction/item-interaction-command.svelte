@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter, useInteraction, useItem } from '$lib/hooks';
+	import { useInteraction, useItem } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import {
 		Command,
@@ -18,13 +18,12 @@
 	} from '$lib/components/ui/dropdown-menu';
 	import { IconCheck, IconDotsVertical } from '@tabler/icons-svelte';
 	import { cn } from '$lib/utils';
-	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
+	import { getInteractionLabelString } from '$lib/utils/label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId, ItemId, CharacterId, ItemInteraction } from '$lib/types';
+	import type { ScenarioId, ItemId, ItemInteraction } from '$lib/types';
 
 	const { itemStore } = useItem();
-	const { characterStore } = useCharacter();
 	const { itemInteractionStore, openItemInteractionDialog } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const currentInteractionId = $derived(page.params.itemInteractionId);
@@ -58,14 +57,7 @@
 			{#if defaultInteractions().length > 0}
 				<CommandGroup heading="기본 (모든 아이템)">
 					{#each defaultInteractions() as interaction (interaction.id)}
-						{@const character = interaction.character_id
-							? $characterStore.data[interaction.character_id as CharacterId]
-							: undefined}
-						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type ||
-							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}
@@ -117,14 +109,7 @@
 			{#each interactionsGroupedByItem() as { item, interactions } (item.id)}
 				<CommandGroup heading={item.name}>
 					{#each interactions as interaction (interaction.id)}
-						{@const character = interaction.character_id
-							? $characterStore.data[interaction.character_id as CharacterId]
-							: undefined}
-						{@const interactionType = (interaction.once_interaction_type ||
-							interaction.fulfill_interaction_type ||
-							interaction.system_interaction_type)!}
-						{@const characterName = character ? character.name : getFallbackString('allCharacters')}
-						{@const label = `${characterName} ${getBehaviorInteractTypeString(interactionType)}`}
+						{@const label = getInteractionLabelString(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						{@const isSelected = interaction.id === currentInteractionId}
 						{@const href = `/admin/scenarios/${scenarioId}/item-interactions/${interaction.id}`}
