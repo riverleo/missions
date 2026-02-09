@@ -47,14 +47,19 @@
 
 	let { interaction, buildingInteractionId }: Props = $props();
 
-	const { buildingStore } = useBuilding();
+	const { buildingStore, getBuilding } = useBuilding();
 	const { characterStore } = useCharacter();
-	const { buildingInteractionActionStore, openBuildingInteractionDialog, admin } = useInteraction();
+	const {
+		buildingInteractionActionStore,
+		getBuildingInteractionActions,
+		openBuildingInteractionDialog,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
-	const building = $derived($buildingStore.data[interaction.building_id]);
-	const actions = $derived($buildingInteractionActionStore.data[buildingInteractionId] ?? []);
+	const building = $derived(getBuilding(interaction.building_id));
+	const actions = $derived(getBuildingInteractionActions(buildingInteractionId));
 	const characters = $derived(Object.values($characterStore.data));
 
 	const rootAction = $derived(actions.find((a) => a.root));
