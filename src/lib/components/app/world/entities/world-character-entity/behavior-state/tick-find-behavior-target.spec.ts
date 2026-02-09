@@ -73,7 +73,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 		expect(behavior.behaviors).toBe(mockBehaviors2);
 	});
 
-	describe('현재 행동 타깃이 있는 경우', () => {
+	describe('진행중인 행동 타깃이 있는 경우', () => {
 		beforeEach(() => {
 			behavior.behaviorTargetId = 'existing-behavior-target' as any;
 		});
@@ -92,12 +92,12 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 		});
 	});
 
-	describe('현재 행동 타깃이 없는 경우', () => {
+	describe('진행중인 행동 타깃이 없는 경우', () => {
 		beforeEach(() => {
 			behavior.behaviorTargetId = undefined;
 		});
 
-		it('모든 상태를 초기화(clear)한다', () => {
+		it('모든 상태를 초기화한다', () => {
 			// Given: 기존 상태가 남아있음
 			behavior.path = [vectorUtils.createVector(10, 20)];
 			behavior.targetEntityId = 'entity-1' as any;
@@ -136,7 +136,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 			expect(behavior.behaviorTargetId).toBe('behavior-action-1');
 		});
 
-		it('루트 액션이 설정될 때 behaviorTargetStartTick을 현재 틱(useCurrent().getTick())으로 설정한다', () => {
+		it('루트 액션이 설정될 때 행동 타깃 시작 틱을 현재 틱(useCurrent().getTick())으로 설정한다', () => {
 			// Given
 			const mockBehaviors: Behavior[] = [{ id: 'behavior-1' } as Behavior];
 			const mockRootAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
@@ -178,7 +178,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 		});
 	});
 
-	it('초기화(clear())는 행동 타깃이 없을 때만 호출된다', () => {
+	it('초기화는 현재 행동 타깃이 없을 때만 호출된다', () => {
 		// Given: behaviorTargetId가 있는 경우
 		behavior.behaviorTargetId = 'existing-behavior-target' as any;
 
@@ -204,7 +204,7 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 		expect(behavior.clear).toHaveBeenCalledOnce();
 	});
 
-	it('행동 타깃을 찾을 수 없을 경우 중단한다', () => {
+	it('새로운 행동 타깃을 찾을 수 없을 경우 중단 후 처음으로 돌아간다', () => {
 		// Given: 빈 행동 목록
 		behavior.behaviorTargetId = undefined;
 		mockGetAllBehaviorsByPriority.mockReturnValue([]);

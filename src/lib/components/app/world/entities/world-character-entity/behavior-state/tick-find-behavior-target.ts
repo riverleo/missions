@@ -13,16 +13,16 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  *
  * ## 명세
  * - [x] 우선 순위에 따라 정렬된 행동 목록은 매 틱마다 갱신된다.
- * - 현재 행동 타깃이 있는 경우
+ * - 진행중인 행동 타깃이 있는 경우
  *    - [x] 아무것도 하지 않고 계속 진행한다.
- * - 현재 행동 타깃이 없는 경우
- *    - [x] 모든 상태를 초기화(clear)한다.
+ * - 진행중인 행동 타깃이 없는 경우
+ *    - [x] 모든 상태를 초기화한다.
  *    - [x] 행동 목록의 첫번째를 새로운 행동 타깃으로 설정한다.
- *    - [x] 루트 액션이 설정될 때 behaviorTargetStartTick을 현재 틱(useCurrent().getTick())으로 설정한다.
+ *    - [x] 루트 액션이 설정될 때 행동 타깃 시작 틱을 현재 틱(useCurrent().getTick())으로 설정한다.
  *    - [x] 새로 지정할 행동에 루트 액션이 없는 경우 에러가 발생한다.
  *    - [x] 행동 타깃이 지정되었다면 다음 단계로 진행한다.
- * - [x] 초기화(clear())는 행동 타깃이 없을 때만 호출된다.
- * - [x] 행동 타깃을 찾을 수 없을 경우 중단한다.
+ * - [x] 초기화는 현재 행동 타깃이 없을 때만 호출된다.
+ * - [x] 새로운 행동 타깃을 찾을 수 없을 경우 중단 후 처음으로 돌아간다.
  */
 export default function tickFindBehaviorTarget(
 	this: WorldCharacterEntityBehavior,
