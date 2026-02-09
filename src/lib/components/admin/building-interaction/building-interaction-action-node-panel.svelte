@@ -43,12 +43,18 @@
 
 	let { action, buildingInteractionId, hasParent = false }: Props = $props();
 
-	const { buildingStore } = useBuilding();
-	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useInteraction();
-	const { characterStore } = useCharacter();
+	const { buildingStore, getOrUndefinedBuilding } = useBuilding();
+	const {
+		buildingInteractionStore,
+		buildingInteractionActionStore,
+		getOrUndefinedBuildingInteraction,
+		getBuildingInteractionActions,
+		admin,
+	} = useInteraction();
+	const { characterStore, getOrUndefinedCharacter } = useCharacter();
 	const flowNodes = useNodes();
 
-	const interaction = $derived($buildingInteractionStore.data[buildingInteractionId]);
+	const interaction = $derived(getOrUndefinedBuildingInteraction(buildingInteractionId));
 	const characters = $derived(Object.values($characterStore.data));
 	const buildings = $derived(Object.values($buildingStore.data));
 
@@ -57,9 +63,9 @@
 	let previewBuildingId = $state<string | undefined>(undefined);
 	const previewBuilding = $derived(
 		interactionHasSpecificBuilding && interaction?.building_id
-			? $buildingStore.data[interaction.building_id as BuildingId]
+			? getOrUndefinedBuilding(interaction.building_id as BuildingId)
 			: previewBuildingId
-				? $buildingStore.data[previewBuildingId as BuildingId]
+				? getOrUndefinedBuilding(previewBuildingId as BuildingId)
 				: buildings[0]
 	);
 	const selectedPreviewBuildingLabel = $derived(previewBuilding?.name ?? '건물 선택');
@@ -73,9 +79,9 @@
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
 		behaviorHasSpecificCharacter && interaction?.character_id
-			? $characterStore.data[interaction.character_id as CharacterId]
+			? getOrUndefinedCharacter(interaction.character_id as CharacterId)
 			: previewCharacterId
-				? $characterStore.data[previewCharacterId as CharacterId]
+				? getOrUndefinedCharacter(previewCharacterId as CharacterId)
 				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
@@ -120,7 +126,7 @@
 		try {
 			// root로 설정할 때 다른 root 액션들을 먼저 해제
 			if (changes.root) {
-				const allActions = $buildingInteractionActionStore.data[buildingInteractionId] ?? [];
+				const allActions = getBuildingInteractionActions(buildingInteractionId);
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) => admin.updateBuildingInteractionAction(a.id, { root: false }))
