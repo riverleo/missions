@@ -208,11 +208,12 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 		// Given: 빈 행동 목록
 		behavior.behaviorTargetId = undefined;
 		mockGetAllBehaviorsByPriority.mockReturnValue([]);
-		mockGetRootBehaviorAction.mockReturnValue(undefined);
 
-		// When & Then: 에러 발생으로 중단
-		expect(() => {
-			behavior.tickFindBehaviorTarget(currentTick);
-		}).toThrow();
+		// When
+		const result = behavior.tickFindBehaviorTarget(currentTick);
+
+		// Then: true 반환 (중단 후 처음)
+		expect(result).toBe(true);
+		expect(mockGetRootBehaviorAction).not.toHaveBeenCalled();
 	});
 });

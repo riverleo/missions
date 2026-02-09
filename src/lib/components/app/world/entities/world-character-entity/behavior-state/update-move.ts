@@ -5,7 +5,24 @@ import type { BeforeUpdateEvent } from '../../../context';
 const { Body } = Matter;
 
 /**
- * 경로를 따라 이동
+ * # 경로 이동 처리
+ *
+ * 설정된 경로(path)를 따라 캐릭터를 이동시킵니다.
+ * X축 우선 이동 방식을 사용하며, 경로가 없으면 물리 엔진에 의한 자유낙하를 적용합니다.
+ *
+ * @param event - 업데이트 이벤트 (delta 포함)
+ *
+ * ## 명세
+ * - [x] 경로가 비어있으면 바디를 다이나믹으로 전환한다.
+ * - [x] 경로가 있으면 바디를 스태틱으로 전환한다.
+ * - [x] 경로의 첫 번째 지점을 목표로 설정한다.
+ * - [x] 목표까지의 거리를 계산한다.
+ * - [x] arrivalThreshold(5px) 이내면 경로에서 제거한다.
+ * - [x] X축을 우선으로 이동한다.
+ * - [x] X축 이동 중에는 Y축을 고정한다.
+ * - [x] X축 완료 후 Y축으로 이동한다.
+ * - [x] speed(200) * deltaSeconds 만큼 이동한다.
+ * - [x] 목표 지점 오버슈팅을 방지한다.
  */
 export default function updateMove(
 	this: WorldCharacterEntityBehavior,
