@@ -28,21 +28,16 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { worldCharacterStore, worldBuildingStore, worldItemStore } = useWorld();
-	const { characterStore, needStore } = useCharacter();
-	const { buildingStore } = useBuilding();
-	const { itemStore } = useItem();
-	const { buildingInteractionStore, itemInteractionStore } = useInteraction();
-	const {
-		needBehaviorStore,
-		needBehaviorActionStore,
-		conditionBehaviorStore,
-		conditionBehaviorActionStore,
-	} = useBehavior();
+	const { getWorldCharacter, getWorldBuilding, getWorldItem } = useWorld();
+	const { getOrUndefinedCharacter, getOrUndefinedNeed } = useCharacter();
+	const { getOrUndefinedBuilding } = useBuilding();
+	const { getOrUndefinedItem } = useItem();
+	const { getNeedBehavior, getNeedBehaviorAction, getConditionBehavior, getConditionBehaviorAction } =
+		useBehavior();
 
-	const worldCharacter = $derived($worldCharacterStore.data[entity.instanceId]);
+	const worldCharacter = $derived(getWorldCharacter(entity.instanceId));
 	const character = $derived(
-		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
+		worldCharacter ? getOrUndefinedCharacter(worldCharacter.character_id) : undefined
 	);
 	const needs = $derived(Object.values(entity.needs));
 
@@ -53,19 +48,19 @@
 		const { type, instanceId } = EntityIdUtils.parse(entity.behavior.targetEntityId);
 
 		if (type === 'building') {
-			const worldBuilding = $worldBuildingStore.data[instanceId as WorldBuildingId];
+			const worldBuilding = getWorldBuilding(instanceId as WorldBuildingId);
 			if (!worldBuilding) return undefined;
-			const building = $buildingStore.data[worldBuilding.building_id];
+			const building = getOrUndefinedBuilding(worldBuilding.building_id);
 			return building?.name;
 		} else if (type === 'item') {
-			const worldItem = $worldItemStore.data[instanceId as WorldItemId];
+			const worldItem = getWorldItem(instanceId as WorldItemId);
 			if (!worldItem) return undefined;
-			const item = $itemStore.data[worldItem.item_id];
+			const item = getOrUndefinedItem(worldItem.item_id);
 			return item?.name;
 		} else if (type === 'character') {
-			const worldChar = $worldCharacterStore.data[instanceId as WorldCharacterId];
+			const worldChar = getWorldCharacter(instanceId as WorldCharacterId);
 			if (!worldChar) return undefined;
-			const char = $characterStore.data[worldChar.character_id];
+			const char = getOrUndefinedCharacter(worldChar.character_id);
 			return char?.name;
 		}
 
@@ -82,8 +77,8 @@
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
 			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
 
-			const behavior = $needBehaviorStore.data[behaviorId as NeedBehaviorId];
-			const action = $needBehaviorActionStore.data[behaviorActionId as NeedBehaviorActionId];
+			const behavior = getNeedBehavior(behaviorId as NeedBehaviorId);
+			const action = getNeedBehaviorAction(behaviorActionId as NeedBehaviorActionId);
 
 			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
 
@@ -96,9 +91,8 @@
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
 			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
 
-			const behavior = $conditionBehaviorStore.data[behaviorId as ConditionBehaviorId];
-			const action =
-				$conditionBehaviorActionStore.data[behaviorActionId as ConditionBehaviorActionId];
+			const behavior = getConditionBehavior(behaviorId as ConditionBehaviorId);
+			const action = getConditionBehaviorAction(behaviorActionId as ConditionBehaviorActionId);
 
 			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
 
@@ -153,7 +147,7 @@
 			{/if}
 		</AccordionContentItem>
 		{#each needs as need}
-			{@const needData = $needStore.data[need.need_id]}
+			{@const needData = getOrUndefinedNeed(need.need_id)}
 			<AccordionContentItem label={needData?.name ?? need.need_id}>
 				{need.value} / {needData?.max_value ?? 100}
 			</AccordionContentItem>
