@@ -7,6 +7,7 @@ import updateMove from './update-move';
 import updateDirection from './update-direction';
 import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
+import tickNextOrClear from './tick-next-or-clear';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -30,6 +31,7 @@ export class WorldCharacterEntityBehavior {
 	updateDirection = updateDirection;
 	tick = tick;
 	tickFindBehaviorTarget = tickFindBehaviorTarget;
+	tickNextOrClear = tickNextOrClear;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
