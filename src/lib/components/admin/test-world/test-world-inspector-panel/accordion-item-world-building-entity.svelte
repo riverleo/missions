@@ -16,10 +16,10 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { worldBuildingStore } = useWorld();
-	const { conditionStore } = useBuilding();
+	const { getWorldBuilding } = useWorld();
+	const { getOrUndefinedCondition } = useBuilding();
 
-	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
+	const worldBuilding = $derived(getWorldBuilding(entity.instanceId));
 	const building = $derived(entity.building);
 	const conditions = $derived(Object.values(entity.worldBuildingConditions));
 </script>
@@ -50,7 +50,7 @@
 			({worldBuilding?.cell_x ?? 0}, {worldBuilding?.cell_y ?? 0})
 		</AccordionContentItem>
 		{#each conditions as condition}
-			{@const conditionData = $conditionStore.data[condition.condition_id]}
+			{@const conditionData = getOrUndefinedCondition(condition.condition_id)}
 			<AccordionContentItem label={conditionData?.name ?? condition.condition_id}>
 				{condition.value} / {conditionData?.max_value ?? 100}
 			</AccordionContentItem>
