@@ -290,19 +290,23 @@ function createCharacterStore() {
 	}
 
 	// Getter functions - return undefined if not found (optional data)
-	function getOrUndefinedCharacter(id: string): Character | undefined {
+	function getOrUndefinedCharacter(id: string | null | undefined): Character | undefined {
+		if (!id) return undefined;
 		return get(characterStore).data[id as CharacterId];
 	}
 
-	function getCharacterFaceStates(characterId: string): CharacterFaceState[] | undefined {
+	function getCharacterFaceStates(characterId: string | null | undefined): CharacterFaceState[] | undefined {
+		if (!characterId) return undefined;
 		return get(characterFaceStateStore).data[characterId as CharacterId];
 	}
 
-	function getOrUndefinedCharacterBody(id: string): CharacterBody | undefined {
+	function getOrUndefinedCharacterBody(id: string | null | undefined): CharacterBody | undefined {
+		if (!id) return undefined;
 		return get(characterBodyStore).data[id as CharacterBodyId];
 	}
 
-	function getCharacterBodyStates(bodyId: string): CharacterBodyState[] | undefined {
+	function getCharacterBodyStates(bodyId: string | null | undefined): CharacterBodyState[] | undefined {
+		if (!bodyId) return undefined;
 		return get(characterBodyStateStore).data[bodyId as CharacterBodyId];
 	}
 
@@ -312,7 +316,8 @@ function createCharacterStore() {
 		return data;
 	}
 
-	function getOrUndefinedNeed(id: string): Need | undefined {
+	function getOrUndefinedNeed(id: string | null | undefined): Need | undefined {
+		if (!id) return undefined;
 		return get(needStore).data[id as NeedId];
 	}
 

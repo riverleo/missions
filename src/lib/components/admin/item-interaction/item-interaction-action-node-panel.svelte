@@ -26,7 +26,13 @@
 	import CharacterSpriteAnimator from '$lib/components/app/sprite-animator/character-sprite-animator.svelte';
 	import { clone } from 'radash';
 	import InputGroupText from '$lib/components/ui/input-group/input-group-text.svelte';
-	import { getActionString } from '$lib/utils/label';
+	import {
+		getActionString,
+		getCharacterBodyStateLabels,
+		getCharacterFaceStateLabels,
+		getCharacterBodyStateString,
+		getCharacterFaceStateString,
+	} from '$lib/utils/label';
 
 	interface Props {
 		action: ItemInteractionAction | undefined;
@@ -66,33 +72,12 @@
 		previewCharacterId = value || undefined;
 	}
 
-	const bodyStateTypes: { value: CharacterBodyStateType; label: string }[] = [
-		{ value: 'idle', label: '대기' },
-		{ value: 'walk', label: '걷기' },
-		{ value: 'run', label: '뛰기' },
-		{ value: 'jump', label: '점프' },
-		{ value: 'pick', label: '줍기' },
-	];
-
-	const faceStateTypes: { value: CharacterFaceStateType; label: string }[] = [
-		{ value: 'idle', label: '기본' },
-		{ value: 'happy', label: '행복' },
-		{ value: 'sad', label: '슬픔' },
-		{ value: 'angry', label: '화남' },
-	];
+	const bodyStateTypes = getCharacterBodyStateLabels();
+	const faceStateTypes = getCharacterFaceStateLabels();
 
 	let isUpdating = $state(false);
 	let changes = $state<ItemInteractionAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
-
-	const selectedBodyStateLabel = $derived(
-		bodyStateTypes.find((t) => t.value === changes?.character_body_state_type)?.label ??
-			'캐릭터 바디'
-	);
-	const selectedFaceStateLabel = $derived(
-		faceStateTypes.find((t) => t.value === changes?.character_face_state_type)?.label ??
-			'캐릭터 표정'
-	);
 
 	$effect(() => {
 		if (action && action.id !== currentActionId) {
@@ -174,7 +159,7 @@
 								onValueChange={onBodyStateChange}
 							>
 								<SelectTrigger class="flex-1">
-									{selectedBodyStateLabel}
+									{getCharacterBodyStateString(changes.character_body_state_type)}
 								</SelectTrigger>
 								<SelectContent>
 									{#each bodyStateTypes as bodyStateType (bodyStateType.value)}
@@ -192,7 +177,7 @@
 								onValueChange={onFaceStateChange}
 							>
 								<SelectTrigger class="flex-1">
-									{selectedFaceStateLabel}
+									{getCharacterFaceStateString(changes.character_face_state_type)}
 								</SelectTrigger>
 								<SelectContent>
 									{#each faceStateTypes as faceStateType (faceStateType.value)}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useBuilding, useCharacter, useInteraction } from '$lib/hooks';
-	import type { ScenarioId } from '$lib/types';
+	import type { BehaviorInteractionType, ScenarioId } from '$lib/types';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -59,25 +59,26 @@
 
 	const rootAction = $derived(actions.find((a) => a.root));
 
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>(
-		(interaction.once_interaction_type ||
+	let behaviorInteractionType = $state<BehaviorInteractionType>(
+		interaction.once_interaction_type ||
 			interaction.fulfill_interaction_type ||
-			'building_use') as OnceInteractionType | FulfillInteractionType
+			('building_use' as FulfillInteractionType)
 	);
-	let characterId = $state<string>(interaction.character_id ?? '');
+	let characterId = $state<CharacterId | undefined>(interaction.character_id || undefined);
 
 	const interactionTypeOptions = getBehaviorInteractionTypeLabels('building');
 
-	const selectedCharacter = $derived.by(() => {
-		if (!characterId) return null;
-		return characters.find((c) => c.id === characterId);
-	});
+	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 
 	async function updateInteraction() {
 		await admin.updateBuildingInteraction(buildingInteractionId, {
-			once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
-			fulfill_interaction_type: isFulfillInteractionType(interactionType) ? interactionType : null,
-			character_id: characterId ? (characterId as CharacterId) : null,
+			once_interaction_type: isOnceInteractionType(behaviorInteractionType)
+				? behaviorInteractionType
+				: null,
+			fulfill_interaction_type: isFulfillInteractionType(behaviorInteractionType)
+				? behaviorInteractionType
+				: null,
+			character_id: characterId || null,
 		});
 	}
 
@@ -123,15 +124,15 @@
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
 								<InputGroupButton {...props}>
-									{getBehaviorInteractTypeString(interactionType)}
+									{getBehaviorInteractTypeString(behaviorInteractionType)}
 								</InputGroupButton>
 							{/snippet}
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
 							<DropdownMenuRadioGroup
-								value={interactionType}
+								value={behaviorInteractionType}
 								onValueChange={(value) => {
-									interactionType = value as OnceInteractionType | FulfillInteractionType;
+									behaviorInteractionType = value as OnceInteractionType | FulfillInteractionType;
 									updateInteraction();
 								}}
 							>
@@ -160,7 +161,7 @@
 							<DropdownMenuRadioGroup
 								value={characterId}
 								onValueChange={(value) => {
-									characterId = value;
+									characterId = value as CharacterId;
 									updateInteraction();
 								}}
 							>

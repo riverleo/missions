@@ -25,15 +25,13 @@
 		FulfillInteractionType,
 		SystemInteractionType,
 		ScenarioId,
+		BehaviorInteractionType,
 	} from '$lib/types';
-	import { getFallbackString, getActionString } from '$lib/utils/label';
+	import { getFallbackString } from '$lib/utils/label';
 
 	const { characterStore } = useCharacter();
-	const {
-		characterInteractionDialogStore,
-		closeCharacterInteractionDialog,
-		admin,
-	} = useInteraction();
+	const { characterInteractionDialogStore, closeCharacterInteractionDialog, admin } =
+		useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const open = $derived($characterInteractionDialogStore?.type === 'create');
@@ -41,18 +39,18 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let targetCharacterId = $state<CharacterId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>('character_hug');
+	let behaviorInteractionType = $state<BehaviorInteractionType>('character_hug');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
-	const interactionTypeOptions = getBehaviorInteractionTypeLabels('character');
+	const behaviorInteractionTypeLabels = getBehaviorInteractionTypeLabels('character');
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
-	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
+	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
-	const selectedBehaviorLabel = $derived(
-		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '포옹'
+	const selectedCharacterName = $derived(selectedCharacter?.name);
+	const selectedBehaviorInteractionLabel = $derived(
+		behaviorInteractionTypeLabels.find((o) => o.value === behaviorInteractionType)?.label
 	);
 
 	function onTargetCharacterChange(value: string | undefined) {
@@ -61,7 +59,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
+			behaviorInteractionType = value as BehaviorInteractionType;
 		}
 	}
 
@@ -85,11 +83,15 @@
 		try {
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId,
-				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
-				fulfill_interaction_type: isFulfillInteractionType(interactionType)
-					? interactionType
+				once_interaction_type: isOnceInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
 					: null,
-				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
+				fulfill_interaction_type: isFulfillInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
+					: null,
+				system_interaction_type: isSystemInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
+					: null,
 				character_id: characterId || null,
 			});
 
@@ -114,7 +116,7 @@
 					<ButtonGroupText>대상 캐릭터</ButtonGroupText>
 					<Select type="single" value={targetCharacterId} onValueChange={onTargetCharacterChange}>
 						<SelectTrigger class="flex-1">
-							{selectedTargetCharacterName}
+							{selectedTargetCharacterName ?? '대상 캐릭터 선택'}
 						</SelectTrigger>
 						<SelectContent>
 							{#each characters as character (character.id)}
@@ -128,7 +130,7 @@
 					<ButtonGroupText>캐릭터</ButtonGroupText>
 					<Select type="single" value={characterId} onValueChange={onCharacterChange}>
 						<SelectTrigger class="flex-1">
-							{selectedCharacterName}
+							{selectedCharacterName ?? getFallbackString('all')}
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="">모두</SelectItem>
@@ -138,12 +140,16 @@
 						</SelectContent>
 					</Select>
 					<ButtonGroupText>상호 작용</ButtonGroupText>
-					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
+					<Select
+						type="single"
+						value={behaviorInteractionType}
+						onValueChange={onInteractionTypeChange}
+					>
 						<SelectTrigger class="flex-1">
-							{selectedBehaviorLabel}
+							{selectedBehaviorInteractionLabel}
 						</SelectTrigger>
 						<SelectContent>
-							{#each interactionTypeOptions as option (option.value)}
+							{#each behaviorInteractionTypeLabels as option (option.value)}
 								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>

@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { useCharacter, useInteraction } from '$lib/hooks';
-	import type { ScenarioId } from '$lib/types';
+	import type {
+		BehaviorInteractionType,
+		CharacterInteractionActionUpdate,
+		ScenarioId,
+	} from '$lib/types';
 	import { page } from '$app/state';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
@@ -48,7 +52,7 @@
 
 	let { interaction, characterInteractionId }: Props = $props();
 
-	const { characterStore } = useCharacter();
+	const { characterStore, getOrUndefinedCharacter } = useCharacter();
 	const { characterInteractionActionStore, openCharacterInteractionDialog, admin } =
 		useInteraction();
 
@@ -60,43 +64,40 @@
 
 	const rootAction = $derived(actions.find((a: CharacterInteractionAction) => a.root));
 
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType>(
-		(interaction.once_interaction_type ||
+	let interactionType = $state<BehaviorInteractionType>(
+		interaction.once_interaction_type ||
 			interaction.fulfill_interaction_type ||
-			'character_hug') as OnceInteractionType | FulfillInteractionType
+			('character_hug' as FulfillInteractionType)
 	);
-	let characterId = $state<string>(interaction.character_id ?? '');
+	let characterId = $state<CharacterId | undefined>(interaction.character_id ?? undefined);
 
-	const interactionTypeOptions = getBehaviorInteractionTypeLabels('character');
+	const behaviorInteractionTypeLabels = getBehaviorInteractionTypeLabels('character');
 
-	const selectedCharacter = $derived.by(() => {
-		if (!characterId) return null;
-		return characters.find((c: Character) => c.id === characterId);
-	});
+	const selectedCharacter = $derived(getOrUndefinedCharacter(characterId));
 
-	async function updateInteraction() {
+	async function updateCharacterInteraction() {
 		await admin.updateCharacterInteraction(characterInteractionId, {
 			once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
 			fulfill_interaction_type: isFulfillInteractionType(interactionType) ? interactionType : null,
-			character_id: characterId ? (characterId as CharacterId) : null,
+			character_id: characterId ?? null,
 		});
 	}
 
-	async function createAction() {
+	async function createCharacterInteractionAction() {
 		await admin.createCharacterInteractionAction(scenarioId, characterInteractionId, {
 			root: actions.length === 0, // First action is root
 		});
 	}
 
-	async function updateAction(
-		actionId: CharacterInteractionActionId,
-		updates: Partial<CharacterInteractionAction>
+	async function updateCharacterInteractionAction(
+		id: CharacterInteractionActionId,
+		updates: CharacterInteractionActionUpdate
 	) {
-		await admin.updateCharacterInteractionAction(actionId, updates);
+		await admin.updateCharacterInteractionAction(id, updates);
 	}
 
-	async function removeAction(actionId: CharacterInteractionActionId) {
-		await admin.removeCharacterInteractionAction(actionId);
+	async function removeCharacterInteractionAction(id: CharacterInteractionActionId) {
+		await admin.removeCharacterInteractionAction(id);
 	}
 </script>
 
@@ -133,10 +134,10 @@
 								value={interactionType}
 								onValueChange={(value) => {
 									interactionType = value as OnceInteractionType | FulfillInteractionType;
-									updateInteraction();
+									updateCharacterInteraction();
 								}}
 							>
-								{#each interactionTypeOptions as option (option.value)}
+								{#each behaviorInteractionTypeLabels as option (option.value)}
 									<DropdownMenuRadioItem value={option.value}>
 										{option.label}
 									</DropdownMenuRadioItem>
@@ -161,8 +162,8 @@
 							<DropdownMenuRadioGroup
 								value={characterId}
 								onValueChange={(value) => {
-									characterId = value;
-									updateInteraction();
+									characterId = (value || undefined) as CharacterId | undefined;
+									updateCharacterInteraction();
 								}}
 							>
 								<DropdownMenuRadioItem value="">모든 캐릭터</DropdownMenuRadioItem>
@@ -182,7 +183,7 @@
 	<Card>
 		<CardHeader class="flex flex-row items-center justify-between">
 			<CardTitle>액션</CardTitle>
-			<Button size="sm" onclick={createAction}>
+			<Button size="sm" onclick={createCharacterInteractionAction}>
 				<IconPlus class="mr-2 size-4" />
 				액션 추가
 			</Button>
@@ -199,14 +200,18 @@
 									onchange={async (e) => {
 										const isRoot = e.currentTarget.checked;
 										if (isRoot && rootAction && rootAction.id !== action.id) {
-											await updateAction(rootAction.id, { root: false });
+											await updateCharacterInteractionAction(rootAction.id, { root: false });
 										}
-										await updateAction(action.id, { root: isRoot });
+										await updateCharacterInteractionAction(action.id, { root: isRoot });
 									}}
 								/>
 								<span class="text-sm font-medium">Root</span>
 							</div>
-							<Button variant="ghost" size="sm" onclick={() => removeAction(action.id)}>
+							<Button
+								variant="ghost"
+								size="sm"
+								onclick={() => removeCharacterInteractionAction(action.id)}
+							>
 								<IconTrash class="size-4" />
 							</Button>
 						</div>
@@ -226,7 +231,7 @@
 											<DropdownMenuRadioGroup
 												value={action.character_body_state_type}
 												onValueChange={(value) => {
-													updateAction(action.id, {
+													updateCharacterInteractionAction(action.id, {
 														character_body_state_type: value as CharacterBodyStateType,
 													});
 												}}
@@ -256,7 +261,7 @@
 											<DropdownMenuRadioGroup
 												value={action.character_face_state_type}
 												onValueChange={(value) => {
-													updateAction(action.id, {
+													updateCharacterInteractionAction(action.id, {
 														character_face_state_type: value as CharacterFaceStateType,
 													});
 												}}
@@ -281,7 +286,7 @@
 								value={action.target_character_offset_x}
 								onchange={(e) => {
 									const value = parseInt(e.currentTarget.value) || 0;
-									updateAction(action.id, { target_character_offset_x: value });
+									updateCharacterInteractionAction(action.id, { target_character_offset_x: value });
 								}}
 								placeholder="x"
 							/>
@@ -293,7 +298,7 @@
 								value={action.target_character_offset_y}
 								onchange={(e) => {
 									const value = parseInt(e.currentTarget.value) || 0;
-									updateAction(action.id, { target_character_offset_y: value });
+									updateCharacterInteractionAction(action.id, { target_character_offset_y: value });
 								}}
 								placeholder="y"
 							/>
@@ -310,7 +315,7 @@
 									value={action.target_character_scale}
 									onchange={(e) => {
 										const value = parseFloat(e.currentTarget.value) || 1.0;
-										updateAction(action.id, { target_character_scale: value });
+										updateCharacterInteractionAction(action.id, { target_character_scale: value });
 									}}
 								/>
 							</InputGroup>
@@ -324,7 +329,9 @@
 									value={action.target_character_rotation}
 									onchange={(e) => {
 										const value = parseFloat(e.currentTarget.value) || 0;
-										updateAction(action.id, { target_character_rotation: value });
+										updateCharacterInteractionAction(action.id, {
+											target_character_rotation: value,
+										});
 									}}
 								/>
 							</InputGroup>
@@ -340,7 +347,7 @@
 								value={action.duration_ticks}
 								onchange={(e) => {
 									const value = parseFloat(e.currentTarget.value) || 0;
-									updateAction(action.id, { duration_ticks: value });
+									updateCharacterInteractionAction(action.id, { duration_ticks: value });
 								}}
 							/>
 						</InputGroup>

@@ -304,20 +304,51 @@ function createInteractionStore() {
 		return get(fulfillInteractionsStore);
 	}
 
-	function getInteraction(id: InteractionId): Interaction | undefined {
-		return getAllInteractions().find((i) => i.id === id);
+	// Getter functions - throw if not found (required data)
+	function getInteraction(id: InteractionId): Interaction {
+		const data = getAllInteractions().find((i) => i.id === id);
+		if (!data) throw new Error(`Interaction not found: ${id}`);
+		return data;
 	}
 
-	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction | undefined {
-		return get(buildingInteractionStore).data[id];
+	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction {
+		const data = get(buildingInteractionStore).data[id];
+		if (!data) throw new Error(`BuildingInteraction not found: ${id}`);
+		return data;
 	}
 
-	function getItemInteraction(id: ItemInteractionId): ItemInteraction | undefined {
-		return get(itemInteractionStore).data[id];
+	function getItemInteraction(id: ItemInteractionId): ItemInteraction {
+		const data = get(itemInteractionStore).data[id];
+		if (!data) throw new Error(`ItemInteraction not found: ${id}`);
+		return data;
 	}
 
-	function getCharacterInteraction(id: CharacterInteractionId): CharacterInteraction | undefined {
-		return get(characterInteractionStore).data[id];
+	function getCharacterInteraction(id: CharacterInteractionId): CharacterInteraction {
+		const data = get(characterInteractionStore).data[id];
+		if (!data) throw new Error(`CharacterInteraction not found: ${id}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found (optional data)
+	function getOrUndefinedBuildingInteraction(
+		id: string | null | undefined
+	): BuildingInteraction | undefined {
+		if (!id) return undefined;
+		return get(buildingInteractionStore).data[id as BuildingInteractionId];
+	}
+
+	function getOrUndefinedItemInteraction(
+		id: string | null | undefined
+	): ItemInteraction | undefined {
+		if (!id) return undefined;
+		return get(itemInteractionStore).data[id as ItemInteractionId];
+	}
+
+	function getOrUndefinedCharacterInteraction(
+		id: string | null | undefined
+	): CharacterInteraction | undefined {
+		if (!id) return undefined;
+		return get(characterInteractionStore).data[id as CharacterInteractionId];
 	}
 
 	function getBuildingInteractionActions(id: BuildingInteractionId): BuildingInteractionAction[] {
@@ -878,6 +909,9 @@ function createInteractionStore() {
 		getBuildingInteraction,
 		getItemInteraction,
 		getCharacterInteraction,
+		getOrUndefinedBuildingInteraction,
+		getOrUndefinedItemInteraction,
+		getOrUndefinedCharacterInteraction,
 		getBuildingInteractionActions,
 		getItemInteractionActions,
 		getCharacterInteractionActions,

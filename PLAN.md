@@ -474,12 +474,20 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
 
 ## Phase 4: 구현 순서
 
-### Step 1: 기반 작업 (label.ts 함수 추가)
+### Step 0: Interaction Getter 개선 ✅ 완료
+**목적**: Interaction getter 함수들을 올바른 패턴으로 개선
+
+- [x] **use-interaction.ts getter 함수 개선**
+  - ✅ `getInteraction`, `getBuildingInteraction`, `getItemInteraction`, `getCharacterInteraction`: throw if not found
+  - ✅ `getOrUndefinedBuildingInteraction`, `getOrUndefinedItemInteraction`, `getOrUndefinedCharacterInteraction`: return undefined if not found
+  - ✅ `getFulfillmentTargetLabelString`에서 getOrUndefined 버전 사용
+
+### Step 1: 기반 작업 (label.ts 함수 추가) ✅ 완료
 **목적**: 중복 제거를 위한 공통 함수 먼저 구축
 
 **⚠️ 모든 함수는 컨벤션 준수**: `undefined` 허용 + 기본값 반환
 
-1. [ ] **Labels 함수 추가** (options 배열 대체)
+1. [x] **Labels 함수 추가** (options 배열 대체)
    ```typescript
    // 모두 undefined가 아닌 빈 배열 반환
    getCharacterBodyStateLabels(): Label<CharacterBodyStateType>[]
@@ -487,56 +495,62 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
    getColliderTypeLabels(): Label<ColliderType>[]
    ```
 
-2. [ ] **중복 로직 통합 함수 추가**
+2. [x] **중복 로직 통합 함수 추가**
    ```typescript
    // typeLabel 통합 - 이미 개선됨: ✅ getBehaviorActionTypeString(action?)
+   // SelectItem 라벨용 추가: ✅ getBehaviorActionTypeLabelByType(type?)
    // targetMethod 통합 - 이미 개선됨: ✅ getTargetSelectionMethodLabelString(action?)
 
-   // 추가 필요:
+   // 추가 완료:
+   ✅ getQuestTypeString(type?): string  // 기본값: '퀘스트 타입'
+   ✅ getNarrativeNodeTypeString(type?): string  // 기본값: '노드 타입'
+
+   // 추가 필요 (Step 2에서):
    getInteractionLabelString(interaction?, character?): string  // 기본값: '상호작용'
    getFulfillmentTargetLabelString(fulfillment?): string  // 기본값: '대상 선택...'
-   getQuestTypeString(type?): string  // 기본값: '퀘스트 타입'
-   getNarrativeNodeTypeString(type?): string  // 기본값: '노드 타입'
    getBreadcrumbTitleString(params?): string  // 기본값: '제목 없음'
    getEntityTargetNameString(entity?): string  // 기본값: '대상 없음'
    getBehaviorInfoString(behavior?): string  // 기본값: '행동 정보 없음'
    ```
 
-3. [ ] **기존 함수들 컨벤션 적용 확인**
-   - `getInteractionTargetNameString()` - undefined 허용 확인
-   - `getInteractionBehaviorLabelString()` - undefined 허용 확인
-   - `getInteractionActionSummaryString()` - undefined 허용 확인
-   - 기타 String suffix 함수들
+3. [x] **기존 함수들 컨벤션 적용 확인**
+   - ✅ `getInteractionTargetNameString()` - undefined 허용, 기본값 '대상 없음' 반환
+   - ✅ `getInteractionBehaviorLabelString()` - undefined 허용, 기본값 '상호작용' 반환
+   - ✅ `getInteractionActionSummaryString()` - undefined 허용, 기본값 '액션 정보 없음' 반환
 
-4. [ ] **getOrUndefined 함수 타입 개선**
-   - 모든 getOrUndefined 함수에 `| null | undefined` 추가
+4. [x] **getOrUndefined 함수 타입 개선**
+   - ✅ use-character.ts: 5개 함수 업데이트
+   - ✅ use-building.ts: 6개 함수 업데이트
+   - ✅ use-item.ts: 2개 함수 업데이트
 
-5. [ ] 타입 체크 확인
+5. [x] **타입 체크 확인**
+   - ✅ pnpm check 실행
+   - ⚠️ 1개 unrelated error (character-interaction-panel.svelte line 165: CharacterId branded type 이슈, Step 1과 무관)
 
 ### Step 2: 중복 제거 작업 (우선순위별)
 
 #### 2.1. High Priority - 동일 패턴 중복 제거
-1. [ ] **typeLabel 통합** (완전 동일)
-   - need-behavior-action-node.svelte
-   - condition-behavior-action-node.svelte
-   - → `getBehaviorActionString()` 사용
+1. [x] **typeLabel 통합** (완전 동일) ✅
+   - ✅ Enhanced `getBehaviorActionString()` to match detailed typeLabel logic
+   - ✅ need-behavior-action-node.svelte: removed typeLabel, targetLabel, behaviorTypeLabel
+   - ✅ condition-behavior-action-node.svelte: removed typeLabel, targetLabel, behaviorTypeLabel
+   - ✅ Both files now use `getBehaviorActionString(action)` directly
 
-2. [ ] **selectedBodyStateLabel, selectedFaceStateLabel 제거** (여러 파일)
-   - item-interaction-action-node-panel.svelte
-   - building-interaction-action-node-panel.svelte (이미 완료?)
-   - character-interaction-action-node-panel.svelte (이미 완료?)
-   - → 직접 `getCharacterBodyStateString()` 사용
+2. [x] **selectedBodyStateLabel, selectedFaceStateLabel 제거** (여러 파일) ✅
+   - ✅ Updated `getCharacterBodyStateString()` and `getCharacterFaceStateString()` to accept undefined
+   - ✅ item-interaction-action-node-panel.svelte: replaced arrays with getCharacterBodyStateLabels/getCharacterFaceStateLabels, removed $derived labels, use direct function calls
+   - ✅ building-interaction-action-node-panel.svelte: same as above
+   - ✅ character-interaction-action-node-panel.svelte: same as above + target character labels
 
-3. [ ] **faceStateOptions 배열 제거** (중복)
-   - need-behavior-create-dialog.svelte
-   - need-behavior-update-dialog.svelte
-   - → `getCharacterFaceStateLabels()` 사용
+3. [x] **faceStateOptions 배열 제거** (중복) ✅
+   - ✅ need-behavior-create-dialog.svelte: removed faceStateOptions array, use getCharacterFaceStateLabels() and getCharacterFaceStateString()
+   - ✅ need-behavior-update-dialog.svelte: same as above
 
 #### 2.2. Medium Priority - 복잡한 로직 통합
-4. [ ] **selectedTargetLabel 통합**
-   - need-fulfillment-node-panel.svelte
-   - condition-fulfillment-node-panel.svelte
-   - → `getFulfillmentTargetLabelString()` 사용
+4. [x] **selectedTargetLabel 통합** ✅
+   - ✅ Added `getFulfillmentTargetLabelString()` function in label.ts with proper undefined handling
+   - ✅ need-fulfillment-node-panel.svelte: removed selectedTargetLabel $derived, use getFulfillmentTargetLabelString(changes)
+   - ✅ condition-fulfillment-node-panel.svelte: same as above
 
 5. [ ] **getInteractionLabel 통합**
    - item-interaction-command.svelte

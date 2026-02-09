@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { useBuilding } from '$lib/hooks';
 	import { Panel, useEdges } from '@xyflow/svelte';
-	import type { BuildingCondition, BuildingId } from '$lib/types';
+	import type { BuildingCondition } from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
 	import {
@@ -23,18 +23,11 @@
 	let { buildingCondition }: Props = $props();
 
 	const { admin } = useBuilding();
-	const { buildingStore: buildingStore } = useBuilding();
 	const flowEdges = useEdges();
-
-	const buildings = $derived(Object.values($buildingStore.data));
 
 	let isUpdating = $state(false);
 	let changes = $state<BuildingCondition | undefined>(undefined);
 	let currentBuildingConditionId = $state<string | undefined>(undefined);
-
-	const selectedBuildingName = $derived(
-		buildings.find((b) => b.id === changes?.building_id)?.name ?? '선택...'
-	);
 
 	$effect(() => {
 		if (buildingCondition && buildingCondition.id !== currentBuildingConditionId) {
@@ -48,7 +41,6 @@
 		if (!changes || isUpdating) return;
 
 		const buildingConditionId = changes.id;
-		const edgeId = `building-condition-${changes.building_id}-${changes.condition_id}`;
 		isUpdating = true;
 
 		admin
@@ -73,12 +65,6 @@
 
 		const edgeId = `building-condition-${buildingCondition.building_id}-${buildingCondition.condition_id}`;
 		flowEdges.update((es) => es.map((e) => (e.id === edgeId ? { ...e, selected: false } : e)));
-	}
-
-	function onBuildingChange(value: string | undefined) {
-		if (value && changes) {
-			changes.building_id = value as BuildingId;
-		}
 	}
 </script>
 

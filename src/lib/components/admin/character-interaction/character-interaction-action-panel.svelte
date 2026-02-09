@@ -17,7 +17,7 @@
 
 	let { interaction, characterInteractionId, onlayout }: Props = $props();
 
-	const { characterInteractionActionStore, admin } = useInteraction();
+	const { admin } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
 	let isLayouting = $state(false);

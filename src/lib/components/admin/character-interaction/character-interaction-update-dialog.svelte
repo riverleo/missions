@@ -17,13 +17,8 @@
 		isSystemInteractionType,
 	} from '$lib/utils/label';
 	import { alphabetical } from 'radash';
-	import type {
-		CharacterId,
-		OnceInteractionType,
-		FulfillInteractionType,
-		SystemInteractionType,
-	} from '$lib/types';
-	import { getFallbackString, getActionString } from '$lib/utils/label';
+	import type { CharacterId, SystemInteractionType, BehaviorInteractionType } from '$lib/types';
+	import { getFallbackString } from '$lib/utils/label';
 
 	const { characterStore } = useCharacter();
 	const {
@@ -46,20 +41,18 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let targetCharacterId = $state<CharacterId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>(
-		'character_hug'
-	);
+	let interactionType = $state<BehaviorInteractionType>('character_hug');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
 	const interactionTypeOptions = getBehaviorInteractionTypeLabels('character');
 
 	const selectedTargetCharacter = $derived(characters.find((c) => c.id === targetCharacterId));
-	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name ?? '대상 캐릭터 선택');
+	const selectedTargetCharacterName = $derived(selectedTargetCharacter?.name);
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
+	const selectedCharacterName = $derived(selectedCharacter?.name);
 	const selectedBehaviorLabel = $derived(
-		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '포옹'
+		interactionTypeOptions.find((o) => o.value === interactionType)?.label
 	);
 
 	// interaction이 변경될 때 폼 초기화
@@ -67,9 +60,9 @@
 		if (interaction) {
 			targetCharacterId = interaction.target_character_id || undefined;
 			interactionType =
-				(interaction.once_interaction_type as OnceInteractionType | null) ||
-				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
-				(interaction.system_interaction_type as SystemInteractionType | null) ||
+				interaction.once_interaction_type ||
+				interaction.fulfill_interaction_type ||
+				interaction.system_interaction_type ||
 				'character_hug';
 			characterId = interaction.character_id || undefined;
 		}
@@ -81,7 +74,7 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
+			interactionType = value as BehaviorInteractionType;
 		}
 	}
 
@@ -109,7 +102,7 @@
 					? interactionType
 					: null,
 				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
-				character_id: characterId || undefined,
+				character_id: characterId,
 			});
 
 			closeCharacterInteractionDialog();
@@ -132,7 +125,7 @@
 					<ButtonGroupText>대상 캐릭터</ButtonGroupText>
 					<Select type="single" value={targetCharacterId} onValueChange={onTargetCharacterChange}>
 						<SelectTrigger class="flex-1">
-							{selectedTargetCharacterName}
+							{selectedTargetCharacterName ?? '대상 캐릭터 선택'}
 						</SelectTrigger>
 						<SelectContent>
 							{#each characters as character (character.id)}
@@ -146,7 +139,7 @@
 					<ButtonGroupText>캐릭터</ButtonGroupText>
 					<Select type="single" value={characterId} onValueChange={onCharacterChange}>
 						<SelectTrigger class="flex-1">
-							{selectedCharacterName}
+							{selectedCharacterName ?? getFallbackString('all')}
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="">모두</SelectItem>

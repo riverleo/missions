@@ -34,6 +34,7 @@
 		getActionString,
 		getDomainString,
 		getNeedFulfillmentTaskConditionString,
+		getFulfillmentTargetLabelString,
 	} from '$lib/utils/label';
 	import { clone } from 'radash';
 
@@ -70,56 +71,6 @@
 	let isUpdating = $state(false);
 	let changes = $state<NeedFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
-
-	const selectedTargetLabel = $derived.by(() => {
-		if (changes?.fulfillment_type === 'building' && changes?.building_interaction_id) {
-			const interaction = buildingInteractions.find(
-				(i) => i.id === changes?.building_interaction_id
-			);
-			if (interaction) {
-				const building = buildings.find((b) => b.id === interaction.building_id);
-				const character = interaction.character_id
-					? characters.find((c) => c.id === interaction.character_id)
-					: undefined;
-				const interactionType =
-					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
-				const characterName = character ? character.name : getFallbackString('allCharacters');
-				return `${building?.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
-			}
-		}
-		if (changes?.fulfillment_type === 'character' && changes?.character_interaction_id) {
-			const interaction = characterInteractions.find(
-				(i) => i.id === changes?.character_interaction_id
-			);
-			if (interaction) {
-				const targetCharacter = characters.find((c) => c.id === interaction.target_character_id);
-				const character = interaction.character_id
-					? characters.find((c) => c.id === interaction.character_id)
-					: undefined;
-				const interactionType =
-					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
-				const characterName = character ? character.name : getFallbackString('allCharacters');
-				return `${targetCharacter?.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
-			}
-		}
-		if (changes?.fulfillment_type === 'item' && changes?.item_interaction_id) {
-			const interaction = itemInteractions.find((i) => i.id === changes?.item_interaction_id);
-			if (interaction) {
-				const item = items.find((i) => i.id === interaction.item_id);
-				const character = interaction.character_id
-					? characters.find((c) => c.id === interaction.character_id)
-					: undefined;
-				const interactionType =
-					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
-				const characterName = character ? character.name : getFallbackString('allCharacters');
-				return `${item?.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
-			}
-		}
-		return '상호작용 선택...';
-	});
 
 	$effect(() => {
 		if (fulfillment && fulfillment.id !== currentFulfillmentId) {
@@ -291,10 +242,10 @@
 								<ButtonGroupText>상호작용</ButtonGroupText>
 								<Select type="single" value={selectedTargetId ?? ''} onValueChange={onTargetChange}>
 									<SelectTrigger class="flex-1">
-										{#if selectedTargetLabel.length > 15}
-											{selectedTargetLabel.substring(0, 15) + '...'}
+										{#if getFulfillmentTargetLabelString(changes).length > 15}
+											{getFulfillmentTargetLabelString(changes).substring(0, 15) + '...'}
 										{:else}
-											{selectedTargetLabel}
+											{getFulfillmentTargetLabelString(changes)}
 										{/if}
 									</SelectTrigger>
 									<SelectContent>

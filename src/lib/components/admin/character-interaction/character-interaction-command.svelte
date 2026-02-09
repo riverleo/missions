@@ -21,24 +21,28 @@
 	import { getFallbackString, getBehaviorInteractTypeString } from '$lib/utils/label';
 	import { page } from '$app/state';
 	import { alphabetical, group } from 'radash';
-	import type { ScenarioId, CharacterId, CharacterInteraction } from '$lib/types';
+	import type {
+		ScenarioId,
+		CharacterId,
+		CharacterInteraction,
+		CharacterInteractionId,
+	} from '$lib/types';
 
-	const { characterStore } = useCharacter();
-	const { characterInteractionStore, openCharacterInteractionDialog } = useInteraction();
+	const { characterStore, getAllCharacters, getOrUndefinedCharacter } = useCharacter();
+	const { openCharacterInteractionDialog, getAllCharacterInteractions } = useInteraction();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const currentInteractionId = $derived(page.params.characterInteractionId);
+	const currentCharacterInteractionId = $derived(
+		page.params.characterInteractionId as CharacterInteractionId | undefined
+	);
 
 	const defaultInteractions = $derived(() => {
-		return Object.values($characterInteractionStore.data).filter((i) => !i.target_character_id);
+		return getAllCharacterInteractions().filter((i) => !i.target_character_id);
 	});
 
 	const interactionsGroupedByTargetCharacter = $derived(() => {
-		const interactions = Object.values($characterInteractionStore.data).filter(
-			(i) => i.target_character_id
-		);
+		const interactions = getAllCharacterInteractions().filter((i) => i.target_character_id);
 		const grouped = group(interactions, (i) => i.target_character_id);
-		const characters = Object.values($characterStore.data);
-		const sortedCharacters = alphabetical(characters, (c) => c.name);
+		const sortedCharacters = alphabetical(getAllCharacters(), (c) => c.name);
 
 		return sortedCharacters
 			.map((character) => ({
@@ -48,18 +52,16 @@
 			.filter((g) => g.interactions.length > 0);
 	});
 
-	function getInteractionLabel(interaction: CharacterInteraction) {
-		const character = interaction.character_id
-			? $characterStore.data[interaction.character_id as CharacterId]
-			: undefined;
+	function getCharacterInteractionLabel(characterInteraction: CharacterInteraction) {
+		const character = getOrUndefinedCharacter(characterInteraction.character_id);
 
-		const interactionType = (interaction.once_interaction_type ||
-			interaction.fulfill_interaction_type ||
-			interaction.system_interaction_type)!;
-		const behaviorLabel = getBehaviorInteractTypeString(interactionType);
+		const interactionType = (characterInteraction.once_interaction_type ||
+			characterInteraction.fulfill_interaction_type ||
+			characterInteraction.system_interaction_type)!;
+		const behaviorInteractionLabel = getBehaviorInteractTypeString(interactionType);
 		const characterName = character ? character.name : getFallbackString('allCharacters');
 
-		return `${characterName} ${behaviorLabel}`;
+		return `${characterName} ${behaviorInteractionLabel}`;
 	}
 </script>
 
@@ -71,7 +73,7 @@
 			{#if defaultInteractions().length > 0}
 				<CommandGroup heading="기본 (모든 캐릭터)">
 					{#each defaultInteractions() as interaction (interaction.id)}
-						{@const label = getInteractionLabel(interaction)}
+						{@const label = getCharacterInteractionLabel(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
@@ -80,7 +82,7 @@
 							<IconCheck
 								class={cn(
 									'mr-2 size-4',
-									interaction.id === currentInteractionId ? 'opacity-100' : 'opacity-0'
+									interaction.id === currentCharacterInteractionId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
 							<span class="flex-1 truncate">{label}</span>
@@ -127,7 +129,7 @@
 			{#each interactionsGroupedByTargetCharacter() as { targetCharacter, interactions } (targetCharacter.id)}
 				<CommandGroup heading={targetCharacter.name}>
 					{#each interactions as interaction (interaction.id)}
-						{@const label = getInteractionLabel(interaction)}
+						{@const label = getCharacterInteractionLabel(interaction)}
 						{@const shortId = interaction.id.split('-')[0]}
 						<CommandLinkItem
 							href={`/admin/scenarios/${scenarioId}/character-interactions/${interaction.id}`}
@@ -136,7 +138,7 @@
 							<IconCheck
 								class={cn(
 									'mr-2 size-4',
-									interaction.id === currentInteractionId ? 'opacity-100' : 'opacity-0'
+									interaction.id === currentCharacterInteractionId ? 'opacity-100' : 'opacity-0'
 								)}
 							/>
 							<span class="flex-1 truncate">{label}</span>

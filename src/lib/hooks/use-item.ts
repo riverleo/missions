@@ -141,11 +141,13 @@ function createItemStore() {
 	}
 
 	// Getter functions - return undefined if not found (optional data)
-	function getOrUndefinedItem(id: string): Item | undefined {
+	function getOrUndefinedItem(id: string | null | undefined): Item | undefined {
+		if (!id) return undefined;
 		return get(itemStore).data[id as ItemId];
 	}
 
-	function getItemStates(itemId: string): ItemState[] | undefined {
+	function getItemStates(itemId: string | null | undefined): ItemState[] | undefined {
+		if (!itemId) return undefined;
 		return get(itemStateStore).data[itemId as ItemId];
 	}
 

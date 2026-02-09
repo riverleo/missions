@@ -18,14 +18,12 @@
 	import {
 		createCharacterInteractionActionNodeId,
 		parseCharacterInteractionActionNodeId,
-		isCharacterInteractionActionNextEdgeId,
 	} from '$lib/utils/flow-id';
 	import { applyElkLayout } from '$lib/utils/elk-layout';
 	import CharacterInteractionActionNode from './character-interaction-action-node.svelte';
 	import CharacterInteractionActionPanel from './character-interaction-action-panel.svelte';
 	import CharacterInteractionActionNodePanel from './character-interaction-action-node-panel.svelte';
 	import type {
-		CharacterInteraction,
 		CharacterInteractionId,
 		CharacterInteractionAction,
 		CharacterInteractionActionId,
@@ -112,9 +110,8 @@
 			const targetId = parseCharacterInteractionActionNodeId(connection.target);
 
 			await admin.updateCharacterInteractionAction(sourceId as CharacterInteractionActionId, {
-					next_character_interaction_action_id: targetId as CharacterInteractionActionId,
-				}
-			);
+				next_character_interaction_action_id: targetId as CharacterInteractionActionId,
+			});
 
 			edges = [
 				...edges,
@@ -172,9 +169,8 @@
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
 			await admin.updateCharacterInteractionAction(fromActionId as CharacterInteractionActionId, {
-					next_character_interaction_action_id: newAction.id,
-				}
-			);
+				next_character_interaction_action_id: newAction.id,
+			});
 
 			skipConvertEffect = false;
 			await tick();

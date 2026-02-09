@@ -262,27 +262,33 @@ function createBuildingStore() {
 	}
 
 	// Getter functions - return undefined if not found (optional data)
-	function getOrUndefinedBuilding(id: string): Building | undefined {
+	function getOrUndefinedBuilding(id: string | null | undefined): Building | undefined {
+		if (!id) return undefined;
 		return get(buildingStore).data[id as BuildingId];
 	}
 
-	function getBuildingItem(id: string): BuildingItem | undefined {
+	function getBuildingItem(id: string | null | undefined): BuildingItem | undefined {
+		if (!id) return undefined;
 		return get(buildingItemStore).data[id as BuildingItemId];
 	}
 
-	function getBuildingStates(buildingId: string): BuildingState[] | undefined {
+	function getBuildingStates(buildingId: string | null | undefined): BuildingState[] | undefined {
+		if (!buildingId) return undefined;
 		return get(buildingStateStore).data[buildingId as BuildingId];
 	}
 
-	function getOrUndefinedCondition(id: string): Condition | undefined {
+	function getOrUndefinedCondition(id: string | null | undefined): Condition | undefined {
+		if (!id) return undefined;
 		return get(conditionStore).data[id as ConditionId];
 	}
 
-	function getConditionFulfillment(id: string): ConditionFulfillment | undefined {
+	function getConditionFulfillment(id: string | null | undefined): ConditionFulfillment | undefined {
+		if (!id) return undefined;
 		return get(conditionFulfillmentStore).data[id as ConditionFulfillmentId];
 	}
 
-	function getOrUndefinedBuildingCondition(id: string): BuildingCondition | undefined {
+	function getOrUndefinedBuildingCondition(id: string | null | undefined): BuildingCondition | undefined {
+		if (!id) return undefined;
 		return get(buildingConditionStore).data[id as BuildingConditionId];
 	}
 

@@ -20,11 +20,11 @@
 	import { cn } from '$lib/utils';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { ScenarioId } from '$lib/types';
+	import type { CharacterId, ScenarioId } from '$lib/types';
 
 	const { characterStore, openCharacterDialog } = useCharacter();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
-	const currentCharacterId = $derived(page.params.characterId);
+	const currentCharacterId = $derived(page.params.characterId as CharacterId);
 
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 </script>

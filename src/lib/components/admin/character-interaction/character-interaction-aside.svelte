@@ -13,7 +13,9 @@
 	import CharacterInteractionDeleteDialog from './character-interaction-delete-dialog.svelte';
 
 	const { openCharacterInteractionDialog } = useInteraction();
-	const currentInteractionId = $derived(page.params.characterInteractionId);
+	const currentCharacterInteractionId = $derived(
+		page.params.characterInteractionId as CharacterInteractionId | undefined
+	);
 
 	let toggleValue = $state<string[]>(['list']);
 </script>
@@ -56,12 +58,12 @@
 								{...props}
 								variant="outline"
 								size="icon"
-								disabled={!currentInteractionId}
+								disabled={!currentCharacterInteractionId}
 								onclick={() =>
-									currentInteractionId &&
+									currentCharacterInteractionId &&
 									openCharacterInteractionDialog({
 										type: 'update',
-										characterInteractionId: currentInteractionId as CharacterInteractionId,
+										characterInteractionId: currentCharacterInteractionId,
 									})}
 							>
 								<IconEditCircle class="size-4" />
@@ -80,12 +82,12 @@
 							{...props}
 							variant="outline"
 							size="icon"
-							disabled={!currentInteractionId}
+							disabled={!currentCharacterInteractionId}
 							onclick={() =>
-								currentInteractionId &&
+								currentCharacterInteractionId &&
 								openCharacterInteractionDialog({
 									type: 'delete',
-									characterInteractionId: currentInteractionId as CharacterInteractionId,
+									characterInteractionId: currentCharacterInteractionId,
 								})}
 						>
 							<IconTrash class="size-4" />

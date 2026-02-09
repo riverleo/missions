@@ -29,7 +29,13 @@
 	import type { NeedId, ScenarioId, CharacterId, CharacterFaceStateType } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
+	import {
+		getFallbackString,
+		getActionString,
+		getFormString,
+		getCharacterFaceStateLabels,
+		getCharacterFaceStateString,
+	} from '$lib/utils/label';
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -45,13 +51,6 @@
 	let characterId = $state<string | undefined>(undefined);
 	let characterFaceStateType = $state<CharacterFaceStateType>('idle');
 	let isSubmitting = $state(false);
-
-	const faceStateOptions: { value: CharacterFaceStateType; label: string }[] = [
-		{ value: 'idle', label: '기본' },
-		{ value: 'happy', label: '기쁨' },
-		{ value: 'sad', label: '슬픔' },
-		{ value: 'angry', label: '화남' },
-	];
 
 	const selectedNeed = $derived(needs.find((n) => n.id === needId));
 	const selectedNeedName = $derived(selectedNeed?.name ?? '욕구 선택');
@@ -178,10 +177,10 @@
 					<ButtonGroupText>표정</ButtonGroupText>
 					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
 						<SelectTrigger class="flex-1">
-							{faceStateOptions.find((o) => o.value === characterFaceStateType)?.label ?? '기본'}
+							{getCharacterFaceStateString(characterFaceStateType)}
 						</SelectTrigger>
 						<SelectContent>
-							{#each faceStateOptions as option (option.value)}
+							{#each getCharacterFaceStateLabels() as option (option.value)}
 								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>

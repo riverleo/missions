@@ -33,6 +33,7 @@
 	import { createActionNodeId } from '$lib/utils/flow-id';
 	import {
 		getBehaviorActionTypeString,
+		getBehaviorActionTypeLabelByType,
 		getTargetSelectionMethodLabelString,
 		getBehaviorInteractTypeString,
 		getActionString,
@@ -75,13 +76,8 @@
 	let changes = $state<NeedBehaviorAction | undefined>(undefined);
 	let currentActionId = $state<string | undefined>(undefined);
 
-	const selectedTypeLabel = $derived(
-		changes?.type ? getBehaviorActionTypeString(changes.type) : '액션 타입'
-	);
-
-	const selectedTargetMethodLabel = $derived(
-		changes ? getTargetSelectionMethodLabelString(changes) : '타깃 결정 방법'
-	);
+	const selectedTypeLabel = $derived(getBehaviorActionTypeString(changes));
+	const selectedTargetMethodLabel = $derived(getTargetSelectionMethodLabelString(changes));
 
 	// 현재 선택된 대상의 value 값 (Select의 value prop에 사용)
 	const selectedTargetValue = $derived.by(() => {
@@ -200,9 +196,9 @@
 									{selectedTypeLabel}
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="once">{getBehaviorActionTypeString('once')}</SelectItem>
-									<SelectItem value="fulfill">{getBehaviorActionTypeString('fulfill')}</SelectItem>
-									<SelectItem value="idle">{getBehaviorActionTypeString('idle')}</SelectItem>
+									<SelectItem value="once">{getBehaviorActionTypeLabelByType('once')}</SelectItem>
+									<SelectItem value="fulfill">{getBehaviorActionTypeLabelByType('fulfill')}</SelectItem>
+									<SelectItem value="idle">{getBehaviorActionTypeLabelByType('idle')}</SelectItem>
 								</SelectContent>
 							</Select>
 						</ButtonGroup>

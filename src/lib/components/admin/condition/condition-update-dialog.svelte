@@ -19,13 +19,14 @@
 	import { IconHeading } from '@tabler/icons-svelte';
 	import { getActionString, getFormString } from '$lib/utils/label';
 
-	const { conditionStore, conditionDialogStore, closeConditionDialog, admin } = useBuilding();
+	const { conditionDialogStore, closeConditionDialog, admin, getOrUndefinedCondition } =
+		useBuilding();
 
 	const open = $derived($conditionDialogStore?.type === 'update');
 	const conditionId = $derived(
 		$conditionDialogStore?.type === 'update' ? $conditionDialogStore.conditionId : undefined
 	);
-	const currentCondition = $derived(conditionId ? $conditionStore.data[conditionId] : undefined);
+	const currentCondition = $derived(getOrUndefinedCondition(conditionId));
 
 	let name = $state('');
 	let maxValue = $state(100);
@@ -84,7 +85,7 @@
 					<InputGroupAddon align="inline-start">
 						<IconHeading class="size-4" />
 					</InputGroupAddon>
-					<InputGroupInput placeholder={getFormString("name")} bind:value={name} />
+					<InputGroupInput placeholder={getFormString('name')} bind:value={name} />
 				</InputGroup>
 				<div class="flex gap-1">
 					<InputGroup>

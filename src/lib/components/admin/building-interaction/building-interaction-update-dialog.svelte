@@ -23,6 +23,7 @@
 		OnceInteractionType,
 		FulfillInteractionType,
 		SystemInteractionType,
+		BehaviorInteractionType,
 	} from '$lib/types';
 	import { getFallbackString, getActionString } from '$lib/utils/label';
 
@@ -49,9 +50,7 @@
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 
 	let buildingId = $state<BuildingId | undefined>(undefined);
-	let interactionType = $state<OnceInteractionType | FulfillInteractionType | SystemInteractionType>(
-		'building_use'
-	);
+	let behaviorInteractionType = $state<BehaviorInteractionType>('building_use');
 	let characterId = $state<CharacterId | undefined>(undefined);
 	let isSubmitting = $state(false);
 
@@ -62,14 +61,14 @@
 	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
 	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
 	const selectedInteractionLabel = $derived(
-		interactionTypeOptions.find((o) => o.value === interactionType)?.label ?? '사용'
+		interactionTypeOptions.find((o) => o.value === behaviorInteractionType)?.label ?? '사용'
 	);
 
 	// interaction이 변경될 때 폼 초기화
 	$effect(() => {
 		if (interaction) {
 			buildingId = interaction.building_id || undefined;
-			interactionType =
+			behaviorInteractionType =
 				(interaction.once_interaction_type as OnceInteractionType | null) ||
 				(interaction.fulfill_interaction_type as FulfillInteractionType | null) ||
 				(interaction.system_interaction_type as SystemInteractionType | null) ||
@@ -84,7 +83,10 @@
 
 	function onInteractionTypeChange(value: string | undefined) {
 		if (value) {
-			interactionType = value as OnceInteractionType | FulfillInteractionType | SystemInteractionType;
+			behaviorInteractionType = value as
+				| OnceInteractionType
+				| FulfillInteractionType
+				| SystemInteractionType;
 		}
 	}
 
@@ -107,11 +109,15 @@
 		try {
 			await admin.updateBuildingInteraction(buildingInteractionId, {
 				building_id: buildingId,
-				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
-				fulfill_interaction_type: isFulfillInteractionType(interactionType)
-					? interactionType
+				once_interaction_type: isOnceInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
 					: null,
-				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
+				fulfill_interaction_type: isFulfillInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
+					: null,
+				system_interaction_type: isSystemInteractionType(behaviorInteractionType)
+					? behaviorInteractionType
+					: null,
 				character_id: characterId || undefined,
 			});
 
@@ -147,7 +153,11 @@
 
 				<ButtonGroup class="w-full">
 					<ButtonGroupText>상호작용</ButtonGroupText>
-					<Select type="single" value={interactionType} onValueChange={onInteractionTypeChange}>
+					<Select
+						type="single"
+						value={behaviorInteractionType}
+						onValueChange={onInteractionTypeChange}
+					>
 						<SelectTrigger class="flex-1">
 							{selectedInteractionLabel}
 						</SelectTrigger>
