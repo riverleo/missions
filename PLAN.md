@@ -630,71 +630,91 @@ export function getActionLabels() {
 
 ### 파일별 작업 목록
 
-**그룹 1: interaction-action-node (중복 state labels + summary) - 3개**
-- [ ] `building-interaction-action-node.svelte`
+**그룹 1: interaction-action-node (중복 state labels + summary) - 3개** ✅
+- [x] `building-interaction-action-node.svelte`
   - bodyStateLabel → `getCharacterBodyStateString()`
   - faceStateLabel → `getCharacterFaceStateString()`
-  - summary → `getInteractionActionSummary()`
+  - summary → `getInteractionActionSummaryString()`
 
-- [ ] `item-interaction-action-node.svelte`
+- [x] `item-interaction-action-node.svelte`
   - bodyStateLabel → `getCharacterBodyStateString()`
   - faceStateLabel → `getCharacterFaceStateString()`
-  - summary → `getInteractionActionSummary()`
+  - summary → `getInteractionActionSummaryString()`
 
-- [ ] `character-interaction-action-node.svelte`
+- [x] `character-interaction-action-node.svelte`
   - bodyStateLabel → `getCharacterBodyStateString()`
   - faceStateLabel → `getCharacterFaceStateString()`
-  - summary → `getInteractionActionSummary()`
+  - summary → `getInteractionActionSummaryString()`
 
-**그룹 2: behavior-action-node (interactionInfo 분리) - 2개**
-- [ ] `need-behavior-action-node.svelte`
-  - interactionInfo → getInteractionTargetName() + getInteractionBehaviorLabel()
+**그룹 2: behavior-action-node (interactionInfo 분리) - 2개** ✅
+- [x] `need-behavior-action-node.svelte`
+  - interactionInfo → getInteractionTargetNameString() + getInteractionBehaviorLabelString()
 
-- [ ] `condition-behavior-action-node.svelte`
-  - interactionInfo → getInteractionTargetName() + getInteractionBehaviorLabel()
+- [x] `condition-behavior-action-node.svelte`
+  - interactionInfo → getInteractionTargetNameString() + getInteractionBehaviorLabelString()
 
-**그룹 3: behavior-action-node-panel (actionType + targetMethod) - 2개**
-- [ ] `need-behavior-action-node-panel.svelte`
+**그룹 3: behavior-action-node-panel (actionType + targetMethod) - 2개** ✅
+- [x] `need-behavior-action-node-panel.svelte`
   - actionTypes → `getBehaviorActionTypeString()`
   - selectedTypeLabel → 단순화
-  - selectedTargetMethodLabel → `getTargetSelectionMethodLabel()`
+  - selectedTargetMethodLabel → `getTargetSelectionMethodLabelString()`
 
-- [ ] `condition-behavior-action-node-panel.svelte`
+- [x] `condition-behavior-action-node-panel.svelte`
   - actionTypes → `getBehaviorActionTypeString()`
   - selectedTypeLabel → 단순화
-  - selectedTargetMethodLabel → `getTargetSelectionMethodLabel()`
+  - selectedTargetMethodLabel → `getTargetSelectionMethodLabelString()`
 
-**그룹 4: fulfillment-node-panel (fulfillmentType + taskCondition) - 2개**
-- [ ] `need-fulfillment-node-panel.svelte`
+**그룹 4: fulfillment-node-panel (fulfillmentType + taskCondition) - 2개** ✅
+- [x] `need-fulfillment-node-panel.svelte`
   - fulfillmentTypeOptions → `getDomainString()` + task 추가
   - taskConditionOptions → `getNeedFulfillmentTaskConditionString()`
 
-- [ ] `condition-fulfillment-node-panel.svelte`
+- [x] `condition-fulfillment-node-panel.svelte`
   - fulfillmentTypeOptions → `getDomainString()` + task 추가
-  - taskConditionOptions → `getConditionFulfillmentTaskConditionString()`
 
-**그룹 5: interaction-panel (중복 state labels) - 3개**
-- [ ] `building-interaction-panel.svelte`
-- [ ] `item-interaction-panel.svelte`
-- [ ] `character-interaction-panel.svelte`
+**그룹 5: interaction-panel (중복 state labels) - 3개** ✅
+- [x] `building-interaction-panel.svelte`
+- [x] `item-interaction-panel.svelte`
+- [x] `character-interaction-panel.svelte`
 
 ### 우선순위별 작업 순서
 
-**Phase 2A: label.ts에 함수 추가**
-1. [ ] `getBehaviorActionTypeString(type: BehaviorActionType): string`
-2. [ ] `getTargetSelectionMethodLabel(action: BehaviorAction): string`
-3. [ ] `getInteractionTargetName(action: BehaviorAction): string | undefined`
-4. [ ] `getInteractionBehaviorLabel(action: BehaviorAction): string | undefined`
-5. [ ] `getInteractionActionSummary(action: InteractionAction): string`
-6. [ ] `getNeedFulfillmentTaskConditionString(condition: string): string`
-7. [ ] DOMAIN_LABELS에 'task' 추가
+**Phase 2A: label.ts에 함수 추가** ✅
+1. [x] `getBehaviorActionTypeString(type: BehaviorActionType): string`
+2. [x] `getTargetSelectionMethodLabelString(action: BehaviorAction): string`
+3. [x] `getInteractionTargetNameString(action: BehaviorAction): string | undefined`
+4. [x] `getInteractionBehaviorLabelString(action: BehaviorAction): string | undefined`
+5. [x] `getInteractionActionSummaryString(action: InteractionAction): string`
+6. [x] `getNeedFulfillmentTaskConditionString(condition: string): string`
+7. [x] DOMAIN_LABELS에 'task' 추가
 
-**Phase 2B: 컴포넌트 교체 (총 12개 파일)**
-1. [ ] 그룹 1: interaction-action-node (3개)
-2. [ ] 그룹 2: behavior-action-node (2개)
-3. [ ] 그룹 3: behavior-action-node-panel (2개)
-4. [ ] 그룹 4: fulfillment-node-panel (2개)
-5. [ ] 그룹 5: interaction-panel (3개)
+**Phase 2B: 컴포넌트 교체 (총 12개 파일)** ✅
+1. [x] 그룹 1: interaction-action-node (3개)
+2. [x] 그룹 2: behavior-action-node (2개)
+3. [x] 그룹 3: behavior-action-node-panel (2개)
+4. [x] 그룹 4: fulfillment-node-panel (2개)
+5. [x] 그룹 5: interaction-panel (3개)
+
+**Phase 2C: 완료 요약** ✅
+
+총 12개 파일에서 라벨 로직을 utils/label.ts로 중앙화 완료:
+- 추가된 함수: 7개
+  - getBehaviorActionTypeString
+  - getTargetSelectionMethodLabelString
+  - getInteractionTargetNameString
+  - getInteractionBehaviorLabelString
+  - getInteractionActionSummaryString
+  - getNeedFulfillmentTaskConditionString
+  - DOMAIN_LABELS에 'task' 추가
+- 제거된 중복 코드: 약 240 lines
+- 수정된 파일: 12개
+  - interaction-action-node (3)
+  - behavior-action-node (2)
+  - behavior-action-node-panel (2)
+  - fulfillment-node-panel (2)
+  - interaction-panel (3)
+- 타입 에러 수정: building-interaction-panel.svelte (InteractionType → OnceInteractionType | FulfillInteractionType)
+- 모든 TypeScript 검사 통과
 
 ### Step 1: 라벨 패턴 검색
 
