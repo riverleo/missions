@@ -568,7 +568,26 @@ function getOrUndefinedCharacter(id: CharacterId | null | undefined): Character 
    - ✅ Reduced component from 127 lines to 47 lines
 
 #### 2.3. Low Priority - Store getter 치환
-7. [ ] 나머지 모든 파일의 store 직접 참조 → getter 변경
+7. [진행중] 나머지 모든 파일의 store 직접 참조 → getter 변경
+
+**완료된 파일 (2/~50)**:
+- ✅ accordion-item-world-character-entity.svelte (13 replacements)
+- ✅ behavior-priority-list-item.svelte (6 replacements)
+
+**남은 store 접근 패턴 (총 ~100개)**:
+- $characterStore.data[ - 20개
+- $buildingStore.data[ - 11개
+- $itemStore.data[ - 10개
+- $conditionStore.data[ - 7개
+- $needStore.data[ - 6개
+- interaction stores - 15개
+- interactionAction stores - 9개
+- 기타 stores - 22개
+
+**우선순위**:
+1. High: interaction action node-panel files (6 occurrences each)
+2. Medium: fulfillment-node files (6 occurrences each)
+3. Low: 나머지 파일들 (1-5 occurrences each)
 
 **각 작업별 흐름**:
 1. 해당 파일들 수정
