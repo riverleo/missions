@@ -257,6 +257,13 @@ export function getBuildingStateString(state: BuildingStateType): string {
 	return BUILDING_STATE_LABELS[state];
 }
 
+export function getBuildingStateTypeLabels(): Label<BuildingStateType>[] {
+	return Object.entries(BUILDING_STATE_LABELS).map(([value, label]) => ({
+		value: value as BuildingStateType,
+		label,
+	}));
+}
+
 // Type guards for interaction types
 export function isOnceInteractionType(type: BehaviorInteractionType): type is OnceInteractionType {
 	return type in ONCE_INTERACTION_TYPE_LABELS;
@@ -378,8 +385,8 @@ export function getNeedBehaviorString(behavior: NeedBehavior): string {
 
 // Behavior Priority 라벨 생성 함수들
 export function getNeedBehaviorPriorityLabel(needBehaviorId: NeedBehaviorId): string | null {
-	const { getNeedBehavior } = useBehavior();
-	const behavior = getNeedBehavior(needBehaviorId);
+	const { getOrUndefinedNeedBehavior } = useBehavior();
+	const behavior = getOrUndefinedNeedBehavior(needBehaviorId);
 	if (!behavior) return null;
 	return getNeedBehaviorString(behavior);
 }
@@ -387,11 +394,11 @@ export function getNeedBehaviorPriorityLabel(needBehaviorId: NeedBehaviorId): st
 export function getConditionBehaviorPriorityLabel(
 	conditionBehaviorId: ConditionBehaviorId
 ): string | null {
-	const { getConditionBehavior } = useBehavior();
+	const { getOrUndefinedConditionBehavior } = useBehavior();
 	const { getOrUndefinedCondition } = useBuilding();
 	const { getOrUndefinedCharacter } = useCharacter();
 
-	const behavior = getConditionBehavior(conditionBehaviorId);
+	const behavior = getOrUndefinedConditionBehavior(conditionBehaviorId);
 	if (!behavior) return null;
 
 	const condition = getOrUndefinedCondition(behavior.condition_id);
@@ -407,9 +414,9 @@ export function getConditionBehaviorPriorityLabel(
 export function getBehaviorActionString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string {
-	const { getBuilding, getBuildingCondition, getConditionFulfillment } = useBuilding();
+	const { getBuilding, getBuildingCondition, getOrUndefinedConditionFulfillment } = useBuilding();
 	const { getItem } = useItem();
-	const { getCharacter, getNeedFulfillment } = useCharacter();
+	const { getCharacter, getOrUndefinedNeedFulfillment } = useCharacter();
 	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
 	// target 결정
@@ -433,9 +440,9 @@ export function getBehaviorActionString(
 		// fulfillment 대상 결정
 		let fulfillment;
 		if ('need_fulfillment_id' in action && action.need_fulfillment_id) {
-			fulfillment = getNeedFulfillment(action.need_fulfillment_id);
+			fulfillment = getOrUndefinedNeedFulfillment(action.need_fulfillment_id);
 		} else if ('condition_fulfillment_id' in action && action.condition_fulfillment_id) {
-			fulfillment = getConditionFulfillment(action.condition_fulfillment_id);
+			fulfillment = getOrUndefinedConditionFulfillment(action.condition_fulfillment_id);
 		}
 
 		let fulfillmentLabel = '자동';

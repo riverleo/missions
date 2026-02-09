@@ -298,14 +298,14 @@ function createCharacterStore() {
 	}
 
 	// World entity helper functions
-	function getCharacterByWorldCharacter(worldCharacterId: WorldCharacterId): Character {
+	function getCharacterByWorldCharacterId(worldCharacterId: WorldCharacterId): Character {
 		const { getWorldCharacter } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
 		if (!worldCharacter) throw new Error(`WorldCharacter not found: ${worldCharacterId}`);
 		return getCharacter(worldCharacter.character_id);
 	}
 
-	function getOrUndefinedCharacterByWorldCharacter(worldCharacterId: WorldCharacterId | null | undefined): Character | undefined {
+	function getOrUndefinedCharacterByWorldCharacterId(worldCharacterId: WorldCharacterId | null | undefined): Character | undefined {
 		if (!worldCharacterId) return undefined;
 		const { getWorldCharacter } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
@@ -313,7 +313,7 @@ function createCharacterStore() {
 		return getOrUndefinedCharacter(worldCharacter.character_id);
 	}
 
-	function getCharacterFaceStates(characterId: string | null | undefined): CharacterFaceState[] | undefined {
+	function getOrUndefinedCharacterFaceStates(characterId: string | null | undefined): CharacterFaceState[] | undefined {
 		if (!characterId) return undefined;
 		return get(characterFaceStateStore).data[characterId as CharacterId];
 	}
@@ -323,7 +323,7 @@ function createCharacterStore() {
 		return get(characterBodyStore).data[id as CharacterBodyId];
 	}
 
-	function getCharacterBodyStates(bodyId: string | null | undefined): CharacterBodyState[] | undefined {
+	function getOrUndefinedCharacterBodyStates(bodyId: string | null | undefined): CharacterBodyState[] | undefined {
 		if (!bodyId) return undefined;
 		return get(characterBodyStateStore).data[bodyId as CharacterBodyId];
 	}
@@ -339,7 +339,8 @@ function createCharacterStore() {
 		return get(needStore).data[id as NeedId];
 	}
 
-	function getNeedFulfillment(id: string): NeedFulfillment | undefined {
+	function getOrUndefinedNeedFulfillment(id: string | null | undefined): NeedFulfillment | undefined {
+		if (!id) return undefined;
 		return get(needFulfillmentStore).data[id as NeedFulfillmentId];
 	}
 
@@ -909,15 +910,15 @@ function createCharacterStore() {
 		closeNeedDialog,
 		getCharacter,
 		getOrUndefinedCharacter,
-		getCharacterByWorldCharacter,
-		getOrUndefinedCharacterByWorldCharacter,
-		getCharacterFaceStates,
+		getCharacterByWorldCharacterId,
+		getOrUndefinedCharacterByWorldCharacterId,
+		getOrUndefinedCharacterFaceStates,
 		getCharacterBody,
 		getOrUndefinedCharacterBody,
-		getCharacterBodyStates,
+		getOrUndefinedCharacterBodyStates,
 		getNeed,
 		getOrUndefinedNeed,
-		getNeedFulfillment,
+		getOrUndefinedNeedFulfillment,
 		getCharacterNeed,
 		getOrUndefinedCharacterNeed,
 		getAllCharacters,

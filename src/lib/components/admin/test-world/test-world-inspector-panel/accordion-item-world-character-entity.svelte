@@ -2,15 +2,7 @@
 	import { useBehavior, useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import type {
-		NeedBehaviorId,
-		NeedBehaviorActionId,
-		ConditionBehaviorId,
-		ConditionBehaviorActionId,
-		WorldBuildingId,
-		WorldItemId,
-		WorldCharacterId,
-	} from '$lib/types';
+	import type { WorldItemId } from '$lib/types';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { getBehaviorActionString } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
@@ -28,18 +20,17 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { getWorldCharacter } = useWorld();
-	const { getOrUndefinedCharacter, getCharacterByWorldCharacter, getOrUndefinedNeed } =
-		useCharacter();
-	const { getOrUndefinedBuilding, getBuildingByWorldBuilding } = useBuilding();
-	const { getOrUndefinedItem, getItemByWorldItem } = useItem();
-	const { getNeedBehavior, getNeedBehaviorAction, getConditionBehavior, getConditionBehaviorAction } =
-		useBehavior();
+	const { getCharacterByWorldCharacterId, getOrUndefinedNeed } = useCharacter();
+	const { getBuildingByWorldBuildingId } = useBuilding();
+	const { getItemByWorldItemId } = useItem();
+	const {
+		getOrUndefinedNeedBehavior,
+		getOrUndefinedNeedBehaviorAction,
+		getOrUndefinedConditionBehavior,
+		getOrUndefinedConditionBehaviorAction,
+	} = useBehavior();
 
-	const worldCharacter = $derived(getWorldCharacter(entity.instanceId));
-	const character = $derived(
-		worldCharacter ? getOrUndefinedCharacter(worldCharacter.character_id) : undefined
-	);
+	const character = $derived(getCharacterByWorldCharacterId(entity.instanceId));
 	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
@@ -49,11 +40,11 @@
 		const { type, instanceId } = EntityIdUtils.parse(entity.behavior.targetEntityId);
 
 		if (type === 'building') {
-			return getBuildingByWorldBuilding(instanceId).name;
+			return getBuildingByWorldBuildingId(instanceId).name;
 		} else if (type === 'item') {
-			return getItemByWorldItem(instanceId).name;
+			return getItemByWorldItemId(instanceId).name;
 		} else if (type === 'character') {
-			return getCharacterByWorldCharacter(instanceId).name;
+			return getCharacterByWorldCharacterId(instanceId).name;
 		}
 
 		return undefined;
@@ -67,11 +58,11 @@
 
 		if (type === 'need') {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
-			const behavior = getNeedBehavior(behaviorId as NeedBehaviorId);
+			const behavior = getOrUndefinedNeedBehavior(behaviorId);
 			return behavior?.name ?? '행동';
 		} else {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
-			const behavior = getConditionBehavior(behaviorId as ConditionBehaviorId);
+			const behavior = getOrUndefinedConditionBehavior(behaviorId);
 			return behavior?.name ?? '컨디션';
 		}
 	});
@@ -84,12 +75,12 @@
 
 		if (type === 'need') {
 			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
-			const action = getNeedBehaviorAction(behaviorActionId as NeedBehaviorActionId);
+			const action = getOrUndefinedNeedBehaviorAction(behaviorActionId);
 			if (!action) return undefined;
 			return getBehaviorActionString(action);
 		} else {
 			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
-			const action = getConditionBehaviorAction(behaviorActionId as ConditionBehaviorActionId);
+			const action = getOrUndefinedConditionBehaviorAction(behaviorActionId);
 			if (!action) return undefined;
 			return getBehaviorActionString(action);
 		}
@@ -103,10 +94,10 @@
 
 		return entity.behavior.behaviors.map((behavior) => {
 			if (behavior.behaviorType === 'need') {
-				const needBehavior = getNeedBehavior(behavior.id as NeedBehaviorId);
+				const needBehavior = getOrUndefinedNeedBehavior(behavior.id);
 				return needBehavior?.name ?? '행동';
 			} else {
-				const conditionBehavior = getConditionBehavior(behavior.id as ConditionBehaviorId);
+				const conditionBehavior = getOrUndefinedConditionBehavior(behavior.id);
 				return conditionBehavior?.name ?? '컨디션';
 			}
 		});
@@ -116,9 +107,9 @@
 	const heldItemsTooltip = $derived.by(() => {
 		if (entity.heldItemIds.length === 0) return undefined;
 
-		const { getOrUndefinedItemByWorldItem } = useItem();
+		const { getOrUndefinedItemByWorldItemId } = useItem();
 		return entity.heldItemIds.map((itemId) => {
-			const item = getOrUndefinedItemByWorldItem(EntityIdUtils.instanceId(itemId) as WorldItemId);
+			const item = getOrUndefinedItemByWorldItemId(EntityIdUtils.instanceId<WorldItemId>(itemId));
 			const idPrefix = itemId.split('-')[0];
 			return item ? `${item.name} (${idPrefix})` : `아이템 (${idPrefix})`;
 		});

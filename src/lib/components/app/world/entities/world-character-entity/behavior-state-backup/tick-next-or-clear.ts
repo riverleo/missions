@@ -9,9 +9,9 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * 완료 여부는 각 tick 메서드에서 판단하며, 이 메서드는 전환/종료만 수행합니다.
  */
 export default function tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number): void {
-	const { getBehaviorAction, getNextBehaviorAction } = useBehavior();
+	const { getOrUndefinedBehaviorAction, getNextBehaviorAction } = useBehavior();
 
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return;
 
 	// 다음 행동 액션으로 전환

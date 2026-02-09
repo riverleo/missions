@@ -16,12 +16,12 @@ export default function tickActionIfSystemItemPick(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getBehaviorAction } = useBehavior();
+	const { getOrUndefinedBehaviorAction } = useBehavior();
 	const { getWorldItem, worldItemStore } = useWorld();
 	const { getAllItemInteractions, getItemInteractionActions, getNextInteractionAction } =
 		useInteraction();
 
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return false;
 
 	// idle 타입이거나 타겟이 없으면 skip

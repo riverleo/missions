@@ -15,11 +15,11 @@
 
 	let { characterId, type }: Props = $props();
 
-	const { getOrUndefinedCharacter, getCharacterFaceStates, admin, openCharacterFaceStateDialog } =
+	const { getOrUndefinedCharacter, getOrUndefinedCharacterFaceStates, admin, openCharacterFaceStateDialog } =
 		useCharacter();
 
 	const character = $derived(getOrUndefinedCharacter(characterId));
-	const faceStates = $derived(getCharacterFaceStates(characterId) ?? []);
+	const faceStates = $derived(getOrUndefinedCharacterFaceStates(characterId) ?? []);
 	const faceState = $derived(faceStates.find((s: CharacterFaceState) => s.type === type));
 
 	// 선택된 바디 상태 가져오기

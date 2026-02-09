@@ -66,11 +66,11 @@ function getInteractions(
 	let fulfillments: Fulfillment[] = [];
 
 	if ('need_id' in behaviorAction) {
-		const { getAllNeedFulfillments, getNeedFulfillment } = useCharacter();
+		const { getAllNeedFulfillments, getOrUndefinedNeedFulfillment } = useCharacter();
 
 		if (behaviorAction.need_fulfillment_id) {
 			// 명시적 fulfillment
-			const fulfillment = getNeedFulfillment(behaviorAction.need_fulfillment_id);
+			const fulfillment = getOrUndefinedNeedFulfillment(behaviorAction.need_fulfillment_id);
 			if (fulfillment) fulfillments = [FulfillmentIdUtils.to(fulfillment)];
 		} else {
 			// 자동 탐색: need_id로 필터링
@@ -79,11 +79,11 @@ function getInteractions(
 				.map(FulfillmentIdUtils.to);
 		}
 	} else {
-		const { getConditionFulfillment, getAllConditionFulfillments } = useBuilding();
+		const { getOrUndefinedConditionFulfillment, getAllConditionFulfillments } = useBuilding();
 
 		if (behaviorAction.condition_fulfillment_id) {
 			// 명시적 fulfillment
-			const fulfillment = getConditionFulfillment(behaviorAction.condition_fulfillment_id);
+			const fulfillment = getOrUndefinedConditionFulfillment(behaviorAction.condition_fulfillment_id);
 			if (fulfillment) fulfillments = [FulfillmentIdUtils.to(fulfillment)];
 		} else {
 			// 자동 탐색: condition_id로 필터링

@@ -263,8 +263,8 @@ function createScenarioStore() {
 				getAllCharacters,
 				getAllNeedFulfillments,
 				getAllNeeds,
-				getCharacterBodyStates,
-				getCharacterFaceStates,
+				getOrUndefinedCharacterBodyStates,
+				getOrUndefinedCharacterFaceStates,
 			} = useCharacter();
 			const {
 				getAllBuildingConditions,
@@ -272,9 +272,9 @@ function createScenarioStore() {
 				getAllConditionEffects,
 				getAllConditionFulfillments,
 				getAllConditions,
-				getBuildingStates,
+				getOrUndefinedBuildingStates,
 			} = useBuilding();
-			const { getAllItems, getItemStates } = useItem();
+			const { getAllItems, getOrUndefinedItemStates } = useItem();
 			const {
 				getAllCharacterInteractions,
 				getCharacterInteractionActions,
@@ -319,10 +319,10 @@ function createScenarioStore() {
 				characters.some((c) => c.character_body_id === cb.id)
 			);
 			const characterBodyStates = characterBodies.flatMap((cb) =>
-				Object.values(getCharacterBodyStates(cb.id) ?? [])
+				Object.values(getOrUndefinedCharacterBodyStates(cb.id) ?? [])
 			);
 			const characterFaceStates = characters.flatMap((c) =>
-				Object.values(getCharacterFaceStates(c.id) ?? [])
+				Object.values(getOrUndefinedCharacterFaceStates(c.id) ?? [])
 			);
 			const characterInteractions = getAllCharacterInteractions().filter(
 				(ci) => ci.scenario_id === scenarioId
@@ -336,7 +336,7 @@ function createScenarioStore() {
 			const buildingConditions = getAllBuildingConditions().filter((bc) =>
 				buildings.some((b) => b.id === bc.building_id)
 			);
-			const buildingStates = buildings.flatMap((b) => Object.values(getBuildingStates(b.id) ?? []));
+			const buildingStates = buildings.flatMap((b) => Object.values(getOrUndefinedBuildingStates(b.id) ?? []));
 			const buildingInteractions = getAllBuildingInteractions().filter(
 				(bi) => bi.scenario_id === scenarioId
 			);
@@ -346,7 +346,7 @@ function createScenarioStore() {
 
 			// Item related
 			const items = getAllItems().filter((i) => i.scenario_id === scenarioId);
-			const itemStates = items.flatMap((i) => Object.values(getItemStates(i.id) ?? []));
+			const itemStates = items.flatMap((i) => Object.values(getOrUndefinedItemStates(i.id) ?? []));
 			const itemInteractions = getAllItemInteractions().filter(
 				(ii) => ii.scenario_id === scenarioId
 			);

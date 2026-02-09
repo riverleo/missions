@@ -149,14 +149,14 @@ function createItemStore() {
 	}
 
 	// World entity helper functions
-	function getItemByWorldItem(worldItemId: WorldItemId): Item {
+	function getItemByWorldItemId(worldItemId: WorldItemId): Item {
 		const { getWorldItem } = useWorld();
 		const worldItem = getWorldItem(worldItemId);
 		if (!worldItem) throw new Error(`WorldItem not found: ${worldItemId}`);
 		return getItem(worldItem.item_id);
 	}
 
-	function getOrUndefinedItemByWorldItem(worldItemId: WorldItemId | null | undefined): Item | undefined {
+	function getOrUndefinedItemByWorldItemId(worldItemId: WorldItemId | null | undefined): Item | undefined {
 		if (!worldItemId) return undefined;
 		const { getWorldItem } = useWorld();
 		const worldItem = getWorldItem(worldItemId);
@@ -164,7 +164,7 @@ function createItemStore() {
 		return getOrUndefinedItem(worldItem.item_id);
 	}
 
-	function getItemStates(itemId: string | null | undefined): ItemState[] | undefined {
+	function getOrUndefinedItemStates(itemId: string | null | undefined): ItemState[] | undefined {
 		if (!itemId) return undefined;
 		return get(itemStateStore).data[itemId as ItemId];
 	}
@@ -345,9 +345,9 @@ function createItemStore() {
 		closeStateDialog,
 		getItem,
 		getOrUndefinedItem,
-		getItemByWorldItem,
-		getOrUndefinedItemByWorldItem,
-		getItemStates,
+		getItemByWorldItemId,
+		getOrUndefinedItemByWorldItemId,
+		getOrUndefinedItemStates,
 		getAllItems,
 		getAllItemStates,
 		admin,

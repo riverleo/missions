@@ -228,29 +228,77 @@ function createBehaviorStore() {
 		conditionBehaviorDialogStore.set(undefined);
 	}
 
-	// Getter functions
-	function getBehaviorPriority(id: string): BehaviorPriority | undefined {
+	// Getter functions - throw if not found
+	function getBehaviorPriority(id: string): BehaviorPriority {
+		const data = get(behaviorPriorityStore).data[id as BehaviorPriorityId];
+		if (!data) throw new Error(`BehaviorPriority not found: ${id}`);
+		return data;
+	}
+
+	function getNeedBehavior(id: string): NeedBehavior {
+		const data = get(needBehaviorStore).data[id as NeedBehaviorId];
+		if (!data) throw new Error(`NeedBehavior not found: ${id}`);
+		return data;
+	}
+
+	function getNeedBehaviorAction(id: string): NeedBehaviorAction {
+		const data = get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
+		if (!data) throw new Error(`NeedBehaviorAction not found: ${id}`);
+		return data;
+	}
+
+	function getConditionBehavior(id: string): ConditionBehavior {
+		const data = get(conditionBehaviorStore).data[id as ConditionBehaviorId];
+		if (!data) throw new Error(`ConditionBehavior not found: ${id}`);
+		return data;
+	}
+
+	function getConditionBehaviorAction(id: string): ConditionBehaviorAction {
+		const data = get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
+		if (!data) throw new Error(`ConditionBehaviorAction not found: ${id}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found
+	function getOrUndefinedBehaviorPriority(id: string | null | undefined): BehaviorPriority | undefined {
+		if (!id) return undefined;
 		return get(behaviorPriorityStore).data[id as BehaviorPriorityId];
 	}
 
-	function getNeedBehavior(id: string): NeedBehavior | undefined {
+	function getOrUndefinedNeedBehavior(id: string | null | undefined): NeedBehavior | undefined {
+		if (!id) return undefined;
 		return get(needBehaviorStore).data[id as NeedBehaviorId];
 	}
 
-	function getNeedBehaviorAction(id: string): NeedBehaviorAction | undefined {
+	function getOrUndefinedNeedBehaviorAction(id: string | null | undefined): NeedBehaviorAction | undefined {
+		if (!id) return undefined;
 		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
 	}
 
-	function getConditionBehavior(id: string): ConditionBehavior | undefined {
+	function getOrUndefinedConditionBehavior(id: string | null | undefined): ConditionBehavior | undefined {
+		if (!id) return undefined;
 		return get(conditionBehaviorStore).data[id as ConditionBehaviorId];
 	}
 
-	function getConditionBehaviorAction(id: string): ConditionBehaviorAction | undefined {
+	function getOrUndefinedConditionBehaviorAction(id: string | null | undefined): ConditionBehaviorAction | undefined {
+		if (!id) return undefined;
 		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
 	}
 
-	function getBehaviorAction(
-		behaviorTargetId: BehaviorTargetId | undefined
+	function getBehaviorAction(behaviorTargetId: BehaviorTargetId): BehaviorAction {
+		const { type } = BehaviorIdUtils.parse(behaviorTargetId);
+		const behaviorActionId = BehaviorIdUtils.behaviorActionId(behaviorTargetId);
+
+		const plainAction =
+			type === 'need'
+				? getNeedBehaviorAction(behaviorActionId)
+				: getConditionBehaviorAction(behaviorActionId);
+
+		return BehaviorIdUtils.to(plainAction);
+	}
+
+	function getOrUndefinedBehaviorAction(
+		behaviorTargetId: BehaviorTargetId | null | undefined
 	): BehaviorAction | undefined {
 		if (!behaviorTargetId) return undefined;
 
@@ -259,8 +307,8 @@ function createBehaviorStore() {
 
 		const plainAction =
 			type === 'need'
-				? getNeedBehaviorAction(behaviorActionId)
-				: getConditionBehaviorAction(behaviorActionId);
+				? getOrUndefinedNeedBehaviorAction(behaviorActionId)
+				: getOrUndefinedConditionBehaviorAction(behaviorActionId);
 
 		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
 	}
@@ -277,6 +325,24 @@ function createBehaviorStore() {
 			behaviorAction.behaviorType === 'need'
 				? getNeedBehaviorAction(nextActionId)
 				: getConditionBehaviorAction(nextActionId);
+
+		return BehaviorIdUtils.to(plainAction);
+	}
+
+	function getOrUndefinedNextBehaviorAction(behaviorAction: BehaviorAction | null | undefined): BehaviorAction | undefined {
+		if (!behaviorAction) return undefined;
+
+		const nextActionId =
+			behaviorAction.behaviorType === 'need'
+				? behaviorAction.next_need_behavior_action_id
+				: behaviorAction.next_condition_behavior_action_id;
+
+		if (!nextActionId) return undefined;
+
+		const plainAction =
+			behaviorAction.behaviorType === 'need'
+				? getOrUndefinedNeedBehaviorAction(nextActionId)
+				: getOrUndefinedConditionBehaviorAction(nextActionId);
 
 		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
 	}
@@ -339,10 +405,7 @@ function createBehaviorStore() {
 		});
 	}
 
-	function getRootBehaviorAction(behavior: Behavior | undefined): BehaviorAction {
-		if (behavior === undefined) {
-			throw new Error('No behavior provided to getRootBehaviorAction');
-		}
+	function getRootBehaviorAction(behavior: Behavior): BehaviorAction {
 
 		let rootAction: BehaviorAction | undefined;
 
@@ -724,8 +787,15 @@ function createBehaviorStore() {
 		getNeedBehaviorAction,
 		getConditionBehavior,
 		getConditionBehaviorAction,
+		getOrUndefinedBehaviorPriority,
+		getOrUndefinedNeedBehavior,
+		getOrUndefinedNeedBehaviorAction,
+		getOrUndefinedConditionBehavior,
+		getOrUndefinedConditionBehaviorAction,
 		getBehaviorAction,
+		getOrUndefinedBehaviorAction,
 		getNextBehaviorAction,
+		getOrUndefinedNextBehaviorAction,
 		getAllBehaviorPriorities,
 		getAllNeedBehaviors,
 		getAllNeedBehaviorActions,

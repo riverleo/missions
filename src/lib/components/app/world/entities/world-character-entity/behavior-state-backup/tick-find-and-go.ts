@@ -1,4 +1,4 @@
-import { useBehavior, useWorld } from '$lib/hooks';
+import { useBehavior, useWorld, useInteraction } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { Entity } from '../../entity.svelte';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -16,13 +16,14 @@ import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
  * @returns true: 행동 실행 중단, false: 행동 실행 계속 진행
  */
 export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: number): boolean {
-	const { getInteraction, getEntitySourceId, getWorldItem } = useWorld();
-	const { getBehaviorAction, searchEntitySources } = useBehavior();
+	const { getEntitySourceId, getWorldItem } = useWorld();
+	const { getOrUndefinedBehaviorAction, searchEntitySources } = useBehavior();
+	const { getInteractionByBehaviorAction } = useInteraction();
 
 	// 인터렉션이 이미 진행 중이면 skip
 	if (this.interactionTargetId) return false;
 
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) return false;
 
 	// idle 타입은 타겟이 필요 없으므로 skip
@@ -67,7 +68,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	let candidateEntities: Entity[] = [];
 
 	if (behaviorAction.target_selection_method === 'explicit') {
-		const interaction = getInteraction(behaviorAction);
+		const interaction = getInteractionByBehaviorAction(behaviorAction);
 		if (interaction) {
 			const entitySourceId = getEntitySourceId(behaviorAction);
 			if (!entitySourceId) {

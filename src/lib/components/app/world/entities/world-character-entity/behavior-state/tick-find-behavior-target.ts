@@ -6,7 +6,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * # 행동 타겟 찾기
  *
  * 캐릭터가 현재 수행할 행동이 없을 때, 우선순위가 가장 높은 행동을 선택하여
- * behaviorTargetId를 할당합니다. 매 틱마다 호출되며, 행동의 시작점 역할을 합니다.
+ * 행동 타깃(behaviorTargetId)를 할당합니다. 매 틱마다 호출되며, 행동의 시작점 역할을 합니다.
  *
  * @param tick - 현재 게임 틱 번호
  * @returns {boolean} true = 중단 후 처음, false = 계속 진행
@@ -41,12 +41,13 @@ export default function tickFindBehaviorTarget(
 	this.behaviors = getAllBehaviorsByPriority(this);
 
 	// 4. 행동을 찾을 수 없으면 중단 후 처음으로
-	if (this.behaviors.length === 0) {
+	const firstBehavior = this.behaviors[0];
+	if (!firstBehavior) {
 		return true;
 	}
 
 	// 5. 첫 번째 행동의 root action 가져오기 (없으면 에러 발생)
-	const behaviorAction = getRootBehaviorAction(this.behaviors[0]);
+	const behaviorAction = getRootBehaviorAction(firstBehavior);
 
 	// 6. behaviorTargetId 설정
 	this.behaviorTargetId = BehaviorIdUtils.create(behaviorAction);

@@ -22,6 +22,9 @@ export default function tickFindBehaviorTarget(
 
 	// Type assertion needed because this is backup code with old interface
 	this.behaviors = getAllBehaviorsByPriority(this as any);
+
+	if (!this.behaviors[0]) return true;
+
 	const behaviorAction = getRootBehaviorAction(this.behaviors[0]);
 
 	if (!behaviorAction) return true;

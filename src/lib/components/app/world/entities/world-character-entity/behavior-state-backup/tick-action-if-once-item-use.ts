@@ -17,14 +17,18 @@ export default function tickActionIfOnceItemUse(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getBehaviorAction, searchEntitySources } = useBehavior();
-	const { getInteraction, getWorldItem, worldItemStore } = useWorld();
-	const { getItemInteractionActions, getNextInteractionAction, getAllItemInteractions } =
-		useInteraction();
+	const { getOrUndefinedBehaviorAction, searchEntitySources } = useBehavior();
+	const { getWorldItem, worldItemStore } = useWorld();
+	const {
+		getInteractionByBehaviorAction,
+		getItemInteractionActions,
+		getNextInteractionAction,
+		getAllItemInteractions,
+	} = useInteraction();
 	const { getAllNeedFulfillments, getNeed } = useCharacter();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+	const behaviorAction = getOrUndefinedBehaviorAction(this.behaviorTargetId);
 	if (!behaviorAction) {
 		throw new Error('[tickActionOnceItemUse] No behaviorAction found');
 	}
@@ -37,7 +41,7 @@ export default function tickActionIfOnceItemUse(
 
 	if (behaviorAction.target_selection_method === 'explicit') {
 		// explicit: 명시적으로 지정된 interaction 사용
-		interaction = getInteraction(behaviorAction);
+		interaction = getInteractionByBehaviorAction(behaviorAction);
 	} else if (behaviorAction.target_selection_method === 'search') {
 		// search: searchEntitySources를 통해 자동 탐색
 		const entitySources = searchEntitySources(behaviorAction);
@@ -76,8 +80,8 @@ export default function tickActionIfOnceItemUse(
 		return true;
 	}
 
-	const { instanceId } = EntityIdUtils.parse<WorldItemId>(lastHeldEntityId);
-	const worldItem = getWorldItem(instanceId);
+	const { instanceId } = EntityIdUtils.parse(lastHeldEntityId);
+	const worldItem = getWorldItem(instanceId as WorldItemId);
 	if (!worldItem) {
 		console.warn('[tickActionOnceItemUse] worldItem not found, removing from heldItems:', {
 			lastHeldEntityId,

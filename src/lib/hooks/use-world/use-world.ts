@@ -1,7 +1,6 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { useInteraction } from '$lib/hooks/use-interaction';
 import type {
 	RecordFetchState,
@@ -86,32 +85,82 @@ function createWorldStore() {
 		selectedEntityIdStore.update((state) => ({ ...state, entityId }));
 	}
 
-	// Getter functions
-	function getWorld(id: string): World | undefined {
+	// Getter functions - throw if not found
+	function getWorld(id: string): World {
+		const data = get(worldStore).data[id as WorldId];
+		if (!data) throw new Error(`World not found: ${id}`);
+		return data;
+	}
+
+	function getWorldCharacter(id: string): WorldCharacter {
+		const data = get(worldCharacterStore).data[id as WorldCharacterId];
+		if (!data) throw new Error(`WorldCharacter not found: ${id}`);
+		return data;
+	}
+
+	function getWorldCharacterNeed(id: string): WorldCharacterNeed {
+		const data = get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
+		if (!data) throw new Error(`WorldCharacterNeed not found: ${id}`);
+		return data;
+	}
+
+	function getWorldBuilding(id: string): WorldBuilding {
+		const data = get(worldBuildingStore).data[id as WorldBuildingId];
+		if (!data) throw new Error(`WorldBuilding not found: ${id}`);
+		return data;
+	}
+
+	function getWorldBuildingCondition(id: string): WorldBuildingCondition {
+		const data = get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
+		if (!data) throw new Error(`WorldBuildingCondition not found: ${id}`);
+		return data;
+	}
+
+	function getWorldItem(id: string): WorldItem {
+		const data = get(worldItemStore).data[id as WorldItemId];
+		if (!data) throw new Error(`WorldItem not found: ${id}`);
+		return data;
+	}
+
+	function getWorldTileMap(worldId: string): WorldTileMap {
+		const data = get(worldTileMapStore).data[worldId as WorldId];
+		if (!data) throw new Error(`WorldTileMap not found: ${worldId}`);
+		return data;
+	}
+
+	// Getter functions - return undefined if not found
+	function getOrUndefinedWorld(id: string | null | undefined): World | undefined {
+		if (!id) return undefined;
 		return get(worldStore).data[id as WorldId];
 	}
 
-	function getWorldCharacter(id: string): WorldCharacter | undefined {
+	function getOrUndefinedWorldCharacter(id: string | null | undefined): WorldCharacter | undefined {
+		if (!id) return undefined;
 		return get(worldCharacterStore).data[id as WorldCharacterId];
 	}
 
-	function getWorldCharacterNeed(id: string): WorldCharacterNeed | undefined {
+	function getOrUndefinedWorldCharacterNeed(id: string | null | undefined): WorldCharacterNeed | undefined {
+		if (!id) return undefined;
 		return get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
 	}
 
-	function getWorldBuilding(id: string): WorldBuilding | undefined {
+	function getOrUndefinedWorldBuilding(id: string | null | undefined): WorldBuilding | undefined {
+		if (!id) return undefined;
 		return get(worldBuildingStore).data[id as WorldBuildingId];
 	}
 
-	function getWorldBuildingCondition(id: string): WorldBuildingCondition | undefined {
+	function getOrUndefinedWorldBuildingCondition(id: string | null | undefined): WorldBuildingCondition | undefined {
+		if (!id) return undefined;
 		return get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
 	}
 
-	function getWorldItem(id: string): WorldItem | undefined {
+	function getOrUndefinedWorldItem(id: string | null | undefined): WorldItem | undefined {
+		if (!id) return undefined;
 		return get(worldItemStore).data[id as WorldItemId];
 	}
 
-	function getWorldTileMap(worldId: string): WorldTileMap | undefined {
+	function getOrUndefinedWorldTileMap(worldId: string | null | undefined): WorldTileMap | undefined {
+		if (!worldId) return undefined;
 		return get(worldTileMapStore).data[worldId as WorldId];
 	}
 
@@ -249,7 +298,8 @@ function createWorldStore() {
 		}
 
 		// BehaviorAction인 경우
-		const interaction = getInteraction(data);
+		const { getOrUndefinedInteractionByBehaviorAction } = useInteraction();
+		const interaction = getOrUndefinedInteractionByBehaviorAction(data);
 		if (!interaction) return undefined;
 
 		if (interaction.interactionType === 'building') {
@@ -260,46 +310,6 @@ function createWorldStore() {
 			return interaction.target_character_id ?? undefined;
 		}
 		return undefined;
-	}
-
-	/**
-	 * BehaviorAction으로부터 Interaction을 반환
-	 */
-	function getInteraction(action: BehaviorAction): Interaction | undefined {
-		const { getInteraction: getInteractionById } = useInteraction();
-
-		const interactionId =
-			action.building_interaction_id ||
-			action.item_interaction_id ||
-			action.character_interaction_id;
-
-		if (interactionId) {
-			return getInteractionById(interactionId);
-		}
-		return undefined;
-	}
-
-	/**
-	 * Interaction으로부터 InteractionAction 배열을 반환
-	 */
-	function getInteractionActions(interaction: Interaction): InteractionAction[] {
-		const {
-			getBuildingInteractionActions,
-			getItemInteractionActions,
-			getCharacterInteractionActions,
-		} = useInteraction();
-
-		if (interaction.interactionType === 'building') {
-			const actions = getBuildingInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.interactionType === 'item') {
-			const actions = getItemInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.interactionType === 'character') {
-			const actions = getCharacterInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		}
-		return [];
 	}
 
 	async function fetch() {
@@ -469,6 +479,13 @@ function createWorldStore() {
 		getWorldBuildingCondition,
 		getWorldItem,
 		getWorldTileMap,
+		getOrUndefinedWorld,
+		getOrUndefinedWorldCharacter,
+		getOrUndefinedWorldCharacterNeed,
+		getOrUndefinedWorldBuilding,
+		getOrUndefinedWorldBuildingCondition,
+		getOrUndefinedWorldItem,
+		getOrUndefinedWorldTileMap,
 		getAllWorlds,
 		getAllWorldCharacters,
 		getAllWorldCharacterNeeds,
@@ -482,8 +499,6 @@ function createWorldStore() {
 		updateWorldItem,
 		getEntityInstance,
 		getEntitySourceId,
-		getInteraction,
-		getInteractionActions,
 	};
 }
 

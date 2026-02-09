@@ -14,7 +14,7 @@
 	import type { ScenarioId } from '$lib/types';
 	import { getActionString } from '$lib/utils/label';
 
-	const { needBehaviorDialogStore, closeNeedBehaviorDialog, getNeedBehavior, admin } =
+	const { needBehaviorDialogStore, closeNeedBehaviorDialog, getOrUndefinedNeedBehavior, admin } =
 		useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 
@@ -23,7 +23,7 @@
 			? $needBehaviorDialogStore.needBehaviorId
 			: undefined
 	);
-	const behavior = $derived(needBehaviorId ? getNeedBehavior(needBehaviorId) : undefined);
+	const behavior = $derived(needBehaviorId ? getOrUndefinedNeedBehavior(needBehaviorId) : undefined);
 	const open = $derived($needBehaviorDialogStore?.type === 'delete');
 
 	let isSubmitting = $state(false);

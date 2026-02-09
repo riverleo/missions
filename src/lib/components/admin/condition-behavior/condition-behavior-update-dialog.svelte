@@ -32,16 +32,21 @@
 		ConditionBehaviorUpdate,
 		BuildingStateType,
 	} from '$lib/types';
-	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
+	import {
+		getFallbackString,
+		getActionString,
+		getFormString,
+		getBuildingStateTypeLabels,
+	} from '$lib/utils/label';
 
 	const {
 		conditionBehaviorDialogStore,
 		closeConditionBehaviorDialog,
-		getConditionBehavior,
+		getOrUndefinedConditionBehavior,
 		admin,
 	} = useBehavior();
-	const { conditionStore } = useBuilding();
-	const { characterStore } = useCharacter();
+	const { conditionStore, getOrUndefinedCondition } = useBuilding();
+	const { characterStore, getOrUndefinedCharacter } = useCharacter();
 
 	const open = $derived($conditionBehaviorDialogStore?.type === 'update');
 	const behaviorId = $derived(
@@ -49,7 +54,7 @@
 			? $conditionBehaviorDialogStore.conditionBehaviorId
 			: undefined
 	);
-	const currentBehavior = $derived(behaviorId ? getConditionBehavior(behaviorId) : undefined);
+	const currentBehavior = $derived(behaviorId ? getOrUndefinedConditionBehavior(behaviorId) : undefined);
 	const characters = $derived(alphabetical(Object.values($characterStore.data), (c) => c.name));
 	const conditions = $derived(alphabetical(Object.values($conditionStore.data), (c) => c.name));
 
@@ -60,17 +65,10 @@
 	let buildingStateType = $state<BuildingStateType>('idle');
 	let isSubmitting = $state(false);
 
-	const buildingStateOptions: { value: BuildingStateType; label: string }[] = [
-		{ value: 'idle', label: '기본' },
-		{ value: 'damaged', label: '손상됨' },
-		{ value: 'planning', label: '계획 중' },
-		{ value: 'constructing', label: '건설 중' },
-	];
-
-	const selectedCondition = $derived(conditions.find((c) => c.id === conditionId));
+	const buildingStateOptions = getBuildingStateTypeLabels();
+	const selectedCondition = $derived(getOrUndefinedCondition(conditionId));
 	const selectedConditionName = $derived(selectedCondition?.name ?? '컨디션 선택');
-	const selectedCharacter = $derived(characters.find((c) => c.id === characterId));
-	const selectedCharacterName = $derived(selectedCharacter?.name ?? getFallbackString('all'));
+	const selectedCharacterName = $derived(getOrUndefinedCharacter(characterId)?.name ?? getFallbackString('all'));
 
 	$effect(() => {
 		if (open && currentBehavior) {

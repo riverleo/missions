@@ -10,7 +10,7 @@ import type {
 	WorldBuildingId,
 	WorldCharacterId,
 	WorldItemId,
-	WorldTileId,
+	WorldTileMapId,
 	WorldBuilding,
 	WorldCharacter,
 	WorldItem,
@@ -67,7 +67,7 @@ export const EntityIdUtils = {
 		| { type: 'building'; worldId: WorldId; instanceId: WorldBuildingId }
 		| { type: 'character'; worldId: WorldId; instanceId: WorldCharacterId }
 		| { type: 'item'; worldId: WorldId; instanceId: WorldItemId }
-		| { type: 'tile'; worldId: WorldId; instanceId: WorldTileId } {
+		| { type: 'tile'; worldId: WorldId; instanceId: WorldTileMapId } {
 		const parts = entityId.split('_');
 		const type = parts[0] as EntityType;
 		const worldId = parts[1] as WorldId;
