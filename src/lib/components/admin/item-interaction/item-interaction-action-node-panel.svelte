@@ -43,11 +43,17 @@
 	let { action, itemInteractionId, hasParent = false }: Props = $props();
 
 	const { itemStateStore } = useItem();
-	const { characterStore } = useCharacter();
-	const { itemInteractionStore, itemInteractionActionStore, admin } = useInteraction();
+	const { characterStore, getOrUndefinedCharacter } = useCharacter();
+	const {
+		itemInteractionStore,
+		itemInteractionActionStore,
+		getOrUndefinedItemInteraction,
+		getItemInteractionActions,
+		admin,
+	} = useInteraction();
 	const flowNodes = useNodes();
 
-	const interaction = $derived($itemInteractionStore.data[itemInteractionId]);
+	const interaction = $derived(getOrUndefinedItemInteraction(itemInteractionId));
 	const characters = $derived(Object.values($characterStore.data));
 
 	// 아이템 상태 가져오기
@@ -61,9 +67,9 @@
 	let previewCharacterId = $state<string | undefined>(undefined);
 	const previewCharacter = $derived(
 		behaviorHasSpecificCharacter && interaction?.character_id
-			? $characterStore.data[interaction.character_id as CharacterId]
+			? getOrUndefinedCharacter(interaction.character_id as CharacterId)
 			: previewCharacterId
-				? $characterStore.data[previewCharacterId as CharacterId]
+				? getOrUndefinedCharacter(previewCharacterId as CharacterId)
 				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
@@ -108,7 +114,7 @@
 		try {
 			// root로 설정할 때 다른 root 액션들을 먼저 해제
 			if (changes.root) {
-				const allActions = $itemInteractionActionStore.data[itemInteractionId] ?? [];
+				const allActions = getItemInteractionActions(itemInteractionId);
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) =>
