@@ -376,6 +376,33 @@ export function getNeedBehaviorString(behavior: NeedBehavior): string {
 	return `${behavior.name || name} - ${character} (${need} ${behavior.need_threshold} 이하)`;
 }
 
+// Behavior Priority 라벨 생성 함수들
+export function getNeedBehaviorPriorityLabel(needBehaviorId: NeedBehaviorId): string | null {
+	const { getNeedBehavior } = useBehavior();
+	const behavior = getNeedBehavior(needBehaviorId);
+	if (!behavior) return null;
+	return getNeedBehaviorString(behavior);
+}
+
+export function getConditionBehaviorPriorityLabel(
+	conditionBehaviorId: ConditionBehaviorId
+): string | null {
+	const { getConditionBehavior } = useBehavior();
+	const { getOrUndefinedCondition } = useBuilding();
+	const { getOrUndefinedCharacter } = useCharacter();
+
+	const behavior = getConditionBehavior(conditionBehaviorId);
+	if (!behavior) return null;
+
+	const condition = getOrUndefinedCondition(behavior.condition_id);
+	const character = getOrUndefinedCharacter(behavior.character_id);
+
+	const name = getUnnamedWithId(behavior.id);
+	const char = character?.name ?? getFallbackString('allCharacters');
+	const cond = condition?.name ?? '컨디션';
+	return `${behavior.name || name} - ${char} (${cond} ${behavior.condition_threshold} 이하)`;
+}
+
 // Behavior Action 라벨 생성
 export function getBehaviorActionString(
 	action: NeedBehaviorAction | ConditionBehaviorAction

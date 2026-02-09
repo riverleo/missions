@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter } from '$lib/hooks';
 	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import {
@@ -11,9 +10,8 @@
 	import { IconArrowUp, IconArrowDown, IconTrash, IconDotsVertical } from '@tabler/icons-svelte';
 	import type { BehaviorPriority } from '$lib/types';
 	import {
-		getNeedBehaviorString,
-		getFallbackString,
-		getUnnamedWithId,
+		getNeedBehaviorPriorityLabel,
+		getConditionBehaviorPriorityLabel,
 	} from '$lib/utils/label';
 
 	interface Props {
@@ -26,10 +24,6 @@
 	}
 
 	let { priority, isFirst, isLast, onmoveup, onmovedown, onremove }: Props = $props();
-
-	const { getNeedBehavior, getConditionBehavior } = useBehavior();
-	const { getOrUndefinedNeed, getOrUndefinedCharacter } = useCharacter();
-	const { getOrUndefinedCondition } = useBuilding();
 
 	// behavior 타입 구분
 	const behaviorType = $derived.by(() => {
@@ -46,39 +40,18 @@
 	});
 
 	// behavior 정보 가져오기
-	const behaviorInfo = $derived.by(() => {
+	const behaviorLabel = $derived.by(() => {
 		if (priority.need_behavior_id) {
-			const behavior = getNeedBehavior(priority.need_behavior_id);
-			if (!behavior) return null;
-
-			const need = behavior.need_id ? getOrUndefinedNeed(behavior.need_id) : undefined;
-			const character = behavior.character_id
-				? getOrUndefinedCharacter(behavior.character_id)
-				: undefined;
-
-			return getNeedBehaviorString(behavior);
+			return getNeedBehaviorPriorityLabel(priority.need_behavior_id);
 		} else if (priority.condition_behavior_id) {
-			const behavior = getConditionBehavior(priority.condition_behavior_id);
-			if (!behavior) return null;
-
-			const condition = behavior.condition_id
-				? getOrUndefinedCondition(behavior.condition_id)
-				: undefined;
-			const character = behavior.character_id
-				? getOrUndefinedCharacter(behavior.character_id)
-				: undefined;
-
-			const name = getUnnamedWithId(behavior.id);
-			const char = character?.name ?? getFallbackString('allCharacters');
-			const cond = condition?.name ?? '컨디션';
-			return `${behavior.name || name} - ${char} (${cond} ${behavior.condition_threshold} 이하)`;
+			return getConditionBehaviorPriorityLabel(priority.condition_behavior_id);
 		}
 
 		return null;
 	});
 </script>
 
-{#if behaviorInfo}
+{#if behaviorLabel}
 	<div
 		class="group relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none"
 	>
@@ -91,7 +64,7 @@
 			</Badge>
 		{/if}
 		<span class="flex-1 truncate">
-			{behaviorInfo}
+			{behaviorLabel}
 		</span>
 		<div class="ml-auto flex items-center gap-1">
 			<Button variant="ghost" size="icon" class="size-6" onclick={onmoveup} disabled={isFirst}>

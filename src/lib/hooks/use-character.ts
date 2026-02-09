@@ -41,9 +41,11 @@ import type {
 	NeedFulfillmentId,
 	CharacterNeedId,
 	ScenarioId,
+	WorldCharacterId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { useInteraction } from './use-interaction';
+import { useWorld } from './use-world';
 
 type CharacterDialogState =
 	| { type: 'create' }
@@ -295,6 +297,22 @@ function createCharacterStore() {
 		return get(characterStore).data[id as CharacterId];
 	}
 
+	// World entity helper functions
+	function getCharacterByWorldCharacter(worldCharacterId: WorldCharacterId): Character {
+		const { getWorldCharacter } = useWorld();
+		const worldCharacter = getWorldCharacter(worldCharacterId);
+		if (!worldCharacter) throw new Error(`WorldCharacter not found: ${worldCharacterId}`);
+		return getCharacter(worldCharacter.character_id);
+	}
+
+	function getOrUndefinedCharacterByWorldCharacter(worldCharacterId: WorldCharacterId | null | undefined): Character | undefined {
+		if (!worldCharacterId) return undefined;
+		const { getWorldCharacter } = useWorld();
+		const worldCharacter = getWorldCharacter(worldCharacterId);
+		if (!worldCharacter) return undefined;
+		return getOrUndefinedCharacter(worldCharacter.character_id);
+	}
+
 	function getCharacterFaceStates(characterId: string | null | undefined): CharacterFaceState[] | undefined {
 		if (!characterId) return undefined;
 		return get(characterFaceStateStore).data[characterId as CharacterId];
@@ -325,8 +343,57 @@ function createCharacterStore() {
 		return get(needFulfillmentStore).data[id as NeedFulfillmentId];
 	}
 
-	function getCharacterNeed(id: string): CharacterNeed | undefined {
-		return get(characterNeedStore).data[id as CharacterNeedId];
+	// 오버로드 시그니처
+	function getCharacterNeed(id: CharacterNeedId): CharacterNeed;
+	function getCharacterNeed(characterId: CharacterId, needId: NeedId): CharacterNeed;
+	// 구현
+	function getCharacterNeed(
+		idOrCharacterId: CharacterNeedId | CharacterId,
+		needId?: NeedId
+	): CharacterNeed {
+		if (needId === undefined) {
+			// id로 조회
+			const data = get(characterNeedStore).data[idOrCharacterId as CharacterNeedId];
+			if (!data) throw new Error(`CharacterNeed not found: ${idOrCharacterId}`);
+			return data;
+		} else {
+			// characterId + needId로 조회
+			const characterNeed = Object.values(get(characterNeedStore).data).find(
+				(cn) => cn.character_id === idOrCharacterId && cn.need_id === needId
+			);
+			if (!characterNeed) {
+				throw new Error(
+					`CharacterNeed not found for character: ${idOrCharacterId}, need: ${needId}`
+				);
+			}
+			return characterNeed;
+		}
+	}
+
+	// 오버로드 시그니처
+	function getOrUndefinedCharacterNeed(
+		id: CharacterNeedId | null | undefined
+	): CharacterNeed | undefined;
+	function getOrUndefinedCharacterNeed(
+		characterId: CharacterId | null | undefined,
+		needId: NeedId | null | undefined
+	): CharacterNeed | undefined;
+	// 구현
+	function getOrUndefinedCharacterNeed(
+		idOrCharacterId: CharacterNeedId | CharacterId | null | undefined,
+		needId?: NeedId | null | undefined
+	): CharacterNeed | undefined {
+		if (!idOrCharacterId) return undefined;
+		if (needId === undefined) {
+			// id로 조회
+			return get(characterNeedStore).data[idOrCharacterId as CharacterNeedId];
+		} else {
+			// characterId + needId로 조회
+			if (!needId) return undefined;
+			return Object.values(get(characterNeedStore).data).find(
+				(cn) => cn.character_id === idOrCharacterId && cn.need_id === needId
+			);
+		}
 	}
 
 	// GetAll functions
@@ -842,6 +909,8 @@ function createCharacterStore() {
 		closeNeedDialog,
 		getCharacter,
 		getOrUndefinedCharacter,
+		getCharacterByWorldCharacter,
+		getOrUndefinedCharacterByWorldCharacter,
 		getCharacterFaceStates,
 		getCharacterBody,
 		getOrUndefinedCharacterBody,
@@ -850,6 +919,7 @@ function createCharacterStore() {
 		getOrUndefinedNeed,
 		getNeedFulfillment,
 		getCharacterNeed,
+		getOrUndefinedCharacterNeed,
 		getAllCharacters,
 		getAllCharacterFaceStates,
 		getAllCharacterBodies,

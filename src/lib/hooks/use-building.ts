@@ -34,9 +34,11 @@ import type {
 	BuildingConditionId,
 	ConditionEffectId,
 	ScenarioId,
+	WorldBuildingId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { useInteraction } from './use-interaction';
+import { useWorld } from './use-world';
 
 type BuildingDialogState =
 	| { type: 'create' }
@@ -265,6 +267,22 @@ function createBuildingStore() {
 	function getOrUndefinedBuilding(id: string | null | undefined): Building | undefined {
 		if (!id) return undefined;
 		return get(buildingStore).data[id as BuildingId];
+	}
+
+	// World entity helper functions
+	function getBuildingByWorldBuilding(worldBuildingId: WorldBuildingId): Building {
+		const { getWorldBuilding } = useWorld();
+		const worldBuilding = getWorldBuilding(worldBuildingId);
+		if (!worldBuilding) throw new Error(`WorldBuilding not found: ${worldBuildingId}`);
+		return getBuilding(worldBuilding.building_id);
+	}
+
+	function getOrUndefinedBuildingByWorldBuilding(worldBuildingId: WorldBuildingId | null | undefined): Building | undefined {
+		if (!worldBuildingId) return undefined;
+		const { getWorldBuilding } = useWorld();
+		const worldBuilding = getWorldBuilding(worldBuildingId);
+		if (!worldBuilding) return undefined;
+		return getOrUndefinedBuilding(worldBuilding.building_id);
 	}
 
 	function getBuildingItem(id: string | null | undefined): BuildingItem | undefined {
@@ -775,6 +793,8 @@ function createBuildingStore() {
 		closeConditionDialog,
 		getBuilding,
 		getOrUndefinedBuilding,
+		getBuildingByWorldBuilding,
+		getOrUndefinedBuildingByWorldBuilding,
 		getBuildingItem,
 		getBuildingStates,
 		getCondition,

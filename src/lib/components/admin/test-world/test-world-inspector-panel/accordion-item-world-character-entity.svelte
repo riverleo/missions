@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem, useWorld, useInteraction } from '$lib/hooks';
+	import { useBehavior, useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import type {
@@ -67,41 +67,69 @@
 		return undefined;
 	});
 
-	// 현재 행동 정보
-	const currentBehaviorInfo = $derived.by(() => {
+	// 현재 행동 이름
+	const currentBehaviorName = $derived.by(() => {
 		if (!entity.behavior.behaviorTargetId) return undefined;
 
 		const { type } = BehaviorIdUtils.parse(entity.behavior.behaviorTargetId);
 
 		if (type === 'need') {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
-
 			const behavior = getNeedBehavior(behaviorId as NeedBehaviorId);
-			const action = getNeedBehaviorAction(behaviorActionId as NeedBehaviorActionId);
-
-			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
-
-			return {
-				type: 'need' as const,
-				behaviorName: behavior?.name ?? '행동',
-				actionLabel,
-			};
+			return behavior?.name ?? '행동';
 		} else {
 			const behaviorId = BehaviorIdUtils.behaviorId(entity.behavior.behaviorTargetId);
-			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
-
 			const behavior = getConditionBehavior(behaviorId as ConditionBehaviorId);
-			const action = getConditionBehaviorAction(behaviorActionId as ConditionBehaviorActionId);
-
-			if (!action) return undefined;const actionLabel = getBehaviorActionString(action);
-
-			return {
-				type: 'condition' as const,
-				behaviorName: behavior?.name ?? '컨디션',
-				actionLabel,
-			};
+			return behavior?.name ?? '컨디션';
 		}
+	});
+
+	// 현재 행동 액션 라벨
+	const currentBehaviorActionLabel = $derived.by(() => {
+		if (!entity.behavior.behaviorTargetId) return undefined;
+
+		const { type } = BehaviorIdUtils.parse(entity.behavior.behaviorTargetId);
+
+		if (type === 'need') {
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
+			const action = getNeedBehaviorAction(behaviorActionId as NeedBehaviorActionId);
+			if (!action) return undefined;
+			return getBehaviorActionString(action);
+		} else {
+			const behaviorActionId = BehaviorIdUtils.behaviorActionId(entity.behavior.behaviorTargetId);
+			const action = getConditionBehaviorAction(behaviorActionId as ConditionBehaviorActionId);
+			if (!action) return undefined;
+			return getBehaviorActionString(action);
+		}
+	});
+
+	// behaviors 툴팁
+	const behaviorsTooltip = $derived.by(() => {
+		if (!entity.behavior.behaviors || entity.behavior.behaviors.length === 0) {
+			return undefined;
+		}
+
+		return entity.behavior.behaviors.map((behavior) => {
+			if (behavior.behaviorType === 'need') {
+				const needBehavior = getNeedBehavior(behavior.id as NeedBehaviorId);
+				return needBehavior?.name ?? '행동';
+			} else {
+				const conditionBehavior = getConditionBehavior(behavior.id as ConditionBehaviorId);
+				return conditionBehavior?.name ?? '컨디션';
+			}
+		});
+	});
+
+	// 소지 아이템 툴팁
+	const heldItemsTooltip = $derived.by(() => {
+		if (entity.heldItemIds.length === 0) return undefined;
+
+		const { getOrUndefinedItemByWorldItem } = useItem();
+		return entity.heldItemIds.map((itemId) => {
+			const item = getOrUndefinedItemByWorldItem(EntityIdUtils.instanceId(itemId) as WorldItemId);
+			const idPrefix = itemId.split('-')[0];
+			return item ? `${item.name} (${idPrefix})` : `아이템 (${idPrefix})`;
+		});
 	});
 </script>
 
@@ -130,16 +158,16 @@
 		<AccordionContentItem label="월드 좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
-		<AccordionContentItem label="행동">
-			{currentBehaviorInfo?.behaviorName ?? '없음'}
+		<AccordionContentItem label="행동" tooltip={behaviorsTooltip}>
+			{currentBehaviorName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="행동 액션">
-			{currentBehaviorInfo?.actionLabel ?? '없음'}
+			{currentBehaviorActionLabel ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="대상">
 			{currentTargetName ?? '없음'}
 		</AccordionContentItem>
-		<AccordionContentItem label="들고 있는 아이템">
+		<AccordionContentItem label="소지 아이템" tooltip={heldItemsTooltip}>
 			{#if entity.heldItemIds.length > 0}
 				{entity.heldItemIds.length}개
 			{:else}

@@ -8,11 +8,13 @@ SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
 **Plan 기반 작업**: `plans/` 디렉토리의 문서화된 플랜만 진행. 사용자 언급사항은 해당 플랜에 정리만 (명시적 진행 요청 시에만 구현). 체크리스트 형태 운영.
 - **진행 중**: `plans/*.md` - 현재 작업 중인 플랜
 - **완료됨**: `plans/completed/*.md` - 완료된 플랜 (히스토리 보관)
+- **플랜 완료 처리**: 사용자가 명시적으로 지시할 때만 `completed/`로 이동. Claude가 임의로 이동 금지.
 
 ### Spec-Driven Development
 - **틱 함수 개발**: behavior-state 등 핵심 로직 개발 시 명세(함수 주석 체크리스트) → 테스트 → 구현 순서. 명세 체크박스로 진행 추적.
 - **프로세스**: 사용자가 명세 추가(`[ ]`) → Claude가 테스트 작성 및 구현 → 체크(`[x]`) → `pnpm test:unit` 검증
 - **테스트**: `describe('함수명(파라미터: 타입)', ...)`, 명세 계층 = describe 계층, **명세 항목 텍스트 = it 이름 (정확히 일치 필수)**
+- **명세 작성 스타일**: 한글로 자연어 서술형 작성. 프로그래매틱하지 않고 플루럴하게 (예: "값을 감소시킨다", "목록을 갱신한다", "상태를 초기화한다"). 도메인 용어는 한글 사용 (need→욕구, character→캐릭터, behavior→행동, building→건물)
 - **원칙**: 명세만이 진실, 명세 외 구현 금지, 모든 스펙은 테스트로 검증
 
 ### Commands
@@ -51,6 +53,14 @@ SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
 - **EntityIdUtils**: `create()`, `parse()`, `is()`, `or()`, cache with `$derived`
 - **RecordFetchState**: `data` always defined (no `?? {}`)
 - **Utils**: Radash, `$derived` cache, constants.ts
+- **Naming Convention**:
+  - `get*()`: 값이 없으면 throw Error
+  - `getOrUndefined*()`: 값이 없으면 undefined 반환
+  - get 함수 만들 때 getOrUndefined도 무조건 함께 구현
+- **World Entity Helpers**: World entity에서 source entity 가져오는 헬퍼 함수 패턴
+  - `getItemByWorldItem(WorldItemId)` / `getOrUndefinedItemByWorldItem(WorldItemId)`
+  - `getCharacterByWorldCharacter(WorldCharacterId)` / `getOrUndefinedCharacterByWorldCharacter(WorldCharacterId)`
+  - `getBuildingByWorldBuilding(WorldBuildingId)` / `getOrUndefinedBuildingByWorldBuilding(WorldBuildingId)`
 
 ### Tech Stack
 SvelteKit 2.48+, Svelte 5, TS 5.9+, Tailwind 4.1+, shadcn-svelte, Supabase, Matter.js 0.20, Immer, Radash 12.1+

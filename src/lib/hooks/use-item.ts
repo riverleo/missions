@@ -20,9 +20,11 @@ import type {
 	ItemInteractionId,
 	ItemInteractionActionId,
 	ScenarioId,
+	WorldItemId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { useInteraction } from './use-interaction';
+import { useWorld } from './use-world';
 
 type ItemDialogState =
 	| { type: 'create' }
@@ -144,6 +146,22 @@ function createItemStore() {
 	function getOrUndefinedItem(id: string | null | undefined): Item | undefined {
 		if (!id) return undefined;
 		return get(itemStore).data[id as ItemId];
+	}
+
+	// World entity helper functions
+	function getItemByWorldItem(worldItemId: WorldItemId): Item {
+		const { getWorldItem } = useWorld();
+		const worldItem = getWorldItem(worldItemId);
+		if (!worldItem) throw new Error(`WorldItem not found: ${worldItemId}`);
+		return getItem(worldItem.item_id);
+	}
+
+	function getOrUndefinedItemByWorldItem(worldItemId: WorldItemId | null | undefined): Item | undefined {
+		if (!worldItemId) return undefined;
+		const { getWorldItem } = useWorld();
+		const worldItem = getWorldItem(worldItemId);
+		if (!worldItem) return undefined;
+		return getOrUndefinedItem(worldItem.item_id);
 	}
 
 	function getItemStates(itemId: string | null | undefined): ItemState[] | undefined {
@@ -327,6 +345,8 @@ function createItemStore() {
 		closeStateDialog,
 		getItem,
 		getOrUndefinedItem,
+		getItemByWorldItem,
+		getOrUndefinedItemByWorldItem,
 		getItemStates,
 		getAllItems,
 		getAllItemStates,
