@@ -1,5 +1,11 @@
-import type { EntityId, BehaviorTargetId, InteractionTargetId, Behavior } from '$lib/types';
-import type { Vector } from '$lib/types/vector';
+import type {
+	EntityId,
+	BehaviorTargetId,
+	InteractionTargetId,
+	Behavior,
+	Vector,
+	SystemInteractionType,
+} from '$lib/types';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type { WorldCharacterEntityDirection } from '../index';
 import update from './update';
@@ -8,7 +14,7 @@ import updateDirection from './update-direction';
 import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
 import tickWaitIfIdle from './tick-wait-if-idle';
-import tickFindAndGo from './tick-find-and-go';
+import tickFindTargetAndGo from './tick-find-target-and-go';
 import tickActionIfSystemItemPick from './tick-action-if-system-item-pick';
 import tickActionIfOnceItemUse from './tick-action-if-once-item-use';
 import tickNextOrClear from './tick-next-or-clear';
@@ -21,14 +27,22 @@ import tickNextOrClear from './tick-next-or-clear';
 export class WorldCharacterEntityBehavior {
 	worldCharacterEntity: WorldCharacterEntity;
 
-	path = $state<Vector[]>([]);
-	direction = $state<WorldCharacterEntityDirection>('right');
-	targetEntityId = $state<EntityId | undefined>();
+	// tick-find-behavior-target.ts
+	behaviors = $state<Behavior[]>([]);
 	behaviorTargetId = $state<BehaviorTargetId | undefined>();
 	behaviorTargetStartTick = $state<number | undefined>();
+
+	// tick-find-target-and-go.ts
+	path = $state<Vector[]>([]);
+	targetEntityId = $state<EntityId | undefined>();
+
+	// tick-find-interaction-actions.ts
+	systemInteractionTargetIds = $state<InteractionTargetId[]>();
+	systemInteractionTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
 	interactionTargetStartTick = $state<number | undefined>();
-	behaviors = $state<Behavior[]>([]);
+
+	direction = $state<WorldCharacterEntityDirection>('right');
 
 	update = update;
 	updateMove = updateMove;
@@ -36,7 +50,7 @@ export class WorldCharacterEntityBehavior {
 	tick = tick;
 	tickFindBehaviorTarget = tickFindBehaviorTarget;
 	tickWaitIfIdle = tickWaitIfIdle;
-	tickFindAndGo = tickFindAndGo;
+	tickFindAndGo = tickFindTargetAndGo;
 	tickActionIfSystemItemPick = tickActionIfSystemItemPick;
 	tickActionIfOnceItemUse = tickActionIfOnceItemUse;
 	tickNextOrClear = tickNextOrClear;

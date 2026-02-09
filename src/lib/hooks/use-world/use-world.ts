@@ -274,14 +274,27 @@ function createWorldStore() {
 	 */
 	function getEntitySourceId(entityId: EntityId): EntitySourceId;
 	function getEntitySourceId(entityInstance: EntityInstance): EntitySourceId;
-	function getEntitySourceId(behaviorAction: BehaviorAction): EntitySourceId | undefined;
+	function getEntitySourceId(behaviorAction: BehaviorAction): EntitySourceId;
 	function getEntitySourceId(
+		data: EntityId | EntityInstance | BehaviorAction
+	): EntitySourceId {
+		const result = getOrUndefinedEntitySourceId(data);
+		if (!result) {
+			throw new Error('Entity source not found');
+		}
+		return result;
+	}
+
+	function getOrUndefinedEntitySourceId(entityId: EntityId): EntitySourceId | undefined;
+	function getOrUndefinedEntitySourceId(entityInstance: EntityInstance): EntitySourceId | undefined;
+	function getOrUndefinedEntitySourceId(behaviorAction: BehaviorAction): EntitySourceId | undefined;
+	function getOrUndefinedEntitySourceId(
 		data: EntityId | EntityInstance | BehaviorAction
 	): EntitySourceId | undefined {
 		// EntityId인 경우
 		if (typeof data === 'string') {
 			const entityInstance = getEntityInstance(data);
-			return getEntitySourceId(entityInstance);
+			return getOrUndefinedEntitySourceId(entityInstance);
 		}
 
 		// EntityInstance인 경우
@@ -499,6 +512,7 @@ function createWorldStore() {
 		updateWorldItem,
 		getEntityInstance,
 		getEntitySourceId,
+		getOrUndefinedEntitySourceId,
 	};
 }
 
