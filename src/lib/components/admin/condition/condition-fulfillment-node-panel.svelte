@@ -21,6 +21,7 @@
 		getFallbackString,
 		getBehaviorInteractTypeString,
 		getActionString,
+		getDomainString,
 	} from '$lib/utils/label';
 	import { clone } from 'radash';
 
@@ -39,12 +40,8 @@
 	const characters = $derived(Object.values($characterStore.data));
 	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
 
-	const fulfillmentTypeOptions: { value: ConditionFulfillmentType; label: string }[] = [
-		{ value: 'building', label: '건물' },
-	];
-
 	function getTypeLabel(type: ConditionFulfillmentType) {
-		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
+		return getDomainString(type);
 	}
 
 	let isUpdating = $state(false);
@@ -170,9 +167,7 @@
 									{getTypeLabel(changes.fulfillment_type)}
 								</SelectTrigger>
 								<SelectContent>
-									{#each fulfillmentTypeOptions as option (option.value)}
-										<SelectItem value={option.value}>{option.label}</SelectItem>
-									{/each}
+									<SelectItem value="building">{getDomainString('building')}</SelectItem>
 								</SelectContent>
 							</Select>
 						</ButtonGroup>

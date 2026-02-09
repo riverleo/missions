@@ -32,6 +32,8 @@
 		getFallbackString,
 		getBehaviorInteractTypeString,
 		getActionString,
+		getDomainString,
+		getNeedFulfillmentTaskConditionString,
 	} from '$lib/utils/label';
 	import { clone } from 'radash';
 
@@ -55,25 +57,14 @@
 	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
 	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
 
-	const fulfillmentTypeOptions: { value: NeedFulfillmentType; label: string }[] = [
-		{ value: 'building', label: '건물' },
-		{ value: 'character', label: '캐릭터' },
-		{ value: 'item', label: '아이템' },
-		{ value: 'task', label: '할 일' },
-	];
-
-	const taskConditionOptions: { value: NeedFulfillmentTaskCondition; label: string }[] = [
-		{ value: 'completed', label: '완료' },
-		{ value: 'created', label: '생성' },
-	];
-
 	function getTypeLabel(type: NeedFulfillmentType) {
-		return fulfillmentTypeOptions.find((o) => o.value === type)?.label ?? type;
+		if (type === 'task') return getDomainString('task');
+		return getDomainString(type);
 	}
 
 	function getTaskConditionLabel(condition: NeedFulfillmentTaskCondition | null | undefined) {
 		if (!condition) return '조건 선택';
-		return taskConditionOptions.find((o) => o.value === condition)?.label ?? condition;
+		return getNeedFulfillmentTaskConditionString(condition);
 	}
 
 	let isUpdating = $state(false);
@@ -287,9 +278,10 @@
 									{getTypeLabel(changes.fulfillment_type)}
 								</SelectTrigger>
 								<SelectContent>
-									{#each fulfillmentTypeOptions as option (option.value)}
-										<SelectItem value={option.value}>{option.label}</SelectItem>
-									{/each}
+									<SelectItem value="building">{getDomainString('building')}</SelectItem>
+									<SelectItem value="character">{getDomainString('character')}</SelectItem>
+									<SelectItem value="item">{getDomainString('item')}</SelectItem>
+									<SelectItem value="task">{getDomainString('task')}</SelectItem>
 								</SelectContent>
 							</Select>
 						</ButtonGroup>
@@ -335,11 +327,12 @@
 												value={changes.task_condition ?? ''}
 												onValueChange={onTaskConditionChange}
 											>
-												{#each taskConditionOptions as option (option.value)}
-													<DropdownMenuRadioItem value={option.value}>
-														{option.label}
-													</DropdownMenuRadioItem>
-												{/each}
+												<DropdownMenuRadioItem value="completed">
+													{getNeedFulfillmentTaskConditionString('completed')}
+												</DropdownMenuRadioItem>
+												<DropdownMenuRadioItem value="created">
+													{getNeedFulfillmentTaskConditionString('created')}
+												</DropdownMenuRadioItem>
 											</DropdownMenuRadioGroup>
 										</DropdownMenuContent>
 									</DropdownMenu>

@@ -6,7 +6,6 @@ import type {
 	TileStateType,
 	ColliderType,
 	NeedBehavior,
-	ConditionBehavior,
 	NeedBehaviorAction,
 	ConditionBehaviorAction,
 	OnceInteractionType,
@@ -201,11 +200,8 @@ export function getBuildingStateString(state: BuildingStateType): string {
 	return BUILDING_STATE_LABELS[state];
 }
 
-
 // Type guards for interaction types
-export function isOnceInteractionType(
-	type: BehaviorInteractionType
-): type is OnceInteractionType {
+export function isOnceInteractionType(type: BehaviorInteractionType): type is OnceInteractionType {
 	return type in ONCE_INTERACTION_TYPE_LABELS;
 }
 
@@ -321,8 +317,7 @@ export function getBehaviorActionString(
 	const { getBuilding } = useBuilding();
 	const { getItem } = useItem();
 	const { getCharacter } = useCharacter();
-	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
-		useInteraction();
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
 	// target 결정
 	let target: string | undefined;
@@ -366,8 +361,7 @@ export function getInteractionTargetNameString(
 	const { getBuilding } = useBuilding();
 	const { getItem } = useItem();
 	const { getCharacter } = useCharacter();
-	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
-		useInteraction();
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
 	if (action.building_interaction_id) {
 		const interaction = getBuildingInteraction(action.building_interaction_id);
@@ -396,8 +390,7 @@ export function getInteractionTargetNameString(
 export function getInteractionBehaviorLabelString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string | undefined {
-	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } =
-		useInteraction();
+	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
 	if (action.building_interaction_id) {
 		const interaction = getBuildingInteraction(action.building_interaction_id);
