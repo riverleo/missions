@@ -26,16 +26,20 @@
 	import ItemInteractionActionNodePanel from './item-interaction-action-node-panel.svelte';
 	import type { ItemInteractionId, ItemInteractionActionId, ScenarioId } from '$lib/types';
 
-	const { itemInteractionStore, itemInteractionActionStore, admin } = useInteraction();
+	const {
+		itemInteractionStore,
+		itemInteractionActionStore,
+		getOrUndefinedItemInteraction,
+		getItemInteractionActions,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const itemInteractionId = $derived(page.params.itemInteractionId as ItemInteractionId);
 	const interaction = $derived(
-		itemInteractionId ? $itemInteractionStore.data[itemInteractionId] : undefined
+		itemInteractionId ? getOrUndefinedItemInteraction(itemInteractionId) : undefined
 	);
-	const actions = $derived(
-		itemInteractionId ? ($itemInteractionActionStore.data[itemInteractionId] ?? []) : []
-	);
+	const actions = $derived(itemInteractionId ? getItemInteractionActions(itemInteractionId) : []);
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();

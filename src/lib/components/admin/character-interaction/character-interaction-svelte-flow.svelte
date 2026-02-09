@@ -30,19 +30,23 @@
 		ScenarioId,
 	} from '$lib/types';
 
-	const { characterInteractionStore, characterInteractionActionStore, admin } = useInteraction();
+	const {
+		characterInteractionStore,
+		characterInteractionActionStore,
+		getOrUndefinedCharacterInteraction,
+		getCharacterInteractionActions,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const characterInteractionId = $derived(
 		page.params.characterInteractionId as CharacterInteractionId
 	);
 	const interaction = $derived(
-		characterInteractionId ? $characterInteractionStore.data[characterInteractionId] : undefined
+		characterInteractionId ? getOrUndefinedCharacterInteraction(characterInteractionId) : undefined
 	);
 	const actions = $derived(
-		characterInteractionId
-			? ($characterInteractionActionStore.data[characterInteractionId] ?? [])
-			: []
+		characterInteractionId ? getCharacterInteractionActions(characterInteractionId) : []
 	);
 
 	const flowNodes = useNodes();

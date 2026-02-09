@@ -26,17 +26,23 @@
 	import BuildingInteractionActionNodePanel from './building-interaction-action-node-panel.svelte';
 	import type { BuildingInteractionId, BuildingInteractionActionId, ScenarioId } from '$lib/types';
 
-	const { buildingInteractionStore, buildingInteractionActionStore, admin } = useInteraction();
+	const {
+		buildingInteractionStore,
+		buildingInteractionActionStore,
+		getOrUndefinedBuildingInteraction,
+		getBuildingInteractionActions,
+		admin,
+	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const buildingInteractionId = $derived(
 		page.params.buildingInteractionId as BuildingInteractionId
 	);
 	const interaction = $derived(
-		buildingInteractionId ? $buildingInteractionStore.data[buildingInteractionId] : undefined
+		buildingInteractionId ? getOrUndefinedBuildingInteraction(buildingInteractionId) : undefined
 	);
 	const actions = $derived(
-		buildingInteractionId ? ($buildingInteractionActionStore.data[buildingInteractionId] ?? []) : []
+		buildingInteractionId ? getBuildingInteractionActions(buildingInteractionId) : []
 	);
 
 	const flowNodes = useNodes();
