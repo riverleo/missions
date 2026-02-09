@@ -16,10 +16,10 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { worldTileMapStore } = useWorld();
+	const { getWorldTileMap } = useWorld();
 	const { tileStore } = useTerrain();
 
-	const worldTileMap = $derived($worldTileMapStore.data[entity.worldId]);
+	const worldTileMap = $derived(getWorldTileMap(entity.worldId));
 	const tileData = $derived(worldTileMap?.data[entity.instanceId]);
 	const tile = $derived(tileData ? $tileStore.data[tileData.tile_id] : undefined);
 
