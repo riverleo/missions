@@ -313,8 +313,12 @@ function createBehaviorStore() {
 		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
 	}
 
-	function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction | undefined {
-		return getOrUndefinedNextBehaviorAction(behaviorAction);
+	function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction {
+		const data = getOrUndefinedNextBehaviorAction(behaviorAction);
+		if (!data) {
+			throw new Error(`Next BehaviorAction not found for: ${behaviorAction.id}`);
+		}
+		return data;
 	}
 
 	function getOrUndefinedNextBehaviorAction(behaviorAction: BehaviorAction | null | undefined): BehaviorAction | undefined {

@@ -18,7 +18,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * - [x] 다음 행동 액션이 없으면 모든 상태를 초기화하여 행동을 종료한다.
  */
 export default function tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number) {
-	const { getBehaviorAction, getNextBehaviorAction } = useBehavior();
+	const { getBehaviorAction, getOrUndefinedNextBehaviorAction } = useBehavior();
 
 	// 1. 현재 행동 타깃이 없으면 초기화하고 종료
 	if (!this.behaviorTargetId) {
@@ -29,7 +29,7 @@ export default function tickNextOrClear(this: WorldCharacterEntityBehavior, tick
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
 	// 3. 다음 행동 액션 조회
-	const nextBehaviorAction = getNextBehaviorAction(behaviorAction);
+	const nextBehaviorAction = getOrUndefinedNextBehaviorAction(behaviorAction);
 
 	if (nextBehaviorAction) {
 		// 4. 다음 행동 액션이 있으면 모든 상태 초기화 후 전환
