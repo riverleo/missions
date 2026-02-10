@@ -20,7 +20,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 	let behavior: WorldCharacterEntityBehavior;
 	let mockWorldCharacterEntity: Partial<WorldCharacterEntity>;
 	let mockGetBehaviorAction: ReturnType<typeof vi.fn>;
-	let mockGetNextBehaviorAction: ReturnType<typeof vi.fn>;
+	let mockGetOrUndefinedNextBehaviorAction: ReturnType<typeof vi.fn>;
 	const currentTick = 100;
 
 	beforeEach(async () => {
@@ -38,12 +38,12 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 
 		// Setup useBehavior mock
 		mockGetBehaviorAction = vi.fn();
-		mockGetNextBehaviorAction = vi.fn();
+		mockGetOrUndefinedNextBehaviorAction = vi.fn();
 
 		const { useBehavior } = await import('$lib/hooks');
 		vi.mocked(useBehavior).mockReturnValue({
 			getBehaviorAction: mockGetBehaviorAction,
-			getNextBehaviorAction: mockGetNextBehaviorAction,
+			getOrUndefinedNextBehaviorAction: mockGetOrUndefinedNextBehaviorAction,
 		} as any);
 
 		// Spy on clear and setBehaviorTarget methods
@@ -84,7 +84,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
 		const mockNextAction: BehaviorAction = { id: 'action-2' } as BehaviorAction;
 		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
-		mockGetNextBehaviorAction.mockReturnValue(mockNextAction);
+		mockGetOrUndefinedNextBehaviorAction.mockReturnValue(mockNextAction);
 
 		// When
 		behavior.tickNextOrClear(currentTick);
@@ -101,7 +101,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		behavior.interactionTargetId = 'interaction-1' as any;
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
 		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
-		mockGetNextBehaviorAction.mockReturnValue(undefined);
+		mockGetOrUndefinedNextBehaviorAction.mockReturnValue(undefined);
 
 		// When
 		behavior.tickNextOrClear(currentTick);
