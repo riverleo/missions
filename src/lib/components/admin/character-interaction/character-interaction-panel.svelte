@@ -125,6 +125,13 @@
 		<CardContent class="flex flex-col gap-2">
 			<InputGroup>
 				<InputGroupAddon align="inline-start">
+					<InputGroupText>타입</InputGroupText>
+				</InputGroupAddon>
+				<InputGroupInput value={interaction.type} readonly />
+			</InputGroup>
+
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
 					<DropdownMenu>
 						<DropdownMenuTrigger>
 							{#snippet child({ props })}
