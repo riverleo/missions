@@ -282,6 +282,7 @@ export type {
 	FulfillmentId,
 	Interaction,
 	InteractionId,
+	EntitySourceType,
 	InteractionType,
 	InteractionTargetId,
 	InteractionAction,

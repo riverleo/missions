@@ -417,13 +417,13 @@ function createInteractionStore() {
 	 * Interaction으로부터 InteractionAction 배열을 반환
 	 */
 	function getAllInteractionActionsByInteraction(interaction: Interaction): InteractionAction[] {
-		if (interaction.interactionType === 'building') {
+		if (interaction.entitySourceType === 'building') {
 			const actions = getBuildingInteractionActions(interaction.id) || [];
 			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.interactionType === 'item') {
+		} else if (interaction.entitySourceType === 'item') {
 			const actions = getItemInteractionActions(interaction.id) || [];
 			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.interactionType === 'character') {
+		} else if (interaction.entitySourceType === 'character') {
 			const actions = getCharacterInteractionActions(interaction.id) || [];
 			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
 		}

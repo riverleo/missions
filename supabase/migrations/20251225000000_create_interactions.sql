@@ -1,4 +1,10 @@
 -- ============================================
+-- Interaction Type Enum
+-- ============================================
+
+create type interaction_type as enum ('once', 'fulfill', 'system');
+
+-- ============================================
 -- Building Interactions
 -- ============================================
 
@@ -7,6 +13,7 @@ create table building_interactions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   building_id uuid not null references buildings(id) on delete cascade,
+  type interaction_type not null,
   once_interaction_type once_interaction_type,
   fulfill_interaction_type fulfill_interaction_type,
   system_interaction_type system_interaction_type,
@@ -16,6 +23,11 @@ create table building_interactions (
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
   constraint chk_building_interaction_type_exclusive check ((once_interaction_type is not null)::int + (fulfill_interaction_type is not null)::int + (system_interaction_type is not null)::int = 1),
+  constraint chk_building_interaction_valid_type_combination check (
+    (type = 'once' and once_interaction_type is not null and fulfill_interaction_type is null and system_interaction_type is null) or
+    (type = 'fulfill' and fulfill_interaction_type is not null and once_interaction_type is null and system_interaction_type is null) or
+    (type = 'system' and system_interaction_type is not null and once_interaction_type is null and fulfill_interaction_type is null)
+  ),
   constraint uq_building_interactions_building_id_interaction_type_character_id unique nulls not distinct (building_id, once_interaction_type, fulfill_interaction_type, system_interaction_type, character_id)
 );
 
@@ -112,6 +124,7 @@ create table item_interactions (
   id uuid primary key default gen_random_uuid(),
   scenario_id uuid not null references scenarios(id) on delete cascade,
   item_id uuid not null references items(id) on delete cascade,
+  type interaction_type not null,
   once_interaction_type once_interaction_type,
   fulfill_interaction_type fulfill_interaction_type,
   system_interaction_type system_interaction_type,
@@ -121,6 +134,11 @@ create table item_interactions (
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
   constraint chk_item_interaction_type_exclusive check ((once_interaction_type is not null)::int + (fulfill_interaction_type is not null)::int + (system_interaction_type is not null)::int = 1),
+  constraint chk_item_interaction_valid_type_combination check (
+    (type = 'once' and once_interaction_type is not null and fulfill_interaction_type is null and system_interaction_type is null) or
+    (type = 'fulfill' and fulfill_interaction_type is not null and once_interaction_type is null and system_interaction_type is null) or
+    (type = 'system' and system_interaction_type is not null and once_interaction_type is null and fulfill_interaction_type is null)
+  ),
   constraint uq_item_interactions_item_id_interaction_type_character_id unique nulls not distinct (item_id, once_interaction_type, fulfill_interaction_type, system_interaction_type, character_id)
 );
 
@@ -218,6 +236,7 @@ create table character_interactions (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   character_id uuid references characters(id) on delete set null, -- nullable: null이면 모든 캐릭터
   target_character_id uuid not null references characters(id) on delete cascade,
+  type interaction_type not null,
   once_interaction_type once_interaction_type,
   fulfill_interaction_type fulfill_interaction_type,
   system_interaction_type system_interaction_type,
@@ -226,6 +245,11 @@ create table character_interactions (
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
   constraint chk_character_interaction_type_exclusive check ((once_interaction_type is not null)::int + (fulfill_interaction_type is not null)::int + (system_interaction_type is not null)::int = 1),
+  constraint chk_character_interaction_valid_type_combination check (
+    (type = 'once' and once_interaction_type is not null and fulfill_interaction_type is null and system_interaction_type is null) or
+    (type = 'fulfill' and fulfill_interaction_type is not null and once_interaction_type is null and system_interaction_type is null) or
+    (type = 'system' and system_interaction_type is not null and once_interaction_type is null and fulfill_interaction_type is null)
+  ),
   constraint uq_character_interactions_character_id_target_character_id_interaction_type unique nulls not distinct (character_id, target_character_id, once_interaction_type, fulfill_interaction_type, system_interaction_type)
 );
 

@@ -262,6 +262,7 @@ export type Database = {
           system_interaction_type:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Insert: {
           building_id: string
@@ -279,6 +280,7 @@ export type Database = {
           system_interaction_type?:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Update: {
           building_id?: string
@@ -296,6 +298,7 @@ export type Database = {
           system_interaction_type?:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type?: Database["public"]["Enums"]["interaction_type"]
         }
         Relationships: [
           {
@@ -814,6 +817,7 @@ export type Database = {
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
           target_character_id: string
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Insert: {
           character_id?: string | null
@@ -831,6 +835,7 @@ export type Database = {
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
           target_character_id: string
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Update: {
           character_id?: string | null
@@ -848,6 +853,7 @@ export type Database = {
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
           target_character_id?: string
+          type?: Database["public"]["Enums"]["interaction_type"]
         }
         Relationships: [
           {
@@ -1511,6 +1517,7 @@ export type Database = {
           system_interaction_type:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Insert: {
           character_id?: string | null
@@ -1528,6 +1535,7 @@ export type Database = {
           system_interaction_type?:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type: Database["public"]["Enums"]["interaction_type"]
         }
         Update: {
           character_id?: string | null
@@ -1545,6 +1553,7 @@ export type Database = {
           system_interaction_type?:
             | Database["public"]["Enums"]["system_interaction_type"]
             | null
+          type?: Database["public"]["Enums"]["interaction_type"]
         }
         Relationships: [
           {
@@ -3660,6 +3669,7 @@ export type Database = {
         | "building_clean"
         | "character_hug"
         | "building_use"
+      interaction_type: "once" | "fulfill" | "system"
       item_state_type: "idle" | "broken"
       loop_type: "loop" | "once" | "ping-pong" | "ping-pong-once"
       narrative_node_type: "text" | "choice"
@@ -3822,6 +3832,7 @@ export const Constants = {
         "character_hug",
         "building_use",
       ],
+      interaction_type: ["once", "fulfill", "system"],
       item_state_type: ["idle", "broken"],
       loop_type: ["loop", "once", "ping-pong", "ping-pong-once"],
       narrative_node_type: ["text", "choice"],

@@ -81,8 +81,15 @@
 		isSubmitting = true;
 
 		try {
+			const type = isOnceInteractionType(behaviorInteractionType)
+				? 'once'
+				: isFulfillInteractionType(behaviorInteractionType)
+					? 'fulfill'
+					: 'system';
+
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId,
+				type,
 				once_interaction_type: isOnceInteractionType(behaviorInteractionType)
 					? behaviorInteractionType
 					: null,

@@ -145,7 +145,7 @@ function interactionsToEntitySources(interactions: Interaction[]): EntitySource[
 	const templateMap = new Map<string, EntitySource>();
 
 	for (const interaction of interactions) {
-		if (interaction.interactionType === 'building') {
+		if (interaction.entitySourceType === 'building') {
 			// BuildingInteraction
 			if (interaction.building_id) {
 				// 특정 건물
@@ -159,7 +159,7 @@ function interactionsToEntitySources(interactions: Interaction[]): EntitySource[
 					templateMap.set(b.id, template);
 				});
 			}
-		} else if (interaction.interactionType === 'item') {
+		} else if (interaction.entitySourceType === 'item') {
 			// ItemInteraction
 			if (interaction.item_id) {
 				// 특정 아이템
@@ -173,7 +173,7 @@ function interactionsToEntitySources(interactions: Interaction[]): EntitySource[
 					templateMap.set(i.id, template);
 				});
 			}
-		} else if (interaction.interactionType === 'character') {
+		} else if (interaction.entitySourceType === 'character') {
 			// CharacterInteraction
 			if (interaction.target_character_id) {
 				// 특정 캐릭터

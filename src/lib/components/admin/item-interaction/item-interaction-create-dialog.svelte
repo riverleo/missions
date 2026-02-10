@@ -86,8 +86,15 @@
 		isSubmitting = true;
 
 		try {
+			const type = isOnceInteractionType(interactionType)
+				? 'once'
+				: isFulfillInteractionType(interactionType)
+					? 'fulfill'
+					: 'system';
+
 			const itemInteraction = await admin.createItemInteraction(scenarioId, {
 				item_id: itemId,
+				type,
 				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
 				fulfill_interaction_type: isFulfillInteractionType(interactionType)
 					? interactionType

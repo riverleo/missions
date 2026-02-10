@@ -105,8 +105,11 @@ export type BehaviorTargetId =
 	| `need_${NeedBehaviorId}_${NeedBehaviorActionId}`
 	| `condition_${ConditionBehaviorId}_${ConditionBehaviorActionId}`;
 
-// Interaction types
-export type InteractionType = 'building' | 'item' | 'character';
+// Entity source types (building, item, character)
+export type EntitySourceType = 'building' | 'item' | 'character';
+
+// Interaction types (once, fulfill, system)
+export type InteractionType = 'once' | 'fulfill' | 'system';
 
 // Union types for interactions
 export type InteractionId = BuildingInteractionId | ItemInteractionId | CharacterInteractionId;
@@ -117,17 +120,17 @@ export type InteractionActionId =
 
 // Discriminated union for interactions
 export type Interaction =
-	| ({ interactionType: 'building' } & BuildingInteraction)
-	| ({ interactionType: 'item' } & ItemInteraction)
-	| ({ interactionType: 'character' } & CharacterInteraction);
+	| ({ entitySourceType: 'building' } & BuildingInteraction)
+	| ({ entitySourceType: 'item' } & ItemInteraction)
+	| ({ entitySourceType: 'character' } & CharacterInteraction);
 
 // Discriminated union for interaction actions
 export type InteractionAction =
-	| ({ interactionType: 'building' } & BuildingInteractionAction)
-	| ({ interactionType: 'item' } & ItemInteractionAction)
-	| ({ interactionType: 'character' } & CharacterInteractionAction);
+	| ({ entitySourceType: 'building' } & BuildingInteractionAction)
+	| ({ entitySourceType: 'item' } & ItemInteractionAction)
+	| ({ entitySourceType: 'character' } & CharacterInteractionAction);
 
-// Runtime-only interaction target ID: "{interactionType}_{interactionId}_{interactionActionId}"
+// Runtime-only interaction target ID: "{entitySourceType}_{interactionId}_{interactionActionId}"
 export type InteractionTargetId =
 	| `building_${BuildingInteractionId}_${BuildingInteractionActionId}`
 	| `item_${ItemInteractionId}_${ItemInteractionActionId}`

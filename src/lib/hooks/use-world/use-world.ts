@@ -330,11 +330,11 @@ function createWorldStore() {
 		const interaction = getOrUndefinedInteractionByBehaviorAction(data);
 		if (!interaction) return undefined;
 
-		if (interaction.interactionType === 'building') {
+		if (interaction.entitySourceType === 'building') {
 			return interaction.building_id ?? undefined;
-		} else if (interaction.interactionType === 'item') {
+		} else if (interaction.entitySourceType === 'item') {
 			return interaction.item_id ?? undefined;
-		} else if (interaction.interactionType === 'character') {
+		} else if (interaction.entitySourceType === 'character') {
 			return interaction.target_character_id ?? undefined;
 		}
 		return undefined;

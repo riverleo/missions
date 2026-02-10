@@ -12,6 +12,7 @@ import type {
 	FulfillInteractionType,
 	SystemInteractionType,
 	BehaviorInteractionType,
+	EntitySourceType,
 	InteractionType,
 	Label,
 	BehaviorActionType,
@@ -293,7 +294,7 @@ export function getSystemInteractionTypeOptions(): {
 
 // Get interaction type labels by domain
 export function getBehaviorInteractionTypeLabels(
-	interactionType: InteractionType
+	interactionType: EntitySourceType
 ): Label<BehaviorInteractionType>[] {
 	switch (interactionType) {
 		case 'building':
@@ -311,6 +312,8 @@ export function getBehaviorInteractionTypeLabels(
 			];
 		case 'character':
 			return [{ value: 'character_hug', label: FULFILL_INTERACTION_TYPE_LABELS.character_hug }];
+		default:
+			return [];
 	}
 }
 

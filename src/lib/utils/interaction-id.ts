@@ -1,6 +1,6 @@
 import type {
 	InteractionTargetId,
-	InteractionType,
+	EntitySourceType,
 	InteractionId,
 	InteractionActionId,
 	Interaction,
@@ -30,7 +30,7 @@ export const InteractionIdUtils = {
 	 * // InteractionAction 객체로부터 생성
 	 */
 	create(
-		typeOrAction: InteractionType | InteractionAction,
+		typeOrAction: EntitySourceType | InteractionAction,
 		interactionId?: BuildingInteractionId | ItemInteractionId | CharacterInteractionId,
 		interactionActionId?:
 			| BuildingInteractionActionId
@@ -40,12 +40,12 @@ export const InteractionIdUtils = {
 		// InteractionAction 객체로 호출된 경우
 		if (typeof typeOrAction === 'object') {
 			const action = typeOrAction;
-			const type = action.interactionType;
+			const type = action.entitySourceType;
 			const actionId = action.id;
 
-			if (action.interactionType === 'building') {
+			if (action.entitySourceType === 'building') {
 				return `${type}_${action.building_interaction_id}_${actionId}` as InteractionTargetId;
-			} else if (action.interactionType === 'item') {
+			} else if (action.entitySourceType === 'item') {
 				return `${type}_${action.item_interaction_id}_${actionId}` as InteractionTargetId;
 			} else {
 				return `${type}_${action.character_interaction_id}_${actionId}` as InteractionTargetId;
@@ -62,12 +62,12 @@ export const InteractionIdUtils = {
 	 * const { type, interactionId, interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
 	 */
 	parse(interactionTargetId: InteractionTargetId): {
-		type: InteractionType;
+		type: EntitySourceType;
 		interactionId: InteractionId;
 		interactionActionId: InteractionActionId;
 	} {
 		const parts = interactionTargetId.split('_');
-		const type = parts[0] as InteractionType;
+		const type = parts[0] as EntitySourceType;
 		const parsedInteractionId = parts[1] as InteractionId;
 		const interactionActionId = parts[2] as InteractionActionId;
 		return { type, interactionId: parsedInteractionId, interactionActionId: interactionActionId };
@@ -78,9 +78,9 @@ export const InteractionIdUtils = {
 	 * @example
 	 * const type = InteractionIdUtils.type(interactionTargetId);
 	 */
-	type(interactionTargetId: InteractionTargetId): InteractionType {
+	type(interactionTargetId: InteractionTargetId): EntitySourceType {
 		const parts = interactionTargetId.split('_');
-		return parts[0] as InteractionType;
+		return parts[0] as EntitySourceType;
 	},
 
 	/**
@@ -108,7 +108,7 @@ export const InteractionIdUtils = {
 	 * @example
 	 * InteractionIdUtils.is('building', interactionTargetId)
 	 */
-	is(type: InteractionType, interactionTargetId: InteractionTargetId | undefined): boolean {
+	is(type: EntitySourceType, interactionTargetId: InteractionTargetId | undefined): boolean {
 		return interactionTargetId?.startsWith(`${type}_`) ?? false;
 	},
 
@@ -123,12 +123,12 @@ export const InteractionIdUtils = {
 		 */
 		to(data: BuildingInteraction | ItemInteraction | CharacterInteraction): Interaction {
 			if ('building_id' in data) {
-				return { interactionType: 'building', ...data } as Interaction;
+				return { entitySourceType: 'building', ...data } as Interaction;
 			}
 			if ('item_id' in data) {
-				return { interactionType: 'item', ...data } as Interaction;
+				return { entitySourceType: 'item', ...data } as Interaction;
 			}
-			return { interactionType: 'character', ...data } as Interaction;
+			return { entitySourceType: 'character', ...data } as Interaction;
 		},
 	},
 
@@ -145,12 +145,12 @@ export const InteractionIdUtils = {
 			data: BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction
 		): InteractionAction {
 			if ('building_interaction_id' in data) {
-				return { interactionType: 'building', ...data } as InteractionAction;
+				return { entitySourceType: 'building', ...data } as InteractionAction;
 			}
 			if ('item_interaction_id' in data) {
-				return { interactionType: 'item', ...data } as InteractionAction;
+				return { entitySourceType: 'item', ...data } as InteractionAction;
 			}
-			return { interactionType: 'character', ...data } as InteractionAction;
+			return { entitySourceType: 'character', ...data } as InteractionAction;
 		},
 	},
 };
