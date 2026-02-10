@@ -41,37 +41,36 @@ class WorldCharacterEntityBehavior {
 
 #### 1. InteractionChain (인터렉션 체인)
 ```typescript
-type InteractionChainStep = {
-  type: 'move' | 'interaction' | 'expression';
-  interactionId?: InteractionTargetId;
-  targetEntityId?: EntityId;
-  duration?: number;
-};
-
-type InteractionChain = {
-  steps: InteractionChainStep[];
-  currentStepIndex: number;
-  startTick: number;
-};
+interface InteractionChain {
+  interactions: Interaction[];       // 순차적으로 실행할 인터렉션 배열
+  currentIndex: number;               // 현재 실행 중인 인터렉션 인덱스
+  currentStartedAtTick: number;      // 현재 인터렉션 시작 틱
+}
 ```
+
+**장점**:
+- ✅ 단순한 구조 (step 타입 불필요)
+- ✅ duration은 각 Interaction의 InteractionAction.duration_ticks 활용
+- ✅ Interaction이 이미 모든 정보를 포함
 
 #### 2. 체인 실행 흐름
 ```
-1. 체인 초기화 (setBehaviorTarget 시점)
+1. 체인 생성 (tickCreateInteractionChain)
    - 타겟 엔티티 결정
-   - 필요한 인터렉션 순서 결정
-   - InteractionChain 생성
+   - searchInteractions()로 필요한 인터렉션 검색
+   - InteractionChain 생성 및 설정
 
-2. 각 Step 실행
-   - move: 타겟 엔티티로 이동
-   - interaction: 인터렉션 실행 (기존 로직)
-   - expression: 감정 표현
+2. 인터렉션 실행 (향후 구현)
+   - interactions[currentIndex] 가져오기
+   - 해당 인터렉션의 InteractionAction 체인 실행
+   - duration_ticks 경과 체크
 
-3. Step 완료 → 다음 Step
-   - currentStepIndex++
-   - 다음 Step 시작
+3. 인터렉션 완료 → 다음 인터렉션
+   - currentIndex++
+   - currentStartedAtTick = 현재 tick
+   - 다음 인터렉션 시작
 
-4. 모든 Step 완료 → 행동 종료
+4. 모든 인터렉션 완료 → 행동 종료
    - tickNextOrClear() 호출
 ```
 
@@ -97,11 +96,17 @@ class WorldCharacterEntityBehavior {
 
 ### Phase 1: 체인 구조 설계 및 타입 정의
 - [ ] `InteractionChain` 타입 정의 (`src/lib/types/core.ts`)
-- [ ] `InteractionChainStep` 타입 정의
+  ```typescript
+  export interface InteractionChain {
+    interactions: Interaction[];
+    currentIndex: number;
+    currentStartedAtTick: number;
+  }
+  ```
 - [ ] InteractionChainUtils 유틸리티 생성 (`src/lib/utils/interaction-chain.ts`)
-  - `createChain(steps: InteractionChainStep[]): InteractionChain`
-  - `getCurrentStep(chain: InteractionChain): InteractionChainStep | undefined`
-  - `moveToNextStep(chain: InteractionChain): boolean`
+  - `createChain(interactions: Interaction[], startTick: number): InteractionChain`
+  - `getCurrentInteraction(chain: InteractionChain): Interaction | undefined`
+  - `moveToNextInteraction(chain: InteractionChain, tick: number): boolean`
   - `isChainComplete(chain: InteractionChain): boolean`
 
 ### Phase 2: WorldCharacterEntityBehavior 확장
@@ -113,12 +118,14 @@ class WorldCharacterEntityBehavior {
 ### Phase 3: 체인 생성 로직 구현
 - [ ] `tick-create-interaction-chain.ts` 생성
   - BehaviorAction과 타겟 엔티티 기반으로 체인 생성
-  - 엔티티 타입별 체인 구성:
-    - 아이템: move → pick → use → express
-    - 건물: move → interact → express
-    - 캐릭터: move → interact → express
-  - `searchInteractions()`로 필요한 인터렉션 검색
-  - `InteractionChainUtils.createChain()` 사용
+  - 엔티티 타입별 필요한 인터렉션 순서 결정:
+    - 아이템: [pick 인터렉션, use 인터렉션, express 인터렉션]
+    - 건물: [interact 인터렉션, express 인터렉션]
+    - 캐릭터: [interact 인터렉션, express 인터렉션]
+  - `searchInteractions(behaviorAction, 'system')`로 pick 인터렉션 검색 (아이템)
+  - `searchInteractions(behaviorAction, 'once')`로 use/interact 인터렉션 검색
+  - `searchInteractions(behaviorAction, 'once')`로 express 인터렉션 검색 (감정표현)
+  - `InteractionChainUtils.createChain(interactions, tick)` 사용
   - `setInteractionChain()` 호출하여 behavior에 설정
 - [ ] `tick.ts` 플로우에 체인 생성 단계 추가
   ```typescript
@@ -138,12 +145,10 @@ class WorldCharacterEntityBehavior {
 
 ### Phase 5: 체인 실행 로직 구현 (향후)
 - [ ] `tick-execute-interaction-chain.ts` 생성 (별도 작업)
-  - 현재 step 가져오기
-  - step 타입별 처리:
-    - `move`: 이동 처리
-    - `interaction`: 인터렉션 실행
-    - `expression`: 감정 표현
-  - step 완료 체크 및 전환
+  - `getCurrentInteraction(chain)` 호출
+  - 현재 인터렉션의 InteractionAction 체인 실행
+  - duration_ticks 경과 체크
+  - 인터렉션 완료 시 `moveToNextInteraction(chain, tick)` 호출
 - [ ] 기존 단일 인터렉션 로직을 체인 시스템으로 마이그레이션
 - [ ] backup의 `tick-action-if-*` 로직들을 체인 step으로 변환
 
@@ -162,15 +167,15 @@ class WorldCharacterEntityBehavior {
 - 체인 실행 중 다른 행동으로 전환 시 처리?
 - 체인 일시정지/재개 기능 필요?
 
-### 3. 조건부 Step
-- 특정 조건에서만 실행되는 step 지원?
-- 예: "아이템이 이미 들고 있으면 pick step 스킵"
+### 3. 조건부 인터렉션
+- 특정 조건에서만 실행되는 인터렉션 지원?
+- 예: "아이템이 이미 들고 있으면 pick 인터렉션 스킵"
 
 ### 4. 동적 체인 수정
-- 실행 중 체인에 step 추가/제거 가능?
+- 실행 중 체인에 인터렉션 추가/제거 가능?
 
 ### 5. 에러 처리
-- Step 실행 실패 시 체인 중단? 계속 진행? 재시도?
+- 인터렉션 실행 실패 시 체인 중단? 계속 진행? 재시도?
 
 ## 테스트 시나리오
 
@@ -179,15 +184,15 @@ class WorldCharacterEntityBehavior {
 // 아이템 줍기 → 사용 → 감정표현
 describe('아이템 사용 체인', () => {
   it('아이템으로 이동 → 줍기 → 사용 → 감정표현 순서로 실행된다');
-  it('각 step이 완료되면 자동으로 다음 step으로 전환된다');
-  it('모든 step 완료 후 행동이 종료된다');
+  it('각 인터렉션이 완료되면 자동으로 다음 인터렉션으로 전환된다');
+  it('모든 인터렉션 완료 후 행동이 종료된다');
 });
 ```
 
-### 2. Step 스킵
+### 2. 인터렉션 스킵
 ```typescript
-describe('조건부 step', () => {
-  it('이미 아이템을 들고 있으면 move와 pick step을 스킵한다');
+describe('조건부 인터렉션', () => {
+  it('이미 아이템을 들고 있으면 pick 인터렉션을 스킵한다');
 });
 ```
 
