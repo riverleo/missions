@@ -7,6 +7,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  */
 export default function tick(this: WorldCharacterEntityBehavior, tick: number): void {
 	if (this.tickFindBehaviorTarget(tick)) return;
+	if (this.tickFindTargetEntityAndGo(tick)) return;
 	// TODO: 나머지 단계 추가 예정
 	this.tickNextOrClear(tick);
 }

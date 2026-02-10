@@ -1,6 +1,5 @@
-import { useBehavior, useWorld, useInteraction } from '$lib/hooks';
+import { useBehavior, useWorld } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import { Entity } from '../../entity.svelte';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
@@ -33,7 +32,10 @@ import type { EntitySourceId } from '$lib/types';
  *    - [x] 월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 타깃 엔티티가 될 수 없다.
  * - [x] 현재 행동에 대한 타깃 엔티티를 찾지 못한 경우 계속 진행한다.
  */
-export default function tickFindTargetAndGo(this: WorldCharacterEntityBehavior): boolean {
+export default function tickFindTargetEntityAndGo(
+	this: WorldCharacterEntityBehavior,
+	tick: number
+): boolean {
 	const { getEntitySourceId, getWorldItem, updateWorldItem } = useWorld();
 	const { getBehaviorAction, searchEntitySources } = useBehavior();
 

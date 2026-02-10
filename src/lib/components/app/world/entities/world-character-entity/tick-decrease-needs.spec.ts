@@ -67,7 +67,7 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 		expect(mockGetCharacterNeed).toHaveBeenCalledTimes(2);
 	});
 
-	it('욕구 정보가 없으면 해당 욕구를 건너뛴다', async () => {
+	it('욕구 정보가 없으면 에러가 발생한다', async () => {
 		// Given: getNeed가 에러를 던짐
 		const tickDecreaseNeeds = (await import('./tick-decrease-needs')).default;
 		const characterId = 'char-1' as CharacterId;
@@ -85,13 +85,13 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			throw new Error('Need not found');
 		});
 
-		// When & Then: 에러가 전파됨 (건너뛰지 않음)
+		// When & Then: 에러 발생
 		expect(() => {
 			tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
 		}).toThrow('Need not found');
 	});
 
-	it('캐릭터 욕구 정보가 없으면 에러가 발생한다', async () => {
+	it('캐릭터 욕구가 없으면 에러가 발생한다', async () => {
 		// Given: characterNeed를 찾을 수 없음
 		const tickDecreaseNeeds = (await import('./tick-decrease-needs')).default;
 		const characterId = 'char-1' as CharacterId;

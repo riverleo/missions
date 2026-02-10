@@ -51,9 +51,6 @@ type ConditionBehaviorDialogState =
 	| { type: 'delete'; conditionBehaviorId: ConditionBehaviorId }
 	| undefined;
 
-// Runtime behavior instance management (DEPRECATED - not used)
-// const behaviorInstanceMap = new Map<WorldCharacterId, WorldCharacterEntityBehavior[]>();
-
 let instance: ReturnType<typeof createBehaviorStore> | null = null;
 
 function createBehaviorStore() {
@@ -260,7 +257,9 @@ function createBehaviorStore() {
 	}
 
 	// Getter functions - return undefined if not found
-	function getOrUndefinedBehaviorPriority(id: string | null | undefined): BehaviorPriority | undefined {
+	function getOrUndefinedBehaviorPriority(
+		id: string | null | undefined
+	): BehaviorPriority | undefined {
 		if (!id) return undefined;
 		return get(behaviorPriorityStore).data[id as BehaviorPriorityId];
 	}
@@ -270,17 +269,23 @@ function createBehaviorStore() {
 		return get(needBehaviorStore).data[id as NeedBehaviorId];
 	}
 
-	function getOrUndefinedNeedBehaviorAction(id: string | null | undefined): NeedBehaviorAction | undefined {
+	function getOrUndefinedNeedBehaviorAction(
+		id: string | null | undefined
+	): NeedBehaviorAction | undefined {
 		if (!id) return undefined;
 		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
 	}
 
-	function getOrUndefinedConditionBehavior(id: string | null | undefined): ConditionBehavior | undefined {
+	function getOrUndefinedConditionBehavior(
+		id: string | null | undefined
+	): ConditionBehavior | undefined {
 		if (!id) return undefined;
 		return get(conditionBehaviorStore).data[id as ConditionBehaviorId];
 	}
 
-	function getOrUndefinedConditionBehaviorAction(id: string | null | undefined): ConditionBehaviorAction | undefined {
+	function getOrUndefinedConditionBehaviorAction(
+		id: string | null | undefined
+	): ConditionBehaviorAction | undefined {
 		if (!id) return undefined;
 		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
 	}
@@ -321,7 +326,9 @@ function createBehaviorStore() {
 		return data;
 	}
 
-	function getOrUndefinedNextBehaviorAction(behaviorAction: BehaviorAction | null | undefined): BehaviorAction | undefined {
+	function getOrUndefinedNextBehaviorAction(
+		behaviorAction: BehaviorAction | null | undefined
+	): BehaviorAction | undefined {
 		if (!behaviorAction) return undefined;
 
 		const nextActionId =
@@ -398,7 +405,6 @@ function createBehaviorStore() {
 	}
 
 	function getRootBehaviorAction(behavior: Behavior): BehaviorAction {
-
 		let rootAction: BehaviorAction | undefined;
 
 		if (behavior.behaviorType === 'need') {
@@ -711,37 +717,6 @@ function createBehaviorStore() {
 		},
 	};
 
-	// Runtime behavior instance management (DEPRECATED - not used)
-	// function getBehavior(worldCharacterId: WorldCharacterId): WorldCharacterEntityBehavior | undefined {
-	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId);
-	// 	if (!behaviors || behaviors.length === 0) {
-	// 		return undefined;
-	// 	}
-	//
-	// 	// 우선도가 가장 높은 행동 반환
-	// 	return behaviors.reduce((prev, current) =>
-	// 		current.getPriority() > prev.getPriority() ? current : prev
-	// 	);
-	// }
-	//
-	// function addBehavior(worldCharacterId: WorldCharacterId, behavior: WorldCharacterEntityBehavior): void {
-	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId) ?? [];
-	// 	behaviors.push(behavior);
-	// 	behaviorInstanceMap.set(worldCharacterId, behaviors);
-	// }
-	//
-	// function removeBehavior(worldCharacterId: WorldCharacterId, behaviorId: string): void {
-	// 	const behaviors = behaviorInstanceMap.get(worldCharacterId);
-	// 	if (!behaviors) return;
-	//
-	// 	const filtered = behaviors.filter((b) => b.id !== behaviorId);
-	// 	behaviorInstanceMap.set(worldCharacterId, filtered);
-	// }
-
-	// function clearBehaviors(worldCharacterId: WorldCharacterId): void {
-	// 	behaviorInstanceMap.delete(worldCharacterId);
-	// }
-
 	return {
 		behaviorPriorityStore,
 		needBehaviorStore: needBehaviorStore as Readable<
@@ -796,10 +771,6 @@ function createBehaviorStore() {
 		getAllBehaviors,
 		getAllBehaviorsByPriority,
 		getRootBehaviorAction,
-		// getBehavior,
-		// addBehavior,
-		// removeBehavior,
-		// clearBehaviors,
 		searchEntitySources,
 		admin,
 	};

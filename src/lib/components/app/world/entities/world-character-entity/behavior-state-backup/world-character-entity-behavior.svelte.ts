@@ -14,7 +14,7 @@ import updateDirection from './update-direction';
 import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
 import tickWaitIfIdle from './tick-wait-if-idle';
-import tickFindTargetAndGo from './tick-find-target-and-go';
+import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
 import tickActionIfSystemItemPick from './tick-action-if-system-item-pick';
 import tickActionIfOnceItemUse from './tick-action-if-once-item-use';
 import tickNextOrClear from './tick-next-or-clear';
@@ -50,7 +50,7 @@ export class WorldCharacterEntityBehavior {
 	tick = tick;
 	tickFindBehaviorTarget = tickFindBehaviorTarget;
 	tickWaitIfIdle = tickWaitIfIdle;
-	tickFindAndGo = tickFindTargetAndGo;
+	tickFindAndGo = tickFindTargetEntityAndGo;
 	tickActionIfSystemItemPick = tickActionIfSystemItemPick;
 	tickActionIfOnceItemUse = tickActionIfOnceItemUse;
 	tickNextOrClear = tickNextOrClear;
