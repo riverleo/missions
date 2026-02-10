@@ -1,4 +1,4 @@
-import { useBehavior, useWorld, useInteraction, useCharacter } from '$lib/hooks';
+import { useBehavior, useWorld, useInteraction, useCharacter, useFulfillment } from '$lib/hooks';
 import { produce } from 'immer';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -25,7 +25,8 @@ export default function tickActionIfOnceItemUse(
 		getNextInteractionAction,
 		getAllItemInteractions,
 	} = useInteraction();
-	const { getAllNeedFulfillments, getNeed } = useCharacter();
+	const { getNeed } = useCharacter();
+	const { getAllNeedFulfillments } = useFulfillment();
 
 	const worldCharacterEntity = this.worldCharacterEntity;
 	if (!this.behaviorTargetId) {

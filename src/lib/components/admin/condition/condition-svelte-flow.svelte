@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBuilding, useCharacter } from '$lib/hooks';
+	import { useBuilding, useCharacter, useFulfillment } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
@@ -47,13 +47,9 @@
 		ConditionEffectId,
 	} from '$lib/types';
 
-	const {
-		conditionFulfillmentStore,
-		buildingConditionStore,
-		conditionEffectStore,
-		getOrUndefinedCondition,
-		admin,
-	} = useBuilding();
+	const { buildingConditionStore, conditionEffectStore, getOrUndefinedCondition, admin } =
+		useBuilding();
+	const { conditionFulfillmentStore } = useFulfillment();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { buildingStore: buildingStore } = useBuilding();

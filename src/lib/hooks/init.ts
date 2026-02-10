@@ -6,6 +6,7 @@ import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
 import { useBehavior } from './use-behavior';
+import { useFulfillment } from './use-fulfillment';
 import { useItem } from './use-item';
 import { useInteraction } from './use-interaction';
 import { useWorld } from './use-world';
@@ -22,6 +23,7 @@ export function init() {
 	useCharacter().init();
 	useBuilding().init();
 	useBehavior().init();
+	useFulfillment().init();
 	useItem().init();
 	useInteraction().init();
 	useWorld().init();

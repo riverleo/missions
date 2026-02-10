@@ -1,5 +1,11 @@
-import type { BehaviorTargetId, CharacterId, Interaction, Fulfillment } from '$lib/types';
-import { useBehavior, useBuilding, useCharacter, useInteraction } from '$lib/hooks';
+import type {
+	BehaviorTargetId,
+	CharacterId,
+	Interaction,
+	Fulfillment,
+	InteractionType,
+} from '$lib/types';
+import { useBehavior, useFulfillment, useInteraction } from '$lib/hooks';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 
 /**
@@ -22,19 +28,21 @@ export function searchInteractions(
 	const behaviorAction = getBehaviorAction(behaviorTargetId);
 	if (!behaviorAction) return [];
 
-	// 2. actionType 결정
-	const actionType = behaviorAction.type === 'once' ? 'once' : 'fulfill';
+	// 2. idle 타입은 fulfillment가 없음
+	if (behaviorAction.type === 'idle') return [];
 
-	// 3. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
+	// 3. actionType 결정
+	const interactionType: InteractionType = behaviorAction.type;
+
+	// 4. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
+	const { getAllNeedFulfillments, getAllConditionFulfillments } = useFulfillment();
 	let fulfillments: Fulfillment[] = [];
 
 	if (behaviorAction.behaviorType === 'need') {
-		const { getAllNeedFulfillments } = useCharacter();
 		fulfillments = getAllNeedFulfillments()
 			.filter((f) => f.need_id === behaviorAction.need_id)
 			.map(FulfillmentIdUtils.to);
 	} else {
-		const { getAllConditionFulfillments } = useBuilding();
 		fulfillments = getAllConditionFulfillments()
 			.filter((f) => f.condition_id === behaviorAction.condition_id)
 			.map(FulfillmentIdUtils.to);
@@ -51,7 +59,7 @@ export function searchInteractions(
 
 		if (interactionId) {
 			const interaction = getInteraction(interactionId);
-			if (interaction && interaction.type === actionType) {
+			if (interaction && interaction.type === interactionType) {
 				// 캐릭터 제약 필터링: character_id가 있으면 일치하는 것만
 				if (characterId && interaction.character_id && interaction.character_id !== characterId) {
 					continue;

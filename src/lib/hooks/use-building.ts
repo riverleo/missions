@@ -16,8 +16,6 @@ import type {
 	ConditionInsert,
 	ConditionUpdate,
 	ConditionFulfillment,
-	ConditionFulfillmentInsert,
-	ConditionFulfillmentUpdate,
 	BuildingCondition,
 	BuildingConditionInsert,
 	BuildingConditionUpdate,
@@ -37,6 +35,7 @@ import type {
 	WorldBuildingId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
+import { useFulfillment } from './use-fulfillment';
 import { useInteraction } from './use-interaction';
 import { useWorld } from './use-world';
 
@@ -81,13 +80,6 @@ function createBuildingStore() {
 		data: {},
 	});
 
-	const conditionFulfillmentStore = writable<
-		RecordFetchState<ConditionFulfillmentId, ConditionFulfillment>
-	>({
-		status: 'idle',
-		data: {},
-	});
-
 	const buildingConditionStore = writable<RecordFetchState<BuildingConditionId, BuildingCondition>>(
 		{
 			status: 'idle',
@@ -110,10 +102,6 @@ function createBuildingStore() {
 	const allBuildingStatesStore = derived(buildingStateStore, ($store) => $store.data);
 
 	const allConditionsStore = derived(conditionStore, ($store) => Object.values($store.data));
-
-	const allConditionFulfillmentsStore = derived(conditionFulfillmentStore, ($store) =>
-		Object.values($store.data)
-	);
 
 	const allBuildingConditionsStore = derived(buildingConditionStore, ($store) =>
 		Object.values($store.data)
@@ -141,7 +129,6 @@ function createBuildingStore() {
 		buildingStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingItemStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionStore.update((state) => ({ ...state, status: 'loading' }));
-		conditionFulfillmentStore.update((state) => ({ ...state, status: 'loading' }));
 		buildingConditionStore.update((state) => ({ ...state, status: 'loading' }));
 		conditionEffectStore.update((state) => ({ ...state, status: 'loading' }));
 
@@ -150,14 +137,12 @@ function createBuildingStore() {
 				buildingsResult,
 				buildingItemsResult,
 				conditionsResult,
-				fulfillmentsResult,
 				buildingConditionsResult,
 				effectsResult,
 			] = await Promise.all([
 				supabase.from('buildings').select('*, building_states(*)').order('name'),
 				supabase.from('building_items').select('*'),
 				supabase.from('conditions').select('*').order('name'),
-				supabase.from('condition_fulfillments').select('*'),
 				supabase.from('building_conditions').select('*'),
 				supabase.from('condition_effects').select('*'),
 			]);
@@ -165,7 +150,6 @@ function createBuildingStore() {
 			if (buildingsResult.error) throw buildingsResult.error;
 			if (buildingItemsResult.error) throw buildingItemsResult.error;
 			if (conditionsResult.error) throw conditionsResult.error;
-			if (fulfillmentsResult.error) throw fulfillmentsResult.error;
 			if (buildingConditionsResult.error) throw buildingConditionsResult.error;
 			if (effectsResult.error) throw effectsResult.error;
 
@@ -191,12 +175,6 @@ function createBuildingStore() {
 				conditionRecord[item.id as ConditionId] = item as Condition;
 			}
 
-			// Condition fulfillments
-			const fulfillmentRecord: Record<ConditionFulfillmentId, ConditionFulfillment> = {};
-			for (const item of fulfillmentsResult.data ?? []) {
-				fulfillmentRecord[item.id as ConditionFulfillmentId] = item as ConditionFulfillment;
-			}
-
 			// Building conditions
 			const buildingConditionRecord: Record<BuildingConditionId, BuildingCondition> = {};
 			for (const item of buildingConditionsResult.data ?? []) {
@@ -213,7 +191,6 @@ function createBuildingStore() {
 			buildingItemStore.set({ status: 'success', data: buildingItemRecord, error: undefined });
 			buildingStateStore.set({ status: 'success', data: stateRecord, error: undefined });
 			conditionStore.set({ status: 'success', data: conditionRecord });
-			conditionFulfillmentStore.set({ status: 'success', data: fulfillmentRecord });
 			buildingConditionStore.set({ status: 'success', data: buildingConditionRecord });
 			conditionEffectStore.set({ status: 'success', data: effectRecord });
 		} catch (error) {
@@ -222,7 +199,6 @@ function createBuildingStore() {
 			buildingItemStore.set({ status: 'error', data: {}, error: err });
 			buildingStateStore.set({ status: 'error', data: {}, error: err });
 			conditionStore.set({ status: 'error', data: {}, error: err });
-			conditionFulfillmentStore.set({ status: 'error', data: {}, error: err });
 			buildingConditionStore.set({ status: 'error', data: {}, error: err });
 			conditionEffectStore.set({ status: 'error', data: {}, error: err });
 		}
@@ -300,10 +276,6 @@ function createBuildingStore() {
 		return get(conditionStore).data[id as ConditionId];
 	}
 
-	function getOrUndefinedConditionFulfillment(id: string | null | undefined): ConditionFulfillment | undefined {
-		if (!id) return undefined;
-		return get(conditionFulfillmentStore).data[id as ConditionFulfillmentId];
-	}
 
 	function getOrUndefinedBuildingCondition(id: string | null | undefined): BuildingCondition | undefined {
 		if (!id) return undefined;
@@ -332,9 +304,6 @@ function createBuildingStore() {
 		return get(allConditionsStore);
 	}
 
-	function getAllConditionFulfillments(): ConditionFulfillment[] {
-		return get(allConditionFulfillmentsStore);
-	}
 
 	function getAllBuildingConditions(): BuildingCondition[] {
 		return get(allBuildingConditionsStore);
@@ -597,59 +566,10 @@ function createBuildingStore() {
 			);
 		},
 
-		// ConditionFulfillment CRUD
-		async createConditionFulfillment(
-			scenarioId: ScenarioId,
-			fulfillment: Omit<ConditionFulfillmentInsert, 'scenario_id'>
-		) {
-			const { data, error } = await supabase
-				.from('condition_fulfillments')
-				.insert({ ...fulfillment, scenario_id: scenarioId })
-				.select()
-				.single<ConditionFulfillment>();
-
-			if (error) throw error;
-
-			conditionFulfillmentStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[data.id as ConditionFulfillmentId] = data;
-				})
-			);
-
-			return data;
-		},
-
-		async updateConditionFulfillment(
-			id: ConditionFulfillmentId,
-			fulfillment: ConditionFulfillmentUpdate
-		) {
-			const { error } = await supabase
-				.from('condition_fulfillments')
-				.update(fulfillment)
-				.eq('id', id);
-
-			if (error) throw error;
-
-			conditionFulfillmentStore.update((state) =>
-				produce(state, (draft) => {
-					if (draft.data[id]) {
-						Object.assign(draft.data[id], fulfillment);
-					}
-				})
-			);
-		},
-
-		async removeConditionFulfillment(id: ConditionFulfillmentId) {
-			const { error } = await supabase.from('condition_fulfillments').delete().eq('id', id);
-
-			if (error) throw error;
-
-			conditionFulfillmentStore.update((state) =>
-				produce(state, (draft) => {
-					delete draft.data[id];
-				})
-			);
-		},
+		// ConditionFulfillment CRUD - delegated to useFulfillment
+		createConditionFulfillment: useFulfillment().admin.createConditionFulfillment,
+		updateConditionFulfillment: useFulfillment().admin.updateConditionFulfillment,
+		removeConditionFulfillment: useFulfillment().admin.removeConditionFulfillment,
 
 		// BuildingCondition CRUD
 		async createBuildingCondition(
@@ -769,9 +689,6 @@ function createBuildingStore() {
 		>,
 		buildingDialogStore: buildingDialogStore as Readable<BuildingDialogState>,
 		conditionStore: conditionStore as Readable<RecordFetchState<ConditionId, Condition>>,
-		conditionFulfillmentStore: conditionFulfillmentStore as Readable<
-			RecordFetchState<ConditionFulfillmentId, ConditionFulfillment>
-		>,
 		buildingConditionStore: buildingConditionStore as Readable<
 			RecordFetchState<BuildingConditionId, BuildingCondition>
 		>,
@@ -783,7 +700,6 @@ function createBuildingStore() {
 		allBuildingItemsStore,
 		allBuildingStatesStore,
 		allConditionsStore,
-		allConditionFulfillmentsStore,
 		allBuildingConditionsStore,
 		allConditionEffectsStore,
 		init,
@@ -800,7 +716,6 @@ function createBuildingStore() {
 		getOrUndefinedBuildingStates,
 		getCondition,
 		getOrUndefinedCondition,
-		getOrUndefinedConditionFulfillment,
 		getBuildingCondition,
 		getOrUndefinedBuildingCondition,
 		getOrUndefinedConditionEffect,
@@ -808,7 +723,6 @@ function createBuildingStore() {
 		getAllBuildingItems,
 		getAllBuildingStates,
 		getAllConditions,
-		getAllConditionFulfillments,
 		getAllBuildingConditions,
 		getAllConditionEffects,
 		admin,

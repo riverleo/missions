@@ -280,6 +280,7 @@ export type {
 	BehaviorActionId,
 	Fulfillment,
 	FulfillmentId,
+	FulfillmentType,
 	Interaction,
 	InteractionId,
 	EntitySourceType,

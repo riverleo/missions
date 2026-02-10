@@ -79,6 +79,7 @@ export interface AppPayload {
 }
 
 export type BehaviorType = 'need' | 'condition';
+export type FulfillmentType = 'need' | 'condition';
 
 // Union types for behaviors
 export type BehaviorId = NeedBehaviorId | ConditionBehaviorId;

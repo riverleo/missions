@@ -18,6 +18,7 @@ import { useTerrain } from './use-terrain';
 import { useCharacter } from './use-character';
 import { useBuilding } from './use-building';
 import { useBehavior } from './use-behavior/index';
+import { useFulfillment } from './use-fulfillment';
 import { useItem } from './use-item';
 import { useWorld } from './use-world';
 import { useNarrative } from './use-narrative';
@@ -261,7 +262,6 @@ function createScenarioStore() {
 				getAllCharacterBodies,
 				getAllCharacterNeeds,
 				getAllCharacters,
-				getAllNeedFulfillments,
 				getAllNeeds,
 				getOrUndefinedCharacterBodyStates,
 				getOrUndefinedCharacterFaceStates,
@@ -270,10 +270,10 @@ function createScenarioStore() {
 				getAllBuildingConditions,
 				getAllBuildings,
 				getAllConditionEffects,
-				getAllConditionFulfillments,
 				getAllConditions,
 				getOrUndefinedBuildingStates,
 			} = useBuilding();
+			const { getAllNeedFulfillments, getAllConditionFulfillments } = useFulfillment();
 			const { getAllItems, getOrUndefinedItemStates } = useItem();
 			const {
 				getAllCharacterInteractions,

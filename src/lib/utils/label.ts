@@ -47,6 +47,7 @@ import { josa } from './josa';
 import {
 	useCharacter,
 	useBuilding,
+	useFulfillment,
 	useItem,
 	useInteraction,
 	useScenario,
@@ -417,9 +418,10 @@ export function getConditionBehaviorPriorityLabel(
 export function getBehaviorActionString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string {
-	const { getBuilding, getBuildingCondition, getOrUndefinedConditionFulfillment } = useBuilding();
+	const { getBuilding, getBuildingCondition } = useBuilding();
 	const { getItem } = useItem();
-	const { getCharacter, getOrUndefinedNeedFulfillment } = useCharacter();
+	const { getCharacter } = useCharacter();
+	const { getOrUndefinedNeedFulfillment, getOrUndefinedConditionFulfillment } = useFulfillment();
 	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
 	// target 결정

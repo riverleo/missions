@@ -5,6 +5,7 @@ export { useBuilding } from './use-building';
 export { useChapter } from './use-chapter';
 export { useCharacter } from './use-character';
 export { useCurrent } from './use-current';
+export { useFulfillment } from './use-fulfillment';
 export { useInteraction } from './use-interaction';
 export { useItem } from './use-item';
 export { useNarrative } from './use-narrative';

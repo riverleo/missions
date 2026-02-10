@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useCharacter } from '$lib/hooks';
+	import { useCharacter, useFulfillment } from '$lib/hooks';
 	import type { ScenarioId } from '$lib/types';
 	import {
 		SvelteFlow,
@@ -36,7 +36,8 @@
 	import NeedCharacterEdge from './need-character-edge.svelte';
 	import type { CharacterId, NeedId, NeedFulfillmentId } from '$lib/types';
 
-	const { needFulfillmentStore, characterNeedStore, getOrUndefinedNeed, admin } = useCharacter();
+	const { characterNeedStore, getOrUndefinedNeed, admin } = useCharacter();
+	const { needFulfillmentStore } = useFulfillment();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const { characterStore } = useCharacter();

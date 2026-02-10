@@ -50,7 +50,7 @@
 
 	const { needBehaviorActionStore, searchEntitySources, admin } = useBehavior();
 	const { getBuilding } = useBuilding();
-	const { getCharacter, needFulfillmentStore } = useCharacter();
+	const { getCharacter } = useCharacter();
 	const { getItem } = useItem();
 	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
 		useInteraction();

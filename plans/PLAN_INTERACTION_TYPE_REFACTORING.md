@@ -213,17 +213,17 @@ searchInteractions(behaviorTargetId: BehaviorTargetId, characterId: CharacterId,
 - [x] `searchEntitySources` 내부에서 getInteractions 대신 searchInteractions 사용 (시그니처는 유지)
   ```typescript
   // search-entity-sources.ts
-  export function searchEntitySources(
-    behaviorTargetId: BehaviorTargetId,
-    characterId: CharacterId  // 추가!
-  ): EntitySource[] {
-    // BehaviorTarget 분석
-    // characterId로 캐릭터 제약 필터링
-    // 적절한 엔티티 소스 반환
+  export function searchEntitySources(behaviorAction: BehaviorAction): EntitySource[] {
+    const behaviorTargetId = BehaviorIdUtils.create(behaviorAction);
+    const interactions = searchInteractions(behaviorTargetId);
+    return interactionsToEntitySources(interactions);
   }
   ```
+- [x] getInteractions, searchEntitySourcesForOnce, searchEntitySourcesForFulfill 제거
+- [x] 사용하지 않는 fulfillment_id 컬럼 제거 (DB 마이그레이션 파일 수정)
+- [x] Admin UI에서 fulfillment_id 참조 제거
 
-**중요**: characterId 파라미터 추가하여 NeedBehavior/ConditionBehavior의 캐릭터 제약 필터링
+**중요**: searchEntitySources는 BehaviorAction을 받아서 내부에서 behaviorTargetId로 변환
 
 #### 4.3 use-interaction.ts (hook)
 - [ ] `getInteractionsByType(type: InteractionType)` 추가
