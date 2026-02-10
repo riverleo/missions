@@ -110,39 +110,44 @@ class WorldCharacterEntityBehavior {
 - [ ] `clearInteractionChain()` 메서드 추가
 - [ ] `clear()` 메서드 업데이트 (체인도 클리어)
 
-### Phase 3: 체인 실행 로직 구현
-- [ ] `tick-execute-interaction-chain.ts` 생성
-  - 현재 step 가져오기
-  - step 타입별 처리:
-    - `move`: 이동 처리 (기존 로직 재사용)
-    - `interaction`: 인터렉션 실행 (기존 로직 재사용)
-    - `expression`: 감정 표현 처리
-  - step 완료 체크
-  - 다음 step으로 전환
-- [ ] `tick.ts` 플로우에 체인 실행 단계 추가
+### Phase 3: 체인 생성 로직 구현
+- [ ] `tick-create-interaction-chain.ts` 생성
+  - BehaviorAction과 타겟 엔티티 기반으로 체인 생성
+  - 엔티티 타입별 체인 구성:
+    - 아이템: move → pick → use → express
+    - 건물: move → interact → express
+    - 캐릭터: move → interact → express
+  - `searchInteractions()`로 필요한 인터렉션 검색
+  - `InteractionChainUtils.createChain()` 사용
+  - `setInteractionChain()` 호출하여 behavior에 설정
+- [ ] `tick.ts` 플로우에 체인 생성 단계 추가
   ```typescript
   if (this.tickFindBehaviorTarget(tick)) return;
   if (this.tickFindTargetEntityAndGo(tick)) return;
-  if (this.tickExecuteInteractionChain(tick)) return;  // 새로 추가
+  if (this.tickCreateInteractionChain(tick)) return;  // 새로 추가
+  // TODO: 체인 실행은 다음 단계에서 구현
   this.tickNextOrClear(tick);
   ```
 
-### Phase 4: 체인 생성 로직
-- [ ] BehaviorAction → InteractionChain 변환 로직
-  - 타겟 엔티티 타입별 체인 구성
-  - 아이템: move → pick → use → express
-  - 건물: move → interact → express
-  - 캐릭터: move → interact → express
-- [ ] `tickFindTargetEntityAndGo.ts` 수정
-  - 타겟 엔티티 결정 시 체인 생성
-  - `setInteractionChain()` 호출
+**참고**: 체인 **실행** 로직은 이후 단계에서 별도로 구현 예정
 
-### Phase 5: 기존 로직 통합
+### Phase 4: 체인 생성 통합
+- [ ] `tickFindTargetEntityAndGo.ts`와 `tickCreateInteractionChain.ts` 연계
+  - 타겟 엔티티 결정 → 체인 생성으로 자연스럽게 흐름
+  - 체인 생성 완료 후 다음 단계로 진행
+
+### Phase 5: 체인 실행 로직 구현 (향후)
+- [ ] `tick-execute-interaction-chain.ts` 생성 (별도 작업)
+  - 현재 step 가져오기
+  - step 타입별 처리:
+    - `move`: 이동 처리
+    - `interaction`: 인터렉션 실행
+    - `expression`: 감정 표현
+  - step 완료 체크 및 전환
 - [ ] 기존 단일 인터렉션 로직을 체인 시스템으로 마이그레이션
 - [ ] backup의 `tick-action-if-*` 로직들을 체인 step으로 변환
-- [ ] 테스트 작성 및 검증
 
-### Phase 6: 최적화 및 정리
+### Phase 6: 테스트 및 정리 (향후)
 - [ ] 사용하지 않는 필드/메서드 제거
 - [ ] 문서화 업데이트
 - [ ] 성능 최적화
@@ -201,9 +206,15 @@ describe('체인 중단', () => {
 - ✅ 확장성 개선 (새로운 step 타입 추가 용이)
 
 ## 작업 순서
+
+### 🎯 현재 스코프 (체인 생성)
 1. [ ] Phase 1: 타입 및 유틸리티 정의
 2. [ ] Phase 2: Behavior 클래스 확장
-3. [ ] Phase 3: 체인 실행 로직 구현
-4. [ ] Phase 4: 체인 생성 로직
-5. [ ] Phase 5: 기존 로직 통합
-6. [ ] Phase 6: 최적화 및 정리
+3. [ ] Phase 3: 체인 생성 로직 구현 (`tick-create-interaction-chain.ts`)
+4. [ ] Phase 4: 체인 생성 통합
+
+### 🔮 향후 스코프 (체인 실행)
+5. [ ] Phase 5: 체인 실행 로직 구현 (별도 작업)
+6. [ ] Phase 6: 테스트 및 정리 (별도 작업)
+
+**현재는 Phase 1-4만 진행하여 체인 생성 기능 완성**
