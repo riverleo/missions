@@ -136,6 +136,13 @@ export type InteractionTargetId =
 	| `item_${ItemInteractionId}_${ItemInteractionActionId}`
 	| `character_${CharacterInteractionId}_${CharacterInteractionActionId}`;
 
+// Interaction Queue for sequential interaction execution
+export interface InteractionQueue {
+	interactionTargetIds: InteractionTargetId[];
+	poppedInteractionTargetId: InteractionTargetId | undefined;
+	poppedAtTick: number;
+}
+
 // ============================================================
 // Entity Types
 // ============================================================

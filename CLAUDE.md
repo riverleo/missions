@@ -9,6 +9,10 @@ SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
 - **진행 중**: `plans/*.md` - 현재 작업 중인 플랜
 - **완료됨**: `plans/completed/*.md` - 완료된 플랜 (히스토리 보관)
 - **플랜 완료 처리**: 사용자가 명시적으로 지시할 때만 `completed/`로 이동. Claude가 임의로 이동 금지.
+- **체크리스트 관리**:
+  - 플랜 작업을 완료하면 체크리스트에 반드시 체크(`[x]`)한다.
+  - 체크되지 않은 작업을 진행하기 전에 코드를 확인하여 실제로 미완료인지 검증한다.
+  - 모든 체크박스가 체크되지 않은 플랜은 완료 처리하지 않는다.
 
 ### Spec-Driven Development
 - **틱 함수 개발**: behavior-state 등 핵심 로직 개발 시 명세(함수 주석 체크리스트) → 테스트 → 구현 순서. 명세 체크박스로 진행 추적.

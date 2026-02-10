@@ -32,6 +32,7 @@ import type {
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
 import { searchEntitySources } from './search-entity-sources';
+import { searchInteractions } from './search-interactions';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -772,6 +773,7 @@ function createBehaviorStore() {
 		getAllBehaviorsByPriority,
 		getRootBehaviorAction,
 		searchEntitySources,
+		searchInteractions,
 		admin,
 	};
 }

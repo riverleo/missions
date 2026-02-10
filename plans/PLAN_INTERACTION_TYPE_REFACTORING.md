@@ -74,7 +74,7 @@ type BuildingInteraction = {
 - [ ] CREATE TABLE 마이그레이션 수정 vs 새 ALTER 마이그레이션 생성 결정
 
 #### 1.2 새 마이그레이션 작성
-- [ ] `type` 컬럼 추가
+- [x] `type` 컬럼 추가
   ```sql
   -- building_interactions에 type 추가
   ALTER TABLE building_interactions
@@ -105,60 +105,60 @@ type BuildingInteraction = {
     (type = 'system' AND system_interaction_type IS NOT NULL AND once_interaction_type IS NULL AND fulfill_interaction_type IS NULL)
   );
   ```
-- [ ] item_interactions에 동일 작업
-- [ ] character_interactions에 동일 작업
+- [x] item_interactions에 동일 작업
+- [x] character_interactions에 동일 작업
 
 #### 1.3 타입 생성 (supabase gen types)
-- [ ] `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
-- [ ] 생성된 타입 확인
+- [x] `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
+- [x] 생성된 타입 확인
 
 ### 2. TypeScript 타입 업데이트
 
 #### 2.1 core.ts 타입 정의 업데이트
-- [ ] `InteractionType` 타입 추가
+- [x] `InteractionType` 타입 추가
   ```typescript
   export type InteractionType = 'once' | 'fulfill' | 'system';
   ```
-- [ ] `BuildingInteraction`, `ItemInteraction`, `CharacterInteraction` 타입에 `type` 필드 추가
-- [ ] `Interaction` union 타입 업데이트
+- [x] `BuildingInteraction`, `ItemInteraction`, `CharacterInteraction` 타입에 `type` 필드 추가
+- [x] `Interaction` union 타입 업데이트
 
 #### 2.2 타입 가드 함수 업데이트
-- [ ] `isOnceInteraction(interaction: Interaction): boolean` 추가
+- [x] `isOnceInteraction(interaction: Interaction): boolean` 추가 (제거하기로 결정)
   ```typescript
   export function isOnceInteraction(interaction: Interaction): boolean {
     return interaction.type === 'once';
   }
   ```
-- [ ] `isFulfillInteraction(interaction: Interaction): boolean` 추가
-- [ ] `isSystemInteraction(interaction: Interaction): boolean` 추가
+- [x] `isFulfillInteraction(interaction: Interaction): boolean` 추가 (제거하기로 결정)
+- [x] `isSystemInteraction(interaction: Interaction): boolean` 추가 (제거하기로 결정)
 
 ### 3. Admin UI 개선
 
 #### 3.1 Create Dialog 업데이트
-- [ ] `building-interaction-create-dialog.svelte`
+- [x] `building-interaction-create-dialog.svelte`
   - type 선택 라디오/셀렉트 추가
   - type에 따라 interaction_type 옵션 필터링
-- [ ] `item-interaction-create-dialog.svelte`
-- [ ] `character-interaction-create-dialog.svelte`
+- [x] `item-interaction-create-dialog.svelte`
+- [x] `character-interaction-create-dialog.svelte`
 
 #### 3.2 Update Dialog 업데이트
-- [ ] `building-interaction-update-dialog.svelte`
+- [x] `building-interaction-update-dialog.svelte`
   - type 변경 시 기존 interaction_type 초기화 로직
-- [ ] `item-interaction-update-dialog.svelte`
-- [ ] `character-interaction-update-dialog.svelte`
+- [x] `item-interaction-update-dialog.svelte`
+- [x] `character-interaction-update-dialog.svelte`
 
 #### 3.3 Panel 컴포넌트 업데이트
-- [ ] `building-interaction-panel.svelte`
+- [x] `building-interaction-panel.svelte` (삭제됨 - 사용하지 않음)
   - type 표시 추가
-- [ ] `item-interaction-panel.svelte`
-- [ ] `character-interaction-panel.svelte`
+- [x] `item-interaction-panel.svelte` (삭제됨 - 사용하지 않음)
+- [x] `character-interaction-panel.svelte` (삭제됨 - 사용하지 않음)
 
 ### 4. 로직 리팩토링
 
 #### 4.1 search-interactions.ts 분리 및 개선
-- [ ] `search-interactions.ts` 파일 생성
-- [ ] `getInteractions()` → `searchInteractions()` 리네이밍
-- [ ] 함수 시그니처 개선
+- [x] `search-interactions.ts` 파일 생성
+- [x] `getInteractions()` → `searchInteractions()` 리네이밍
+- [x] 함수 시그니처 개선
   ```typescript
   // Before (search-entity-sources.ts 내부)
   function getInteractions(behaviorAction, actionType: 'once' | 'fulfill') {
@@ -184,7 +184,7 @@ type BuildingInteraction = {
 
 **역할**: 단순히 인터렉션 검색만 담당. 시퀀스 구성은 호출자(tick-enqueue-interactions.ts)에서 처리
   ```
-- [ ] `useBehavior` 훅에서 `searchInteractions` export
+- [x] `useBehavior` 훅에서 `searchInteractions` export
   ```typescript
   // use-behavior.ts
   import { searchInteractions } from './search-interactions';
@@ -210,7 +210,7 @@ searchInteractions(behaviorTargetId: BehaviorTargetId, characterId: CharacterId,
 - `BehaviorInteractionType`: `OnceInteractionType | FulfillInteractionType | SystemInteractionType` (구체적인 인터렉션 타입: 'item_pick', 'item_use', 'express' 등)
 
 #### 4.2 search-entity-sources.ts 업데이트
-- [ ] `searchEntitySources` 시그니처 업데이트
+- [x] `searchEntitySources` 내부에서 getInteractions 대신 searchInteractions 사용 (시그니처는 유지)
   ```typescript
   // search-entity-sources.ts
   export function searchEntitySources(
