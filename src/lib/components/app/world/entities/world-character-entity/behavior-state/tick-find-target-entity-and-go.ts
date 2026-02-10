@@ -84,7 +84,7 @@ export default function tickFindTargetEntityAndGo(
 		targetEntitySourceIds = new Set([entitySourceId]);
 	} else if (behaviorAction.target_selection_method === 'search') {
 		targetEntitySourceIds = new Set(
-			searchEntitySources(behaviorAction).map((entitySource) => entitySource.id)
+			searchEntitySources(this.behaviorTargetId).map((entitySource) => entitySource.id)
 		);
 	}
 

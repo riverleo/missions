@@ -6,7 +6,6 @@ import type {
 	InteractionType,
 } from '$lib/types';
 import { useBehavior, useFulfillment, useInteraction } from '$lib/hooks';
-import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
 
 /**
  * BehaviorTarget 기반 인터렉션 검색 (once/fulfill 자동 판단)
@@ -35,18 +34,8 @@ export function searchInteractions(
 	const interactionType: InteractionType = behaviorAction.type;
 
 	// 4. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
-	const { getAllNeedFulfillments, getAllConditionFulfillments } = useFulfillment();
-	let fulfillments: Fulfillment[] = [];
-
-	if (behaviorAction.behaviorType === 'need') {
-		fulfillments = getAllNeedFulfillments()
-			.filter((f) => f.need_id === behaviorAction.need_id)
-			.map(FulfillmentIdUtils.to);
-	} else {
-		fulfillments = getAllConditionFulfillments()
-			.filter((f) => f.condition_id === behaviorAction.condition_id)
-			.map(FulfillmentIdUtils.to);
-	}
+	const { getAllFulfillmentsByBehaviorAction } = useFulfillment();
+	const fulfillments = getAllFulfillmentsByBehaviorAction(behaviorAction);
 
 	// 4. Fulfillment의 Interaction 가져오기 (actionType에 맞는 interaction_type만)
 	const interactions: Interaction[] = [];

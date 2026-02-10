@@ -14,6 +14,7 @@ import type {
 	ConditionId,
 	ScenarioId,
 	Fulfillment,
+	BehaviorAction,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { FulfillmentIdUtils } from '$lib/utils/fulfillment-id';
@@ -147,14 +148,15 @@ function createFulfillmentStore() {
 		return get(allFulfillmentsStore);
 	}
 
-	// Get fulfillments by need ID
-	function getAllFulfillmentsByNeedId(needId: NeedId): NeedFulfillment[] {
-		return getAllNeedFulfillments().filter((f) => f.need_id === needId);
-	}
-
-	// Get fulfillments by condition ID
-	function getAllFulfillmentsByConditionId(conditionId: ConditionId): ConditionFulfillment[] {
-		return getAllConditionFulfillments().filter((f) => f.condition_id === conditionId);
+	// Get fulfillments by behavior action
+	function getAllFulfillmentsByBehaviorAction(behaviorAction: BehaviorAction): Fulfillment[] {
+		return getAllFulfillments().filter((f) => {
+			if (behaviorAction.behaviorType === 'need') {
+				return f.fulfillmentType === 'need' && f.need_id === behaviorAction.need_id;
+			} else {
+				return f.fulfillmentType === 'condition' && f.condition_id === behaviorAction.condition_id;
+			}
+		});
 	}
 
 	const admin = {
@@ -280,8 +282,7 @@ function createFulfillmentStore() {
 		getOrUndefinedFulfillment,
 		getFulfillment,
 		getAllFulfillments,
-		getAllFulfillmentsByNeedId,
-		getAllFulfillmentsByConditionId,
+		getAllFulfillmentsByBehaviorAction,
 		admin,
 	};
 }

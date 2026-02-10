@@ -67,7 +67,7 @@
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
-		return searchEntitySources(BehaviorIdUtils.to(changes));
+		return searchEntitySources(BehaviorIdUtils.create(BehaviorIdUtils.to(changes)));
 	});
 
 	let isUpdating = $state(false);

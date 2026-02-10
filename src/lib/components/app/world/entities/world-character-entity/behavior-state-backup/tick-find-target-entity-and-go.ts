@@ -53,7 +53,7 @@ export default function tickFindAndGo(this: WorldCharacterEntityBehavior, tick: 
 	}
 
 	const entities = Object.values(this.worldCharacterEntity.worldContext.entities);
-	const entitySources = searchEntitySources(behaviorAction);
+	const entitySources = searchEntitySources(this.behaviorTargetId);
 	const entitySourceIds = new Set(entitySources.map((es) => es.id));
 
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
