@@ -8,8 +8,6 @@
 		BuildingInteractionId,
 		ItemInteractionId,
 		CharacterInteractionId,
-		ConditionFulfillmentId,
-		ConditionFulfillment,
 	} from '$lib/types';
 	import { Button } from '$lib/components/ui/button';
 	import { Card, CardContent } from '$lib/components/ui/card';
@@ -49,7 +47,7 @@
 	let { action, hasParent = false }: Props = $props();
 
 	const { conditionBehaviorActionStore, searchEntitySources, admin } = useBehavior();
-	const { getBuilding, conditionFulfillmentStore } = useBuilding();
+	const { getBuilding } = useBuilding();
 	const { getCharacter } = useCharacter();
 	const { getItem } = useItem();
 	const { buildingInteractionStore, characterInteractionStore, itemInteractionStore } =
@@ -101,6 +99,12 @@
 	function onTypeChange(value: string | undefined) {
 		if (changes && value) {
 			changes.type = value as BehaviorActionType;
+			// 타입 변경 시 선택된 대상 초기화
+			changes.target_selection_method = 'search';
+			changes.building_interaction_id = null;
+			changes.item_interaction_id = null;
+			changes.character_interaction_id = null;
+			changes.condition_fulfillment_id = null;
 		}
 	}
 
@@ -192,14 +196,16 @@
 					<div class="space-y-2">
 						<!-- 액션 타입 -->
 						<ButtonGroup class="w-full">
-							<ButtonGroupText>행동</ButtonGroupText>
+							<ButtonGroupText>동작 방식</ButtonGroupText>
 							<Select type="single" value={changes.type} onValueChange={onTypeChange}>
 								<SelectTrigger class="flex-1">
 									{selectedTypeLabel}
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="once">{getBehaviorActionTypeLabelByType('once')}</SelectItem>
-									<SelectItem value="fulfill">{getBehaviorActionTypeLabelByType('fulfill')}</SelectItem>
+									<SelectItem value="fulfill">
+										{getBehaviorActionTypeLabelByType('fulfill')}
+									</SelectItem>
 									<SelectItem value="idle">{getBehaviorActionTypeLabelByType('idle')}</SelectItem>
 								</SelectContent>
 							</Select>
@@ -208,7 +214,7 @@
 						<!-- interact 타입: Interaction 선택 -->
 						{#if changes.type === 'once'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상</ButtonGroupText>
+								<ButtonGroupText>대상 탐색</ButtonGroupText>
 								<Select
 									type="single"
 									value={selectedTargetValue}
@@ -218,7 +224,7 @@
 										{selectedTargetMethodLabel}
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="search">새로운 탐색 대상</SelectItem>
+										<SelectItem value="search">가까운 대상 탐색</SelectItem>
 
 										{#if buildingInteractions.length > 0}
 											<SelectGroup>
@@ -272,7 +278,7 @@
 						<!-- fulfill 타입: Interaction 선택 -->
 						{#if changes.type === 'fulfill'}
 							<ButtonGroup class="w-full">
-								<ButtonGroupText>대상</ButtonGroupText>
+								<ButtonGroupText>대상 탐색</ButtonGroupText>
 								<Select
 									type="single"
 									value={selectedTargetValue}
@@ -282,7 +288,7 @@
 										{selectedTargetMethodLabel}
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="search">새로운 탐색 대상</SelectItem>
+										<SelectItem value="search">가까운 대상 탐색</SelectItem>
 
 										{#if buildingInteractions.length > 0}
 											<SelectGroup>

@@ -6,7 +6,7 @@
 
 	let { children } = $props();
 
-	const { scenarioStore, admin } = useScenario();
+	const { scenarioStore, fetchAllStatus, admin } = useScenario();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const isValidScenario = $derived(scenarioId ? !!$scenarioStore.data?.[scenarioId] : false);
@@ -31,5 +31,15 @@
 </script>
 
 {#if isValidScenario}
-	{@render children()}
+	{#if $fetchAllStatus === 'loading'}
+		<div class="flex h-screen items-center justify-center">
+			<div class="text-muted-foreground">데이터를 불러오는 중...</div>
+		</div>
+	{:else if $fetchAllStatus === 'error'}
+		<div class="flex h-screen items-center justify-center">
+			<div class="text-destructive">데이터를 불러오는데 실패했습니다.</div>
+		</div>
+	{:else if $fetchAllStatus === 'success'}
+		{@render children()}
+	{/if}
 {/if}

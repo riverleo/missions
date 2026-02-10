@@ -421,7 +421,7 @@ export function getBehaviorActionString(
 
 	// target 결정
 	const targetNameString = getInteractionTargetNameString(action);
-	const targetLabel = targetNameString || (action.target_selection_method === 'search' ? '새로운 탐색 대상' : undefined);
+	const targetLabel = targetNameString || (action.target_selection_method === 'search' ? '가까운 대상 탐색' : undefined);
 
 	// behavior 결정
 	const behaviorLabel = getInteractionBehaviorLabelString(action);
@@ -561,7 +561,7 @@ export function getTargetSelectionMethodLabelString(
 	if (!action || !action.target_selection_method) return '타깃 결정 방법';
 
 	if (action.target_selection_method === 'search') {
-		return '새로운 탐색 대상';
+		return '가까운 대상 탐색';
 	}
 
 	if (action.target_selection_method === 'explicit') {

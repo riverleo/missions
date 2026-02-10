@@ -166,14 +166,23 @@ type BuildingInteraction = {
   }
 
   // After (search-interactions.ts)
+
+  // BehaviorTarget 기반 인터렉션 검색 (once/fulfill 자동 판단)
   export function searchInteractions(
-    behaviorAction: BehaviorAction,
-    interactionType: InteractionType
+    behaviorTargetId: BehaviorTargetId,
+    characterId: CharacterId,
+    entityId?: EntityId
   ): Interaction[] {
-    // interaction.type === interactionType 체크
+    // BehaviorAction의 once/fulfill 정보 사용
+    // characterId로 NeedBehavior/ConditionBehavior의 캐릭터 제약 필터링
     const interactions = getAllInteractions();
-    return interactions.filter(i => i.type === interactionType);
+    return interactions.filter(/* 적절한 인터렉션 필터링 */);
   }
+  ```
+
+**BehaviorInteractionType**: `OnceInteractionType | FulfillInteractionType | SystemInteractionType`
+
+**역할**: 단순히 인터렉션 검색만 담당. 시퀀스 구성은 호출자(tick-enqueue-interactions.ts)에서 처리
   ```
 - [ ] `useBehavior` 훅에서 `searchInteractions` export
   ```typescript
@@ -187,16 +196,34 @@ type BuildingInteraction = {
   };
   ```
 
-#### 4.2 search-entity-sources.ts 업데이트
-- [ ] `searchInteractions` import 및 사용
-  ```typescript
-  import { searchInteractions } from './search-interactions';
+**참고**: 일관된 네이밍 패턴
+```typescript
+// 엔티티 소스 검색
+searchEntitySources(behaviorTargetId: BehaviorTargetId, characterId: CharacterId): EntitySource[]
 
-  function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySource[] {
-    const interactions = searchInteractions(behaviorAction, 'once');
-    return interactionsToTemplates(interactions);
+// 인터렉션 검색
+searchInteractions(behaviorTargetId: BehaviorTargetId, characterId: CharacterId, entityId?: EntityId): Interaction[]
+```
+
+**타입 구분**:
+- `InteractionType`: `'once' | 'fulfill' | 'system'` (DB 컬럼 타입)
+- `BehaviorInteractionType`: `OnceInteractionType | FulfillInteractionType | SystemInteractionType` (구체적인 인터렉션 타입: 'item_pick', 'item_use', 'express' 등)
+
+#### 4.2 search-entity-sources.ts 업데이트
+- [ ] `searchEntitySources` 시그니처 업데이트
+  ```typescript
+  // search-entity-sources.ts
+  export function searchEntitySources(
+    behaviorTargetId: BehaviorTargetId,
+    characterId: CharacterId  // 추가!
+  ): EntitySource[] {
+    // BehaviorTarget 분석
+    // characterId로 캐릭터 제약 필터링
+    // 적절한 엔티티 소스 반환
   }
   ```
+
+**중요**: characterId 파라미터 추가하여 NeedBehavior/ConditionBehavior의 캐릭터 제약 필터링
 
 #### 4.3 use-interaction.ts (hook)
 - [ ] `getInteractionsByType(type: InteractionType)` 추가
@@ -263,20 +290,25 @@ type BuildingInteraction = {
 
 ## searchInteractions 분리의 이점
 
-### 인터렉션 체이닝과의 연계
+### 인터렉션 큐와의 연계
 ```typescript
-// tick-execute-interaction-chain.ts에서 사용
+// tick-enqueue-interactions.ts에서 사용
 const { searchInteractions } = useBehavior();
 
-// 체인 실행 중 필요한 인터렉션 검색
-const interactions = searchInteractions(behaviorAction, 'once');
-const interaction = interactions[0]; // 첫 번째 인터렉션 실행
+// 인터렉션 검색 (BehaviorAction의 once/fulfill 정보 자동 사용 + 캐릭터 제약 필터링)
+const interactions = searchInteractions(
+  this.behaviorTargetId,
+  this.worldCharacterEntity.characterId,  // 캐릭터 제약 필터링
+  this.targetEntityId
+);
+
+// 검색된 인터렉션들로 큐 구성
 ```
 
 ### 재사용성 향상
-- `search-entity-sources.ts`: 엔티티 템플릿 검색
-- `tick-execute-interaction-chain.ts`: 인터렉션 체인 실행
+- `tick-enqueue-interactions.ts`: 인터렉션 큐 구성
 - 기타 behavior-state 로직: 인터렉션 찾기
+- `searchEntitySources`와 일관된 API 패턴
 
 ## 예상 효과
 - ✅ 타입 판별 로직 단순화 (3개 컬럼 체크 → 1개 컬럼 체크)
