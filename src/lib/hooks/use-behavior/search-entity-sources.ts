@@ -49,7 +49,7 @@ function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySourc
 	}
 
 	// 2. Interaction에서 엔티티 템플릿 추출
-	return interactionsToTemplates(interactions);
+	return interactionsToEntitySources(interactions);
 }
 
 /**
@@ -83,7 +83,9 @@ function getInteractions(
 
 		if (behaviorAction.condition_fulfillment_id) {
 			// 명시적 fulfillment
-			const fulfillment = getOrUndefinedConditionFulfillment(behaviorAction.condition_fulfillment_id);
+			const fulfillment = getOrUndefinedConditionFulfillment(
+				behaviorAction.condition_fulfillment_id
+			);
 			if (fulfillment) fulfillments = [FulfillmentIdUtils.to(fulfillment)];
 		} else {
 			// 자동 탐색: condition_id로 필터링
@@ -127,14 +129,14 @@ function searchEntitySourcesForFulfill(behaviorAction: BehaviorAction): EntitySo
 	const interactions = getInteractions(behaviorAction, 'fulfill');
 
 	// 2. Interaction에서 엔티티 템플릿 추출
-	return interactionsToTemplates(interactions);
+	return interactionsToEntitySources(interactions);
 }
 
 /**
  * Interaction 배열을 EntitySource 배열로 변환합니다.
  * 기본 인터랙션(NULL entity_id)의 경우 모든 해당 타입 엔티티를 반환합니다.
  */
-function interactionsToTemplates(interactions: Interaction[]): EntitySource[] {
+function interactionsToEntitySources(interactions: Interaction[]): EntitySource[] {
 	const { getBuilding, getAllBuildings } = useBuilding();
 	const { getAllItems, getItem } = useItem();
 	const { getAllCharacters, getCharacter } = useCharacter();

@@ -155,32 +155,60 @@ type BuildingInteraction = {
 
 ### 4. 로직 리팩토링
 
-#### 4.1 search-entity-sources.ts
-- [ ] `getInteractions()` 함수 수정
+#### 4.1 search-interactions.ts 분리 및 개선
+- [ ] `search-interactions.ts` 파일 생성
+- [ ] `getInteractions()` → `searchInteractions()` 리네이밍
+- [ ] 함수 시그니처 개선
   ```typescript
-  // Before
+  // Before (search-entity-sources.ts 내부)
   function getInteractions(behaviorAction, actionType: 'once' | 'fulfill') {
     // once_interaction_type/fulfill_interaction_type 체크
   }
 
-  // After
-  function getInteractions(behaviorAction, actionType: 'once' | 'fulfill') {
+  // After (search-interactions.ts)
+  export function searchInteractions(
+    behaviorAction: BehaviorAction,
+    interactionType: InteractionType
+  ): Interaction[] {
+    // interaction.type === interactionType 체크
     const interactions = getAllInteractions();
-    return interactions.filter(i => i.type === actionType);
+    return interactions.filter(i => i.type === interactionType);
+  }
+  ```
+- [ ] `useBehavior` 훅에서 `searchInteractions` export
+  ```typescript
+  // use-behavior.ts
+  import { searchInteractions } from './search-interactions';
+
+  return {
+    // ...
+    searchInteractions,
+    // ...
+  };
+  ```
+
+#### 4.2 search-entity-sources.ts 업데이트
+- [ ] `searchInteractions` import 및 사용
+  ```typescript
+  import { searchInteractions } from './search-interactions';
+
+  function searchEntitySourcesForOnce(behaviorAction: BehaviorAction): EntitySource[] {
+    const interactions = searchInteractions(behaviorAction, 'once');
+    return interactionsToTemplates(interactions);
   }
   ```
 
-#### 4.2 use-interaction.ts (hook)
+#### 4.3 use-interaction.ts (hook)
 - [ ] `getInteractionsByType(type: InteractionType)` 추가
 - [ ] 기존 로직에서 type 필드 사용
 
-#### 4.3 label.ts 유틸리티
+#### 4.4 label.ts 유틸리티
 - [ ] `isOnceInteractionType()` → `isOnceInteraction()` 변경 (Interaction 객체 받도록)
 - [ ] `isFulfillInteractionType()` → `isFulfillInteraction()` 변경
 - [ ] `isSystemInteractionType()` → `isSystemInteraction()` 변경
 - [ ] 또는 완전히 제거하고 `interaction.type === 'once'` 직접 사용
 
-#### 4.4 기타 영향 받는 파일
+#### 4.5 기타 영향 받는 파일
 - [ ] `getInteractionLabelString()` 함수 업데이트 (label.ts)
 - [ ] Admin 컴포넌트들에서 type 체크 로직 업데이트
 - [ ] behavior-state 로직 업데이트 (필요 시)
@@ -233,12 +261,30 @@ type BuildingInteraction = {
 - interaction type 변경 시 기존 interaction_type 초기화 필요
 - Admin UI에서 명확한 경고 메시지
 
+## searchInteractions 분리의 이점
+
+### 인터렉션 체이닝과의 연계
+```typescript
+// tick-execute-interaction-chain.ts에서 사용
+const { searchInteractions } = useBehavior();
+
+// 체인 실행 중 필요한 인터렉션 검색
+const interactions = searchInteractions(behaviorAction, 'once');
+const interaction = interactions[0]; // 첫 번째 인터렉션 실행
+```
+
+### 재사용성 향상
+- `search-entity-sources.ts`: 엔티티 템플릿 검색
+- `tick-execute-interaction-chain.ts`: 인터렉션 체인 실행
+- 기타 behavior-state 로직: 인터렉션 찾기
+
 ## 예상 효과
 - ✅ 타입 판별 로직 단순화 (3개 컬럼 체크 → 1개 컬럼 체크)
 - ✅ 데이터 무결성 향상 (CHECK 제약)
 - ✅ 코드 가독성 향상 (`interaction.type === 'once'`)
 - ✅ 유지보수 용이성 증가
 - ✅ 버그 가능성 감소
+- ✅ 인터렉션 검색 로직 재사용 가능 (체이닝에서 활용)
 
 ## 작업 추정
 - **1단계 (DB)**: 2-3시간
