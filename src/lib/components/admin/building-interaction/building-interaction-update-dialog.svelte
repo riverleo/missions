@@ -107,8 +107,15 @@
 		isSubmitting = true;
 
 		try {
+			const type = isOnceInteractionType(behaviorInteractionType)
+				? 'once'
+				: isFulfillInteractionType(behaviorInteractionType)
+					? 'fulfill'
+					: 'system';
+
 			await admin.updateBuildingInteraction(buildingInteractionId, {
 				building_id: buildingId,
+				type,
 				once_interaction_type: isOnceInteractionType(behaviorInteractionType)
 					? behaviorInteractionType
 					: null,

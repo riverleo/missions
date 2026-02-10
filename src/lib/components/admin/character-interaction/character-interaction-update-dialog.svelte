@@ -95,8 +95,15 @@
 		isSubmitting = true;
 
 		try {
+			const type = isOnceInteractionType(interactionType)
+				? 'once'
+				: isFulfillInteractionType(interactionType)
+					? 'fulfill'
+					: 'system';
+
 			await admin.updateCharacterInteraction(characterInteractionId, {
 				target_character_id: targetCharacterId,
+				type,
 				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
 				fulfill_interaction_type: isFulfillInteractionType(interactionType)
 					? interactionType
