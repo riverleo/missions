@@ -1,11 +1,11 @@
-import { writable, derived, get, type Readable } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { produce } from 'immer';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import type {
 	Database,
 	RecordFetchState,
 	Interaction,
-	InteractionId,
 	InteractionActionId,
 	BuildingInteraction,
 	BuildingInteractionId,
@@ -34,9 +34,11 @@ import type {
 	ScenarioId,
 	InteractionAction,
 	BehaviorAction,
+	EntityId,
+	EntitySourceId,
+	BehaviorInteractionType,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
-import type { IconMathOff } from '@tabler/icons-svelte';
 
 type BuildingInteractionDialogState =
 	| { type: 'create' }
@@ -135,15 +137,9 @@ function createInteractionStore() {
 	const allInteractionActionsStore = derived(
 		[buildingInteractionActionStore, itemInteractionActionStore, characterInteractionActionStore],
 		([$building, $item, $character]) => [
-			...Object.values($building.data)
-				.flat()
-				.map(InteractionIdUtils.interactionAction.to),
-			...Object.values($item.data)
-				.flat()
-				.map(InteractionIdUtils.interactionAction.to),
-			...Object.values($character.data)
-				.flat()
-				.map(InteractionIdUtils.interactionAction.to),
+			...Object.values($building.data).flat().map(InteractionIdUtils.interactionAction.to),
+			...Object.values($item.data).flat().map(InteractionIdUtils.interactionAction.to),
+			...Object.values($character.data).flat().map(InteractionIdUtils.interactionAction.to),
 		]
 	);
 
@@ -400,6 +396,69 @@ function createInteractionStore() {
 			return getInteraction(interactionId);
 		}
 		return undefined;
+	}
+
+	/**
+	 * BehaviorInteractionType과 EntityId/EntitySourceId로 Interaction을 반환 (throw)
+	 */
+	function getInteractionByType(
+		behaviorInteractionType: BehaviorInteractionType,
+		entityIdOrSourceId: EntityId | EntitySourceId
+	): Interaction {
+		const data = getOrUndefinedInteractionByType(behaviorInteractionType, entityIdOrSourceId);
+		if (!data) {
+			throw new Error(
+				`Interaction not found: ${behaviorInteractionType} for ${entityIdOrSourceId}`
+			);
+		}
+		return data;
+	}
+
+	/**
+	 * BehaviorInteractionType과 EntityId/EntitySourceId로 Interaction을 반환 (return undefined)
+	 */
+	function getOrUndefinedInteractionByType(
+		behaviorInteractionType: BehaviorInteractionType,
+		entityIdOrSourceId: EntityId | EntitySourceId
+	): Interaction | undefined {
+		let sourceId: EntitySourceId;
+		let entityType: 'building' | 'item' | 'character';
+
+		// EntityId인지 확인
+		if (EntityIdUtils.or(['building', 'item', 'character'], entityIdOrSourceId as EntityId)) {
+			// EntityId
+			const parsed = EntityIdUtils.parse(entityIdOrSourceId as EntityId);
+			sourceId = parsed.sourceId;
+			entityType = parsed.type as 'building' | 'item' | 'character';
+		} else {
+			// EntitySourceId
+			sourceId = entityIdOrSourceId as EntitySourceId;
+			// BehaviorInteractionType에서 entityType 추출 (예: 'item_use' -> 'item')
+			const typePrefix = behaviorInteractionType.split('_')[0];
+			if (typePrefix === 'building' || typePrefix === 'item' || typePrefix === 'character') {
+				entityType = typePrefix;
+			} else {
+				throw new Error(`Invalid BehaviorInteractionType: ${behaviorInteractionType}`);
+			}
+		}
+
+		// 캐싱된 모든 인터랙션에서 검색
+		const interactions = getAllInteractions();
+		return interactions.find((i) => {
+			// entitySourceType과 sourceId 확인
+			const isMatchingSource =
+				(i.entitySourceType === 'building' && 'building_id' in i && i.building_id === sourceId) ||
+				(i.entitySourceType === 'item' && 'item_id' in i && i.item_id === sourceId) ||
+				(i.entitySourceType === 'character' && 'character_id' in i && i.character_id === sourceId);
+
+			// BehaviorInteractionType 확인
+			const isMatchingType =
+				i.once_interaction_type === behaviorInteractionType ||
+				i.fulfill_interaction_type === behaviorInteractionType ||
+				i.system_interaction_type === behaviorInteractionType;
+
+			return i.entitySourceType === entityType && isMatchingSource && isMatchingType;
+		});
 	}
 
 	function getAllBuildingInteractionActions(
@@ -954,6 +1013,8 @@ function createInteractionStore() {
 		getOrUndefinedCharacterInteraction,
 		getInteractionByBehaviorAction,
 		getOrUndefinedInteractionByBehaviorAction,
+		getInteractionByType,
+		getOrUndefinedInteractionByType,
 		getAllBuildingInteractionActions,
 		getAllItemInteractionActions,
 		getAllCharacterInteractionActions,

@@ -33,7 +33,7 @@ export class WorldTileEntity extends Entity {
 		tileCellKey: TileCellKey,
 		tileId: TileId
 	) {
-		super(worldContext, 'tile', worldId, tileCellKey);
+		super(worldContext, 'tile', worldId, tileId, tileCellKey);
 		this.tileId = tileId;
 
 		// 타일 좌표 파싱

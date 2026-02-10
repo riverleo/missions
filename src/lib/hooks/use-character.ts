@@ -271,22 +271,6 @@ function createCharacterStore() {
 		return get(characterStore).data[id as CharacterId];
 	}
 
-	// World entity helper functions
-	function getCharacterByWorldCharacterId(worldCharacterId: WorldCharacterId): Character {
-		const { getWorldCharacter } = useWorld();
-		const worldCharacter = getWorldCharacter(worldCharacterId);
-		if (!worldCharacter) throw new Error(`WorldCharacter not found: ${worldCharacterId}`);
-		return getCharacter(worldCharacter.character_id);
-	}
-
-	function getOrUndefinedCharacterByWorldCharacterId(worldCharacterId: WorldCharacterId | null | undefined): Character | undefined {
-		if (!worldCharacterId) return undefined;
-		const { getWorldCharacter } = useWorld();
-		const worldCharacter = getWorldCharacter(worldCharacterId);
-		if (!worldCharacter) return undefined;
-		return getOrUndefinedCharacter(worldCharacter.character_id);
-	}
-
 	function getOrUndefinedCharacterFaceStates(characterId: string | null | undefined): CharacterFaceState[] | undefined {
 		if (!characterId) return undefined;
 		return get(characterFaceStateStore).data[characterId as CharacterId];
@@ -832,8 +816,6 @@ function createCharacterStore() {
 		closeNeedDialog,
 		getCharacter,
 		getOrUndefinedCharacter,
-		getCharacterByWorldCharacterId,
-		getOrUndefinedCharacterByWorldCharacterId,
 		getOrUndefinedCharacterFaceStates,
 		getCharacterBody,
 		getOrUndefinedCharacterBody,

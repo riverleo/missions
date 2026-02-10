@@ -245,22 +245,6 @@ function createBuildingStore() {
 		return get(buildingStore).data[id as BuildingId];
 	}
 
-	// World entity helper functions
-	function getBuildingByWorldBuildingId(worldBuildingId: WorldBuildingId): Building {
-		const { getWorldBuilding } = useWorld();
-		const worldBuilding = getWorldBuilding(worldBuildingId);
-		if (!worldBuilding) throw new Error(`WorldBuilding not found: ${worldBuildingId}`);
-		return getBuilding(worldBuilding.building_id);
-	}
-
-	function getOrUndefinedBuildingByWorldBuildingId(worldBuildingId: WorldBuildingId | null | undefined): Building | undefined {
-		if (!worldBuildingId) return undefined;
-		const { getWorldBuilding } = useWorld();
-		const worldBuilding = getWorldBuilding(worldBuildingId);
-		if (!worldBuilding) return undefined;
-		return getOrUndefinedBuilding(worldBuilding.building_id);
-	}
-
 	function getOrUndefinedBuildingItem(id: string | null | undefined): BuildingItem | undefined {
 		if (!id) return undefined;
 		return get(buildingItemStore).data[id as BuildingItemId];
@@ -710,8 +694,6 @@ function createBuildingStore() {
 		closeConditionDialog,
 		getBuilding,
 		getOrUndefinedBuilding,
-		getBuildingByWorldBuildingId,
-		getOrUndefinedBuildingByWorldBuildingId,
 		getOrUndefinedBuildingItem,
 		getOrUndefinedBuildingStates,
 		getCondition,

@@ -32,10 +32,11 @@ export abstract class Entity {
 		worldContext: WorldContext,
 		type: EntityType,
 		worldId: WorldId,
+		sourceId: EntitySourceId,
 		instanceId: EntityInstanceId
 	) {
 		this.worldContext = worldContext;
-		this.id = EntityIdUtils.createId(type, worldId, instanceId);
+		this.id = EntityIdUtils.createId(type, worldId, sourceId, instanceId);
 	}
 
 	get debug(): boolean {

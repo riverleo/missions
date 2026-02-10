@@ -18,61 +18,78 @@ import type {
 	Character,
 	Item,
 	Tile,
+	BuildingId,
+	CharacterId,
+	ItemId,
+	TileId,
 } from '$lib/types';
 
-function createEntityId(type: EntityType, worldId: WorldId, id: EntityInstanceId): EntityId;
+function createEntityId(
+	type: EntityType,
+	worldId: WorldId,
+	sourceId: EntitySourceId,
+	instanceId: EntityInstanceId
+): EntityId;
 function createEntityId(entityInstance: EntityInstance): EntityId;
 function createEntityId(
 	entityInstanceOrType: EntityType | EntityInstance,
 	worldId?: WorldId,
-	id?: EntityInstanceId
+	sourceId?: EntitySourceId,
+	instanceId?: EntityInstanceId
 ): EntityId {
 	if (typeof entityInstanceOrType === 'string') {
-		if (!worldId || !id) {
-			throw new Error('worldId and id are required when creating EntityId from type');
+		if (!worldId || !sourceId || !instanceId) {
+			throw new Error(
+				'worldId, sourceId, and instanceId are required when creating EntityId from type'
+			);
 		}
-		return `${entityInstanceOrType}_${worldId}_${id}` as EntityId;
+		return `${entityInstanceOrType}_${worldId}_${sourceId}_${instanceId}` as EntityId;
 	}
 
 	// 객체로부터 EntityId 생성
 	const entity = entityInstanceOrType;
 	let type: EntityType;
+	let entitySourceId: EntitySourceId;
 
 	// 타입을 구별하기 위해 고유한 속성을 확인
 	if ('building_id' in entity) {
 		type = 'building';
+		entitySourceId = entity.building_id;
 	} else if ('character_id' in entity) {
 		type = 'character';
+		entitySourceId = entity.character_id;
 	} else if ('item_id' in entity) {
 		type = 'item';
+		entitySourceId = entity.item_id;
 	} else {
 		throw new Error('Unknown entity type');
 	}
 
-	return `${type}_${entity.world_id}_${entity.id}` as EntityId;
+	return `${type}_${entity.world_id}_${entitySourceId}_${entity.id}` as EntityId;
 }
 
 export const EntityIdUtils = {
 	/**
-	 * EntityId를 파싱하여 타입, worldId, instanceId를 반환
+	 * EntityId를 파싱하여 타입, worldId, sourceId, instanceId를 반환
 	 * @example
-	 * const { type, worldId, instanceId } = EntityIdUtils.parse(entityId);
+	 * const { type, worldId, sourceId, instanceId } = EntityIdUtils.parse(entityId);
 	 * if (type === 'building') {
-	 *   // instanceId는 자동으로 WorldBuildingId 타입으로 좁혀짐
+	 *   // sourceId는 BuildingId, instanceId는 WorldBuildingId 타입으로 좁혀짐
 	 * }
 	 */
 	parse(
 		entityId: EntityId
 	):
-		| { type: 'building'; worldId: WorldId; instanceId: WorldBuildingId }
-		| { type: 'character'; worldId: WorldId; instanceId: WorldCharacterId }
-		| { type: 'item'; worldId: WorldId; instanceId: WorldItemId }
-		| { type: 'tile'; worldId: WorldId; instanceId: WorldTileMapId } {
+		| { type: 'building'; worldId: WorldId; sourceId: BuildingId; instanceId: WorldBuildingId }
+		| { type: 'character'; worldId: WorldId; sourceId: CharacterId; instanceId: WorldCharacterId }
+		| { type: 'item'; worldId: WorldId; sourceId: ItemId; instanceId: WorldItemId }
+		| { type: 'tile'; worldId: WorldId; sourceId: TileId; instanceId: WorldTileMapId } {
 		const parts = entityId.split('_');
 		const type = parts[0] as EntityType;
 		const worldId = parts[1] as WorldId;
-		const instanceId = parts.slice(2).join('_');
-		return { type, worldId, instanceId } as any;
+		const sourceId = parts[2] as EntitySourceId;
+		const instanceId = parts.slice(3).join('_');
+		return { type, worldId, sourceId, instanceId } as any;
 	},
 
 	/**
@@ -96,13 +113,23 @@ export const EntityIdUtils = {
 	},
 
 	/**
+	 * EntityId에서 sourceId만 추출
+	 * @example
+	 * const sourceId = EntityIdUtils.sourceId<BuildingId>(entityId);
+	 */
+	sourceId<T extends EntitySourceId | string = string>(entityId: EntityId): T {
+		const parts = entityId.split('_');
+		return parts[2] as T;
+	},
+
+	/**
 	 * EntityId에서 instanceId만 추출
 	 * @example
 	 * const instanceId = EntityIdUtils.instanceId<WorldCharacterId>(entityId);
 	 */
 	instanceId<T extends EntityInstanceId | string = string>(entityId: EntityId): T {
 		const parts = entityId.split('_');
-		return parts.slice(2).join('_') as T;
+		return parts.slice(3).join('_') as T;
 	},
 
 	/**

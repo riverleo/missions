@@ -4,6 +4,7 @@ import type {
 	WorldId,
 	WorldCharacterId,
 	CharacterBody,
+	CharacterId,
 	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
@@ -39,19 +40,19 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	constructor(worldContext: WorldContext, worldId: WorldId, worldCharacterId: WorldCharacterId) {
-		super(worldContext, 'character', worldId, worldCharacterId);
-
-		this.behavior = new WorldCharacterEntityBehavior(this);
-
 		const { getWorldCharacter, getAllWorldItems, getAllWorldCharacterNeeds } = useWorld();
 		const worldCharacter = getWorldCharacter(worldCharacterId);
-		const characterBody = this.characterBody;
 
 		if (!worldCharacter) {
 			throw new Error(
 				`Cannot create WorldCharacterEntity: missing data for id ${worldCharacterId}`
 			);
 		}
+
+		super(worldContext, 'character', worldId, worldCharacter.character_id, worldCharacterId);
+
+		this.behavior = new WorldCharacterEntityBehavior(this);
+		const characterBody = this.characterBody;
 
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
 		this.heldItemIds = getAllWorldItems()
@@ -87,13 +88,8 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	get characterBody(): CharacterBody {
-		const { getWorldCharacter } = useWorld();
 		const { getCharacter, getCharacterBody } = useCharacter();
-
-		const worldCharacter = getWorldCharacter(this.instanceId);
-		if (!worldCharacter) throw new Error(`WorldCharacter not found for id ${this.instanceId}`);
-
-		const character = getCharacter(worldCharacter.character_id);
+		const character = getCharacter(EntityIdUtils.sourceId<CharacterId>(this.id));
 		return getCharacterBody(character.character_body_id);
 	}
 

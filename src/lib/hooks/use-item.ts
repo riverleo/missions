@@ -148,22 +148,6 @@ function createItemStore() {
 		return get(itemStore).data[id as ItemId];
 	}
 
-	// World entity helper functions
-	function getItemByWorldItemId(worldItemId: WorldItemId): Item {
-		const { getWorldItem } = useWorld();
-		const worldItem = getWorldItem(worldItemId);
-		if (!worldItem) throw new Error(`WorldItem not found: ${worldItemId}`);
-		return getItem(worldItem.item_id);
-	}
-
-	function getOrUndefinedItemByWorldItemId(worldItemId: WorldItemId | null | undefined): Item | undefined {
-		if (!worldItemId) return undefined;
-		const { getWorldItem } = useWorld();
-		const worldItem = getWorldItem(worldItemId);
-		if (!worldItem) return undefined;
-		return getOrUndefinedItem(worldItem.item_id);
-	}
-
 	function getOrUndefinedItemStates(itemId: string | null | undefined): ItemState[] | undefined {
 		if (!itemId) return undefined;
 		return get(itemStateStore).data[itemId as ItemId];
@@ -345,8 +329,6 @@ function createItemStore() {
 		closeStateDialog,
 		getItem,
 		getOrUndefinedItem,
-		getItemByWorldItemId,
-		getOrUndefinedItemByWorldItemId,
 		getOrUndefinedItemStates,
 		getAllItems,
 		getAllItemStates,

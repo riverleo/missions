@@ -27,6 +27,7 @@ export default function tickDecreaseDurabilities(this: WorldItemEntity, tick: nu
 					const itemEntityId = EntityIdUtils.createId(
 						'item',
 						this.worldContext.worldId,
+						worldItem.item_id,
 						this.instanceId
 					);
 					const index = characterEntity.heldItemIds.indexOf(itemEntityId);

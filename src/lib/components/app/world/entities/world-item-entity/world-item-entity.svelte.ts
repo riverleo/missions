@@ -1,6 +1,6 @@
 import { useItem, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
-import type { WorldItemId, Item, WorldId } from '$lib/types';
+import type { WorldItemId, Item, ItemId, WorldId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_ITEM } from '$lib/constants';
 import { Entity } from '../entity.svelte';
@@ -23,16 +23,17 @@ export class WorldItemEntity extends Entity {
 	}
 
 	constructor(worldContext: WorldContext, worldId: WorldId, worldItemId: WorldItemId) {
-		super(worldContext, 'item', worldId, worldItemId);
-
 		// 스토어에서 데이터 조회
 		const { getWorldItem } = useWorld();
 		const worldItem = getWorldItem(worldItemId);
-		const item = this.item;
 
 		if (!worldItem) {
 			throw new Error(`Cannot create WorldItemEntity: missing data for id ${worldItemId}`);
 		}
+
+		super(worldContext, 'item', worldId, worldItem.item_id, worldItemId);
+
+		const item = this.item;
 
 		// durability_ticks 초기화
 		this.durabilityTicks = worldItem.durability_ticks ?? undefined;
@@ -57,13 +58,8 @@ export class WorldItemEntity extends Entity {
 	}
 
 	get item(): Item {
-		const { getWorldItem } = useWorld();
 		const { getItem } = useItem();
-
-		const worldItem = getWorldItem(this.instanceId);
-		if (!worldItem) throw new Error(`WorldItem not found for id ${this.instanceId}`);
-
-		return getItem(worldItem.item_id);
+		return getItem(EntityIdUtils.sourceId<ItemId>(this.id));
 	}
 
 	save(): void {

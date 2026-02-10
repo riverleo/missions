@@ -123,7 +123,12 @@ export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: W
 
 	// worldContext가 있으면 엔티티 제거
 	if (worldContext) {
-		const entityId = EntityIdUtils.createId('item', worldContext.worldId, worldItemId);
+		const entityId = EntityIdUtils.createId(
+			'item',
+			worldContext.worldId,
+			worldItem.item_id,
+			worldItemId
+		);
 		const entity = worldContext.entities[entityId];
 		if (entity) {
 			entity.removeFromWorld();

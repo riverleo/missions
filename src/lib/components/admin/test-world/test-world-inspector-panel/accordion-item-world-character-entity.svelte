@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem, useWorld } from '$lib/hooks';
+	import { useBehavior, useBuilding, useCharacter, useItem } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import type { WorldItemId } from '$lib/types';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import { getBehaviorActionString } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
@@ -20,9 +19,9 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { getCharacterByWorldCharacterId, getOrUndefinedNeed } = useCharacter();
-	const { getBuildingByWorldBuildingId } = useBuilding();
-	const { getItemByWorldItemId } = useItem();
+	const { getCharacter, getOrUndefinedNeed } = useCharacter();
+	const { getBuilding } = useBuilding();
+	const { getItem } = useItem();
 	const {
 		getOrUndefinedNeedBehavior,
 		getOrUndefinedNeedBehaviorAction,
@@ -30,21 +29,24 @@
 		getOrUndefinedConditionBehaviorAction,
 	} = useBehavior();
 
-	const character = $derived(getCharacterByWorldCharacterId(entity.instanceId));
+	const character = $derived(getCharacter(entity.sourceId));
 	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
 	const currentTargetName = $derived.by(() => {
 		if (!entity.behavior.targetEntityId) return undefined;
 
-		const { type, instanceId } = EntityIdUtils.parse(entity.behavior.targetEntityId);
+		const { type } = EntityIdUtils.parse(entity.behavior.targetEntityId);
 
 		if (type === 'building') {
-			return getBuildingByWorldBuildingId(instanceId).name;
+			const buildingId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
+			return getBuilding(buildingId).name;
 		} else if (type === 'item') {
-			return getItemByWorldItemId(instanceId).name;
+			const itemId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
+			return getItem(itemId).name;
 		} else if (type === 'character') {
-			return getCharacterByWorldCharacterId(instanceId).name;
+			const characterId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
+			return getCharacter(characterId).name;
 		}
 
 		return undefined;
@@ -107,9 +109,9 @@
 	const heldItemsTooltip = $derived.by(() => {
 		if (entity.heldItemIds.length === 0) return undefined;
 
-		const { getOrUndefinedItemByWorldItemId } = useItem();
+		const { getOrUndefinedItem } = useItem();
 		return entity.heldItemIds.map((itemId) => {
-			const item = getOrUndefinedItemByWorldItemId(EntityIdUtils.instanceId<WorldItemId>(itemId));
+			const item = getOrUndefinedItem(EntityIdUtils.sourceId(itemId));
 			const idPrefix = itemId.split('-')[0];
 			return item ? `${item.name} (${idPrefix})` : `아이템 (${idPrefix})`;
 		});

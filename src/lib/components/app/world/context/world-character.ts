@@ -222,7 +222,12 @@ export async function deleteWorldCharacter(
 
 	// worldContext가 있으면 엔티티 제거
 	if (worldContext) {
-		const entityId = EntityIdUtils.createId('character', worldContext.worldId, worldCharacterId);
+		const entityId = EntityIdUtils.createId(
+			'character',
+			worldContext.worldId,
+			worldCharacter.character_id,
+			worldCharacterId
+		);
 		const entity = worldContext.entities[entityId];
 		if (entity) {
 			entity.removeFromWorld();

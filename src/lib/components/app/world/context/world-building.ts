@@ -220,7 +220,12 @@ export async function deleteWorldBuilding(
 
 	// worldContext가 있으면 엔티티 제거
 	if (worldContext) {
-		const entityId = EntityIdUtils.createId('building', worldContext.worldId, worldBuildingId);
+		const entityId = EntityIdUtils.createId(
+			'building',
+			worldContext.worldId,
+			worldBuilding.building_id,
+			worldBuildingId
+		);
 		const entity = worldContext.entities[entityId];
 		if (entity) {
 			entity.removeFromWorld();

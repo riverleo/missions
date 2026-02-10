@@ -3,6 +3,7 @@ import Matter from 'matter-js';
 import type {
 	WorldBuildingId,
 	Building,
+	BuildingId,
 	WorldId,
 	WorldBuildingCondition,
 	ConditionId,
@@ -29,16 +30,17 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	constructor(worldContext: WorldContext, worldId: WorldId, worldBuildingId: WorldBuildingId) {
-		super(worldContext, 'building', worldId, worldBuildingId);
-
 		// 스토어에서 데이터 조회
 		const { getAllWorldBuildingConditions, getWorldBuilding } = useWorld();
 		const worldBuilding = getWorldBuilding(worldBuildingId);
-		const building = this.building;
 
 		if (!worldBuilding) {
 			throw new Error(`Cannot create WorldBuildingEntity: missing data for id ${worldBuildingId}`);
 		}
+
+		super(worldContext, 'building', worldId, worldBuilding.building_id, worldBuildingId);
+
+		const building = this.building;
 
 		// conditions 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const buildingConditions = getAllWorldBuildingConditions().filter(
@@ -70,13 +72,8 @@ export class WorldBuildingEntity extends Entity {
 	}
 
 	get building(): Building {
-		const { getWorldBuilding } = useWorld();
 		const { getBuilding } = useBuilding();
-
-		const worldBuilding = getWorldBuilding(this.instanceId);
-		if (!worldBuilding) throw new Error(`WorldBuilding not found for id ${this.instanceId}`);
-
-		return getBuilding(worldBuilding.building_id);
+		return getBuilding(EntityIdUtils.sourceId<BuildingId>(this.id));
 	}
 
 	save(): void {

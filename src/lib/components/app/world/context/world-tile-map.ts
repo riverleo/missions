@@ -108,14 +108,15 @@ export function createTilesInWorldTileMap(
 
 	// 모든 엔티티 생성
 	for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
-		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
+		const tileId = tiles[tileCellKey]!;
+		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileId, tileCellKey);
 		if (!worldContext.entities[entityId]) {
 			try {
 				const entity = new WorldTileEntity(
 					worldContext,
 					worldContext.worldId,
 					tileCellKey,
-					tiles[tileCellKey]!
+					tileId
 				);
 				entity.addToWorld();
 			} catch (error) {
@@ -128,9 +129,10 @@ export function createTilesInWorldTileMap(
 export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileCellKey: TileCellKey) {
 	const { worldTileMapStore, getWorldTileMap } = useWorld();
 
-	// 엔티티 제거
-	const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileCellKey);
-	const entity = worldContext.entities[entityId];
+	// 엔티티 찾기 (tileCellKey로 instanceId가 일치하는 tile 엔티티 검색)
+	const entity = Object.values(worldContext.entities).find(
+		(e) => e.type === 'tile' && e.instanceId === tileCellKey
+	);
 	if (entity) {
 		entity.removeFromWorld();
 	}

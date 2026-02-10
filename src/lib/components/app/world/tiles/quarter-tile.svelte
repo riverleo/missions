@@ -23,10 +23,12 @@
 		// context가 없으면 (실제 타일 렌더링) 엔티티만 체크
 		if (!context) return false;
 
-		// 실제 엔티티 체크
+		// 실제 엔티티 체크 (tileCellKey로 instanceId가 일치하는 tile 엔티티 검색)
 		const tileCellKey: TileCellKey = vectorUtils.createTileCellKey(tx, ty);
-		const tileId = EntityIdUtils.createId('tile', worldId, tileCellKey);
-		if (context.entities[tileId]) return true;
+		const hasTile = Object.values(context.entities).some(
+			(e) => e.type === 'tile' && e.instanceId === tileCellKey
+		);
+		if (hasTile) return true;
 
 		// cursor 체크
 		const cursor = context.blueprint.cursor;
