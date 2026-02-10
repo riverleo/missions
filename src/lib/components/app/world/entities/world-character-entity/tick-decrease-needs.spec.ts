@@ -10,17 +10,17 @@ vi.mock('$lib/hooks', () => ({
 describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 	let mockWorldCharacterEntity: Partial<WorldCharacterEntity>;
 	let mockGetNeed: ReturnType<typeof vi.fn>;
-	let mockGetOrUndefinedCharacterNeed: ReturnType<typeof vi.fn>;
+	let mockGetCharacterNeed: ReturnType<typeof vi.fn>;
 
 	beforeEach(async () => {
 		// Setup mocks
 		mockGetNeed = vi.fn();
-		mockGetOrUndefinedCharacterNeed = vi.fn();
+		mockGetCharacterNeed = vi.fn();
 
 		const { useCharacter } = await import('$lib/hooks');
 		vi.mocked(useCharacter).mockReturnValue({
 			getNeed: mockGetNeed,
-			getOrUndefinedCharacterNeed: mockGetOrUndefinedCharacterNeed,
+			getCharacterNeed: mockGetCharacterNeed,
 		} as any);
 
 		// Mock WorldCharacterEntity
@@ -55,7 +55,7 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			decrease_per_tick: 1,
 		}));
 
-		mockGetOrUndefinedCharacterNeed.mockReturnValue({
+		mockGetCharacterNeed.mockReturnValue({
 			decay_multiplier: 1,
 		} as CharacterNeed);
 
@@ -64,7 +64,7 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 
 		// Then: 모든 욕구가 처리됨
 		expect(mockGetNeed).toHaveBeenCalledTimes(2);
-		expect(mockGetOrUndefinedCharacterNeed).toHaveBeenCalledTimes(2);
+		expect(mockGetCharacterNeed).toHaveBeenCalledTimes(2);
 	});
 
 	it('욕구 정보가 없으면 해당 욕구를 건너뛴다', async () => {
@@ -91,8 +91,8 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 		}).toThrow('Need not found');
 	});
 
-	it('캐릭터 욕구 정보가 없으면 해당 욕구를 건너뛴다', async () => {
-		// Given: characterNeed가 undefined
+	it('캐릭터 욕구 정보가 없으면 에러가 발생한다', async () => {
+		// Given: characterNeed를 찾을 수 없음
 		const tickDecreaseNeeds = (await import('./tick-decrease-needs')).default;
 		const characterId = 'char-1' as CharacterId;
 		const needId = 'need-1' as NeedId;
@@ -110,15 +110,14 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			decrease_per_tick: 1,
 		} as Need);
 
-		mockGetOrUndefinedCharacterNeed.mockReturnValue(undefined);
+		mockGetCharacterNeed.mockImplementation(() => {
+			throw new Error('CharacterNeed not found');
+		});
 
-		const initialValue = (mockWorldCharacterEntity.needs as any)['world-need-1']!.value;
-
-		// When
-		tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
-
-		// Then: 값이 변경되지 않음
-		expect((mockWorldCharacterEntity.needs as any)['world-need-1']!.value).toBe(initialValue);
+		// When & Then: 에러 발생
+		expect(() => {
+			tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+		}).toThrow('CharacterNeed not found');
 	});
 
 	it('decrease_per_tick과 decay_multiplier를 곱하여 감소량을 계산한다', async () => {
@@ -140,7 +139,7 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			decrease_per_tick: 2,
 		} as Need);
 
-		mockGetOrUndefinedCharacterNeed.mockReturnValue({
+		mockGetCharacterNeed.mockReturnValue({
 			decay_multiplier: 3,
 		} as CharacterNeed);
 
@@ -170,7 +169,7 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			decrease_per_tick: 10,
 		} as Need);
 
-		mockGetOrUndefinedCharacterNeed.mockReturnValue({
+		mockGetCharacterNeed.mockReturnValue({
 			decay_multiplier: 2,
 		} as CharacterNeed);
 
