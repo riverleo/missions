@@ -106,14 +106,8 @@ function getInteractions(
 
 		if (interactionId) {
 			const interaction = getInteraction(interactionId);
-			if (interaction) {
-				const hasCorrectType =
-					actionType === 'once'
-						? interaction.once_interaction_type !== null
-						: interaction.fulfill_interaction_type !== null;
-				if (hasCorrectType) {
-					interactions.push(interaction);
-				}
+			if (interaction && interaction.type === actionType) {
+				interactions.push(interaction);
 			}
 		}
 	}
