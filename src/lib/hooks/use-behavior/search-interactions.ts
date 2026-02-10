@@ -25,37 +25,19 @@ export function searchInteractions(
 	// 2. actionType 결정
 	const actionType = behaviorAction.type === 'once' ? 'once' : 'fulfill';
 
-	// 3. Fulfillment 가져오기
+	// 3. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
 	let fulfillments: Fulfillment[] = [];
 
-	if ('need_id' in behaviorAction) {
-		const { getAllNeedFulfillments, getOrUndefinedNeedFulfillment } = useCharacter();
-
-		if (behaviorAction.need_fulfillment_id) {
-			// 명시적 fulfillment
-			const fulfillment = getOrUndefinedNeedFulfillment(behaviorAction.need_fulfillment_id);
-			if (fulfillment) fulfillments = [FulfillmentIdUtils.to(fulfillment)];
-		} else {
-			// 자동 탐색: need_id로 필터링
-			fulfillments = getAllNeedFulfillments()
-				.filter((f) => f.need_id === behaviorAction.need_id)
-				.map(FulfillmentIdUtils.to);
-		}
+	if (behaviorAction.behaviorType === 'need') {
+		const { getAllNeedFulfillments } = useCharacter();
+		fulfillments = getAllNeedFulfillments()
+			.filter((f) => f.need_id === behaviorAction.need_id)
+			.map(FulfillmentIdUtils.to);
 	} else {
-		const { getOrUndefinedConditionFulfillment, getAllConditionFulfillments } = useBuilding();
-
-		if (behaviorAction.condition_fulfillment_id) {
-			// 명시적 fulfillment
-			const fulfillment = getOrUndefinedConditionFulfillment(
-				behaviorAction.condition_fulfillment_id
-			);
-			if (fulfillment) fulfillments = [FulfillmentIdUtils.to(fulfillment)];
-		} else {
-			// 자동 탐색: condition_id로 필터링
-			fulfillments = getAllConditionFulfillments()
-				.filter((f) => f.condition_id === behaviorAction.condition_id)
-				.map(FulfillmentIdUtils.to);
-		}
+		const { getAllConditionFulfillments } = useBuilding();
+		fulfillments = getAllConditionFulfillments()
+			.filter((f) => f.condition_id === behaviorAction.condition_id)
+			.map(FulfillmentIdUtils.to);
 	}
 
 	// 4. Fulfillment의 Interaction 가져오기 (actionType에 맞는 interaction_type만)

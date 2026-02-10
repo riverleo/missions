@@ -68,9 +68,6 @@ create table need_behavior_actions (
   -- go/interact/fulfill 타입용: 대상 지정
   target_selection_method target_selection_method not null default 'search',
 
-  -- fulfill 타입용: Fulfillment 참조 (null이면 자동 탐색)
-  need_fulfillment_id uuid references need_fulfillments(id) on delete set null,
-
   -- idle 대기 시간 (틱 단위, idle 타입에서만 사용)
   idle_duration_ticks float not null default 6,
 

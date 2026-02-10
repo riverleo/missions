@@ -104,7 +104,6 @@
 			changes.building_interaction_id = null;
 			changes.item_interaction_id = null;
 			changes.character_interaction_id = null;
-			changes.condition_fulfillment_id = null;
 		}
 	}
 
@@ -166,7 +165,6 @@
 				building_interaction_id: changes.building_interaction_id,
 				item_interaction_id: changes.item_interaction_id,
 				character_interaction_id: changes.character_interaction_id,
-				condition_fulfillment_id: changes.condition_fulfillment_id,
 				idle_duration_ticks: changes.idle_duration_ticks,
 				root: changes.root,
 			});

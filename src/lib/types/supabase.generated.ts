@@ -1002,7 +1002,6 @@ export type Database = {
           building_interaction_id: string | null
           character_interaction_id: string | null
           condition_behavior_id: string
-          condition_fulfillment_id: string | null
           condition_id: string
           id: string
           idle_duration_ticks: number
@@ -1017,7 +1016,6 @@ export type Database = {
           building_interaction_id?: string | null
           character_interaction_id?: string | null
           condition_behavior_id: string
-          condition_fulfillment_id?: string | null
           condition_id: string
           id?: string
           idle_duration_ticks?: number
@@ -1032,7 +1030,6 @@ export type Database = {
           building_interaction_id?: string | null
           character_interaction_id?: string | null
           condition_behavior_id?: string
-          condition_fulfillment_id?: string | null
           condition_id?: string
           id?: string
           idle_duration_ticks?: number
@@ -1063,13 +1060,6 @@ export type Database = {
             columns: ["condition_behavior_id"]
             isOneToOne: false
             referencedRelation: "condition_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_behavior_actions_condition_fulfillment_id_fkey"
-            columns: ["condition_fulfillment_id"]
-            isOneToOne: false
-            referencedRelation: "condition_fulfillments"
             referencedColumns: ["id"]
           },
           {
@@ -1934,7 +1924,6 @@ export type Database = {
           idle_duration_ticks: number
           item_interaction_id: string | null
           need_behavior_id: string
-          need_fulfillment_id: string | null
           need_id: string
           next_need_behavior_action_id: string | null
           root: boolean
@@ -1949,7 +1938,6 @@ export type Database = {
           idle_duration_ticks?: number
           item_interaction_id?: string | null
           need_behavior_id: string
-          need_fulfillment_id?: string | null
           need_id: string
           next_need_behavior_action_id?: string | null
           root?: boolean
@@ -1964,7 +1952,6 @@ export type Database = {
           idle_duration_ticks?: number
           item_interaction_id?: string | null
           need_behavior_id?: string
-          need_fulfillment_id?: string | null
           need_id?: string
           next_need_behavior_action_id?: string | null
           root?: boolean
@@ -1999,13 +1986,6 @@ export type Database = {
             columns: ["need_behavior_id"]
             isOneToOne: false
             referencedRelation: "need_behaviors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "need_behavior_actions_need_fulfillment_id_fkey"
-            columns: ["need_fulfillment_id"]
-            isOneToOne: false
-            referencedRelation: "need_fulfillments"
             referencedColumns: ["id"]
           },
           {
