@@ -10,8 +10,6 @@ import type {
 	ConditionFulfillmentUpdate,
 	NeedFulfillmentId,
 	ConditionFulfillmentId,
-	NeedId,
-	ConditionId,
 	ScenarioId,
 	Fulfillment,
 	BehaviorAction,
@@ -124,21 +122,15 @@ function createFulfillmentStore() {
 		return get(allConditionFulfillmentsStore);
 	}
 
-	// Get fulfillment by type and id
-	function getOrUndefinedFulfillment(type: FulfillmentType, id: string): Fulfillment | undefined {
-		return getAllFulfillments().find((f) => {
-			if (type === 'need') {
-				return f.fulfillmentType === 'need' && f.id === id;
-			} else {
-				return f.fulfillmentType === 'condition' && f.id === id;
-			}
-		});
+	// Get fulfillment by id
+	function getOrUndefinedFulfillment(id: string): Fulfillment | undefined {
+		return getAllFulfillments().find((f) => f.id === id);
 	}
 
-	function getFulfillment(type: FulfillmentType, id: string): Fulfillment {
-		const fulfillment = getOrUndefinedFulfillment(type, id);
+	function getFulfillment(id: string): Fulfillment {
+		const fulfillment = getOrUndefinedFulfillment(id);
 		if (!fulfillment) {
-			throw new Error(`${type === 'need' ? 'Need' : 'Condition'} fulfillment not found: ${id}`);
+			throw new Error(`Fulfillment not found: ${id}`);
 		}
 		return fulfillment;
 	}
