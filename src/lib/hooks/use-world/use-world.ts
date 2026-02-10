@@ -278,7 +278,22 @@ function createWorldStore() {
 	function getEntitySourceId(
 		data: EntityId | EntityInstance | BehaviorAction
 	): EntitySourceId {
-		const result = getOrUndefinedEntitySourceId(data);
+		let result: EntitySourceId | undefined;
+
+		// EntityId인 경우
+		if (typeof data === 'string') {
+			const entityInstance = getEntityInstance(data);
+			result = getOrUndefinedEntitySourceId(entityInstance);
+		}
+		// EntityInstance인 경우
+		else if ('entityType' in data) {
+			result = getOrUndefinedEntitySourceId(data);
+		}
+		// BehaviorAction인 경우
+		else {
+			result = getOrUndefinedEntitySourceId(data);
+		}
+
 		if (!result) {
 			throw new Error('Entity source not found');
 		}
