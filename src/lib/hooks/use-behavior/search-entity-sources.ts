@@ -1,4 +1,4 @@
-import type { BehaviorTargetId, Interaction, EntitySource } from '$lib/types';
+import type { BehaviorTargetId, Interaction, EntitySource, CharacterId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { useBuilding, useCharacter, useItem } from '$lib/hooks';
 import { searchInteractions } from './search-interactions';
@@ -9,10 +9,14 @@ import { searchInteractions } from './search-interactions';
  * searchInteractions의 래퍼로, Interaction[]을 EntitySource[]로 변환합니다.
  *
  * @param behaviorTargetId - 행동 타겟 ID (BehaviorTargetId)
+ * @param characterId - 캐릭터 ID (캐릭터 제약 필터링용, 선택적)
  * @returns 상호작용 가능한 엔티티 템플릿 배열
  */
-export function searchEntitySources(behaviorTargetId: BehaviorTargetId): EntitySource[] {
-	const interactions = searchInteractions(behaviorTargetId);
+export function searchEntitySources(
+	behaviorTargetId: BehaviorTargetId,
+	characterId?: CharacterId
+): EntitySource[] {
+	const interactions = searchInteractions(behaviorTargetId, characterId);
 	return interactionsToEntitySources(interactions);
 }
 

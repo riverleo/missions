@@ -36,6 +36,7 @@ import type {
 	BehaviorAction,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
+import type { IconMathOff } from '@tabler/icons-svelte';
 
 type BuildingInteractionDialogState =
 	| { type: 'create' }
@@ -128,6 +129,21 @@ function createInteractionStore() {
 			...(Object.values($character.data) as CharacterInteraction[]).map(
 				InteractionIdUtils.interaction.to
 			),
+		]
+	);
+
+	const allInteractionActionsStore = derived(
+		[buildingInteractionActionStore, itemInteractionActionStore, characterInteractionActionStore],
+		([$building, $item, $character]) => [
+			...Object.values($building.data)
+				.flat()
+				.map(InteractionIdUtils.interactionAction.to),
+			...Object.values($item.data)
+				.flat()
+				.map(InteractionIdUtils.interactionAction.to),
+			...Object.values($character.data)
+				.flat()
+				.map(InteractionIdUtils.interactionAction.to),
 		]
 	);
 
@@ -297,6 +313,10 @@ function createInteractionStore() {
 		return get(allInteractionsStore);
 	}
 
+	function getAllInteractionActions(): InteractionAction[] {
+		return get(allInteractionActionsStore);
+	}
+
 	function getOnceInteractions(): Interaction[] {
 		return get(onceInteractionsStore);
 	}
@@ -306,26 +326,26 @@ function createInteractionStore() {
 	}
 
 	// Getter functions - throw if not found (required data)
-	function getInteraction(id: InteractionId): Interaction {
+	function getInteraction(id: string): Interaction {
 		const data = getAllInteractions().find((i) => i.id === id);
 		if (!data) throw new Error(`Interaction not found: ${id}`);
 		return data;
 	}
 
-	function getBuildingInteraction(id: BuildingInteractionId): BuildingInteraction {
+	function getBuildingInteraction(id: string): BuildingInteraction {
 		const data = getOrUndefinedBuildingInteraction(id);
 		if (!data) throw new Error(`BuildingInteraction not found: ${id}`);
 		return data;
 	}
 
-	function getItemInteraction(id: ItemInteractionId): ItemInteraction {
-		const data = get(itemInteractionStore).data[id];
+	function getItemInteraction(id: string): ItemInteraction {
+		const data = get(itemInteractionStore).data[id as ItemInteractionId];
 		if (!data) throw new Error(`ItemInteraction not found: ${id}`);
 		return data;
 	}
 
-	function getCharacterInteraction(id: CharacterInteractionId): CharacterInteraction {
-		const data = get(characterInteractionStore).data[id];
+	function getCharacterInteraction(id: string): CharacterInteraction {
+		const data = get(characterInteractionStore).data[id as CharacterInteractionId];
 		if (!data) throw new Error(`CharacterInteraction not found: ${id}`);
 		return data;
 	}
@@ -382,52 +402,38 @@ function createInteractionStore() {
 		return undefined;
 	}
 
-	function getBuildingInteractionActions(id: BuildingInteractionId): BuildingInteractionAction[] {
-		return get(buildingInteractionActionStore).data[id] ?? [];
+	function getAllBuildingInteractionActions(
+		buildingInteractionId: BuildingInteractionId
+	): BuildingInteractionAction[] {
+		return get(buildingInteractionActionStore).data[buildingInteractionId] ?? [];
 	}
 
-	function getItemInteractionActions(id: ItemInteractionId): ItemInteractionAction[] {
-		return get(itemInteractionActionStore).data[id] ?? [];
+	function getAllItemInteractionActions(
+		itemInteractionId: ItemInteractionId
+	): ItemInteractionAction[] {
+		return get(itemInteractionActionStore).data[itemInteractionId] ?? [];
 	}
 
-	function getCharacterInteractionActions(
-		id: CharacterInteractionId
+	function getAllCharacterInteractionActions(
+		characterInteractionId: CharacterInteractionId
 	): CharacterInteractionAction[] {
-		return get(characterInteractionActionStore).data[id] ?? [];
-	}
-
-	function getInteractionActions(
-		interaction: BuildingInteraction | ItemInteraction | CharacterInteraction
-	): (BuildingInteractionAction | ItemInteractionAction | CharacterInteractionAction)[] {
-		if ('building_interaction_id' in interaction) {
-			return getBuildingInteractionActions(
-				interaction.building_interaction_id as BuildingInteractionId
-			);
-		} else if ('item_interaction_id' in interaction) {
-			return getItemInteractionActions(interaction.item_interaction_id as ItemInteractionId);
-		} else if ('character_interaction_id' in interaction) {
-			return getCharacterInteractionActions(
-				interaction.character_interaction_id as CharacterInteractionId
-			);
-		}
-		return [];
+		return get(characterInteractionActionStore).data[characterInteractionId] ?? [];
 	}
 
 	/**
 	 * Interaction으로부터 InteractionAction 배열을 반환
 	 */
 	function getAllInteractionActionsByInteraction(interaction: Interaction): InteractionAction[] {
-		if (interaction.entitySourceType === 'building') {
-			const actions = getBuildingInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.entitySourceType === 'item') {
-			const actions = getItemInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		} else if (interaction.entitySourceType === 'character') {
-			const actions = getCharacterInteractionActions(interaction.id) || [];
-			return actions.map((a) => InteractionIdUtils.interactionAction.to(a));
-		}
-		return [];
+		return getAllInteractionActions().filter((action) => {
+			if ('building_interaction_id' in action) {
+				return action.building_interaction_id === interaction.id;
+			} else if ('item_interaction_id' in action) {
+				return action.item_interaction_id === interaction.id;
+			} else if ('character_interaction_id' in action) {
+				return action.character_interaction_id === interaction.id;
+			}
+			return false;
+		});
 	}
 
 	function getNextInteractionActionId(
@@ -449,21 +455,7 @@ function createInteractionStore() {
 		const nextActionId = getNextInteractionActionId(interactionAction);
 		if (!nextActionId) return undefined;
 
-		// Determine interaction type and get actions
-		if ('building_interaction_id' in interactionAction) {
-			const actions = getBuildingInteractionActions(interactionAction.building_interaction_id);
-			const plainAction = actions.find((a) => a.id === nextActionId);
-			return plainAction ? InteractionIdUtils.interactionAction.to(plainAction) : undefined;
-		} else if ('item_interaction_id' in interactionAction) {
-			const actions = getItemInteractionActions(interactionAction.item_interaction_id);
-			const plainAction = actions.find((a) => a.id === nextActionId);
-			return plainAction ? InteractionIdUtils.interactionAction.to(plainAction) : undefined;
-		} else if ('character_interaction_id' in interactionAction) {
-			const actions = getCharacterInteractionActions(interactionAction.character_interaction_id);
-			const plainAction = actions.find((a) => a.id === nextActionId);
-			return plainAction ? InteractionIdUtils.interactionAction.to(plainAction) : undefined;
-		}
-		return undefined;
+		return getAllInteractionActions().find((action) => action.id === nextActionId);
 	}
 
 	// ===== Admin CRUD - Building Interactions =====
@@ -962,10 +954,10 @@ function createInteractionStore() {
 		getOrUndefinedCharacterInteraction,
 		getInteractionByBehaviorAction,
 		getOrUndefinedInteractionByBehaviorAction,
-		getBuildingInteractionActions,
-		getItemInteractionActions,
-		getCharacterInteractionActions,
-		getInteractionActions,
+		getAllBuildingInteractionActions,
+		getAllItemInteractionActions,
+		getAllCharacterInteractionActions,
+		getAllInteractionActions,
 		getAllInteractionActionsByInteraction,
 		getNextInteractionActionId,
 		getNextInteractionAction,

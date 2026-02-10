@@ -18,8 +18,11 @@ export default function tickActionIfSystemItemPick(
 ): boolean {
 	const { getBehaviorAction } = useBehavior();
 	const { getWorldItem, worldItemStore } = useWorld();
-	const { getAllItemInteractions, getItemInteractionActions, getNextInteractionAction } =
-		useInteraction();
+	const {
+		getAllItemInteractions,
+		getAllItemInteractionActions: getItemInteractionActions,
+		getNextInteractionAction,
+	} = useInteraction();
 
 	if (!this.behaviorTargetId) return false;
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);

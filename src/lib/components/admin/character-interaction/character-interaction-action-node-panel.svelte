@@ -47,7 +47,7 @@
 		characterInteractionStore,
 		characterInteractionActionStore,
 		getOrUndefinedCharacterInteraction,
-		getCharacterInteractionActions,
+		getAllCharacterInteractionActions: getCharacterInteractionActions,
 		admin,
 	} = useInteraction();
 	const flowNodes = useNodes();

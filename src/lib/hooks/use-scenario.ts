@@ -277,11 +277,11 @@ function createScenarioStore() {
 			const { getAllItems, getOrUndefinedItemStates } = useItem();
 			const {
 				getAllCharacterInteractions,
-				getCharacterInteractionActions,
+				getAllCharacterInteractionActions: getCharacterInteractionActions,
 				getAllBuildingInteractions,
-				getBuildingInteractionActions,
+				getAllBuildingInteractionActions: getBuildingInteractionActions,
 				getAllItemInteractions,
-				getItemInteractionActions,
+				getAllItemInteractionActions: getItemInteractionActions,
 			} = useInteraction();
 			const {
 				conditionBehaviorActionStore,
@@ -336,7 +336,9 @@ function createScenarioStore() {
 			const buildingConditions = getAllBuildingConditions().filter((bc) =>
 				buildings.some((b) => b.id === bc.building_id)
 			);
-			const buildingStates = buildings.flatMap((b) => Object.values(getOrUndefinedBuildingStates(b.id) ?? []));
+			const buildingStates = buildings.flatMap((b) =>
+				Object.values(getOrUndefinedBuildingStates(b.id) ?? [])
+			);
 			const buildingInteractions = getAllBuildingInteractions().filter(
 				(bi) => bi.scenario_id === scenarioId
 			);

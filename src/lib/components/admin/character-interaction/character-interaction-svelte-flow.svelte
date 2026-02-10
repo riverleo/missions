@@ -34,7 +34,7 @@
 		characterInteractionStore,
 		characterInteractionActionStore,
 		getOrUndefinedCharacterInteraction,
-		getCharacterInteractionActions,
+		getAllCharacterInteractionActions: getCharacterInteractionActions,
 		admin,
 	} = useInteraction();
 

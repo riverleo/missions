@@ -48,7 +48,7 @@
 		itemInteractionStore,
 		itemInteractionActionStore,
 		getOrUndefinedItemInteraction,
-		getItemInteractionActions,
+		getAllItemInteractionActions: getItemInteractionActions,
 		admin,
 	} = useInteraction();
 	const flowNodes = useNodes();
@@ -57,7 +57,9 @@
 	const characters = $derived(Object.values($characterStore.data));
 
 	// 아이템 상태 가져오기
-	const itemStates = $derived(interaction?.item_id ? (getOrUndefinedItemStates(interaction.item_id) ?? []) : []);
+	const itemStates = $derived(
+		interaction?.item_id ? (getOrUndefinedItemStates(interaction.item_id) ?? []) : []
+	);
 	const heldItemState = $derived(itemStates[0]); // 첫 번째 state 사용
 
 	// 미리보기용 캐릭터 선택
@@ -115,9 +117,7 @@
 				const allActions = getItemInteractionActions(itemInteractionId);
 				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
-					otherRootActions.map((a) =>
-						admin.updateItemInteractionAction(a.id, { root: false })
-					)
+					otherRootActions.map((a) => admin.updateItemInteractionAction(a.id, { root: false }))
 				);
 			}
 

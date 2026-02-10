@@ -48,7 +48,7 @@
 		buildingInteractionStore,
 		buildingInteractionActionStore,
 		getOrUndefinedBuildingInteraction,
-		getBuildingInteractionActions,
+		getAllBuildingInteractionActions: getBuildingInteractionActions,
 		admin,
 	} = useInteraction();
 	const { characterStore, getOrUndefinedCharacter } = useCharacter();

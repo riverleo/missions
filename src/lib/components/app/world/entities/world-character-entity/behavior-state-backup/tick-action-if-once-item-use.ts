@@ -21,7 +21,7 @@ export default function tickActionIfOnceItemUse(
 	const { getWorldItem, worldItemStore } = useWorld();
 	const {
 		getInteractionByBehaviorAction,
-		getItemInteractionActions,
+		getAllItemInteractionActions: getItemInteractionActions,
 		getNextInteractionAction,
 		getAllItemInteractions,
 	} = useInteraction();
@@ -45,7 +45,10 @@ export default function tickActionIfOnceItemUse(
 		interaction = getInteractionByBehaviorAction(behaviorAction);
 	} else if (behaviorAction.target_selection_method === 'search') {
 		// search: searchEntitySources를 통해 자동 탐색
-		const entitySources = searchEntitySources(this.behaviorTargetId);
+		const entitySources = searchEntitySources(
+			this.behaviorTargetId,
+			this.worldCharacterEntity.sourceId
+		);
 		const entitySourceIds = new Set(entitySources.map((es) => es.id));
 
 		// 엔티티 소스 ID와 매칭되는 아이템 인터렉션 찾기

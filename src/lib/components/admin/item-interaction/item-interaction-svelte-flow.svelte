@@ -30,7 +30,7 @@
 		itemInteractionStore,
 		itemInteractionActionStore,
 		getOrUndefinedItemInteraction,
-		getItemInteractionActions,
+		getAllItemInteractionActions: getItemInteractionActions,
 		admin,
 	} = useInteraction();
 
@@ -100,9 +100,8 @@
 			const targetId = parseItemInteractionActionNodeId(connection.target);
 
 			await admin.updateItemInteractionAction(sourceId as ItemInteractionActionId, {
-					next_item_interaction_action_id: targetId as ItemInteractionActionId,
-				}
-			);
+				next_item_interaction_action_id: targetId as ItemInteractionActionId,
+			});
 
 			edges = [
 				...edges,
@@ -156,9 +155,8 @@
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
 			await admin.updateItemInteractionAction(fromActionId as ItemInteractionActionId, {
-					next_item_interaction_action_id: newAction.id,
-				}
-			);
+				next_item_interaction_action_id: newAction.id,
+			});
 
 			skipConvertEffect = false;
 			await tick();
