@@ -39,7 +39,9 @@
 
 	const buildings = $derived(Object.values($buildingStore.data));
 	const characters = $derived(Object.values($characterStore.data));
-	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
+	const buildingInteractions = $derived(
+		Object.values($buildingInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
 
 	function getTypeLabel(type: ConditionFulfillmentType) {
 		return getDomainString(type);

@@ -54,9 +54,15 @@
 	const buildings = $derived(Object.values($buildingStore.data));
 	const characters = $derived(Object.values($characterStore.data));
 	const items = $derived(Object.values($itemStore.data));
-	const buildingInteractions = $derived(Object.values($buildingInteractionStore.data));
-	const characterInteractions = $derived(Object.values($characterInteractionStore.data));
-	const itemInteractions = $derived(Object.values($itemInteractionStore.data));
+	const buildingInteractions = $derived(
+		Object.values($buildingInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
+	const characterInteractions = $derived(
+		Object.values($characterInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
+	const itemInteractions = $derived(
+		Object.values($itemInteractionStore.data).filter((i) => i.system_interaction_type === null)
+	);
 
 	function getTypeLabel(type: NeedFulfillmentType) {
 		if (type === 'task') return getDomainString('task');
