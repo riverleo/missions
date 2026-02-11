@@ -15,7 +15,7 @@ import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
 import tickNextOrClear from './tick-next-or-clear';
 import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
-import tickEnqueueInteractions from './tick-enqueue-interactions';
+import tickEnqueueInteractions from './tick-enqueue-interaction-queue';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
