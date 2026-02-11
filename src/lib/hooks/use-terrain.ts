@@ -96,6 +96,9 @@ function createTerrainStore() {
 				data: record,
 				error: undefined,
 			});
+
+			// Fetch tiles, tile states, and terrain tiles
+			await Promise.all([fetchTiles(), fetchTileStates(), fetchTerrainTiles()]);
 		} catch (error) {
 			const err = error instanceof Error ? error : new Error('Unknown error');
 			terrainStore.set({

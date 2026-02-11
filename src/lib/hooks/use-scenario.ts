@@ -64,7 +64,16 @@ function createScenarioStore() {
 		snapshotDialogStore.set(undefined);
 	}
 
+	let initialized = false;
+
+	function init() {
+		initialized = true;
+	}
+
 	async function fetch() {
+		if (!initialized) {
+			throw new Error('useScenario not initialized. Call init() first.');
+		}
 		scenarioStore.update((state) => ({ ...state, status: 'loading' }));
 
 		try {
@@ -138,39 +147,31 @@ function createScenarioStore() {
 				const { fetch: fetchPlayer } = usePlayer();
 				await fetchPlayer();
 
-				const { fetch: fetchQuest } = useQuest();
-				const { fetch: fetchChapter } = useChapter();
-				const {
-					fetch: fetchTerrain,
-					fetchTiles,
-					fetchTileStates,
-					fetchTerrainTiles,
-				} = useTerrain();
-				const { fetch: fetchCharacter } = useCharacter();
-				const { fetch: fetchBuilding } = useBuilding();
 				const { fetch: fetchBehavior } = useBehavior();
-				const { fetch: fetchItem } = useItem();
+				const { fetch: fetchBuilding } = useBuilding();
+				const { fetch: fetchChapter } = useChapter();
+				const { fetch: fetchCharacter } = useCharacter();
+				const { fetch: fetchFulfillment } = useFulfillment();
 				const { fetch: fetchInteraction } = useInteraction();
+				const { fetch: fetchItem } = useItem();
+				const { fetch: fetchNarrative } = useNarrative();
+				const { fetch: fetchQuest } = useQuest();
+				const { fetch: fetchTerrain } = useTerrain();
 				const { fetch: fetchWorld } = useWorld();
-				const { init: initFulfillment, fetch: fetchFulfillment } = useFulfillment();
-
-				// Fulfillment 초기화
-				initFulfillment();
 
 				await Promise.all([
-					fetchQuest(),
-					fetchChapter(),
-					fetchTerrain(),
-					fetchTiles(),
-					fetchTileStates(),
-					fetchTerrainTiles(),
-					fetchCharacter(),
-					fetchBuilding(),
+					fetch(),
 					fetchBehavior(),
-					fetchItem(),
-					fetchInteraction(),
-					fetchWorld(),
+					fetchBuilding(),
+					fetchChapter(),
+					fetchCharacter(),
 					fetchFulfillment(),
+					fetchInteraction(),
+					fetchItem(),
+					fetchNarrative(),
+					fetchQuest(),
+					fetchTerrain(),
+					fetchWorld(),
 				]);
 
 				fetchAllStatus.set('success');
@@ -503,6 +504,7 @@ function createScenarioStore() {
 		scenarioDialogStore: scenarioDialogStore as Readable<ScenarioDialogState>,
 		scenarioSnapshotDialogStore: snapshotDialogStore as Readable<SnapshotDialogState>,
 		fetchAllStatus: fetchAllStatus as Readable<FetchStatus>,
+		init,
 		fetch,
 		fetchScenarioSnapshots,
 		openScenarioDialog,

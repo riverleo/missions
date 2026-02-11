@@ -71,19 +71,29 @@ function createNarrativeStore() {
 		adminStore.update((s) => ({ ...s, dialog: undefined }));
 	};
 
+	let initialized = false;
+
+	function init() {
+		initialized = true;
+	}
+
 	// Fetch all data
-	const fetchAll = async () => {
+	async function fetch() {
+		if (!initialized) {
+			throw new Error('useNarrative not initialized. Call init() first.');
+		}
+
 		await Promise.all([
 			fetchNarratives(supabase, narrativeStore),
 			fetchNarrativeNodes(supabase, narrativeNodeStore),
 			fetchNarrativeDiceRolls(supabase, narrativeDiceRollStore),
 			fetchNarrativeNodeChoices(supabase, narrativeNodeChoiceStore),
 		]);
-	};
-
-	fetchAll();
+	}
 
 	return {
+		init,
+		fetch,
 		narrativeStore: narrativeStore as Readable<RecordFetchState<NarrativeId, Narrative>>,
 		narrativeNodeStore: narrativeNodeStore as Readable<
 			RecordFetchState<NarrativeNodeId, NarrativeNode>

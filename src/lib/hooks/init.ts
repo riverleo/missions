@@ -10,6 +10,8 @@ import { useFulfillment } from './use-fulfillment';
 import { useItem } from './use-item';
 import { useInteraction } from './use-interaction';
 import { useWorld } from './use-world';
+import { useNarrative } from './use-narrative';
+import { useScenario } from './use-scenario';
 
 /**
  * 모든 훅의 싱글톤 생성 및 초기화
@@ -27,4 +29,6 @@ export function init() {
 	useItem().init();
 	useInteraction().init();
 	useWorld().init();
+	useNarrative().init();
+	useScenario().init();
 }
