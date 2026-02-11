@@ -2013,7 +2013,6 @@ export type Database = {
       }
       need_behaviors: {
         Row: {
-          character_face_state_type: Database["public"]["Enums"]["character_face_state_type"]
           character_id: string | null
           created_at: string
           created_by: string | null
@@ -2024,7 +2023,6 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -2035,7 +2033,6 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          character_face_state_type?: Database["public"]["Enums"]["character_face_state_type"]
           character_id?: string | null
           created_at?: string
           created_by?: string | null

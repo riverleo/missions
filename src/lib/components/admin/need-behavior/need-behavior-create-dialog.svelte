@@ -26,16 +26,10 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { alphabetical } from 'radash';
-	import type { NeedId, ScenarioId, CharacterId, CharacterFaceStateType } from '$lib/types';
+	import type { NeedId, ScenarioId, CharacterId } from '$lib/types';
 	import { Select, SelectTrigger, SelectContent, SelectItem } from '$lib/components/ui/select';
 	import { ButtonGroup, ButtonGroupText } from '$lib/components/ui/button-group';
-	import {
-		getFallbackString,
-		getActionString,
-		getFormString,
-		getCharacterFaceStateLabels,
-		getCharacterFaceStateString,
-	} from '$lib/utils/label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
 
 	const { needBehaviorDialogStore, closeNeedBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -49,7 +43,6 @@
 	let needId = $state<string | undefined>(undefined);
 	let needThreshold = $state(0);
 	let characterId = $state<string | undefined>(undefined);
-	let characterFaceStateType = $state<CharacterFaceStateType>('idle');
 	let isSubmitting = $state(false);
 
 	const selectedNeed = $derived(needs.find((n) => n.id === needId));
@@ -63,7 +56,6 @@
 			needId = undefined;
 			needThreshold = 0;
 			characterId = undefined;
-			characterFaceStateType = 'idle';
 		}
 	});
 
@@ -73,12 +65,6 @@
 
 	function onCharacterChange(value: string | undefined) {
 		characterId = value || undefined;
-	}
-
-	function onFaceStateChange(value: string | undefined) {
-		if (value) {
-			characterFaceStateType = value as CharacterFaceStateType;
-		}
 	}
 
 	function onOpenChange(value: boolean) {
@@ -99,7 +85,6 @@
 				need_id: needId as NeedId,
 				need_threshold: needThreshold,
 				character_id: characterId as CharacterId | undefined,
-				character_face_state_type: characterFaceStateType,
 			})
 			.then((behavior) => {
 				closeNeedBehaviorDialog();
@@ -171,17 +156,6 @@
 							<SelectItem value="">모두</SelectItem>
 							{#each characters as character (character.id)}
 								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-					<ButtonGroupText>표정</ButtonGroupText>
-					<Select type="single" value={characterFaceStateType} onValueChange={onFaceStateChange}>
-						<SelectTrigger class="flex-1">
-							{getCharacterFaceStateString(characterFaceStateType)}
-						</SelectTrigger>
-						<SelectContent>
-							{#each getCharacterFaceStateLabels() as option (option.value)}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>
 					</Select>
