@@ -520,12 +520,35 @@ function createInteractionStore() {
 	/**
 	 * Interaction으로부터 root InteractionAction을 반환 (throw)
 	 */
-	function getRootInteractionAction(interaction: Interaction): InteractionAction {
-		const data = getOrUndefinedRootInteractionAction(interaction);
-		if (!data) {
-			throw new Error(`Root InteractionAction not found for interaction: ${interaction.id}`);
+	function getRootInteractionAction(interaction: Interaction): InteractionAction;
+	function getRootInteractionAction(
+		entityId: EntityId,
+		behaviorInteractionType: BehaviorInteractionType
+	): InteractionAction;
+	function getRootInteractionAction(
+		interactionOrEntityId: Interaction | EntityId,
+		behaviorInteractionType?: BehaviorInteractionType
+	): InteractionAction {
+		if (behaviorInteractionType !== undefined) {
+			// EntityId와 BehaviorInteractionType로 조회
+			const interaction = getInteraction(interactionOrEntityId as EntityId, behaviorInteractionType);
+			const data = getOrUndefinedRootInteractionAction(interaction);
+			if (!data) {
+				throw new Error(
+					`Root InteractionAction not found for entity ${interactionOrEntityId} with type ${behaviorInteractionType}`
+				);
+			}
+			return data;
+		} else {
+			// Interaction으로 조회
+			const data = getOrUndefinedRootInteractionAction(interactionOrEntityId as Interaction);
+			if (!data) {
+				throw new Error(
+					`Root InteractionAction not found for interaction: ${(interactionOrEntityId as Interaction).id}`
+				);
+			}
+			return data;
 		}
-		return data;
 	}
 
 	/**
@@ -533,10 +556,31 @@ function createInteractionStore() {
 	 */
 	function getOrUndefinedRootInteractionAction(
 		interaction: Interaction | null | undefined
+	): InteractionAction | undefined;
+	function getOrUndefinedRootInteractionAction(
+		entityId: EntityId,
+		behaviorInteractionType: BehaviorInteractionType
+	): InteractionAction | undefined;
+	function getOrUndefinedRootInteractionAction(
+		interactionOrEntityId: Interaction | EntityId | null | undefined,
+		behaviorInteractionType?: BehaviorInteractionType
 	): InteractionAction | undefined {
-		if (!interaction) return undefined;
-		const actions = getAllInteractionActionsByInteraction(interaction);
-		return actions.find((action) => action.root);
+		if (behaviorInteractionType !== undefined) {
+			// EntityId와 BehaviorInteractionType로 조회
+			const interaction = getOrUndefinedInteraction(
+				interactionOrEntityId as EntityId,
+				behaviorInteractionType
+			);
+			if (!interaction) return undefined;
+			const actions = getAllInteractionActionsByInteraction(interaction);
+			return actions.find((action) => action.root);
+		} else {
+			// Interaction으로 조회
+			const interaction = interactionOrEntityId as Interaction | null | undefined;
+			if (!interaction) return undefined;
+			const actions = getAllInteractionActionsByInteraction(interaction);
+			return actions.find((action) => action.root);
+		}
 	}
 
 	/**
