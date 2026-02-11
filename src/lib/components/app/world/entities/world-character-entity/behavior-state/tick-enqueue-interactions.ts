@@ -29,7 +29,7 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	const { getInteraction, getAllInteractionsByEntityId, getOrUndefinedRootInteractionAction } =
+	const { getInteraction, getOrUndefinedInteraction, getOrUndefinedRootInteractionAction } =
 		useInteraction();
 
 	// 1. coreInteractionTargetId에서 Interaction 가져오기
@@ -40,8 +40,7 @@ export default function tickEnqueueInteractions(
 
 	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
-		const allInteractions = getAllInteractionsByEntityId(this.targetEntityId);
-		const pickInteraction = allInteractions.find((i) => i.system_interaction_type === 'item_pick');
+		const pickInteraction = getOrUndefinedInteraction(this.targetEntityId, 'item_pick');
 		const pickRootAction = getOrUndefinedRootInteractionAction(pickInteraction);
 		if (pickRootAction) {
 			this.interactionQueue.interactionTargetIds.push(InteractionIdUtils.create(pickRootAction));

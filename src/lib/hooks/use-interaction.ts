@@ -323,10 +323,31 @@ function createInteractionStore() {
 	}
 
 	// Getter functions - throw if not found (required data)
-	function getInteraction(id: string): Interaction {
-		const data = getAllInteractions().find((i) => i.id === id);
-		if (!data) throw new Error(`Interaction not found: ${id}`);
-		return data;
+	function getInteraction(id: string): Interaction;
+	function getInteraction(
+		entityId: EntityId,
+		behaviorInteractionType: BehaviorInteractionType
+	): Interaction;
+	function getInteraction(
+		idOrEntityId: string | EntityId,
+		behaviorInteractionType?: BehaviorInteractionType
+	): Interaction {
+		if (behaviorInteractionType !== undefined) {
+			// EntityId와 BehaviorInteractionType로 조회
+			return getInteractionByType(behaviorInteractionType, idOrEntityId as EntityId);
+		} else {
+			// ID로 조회
+			const data = getAllInteractions().find((i) => i.id === idOrEntityId);
+			if (!data) throw new Error(`Interaction not found: ${idOrEntityId}`);
+			return data;
+		}
+	}
+
+	function getOrUndefinedInteraction(
+		entityId: EntityId,
+		behaviorInteractionType: BehaviorInteractionType
+	): Interaction | undefined {
+		return getOrUndefinedInteractionByType(behaviorInteractionType, entityId);
 	}
 
 	function getBuildingInteraction(id: string): BuildingInteraction {
@@ -1055,6 +1076,7 @@ function createInteractionStore() {
 		getOnceInteractions,
 		getFulfillInteractions,
 		getInteraction,
+		getOrUndefinedInteraction,
 		getBuildingInteraction,
 		getItemInteraction,
 		getCharacterInteraction,
