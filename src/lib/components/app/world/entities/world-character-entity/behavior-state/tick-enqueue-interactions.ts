@@ -6,14 +6,20 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 /**
  * # 인터렉션 큐를 구성하는 tick 함수
  *
- * behaviorTargetId와 targetEntityId를 기반으로 실행할 인터렉션 시퀀스를 구성하고,
- * InteractionQueue를 생성하여 behavior에 설정합니다.
+ * coreInteractionTargetId를 기반으로 실행할 인터렉션 시퀀스를 구성하고,
+ * interactionTargetIds 배열을 채웁니다.
  *
  * @param tick - 현재 틱
- * @returns true: 큐 구성 성공 및 대기, false: 다음 단계로 진행
+ * @returns false (항상 다음 단계로 진행)
  *
  * ## 명세
- * - [ ]
+ * - [x] interactionTargetIds가 이미 채워져 있으면 다음 단계로 진행한다.
+ * - [x] coreInteractionTargetId가 없으면 다음 단계로 진행한다.
+ * - [x] targetEntityId가 없으면 다음 단계로 진행한다.
+ * - [x] coreInteractionTargetId를 파싱하여 Interaction을 가져온다.
+ * - [x] coreInteraction의 once_interaction_type이 'item_use'인 경우 item_pick 시스템 인터렉션의 root 액션을 먼저 추가한다.
+ * - [x] coreInteractionTargetId를 interactionTargetIds 배열에 추가한다.
+ * - [x] 항상 false를 반환하여 다음 단계로 진행한다.
  */
 export default function tickEnqueueInteractions(
 	this: WorldCharacterEntityBehavior,
