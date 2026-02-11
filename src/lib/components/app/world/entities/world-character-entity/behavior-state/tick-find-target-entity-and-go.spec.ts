@@ -17,7 +17,28 @@ vi.mock('$lib/hooks', () => ({
 vi.mock('$lib/utils/entity-id', () => ({
 	EntityIdUtils: {
 		instanceId: vi.fn((id: any) => id),
+		parse: vi.fn((id: any) => ({
+			instanceId: id,
+			sourceId: id.split('_')[0] || id,
+		})),
 	},
+}));
+
+// Mock InteractionIdUtils
+vi.mock('$lib/utils/interaction-id', () => ({
+	InteractionIdUtils: {
+		create: vi.fn(),
+	},
+}));
+
+// Mock getAllInteractionsByBehaviorTargetId
+vi.mock('$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id', () => ({
+	getAllInteractionsByBehaviorTargetId: vi.fn(),
+}));
+
+// Mock getAllEntitySourcesByInteraction
+vi.mock('$lib/hooks/use-behavior/get-all-entity-sources-by-interaction', () => ({
+	getAllEntitySourcesByInteraction: vi.fn(),
 }));
 
 // Mock constants
@@ -58,6 +79,9 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 	let mockGetWorldItem: ReturnType<typeof vi.fn>;
 	let mockUpdateWorldItem: ReturnType<typeof vi.fn>;
 	let mockPathfinder: any;
+	let mockGetAllInteractionsByBehaviorTargetId: ReturnType<typeof vi.fn>;
+	let mockGetAllEntitySourcesByInteraction: ReturnType<typeof vi.fn>;
+	let mockGetOrUndefinedRootInteractionAction: ReturnType<typeof vi.fn>;
 
 	beforeEach(async () => {
 		mockPathfinder = {
@@ -67,6 +91,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		mockWorldCharacterEntity = {
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
+			sourceId: 'character-source-1' as any,
 			x: 100,
 			y: 100,
 			body: {
@@ -86,8 +111,19 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		mockGetEntitySourceId = vi.fn();
 		mockGetWorldItem = vi.fn();
 		mockUpdateWorldItem = vi.fn();
+		mockGetOrUndefinedRootInteractionAction = vi.fn();
 
 		const { useBehavior, useWorld, useInteraction, useFulfillment } = await import('$lib/hooks');
+		const { getAllInteractionsByBehaviorTargetId } = await import(
+			'$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id'
+		);
+		const { getAllEntitySourcesByInteraction } = await import(
+			'$lib/hooks/use-behavior/get-all-entity-sources-by-interaction'
+		);
+
+		mockGetAllInteractionsByBehaviorTargetId = vi.mocked(getAllInteractionsByBehaviorTargetId);
+		mockGetAllEntitySourcesByInteraction = vi.mocked(getAllEntitySourcesByInteraction);
+
 		vi.mocked(useBehavior).mockReturnValue({
 			getBehaviorAction: mockGetBehaviorAction,
 			searchEntitySources: mockSearchEntitySources,
@@ -98,7 +134,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			updateWorldItem: mockUpdateWorldItem,
 		} as any);
 		vi.mocked(useInteraction).mockReturnValue({
-			getOrUndefinedRootInteractionAction: vi.fn(),
+			getOrUndefinedRootInteractionAction: mockGetOrUndefinedRootInteractionAction,
 		} as any);
 		vi.mocked(useFulfillment).mockReturnValue({
 			getAllFulfillmentsByBehaviorAction: vi.fn().mockReturnValue([]),
@@ -223,7 +259,17 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			target_selection_method: 'search',
 		} as any;
 		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-		mockSearchEntitySources.mockReturnValue([{ id: entitySourceId1 }, { id: entitySourceId2 }]);
+
+		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+		const mockInteraction = { id: 'interaction-1' } as any;
+		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+		// Mock getAllEntitySourcesByInteraction to return entity sources
+		mockGetAllEntitySourcesByInteraction.mockReturnValue([
+			{ id: entitySourceId1 },
+			{ id: entitySourceId2 },
+		]);
+
 		mockGetWorldItem.mockReturnValue({ world_character_id: null });
 
 		const mockEntity1: Entity = {
@@ -261,7 +307,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			target_selection_method: 'search',
 		} as any;
 		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-		mockSearchEntitySources.mockReturnValue([]);
+		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([]);
 		mockWorldCharacterEntity.worldContext!.entities = {
 			['character-1' as any]: mockWorldCharacterEntity as any,
 		};
@@ -271,8 +317,42 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		expect(result).toBe(false);
 	});
 
+	it('자기 자신은 타깃 엔티티가 될 수 없다', () => {
+		behavior.behaviorTargetId = 'behavior-target-1' as any;
+		const entitySourceId = 'character-source-1' as EntitySourceId;
+		const mockBehaviorAction = {
+			id: 'action-1',
+			type: 'system-item-pick',
+			target_selection_method: 'search',
+		} as any;
+		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+
+		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+		const mockInteraction = { id: 'interaction-1' } as any;
+		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+		// Mock getAllEntitySourcesByInteraction to return entity sources
+		mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
+
+		mockGetWorldItem.mockReturnValue(null);
+
+		// 캐릭터 자신의 sourceId를 대상 후보로 설정
+		(mockWorldCharacterEntity as any).sourceId = entitySourceId;
+		mockWorldCharacterEntity.worldContext!.entities = {
+			['character-1' as any]: mockWorldCharacterEntity as any,
+		};
+
+		const result = behavior.tickFindTargetEntityAndGo(0);
+
+		// 자기 자신은 타깃이 될 수 없으므로 targetEntityId는 undefined여야 함
+		expect(behavior.targetEntityId).toBeUndefined();
+		expect(result).toBe(false);
+	});
+
 	describe('들고 있는 아이템 중 대상 후보가 있는 경우', () => {
-		it('대상 후보와 일치하는 첫번째 아이템을 타깃 엔티티로 설정한다', () => {
+		it('대상 후보와 일치하는 첫번째 아이템을 타깃 엔티티로 설정한다', async () => {
+			const { EntityIdUtils } = await import('$lib/utils/entity-id');
+
 			behavior.behaviorTargetId = 'behavior-target-1' as any;
 			const entitySourceId = 'item-source-1' as EntitySourceId;
 			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
@@ -283,7 +363,13 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			} as any;
 			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
 			mockGetEntitySourceId.mockReturnValue(entitySourceId);
-			mockGetWorldItem.mockReturnValue({ id: '1', item_id: entitySourceId });
+			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
+
+			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
+			vi.mocked(EntityIdUtils.parse).mockReturnValue({
+				instanceId: 'held-item-1' as any,
+				sourceId: entitySourceId,
+			} as any);
 
 			const result = behavior.tickFindTargetEntityAndGo(0);
 
@@ -292,7 +378,9 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			expect(result).toBe(false);
 		});
 
-		it('아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정한다', () => {
+		it('아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정한다', async () => {
+			const { EntityIdUtils } = await import('$lib/utils/entity-id');
+
 			behavior.behaviorTargetId = 'behavior-target-1' as any;
 			const entitySourceId = 'item-source-1' as EntitySourceId;
 			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
@@ -303,13 +391,56 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			} as any;
 			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
 			mockGetEntitySourceId.mockReturnValue(entitySourceId);
-			mockGetWorldItem.mockReturnValue({ id: '1', item_id: entitySourceId });
+			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
+
+			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
+			vi.mocked(EntityIdUtils.parse).mockReturnValue({
+				instanceId: 'held-item-1' as any,
+				sourceId: entitySourceId,
+			} as any);
 
 			behavior.tickFindTargetEntityAndGo(0);
 
-			expect(mockUpdateWorldItem).toHaveBeenCalledWith('1', {
+			expect(mockUpdateWorldItem).toHaveBeenCalledWith('held-item-1', {
 				world_character_id: 'world-character-1',
 			});
+		});
+
+		it('핵심 상호작용 대상을 상호작용 큐에 설정한다', async () => {
+			const { EntityIdUtils } = await import('$lib/utils/entity-id');
+			const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
+
+			behavior.behaviorTargetId = 'behavior-target-1' as any;
+			const entitySourceId = 'item-source-1' as EntitySourceId;
+			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
+			const mockBehaviorAction = {
+				id: 'action-1',
+				type: 'system-item-pick',
+				target_selection_method: 'explicit',
+			} as any;
+			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+			mockGetEntitySourceId.mockReturnValue(entitySourceId);
+			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
+
+			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
+			vi.mocked(EntityIdUtils.parse).mockReturnValue({
+				instanceId: 'held-item-1' as any,
+				sourceId: entitySourceId,
+			} as any);
+
+			const mockRootAction = {
+				id: 'root-action-1',
+				entity_source_type: 'item',
+				interaction_id: 'interaction-1',
+			} as any;
+			mockGetOrUndefinedRootInteractionAction.mockReturnValue(mockRootAction);
+
+			const mockInteractionTargetId = 'item_interaction-1_root-action-1' as any;
+			vi.mocked(InteractionIdUtils.create).mockReturnValue(mockInteractionTargetId);
+
+			behavior.tickFindTargetEntityAndGo(0);
+
+			expect(behavior.interactionQueue.coreInteractionTargetId).toBe(mockInteractionTargetId);
 		});
 	});
 
@@ -323,7 +454,14 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 				target_selection_method: 'search',
 			} as any;
 			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockSearchEntitySources.mockReturnValue([{ id: entitySourceId }]);
+
+			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+			const mockInteraction = { id: 'interaction-1' } as any;
+			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+			// Mock getAllEntitySourcesByInteraction to return entity sources
+			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
+
 			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
 
 			const mockEntity1: Entity = {
@@ -361,7 +499,14 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 				target_selection_method: 'search',
 			} as any;
 			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockSearchEntitySources.mockReturnValue([{ id: entitySourceId }]);
+
+			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+			const mockInteraction = { id: 'interaction-1' } as any;
+			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+			// Mock getAllEntitySourcesByInteraction to return entity sources
+			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
+
 			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
 
 			const mockEntity: Entity = {
@@ -378,7 +523,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 
 			behavior.tickFindTargetEntityAndGo(0);
 
-			expect(mockUpdateWorldItem).toHaveBeenCalledWith('1', {
+			expect(mockUpdateWorldItem).toHaveBeenCalledWith('entity-1', {
 				world_character_id: 'world-character-1',
 			});
 		});
@@ -392,7 +537,13 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 				target_selection_method: 'search',
 			} as any;
 			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockSearchEntitySources.mockReturnValue([{ id: entitySourceId }]);
+
+			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+			const mockInteraction = { id: 'interaction-1' } as any;
+			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+			// Mock getAllEntitySourcesByInteraction to return entity sources
+			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
 
 			// entity-1은 이미 캐릭터 ID가 있음 (제외되어야 함)
 			// entity-2는 캐릭터 ID가 없음 (선택되어야 함)
@@ -435,7 +586,14 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			target_selection_method: 'search',
 		} as any;
 		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-		mockSearchEntitySources.mockReturnValue([{ id: 'source-1' }]);
+
+		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
+		const mockInteraction = { id: 'interaction-1' } as any;
+		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+
+		// Mock getAllEntitySourcesByInteraction to return entity sources
+		mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: 'source-1' }]);
+
 		mockWorldCharacterEntity.worldContext!.entities = {
 			['character-1' as any]: mockWorldCharacterEntity as any,
 		};
