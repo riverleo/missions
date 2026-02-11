@@ -42,7 +42,7 @@ export default function tickFindTargetEntityAndGo(
 ): boolean {
 	const { getEntitySourceId, getWorldItem, updateWorldItem } = useWorld();
 	const { getBehaviorAction } = useBehavior();
-	const { getAllInteractionActionsByInteraction } = useInteraction();
+	const { getOrUndefinedRootInteractionAction } = useInteraction();
 
 	if (!this.behaviorTargetId) return false;
 
@@ -105,9 +105,7 @@ export default function tickFindTargetEntityAndGo(
 
 	// Helper: coreInteractionTargetId 설정
 	const setCoreInteractionTargetId = (): void => {
-		if (!coreInteraction) return;
-		const actions = getAllInteractionActionsByInteraction(coreInteraction);
-		const rootAction = actions.find((action) => action.root);
+		const rootAction = getOrUndefinedRootInteractionAction(coreInteraction);
 		if (!rootAction) return;
 
 		this.interactionQueue.coreInteractionTargetId = InteractionIdUtils.create(rootAction);

@@ -29,36 +29,22 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	const { getInteraction, getAllInteractionsByEntityId, getAllInteractionActionsByInteraction } =
+	const { getInteraction, getAllInteractionsByEntityId, getOrUndefinedRootInteractionAction } =
 		useInteraction();
 
 	// 1. coreInteractionTargetId에서 Interaction 가져오기
 	const { interactionId } = InteractionIdUtils.parse(this.interactionQueue.coreInteractionTargetId);
 	const coreInteraction = getInteraction(interactionId);
 
-	/**
-	 * Interaction에서 root InteractionAction을 찾아 InteractionTargetId 생성
-	 */
-	const getInteractionTargetId = (interaction: Interaction): InteractionTargetId | undefined => {
-		const actions = getAllInteractionActionsByInteraction(interaction);
-		const rootAction = actions.find((action) => action.root);
-		if (rootAction) {
-			return InteractionIdUtils.create(rootAction);
-		}
-		return undefined;
-	};
-
-	// 3. 인터렉션 타입에 따라 시퀀스 구성
+	// 2. 인터렉션 타입에 따라 시퀀스 구성
 
 	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
 		const allInteractions = getAllInteractionsByEntityId(this.targetEntityId);
 		const pickInteraction = allInteractions.find((i) => i.system_interaction_type === 'item_pick');
-		if (pickInteraction) {
-			const pickInteractionTargetId = getInteractionTargetId(pickInteraction);
-			if (pickInteractionTargetId) {
-				this.interactionQueue.interactionTargetIds.push(pickInteractionTargetId);
-			}
+		const pickRootAction = getOrUndefinedRootInteractionAction(pickInteraction);
+		if (pickRootAction) {
+			this.interactionQueue.interactionTargetIds.push(InteractionIdUtils.create(pickRootAction));
 		}
 	}
 

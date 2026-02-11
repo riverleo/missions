@@ -497,6 +497,28 @@ function createInteractionStore() {
 	}
 
 	/**
+	 * Interaction으로부터 root InteractionAction을 반환 (throw)
+	 */
+	function getRootInteractionAction(interaction: Interaction): InteractionAction {
+		const data = getOrUndefinedRootInteractionAction(interaction);
+		if (!data) {
+			throw new Error(`Root InteractionAction not found for interaction: ${interaction.id}`);
+		}
+		return data;
+	}
+
+	/**
+	 * Interaction으로부터 root InteractionAction을 반환 (return undefined)
+	 */
+	function getOrUndefinedRootInteractionAction(
+		interaction: Interaction | null | undefined
+	): InteractionAction | undefined {
+		if (!interaction) return undefined;
+		const actions = getAllInteractionActionsByInteraction(interaction);
+		return actions.find((action) => action.root);
+	}
+
+	/**
 	 * EntityId에 해당하는 엔티티의 모든 Interaction 반환
 	 * @example
 	 * const interactions = getAllInteractionsByEntityId(entityId);
@@ -1048,6 +1070,8 @@ function createInteractionStore() {
 		getAllCharacterInteractionActions,
 		getAllInteractionActions,
 		getAllInteractionActionsByInteraction,
+		getRootInteractionAction,
+		getOrUndefinedRootInteractionAction,
 		getAllInteractionsByEntityId,
 		getNextInteractionActionId,
 		getNextInteractionAction,
