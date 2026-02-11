@@ -10,7 +10,7 @@ import { useBehavior, useFulfillment, useInteraction } from '$lib/hooks';
  * @param characterId - 캐릭터 ID (캐릭터 제약 필터링용, 선택적)
  * @returns 필터링된 인터렉션 배열
  */
-export function searchInteractions(
+export function getAllInteractionsByBehaviorTargetId(
 	behaviorTargetId: BehaviorTargetId,
 	characterId?: CharacterId
 ): Interaction[] {
@@ -23,9 +23,12 @@ export function searchInteractions(
 	// 2. idle 타입은 fulfillment가 없음
 	if (behaviorAction.type === 'idle') return [];
 
-	// 4. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
+	// 3. Fulfillment 가져오기 (need_id/condition_id로 자동 탐색)
 	const { getAllFulfillmentsByBehaviorAction } = useFulfillment();
 	const fulfillments = getAllFulfillmentsByBehaviorAction(behaviorAction);
+
+	// 회복량이 높은 순으로 정렬 (interactions[0]이 가장 회복량이 높은 인터렉션)
+	fulfillments.sort((a, b) => b.increase_per_tick - a.increase_per_tick);
 
 	// 4. Fulfillment의 Interaction 가져오기 (actionType에 맞는 interaction_type만)
 	const interactions: Interaction[] = [];

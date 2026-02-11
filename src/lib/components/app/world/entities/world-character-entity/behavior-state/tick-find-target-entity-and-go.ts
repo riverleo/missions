@@ -3,7 +3,9 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import type { EntitySourceId } from '$lib/types';
+import type { EntitySourceId, WorldItemId } from '$lib/types';
+import { getAllInteractionsByBehaviorTargetId } from '$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id';
+import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-all-entity-sources-by-interaction';
 
 /**
  * # 타깃 엔티티 탐색 및 경로 설정
@@ -38,7 +40,7 @@ export default function tickFindTargetEntityAndGo(
 	tick: number
 ): boolean {
 	const { getEntitySourceId, getWorldItem, updateWorldItem } = useWorld();
-	const { getBehaviorAction, searchEntitySources } = useBehavior();
+	const { getBehaviorAction } = useBehavior();
 
 	if (!this.behaviorTargetId) return false;
 
@@ -77,35 +79,37 @@ export default function tickFindTargetEntityAndGo(
 	}
 
 	// 3. 타깃이 없는 경우: 대상 후보 필터링
-	let targetEntitySourceIds: Set<EntitySourceId> = new Set();
+	let targetEntitySourceIds: EntitySourceId[] = [];
 
 	// 타깃 선택 방식에 따라 후보 필터링
 	if (behaviorAction.target_selection_method === 'explicit') {
 		const entitySourceId = getEntitySourceId(behaviorAction);
-		targetEntitySourceIds = new Set([entitySourceId]);
+		targetEntitySourceIds = [entitySourceId];
 	} else if (behaviorAction.target_selection_method === 'search') {
-		targetEntitySourceIds = new Set(
-			searchEntitySources(this.behaviorTargetId, this.worldCharacterEntity.sourceId).map(
-				(entitySource) => entitySource.id
-			)
-		);
+		const interaction = getAllInteractionsByBehaviorTargetId(
+			this.behaviorTargetId,
+			this.worldCharacterEntity.sourceId
+		)[0];
+		if (interaction) {
+			targetEntitySourceIds = getAllEntitySourcesByInteraction(interaction).map((es) => es.id);
+		}
 	}
 
 	// 아무런 대상 후보도 찾지 못한 경우
-	if (targetEntitySourceIds.size === 0) {
+	if (targetEntitySourceIds.length === 0) {
 		return false;
 	}
 
 	// 4. 들고 있는 아이템 중 대상 후보가 있는 경우
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
-		const worldItem = getWorldItem(EntityIdUtils.instanceId(heldItemEntityId));
-		if (worldItem && targetEntitySourceIds.has(worldItem.item_id)) {
+		const { instanceId, sourceId } = EntityIdUtils.parse(heldItemEntityId);
+		if (targetEntitySourceIds.includes(sourceId)) {
 			// 타깃 엔티티로 설정
 			this.targetEntityId = heldItemEntityId;
 			this.path = [];
 
 			// 아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정
-			updateWorldItem(worldItem.id, {
+			updateWorldItem(instanceId as WorldItemId, {
 				world_character_id: this.worldCharacterEntity.instanceId,
 			});
 
@@ -118,7 +122,7 @@ export default function tickFindTargetEntityAndGo(
 
 	// 월드 캐릭터 아이디가 설정된 아이템은 제외
 	const candidateEntities = entities.filter((e) => {
-		if (!targetEntitySourceIds.has(e.sourceId)) return false;
+		if (!targetEntitySourceIds.includes(e.sourceId)) return false;
 		if (e.id === this.worldCharacterEntity.id) return false;
 
 		// 아이템인 경우 캐릭터 ID가 없는 것만
@@ -137,12 +141,9 @@ export default function tickFindTargetEntityAndGo(
 		this.targetEntityId = sortedCandidates[0]!.id;
 
 		// 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정
-		const worldItem = getWorldItem(EntityIdUtils.instanceId(this.targetEntityId));
-		if (worldItem) {
-			updateWorldItem(worldItem.id, {
-				world_character_id: this.worldCharacterEntity.instanceId,
-			});
-		}
+		updateWorldItem(EntityIdUtils.instanceId(this.targetEntityId), {
+			world_character_id: this.worldCharacterEntity.instanceId,
+		});
 
 		return false;
 	}

@@ -46,7 +46,7 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { conditionBehaviorActionStore, searchEntitySources, admin } = useBehavior();
+	const { conditionBehaviorActionStore, getAllInteractionsByBehaviorTargetId, getAllEntitySourcesByInteraction, admin } = useBehavior();
 	const { getBuilding } = useBuilding();
 	const { getCharacter } = useCharacter();
 	const { getItem } = useItem();
@@ -67,7 +67,11 @@
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
 	const interactableEntityTemplates = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
-		return searchEntitySources(BehaviorIdUtils.create(BehaviorIdUtils.to(changes)));
+		const behaviorTargetId = BehaviorIdUtils.create(BehaviorIdUtils.to(changes));
+		const interactions = getAllInteractionsByBehaviorTargetId(behaviorTargetId);
+		const interaction = interactions[0];
+		if (!interaction) return [];
+		return getAllEntitySourcesByInteraction(interaction);
 	});
 
 	let isUpdating = $state(false);

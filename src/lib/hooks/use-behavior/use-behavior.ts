@@ -31,8 +31,8 @@ import type {
 	WorldCharacterEntityBehavior,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
-import { searchEntitySources } from './search-entity-sources';
-import { searchInteractions } from './search-interactions';
+import { getAllEntitySourcesByInteraction } from './get-all-entity-sources-by-interaction';
+import { getAllInteractionsByBehaviorTargetId } from './get-all-interactions-by-behavior-target-id';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -772,8 +772,8 @@ function createBehaviorStore() {
 		getAllBehaviors,
 		getAllBehaviorsByPriority,
 		getRootBehaviorAction,
-		searchEntitySources,
-		searchInteractions,
+		getAllEntitySourcesByInteraction,
+		getAllInteractionsByBehaviorTargetId,
 		admin,
 	};
 }
