@@ -143,6 +143,7 @@ export interface InteractionQueue {
 	coreInteractionTargetId?: InteractionTargetId;
 	poppedInteractionTargetId?: InteractionTargetId;
 	poppedAtTick: number;
+	poppedInteractionTargetFinished: boolean;
 }
 
 // ============================================================

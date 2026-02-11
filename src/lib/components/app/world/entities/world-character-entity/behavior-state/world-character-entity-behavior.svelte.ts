@@ -32,7 +32,11 @@ export class WorldCharacterEntityBehavior {
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
 	interactionTargetStartTick = $state<number | undefined>();
-	interactionQueue = $state<InteractionQueue>({ interactionTargetIds: [], poppedAtTick: 0 });
+	interactionQueue = $state<InteractionQueue>({
+		interactionTargetIds: [],
+		poppedAtTick: 0,
+		poppedInteractionTargetFinished: false,
+	});
 	behaviors = $state<Behavior[]>([]);
 
 	update = update;
@@ -94,6 +98,7 @@ export class WorldCharacterEntityBehavior {
 		this.interactionQueue = {
 			interactionTargetIds: [],
 			poppedAtTick: 0,
+			poppedInteractionTargetFinished: false,
 		};
 	}
 
