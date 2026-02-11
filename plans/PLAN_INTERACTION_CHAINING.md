@@ -5,7 +5,7 @@
 
 ## 인터렉션 체이닝 예시
 ```
-아이템으로 이동 → 아이템 줍기 → 아이템 사용 → 감정 표현
+아이템으로 이동 → 아이템 줍기 → 아이템 사용
 ```
 
 ## 현재 구조 분석
@@ -131,8 +131,9 @@ class WorldCharacterEntityBehavior {
 
 ## 구현 전략
 
-### Phase 1: 큐 구조 설계 및 타입 정의
-- [ ] `InteractionQueue` 타입 정의 (`src/lib/types/core.ts`)
+### Phase 1: 큐 구조 설계 및 타입 정의 ✅
+- [x] `InteractionQueue` 타입 정의 (`src/lib/types/core.ts`)
+- [x] `src/lib/types/index.ts`에서 export 추가
   ```typescript
   export interface InteractionQueue {
     interactionTargetIds: InteractionTargetId[];
@@ -152,14 +153,14 @@ class WorldCharacterEntityBehavior {
 - Push (동적 추가): `queue.interactionTargetIds.push(id)`
 - 완료 체크: `queue.interactionTargetIds.length === 0 && duration 완료`
 
-### Phase 2: WorldCharacterEntityBehavior 확장
-- [ ] `interactionQueue` 필드 추가
-- [ ] `setInteractionQueue(queue: InteractionQueue)` 메서드 추가
-- [ ] `clearInteractionQueue()` 메서드 추가
-- [ ] `clear()` 메서드 업데이트 (큐도 클리어)
+### Phase 2: WorldCharacterEntityBehavior 확장 ✅
+- [x] `interactionQueue` 필드 추가
+- [x] `setInteractionQueue(queue: InteractionQueue)` 메서드 추가
+- [x] `clearInteractionQueue()` 메서드 추가
+- [x] `clear()` 메서드 업데이트 (큐도 클리어)
 
-### Phase 3: 인터렉션 enqueue 로직 구현
-- [ ] `tick-enqueue-interactions.ts` 생성
+### Phase 3: 인터렉션 enqueue 로직 구현 ✅
+- [x] `tick-enqueue-interactions.ts` 생성
 
 #### 핵심 개념
 **입력**:
@@ -171,7 +172,7 @@ class WorldCharacterEntityBehavior {
 
 #### 구현 로직
 
-- [ ] **핵심 인터렉션 선택**
+- [x] **핵심 인터렉션 선택**
   ```typescript
   // tick-enqueue-interactions.ts
 
@@ -188,7 +189,7 @@ class WorldCharacterEntityBehavior {
   }
   ```
 
-- [ ] **시스템 인터렉션 구성 (절차적 코드)**
+- [x] **시스템 인터렉션 구성 (절차적 코드)**
   ```typescript
   const interactionTargetIds: InteractionTargetId[] = [];
 
@@ -213,19 +214,6 @@ class WorldCharacterEntityBehavior {
 
   // 3. 핵심 인터렉션 추가
   interactionTargetIds.push(coreInteraction.id);
-
-  // 4. 감정 표현 시스템 인터렉션 추가 (선택적)
-  const systemInteractions = searchInteractions(
-    this.behaviorTargetId,
-    this.worldCharacterEntity.characterId,
-    this.targetEntityId
-  );
-  const expressInteraction = systemInteractions.find(i =>
-    i.system_interaction_type === 'express'
-  );
-  if (expressInteraction) {
-    interactionTargetIds.push(expressInteraction.id);
-  }
   ```
 
 **구현 포인트**:
@@ -243,7 +231,7 @@ searchInteractions(
 ): Interaction[]
 ```
 
-- [ ] InteractionQueue 생성 및 설정
+- [x] InteractionQueue 생성 및 설정
   ```typescript
   const interactionQueue: InteractionQueue = {
     interactionTargetIds: [...extractedIds],
@@ -252,7 +240,7 @@ searchInteractions(
   };
   ```
   - `setInteractionQueue()` 호출하여 behavior에 설정
-- [ ] `tick.ts` 플로우에 enqueue 단계 추가
+- [x] `tick.ts` 플로우에 enqueue 단계 추가
   ```typescript
   // tick.ts
   export default function tick(this: WorldCharacterEntityBehavior, tick: number): void {
@@ -267,10 +255,11 @@ searchInteractions(
 
 **참고**: 큐 **실행** 로직은 이후 단계에서 별도로 구현 예정
 
-### Phase 4: 인터렉션 enqueue 통합
-- [ ] `tickFindTargetEntityAndGo.ts`와 `tickEnqueueInteractions.ts` 연계
+### Phase 4: 인터렉션 enqueue 통합 ✅
+- [x] `tickFindTargetEntityAndGo.ts`와 `tickEnqueueInteractions.ts` 연계
   - 타겟 엔티티 결정 → 인터렉션 enqueue로 자연스럽게 흐름
   - enqueue 완료 후 다음 단계로 진행
+- [x] pnpm check 통과 확인
 
 ### Phase 5: 인터렉션 dequeue 로직 구현 (향후)
 - [ ] `tick-dequeue-interaction.ts` 생성 (별도 작업)
@@ -365,11 +354,11 @@ describe('큐 중단', () => {
 
 ## 작업 순서
 
-### 🎯 현재 스코프 (인터렉션 enqueue)
-1. [ ] Phase 1: 타입 정의
-2. [ ] Phase 2: Behavior 클래스 확장
-3. [ ] Phase 3: 인터렉션 enqueue 로직 구현 (`tick-enqueue-interactions.ts`)
-4. [ ] Phase 4: 인터렉션 enqueue 통합
+### 🎯 현재 스코프 (인터렉션 enqueue) - ✅ 완료
+1. [x] Phase 1: 타입 정의
+2. [x] Phase 2: Behavior 클래스 확장
+3. [x] Phase 3: 인터렉션 enqueue 로직 구현 (`tick-enqueue-interactions.ts`)
+4. [x] Phase 4: 인터렉션 enqueue 통합
 
 ### 🔮 향후 스코프 (인터렉션 dequeue)
 5. [ ] Phase 5: 인터렉션 dequeue 로직 구현 (별도 작업)

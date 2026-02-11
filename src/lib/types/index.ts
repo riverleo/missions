@@ -286,6 +286,7 @@ export type {
 	EntitySourceType,
 	InteractionType,
 	InteractionTargetId,
+	InteractionQueue,
 	InteractionAction,
 	InteractionActionId,
 	EntityId,

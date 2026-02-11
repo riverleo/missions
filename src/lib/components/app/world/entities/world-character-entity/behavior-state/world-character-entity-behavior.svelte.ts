@@ -1,4 +1,10 @@
-import type { EntityId, BehaviorTargetId, InteractionTargetId, Behavior } from '$lib/types';
+import type {
+	EntityId,
+	BehaviorTargetId,
+	InteractionTargetId,
+	InteractionQueue,
+	Behavior,
+} from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type { WorldCharacterEntityDirection } from '../index';
@@ -9,6 +15,7 @@ import tick from './tick';
 import tickFindBehaviorTarget from './tick-find-behavior-target';
 import tickNextOrClear from './tick-next-or-clear';
 import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
+import tickEnqueueInteractions from './tick-enqueue-interactions';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -25,6 +32,7 @@ export class WorldCharacterEntityBehavior {
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
 	interactionTargetStartTick = $state<number | undefined>();
+	interactionQueue = $state<InteractionQueue | undefined>();
 	behaviors = $state<Behavior[]>([]);
 
 	update = update;
@@ -34,6 +42,7 @@ export class WorldCharacterEntityBehavior {
 	tickFindBehaviorTarget = tickFindBehaviorTarget;
 	tickNextOrClear = tickNextOrClear;
 	tickFindTargetEntityAndGo = tickFindTargetEntityAndGo;
+	tickEnqueueInteractions = tickEnqueueInteractions;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
@@ -72,11 +81,26 @@ export class WorldCharacterEntityBehavior {
 	}
 
 	/**
+	 * 인터렉션 큐를 설정합니다.
+	 */
+	setInteractionQueue(queue: InteractionQueue): void {
+		this.interactionQueue = queue;
+	}
+
+	/**
+	 * 인터렉션 큐를 초기화합니다.
+	 */
+	clearInteractionQueue(): void {
+		this.interactionQueue = undefined;
+	}
+
+	/**
 	 * 모든 상태를 초기화합니다.
 	 */
 	clear(): void {
 		this.clearTargetEntity();
 		this.clearInteractionTarget();
+		this.clearInteractionQueue();
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
 	}
