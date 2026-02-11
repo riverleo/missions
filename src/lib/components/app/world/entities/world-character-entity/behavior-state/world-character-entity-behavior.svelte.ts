@@ -35,7 +35,7 @@ export class WorldCharacterEntityBehavior {
 	interactionQueue = $state<InteractionQueue>({
 		interactionTargetIds: [],
 		poppedAtTick: 0,
-		poppedInteractionTargetFinished: false,
+		status: 'idle',
 	});
 	behaviors = $state<Behavior[]>([]);
 
@@ -98,7 +98,7 @@ export class WorldCharacterEntityBehavior {
 		this.interactionQueue = {
 			interactionTargetIds: [],
 			poppedAtTick: 0,
-			poppedInteractionTargetFinished: false,
+			status: 'idle',
 		};
 	}
 
