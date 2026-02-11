@@ -140,9 +140,9 @@ export type InteractionTargetId =
 // Interaction Queue for sequential interaction execution
 export interface InteractionQueue {
 	interactionTargetIds: InteractionTargetId[];
-	poppedInteractionTargetId: InteractionTargetId | undefined;
+	coreInteractionTargetId?: InteractionTargetId;
+	poppedInteractionTargetId?: InteractionTargetId;
 	poppedAtTick: number;
-	coreInteractionTargetId: InteractionTargetId;
 }
 
 // ============================================================

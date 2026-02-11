@@ -1,9 +1,10 @@
-import { useBehavior, useWorld } from '$lib/hooks';
+import { useBehavior, useWorld, useInteraction } from '$lib/hooks';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import type { EntitySourceId, WorldItemId } from '$lib/types';
+import type { EntitySourceId, WorldItemId, InteractionQueue, Interaction } from '$lib/types';
 import { getAllInteractionsByBehaviorTargetId } from '$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id';
 import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-all-entity-sources-by-interaction';
 
@@ -41,6 +42,7 @@ export default function tickFindTargetEntityAndGo(
 ): boolean {
 	const { getEntitySourceId, getWorldItem, updateWorldItem } = useWorld();
 	const { getBehaviorAction } = useBehavior();
+	const { getAllInteractionActionsByInteraction } = useInteraction();
 
 	if (!this.behaviorTargetId) return false;
 
@@ -80,18 +82,19 @@ export default function tickFindTargetEntityAndGo(
 
 	// 3. 타깃이 없는 경우: 대상 후보 필터링
 	let targetEntitySourceIds: EntitySourceId[] = [];
+	let coreInteraction: Interaction | undefined;
 
 	// 타깃 선택 방식에 따라 후보 필터링
 	if (behaviorAction.target_selection_method === 'explicit') {
 		const entitySourceId = getEntitySourceId(behaviorAction);
 		targetEntitySourceIds = [entitySourceId];
 	} else if (behaviorAction.target_selection_method === 'search') {
-		const interaction = getAllInteractionsByBehaviorTargetId(
+		coreInteraction = getAllInteractionsByBehaviorTargetId(
 			this.behaviorTargetId,
 			this.worldCharacterEntity.sourceId
 		)[0];
-		if (interaction) {
-			targetEntitySourceIds = getAllEntitySourcesByInteraction(interaction).map((es) => es.id);
+		if (coreInteraction) {
+			targetEntitySourceIds = getAllEntitySourcesByInteraction(coreInteraction).map((es) => es.id);
 		}
 	}
 
@@ -99,6 +102,16 @@ export default function tickFindTargetEntityAndGo(
 	if (targetEntitySourceIds.length === 0) {
 		return false;
 	}
+
+	// Helper: coreInteractionTargetId 설정
+	const setCoreInteractionTargetId = (): void => {
+		if (!coreInteraction) return;
+		const actions = getAllInteractionActionsByInteraction(coreInteraction);
+		const rootAction = actions.find((action) => action.root);
+		if (!rootAction) return;
+
+		this.interactionQueue.coreInteractionTargetId = InteractionIdUtils.create(rootAction);
+	};
 
 	// 4. 들고 있는 아이템 중 대상 후보가 있는 경우
 	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
@@ -112,6 +125,9 @@ export default function tickFindTargetEntityAndGo(
 			updateWorldItem(instanceId as WorldItemId, {
 				world_character_id: this.worldCharacterEntity.instanceId,
 			});
+
+			// InteractionQueue 생성
+			setCoreInteractionTargetId();
 
 			return false;
 		}
@@ -144,6 +160,9 @@ export default function tickFindTargetEntityAndGo(
 		updateWorldItem(EntityIdUtils.instanceId(this.targetEntityId), {
 			world_character_id: this.worldCharacterEntity.instanceId,
 		});
+
+		// InteractionQueue 생성
+		setCoreInteractionTargetId();
 
 		return false;
 	}

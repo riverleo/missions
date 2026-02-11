@@ -19,8 +19,8 @@ export default function tickEnqueueInteractions(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	// 이미 큐가 설정되어 있으면 다음 단계로 진행
-	if (this.interactionQueue) {
+	// 이미 채워져 있으면 다음 단계로 진행
+	if (this.interactionQueue.interactionTargetIds.length > 0) {
 		return false;
 	}
 
@@ -54,8 +54,6 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	const interactionTargetIds: InteractionTargetId[] = [];
-
 	/**
 	 * Interaction에서 root InteractionAction을 찾아 InteractionTargetId 생성
 	 */
@@ -68,13 +66,7 @@ export default function tickEnqueueInteractions(
 		return undefined;
 	};
 
-	// 3. 핵심 인터렉션 타겟 ID 생성
-	const coreInteractionTargetId = getInteractionTargetId(coreInteraction);
-	if (!coreInteractionTargetId) {
-		return false;
-	}
-
-	// 4. 인터렉션 타입에 따라 시퀀스 구성
+	// 3. 인터렉션 타입에 따라 시퀀스 구성
 
 	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
@@ -83,23 +75,15 @@ export default function tickEnqueueInteractions(
 		if (pickInteraction) {
 			const pickInteractionTargetId = getInteractionTargetId(pickInteraction);
 			if (pickInteractionTargetId) {
-				interactionTargetIds.push(pickInteractionTargetId);
+				this.interactionQueue.interactionTargetIds.push(pickInteractionTargetId);
 			}
 		}
 	}
 
 	// 핵심 인터렉션 추가
-	interactionTargetIds.push(coreInteractionTargetId);
-
-	// 5. InteractionQueue 생성 및 설정
-	const interactionQueue: InteractionQueue = {
-		interactionTargetIds,
-		poppedInteractionTargetId: undefined,
-		poppedAtTick: 0,
-		coreInteractionTargetId,
-	};
-
-	this.setInteractionQueue(interactionQueue);
+	if (this.interactionQueue.coreInteractionTargetId) {
+		this.interactionQueue.interactionTargetIds.push(this.interactionQueue.coreInteractionTargetId);
+	}
 
 	// 큐 구성 완료, 다음 단계로 진행
 	return false;

@@ -32,7 +32,7 @@ export class WorldCharacterEntityBehavior {
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionTargetId = $state<InteractionTargetId | undefined>();
 	interactionTargetStartTick = $state<number | undefined>();
-	interactionQueue = $state<InteractionQueue | undefined>();
+	interactionQueue = $state<InteractionQueue>({ interactionTargetIds: [], poppedAtTick: 0 });
 	behaviors = $state<Behavior[]>([]);
 
 	update = update;
@@ -91,7 +91,10 @@ export class WorldCharacterEntityBehavior {
 	 * 인터렉션 큐를 초기화합니다.
 	 */
 	clearInteractionQueue(): void {
-		this.interactionQueue = undefined;
+		this.interactionQueue = {
+			interactionTargetIds: [],
+			poppedAtTick: 0,
+		};
 	}
 
 	/**
