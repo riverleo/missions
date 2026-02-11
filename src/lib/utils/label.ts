@@ -418,15 +418,21 @@ export function getConditionBehaviorPriorityLabel(
 export function getBehaviorActionString(
 	action: NeedBehaviorAction | ConditionBehaviorAction
 ): string {
-	const { getBuilding, getBuildingCondition } = useBuilding();
+	const { getBuilding } = useBuilding();
 	const { getItem } = useItem();
 	const { getCharacter } = useCharacter();
 	const { getOrUndefinedNeedFulfillment, getOrUndefinedConditionFulfillment } = useFulfillment();
 	const { getBuildingInteraction, getItemInteraction, getCharacterInteraction } = useInteraction();
 
+	if (
+		(action.type === 'once' || action.type === 'fulfill') &&
+		action.target_selection_method === 'search'
+	)
+		return '가까운 대상과 상호작용';
+
 	// target 결정
 	const targetNameString = getInteractionTargetNameString(action);
-	const targetLabel = targetNameString || (action.target_selection_method === 'search' ? '가까운 대상 탐색' : undefined);
+	const targetLabel = targetNameString;
 
 	// behavior 결정
 	const behaviorLabel = getInteractionBehaviorLabelString(action);
@@ -639,9 +645,7 @@ export function getQuestTypeString(type: 'primary' | 'secondary' | undefined): s
 	return type === 'primary' ? '메인' : '보조';
 }
 
-export function getNarrativeNodeTypeString(
-	type: 'text' | 'choice' | undefined
-): string {
+export function getNarrativeNodeTypeString(type: 'text' | 'choice' | undefined): string {
 	if (!type) return '노드 타입';
 	return type === 'text' ? '텍스트' : '선택지';
 }
@@ -669,9 +673,7 @@ export function getFulfillmentTargetLabelString(
 				const character = getOrUndefinedCharacter(interaction.character_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType
-					? getBehaviorInteractTypeString(interactionType)
-					: '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${building.name ?? '건물'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -679,17 +681,13 @@ export function getFulfillmentTargetLabelString(
 
 		// Character interaction (only in NeedFulfillment)
 		if ('character_interaction_id' in fulfillment && fulfillment.fulfillment_type === 'character') {
-			const interaction = getOrUndefinedCharacterInteraction(
-				fulfillment.character_interaction_id
-			);
+			const interaction = getOrUndefinedCharacterInteraction(fulfillment.character_interaction_id);
 			if (interaction) {
 				const targetCharacter = getCharacter(interaction.target_character_id);
 				const character = getOrUndefinedCharacter(interaction.character_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType
-					? getBehaviorInteractTypeString(interactionType)
-					: '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${targetCharacter.name ?? '캐릭터'} - ${characterName} ${behaviorLabel}`;
 			}
@@ -703,9 +701,7 @@ export function getFulfillmentTargetLabelString(
 				const character = getOrUndefinedCharacter(interaction.character_id);
 				const interactionType =
 					interaction.once_interaction_type || interaction.fulfill_interaction_type;
-				const behaviorLabel = interactionType
-					? getBehaviorInteractTypeString(interactionType)
-					: '';
+				const behaviorLabel = interactionType ? getBehaviorInteractTypeString(interactionType) : '';
 				const characterName = character ? character.name : getFallbackString('allCharacters');
 				return `${item.name ?? '아이템'} - ${characterName} ${behaviorLabel}`;
 			}
