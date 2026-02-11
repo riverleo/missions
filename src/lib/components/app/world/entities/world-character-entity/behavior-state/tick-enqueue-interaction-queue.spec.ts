@@ -91,7 +91,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
 		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			entitySourceType: 'item',
+			type: 'item',
 			interactionId: 'item-interaction-1' as InteractionId,
 			interactionActionId: 'item-interaction-action-1' as any,
 		});
@@ -124,7 +124,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
 		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			entitySourceType: 'item',
+			type: 'item',
 			interactionId: 'item-interaction-1' as InteractionId,
 			interactionActionId: 'item-interaction-action-1' as any,
 		});
@@ -165,7 +165,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
 		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			entitySourceType: 'item',
+			type: 'item',
 			interactionId: 'item-interaction-1' as InteractionId,
 			interactionActionId: 'item-interaction-action-1' as any,
 		});
@@ -193,7 +193,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
 		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			entitySourceType: 'item',
+			type: 'item',
 			interactionId: 'item-interaction-1' as InteractionId,
 			interactionActionId: 'item-interaction-action-1' as any,
 		});
@@ -219,7 +219,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
 		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			entitySourceType: 'item',
+			type: 'item',
 			interactionId: 'item-interaction-1' as InteractionId,
 			interactionActionId: 'item-interaction-action-1' as any,
 		});

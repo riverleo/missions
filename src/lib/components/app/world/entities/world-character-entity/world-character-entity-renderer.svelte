@@ -54,12 +54,12 @@
 	// InteractionAction의 아이템 transform 가져오기
 	const heldItemTransform = $derived.by(() => {
 		// InteractionAction이 없으면 기본값
-		if (!entity.behavior.interactionTargetId) {
+		if (!entity.behavior.interactionQueue.poppedInteractionTargetId) {
 			return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
 		}
 
 		// InteractionTargetId 파싱
-		const { interactionActionId } = InteractionIdUtils.parse(entity.behavior.interactionTargetId);
+		const { interactionActionId } = InteractionIdUtils.parse(entity.behavior.interactionQueue.poppedInteractionTargetId);
 
 		// ItemInteractionAction 조회
 		for (const [interactionId, actions] of Object.entries($itemInteractionActionStore.data)) {
@@ -95,7 +95,7 @@
 		if (entity.behavior.path.length > 0) return 'walk';
 
 		// 인터렉션 중이면 interaction 상태
-		if (entity.behavior.interactionTargetId) {
+		if (entity.behavior.interactionQueue.poppedInteractionTargetId) {
 			// TODO: 인터렉션 타입에 따라 다른 상태 반환
 			return 'idle';
 		}
@@ -107,7 +107,7 @@
 	// faceStateType 계산
 	const faceStateType = $derived.by((): CharacterFaceStateType => {
 		// 인터렉션 중이면 interaction 표정
-		if (entity.behavior.interactionTargetId) {
+		if (entity.behavior.interactionQueue.poppedInteractionTargetId) {
 			// TODO: 인터렉션 타입에 따라 다른 표정 반환
 			return 'idle';
 		}

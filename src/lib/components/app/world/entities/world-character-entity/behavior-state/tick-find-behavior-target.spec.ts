@@ -101,7 +101,6 @@ describe('tickFindBehaviorTarget(this: WorldCharacterEntityBehavior, tick: numbe
 			// Given: 기존 상태가 남아있음
 			behavior.path = [vectorUtils.createVector(10, 20)];
 			behavior.targetEntityId = 'entity-1' as any;
-			behavior.interactionTargetId = 'interaction-1' as any;
 
 			const mockBehaviors: Behavior[] = [{ id: 'behavior-1' } as Behavior];
 			const mockRootAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;

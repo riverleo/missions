@@ -80,7 +80,6 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		// Given: 다음 행동 액션이 있음
 		behavior.behaviorTargetId = 'behavior-target-1' as any;
 		behavior.targetEntityId = 'entity-1' as any;
-		behavior.interactionTargetId = 'interaction-1' as any;
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
 		const mockNextAction: BehaviorAction = { id: 'action-2' } as BehaviorAction;
 		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
@@ -98,7 +97,6 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		// Given: 다음 행동 액션이 없음
 		behavior.behaviorTargetId = 'behavior-target-1' as any;
 		behavior.targetEntityId = 'entity-1' as any;
-		behavior.interactionTargetId = 'interaction-1' as any;
 		const mockCurrentAction: BehaviorAction = { id: 'action-1' } as BehaviorAction;
 		mockGetBehaviorAction.mockReturnValue(mockCurrentAction);
 		mockGetOrUndefinedNextBehaviorAction.mockReturnValue(undefined);

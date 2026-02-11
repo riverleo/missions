@@ -16,6 +16,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * - [x] 현재 행동 액션을 찾을 수 없으면 에러가 발생한다.
  * - [x] 다음 행동 액션이 있으면 모든 상태를 초기화하고 다음 액션으로 전환한다.
  * - [x] 다음 행동 액션이 없으면 모든 상태를 초기화하여 행동을 종료한다.
+ * - [ ] 상호작용 큐가 실행 중인 경우 로직을 종료한다.
  */
 export default function tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number) {
 	const { getBehaviorAction, getOrUndefinedNextBehaviorAction } = useBehavior();

@@ -30,8 +30,6 @@ export class WorldCharacterEntityBehavior {
 	targetEntityId = $state<EntityId | undefined>();
 	behaviorTargetId = $state<BehaviorTargetId | undefined>();
 	behaviorTargetStartTick = $state<number | undefined>();
-	interactionTargetId = $state<InteractionTargetId | undefined>();
-	interactionTargetStartTick = $state<number | undefined>();
 	interactionQueue = $state<InteractionQueue>({
 		interactionTargetIds: [],
 		poppedAtTick: 0,
@@ -61,27 +59,11 @@ export class WorldCharacterEntityBehavior {
 	}
 
 	/**
-	 * 인터렉션 타겟과 시작 틱을 초기화합니다.
-	 */
-	clearInteractionTarget(): void {
-		this.interactionTargetId = undefined;
-		this.interactionTargetStartTick = undefined;
-	}
-
-	/**
 	 * 행동 타겟을 설정합니다.
 	 */
 	setBehaviorTarget(behaviorTargetId: BehaviorTargetId, tick: number): void {
 		this.behaviorTargetId = behaviorTargetId;
 		this.behaviorTargetStartTick = tick;
-	}
-
-	/**
-	 * 인터렉션 타겟을 설정합니다.
-	 */
-	setInteractionTarget(interactionTargetId: InteractionTargetId, tick: number): void {
-		this.interactionTargetId = interactionTargetId;
-		this.interactionTargetStartTick = tick;
 	}
 
 	/**
@@ -107,7 +89,6 @@ export class WorldCharacterEntityBehavior {
 	 */
 	clear(): void {
 		this.clearTargetEntity();
-		this.clearInteractionTarget();
 		this.clearInteractionQueue();
 		this.behaviorTargetId = undefined;
 		this.behaviorTargetStartTick = undefined;
