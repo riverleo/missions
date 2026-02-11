@@ -138,7 +138,7 @@ export type InteractionTargetId =
 	| `character_${CharacterInteractionId}_${CharacterInteractionActionId}`;
 
 // Interaction Queue for sequential interaction execution
-export type InteractionQueueStatus = 'idle' | 'running' | 'completed';
+export type InteractionQueueStatus = 'enqueuing' | 'running' | 'completed';
 
 export interface InteractionQueue {
 	interactionTargetIds: InteractionTargetId[];

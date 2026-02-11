@@ -60,7 +60,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	});
 
 	it("핵심 상호작용 대상이 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.", () => {
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId = undefined;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
 
@@ -71,7 +71,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	});
 
 	it("타깃 엔티티가 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.", () => {
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = undefined;
@@ -85,7 +85,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	it('핵심 상호작용 대상을 파싱하여 상호작용을 가져온다.', async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
@@ -118,7 +118,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	it("핵심 상호작용이 '아이템 사용'인 경우 '아이템 줍기' 시스템 상호작용의 시작 액션을 먼저 추가한다.", async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
@@ -159,7 +159,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	it('핵심 상호작용 대상을 상호작용 대상 목록에 추가한다.', async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
@@ -187,7 +187,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	it("상태를 '실행중'으로 변경한다.", async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
@@ -213,7 +213,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 	it('항상 false를 반환하여 다음 단계로 진행한다.', async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
-		behavior.interactionQueue.status = 'idle';
+		behavior.interactionQueue.status = 'enqueuing';
 		behavior.interactionQueue.coreInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
 		behavior.targetEntityId = 'item_world-1_world-item-1' as any;
