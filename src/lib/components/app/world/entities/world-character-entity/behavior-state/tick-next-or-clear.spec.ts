@@ -49,6 +49,32 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		// Spy on clear and setBehaviorTarget methods
 		vi.spyOn(behavior, 'clear');
 		vi.spyOn(behavior, 'setBehaviorTarget');
+
+		// Set interactionQueue status to completed by default for most tests
+		behavior.interactionQueue.status = 'completed';
+	});
+
+	it('상호작용 큐가 완료되지 않은 경우 로직을 종료한다', () => {
+		// Given: interactionQueue.status가 completed가 아님
+		behavior.interactionQueue.status = 'enqueuing';
+		behavior.behaviorTargetId = 'behavior-target-1' as any;
+
+		// When
+		behavior.tickNextOrClear(currentTick);
+
+		// Then: 아무 동작도 하지 않음
+		expect(behavior.clear).not.toHaveBeenCalled();
+		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
+
+		// Given: interactionQueue.status가 running
+		behavior.interactionQueue.status = 'running';
+
+		// When
+		behavior.tickNextOrClear(currentTick);
+
+		// Then: 아무 동작도 하지 않음
+		expect(behavior.clear).not.toHaveBeenCalled();
+		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
 	});
 
 	it('현재 행동 타깃이 없으면 초기화하고 로직을 종료한다', () => {
