@@ -9,50 +9,52 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  * 상호작용 대상 목록을 채웁니다.
  *
  * @param tick - 현재 틱
- * @returns {boolean} true = 중단, false = 계속 진행
+ * @returns false (항상 다음 단계로 진행)
  *
  * ## 명세
- * - [ ] 상호작용 실행 또는 완료 상태면 다음 단계로 진행한다.
- * - [ ] 핵심 상호작용 대상이 없으면 완료 상태로 변경하고 다음 단계로 진행한다.
- * - [ ] 핵심 상호작용 대상을 파싱하여 상호작용을 가져온다.
- * - [ ] 핵심 상호작용이 아이템 사용인 경우 아이템 줍기 시스템 상호작용의 시작 액션을 먼저 추가한다.
- * - [ ] 핵심 상호작용 대상을 상호작용 대상 목록에 추가한다.
- * - [ ] 항상 false를 반환하여 다음 단계로 진행한다.
+ * - [x] 상호작용 큐 상태가 '실행중' 또는 '완료'면 다음 단계로 진행한다.
+ * - [x] 핵심 상호작용 대상이 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.
+ * - [x] 타깃 엔티티가 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.
+ * - [x] 핵심 상호작용 대상을 파싱하여 상호작용을 가져온다.
+ * - [x] 핵심 상호작용이 '아이템 사용'인 경우 '아이템 줍기' 시스템 상호작용의 시작 액션을 먼저 추가한다.
+ * - [x] 핵심 상호작용 대상을 상호작용 대상 목록에 추가한다.
+ * - [x] 상태를 '실행중'으로 변경한다.
+ * - [x] 항상 false를 반환하여 다음 단계로 진행한다.
  */
-export default function tickEnqueueInteractions(
+export default function tickEnqueueInteractionQueue(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	// 이미 채워져 있으면 다음 단계로 진행
-	if (this.interactionQueue.interactionTargetIds.length > 0) {
+	// 상태가 '실행중' 또는 '완료'면 다음 단계로 진행
+	if (this.interactionQueue.status === 'running' || this.interactionQueue.status === 'completed') {
 		return false;
 	}
 
-	// coreInteractionTargetId가 없으면 큐 구성 불가
+	// 핵심 상호작용 대상이 없으면 상태를 '완료'로 변경하고 다음 단계로 진행
 	if (!this.interactionQueue.coreInteractionTargetId || !this.targetEntityId) {
+		this.interactionQueue.status = 'completed';
 		return false;
 	}
 
 	const { getInteraction, getRootInteractionAction } = useInteraction();
 
-	// 1. coreInteractionTargetId에서 Interaction 가져오기
+	// 핵심 상호작용 대상을 파싱하여 상호작용 가져오기
 	const { interactionId } = InteractionIdUtils.parse(this.interactionQueue.coreInteractionTargetId);
 	const coreInteraction = getInteraction(interactionId);
 
-	// 2. 인터렉션 타입에 따라 시퀀스 구성
-
-	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
+	// 핵심 상호작용이 '아이템 사용'인 경우 '아이템 줍기' 시스템 상호작용의 시작 액션을 먼저 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
 		this.interactionQueue.interactionTargetIds.push(
 			InteractionIdUtils.create(getRootInteractionAction(this.targetEntityId, 'item_pick'))
 		);
 	}
 
-	// 핵심 인터렉션 추가
-	if (this.interactionQueue.coreInteractionTargetId) {
-		this.interactionQueue.interactionTargetIds.push(this.interactionQueue.coreInteractionTargetId);
-	}
+	// 핵심 상호작용 대상을 상호작용 대상 목록에 추가
+	this.interactionQueue.interactionTargetIds.push(this.interactionQueue.coreInteractionTargetId);
 
-	// 큐 구성 완료, 다음 단계로 진행
+	// 상태를 '실행중'으로 변경
+	this.interactionQueue.status = 'running';
+
+	// 다음 단계로 진행
 	return false;
 }
