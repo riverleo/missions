@@ -76,10 +76,20 @@
 		if (!changes || changes.target_selection_method !== 'search') return [];
 		const behaviorTargetId = BehaviorIdUtils.create(BehaviorIdUtils.to(changes));
 		const interactions = getAllInteractionsByBehaviorTargetId(behaviorTargetId);
-		const interaction = interactions[0];
-		console.log({ behaviorTargetId, interactions, interaction });
-		if (!interaction) return [];
-		return getAllEntitySourcesByInteraction(interaction);
+		console.log({ behaviorTargetId, interactions });
+		if (interactions.length === 0) return [];
+
+		// 모든 interactions의 entity sources를 수집하고 중복 제거
+		const allSources = interactions.flatMap((interaction) =>
+			getAllEntitySourcesByInteraction(interaction)
+		);
+
+		// id 기준으로 중복 제거
+		const uniqueSources = Array.from(
+			new Map(allSources.map((source) => [source.id, source])).values()
+		);
+
+		return uniqueSources;
 	});
 
 	let isUpdating = $state(false);
