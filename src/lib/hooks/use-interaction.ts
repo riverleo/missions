@@ -532,7 +532,10 @@ function createInteractionStore() {
 	): InteractionAction {
 		if (behaviorInteractionType !== undefined) {
 			// EntityId와 BehaviorInteractionType로 조회
-			const interaction = getInteraction(interactionOrEntityId as EntityId, behaviorInteractionType);
+			const interaction = getInteraction(
+				interactionOrEntityId as EntityId,
+				behaviorInteractionType
+			);
 			const data = getOrUndefinedRootInteractionAction(interaction);
 			if (!data) {
 				throw new Error(
@@ -610,7 +613,6 @@ function createInteractionStore() {
 		});
 	}
 
-
 	function getNextInteractionActionId(
 		interactionAction: InteractionAction
 	): InteractionActionId | undefined {
@@ -633,27 +635,6 @@ function createInteractionStore() {
 		return getAllInteractionActions().find((action) => action.id === nextActionId);
 	}
 
-	/**
-	 * InteractionId로 전체 InteractionAction 시퀀스를 배열로 반환
-	 * root부터 시작하여 next를 따라가며 모든 action을 수집
-	 */
-	function getAllInteractionActionsByInteractionId(
-		interactionId: InteractionId
-	): InteractionAction[] {
-		const interaction = getInteraction(interactionId);
-		const rootAction = getOrUndefinedRootInteractionAction(interaction);
-		if (!rootAction) return [];
-
-		const actions: InteractionAction[] = [];
-		let currentAction: InteractionAction | undefined = rootAction;
-
-		while (currentAction) {
-			actions.push(currentAction);
-			currentAction = getNextInteractionAction(currentAction);
-		}
-
-		return actions;
-	}
 
 	// ===== Admin CRUD - Building Interactions =====
 	const admin = {
@@ -1164,7 +1145,6 @@ function createInteractionStore() {
 		getAllInteractionsByEntityId,
 		getNextInteractionActionId,
 		getNextInteractionAction,
-		getAllInteractionActionsByInteractionId,
 		// Admin
 		admin,
 	};
