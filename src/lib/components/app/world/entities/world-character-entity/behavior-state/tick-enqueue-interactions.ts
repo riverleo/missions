@@ -1,5 +1,5 @@
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import type { InteractionQueue, InteractionTargetId, Interaction } from '$lib/types';
+import type { InteractionTargetId, Interaction } from '$lib/types';
 import { useInteraction, useBehavior } from '$lib/hooks';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
@@ -24,35 +24,17 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	// behaviorTargetId와 targetEntityId가 없으면 큐 구성 불가
-	if (!this.behaviorTargetId || !this.targetEntityId) {
+	// coreInteractionTargetId가 없으면 큐 구성 불가
+	if (!this.interactionQueue.coreInteractionTargetId || !this.targetEntityId) {
 		return false;
 	}
 
-	const { getBehaviorAction } = useBehavior();
-	const {
-		getAllInteractionsByEntityId,
-		getOrUndefinedInteractionByEntityId,
-		getAllInteractionActionsByInteraction,
-	} = useInteraction();
+	const { getInteraction, getAllInteractionsByEntityId, getAllInteractionActionsByInteraction } =
+		useInteraction();
 
-	// 1. BehaviorAction에서 인터렉션 타입 가져오기
-	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
-
-	// idle 타입은 인터렉션이 없음
-	if (behaviorAction.type === 'idle') {
-		return false;
-	}
-
-	const interactionType = behaviorAction.type;
-
-	// 2. 타겟 엔티티의 해당 타입 인터렉션 검색
-	const coreInteraction = getOrUndefinedInteractionByEntityId(this.targetEntityId, interactionType);
-
-	if (!coreInteraction) {
-		// 인터렉션이 없으면 다음 단계로 진행
-		return false;
-	}
+	// 1. coreInteractionTargetId에서 Interaction 가져오기
+	const { interactionId } = InteractionIdUtils.parse(this.interactionQueue.coreInteractionTargetId);
+	const coreInteraction = getInteraction(interactionId);
 
 	/**
 	 * Interaction에서 root InteractionAction을 찾아 InteractionTargetId 생성
