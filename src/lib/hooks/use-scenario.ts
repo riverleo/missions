@@ -152,6 +152,10 @@ function createScenarioStore() {
 				const { fetch: fetchItem } = useItem();
 				const { fetch: fetchInteraction } = useInteraction();
 				const { fetch: fetchWorld } = useWorld();
+				const { init: initFulfillment, fetch: fetchFulfillment } = useFulfillment();
+
+				// Fulfillment 초기화
+				initFulfillment();
 
 				await Promise.all([
 					fetchQuest(),
@@ -166,6 +170,7 @@ function createScenarioStore() {
 					fetchItem(),
 					fetchInteraction(),
 					fetchWorld(),
+					fetchFulfillment(),
 				]);
 
 				fetchAllStatus.set('success');

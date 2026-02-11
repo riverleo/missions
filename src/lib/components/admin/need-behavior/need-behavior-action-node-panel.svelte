@@ -48,7 +48,12 @@
 
 	let { action, hasParent = false }: Props = $props();
 
-	const { needBehaviorActionStore, getAllInteractionsByBehaviorTargetId, getAllEntitySourcesByInteraction, admin } = useBehavior();
+	const {
+		needBehaviorActionStore,
+		getAllInteractionsByBehaviorTargetId,
+		getAllEntitySourcesByInteraction,
+		admin,
+	} = useBehavior();
 	const { getBuilding } = useBuilding();
 	const { getCharacter } = useCharacter();
 	const { getItem } = useItem();
@@ -67,11 +72,12 @@
 	);
 
 	// 상호작용 가능한 엔티티 템플릿 (search 모드용)
-	const interactableEntityTemplates = $derived.by(() => {
+	const interactableEntitySources = $derived.by(() => {
 		if (!changes || changes.target_selection_method !== 'search') return [];
 		const behaviorTargetId = BehaviorIdUtils.create(BehaviorIdUtils.to(changes));
 		const interactions = getAllInteractionsByBehaviorTargetId(behaviorTargetId);
 		const interaction = interactions[0];
+		console.log({ behaviorTargetId, interactions, interaction });
 		if (!interaction) return [];
 		return getAllEntitySourcesByInteraction(interaction);
 	});
@@ -205,7 +211,9 @@
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="once">{getBehaviorActionTypeLabelByType('once')}</SelectItem>
-									<SelectItem value="fulfill">{getBehaviorActionTypeLabelByType('fulfill')}</SelectItem>
+									<SelectItem value="fulfill">
+										{getBehaviorActionTypeLabelByType('fulfill')}
+									</SelectItem>
 									<SelectItem value="idle">{getBehaviorActionTypeLabelByType('idle')}</SelectItem>
 								</SelectContent>
 							</Select>
@@ -342,12 +350,12 @@
 						<!-- search 모드일 때 검색 가능한 대상 표시 -->
 						{#if (changes.type === 'once' || changes.type === 'fulfill') && changes.target_selection_method === 'search'}
 							<div class="px-2 text-right text-xs">
-								{#if interactableEntityTemplates.length > 0}
+								{#if interactableEntitySources.length > 0}
 									<div class="text-xs">
-										{interactableEntityTemplates.map(({ name }) => name).join(', ')}
+										{interactableEntitySources.map(({ name }) => name).join(', ')}
 									</div>
 								{:else}
-									<div class="text-xs text-muted-foreground">해당 타입의 대상이 없습니다.</div>
+									<div class="text-xs text-muted-foreground">탐색 가능한 대상이 없습니다.</div>
 								{/if}
 							</div>
 						{/if}
