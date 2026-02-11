@@ -59,33 +59,44 @@ export default function tickEnqueueInteractions(
 	/**
 	 * Interaction에서 root InteractionAction을 찾아 InteractionTargetId 생성
 	 */
-	const addInteractionToQueue = (interaction: Interaction): void => {
+	const getInteractionTargetId = (interaction: Interaction): InteractionTargetId | undefined => {
 		const actions = getAllInteractionActionsByInteraction(interaction);
 		const rootAction = actions.find((action) => action.root);
 		if (rootAction) {
-			interactionTargetIds.push(InteractionIdUtils.create(rootAction));
+			return InteractionIdUtils.create(rootAction);
 		}
+		return undefined;
 	};
 
-	// 3. 인터렉션 타입에 따라 시퀀스 구성
+	// 3. 핵심 인터렉션 타겟 ID 생성
+	const coreInteractionTargetId = getInteractionTargetId(coreInteraction);
+	if (!coreInteractionTargetId) {
+		return false;
+	}
+
+	// 4. 인터렉션 타입에 따라 시퀀스 구성
 
 	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
 		const allInteractions = getAllInteractionsByEntityId(this.targetEntityId);
 		const pickInteraction = allInteractions.find((i) => i.system_interaction_type === 'item_pick');
 		if (pickInteraction) {
-			addInteractionToQueue(pickInteraction);
+			const pickInteractionTargetId = getInteractionTargetId(pickInteraction);
+			if (pickInteractionTargetId) {
+				interactionTargetIds.push(pickInteractionTargetId);
+			}
 		}
 	}
 
 	// 핵심 인터렉션 추가
-	addInteractionToQueue(coreInteraction);
+	interactionTargetIds.push(coreInteractionTargetId);
 
-	// 4. InteractionQueue 생성 및 설정
+	// 5. InteractionQueue 생성 및 설정
 	const interactionQueue: InteractionQueue = {
 		interactionTargetIds,
 		poppedInteractionTargetId: undefined,
 		poppedAtTick: 0,
+		coreInteractionTargetId,
 	};
 
 	this.setInteractionQueue(interactionQueue);

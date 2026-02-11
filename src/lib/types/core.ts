@@ -142,6 +142,7 @@ export interface InteractionQueue {
 	interactionTargetIds: InteractionTargetId[];
 	poppedInteractionTargetId: InteractionTargetId | undefined;
 	poppedAtTick: number;
+	coreInteractionTargetId: InteractionTargetId;
 }
 
 // ============================================================
