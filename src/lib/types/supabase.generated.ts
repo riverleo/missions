@@ -1094,7 +1094,6 @@ export type Database = {
       }
       condition_behaviors: {
         Row: {
-          building_state_type: Database["public"]["Enums"]["building_state_type"]
           character_id: string | null
           condition_id: string
           condition_threshold: number
@@ -1105,7 +1104,6 @@ export type Database = {
           scenario_id: string
         }
         Insert: {
-          building_state_type?: Database["public"]["Enums"]["building_state_type"]
           character_id?: string | null
           condition_id: string
           condition_threshold?: number
@@ -1116,7 +1114,6 @@ export type Database = {
           scenario_id: string
         }
         Update: {
-          building_state_type?: Database["public"]["Enums"]["building_state_type"]
           character_id?: string | null
           condition_id?: string
           condition_threshold?: number

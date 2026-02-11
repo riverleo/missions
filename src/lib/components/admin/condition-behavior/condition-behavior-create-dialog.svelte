@@ -33,14 +33,8 @@
 		CharacterId,
 		ScenarioId,
 		ConditionBehaviorInsert,
-		BuildingStateType,
 	} from '$lib/types';
-	import {
-		getFallbackString,
-		getActionString,
-		getFormString,
-		getBuildingStateTypeLabels,
-	} from '$lib/utils/label';
+	import { getFallbackString, getActionString, getFormString } from '$lib/utils/label';
 
 	const { conditionBehaviorDialogStore, closeConditionBehaviorDialog, admin } = useBehavior();
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
@@ -55,10 +49,8 @@
 	let conditionThreshold = $state(0);
 	let characterId = $state<string | undefined>(undefined);
 	let name = $state('');
-	let buildingStateType = $state<BuildingStateType>('idle');
 	let isSubmitting = $state(false);
 
-	const buildingStateOptions = getBuildingStateTypeLabels();
 	const selectedCondition = $derived(getOrUndefinedCondition(conditionId));
 	const selectedConditionName = $derived(selectedCondition?.name ?? '컨디션 선택');
 	const selectedCharacterName = $derived(getOrUndefinedCharacter(characterId)?.name ?? getFallbackString('all'));
@@ -69,7 +61,6 @@
 			conditionId = undefined;
 			conditionThreshold = 0;
 			characterId = undefined;
-			buildingStateType = 'idle';
 		}
 	});
 
@@ -79,12 +70,6 @@
 
 	function onCharacterChange(value: string | undefined) {
 		characterId = value || undefined;
-	}
-
-	function onBuildingStateChange(value: string | undefined) {
-		if (value) {
-			buildingStateType = value as BuildingStateType;
-		}
 	}
 
 	function onOpenChange(value: boolean) {
@@ -105,7 +90,6 @@
 				condition_id: conditionId as ConditionId,
 				condition_threshold: conditionThreshold,
 				character_id: characterId as CharacterId | undefined,
-				building_state_type: buildingStateType,
 			} as Omit<ConditionBehaviorInsert, 'scenario_id'>)
 			.then((behavior) => {
 				closeConditionBehaviorDialog();
@@ -179,17 +163,6 @@
 							<SelectItem value="">모두</SelectItem>
 							{#each characters as character (character.id)}
 								<SelectItem value={character.id}>{character.name}</SelectItem>
-							{/each}
-						</SelectContent>
-					</Select>
-					<ButtonGroupText>건물 상태</ButtonGroupText>
-					<Select type="single" value={buildingStateType} onValueChange={onBuildingStateChange}>
-						<SelectTrigger class="flex-1">
-							{buildingStateOptions.find((o) => o.value === buildingStateType)?.label ?? '기본'}
-						</SelectTrigger>
-						<SelectContent>
-							{#each buildingStateOptions as option (option.value)}
-								<SelectItem value={option.value}>{option.label}</SelectItem>
 							{/each}
 						</SelectContent>
 					</Select>

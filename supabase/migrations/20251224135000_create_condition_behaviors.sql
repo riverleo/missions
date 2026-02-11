@@ -7,9 +7,6 @@ create table condition_behaviors (
   character_id uuid references characters(id) on delete set null,
   name text not null,
 
-  -- 건물 상태
-  building_state_type building_state_type not null default 'idle',
-
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
