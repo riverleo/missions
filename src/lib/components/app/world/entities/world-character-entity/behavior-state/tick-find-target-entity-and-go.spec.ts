@@ -10,6 +10,7 @@ vi.mock('$lib/hooks', () => ({
 	useBehavior: vi.fn(),
 	useWorld: vi.fn(),
 	useInteraction: vi.fn(),
+	useFulfillment: vi.fn(),
 }));
 
 // Mock EntityIdUtils
@@ -86,7 +87,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		mockGetWorldItem = vi.fn();
 		mockUpdateWorldItem = vi.fn();
 
-		const { useBehavior, useWorld } = await import('$lib/hooks');
+		const { useBehavior, useWorld, useInteraction, useFulfillment } = await import('$lib/hooks');
 		vi.mocked(useBehavior).mockReturnValue({
 			getBehaviorAction: mockGetBehaviorAction,
 			searchEntitySources: mockSearchEntitySources,
@@ -95,6 +96,12 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			getEntitySourceId: mockGetEntitySourceId,
 			getWorldItem: mockGetWorldItem,
 			updateWorldItem: mockUpdateWorldItem,
+		} as any);
+		vi.mocked(useInteraction).mockReturnValue({
+			getOrUndefinedRootInteractionAction: vi.fn(),
+		} as any);
+		vi.mocked(useFulfillment).mockReturnValue({
+			getAllFulfillmentsByBehaviorAction: vi.fn().mockReturnValue([]),
 		} as any);
 	});
 
