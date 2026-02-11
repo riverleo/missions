@@ -35,7 +35,7 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	const { getInteraction, getRootInteractionAction } = useInteraction();
+	const { getInteraction, getAllInteractionActionsByInteractionId } = useInteraction();
 
 	// 1. coreInteractionTargetId에서 Interaction 가져오기
 	const { interactionId } = InteractionIdUtils.parse(this.interactionQueue.coreInteractionTargetId);
@@ -43,17 +43,20 @@ export default function tickEnqueueInteractions(
 
 	// 2. 인터렉션 타입에 따라 시퀀스 구성
 
-	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
+	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션의 전체 시퀀스 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
+		const pickInteraction = getInteraction(this.targetEntityId, 'item_pick');
+		const pickActions = getAllInteractionActionsByInteractionId(pickInteraction.id);
 		this.interactionQueue.interactionTargetIds.push(
-			InteractionIdUtils.create(getRootInteractionAction(this.targetEntityId, 'item_pick'))
+			...pickActions.map((action) => InteractionIdUtils.create(action))
 		);
 	}
 
-	// 핵심 인터렉션 추가
-	if (this.interactionQueue.coreInteractionTargetId) {
-		this.interactionQueue.interactionTargetIds.push(this.interactionQueue.coreInteractionTargetId);
-	}
+	// 핵심 인터렉션의 전체 시퀀스 추가
+	const coreActions = getAllInteractionActionsByInteractionId(interactionId);
+	this.interactionQueue.interactionTargetIds.push(
+		...coreActions.map((action) => InteractionIdUtils.create(action))
+	);
 
 	// 큐 구성 완료, 다음 단계로 진행
 	return false;
