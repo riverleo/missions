@@ -31,6 +31,7 @@ import type { EntitySourceId } from '$lib/types';
  *    - [x] 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정한다.
  *    - [x] 월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 타깃 엔티티가 될 수 없다.
  * - [x] 현재 행동에 대한 타깃 엔티티를 찾지 못한 경우 계속 진행한다.
+ * - [ ] 자기 자신은 타깃 엔티티가 될 수 없다.
  */
 export default function tickFindTargetEntityAndGo(
 	this: WorldCharacterEntityBehavior,
@@ -133,12 +134,10 @@ export default function tickFindTargetEntityAndGo(
 			this.worldCharacterEntity,
 			candidateEntities
 		);
-		const targetEntity = sortedCandidates[0]!;
-
-		this.targetEntityId = targetEntity.id;
+		this.targetEntityId = sortedCandidates[0]!.id;
 
 		// 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정
-		const worldItem = getWorldItem(EntityIdUtils.instanceId(targetEntity.id));
+		const worldItem = getWorldItem(EntityIdUtils.instanceId(this.targetEntityId));
 		if (worldItem) {
 			updateWorldItem(worldItem.id, {
 				world_character_id: this.worldCharacterEntity.instanceId,

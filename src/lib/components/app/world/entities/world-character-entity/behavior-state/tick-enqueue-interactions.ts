@@ -1,17 +1,19 @@
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { InteractionQueue, InteractionTargetId, Interaction } from '$lib/types';
-import { searchInteractions } from '$lib/hooks/use-behavior/search-interactions';
-import { useInteraction } from '$lib/hooks';
+import { useInteraction, useBehavior } from '$lib/hooks';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 
 /**
- * 인터렉션 큐를 구성하는 tick 함수
+ * # 인터렉션 큐를 구성하는 tick 함수
  *
  * behaviorTargetId와 targetEntityId를 기반으로 실행할 인터렉션 시퀀스를 구성하고,
  * InteractionQueue를 생성하여 behavior에 설정합니다.
  *
  * @param tick - 현재 틱
  * @returns true: 큐 구성 성공 및 대기, false: 다음 단계로 진행
+ *
+ * ## 명세
+ * - [ ]
  */
 export default function tickEnqueueInteractions(
 	this: WorldCharacterEntityBehavior,
@@ -27,24 +29,31 @@ export default function tickEnqueueInteractions(
 		return false;
 	}
 
-	// 1. 핵심 인터렉션 검색 및 선택
-	const coreInteractions = searchInteractions(
-		this.behaviorTargetId,
-		this.worldCharacterEntity.sourceId
-	);
+	const { getBehaviorAction } = useBehavior();
+	const {
+		getAllInteractionsByEntityId,
+		getOrUndefinedInteractionByEntityId,
+		getAllInteractionActionsByInteraction,
+	} = useInteraction();
 
-	if (coreInteractions.length === 0) {
+	// 1. BehaviorAction에서 인터렉션 타입 가져오기
+	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
+
+	// idle 타입은 인터렉션이 없음
+	if (behaviorAction.type === 'idle') {
+		return false;
+	}
+
+	const interactionType = behaviorAction.type;
+
+	// 2. 타겟 엔티티의 해당 타입 인터렉션 검색
+	const coreInteraction = getOrUndefinedInteractionByEntityId(this.targetEntityId, interactionType);
+
+	if (!coreInteraction) {
 		// 인터렉션이 없으면 다음 단계로 진행
 		return false;
 	}
 
-	// 첫 번째 인터렉션 선택
-	const coreInteraction = coreInteractions[0];
-	if (!coreInteraction) {
-		return false;
-	}
-
-	const { getAllInteractionActionsByInteraction } = useInteraction();
 	const interactionTargetIds: InteractionTargetId[] = [];
 
 	/**
@@ -58,20 +67,18 @@ export default function tickEnqueueInteractions(
 		}
 	};
 
-	// 2. 핵심 인터렉션 타입에 따라 시스템 인터렉션 추가
+	// 3. 인터렉션 타입에 따라 시퀀스 구성
 
-	// 아이템 사용 인터렉션인 경우
+	// 아이템 사용 인터렉션인 경우, 먼저 item_pick 시스템 인터렉션 추가
 	if (coreInteraction.once_interaction_type === 'item_use') {
-		// item_pick 시스템 인터렉션 찾기
-		const pickInteraction = coreInteractions.find(
-			(i) => i.system_interaction_type === 'item_pick'
-		);
+		const allInteractions = getAllInteractionsByEntityId(this.targetEntityId);
+		const pickInteraction = allInteractions.find((i) => i.system_interaction_type === 'item_pick');
 		if (pickInteraction) {
 			addInteractionToQueue(pickInteraction);
 		}
 	}
 
-	// 3. 핵심 인터렉션 추가
+	// 핵심 인터렉션 추가
 	addInteractionToQueue(coreInteraction);
 
 	// 4. InteractionQueue 생성 및 설정

@@ -37,6 +37,7 @@ import type {
 	EntityId,
 	EntitySourceId,
 	BehaviorInteractionType,
+	InteractionType,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 
@@ -491,6 +492,79 @@ function createInteractionStore() {
 			} else if ('character_interaction_id' in action) {
 				return action.character_interaction_id === interaction.id;
 			}
+			return false;
+		});
+	}
+
+	/**
+	 * EntityId에 해당하는 엔티티의 모든 Interaction 반환
+	 * @example
+	 * const interactions = getAllInteractionsByEntityId(entityId);
+	 */
+	function getAllInteractionsByEntityId(entityId: EntityId): Interaction[] {
+		const entityType = EntityIdUtils.type(entityId);
+		const sourceId = EntityIdUtils.sourceId(entityId);
+
+		return getAllInteractions().filter((interaction) => {
+			if (interaction.entitySourceType !== entityType) {
+				return false;
+			}
+
+			if (interaction.entitySourceType === 'building') {
+				return interaction.building_id === sourceId;
+			} else if (interaction.entitySourceType === 'item') {
+				return interaction.item_id === sourceId;
+			} else if (interaction.entitySourceType === 'character') {
+				return interaction.character_id === sourceId;
+			}
+
+			return false;
+		});
+	}
+
+	/**
+	 * EntityId와 InteractionType에 해당하는 Interaction 반환 (없으면 throw)
+	 * @example
+	 * const interaction = getInteractionByEntityId(entityId, 'once');
+	 */
+	function getInteractionByEntityId(
+		entityId: EntityId,
+		interactionType: InteractionType
+	): Interaction {
+		const data = getOrUndefinedInteractionByEntityId(entityId, interactionType);
+		if (!data) {
+			throw new Error(
+				`Interaction not found for entity ${entityId} with type ${interactionType}`
+			);
+		}
+		return data;
+	}
+
+	/**
+	 * EntityId와 InteractionType에 해당하는 Interaction 반환 (없으면 undefined)
+	 * @example
+	 * const interaction = getOrUndefinedInteractionByEntityId(entityId, 'once');
+	 */
+	function getOrUndefinedInteractionByEntityId(
+		entityId: EntityId,
+		interactionType: InteractionType
+	): Interaction | undefined {
+		const entityType = EntityIdUtils.type(entityId);
+		const sourceId = EntityIdUtils.sourceId(entityId);
+
+		return getAllInteractions().find((interaction) => {
+			if (interaction.entitySourceType !== entityType || interaction.type !== interactionType) {
+				return false;
+			}
+
+			if (interaction.entitySourceType === 'building') {
+				return interaction.building_id === sourceId;
+			} else if (interaction.entitySourceType === 'item') {
+				return interaction.item_id === sourceId;
+			} else if (interaction.entitySourceType === 'character') {
+				return interaction.character_id === sourceId;
+			}
+
 			return false;
 		});
 	}
@@ -1020,6 +1094,9 @@ function createInteractionStore() {
 		getAllCharacterInteractionActions,
 		getAllInteractionActions,
 		getAllInteractionActionsByInteraction,
+		getAllInteractionsByEntityId,
+		getInteractionByEntityId,
+		getOrUndefinedInteractionByEntityId,
 		getNextInteractionActionId,
 		getNextInteractionAction,
 		// Admin
