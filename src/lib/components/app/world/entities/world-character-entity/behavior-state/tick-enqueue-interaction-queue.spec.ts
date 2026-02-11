@@ -45,17 +45,23 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		} as any);
 	});
 
-	it("상호작용 큐 상태가 '실행중' 또는 '완료'면 다음 단계로 진행한다.", () => {
-		behavior.interactionQueue.status = 'running';
+	it("상호작용 큐 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행한다.", () => {
+		behavior.interactionQueue.status = 'ready';
 		const result = behavior.tickEnqueueInteractionQueue(0);
 
 		expect(result).toBe(false);
 		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
 
-		behavior.interactionQueue.status = 'completed';
+		behavior.interactionQueue.status = 'running';
 		const result2 = behavior.tickEnqueueInteractionQueue(0);
 
 		expect(result2).toBe(false);
+		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
+
+		behavior.interactionQueue.status = 'completed';
+		const result3 = behavior.tickEnqueueInteractionQueue(0);
+
+		expect(result3).toBe(false);
 		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
 	});
 
@@ -184,7 +190,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		);
 	});
 
-	it("상태를 '실행중'으로 변경한다.", async () => {
+	it("상태를 '준비완료'로 변경한다.", async () => {
 		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
 
 		behavior.interactionQueue.status = 'enqueuing';
@@ -207,7 +213,7 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 
 		behavior.tickEnqueueInteractionQueue(0);
 
-		expect(behavior.interactionQueue.status).toBe('running');
+		expect(behavior.interactionQueue.status).toBe('ready');
 	});
 
 	it('항상 false를 반환하여 다음 단계로 진행한다.', async () => {

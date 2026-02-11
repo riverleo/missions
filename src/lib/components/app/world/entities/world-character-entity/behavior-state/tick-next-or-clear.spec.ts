@@ -66,6 +66,16 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		expect(behavior.clear).not.toHaveBeenCalled();
 		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
 
+		// Given: interactionQueue.status가 ready
+		behavior.interactionQueue.status = 'ready';
+
+		// When
+		behavior.tickNextOrClear(currentTick);
+
+		// Then: 아무 동작도 하지 않음
+		expect(behavior.clear).not.toHaveBeenCalled();
+		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
+
 		// Given: interactionQueue.status가 running
 		behavior.interactionQueue.status = 'running';
 

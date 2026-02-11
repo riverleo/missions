@@ -138,14 +138,14 @@ export type InteractionTargetId =
 	| `character_${CharacterInteractionId}_${CharacterInteractionActionId}`;
 
 // Interaction Queue for sequential interaction execution
-export type InteractionQueueStatus = 'enqueuing' | 'running' | 'completed';
+export type InteractionQueueStatus = 'enqueuing' | 'ready' | 'running' | 'completed';
 
 export interface InteractionQueue {
+	status: InteractionQueueStatus;
 	interactionTargetIds: InteractionTargetId[];
 	coreInteractionTargetId?: InteractionTargetId;
 	poppedInteractionTargetId?: InteractionTargetId;
 	poppedAtTick: number;
-	status: InteractionQueueStatus;
 }
 
 // ============================================================

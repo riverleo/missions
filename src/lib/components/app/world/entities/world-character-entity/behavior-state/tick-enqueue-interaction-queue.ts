@@ -12,21 +12,25 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  * @returns false (항상 다음 단계로 진행)
  *
  * ## 명세
- * - [x] 상호작용 큐 상태가 '실행중' 또는 '완료'면 다음 단계로 진행한다.
+ * - [x] 상호작용 큐 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행한다.
  * - [x] 핵심 상호작용 대상이 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.
  * - [x] 타깃 엔티티가 없으면 상태를 '완료'로 변경하고 다음 단계로 진행한다.
  * - [x] 핵심 상호작용 대상을 파싱하여 상호작용을 가져온다.
  * - [x] 핵심 상호작용이 '아이템 사용'인 경우 '아이템 줍기' 시스템 상호작용의 시작 액션을 먼저 추가한다.
  * - [x] 핵심 상호작용 대상을 상호작용 대상 목록에 추가한다.
- * - [x] 상태를 '실행중'으로 변경한다.
+ * - [x] 상태를 '준비완료'로 변경한다.
  * - [x] 항상 false를 반환하여 다음 단계로 진행한다.
  */
 export default function tickEnqueueInteractionQueue(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	// 상태가 '실행중' 또는 '완료'면 다음 단계로 진행
-	if (this.interactionQueue.status === 'running' || this.interactionQueue.status === 'completed') {
+	// 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행
+	if (
+		this.interactionQueue.status === 'ready' ||
+		this.interactionQueue.status === 'running' ||
+		this.interactionQueue.status === 'completed'
+	) {
 		return false;
 	}
 
@@ -52,8 +56,8 @@ export default function tickEnqueueInteractionQueue(
 	// 핵심 상호작용 대상을 상호작용 대상 목록에 추가
 	this.interactionQueue.interactionTargetIds.push(this.interactionQueue.coreInteractionTargetId);
 
-	// 상태를 '실행중'으로 변경
-	this.interactionQueue.status = 'running';
+	// 상태를 '준비완료'로 변경
+	this.interactionQueue.status = 'ready';
 
 	// 다음 단계로 진행
 	return false;
