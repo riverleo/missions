@@ -42,9 +42,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {
-				root: false,
-			});
+			await admin.createBuildingInteractionAction(scenarioId, buildingInteractionId, {});
 		} catch (error) {
 			console.error('Failed to create action:', error);
 		} finally {
