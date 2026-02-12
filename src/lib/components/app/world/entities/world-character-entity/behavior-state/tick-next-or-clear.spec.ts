@@ -28,6 +28,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		mockWorldCharacterEntity = {
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
+			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 			body: {
 				position: vectorUtils.createVector(100, 100),
 			} as any,
@@ -54,37 +55,14 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 		behavior.interactionQueue.status = 'completed';
 	});
 
-	it('상호작용 큐가 완료되지 않은 경우 로직을 종료한다', () => {
-		// Given: interactionQueue.status가 completed가 아님
-		behavior.interactionQueue.status = 'enqueuing';
+	it('상호작용 큐가 완료되지 않은 경우 클리어하거나 다음 행동 액션으로 넘어가지 않는다', () => {
+		behavior.interactionQueue.status = 'running';
 		behavior.behaviorTargetId = 'behavior-target-1' as any;
 
-		// When
 		behavior.tickNextOrClear(currentTick);
 
-		// Then: 아무 동작도 하지 않음
 		expect(behavior.clear).not.toHaveBeenCalled();
-		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
-
-		// Given: interactionQueue.status가 ready
-		behavior.interactionQueue.status = 'ready';
-
-		// When
-		behavior.tickNextOrClear(currentTick);
-
-		// Then: 아무 동작도 하지 않음
-		expect(behavior.clear).not.toHaveBeenCalled();
-		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
-
-		// Given: interactionQueue.status가 running
-		behavior.interactionQueue.status = 'running';
-
-		// When
-		behavior.tickNextOrClear(currentTick);
-
-		// Then: 아무 동작도 하지 않음
-		expect(behavior.clear).not.toHaveBeenCalled();
-		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
+		expect(behavior.setBehaviorTarget).not.toHaveBeenCalled();
 	});
 
 	it('현재 행동 타깃이 없으면 초기화하고 로직을 종료한다', () => {

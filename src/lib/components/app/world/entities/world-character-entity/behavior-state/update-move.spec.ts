@@ -33,6 +33,7 @@ describe('updateMove(this: WorldCharacterEntityBehavior, event: BeforeUpdateEven
 		mockWorldCharacterEntity = {
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
+			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 			body: mockBody,
 		};
 

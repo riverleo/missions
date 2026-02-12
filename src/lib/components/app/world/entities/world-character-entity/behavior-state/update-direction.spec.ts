@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import { vectorUtils } from '$lib/utils/vector';
@@ -12,6 +12,7 @@ describe('updateDirection(this: WorldCharacterEntityBehavior)', () => {
 		mockWorldCharacterEntity = {
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
+			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 			body: {
 				position: vectorUtils.createVector(100, 100),
 			} as any,
