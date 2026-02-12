@@ -6,6 +6,7 @@ SvelteKit 5 + TypeScript 기반의 gamified task management 앱. (Matter.js 물�
 
 - Plan 기반으로만 작업한다. 구현은 `plans/*.md`에 문서화된 항목만 진행한다.
 - 사용자가 말한 새 요구사항은 해당 plan에 기록만 한다. 구현은 명시적 진행 요청이 있을 때만 한다.
+- 버그 수정은 plan 없이 바로 진행할 수 있다. (bugfix 브랜치 사용)
 - Plan 상태 디렉토리:
 	- 진행 중: `plans/*.md`
 	- 완료: `plans/completed/*.md`
