@@ -41,9 +41,7 @@
 		isCreating = true;
 
 		try {
-			await admin.createItemInteractionAction(scenarioId, itemInteractionId, {
-				root: false,
-			});
+			await admin.createItemInteractionAction(scenarioId, itemInteractionId, {});
 		} catch (error) {
 			console.error('Failed to create action:', error);
 		} finally {

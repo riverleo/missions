@@ -635,6 +635,23 @@ function createInteractionStore() {
 		return getAllInteractionActions().find((action) => action.id === nextActionId);
 	}
 
+	function isFirstBuildingInteractionAction(buildingInteractionId: BuildingInteractionId): boolean {
+		const actions = get(buildingInteractionActionStore).data[buildingInteractionId] ?? [];
+		return actions.length === 0;
+	}
+
+	function isFirstItemInteractionAction(itemInteractionId: ItemInteractionId): boolean {
+		const actions = get(itemInteractionActionStore).data[itemInteractionId] ?? [];
+		return actions.length === 0;
+	}
+
+	function isFirstCharacterInteractionAction(
+		characterInteractionId: CharacterInteractionId
+	): boolean {
+		const actions = get(characterInteractionActionStore).data[characterInteractionId] ?? [];
+		return actions.length === 0;
+	}
+
 
 	// ===== Admin CRUD - Building Interactions =====
 	const admin = {
@@ -665,6 +682,8 @@ function createInteractionStore() {
 					draft.data[data.id as BuildingInteractionId] = [];
 				})
 			);
+
+			await admin.createBuildingInteractionAction(scenarioId, data.id as BuildingInteractionId, {});
 
 			return data;
 		},
@@ -710,17 +729,19 @@ function createInteractionStore() {
 			buildingInteractionId: BuildingInteractionId,
 			action: Omit<
 				BuildingInteractionActionInsert,
-				'scenario_id' | 'building_id' | 'building_interaction_id'
+				'scenario_id' | 'building_id' | 'building_interaction_id' | 'root'
 			>
 		) {
 			const buildingInteractionStoreValue = get(buildingInteractionStore);
 			const buildingId =
 				buildingInteractionStoreValue.data[buildingInteractionId]?.building_id || null;
+			const root = isFirstBuildingInteractionAction(buildingInteractionId);
 
 			const { data, error } = await supabase
 				.from('building_interaction_actions')
 				.insert({
 					...action,
+					root,
 					scenario_id: scenarioId,
 					building_id: buildingId,
 					building_interaction_id: buildingInteractionId,
@@ -816,6 +837,8 @@ function createInteractionStore() {
 				})
 			);
 
+			await admin.createItemInteractionAction(scenarioId, data.id as ItemInteractionId, {});
+
 			return data;
 		},
 
@@ -858,15 +881,20 @@ function createInteractionStore() {
 		async createItemInteractionAction(
 			scenarioId: ScenarioId,
 			itemInteractionId: ItemInteractionId,
-			action: Omit<ItemInteractionActionInsert, 'scenario_id' | 'item_id' | 'item_interaction_id'>
+			action: Omit<
+				ItemInteractionActionInsert,
+				'scenario_id' | 'item_id' | 'item_interaction_id' | 'root'
+			>
 		) {
 			const itemInteractionStoreValue = get(itemInteractionStore);
 			const itemId = itemInteractionStoreValue.data[itemInteractionId]?.item_id || null;
+			const root = isFirstItemInteractionAction(itemInteractionId);
 
 			const { data, error } = await supabase
 				.from('item_interaction_actions')
 				.insert({
 					...action,
+					root,
 					scenario_id: scenarioId,
 					item_id: itemId,
 					item_interaction_id: itemInteractionId,
@@ -962,6 +990,12 @@ function createInteractionStore() {
 				})
 			);
 
+			await admin.createCharacterInteractionAction(
+				scenarioId,
+				data.id as CharacterInteractionId,
+				{}
+			);
+
 			return data;
 		},
 
@@ -1009,17 +1043,19 @@ function createInteractionStore() {
 			characterInteractionId: CharacterInteractionId,
 			action: Omit<
 				CharacterInteractionActionInsert,
-				'scenario_id' | 'character_id' | 'character_interaction_id'
+				'scenario_id' | 'character_id' | 'character_interaction_id' | 'root'
 			>
 		) {
 			const characterInteractionStoreValue = get(characterInteractionStore);
 			const characterId =
 				characterInteractionStoreValue.data[characterInteractionId]?.character_id || null;
+			const root = isFirstCharacterInteractionAction(characterInteractionId);
 
 			const { data, error } = await supabase
 				.from('character_interaction_actions')
 				.insert({
 					...action,
+					root,
 					scenario_id: scenarioId,
 					character_id: characterId,
 					character_interaction_id: characterInteractionId,

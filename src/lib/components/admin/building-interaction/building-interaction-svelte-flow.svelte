@@ -154,9 +154,7 @@
 			const newAction = await admin.createBuildingInteractionAction(
 				scenarioId,
 				buildingInteractionId,
-				{
-					root: false,
-				}
+				{}
 			);
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴

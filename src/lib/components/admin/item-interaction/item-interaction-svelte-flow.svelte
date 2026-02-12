@@ -145,9 +145,7 @@
 
 		try {
 			// 새 액션 생성
-			const newAction = await admin.createItemInteractionAction(scenarioId, itemInteractionId, {
-				root: false,
-			});
+			const newAction = await admin.createItemInteractionAction(scenarioId, itemInteractionId, {});
 
 			// 우측 핸들(next)에서 드래그: 기존 액션이 새 액션을 가리킴
 			await admin.updateItemInteractionAction(fromActionId as ItemInteractionActionId, {
