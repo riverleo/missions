@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useScenario } from '$lib/hooks';
 	import { SidebarTrigger } from '$lib/components/ui/sidebar';
 	import {
 		Breadcrumb,
@@ -8,17 +9,27 @@
 		BreadcrumbPage,
 		BreadcrumbSeparator,
 	} from '$lib/components/ui/breadcrumb';
+	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { page } from '$app/state';
 	import TestWorldPopover from '$lib/components/admin/test-world/test-world-popover.svelte';
 	import { getBreadcrumbTitleString } from '$lib/utils/label';
 
+	const { fetchAllStatus } = useScenario();
+
+	interface BreadcrumbItemData {
+		label: string;
+		href: string;
+		isLast: boolean;
+		loading?: boolean;
+	}
 
 	const breadcrumbs = $derived(() => {
+		const status = $fetchAllStatus;
 		const path = page.url.pathname;
 		const segments = path.split('/').filter(Boolean);
 
 		// 항상 Home을 첫 번째로 추가
-		const crumbs = [
+		const crumbs: BreadcrumbItemData[] = [
 			{
 				label: '홈',
 				href: '/admin',
@@ -41,6 +52,7 @@
 			const isLast = i === segments.length - 1;
 
 			let label = segment;
+			let loading = false;
 			// 라벨 매핑
 			if (segment === 'scenarios') label = '시나리오';
 			else if (segment === 'chapters') label = '챕터';
@@ -66,13 +78,19 @@
 			else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment)) {
 				const prevSegment = segments[i - 1];
 				const title = getBreadcrumbTitleString(segment, prevSegment);
-				label = title || segment.slice(0, 8);
+				if (title) {
+					label = title;
+				} else {
+					loading = status === 'loading' || status === 'idle';
+					label = loading ? '' : segment.slice(0, 8);
+				}
 			}
 
 			crumbs.push({
 				label,
 				href: currentPath,
 				isLast,
+				loading,
 			});
 		}
 
@@ -95,9 +113,21 @@
 				{/if}
 				<BreadcrumbItem>
 					{#if crumb.isLast}
-						<BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+						<BreadcrumbPage>
+							{#if crumb.loading}
+								<Skeleton class="h-4 w-24" />
+							{:else}
+								{crumb.label}
+							{/if}
+						</BreadcrumbPage>
 					{:else}
-						<BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+						<BreadcrumbLink href={crumb.href}>
+							{#if crumb.loading}
+								<Skeleton class="h-4 w-24" />
+							{:else}
+								{crumb.label}
+							{/if}
+						</BreadcrumbLink>
 					{/if}
 				</BreadcrumbItem>
 			{/each}
