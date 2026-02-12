@@ -86,19 +86,19 @@
 				: isFulfillInteractionType(behaviorInteractionType)
 					? 'fulfill'
 					: 'system';
+			const onceInteractionType =
+				type === 'once' ? (behaviorInteractionType as OnceInteractionType) : null;
+			const fulfillInteractionType =
+				type === 'fulfill' ? (behaviorInteractionType as FulfillInteractionType) : null;
+			const systemInteractionType =
+				type === 'system' ? (behaviorInteractionType as SystemInteractionType) : null;
 
 			const interaction = await admin.createCharacterInteraction(scenarioId, {
 				target_character_id: targetCharacterId,
 				type,
-				once_interaction_type: isOnceInteractionType(behaviorInteractionType)
-					? behaviorInteractionType
-					: null,
-				fulfill_interaction_type: isFulfillInteractionType(behaviorInteractionType)
-					? behaviorInteractionType
-					: null,
-				system_interaction_type: isSystemInteractionType(behaviorInteractionType)
-					? behaviorInteractionType
-					: null,
+				once_interaction_type: onceInteractionType,
+				fulfill_interaction_type: fulfillInteractionType,
+				system_interaction_type: systemInteractionType,
 				character_id: characterId || null,
 			});
 

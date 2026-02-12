@@ -29,17 +29,13 @@
 	const {
 		itemInteractionStore,
 		itemInteractionActionStore,
-		getOrUndefinedItemInteraction,
-		getAllItemInteractionActions: getItemInteractionActions,
 		admin,
 	} = useInteraction();
 
 	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
 	const itemInteractionId = $derived(page.params.itemInteractionId as ItemInteractionId);
-	const interaction = $derived(
-		itemInteractionId ? getOrUndefinedItemInteraction(itemInteractionId) : undefined
-	);
-	const actions = $derived(itemInteractionId ? getItemInteractionActions(itemInteractionId) : []);
+	const interaction = $derived(itemInteractionId ? $itemInteractionStore.data[itemInteractionId] : undefined);
+	const actions = $derived(itemInteractionId ? ($itemInteractionActionStore.data[itemInteractionId] ?? []) : []);
 
 	const flowNodes = useNodes();
 	const flowEdges = useEdges();

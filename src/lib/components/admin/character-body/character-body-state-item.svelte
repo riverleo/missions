@@ -32,11 +32,11 @@
 
 	let { bodyId, type }: Props = $props();
 
-	const { getOrUndefinedCharacterBody, getOrUndefinedCharacterBodyStates, admin } = useCharacter();
+	const { characterBodyStore, characterBodyStateStore, admin } = useCharacter();
 	const { characterUiStore } = admin;
 
-	const body = $derived(getOrUndefinedCharacterBody(bodyId));
-	const bodyStates = $derived(getOrUndefinedCharacterBodyStates(bodyId) ?? []);
+	const body = $derived($characterBodyStore.data[bodyId]);
+	const bodyStates = $derived($characterBodyStateStore.data[bodyId] ?? []);
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
 
 	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];

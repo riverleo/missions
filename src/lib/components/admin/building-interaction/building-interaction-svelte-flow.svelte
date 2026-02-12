@@ -29,8 +29,6 @@
 	const {
 		buildingInteractionStore,
 		buildingInteractionActionStore,
-		getOrUndefinedBuildingInteraction,
-		getAllBuildingInteractionActions: getBuildingInteractionActions,
 		admin,
 	} = useInteraction();
 
@@ -39,10 +37,10 @@
 		page.params.buildingInteractionId as BuildingInteractionId
 	);
 	const interaction = $derived(
-		buildingInteractionId ? getOrUndefinedBuildingInteraction(buildingInteractionId) : undefined
+		buildingInteractionId ? $buildingInteractionStore.data[buildingInteractionId] : undefined
 	);
 	const actions = $derived(
-		buildingInteractionId ? getBuildingInteractionActions(buildingInteractionId) : []
+		buildingInteractionId ? ($buildingInteractionActionStore.data[buildingInteractionId] ?? []) : []
 	);
 
 	const flowNodes = useNodes();

@@ -16,11 +16,11 @@
 
 	let { itemId, type }: Props = $props();
 
-	const { getOrUndefinedItem, getOrUndefinedItemStates, admin, openStateDialog } = useItem();
+	const { itemStore, itemStateStore, admin, openStateDialog } = useItem();
 	const { itemUiStore } = admin;
 
-	const item = $derived(getOrUndefinedItem(itemId));
-	const itemStates = $derived(getOrUndefinedItemStates(itemId) ?? []);
+	const item = $derived($itemStore.data[itemId]);
+	const itemStates = $derived($itemStateStore.data[itemId] ?? []);
 	const itemState = $derived(itemStates.find((s) => s.type === type));
 
 	const durabilityPreview = $derived.by(() => {
