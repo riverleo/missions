@@ -1,78 +1,149 @@
 # Agent Guidelines
 
-SvelteKit 5 + TypeScript gamified task management app with Matter.js physics.
+SvelteKit 5 + TypeScript 기반의 gamified task management 앱. (Matter.js 물리 월드)
 
-## Critical Rules
+## 1) Workflow (최우선)
 
-### Workflow
-**Plan 기반 작업**: `plans/` 디렉토리의 문서화된 플랜만 진행. 사용자 언급사항은 해당 플랜에 정리만 (명시적 진행 요청 시에만 구현). 체크리스트 형태 운영.
-- **진행 중**: `plans/*.md` - 현재 작업 중인 플랜
-- **완료됨**: `plans/completed/*.md` - 완료된 플랜 (히스토리 보관)
-- **실패함**: `plans/failed/*.md` - 실패한 플랜 (안티패턴 보관)
-- **플랜 완료 처리**: 사용자가 명시적으로 지시할 때만 `completed/`로 이동. Claude가 임의로 이동 금지.
-- **체크리스트 관리**:
-  - 플랜 작업을 완료하면 체크리스트에 반드시 체크(`[x]`)한다.
-  - 체크되지 않은 작업을 진행하기 전에 코드를 확인하여 실제로 미완료인지 검증한다.
-  - 모든 체크박스가 체크되지 않은 플랜은 완료 처리하지 않는다.
-- **플랜 작성 원칙** (받아적기 금지):
-  - 새 내용 추가 전 기존 내용과 일관성 검증. 충돌 시 즉시 질문
-  - 앞뒤 맥락이 맞지 않으면 "이 부분은 앞에서 X와 다른데 괜찮나요?" 질문 필수
-  - 전체 구조 주기적 검토. 중복/모순 발견 시 "Y와 Z가 중복되는데요" 피드백
+- Plan 기반으로만 작업한다. 구현은 `plans/*.md`에 문서화된 항목만 진행한다.
+- 사용자가 말한 새 요구사항은 해당 plan에 기록만 한다. 구현은 명시적 진행 요청이 있을 때만 한다.
+- Plan 상태 디렉토리:
+	- 진행 중: `plans/*.md`
+	- 완료: `plans/completed/*.md`
+	- 실패: `plans/failed/*.md`
+- Plan 완료 이동(`completed/`)은 사용자 명시 지시가 있을 때만 한다.
 
-### Spec-Driven Development
-- **틱 함수 개발**: behavior-state 등 핵심 로직 개발 시 명세(함수 주석 체크리스트) → 테스트 → 구현 순서. 명세 체크박스로 진행 추적.
-- **프로세스**: 사용자가 명세 추가(`[ ]`) → Claude가 테스트 작성 및 구현 → 체크(`[x]`) → `pnpm test:unit` 검증
-- **테스트**: `describe('함수명(파라미터: 타입)', ...)`, 명세 계층 = describe 계층, **명세 항목 텍스트 = it 이름 (정확히 일치 필수)**
-- **명세 작성 스타일**: 한글로 자연어 서술형 작성. 프로그래매틱하지 않고 플루럴하게 (예: "값을 감소시킨다", "목록을 갱신한다", "상태를 초기화한다"). 도메인 용어는 한글 사용 (need→욕구, character→캐릭터, behavior→행동, building→건물)
-- **원칙**: 명세만이 진실, 명세 외 구현 금지, 모든 스펙은 테스트로 검증
+### 체크리스트 규칙
 
-### Commands
-- **Dev**: `pnpm dev`, `pnpm build`, `pnpm preview`
-- **Check**: `pnpm check`, `pnpm format`, `pnpm lint`
-- **Supabase**: `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
-- **Package**: pnpm ONLY (no npm/yarn)
+- 완료한 작업은 반드시 체크(`[x]`)한다.
+- 미체크 항목을 진행하기 전에 코드 기준으로 실제 미완료인지 검증한다.
+- 체크박스가 하나라도 비어 있으면 완료 처리하지 않는다.
 
-### Code Style
-- **Imports**: 명시적 named imports (no `import * as`), shadcn-svelte 개별 import, `@tabler/icons-svelte` Icon 접두사
-- **Format**: Tabs, single quotes, 100 chars, ES5 trailing commas
-- **Types**: `undefined` (no null except DB), no `as any`, branded IDs, `.single<Type>()` for Supabase
-- **Naming**: Functions match props/events (`onsubmit` not `handleSubmit`), explicit domain names
-- **Components**: Hooks 직접 사용 (no prop drilling), Radash 선호, 공유 로직은 별도 파일
+### 플랜 문서 편집 원칙
 
-### Svelte 5
-- **Runes**: `$state`, `$derived`, `$effect` (no `$app/stores`, use `$app/state`)
-- **External objects**: `$state.raw()` for non-Svelte objects
-- **Updates**: Immer `produce()` for stores
-- **Context**: 초기화 시만 접근, 클래스에는 constructor로 전달
+- 새 내용 추가 전 기존 내용과 충돌/일관성을 검증한다.
+- 앞뒤 맥락이 다르면 즉시 질문한다.
+- 중복/모순이 보이면 즉시 피드백한다.
 
-### Database
-- **Naming**: RLS policies lowercase plural, constraints `uq_/fk_/idx_/chk_` prefix
-- **Rules**: DB level integrity, inline constraints, DB defaults
-- **Queries**: `.single<Type>()`, `.maybeSingle<Type>()`, no type casting
-- **Debug**: psql first, console.log second
+### 브랜치/동시 작업 규칙
 
-### UI
-- **shadcn-svelte**: Explicit imports, no `<Label>` (use `<InputGroupText>`), no Icon `class`
-- **Groups**: ButtonGroup + Select (no InputGroup + Select)
-- **Admin**: `/admin/scenarios/[scenarioId]/{domain}/[{domain}Id]/` pattern
-- **Components**: aside, command, create-dialog, delete-dialog, panel
+- 작업 시작 전에 반드시 새 브랜치를 만든다.
+- 브랜치 이름은 대응 plan 파일명(확장자 제외)과 동일하게 한다.
+	- 예: `plans/42.md` -> 브랜치 `42`
+- 여러 스레드 동시 작업 시 브랜치와 작업 디렉토리를 분리한다.
+- 동시 작업은 `git worktree`를 사용해 스레드별 독립 worktree로 운영한다.
+- 기본 템플릿:
+	- 생성: `git worktree add ../missions-<plan> -b <plan>`
+	- 확인: `git worktree list`
+	- 정리: `git worktree remove ../missions-<plan>`
 
-### Patterns
-- **Bug fix**: Root cause → Small test → Verify → Full deployment
-- **EntityIdUtils**: `create()`, `parse()`, `is()`, `or()`, cache with `$derived`
-- **RecordFetchState**: `data` always defined (no `?? {}`)
-- **Utils**: Radash, `$derived` cache, constants.ts
-- **Naming Convention**:
-  - `get*()`: 값이 없으면 throw Error
-  - `getOrUndefined*()`: 값이 없으면 undefined 반환
-  - get 함수 만들 때 getOrUndefined도 무조건 함께 구현
-- **World Entity Helpers**: World entity에서 source entity 가져오는 헬퍼 함수 패턴
-  - `getItemByWorldItem(WorldItemId)` / `getOrUndefinedItemByWorldItem(WorldItemId)`
-  - `getCharacterByWorldCharacter(WorldCharacterId)` / `getOrUndefinedCharacterByWorldCharacter(WorldCharacterId)`
-  - `getBuildingByWorldBuilding(WorldBuildingId)` / `getOrUndefinedBuildingByWorldBuilding(WorldBuildingId)`
+## 2) Spec-Driven Development
 
-### Tech Stack
-SvelteKit 2.48+, Svelte 5, TS 5.9+, Tailwind 4.1+, shadcn-svelte, Supabase, Matter.js 0.20, Immer, Radash 12.1+
+- 핵심 로직(예: tick, behavior-state)은 반드시 `명세 -> 테스트 -> 구현` 순서로 진행한다.
+- 프로세스:
+	- 사용자: 명세 체크박스 추가(`[ ]`)
+	- 에이전트: 테스트 작성 + 구현
+	- 에이전트: 체크(`[x]`)
+	- 에이전트: `pnpm test:unit` 검증
+- 명세는 유일한 진실이다. 명세 외 구현 금지.
+- 모든 스펙은 테스트로 검증한다.
 
-### App Concept
-Gamified task management: 미션 완료 → 코인 획득 → 건물 건설 → 2D physics world. 캐릭터는 욕구 보유, 건물은 컨디션 보유, Utility AI 행동 시스템.
+### 테스트 작성 규칙
+
+- `describe('함수명(파라미터: 타입)', ...)` 형식 사용
+- 명세 계층과 describe 계층을 일치시킨다.
+- 명세 항목 텍스트와 `it` 이름은 정확히 일치시킨다.
+
+### 명세 문장 스타일
+
+- 한글 자연어 서술형으로 작성한다.
+- 프로그래매틱한 표현보다 도메인 행위를 설명한다.
+- 도메인 용어는 한글 사용:
+	- need -> 욕구
+	- character -> 캐릭터
+	- behavior -> 행동
+	- building -> 건물
+
+## 3) Commands
+
+- Dev: `pnpm dev`, `pnpm build`, `pnpm preview`
+- Check: `pnpm check`, `pnpm format`, `pnpm lint`
+- Unit test: `pnpm test:unit`
+- Supabase types:
+	- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
+- 패키지 매니저는 pnpm만 사용한다. (npm/yarn 금지)
+
+## 4) Code Style & Naming
+
+- Imports:
+	- named import만 사용 (`import * as` 금지)
+	- shadcn-svelte는 필요한 컴포넌트를 개별 import
+	- `@tabler/icons-svelte`는 `Icon` 접두사 사용
+- Format:
+	- Tabs, single quotes, line width 100, trailing comma(ES5)
+- Types:
+	- DB 외 `null` 금지, `undefined` 사용
+	- `as any` 금지
+	- branded ID 사용
+	- Supabase는 `.single<Type>()`, `.maybeSingle<Type>()` 사용
+- Naming:
+	- 이벤트/props 이름과 함수명 일치 (`onsubmit`, `handleSubmit` 지양)
+	- 도메인 의미를 드러내는 명시적 이름 사용
+- Component:
+	- hook 직접 사용 (prop drilling 지양)
+	- 공유 로직은 별도 파일로 분리
+	- 유틸은 Radash 우선
+
+### 함수 네이밍 강제 규칙
+
+- `get*()`: 값이 없으면 throw Error
+- `getOrUndefined*()`: 값이 없으면 undefined 반환
+- `get*()`를 만들면 대응 `getOrUndefined*()`도 함께 구현한다.
+
+### World Entity Helper 패턴
+
+- `getItemByWorldItem(WorldItemId)` / `getOrUndefinedItemByWorldItem(WorldItemId)`
+- `getCharacterByWorldCharacter(WorldCharacterId)` / `getOrUndefinedCharacterByWorldCharacter(WorldCharacterId)`
+- `getBuildingByWorldBuilding(WorldBuildingId)` / `getOrUndefinedBuildingByWorldBuilding(WorldBuildingId)`
+
+## 5) Svelte 5 Rules
+
+- Runes 사용: `$state`, `$derived`, `$effect`
+- `$app/stores` 대신 `$app/state` 사용
+- 외부 객체는 `$state.raw()` 사용
+- store 갱신은 Immer `produce()` 사용
+- context는 초기화 시에만 접근, 클래스에는 constructor 주입
+
+## 6) Database Rules
+
+- RLS policy 이름: lowercase plural
+- constraint prefix: `uq_`, `fk_`, `idx_`, `chk_`
+- 무결성은 DB 레벨에서 강제한다.
+- inline constraints, DB defaults 우선
+- 타입 캐스팅 쿼리 금지
+- 디버깅 우선순위: psql -> console.log
+
+## 7) UI Rules
+
+- shadcn-svelte:
+	- 명시적 import
+	- `<Label>` 금지 (`<InputGroupText>` 사용)
+	- Icon에 `class` 직접 지정 금지
+- 조합 규칙:
+	- `ButtonGroup + Select` 사용
+	- `InputGroup + Select` 금지
+- Admin 경로 패턴:
+	- `/admin/scenarios/[scenarioId]/{domain}/[{domain}Id]/`
+- 주요 컴포넌트 패턴:
+	- aside, command, create-dialog, delete-dialog, panel
+
+## 8) Patterns
+
+- 버그 수정: Root cause -> Small test -> Verify -> Full deployment
+- `EntityIdUtils`: `create()`, `parse()`, `is()`, `or()`
+- 캐시는 `$derived` 사용
+- `RecordFetchState.data`는 항상 defined 상태 유지 (`?? {}` 금지)
+- 상수는 `constants.ts`로 분리
+
+## 9) Tech Stack
+
+SvelteKit 2.48+, Svelte 5, TypeScript 5.9+, Tailwind 4.1+, shadcn-svelte, Supabase, Matter.js 0.20, Immer, Radash 12.1+
