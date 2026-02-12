@@ -91,15 +91,18 @@
 				: isFulfillInteractionType(interactionType)
 					? 'fulfill'
 					: 'system';
+			const onceInteractionType = type === 'once' ? (interactionType as OnceInteractionType) : null;
+			const fulfillInteractionType =
+				type === 'fulfill' ? (interactionType as FulfillInteractionType) : null;
+			const systemInteractionType =
+				type === 'system' ? (interactionType as SystemInteractionType) : null;
 
 			const itemInteraction = await admin.createItemInteraction(scenarioId, {
 				item_id: itemId,
 				type,
-				once_interaction_type: isOnceInteractionType(interactionType) ? interactionType : null,
-				fulfill_interaction_type: isFulfillInteractionType(interactionType)
-					? interactionType
-					: null,
-				system_interaction_type: isSystemInteractionType(interactionType) ? interactionType : null,
+				once_interaction_type: onceInteractionType,
+				fulfill_interaction_type: fulfillInteractionType,
+				system_interaction_type: systemInteractionType,
 				character_id: characterId || null,
 			});
 
