@@ -42,17 +42,18 @@
 
 	let { action, characterInteractionId, hasParent = false }: Props = $props();
 
-	const { characterStore, getOrUndefinedCharacter } = useCharacter();
+	const { characterStore } = useCharacter();
 	const {
 		characterInteractionStore,
 		characterInteractionActionStore,
-		getOrUndefinedCharacterInteraction,
-		getAllCharacterInteractionActions: getCharacterInteractionActions,
 		admin,
 	} = useInteraction();
 	const flowNodes = useNodes();
 
-	const interaction = $derived(getOrUndefinedCharacterInteraction(characterInteractionId));
+	const interaction = $derived($characterInteractionStore.data[characterInteractionId]);
+	const interactionActions = $derived(
+		$characterInteractionActionStore.data[characterInteractionId] ?? []
+	);
 	const characters = $derived(Object.values($characterStore.data));
 
 	// 미리보기용 캐릭터 선택
@@ -60,9 +61,9 @@
 	let previewCharacterId = $state<CharacterId | undefined>(undefined);
 	const previewCharacter = $derived(
 		behaviorHasSpecificCharacter && interaction?.character_id
-			? getOrUndefinedCharacter(interaction.character_id as CharacterId)
+			? $characterStore.data[interaction.character_id as CharacterId]
 			: previewCharacterId
-				? getOrUndefinedCharacter(previewCharacterId as CharacterId)
+				? $characterStore.data[previewCharacterId as CharacterId]
 				: characters[0]
 	);
 	const selectedPreviewCharacterLabel = $derived(previewCharacter?.name ?? '캐릭터 선택');
@@ -119,8 +120,7 @@
 		try {
 			// root로 설정할 때 다른 root 액션들을 먼저 해제
 			if (changes.root) {
-				const allActions = getCharacterInteractionActions(characterInteractionId);
-				const otherRootActions = allActions.filter((a) => a.id !== actionId && a.root);
+				const otherRootActions = interactionActions.filter((a) => a.id !== actionId && a.root);
 				await Promise.all(
 					otherRootActions.map((a) => admin.updateCharacterInteractionAction(a.id, { root: false }))
 				);

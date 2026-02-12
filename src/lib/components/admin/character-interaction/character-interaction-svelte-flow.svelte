@@ -33,8 +33,6 @@
 	const {
 		characterInteractionStore,
 		characterInteractionActionStore,
-		getOrUndefinedCharacterInteraction,
-		getAllCharacterInteractionActions: getCharacterInteractionActions,
 		admin,
 	} = useInteraction();
 
@@ -43,10 +41,10 @@
 		page.params.characterInteractionId as CharacterInteractionId
 	);
 	const interaction = $derived(
-		characterInteractionId ? getOrUndefinedCharacterInteraction(characterInteractionId) : undefined
+		characterInteractionId ? $characterInteractionStore.data[characterInteractionId] : undefined
 	);
 	const actions = $derived(
-		characterInteractionId ? getCharacterInteractionActions(characterInteractionId) : []
+		characterInteractionId ? ($characterInteractionActionStore.data[characterInteractionId] ?? []) : []
 	);
 
 	const flowNodes = useNodes();
