@@ -18,6 +18,7 @@
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		characterId: CharacterId;
 		bodyStateType: CharacterBodyStateType;
+		onBodyAnimationComplete?: () => void;
 		faceStateType?: CharacterFaceStateType;
 		heldItemState?: ItemState;
 		heldItemOffset?: { x: number; y: number };
@@ -37,6 +38,7 @@
 	let {
 		characterId,
 		bodyStateType,
+		onBodyAnimationComplete,
 		faceStateType,
 		heldItemState,
 		heldItemOffset,
@@ -102,6 +104,7 @@
 			newAnimator.play({
 				name: bodyState.type,
 				loop: (bodyState.loop as LoopType) ?? 'loop',
+				onComplete: onBodyAnimationComplete,
 			});
 			bodyAnimator = newAnimator;
 		});

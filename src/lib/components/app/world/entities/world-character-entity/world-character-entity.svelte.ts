@@ -25,6 +25,7 @@ export class WorldCharacterEntity extends Entity {
 	heldItemIds = $state<EntityId[]>([]);
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
 	behavior: WorldCharacterEntityBehavior;
+	private bodyAnimationCompleteListeners = new Set<() => void>();
 
 	tickDecreaseNeeds = tickDecreaseNeeds;
 
@@ -124,5 +125,25 @@ export class WorldCharacterEntity extends Entity {
 			vectorUtils.createVector(this.body.position.x, this.body.position.y),
 			vector
 		);
+	}
+
+	/**
+	 * 바디 애니메이션 완료 콜백을 등록합니다.
+	 * 반환값을 호출하면 등록 해제됩니다.
+	 */
+	onBodyAnimationComplete(listener: () => void): () => void {
+		this.bodyAnimationCompleteListeners.add(listener);
+		return () => {
+			this.bodyAnimationCompleteListeners.delete(listener);
+		};
+	}
+
+	/**
+	 * 현재 등록된 바디 애니메이션 완료 콜백을 실행합니다.
+	 */
+	emitBodyAnimationComplete(): void {
+		for (const listener of this.bodyAnimationCompleteListeners) {
+			listener();
+		}
 	}
 }

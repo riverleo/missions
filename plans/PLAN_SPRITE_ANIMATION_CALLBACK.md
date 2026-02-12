@@ -1,251 +1,87 @@
-# PLAN: Sprite Animation Completion Callback System
+# PLAN: InteractionAction `duration_ticks = 0` Spec
 
 ## 목표
+특정 `InteractionAction`의 `duration_ticks = 0`일 때, 캐릭터 바디 애니메이션이 끝나는 시점에 다음 인터렉션 액션으로 전환한다.
 
-스프라이트 애니메이터에서 애니메이션이 완료되었을 때 실행되는 콜백 시스템을 구현하여, 상호작용 액션의 `duration_ticks = 0` 처리를 지원합니다.
+## 스코프
+- 포함: 실행 스펙 정의, 상태 전이, 완료 신호 계약, 예외/폴백 정책
+- 제외: `tickDequeueInteraction` 전체 구현 상세 (별도 TODO에서 구현)
 
-## 배경
+## 용어
+- `currentInteractionAction`: 현재 실행 중인 `InteractionAction` (=`interactionQueue.poppedInteractionTargetId`로 조회한 액션)
+- `duration_ticks`: 액션 지속 틱
+- `bodyAnimationComplete`: 현재 `currentInteractionAction`이 지정한 바디 상태 애니메이션의 1회 재생 완료 신호
 
-현재 어드민 UI에서 액션 duration 설명:
-> "액션이 지속되는 시간입니다. 0인 경우 캐릭터 바디 애니메이션이 종료될 때까지 실행됩니다."
+## 핵심 규칙
+1. `duration_ticks > 0`
+- 기존 규칙 유지: `tick - interactionQueue.poppedAtTick >= duration_ticks`이면 완료
 
-이 기능을 실제로 구현하려면:
-1. 스프라이트 애니메이터가 애니메이션 완료를 감지해야 함
-2. 완료 시점에 콜백을 실행해야 함
-3. 행동 시스템(behavior state)에서 이 콜백을 구독하여 다음 단계로 진행해야 함
+2. `duration_ticks = 0`
+- 시간 기반이 아니라 애니메이션 완료 기반으로 완료
+- `bodyAnimationComplete` 신호를 받은 tick에서 액션 완료 처리
 
-## 현재 상태 분석
+## 상태 전이 스펙 (Interaction Queue)
+1. `ready -> running`
+- 액션 pop 시 `currentInteractionAction` 확정, `interactionQueue.poppedAtTick` 기록
+- 애니메이션 완료 플래그 `false`로 초기화
 
-### SpriteAnimator 구조
-- 위치: `src/lib/components/app/world/entities/sprite-animator/`
-- 현재 기능: 스프라이트 시트 기반 프레임 애니메이션
-- 부족한 기능: 애니메이션 완료 감지 및 콜백
+2. `running -> running`
+- `duration_ticks > 0`이면 틱 경과 확인
+- `duration_ticks = 0`이면 완료 플래그 확인
 
-### CharacterBodyStateType
-- `idle`, `walk`, `run` 등의 상태
-- 각 상태마다 애니메이션 프레임 정의
-- 반복(loop) vs 한번만 재생(once) 구분 필요
+3. `running -> next action or completed`
+- 완료 조건 충족 시 다음 액션 pop
+- 다음 액션이 없으면 queue `completed`
 
-### InteractionAction duration_ticks
-- `duration_ticks > 0`: 고정 틱 수만큼 실행
-- `duration_ticks = 0`: 애니메이션 종료까지 실행 (미구현)
+## 완료 신호 계약 (Animator -> Entity/Behavior)
+1. 신호 출처
+- `CharacterSpriteAnimator` body animation `onComplete`
 
-## 설계
+2. 신호 소비
+- `WorldCharacterEntity`가 이벤트를 emit
+- behavior 실행기가 이를 구독해 "현재 액션 완료 가능" 플래그를 갱신
 
-### Phase 1: SpriteAnimator 애니메이션 상태 추적
+3. 정확성 규칙
+- 액션당 최대 1회 완료로 처리 (중복 emit 무시)
+- 액션 전환 시 플래그 반드시 reset
+- `clear()` 시 구독/플래그 정리
 
-**목표:** 애니메이션이 언제 완료되는지 감지
+## 선행 조건 (duration=0이 유효하려면)
+- 현재 액션의 바디 상태가 실제로 재생되어야 함
+- 해당 바디 상태의 loop 모드가 완료 가능한 모드여야 함 (`once` 또는 `ping-pong-once`)
 
-#### 1.1 Animation Metadata 정의
-**File:** `src/lib/types/animation.ts` (신규)
+## loop 타입별 `duration_ticks = 0` 처리 규칙
+1. `loop = 'once' | 'ping-pong-once'`
+- `onComplete` 신호를 정상 완료 조건으로 사용
 
-```typescript
-export type AnimationPlayMode = 'loop' | 'once';
+2. `loop = 'loop' | 'ping-pong'`
+- `onComplete`가 발생하지 않으므로 `duration_ticks = 0`과 조합 시 무한 대기 위험
+- 런타임 폴백: `1 tick` 후 완료 처리
+- 디버깅 신호: `console.warn` 출력
 
-export interface AnimationMetadata {
-  totalFrames: number;
-  playMode: AnimationPlayMode;
-  frameRate: number; // frames per second
-}
-```
+## 폴백 정책 (무한 대기 방지)
+- `duration_ticks = 0`인데 완료 불가능 loop(`loop`, `ping-pong`)인 경우:
+  - 기본 정책: `1 tick` 후 완료 처리 + 경고 로그
+  - 목적: gameplay 진행 정지 방지
 
-#### 1.2 SpriteAnimator State 확장
-**File:** `sprite-animator.svelte.ts`
+## 데이터/어드민 가드 (권장)
+- `duration_ticks = 0`일 때 loop를 `once`/`ping-pong-once`로 제한하거나 경고를 노출한다.
+- 목표: 런타임 폴백 의존도를 줄이고 설정 실수를 조기에 발견한다.
 
-```typescript
-export class SpriteAnimator {
-  // 기존 상태
-  currentFrame = $state(0);
+## 엣지 케이스
+1. 같은 바디 상태가 연속 실행되는 경우
+- 액션 식별자 기준으로 재생/완료를 구분해야 함 (이전 액션 완료 신호 재사용 금지)
 
-  // 추가 상태
-  currentAnimation = $state<string | undefined>();
-  animationMetadata = $state<AnimationMetadata | undefined>();
-  isAnimationComplete = $state(false);
+2. 액션 도중 행동 중단/변경
+- 현재 액션 완료 대기 상태를 즉시 폐기
+- 이후 늦게 도착한 완료 신호는 무시
 
-  // 애니메이션 완료 콜백
-  onAnimationComplete: (() => void) | undefined;
-}
-```
+3. 애니메이션 리소스 없음/상태 없음
+- 폴백 정책 적용 (1 tick 완료 + 경고)
 
-#### 1.3 애니메이션 진행 로직 수정
-- 매 프레임 업데이트 시 완료 여부 체크
-- `playMode === 'once'`이고 마지막 프레임이면 `isAnimationComplete = true`
-- 완료 시 `onAnimationComplete` 콜백 호출
-- `playMode === 'loop'`이면 계속 반복
-
-#### 작업 목록
-- [ ] `src/lib/types/animation.ts` 생성
-- [ ] `AnimationMetadata` 타입 정의
-- [ ] `SpriteAnimator`에 애니메이션 상태 추가
-- [ ] 프레임 업데이트 로직에 완료 감지 추가
-- [ ] 콜백 호출 메커니즘 구현
-
-### Phase 2: CharacterBodyStateType Animation Configuration
-
-**목표:** 각 바디 상태마다 애니메이션 메타데이터 정의
-
-#### 2.1 Animation Config 파일
-**File:** `src/lib/config/character-animations.ts` (신규)
-
-```typescript
-export const CHARACTER_ANIMATIONS: Record<CharacterBodyStateType, AnimationMetadata> = {
-  idle: {
-    totalFrames: 4,
-    playMode: 'loop',
-    frameRate: 8,
-  },
-  walk: {
-    totalFrames: 8,
-    playMode: 'loop',
-    frameRate: 12,
-  },
-  // interaction actions용 - 한번만 재생
-  interact: {
-    totalFrames: 6,
-    playMode: 'once',
-    frameRate: 10,
-  },
-  // ... 기타 상태들
-};
-```
-
-#### 2.2 SpriteAnimator 초기화 시 메타데이터 연결
-- 바디 상태 변경 시 해당 애니메이션 메타데이터 로드
-- `currentAnimation`, `animationMetadata` 업데이트
-
-#### 작업 목록
-- [ ] `src/lib/config/character-animations.ts` 생성
-- [ ] 모든 `CharacterBodyStateType`에 대한 메타데이터 정의
-- [ ] 스프라이트 시트 확인하여 정확한 프레임 수 설정
-- [ ] SpriteAnimator에서 상태 변경 시 메타데이터 로드
-
-### Phase 3: Behavior State Integration
-
-**목표:** 행동 시스템에서 애니메이션 완료 콜백 활용
-
-#### 3.1 InteractionAction 실행 로직
-**File:** `tick-dequeue-interaction.ts` (신규 또는 수정)
-
-```typescript
-// duration_ticks = 0인 경우
-if (action.duration_ticks === 0) {
-  // 애니메이션 완료 대기 모드
-  const animator = this.worldCharacterEntity.spriteAnimator;
-
-  if (!animator.onAnimationComplete) {
-    // 콜백 등록 (한번만)
-    animator.onAnimationComplete = () => {
-      // 애니메이션 완료 시 다음 액션으로
-      this.tickNextOrClear(tick);
-    };
-  }
-
-  // 애니메이션이 완료될 때까지 대기
-  return true; // 중단
-}
-```
-
-#### 3.2 콜백 정리 (Cleanup)
-- 액션 전환 시 이전 콜백 제거
-- clear() 호출 시 콜백 초기화
-
-#### 작업 목록
-- [ ] `tick-dequeue-interaction.ts` 생성 (또는 기존 로직 확인)
-- [ ] `duration_ticks = 0` 처리 로직 구현
-- [ ] 애니메이션 완료 콜백 등록
-- [ ] 콜백 정리 로직 구현
-- [ ] `WorldCharacterEntityBehavior.clear()`에 콜백 정리 추가
-
-### Phase 4: Edge Cases & Testing
-
-#### 4.1 엣지 케이스 처리
-- [ ] 애니메이션 도중 행동이 중단되는 경우
-- [ ] 콜백 등록 전에 애니메이션이 이미 완료된 경우
-- [ ] 같은 애니메이션이 연속으로 재생되는 경우
-- [ ] 애니메이션 없이 바로 완료되어야 하는 경우
-
-#### 4.2 테스트
-- [ ] 단위 테스트: SpriteAnimator 애니메이션 완료 감지
-- [ ] 단위 테스트: 콜백 호출 확인
-- [ ] 통합 테스트: duration_ticks = 0 동작 확인
-- [ ] 수동 테스트: 어드민에서 상호작용 액션 생성 및 실행
-
-### Phase 5: Admin UI & Documentation
-
-#### 5.1 Admin UI 개선
-- [ ] duration_ticks 입력 시 힌트 개선
-- [ ] "0 = 애니메이션 종료까지" 명시적 표시
-- [ ] 애니메이션이 없는 액션 타입에 대한 경고
-
-#### 5.2 문서화
-- [ ] 애니메이션 시스템 동작 방식 문서
-- [ ] `CHARACTER_ANIMATIONS` 설정 가이드
-- [ ] 새로운 애니메이션 추가 방법
-
-## 기술적 고려사항
-
-### 1. 프레임 vs 틱
-- **프레임**: 애니메이션 스프라이트의 인덱스 (0, 1, 2, ...)
-- **틱**: 게임 로직 업데이트 단위
-- 둘의 동기화 필요: `frameRate`와 틱 레이트 관계 명확히
-
-### 2. 콜백 메모리 관리
-- 콜백은 closure이므로 메모리 누수 주의
-- 사용 후 반드시 `undefined`로 설정
-- WeakMap 활용 고려
-
-### 3. Svelte Runes
-- `$state`와 콜백의 상호작용 주의
-- 콜백 내에서 `$state` 변경 시 리액티비티 보장
-
-### 4. 애니메이션 프레임 레이트
-- 현재 틱 레이트와 애니메이션 프레임 레이트가 다를 수 있음
-- `requestAnimationFrame` vs 틱 기반 업데이트 고려
-
-## 의존성
-
-### 선행 작업
-- SpriteAnimator 구조 이해
-- WorldCharacterEntity 구조 이해
-- Behavior State 플로우 이해
-
-### 차단 요소
-- 없음 (독립적으로 진행 가능)
-
-## 예상 일정
-
-- Phase 1: 1-2일 (SpriteAnimator 확장)
-- Phase 2: 0.5일 (애니메이션 설정)
-- Phase 3: 1일 (Behavior State 통합)
-- Phase 4: 1일 (테스트)
-- Phase 5: 0.5일 (문서화)
-
-**총 예상: 4-5일**
-
-## 검증 기준
-
-### 기능 검증
-- [ ] `duration_ticks = 0`인 액션이 애니메이션 종료 시 완료됨
-- [ ] `duration_ticks > 0`인 액션은 기존대로 동작
-- [ ] 애니메이션이 loop인 경우 무한 대기하지 않음
-- [ ] 행동 중단 시 콜백이 정리됨
-
-### 성능 검증
-- [ ] 메모리 누수 없음
-- [ ] 콜백 등록/해제가 틱 성능에 영향 없음
-
-### UX 검증
-- [ ] 어드민에서 duration_ticks 설정이 직관적
-- [ ] 실제 게임에서 자연스러운 애니메이션 종료
-
-## 참고사항
-
-### 유사 사례
-- Unity Animator의 `AnimationEvent`
-- Phaser의 `Animation.onComplete`
-- CSS animation의 `animationend` 이벤트
-
-### 향후 확장
-- 애니메이션 중간 프레임 이벤트 (footstep sound 등)
-- 애니메이션 블렌딩
-- 애니메이션 재생 속도 조절
+## 수용 기준 (Acceptance Criteria)
+- [ ] `duration_ticks > 0` 기존 동작 회귀 없음
+- [ ] `duration_ticks = 0` + `once` 바디 애니메이션에서 종료 시점에 다음 액션으로 전환
+- [ ] 완료 불가능 loop에서 무한 대기 없이 진행
+- [ ] 액션 전환/clear 이후 늦게 들어온 완료 신호로 오동작하지 않음
+- [ ] 같은 state 연속 액션에서도 각 액션 단위로 정상 완료 처리

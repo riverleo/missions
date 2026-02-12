@@ -129,6 +129,7 @@
 	<CharacterSpriteAnimator
 		characterId={character.id}
 		{bodyStateType}
+		onBodyAnimationComplete={() => entity.emitBodyAnimationComplete()}
 		{faceStateType}
 		{heldItemState}
 		heldItemOffset={heldItemTransform.offset}
