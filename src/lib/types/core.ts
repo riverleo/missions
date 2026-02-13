@@ -143,6 +143,8 @@ export type InteractionQueueStatus =
 	| 'enqueuing'
 	// 큐 구성 완료. dequeue에서 currentInteractionTargetId를 할당할 수 있는 상태
 	| 'ready'
+	// 실행할 현재 액션은 선택됐지만, 시작 조건을 아직 확인하지 않은 상태
+	| 'action-ready'
 	// 현재 액션 실행 중. 실제 실행/완료 판정은 tick-action-*에서 담당
 	| 'action-running'
 	// 현재 액션 실행 완료 플래그. dequeue에서 다음 액션/완료 상태로 전이
@@ -157,7 +159,7 @@ export interface InteractionQueue {
 	// 현재 실행 중(또는 방금 완료된) 상호작용 타깃 ID
 	currentInteractionTargetId?: InteractionTargetId;
 	// 현재 상호작용의 실제 실행 시작 시각(틱). 시작 전에는 undefined
-	currentInteractionTargetStartedAtTick?: number;
+	currentInteractionTargetRunningAtTick?: number;
 }
 
 // ============================================================

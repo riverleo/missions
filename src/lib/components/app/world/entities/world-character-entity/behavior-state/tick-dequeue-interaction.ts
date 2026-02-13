@@ -14,10 +14,10 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  *
  * ## 명세
  * - [x] 상호작용 큐 상태가 `ready` 또는 `action-completed`가 아니면 아무 작업도 하지 않는다.
- * - [x] `ready` 상태면 첫 번째 타깃을 `currentInteractionTargetId`로 설정하고 `action-running`으로 전환한다.
+ * - [x] `ready` 상태면 첫 번째 타깃을 `currentInteractionTargetId`로 설정하고 `action-ready`로 전환한다.
  * - [x] `action-completed` 상태면 현재 타깃의 next 액션을 우선 탐색한다.
  * - [x] next 액션이 없으면 `interactionTargetIds`에서 현재 타깃의 다음 인덱스를 탐색한다.
- * - [x] 다음 타깃이 있으면 `currentInteractionTargetId`를 갱신하고 `action-running`으로 전환한다.
+ * - [x] 다음 타깃이 있으면 `currentInteractionTargetId`를 갱신하고 `action-ready`로 전환한다.
  * - [x] 다음 타깃이 없으면 `completed`로 전환하고 진행한다.
  */
 export default function tickDequeueInteraction(
@@ -68,8 +68,8 @@ function startInteractionTarget(
 	interactionTargetId: InteractionTargetId
 ): void {
 	behavior.interactionQueue.currentInteractionTargetId = interactionTargetId;
-	behavior.interactionQueue.currentInteractionTargetStartedAtTick = undefined;
-	behavior.interactionQueue.status = 'action-running';
+	behavior.interactionQueue.currentInteractionTargetRunningAtTick = undefined;
+	behavior.interactionQueue.status = 'action-ready';
 }
 
 function completeInteractionQueue(behavior: WorldCharacterEntityBehavior): void {

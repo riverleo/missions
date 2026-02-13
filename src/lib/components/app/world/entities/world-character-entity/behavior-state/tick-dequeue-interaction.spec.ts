@@ -54,7 +54,7 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBeUndefined();
 	});
 
-	it('ready 상태에서 첫 번째 상호작용 대상을 currentInteractionTargetId로 설정하고 action-running으로 전환한다.', () => {
+	it('ready 상태에서 첫 번째 상호작용 대상을 currentInteractionTargetId로 설정하고 action-ready로 전환한다.', () => {
 		behavior.interactionQueue.status = 'ready';
 		behavior.interactionQueue.interactionTargetIds = [
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
@@ -66,8 +66,8 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
 			'item_item-interaction-1_item-interaction-action-1'
 		);
-		expect(behavior.interactionQueue.currentInteractionTargetStartedAtTick).toBeUndefined();
-		expect(behavior.interactionQueue.status).toBe('action-running');
+		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBeUndefined();
+		expect(behavior.interactionQueue.status).toBe('action-ready');
 	});
 
 	it('ready 상태에서 대상이 없으면 completed로 전환한다.', () => {
@@ -75,14 +75,14 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		behavior.interactionQueue.interactionTargetIds = [];
 		behavior.interactionQueue.currentInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.currentInteractionTargetStartedAtTick = 123;
+		behavior.interactionQueue.currentInteractionTargetRunningAtTick = 123;
 
 		behavior.tickDequeueInteraction(10);
 
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
 			'item_item-interaction-1_item-interaction-action-1'
 		);
-		expect(behavior.interactionQueue.currentInteractionTargetStartedAtTick).toBe(123);
+		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBe(123);
 		expect(behavior.interactionQueue.status).toBe('completed');
 	});
 
@@ -113,7 +113,7 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
 			'item_item-interaction-1_item-interaction-action-2'
 		);
-		expect(behavior.interactionQueue.status).toBe('action-running');
+		expect(behavior.interactionQueue.status).toBe('action-ready');
 	});
 
 	it('action-completed 상태에서 next 액션이 없으면 interactionTargetIds의 다음 아이템으로 전환한다.', () => {
@@ -133,14 +133,14 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
 			'item_item-interaction-1_item-interaction-action-2'
 		);
-		expect(behavior.interactionQueue.status).toBe('action-running');
+		expect(behavior.interactionQueue.status).toBe('action-ready');
 	});
 
 	it('action-completed 상태에서 다음 대상이 없으면 completed로 종료한다.', () => {
 		behavior.interactionQueue.status = 'action-completed';
 		behavior.interactionQueue.currentInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.currentInteractionTargetStartedAtTick = 77;
+		behavior.interactionQueue.currentInteractionTargetRunningAtTick = 77;
 		behavior.interactionQueue.interactionTargetIds = [
 			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
 		];
@@ -153,7 +153,7 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
 			'item_item-interaction-1_item-interaction-action-1'
 		);
-		expect(behavior.interactionQueue.currentInteractionTargetStartedAtTick).toBe(77);
+		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBe(77);
 		expect(behavior.interactionQueue.status).toBe('completed');
 	});
 });

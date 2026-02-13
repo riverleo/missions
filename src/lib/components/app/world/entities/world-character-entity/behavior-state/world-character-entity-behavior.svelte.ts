@@ -16,6 +16,7 @@ import tickNextOrClear from './tick-next-or-clear';
 import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
 import tickEnqueueInteractionQueue from './tick-enqueue-interaction-queue';
 import tickDequeueInteraction from './tick-dequeue-interaction';
+import tickActionSystemItemPick from './tick-action-system-item-pick';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -47,6 +48,7 @@ export class WorldCharacterEntityBehavior {
 	tickFindTargetEntityAndGo = tickFindTargetEntityAndGo;
 	tickEnqueueInteractionQueue = tickEnqueueInteractionQueue;
 	tickDequeueInteraction = tickDequeueInteraction;
+	tickActionSystemItemPick = tickActionSystemItemPick;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
