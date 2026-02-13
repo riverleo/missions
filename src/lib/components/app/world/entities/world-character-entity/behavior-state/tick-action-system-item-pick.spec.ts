@@ -67,11 +67,36 @@ describe('tick-action-system-item-pick', () => {
 		});
 	});
 
-	it('path가 비어 있으면 item_pick 시작 가능하다.', () => {
-		behavior.targetEntityId = 'item_item-source-1_world-item-1' as any;
+	it('타깃 아이템과 충분히 가까우면 item_pick 시작 가능하다.', () => {
+		const targetEntityId = 'item_item-source-1_world-item-1' as any;
+		behavior.targetEntityId = targetEntityId;
 		behavior.path = [];
+		(behavior.worldCharacterEntity as any).x = 0;
+		(behavior.worldCharacterEntity as any).y = 0;
+		(behavior.worldCharacterEntity as any).body.position = { x: 0, y: 0 };
+		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
+			x: 0,
+			y: 0,
+			body: { position: { x: 0, y: 0 } },
+		};
 
 		expect(canStartSystemItemPick(behavior)).toBe(true);
+	});
+
+	it('path가 비어 있어도 타깃 아이템과 멀면 item_pick 시작 불가하다.', () => {
+		const targetEntityId = 'item_item-source-1_world-item-1' as any;
+		behavior.targetEntityId = targetEntityId;
+		behavior.path = [];
+		(behavior.worldCharacterEntity as any).x = 0;
+		(behavior.worldCharacterEntity as any).y = 0;
+		(behavior.worldCharacterEntity as any).body.position = { x: 0, y: 0 };
+		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
+			x: 100,
+			y: 100,
+			body: { position: { x: 100, y: 100 } },
+		};
+
+		expect(canStartSystemItemPick(behavior)).toBe(false);
 	});
 
 	it('path가 있고 거리도 멀면 item_pick 시작 불가하다.', () => {
@@ -125,6 +150,15 @@ describe('tick-action-system-item-pick', () => {
 		const targetEntityId = 'item_item-source-1_world-item-1' as any;
 		behavior.targetEntityId = targetEntityId;
 		behavior.path = [];
+		(behavior.worldCharacterEntity as any).x = 0;
+		(behavior.worldCharacterEntity as any).y = 0;
+		(behavior.worldCharacterEntity as any).body.position = { x: 0, y: 0 };
+		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
+			x: 0,
+			y: 0,
+			body: { position: { x: 0, y: 0 } },
+			removeFromWorld: vi.fn(),
+		};
 		behavior.interactionQueue.status = 'action-ready';
 		behavior.interactionQueue.currentInteractionTargetId =
 			'item_item-interaction-1_item-interaction-action-1' as any;
@@ -141,9 +175,6 @@ describe('tick-action-system-item-pick', () => {
 			id: 'world-item-1',
 			world_character_id: null,
 		});
-		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
-			removeFromWorld: vi.fn(),
-		};
 
 		const result = tickActionSystemItemPick.call(behavior, 10);
 		expect(result).toBe(false);
