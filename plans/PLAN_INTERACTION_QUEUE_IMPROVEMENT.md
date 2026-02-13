@@ -74,3 +74,11 @@
 - [x] Admin 입력 폼에서 `duration_ticks` 최소값을 1로 제한한다.
 - [x] 기존 데이터 중 `duration_ticks = 0` 레코드를 마이그레이션/정리한다.
 - [x] 런타임에서 `duration_ticks <= 0` 발견 시 처리 정책(에러/보정)을 결정하고 테스트로 고정한다.
+
+### 8) 미해결 버그 (이어하기)
+
+- [ ] 테스트월드에서 캐릭터가 아이템 근처(시각적으로 도착)까지 이동했지만 `item_pick`이 실행되지 않는 케이스를 재현/해결한다.
+- [ ] `tick-action-system-item-pick`의 시작 조건(`canStartSystemItemPick`)과 실제 이동 완료 판정(`update-move`, `tick-find-target-entity-and-go`) 기준 불일치를 점검한다.
+- [ ] 아래 런타임 값을 디버그 로그로 함께 확인한다.
+  `interactionQueue.status`, `currentInteractionTargetId`, `currentInteractionTargetRunningAtTick`, `targetEntityId`, `path.length`, 캐릭터-아이템 거리
+- [ ] `action-ready`에서 `action-running`으로 전이되지 않는 분기(거리/타깃 조회/상호작용 타입 체크)를 케이스별로 테스트로 고정한다.

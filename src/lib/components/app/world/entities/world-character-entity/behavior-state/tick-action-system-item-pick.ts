@@ -6,6 +6,8 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
+const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 5);
+
 /**
  * # item_pick 시스템 상호작용 실행 tick 함수
  *
@@ -19,7 +21,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * - [x] 상호작용 큐 상태가 `action-ready` 또는 `action-running`이 아니면 아무 작업도 하지 않는다.
  * - [x] 현재 상호작용 타깃이 없으면 아무 작업도 하지 않는다.
  * - [x] 현재 상호작용이 `item_pick`이 아니면 아무 작업도 하지 않는다.
- * - [x] `action-ready` 상태에서 시작 조건(타깃 근접)이 충족되지 않으면 실행을 시작하지 않는다.
+ * - [x] `action-ready` 상태에서 시작 조건(타깃 5px 이내 근접)이 충족되지 않으면 실행을 시작하지 않는다.
  * - [x] `action-ready` 상태에서 시작 조건이 충족되면 `currentInteractionTargetRunningAtTick`를 기록하고 `action-running`으로 전환한다.
  * - [x] `action-running` 상태에서 현재 상호작용 액션을 조회한다.
  * - [x] 실행 시작 틱이 비어 있으면 현재 틱으로 보정한다.
@@ -82,7 +84,7 @@ export function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): 
 	}
 
 	const distance = vectorUtils.getDistance(behavior.worldCharacterEntity, targetEntity);
-	return distance < TARGET_ARRIVAL_DISTANCE;
+	return distance <= ITEM_PICK_START_DISTANCE;
 }
 
 /**

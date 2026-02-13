@@ -115,6 +115,22 @@ describe('tick-action-system-item-pick', () => {
 		expect(canStartSystemItemPick(behavior)).toBe(false);
 	});
 
+	it('타깃과 5px 이내면 path 상태와 무관하게 item_pick 시작 가능하다.', () => {
+		const targetEntityId = 'item_item-source-1_world-item-1' as any;
+		behavior.targetEntityId = targetEntityId;
+		behavior.path = [{ x: 10, y: 10 } as any];
+		(behavior.worldCharacterEntity as any).x = 0;
+		(behavior.worldCharacterEntity as any).y = 0;
+		(behavior.worldCharacterEntity as any).body.position = { x: 0, y: 0 };
+		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
+			x: 3,
+			y: 0,
+			body: { position: { x: 3, y: 0 } },
+		};
+
+		expect(canStartSystemItemPick(behavior)).toBe(true);
+	});
+
 	it('item_pick 완료 시 world_character_id와 heldItemIds를 동기화하고 엔티티를 제거한다.', () => {
 		const targetEntityId = 'item_item-source-1_world-item-1' as any;
 		behavior.targetEntityId = targetEntityId;
