@@ -36,52 +36,52 @@ export default function tickDequeueInteraction(
 	if (this.interactionQueue.status === 'ready') {
 		const firstInteractionTargetId = this.interactionQueue.interactionTargetIds[0];
 		if (!firstInteractionTargetId) {
-			completeInteractionQueue.call(this);
+			completeInteractionQueue(this);
 			return false;
 		}
 
-		startInteractionTarget.call(this, firstInteractionTargetId);
+		startInteractionTarget(this, firstInteractionTargetId);
 		return false;
 	}
 
 	const currentInteractionTargetId = this.interactionQueue.currentInteractionTargetId;
 	if (!currentInteractionTargetId) {
-		completeInteractionQueue.call(this);
+		completeInteractionQueue(this);
 		return false;
 	}
 
 	const nextInteractionTargetId =
-		getOrUndefinedNextInteractionTargetIdFromAction.call(this, currentInteractionTargetId) ??
-		getOrUndefinedNextInteractionTargetIdFromQueue.call(this, currentInteractionTargetId);
+		getOrUndefinedNextInteractionTargetIdFromAction(this, currentInteractionTargetId) ??
+		getOrUndefinedNextInteractionTargetIdFromQueue(this, currentInteractionTargetId);
 
 	if (!nextInteractionTargetId) {
-		completeInteractionQueue.call(this);
+		completeInteractionQueue(this);
 		return false;
 	}
 
-	startInteractionTarget.call(this, nextInteractionTargetId);
+	startInteractionTarget(this, nextInteractionTargetId);
 	return false;
 }
 
 function startInteractionTarget(
-	this: WorldCharacterEntityBehavior,
+	behavior: WorldCharacterEntityBehavior,
 	interactionTargetId: InteractionTargetId
 ): void {
-	this.interactionQueue.currentInteractionTargetId = interactionTargetId;
-	this.interactionQueue.currentInteractionTargetStartedAtTick = undefined;
-	this.interactionQueue.status = 'action-running';
+	behavior.interactionQueue.currentInteractionTargetId = interactionTargetId;
+	behavior.interactionQueue.currentInteractionTargetStartedAtTick = undefined;
+	behavior.interactionQueue.status = 'action-running';
 }
 
-function completeInteractionQueue(this: WorldCharacterEntityBehavior): void {
-	this.interactionQueue.status = 'completed';
+function completeInteractionQueue(behavior: WorldCharacterEntityBehavior): void {
+	behavior.interactionQueue.status = 'completed';
 }
 
 function getOrUndefinedNextInteractionTargetIdFromAction(
-	this: WorldCharacterEntityBehavior,
+	behavior: WorldCharacterEntityBehavior,
 	currentInteractionTargetId: InteractionTargetId
 ): InteractionTargetId | undefined {
-	const currentInteractionAction = getOrUndefinedInteractionActionByTargetId.call(
-		this,
+	const currentInteractionAction = getOrUndefinedInteractionActionByTargetId(
+		behavior,
 		currentInteractionTargetId
 	);
 	if (!currentInteractionAction) return undefined;
@@ -94,19 +94,17 @@ function getOrUndefinedNextInteractionTargetIdFromAction(
 }
 
 function getOrUndefinedNextInteractionTargetIdFromQueue(
-	this: WorldCharacterEntityBehavior,
+	behavior: WorldCharacterEntityBehavior,
 	currentInteractionTargetId: InteractionTargetId
 ): InteractionTargetId | undefined {
-	const currentIndex = this.interactionQueue.interactionTargetIds.indexOf(
-		currentInteractionTargetId
-	);
+	const currentIndex = behavior.interactionQueue.interactionTargetIds.indexOf(currentInteractionTargetId);
 	if (currentIndex === -1) return undefined;
 
-	return this.interactionQueue.interactionTargetIds[currentIndex + 1];
+	return behavior.interactionQueue.interactionTargetIds[currentIndex + 1];
 }
 
 function getOrUndefinedInteractionActionByTargetId(
-	this: WorldCharacterEntityBehavior,
+	behavior: WorldCharacterEntityBehavior,
 	interactionTargetId: InteractionTargetId
 ): InteractionAction | undefined {
 	const { getAllInteractionActions } = useInteraction();
