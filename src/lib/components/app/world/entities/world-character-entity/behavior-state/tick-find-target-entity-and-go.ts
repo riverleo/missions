@@ -4,7 +4,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import type { EntitySourceId, WorldItemId, InteractionQueue, Interaction } from '$lib/types';
+import type { EntitySourceId, InteractionQueue, Interaction, WorldItemId } from '$lib/types';
 import { getAllInteractionsByBehaviorTargetId } from '$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id';
 import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-all-entity-sources-by-interaction';
 
@@ -29,11 +29,9 @@ import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-al
  * - [x] 자기 자신은 타깃 엔티티가 될 수 없다.
  * - 들고 있는 아이템 중 대상 후보가 있는 경우
  *    - [x] 대상 후보와 일치하는 첫번째 아이템을 타깃 엔티티로 설정한다.
- *    - [x] 아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정한다.
  *    - [x] 핵심 상호작용 대상을 상호작용 큐에 설정한다.
  * - 들고 있는 아이템 중 대상 후보가 없는 경우
  *    - [x] 캐릭터와 가장 가까운 엔티티 중 대상 후보와 일치하는 엔티티를 타깃 엔티티로 설정한다.
- *    - [x] 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정한다.
  *    - [x] 월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 타깃 엔티티가 될 수 없다.
  * - [x] 현재 행동에 대한 타깃 엔티티를 찾지 못한 경우 계속 진행한다.
  */
@@ -41,7 +39,7 @@ export default function tickFindTargetEntityAndGo(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	const { getEntitySourceId, getWorldItem, updateWorldItem } = useWorld();
+	const { getEntitySourceId, getWorldItem } = useWorld();
 	const { getBehaviorAction } = useBehavior();
 	const { getOrUndefinedRootInteractionAction } = useInteraction();
 
@@ -89,6 +87,23 @@ export default function tickFindTargetEntityAndGo(
 		this.interactionQueue.coreInteractionTargetId = InteractionIdUtils.create(rootAction);
 	};
 
+	const isItemTargetedByOtherCharacter = (itemEntityId: string): boolean => {
+		for (const entity of Object.values(this.worldCharacterEntity.worldContext.entities)) {
+			if (entity.id === this.worldCharacterEntity.id) continue;
+
+			const targetEntityId = (
+				entity as {
+					behavior?: {
+						targetEntityId?: string;
+					};
+				}
+			).behavior?.targetEntityId;
+			if (targetEntityId === itemEntityId) return true;
+		}
+
+		return false;
+	};
+
 	const trySetTargetEntity = (
 		targetEntitySourceIds: EntitySourceId[],
 		coreInteraction?: Interaction
@@ -99,16 +114,13 @@ export default function tickFindTargetEntityAndGo(
 
 		// 4. 들고 있는 아이템 중 대상 후보가 있는 경우
 		for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
-			const { instanceId, sourceId } = EntityIdUtils.parse(heldItemEntityId);
+			const { sourceId } = EntityIdUtils.parse(heldItemEntityId);
 			if (targetEntitySourceIds.includes(sourceId)) {
 				// 타깃 엔티티로 설정
+				// 소유 상태(world_character_id)는 여기서 변경하지 않음.
+				// 실제 소지 확정은 item_pick 상호작용 완료 시점에 처리한다.
 				this.targetEntityId = heldItemEntityId;
 				this.path = [];
-
-				// 아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정
-				updateWorldItem(instanceId as WorldItemId, {
-					world_character_id: this.worldCharacterEntity.instanceId,
-				});
 
 				// InteractionQueue 생성
 				setCoreInteractionTargetId(coreInteraction);
@@ -125,14 +137,22 @@ export default function tickFindTargetEntityAndGo(
 			if (!targetEntitySourceIds.includes(e.sourceId)) return false;
 			if (e.id === this.worldCharacterEntity.id) return false;
 
-			// 아이템인 경우 캐릭터 ID가 없는 것만
-			const worldItem = getWorldItem(EntityIdUtils.instanceId(e.id));
-			if (
-				worldItem &&
-				worldItem.world_character_id &&
-				worldItem.world_character_id !== this.worldCharacterEntity.instanceId
-			) {
-				return false;
+			// 아이템인 경우 다른 캐릭터가 이미 소지 중인 아이템은 제외
+			// world_character_id는 "실제 소지 상태"로만 사용한다.
+			if (EntityIdUtils.is('item', e.id)) {
+				const worldItemId = EntityIdUtils.instanceId<WorldItemId>(e.id);
+				const worldItem = getWorldItem(worldItemId);
+				if (
+					worldItem.world_character_id &&
+					worldItem.world_character_id !== this.worldCharacterEntity.instanceId
+				) {
+					return false;
+				}
+
+				// 아이템 타깃 예약은 별도 맵이 아니라 각 캐릭터의 targetEntityId로 판단한다.
+				if (isItemTargetedByOtherCharacter(e.id)) {
+					return false;
+				}
 			}
 
 			return true;
@@ -145,11 +165,6 @@ export default function tickFindTargetEntityAndGo(
 				candidateEntities
 			);
 			this.targetEntityId = sortedCandidates[0]!.id;
-
-			// 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정
-			updateWorldItem(EntityIdUtils.instanceId(this.targetEntityId), {
-				world_character_id: this.worldCharacterEntity.instanceId,
-			});
 
 			// InteractionQueue 생성
 			setCoreInteractionTargetId(coreInteraction);

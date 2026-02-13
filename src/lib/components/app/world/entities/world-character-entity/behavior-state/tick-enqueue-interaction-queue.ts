@@ -35,7 +35,7 @@ export default function tickEnqueueInteractionQueue(
 	}
 
 	// 핵심 상호작용 대상이 없으면 상태를 '완료'로 변경하고 다음 단계로 진행
-	if (!this.interactionQueue.coreInteractionTargetId || !this.targetEntityId) {
+	if (!this.targetEntityId || !this.interactionQueue.coreInteractionTargetId) {
 		this.interactionQueue.status = 'completed';
 		return false;
 	}

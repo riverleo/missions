@@ -32,6 +32,9 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 
 		const mockWorldCharacterEntity: Partial<WorldCharacterEntity> = {
 			id: 'character_world-1_character-1' as any,
+			instanceId: 'world-character-1' as any,
+			heldItemIds: [],
+			worldContext: { entities: {} } as any,
 			onBodyAnimationComplete: vi.fn((listener: () => void) => {
 				listeners.add(listener);
 				return () => listeners.delete(listener);
@@ -231,6 +234,30 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 
 		expect(behavior.interactionQueue.poppedInteractionTargetId).toBeUndefined();
 		expect(behavior.isCurrentInteractionBodyAnimationCompleted()).toBe(false);
+	});
+
+	it('상호작용 액션 완료 시 큐 상태만 갱신하고 소지 아이템 상태는 변경하지 않는다.', () => {
+		behavior.worldCharacterEntity.heldItemIds = ['item_world-1_item-1_world-item-1' as any];
+		behavior.interactionQueue.status = 'running';
+		behavior.interactionQueue.poppedAtTick = 10;
+		behavior.interactionQueue.poppedInteractionTargetId =
+			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
+
+		const action: Partial<InteractionAction> = {
+			id: 'item-interaction-action-1' as any,
+			duration_ticks: 1,
+			character_body_state_type: 'idle' as any,
+		};
+		mockGetAllInteractionActions.mockReturnValue([action]);
+
+		const result = behavior.tickDequeueInteraction(11);
+
+		expect(result).toBe(false);
+		expect(behavior.worldCharacterEntity.heldItemIds).toEqual([
+			'item_world-1_item-1_world-item-1'
+		]);
+		expect(behavior.interactionQueue.status).toBe('completed');
+		expect(behavior.interactionQueue.poppedInteractionTargetId).toBeUndefined();
 	});
 
 });

@@ -115,8 +115,7 @@
 		const { getOrUndefinedItem } = useItem();
 		return entity.heldItemIds.map((itemId) => {
 			const item = getOrUndefinedItem(EntityIdUtils.sourceId(itemId));
-			const idPrefix = itemId.split('-')[0];
-			return item ? `${item.name} (${idPrefix})` : `아이템 (${idPrefix})`;
+			return getDisplayNameWithId(item?.name, itemId, '아이템');
 		});
 	});
 </script>

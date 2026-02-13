@@ -21,6 +21,7 @@ vi.mock('$lib/utils/entity-id', () => ({
 			instanceId: id,
 			sourceId: id.split('_')[0] || id,
 		})),
+		is: vi.fn((type: string, id: string | undefined) => id?.startsWith(`${type}_`) ?? false),
 	},
 }));
 
@@ -77,7 +78,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 	let mockSearchEntitySources: ReturnType<typeof vi.fn>;
 	let mockGetEntitySourceId: ReturnType<typeof vi.fn>;
 	let mockGetWorldItem: ReturnType<typeof vi.fn>;
-	let mockUpdateWorldItem: ReturnType<typeof vi.fn>;
 	let mockPathfinder: any;
 	let mockGetAllInteractionsByBehaviorTargetId: ReturnType<typeof vi.fn>;
 	let mockGetAllEntitySourcesByInteraction: ReturnType<typeof vi.fn>;
@@ -111,7 +111,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		mockSearchEntitySources = vi.fn();
 		mockGetEntitySourceId = vi.fn();
 		mockGetWorldItem = vi.fn();
-		mockUpdateWorldItem = vi.fn();
 		mockGetOrUndefinedRootInteractionAction = vi.fn();
 
 		const { useBehavior, useWorld, useInteraction, useFulfillment } = await import('$lib/hooks');
@@ -132,7 +131,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		vi.mocked(useWorld).mockReturnValue({
 			getEntitySourceId: mockGetEntitySourceId,
 			getWorldItem: mockGetWorldItem,
-			updateWorldItem: mockUpdateWorldItem,
 		} as any);
 		vi.mocked(useInteraction).mockReturnValue({
 			getOrUndefinedRootInteractionAction: mockGetOrUndefinedRootInteractionAction,
@@ -246,7 +244,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		const result = behavior.tickFindTargetEntityAndGo(0);
 
 		expect(behavior.targetEntityId).toBe('entity-1');
-		expect(mockUpdateWorldItem).toHaveBeenCalled();
 		expect(result).toBe(false);
 	});
 
@@ -296,7 +293,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		const result = behavior.tickFindTargetEntityAndGo(0);
 
 		expect(behavior.targetEntityId).toBe('entity-2');
-		expect(mockUpdateWorldItem).toHaveBeenCalled();
 		expect(result).toBe(false);
 	});
 
@@ -424,9 +420,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			expect(result).toBe(false);
 		});
 
-		it('아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정한다', async () => {
-			const { EntityIdUtils } = await import('$lib/utils/entity-id');
-
+		it('타깃을 선정할 때는 아이템 소유 상태를 변경하지 않는다', async () => {
 			behavior.behaviorTargetId = 'behavior-target-1' as any;
 			const entitySourceId = 'item-source-1' as EntitySourceId;
 			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
@@ -440,6 +434,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
 
 			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
+			const { EntityIdUtils } = await import('$lib/utils/entity-id');
 			vi.mocked(EntityIdUtils.parse).mockReturnValue({
 				instanceId: 'held-item-1' as any,
 				sourceId: entitySourceId,
@@ -447,9 +442,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 
 			behavior.tickFindTargetEntityAndGo(0);
 
-			expect(mockUpdateWorldItem).toHaveBeenCalledWith('held-item-1', {
-				world_character_id: 'world-character-1',
-			});
+			expect(mockGetWorldItem).not.toHaveBeenCalled();
 		});
 
 		it('핵심 상호작용 대상을 상호작용 큐에 설정한다', async () => {
@@ -536,7 +529,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			expect(result).toBe(false);
 		});
 
-		it('스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정한다', () => {
+		it('타깃을 선정할 때는 스토어의 월드 아이템 소유 상태를 변경하지 않는다', () => {
 			behavior.behaviorTargetId = 'behavior-target-1' as any;
 			const entitySourceId = 'source-1' as EntitySourceId;
 			const mockBehaviorAction = {
@@ -569,9 +562,61 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 
 			behavior.tickFindTargetEntityAndGo(0);
 
-			expect(mockUpdateWorldItem).toHaveBeenCalledWith('entity-1', {
-				world_character_id: 'world-character-1',
-			});
+			expect(mockGetWorldItem).not.toHaveBeenCalled();
+		});
+
+		it('다른 캐릭터가 이미 타깃으로 지정한 아이템은 대상 후보에서 제외한다', () => {
+			behavior.behaviorTargetId = 'behavior-target-1' as any;
+			const entitySourceId = 'source-1' as EntitySourceId;
+			const mockBehaviorAction = {
+				id: 'action-1',
+				type: 'system-item-pick',
+				target_selection_method: 'search',
+			} as any;
+			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+
+			const mockInteraction = { id: 'interaction-1' } as any;
+			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
+
+			mockGetWorldItem
+				.mockReturnValueOnce({ id: '1', world_character_id: null })
+				.mockReturnValueOnce({ id: '2', world_character_id: null });
+
+			const reservedItemEntityId = 'item_entity-1' as any;
+			const mockEntity1: Entity = {
+				id: reservedItemEntityId,
+				sourceId: entitySourceId,
+				x: 110,
+				y: 100,
+				body: { position: vectorUtils.createVector(110, 100) },
+			} as Entity;
+			const mockEntity2: Entity = {
+				id: 'item_entity-2' as any,
+				sourceId: entitySourceId,
+				x: 150,
+				y: 100,
+				body: { position: vectorUtils.createVector(150, 100) },
+			} as Entity;
+
+			const otherCharacterEntity = {
+				id: 'character-2',
+				behavior: {
+					targetEntityId: reservedItemEntityId,
+				},
+			};
+
+			mockWorldCharacterEntity.worldContext!.entities = {
+				['character-1' as any]: mockWorldCharacterEntity as any,
+				['character-2' as any]: otherCharacterEntity as any,
+				['entity-1' as any]: mockEntity1,
+				['entity-2' as any]: mockEntity2,
+			};
+
+			const result = behavior.tickFindTargetEntityAndGo(0);
+
+			expect(behavior.targetEntityId).toBe('item_entity-2');
+			expect(result).toBe(false);
 		});
 
 		it('월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 타깃 엔티티가 될 수 없다', () => {
@@ -598,14 +643,14 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 				.mockReturnValueOnce({ id: '2', world_character_id: null });
 
 			const mockEntity1: Entity = {
-				id: 'entity-1' as any,
+				id: 'item_entity-1' as any,
 				sourceId: entitySourceId,
 				x: 110,
 				y: 100,
 				body: { position: vectorUtils.createVector(110, 100) },
 			} as Entity;
 			const mockEntity2: Entity = {
-				id: 'entity-2' as any,
+				id: 'item_entity-2' as any,
 				sourceId: entitySourceId,
 				x: 150,
 				y: 100,
@@ -619,7 +664,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 
 			const result = behavior.tickFindTargetEntityAndGo(0);
 
-			expect(behavior.targetEntityId).toBe('entity-2');
+			expect(behavior.targetEntityId).toBe('item_entity-2');
 			expect(result).toBe(false);
 		});
 
@@ -643,7 +688,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			});
 
 			const mockEntity: Entity = {
-				id: 'entity-1' as any,
+				id: 'item_entity-1' as any,
 				sourceId: entitySourceId,
 				x: 110,
 				y: 100,
@@ -656,7 +701,7 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 
 			const result = behavior.tickFindTargetEntityAndGo(0);
 
-			expect(behavior.targetEntityId).toBe('entity-1');
+			expect(behavior.targetEntityId).toBe('item_entity-1');
 			expect(result).toBe(false);
 		});
 	});
