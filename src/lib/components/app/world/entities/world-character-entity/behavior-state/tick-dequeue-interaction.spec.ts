@@ -219,4 +219,18 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 		expect(behavior.isCurrentInteractionBodyAnimationCompleted()).toBe(false);
 	});
 
+	it('clear 이후 늦게 들어온 바디 애니메이션 완료 신호는 무시된다.', () => {
+		behavior.interactionQueue.status = 'running';
+		behavior.interactionQueue.poppedInteractionTargetId =
+			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
+		behavior.bodyAnimationCompletedInteractionTargetId =
+			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
+
+		behavior.clear();
+		emitBodyAnimationComplete();
+
+		expect(behavior.interactionQueue.poppedInteractionTargetId).toBeUndefined();
+		expect(behavior.isCurrentInteractionBodyAnimationCompleted()).toBe(false);
+	});
+
 });
