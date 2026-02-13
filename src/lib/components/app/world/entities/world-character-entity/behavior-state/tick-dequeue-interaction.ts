@@ -6,17 +6,21 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
 /**
- * # 상호작용 큐 실행 tick 함수
+ * # 상호작용 큐 진행 tick 함수
  *
- * interaction queue의 현재 액션을 실행하고 완료 조건을 검사합니다.
+ * interaction queue의 현재 액션 완료 조건을 판정하고,
+ * 완료된 액션을 큐에서 다음 액션으로 넘깁니다.
  * - `duration_ticks > 0`: 틱 경과 기반 완료
  * - `duration_ticks = 0`: 바디 애니메이션 완료 기반 완료
  * - 완료 신호를 받을 수 없는 loop 타입(`loop`, `ping-pong`)은 1틱 폴백 완료
  *
+ * 이 함수는 큐 상태만 관리합니다.
+ * 시스템 상호작용의 도메인 부작용(예: 아이템 획득, 월드 엔티티 제거)은 처리하지 않습니다.
+ *
  * @param tick - 현재 틱
  * @returns false (항상 다음 단계로 진행)
  *
- * ## 명세 (초안)
+ * ## 명세
  * - [x] 상호작용 큐 상태가 준비완료 또는 실행중이 아니면 다음 단계로 진행한다.
  * - [x] 상호작용 큐 상태가 준비완료면 다음 상호작용 대상을 꺼내 실행중으로 전환한다.
  * - [x] 실행중 상태에서 현재 실행 중인 상호작용 대상이 없으면 큐를 완료로 전환한다.

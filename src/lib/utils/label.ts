@@ -163,6 +163,18 @@ export function getUnnamedWithId(id: string): string {
 	return `${FALLBACK_LABELS.unnamed} (${shortId})`;
 }
 
+export function getShortId(id: string): string {
+	return id.split('-')[0] ?? id;
+}
+
+export function getDisplayNameWithId(
+	name: string | undefined | null,
+	id: string,
+	fallback: string = FALLBACK_LABELS.unnamed
+): string {
+	return `${name || fallback} (${getShortId(id)})`;
+}
+
 export function getDisplayTitle(title: string | undefined | null, id: string): string {
 	return title || getUntitledWithId(id);
 }

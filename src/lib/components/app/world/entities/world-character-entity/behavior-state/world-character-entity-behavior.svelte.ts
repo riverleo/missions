@@ -28,6 +28,8 @@ export class WorldCharacterEntityBehavior {
 
 	path = $state<Vector[]>([]);
 	direction = $state<WorldCharacterEntityDirection>('right');
+	// 현재 행동의 실행 대상 엔티티 ID.
+	// 아이템의 경우 다른 캐릭터가 동일 대상을 동시에 잡지 않도록 런타임 예약 신호로도 사용한다.
 	targetEntityId = $state<EntityId | undefined>();
 	behaviorTargetId = $state<BehaviorTargetId | undefined>();
 	behaviorTargetStartTick = $state<number | undefined>();
