@@ -27,6 +27,7 @@ export abstract class Entity {
 	colliderType = $state<ColliderType>('rectangle');
 	colliderWidth = $state(0);
 	colliderHeight = $state(0);
+	behavior = $state<{ targetEntityId?: EntityId } | undefined>(undefined);
 
 	constructor(
 		worldContext: WorldContext,

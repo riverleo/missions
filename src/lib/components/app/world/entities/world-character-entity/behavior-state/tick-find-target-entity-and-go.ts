@@ -91,13 +91,7 @@ export default function tickFindTargetEntityAndGo(
 		for (const entity of Object.values(this.worldCharacterEntity.worldContext.entities)) {
 			if (entity.id === this.worldCharacterEntity.id) continue;
 
-			const targetEntityId = (
-				entity as {
-					behavior?: {
-						targetEntityId?: string;
-					};
-				}
-			).behavior?.targetEntityId;
+			const targetEntityId = entity.behavior?.targetEntityId;
 			if (targetEntityId === itemEntityId) return true;
 		}
 
