@@ -96,6 +96,11 @@
 		}
 	});
 
+	const currentInteractionActionLabel = $derived.by(() => {
+		const { currentInteractionTargetId } = entity.behavior.interactionQueue;
+		return getInteractionTargetLabelString(currentInteractionTargetId);
+	});
+
 	const currentInteractionActionStatusLabel = $derived.by(() => {
 		const { status } = entity.behavior.interactionQueue;
 		return getInteractionQueueStatusLabel(status);
@@ -155,7 +160,8 @@
 			{currentBehaviorActionLabel ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="상호작용 액션" tooltip={interactionTargetIdsTooltip}>
-			{currentInteractionActionStatusLabel}
+			{currentInteractionActionLabel}
+			<Badge variant="secondary">{currentInteractionActionStatusLabel}</Badge>
 		</AccordionContentItem>
 		<AccordionContentItem label="대상">
 			{currentTargetName ?? '없음'}
