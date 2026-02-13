@@ -1,136 +1,115 @@
-import { useCharacter, useInteraction } from '$lib/hooks';
-import { DURATION_ZERO_FALLBACK_TICKS } from '$lib/constants';
-import type { InteractionAction, LoopType } from '$lib/types';
-import { EntityIdUtils } from '$lib/utils/entity-id';
+import { useInteraction } from '$lib/hooks';
+import type { InteractionAction, InteractionTargetId } from '$lib/types';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
 /**
- * # 상호작용 큐 진행 tick 함수
+ * # 상호작용 큐 dequeue tick 함수
  *
- * interaction queue의 현재 액션 완료 조건을 판정하고,
- * 완료된 액션을 큐에서 다음 액션으로 넘깁니다.
- * - `duration_ticks > 0`: 틱 경과 기반 완료
- * - `duration_ticks = 0`: 바디 애니메이션 완료 기반 완료
- * - 완료 신호를 받을 수 없는 loop 타입(`loop`, `ping-pong`)은 1틱 폴백 완료
+ * 이 함수는 상호작용 큐에서 "다음에 실행할 액션"만 선택합니다.
+ * 실제 상호작용 실행/완료 판정은 각 tick-action-*에서 처리합니다.
  *
- * 이 함수는 큐 상태만 관리합니다.
- * 시스템 상호작용의 도메인 부작용(예: 아이템 획득, 월드 엔티티 제거)은 처리하지 않습니다.
- *
- * @param tick - 현재 틱
+ * @param tick - 현재 틱 (dequeue에서는 사용하지 않음)
  * @returns false (항상 다음 단계로 진행)
  *
  * ## 명세
- * - [x] 상호작용 큐 상태가 준비완료 또는 실행중이 아니면 다음 단계로 진행한다.
- * - [x] 상호작용 큐 상태가 준비완료면 다음 상호작용 대상을 꺼내 실행중으로 전환한다.
- * - [x] 실행중 상태에서 현재 실행 중인 상호작용 대상이 없으면 큐를 완료로 전환한다.
- * - [x] 현재 실행 중인 상호작용 대상으로 현재 실행 중인 상호작용 액션을 조회한다.
- * - [x] 상호작용 액션 지속 시간이 0보다 크면, 현재 실행 중인 상호작용 시작 시각(틱) 기준 경과 시간으로 완료를 판정한다.
- * - [x] 상호작용 액션 지속 시간이 0이고 바디 애니메이션 완료 신호를 받을 수 있는 반복 모드면, 완료 신호를 기다린다.
- * - [x] 상호작용 액션 지속 시간이 0이고 바디 애니메이션 완료 신호를 받을 수 없는 반복 모드면, 1틱 폴백으로 완료 처리한다.
- * - [x] 현재 상호작용 액션 완료 시 다음 상호작용 대상을 꺼내고, 더 없으면 큐를 완료로 전환한다.
- * - [x] 상호작용 액션 전환 또는 큐 완료 시 바디 애니메이션 완료 상태를 초기화한다.
+ * - [x] 상호작용 큐 상태가 `ready` 또는 `action-completed`가 아니면 아무 작업도 하지 않는다.
+ * - [x] `ready` 상태면 첫 번째 타깃을 `currentInteractionTargetId`로 설정하고 `action-running`으로 전환한다.
+ * - [x] `action-completed` 상태면 현재 타깃의 next 액션을 우선 탐색한다.
+ * - [x] next 액션이 없으면 `interactionTargetIds`에서 현재 타깃의 다음 인덱스를 탐색한다.
+ * - [x] 다음 타깃이 있으면 `currentInteractionTargetId`를 갱신하고 `action-running`으로 전환한다.
+ * - [ ] 다음 타깃이 없으면 `completed`로 전환하고 진행한다.
  */
 export default function tickDequeueInteraction(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	if (this.interactionQueue.status !== 'ready' && this.interactionQueue.status !== 'running') {
+	void tick;
+
+	if (
+		this.interactionQueue.status !== 'ready' &&
+		this.interactionQueue.status !== 'action-completed'
+	) {
 		return false;
 	}
 
 	if (this.interactionQueue.status === 'ready') {
-		popNextInteractionTargetId.call(this, tick);
+		const firstInteractionTargetId = this.interactionQueue.interactionTargetIds[0];
+		if (!firstInteractionTargetId) {
+			completeInteractionQueue.call(this);
+			return false;
+		}
+
+		startInteractionTarget.call(this, firstInteractionTargetId);
 		return false;
 	}
 
-	if (!this.interactionQueue.poppedInteractionTargetId) {
-		this.interactionQueue.status = 'completed';
+	const currentInteractionTargetId = this.interactionQueue.currentInteractionTargetId;
+	if (!currentInteractionTargetId) {
+		completeInteractionQueue.call(this);
 		return false;
 	}
 
-	const currentInteractionAction = getCurrentInteractionAction.call(this);
-	const elapsed = tick - this.interactionQueue.poppedAtTick;
+	const nextInteractionTargetId =
+		getOrUndefinedNextInteractionTargetIdFromAction.call(this, currentInteractionTargetId) ??
+		getOrUndefinedNextInteractionTargetIdFromQueue.call(this, currentInteractionTargetId);
 
-	if (currentInteractionAction.duration_ticks > 0) {
-		if (elapsed < currentInteractionAction.duration_ticks) return false;
-		popNextInteractionTargetId.call(this, tick);
+	if (!nextInteractionTargetId) {
+		completeInteractionQueue.call(this);
 		return false;
 	}
 
-	if (isDurationZeroCompletableByAnimation.call(this, currentInteractionAction)) {
-		if (!this.isCurrentInteractionBodyAnimationCompleted()) return false;
-		popNextInteractionTargetId.call(this, tick);
-		return false;
-	}
-
-	if (elapsed < DURATION_ZERO_FALLBACK_TICKS) return false;
-
-	console.warn(
-		`duration_ticks=0 fallback applied for interaction action "${currentInteractionAction.id}" because body animation completion is not available.`
-	);
-	popNextInteractionTargetId.call(this, tick);
+	startInteractionTarget.call(this, nextInteractionTargetId);
 	return false;
 }
 
-function popNextInteractionTargetId(this: WorldCharacterEntityBehavior, tick: number): void {
-	const nextInteractionTargetId = this.interactionQueue.interactionTargetIds.shift();
-	this.resetCurrentInteractionBodyAnimationCompleted();
-
-	if (!nextInteractionTargetId) {
-		this.interactionQueue.poppedInteractionTargetId = undefined;
-		this.interactionQueue.status = 'completed';
-		return;
-	}
-
-	this.interactionQueue.poppedInteractionTargetId = nextInteractionTargetId;
-	this.interactionQueue.poppedAtTick = tick;
-	this.interactionQueue.status = 'running';
-}
-
-function getCurrentInteractionAction(this: WorldCharacterEntityBehavior): InteractionAction {
-	const { getAllInteractionActions } = useInteraction();
-
-	const interactionTargetId = this.interactionQueue.poppedInteractionTargetId;
-	if (!interactionTargetId) {
-		throw new Error('Interaction target ID is missing while queue status is running');
-	}
-
-	const { interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
-	const currentInteractionAction = getAllInteractionActions().find(
-		(action) => action.id === interactionActionId
-	);
-
-	if (!currentInteractionAction) {
-		throw new Error(`InteractionAction not found: ${interactionActionId}`);
-	}
-
-	return currentInteractionAction;
-}
-
-function isDurationZeroCompletableByAnimation(
+function startInteractionTarget(
 	this: WorldCharacterEntityBehavior,
-	currentInteractionAction: InteractionAction
-): boolean {
-	const {
-		getOrUndefinedCharacter,
-		getOrUndefinedCharacterBody,
-		getOrUndefinedCharacterBodyStates,
-	} = useCharacter();
+	interactionTargetId: InteractionTargetId
+): void {
+	this.interactionQueue.currentInteractionTargetId = interactionTargetId;
+	this.interactionQueue.currentInteractionTargetStartedAtTick = undefined;
+	this.interactionQueue.status = 'action-running';
+}
 
-	const bodyStateType = currentInteractionAction.character_body_state_type;
-	if (!bodyStateType) return false;
+function completeInteractionQueue(this: WorldCharacterEntityBehavior): void {
+	this.interactionQueue.status = 'completed';
+}
 
-	const characterId = EntityIdUtils.sourceId(this.worldCharacterEntity.id);
-	const character = getOrUndefinedCharacter(characterId);
-	if (!character) return false;
+function getOrUndefinedNextInteractionTargetIdFromAction(
+	this: WorldCharacterEntityBehavior,
+	currentInteractionTargetId: InteractionTargetId
+): InteractionTargetId | undefined {
+	const currentInteractionAction = getOrUndefinedInteractionActionByTargetId.call(
+		this,
+		currentInteractionTargetId
+	);
+	if (!currentInteractionAction) return undefined;
 
-	const characterBody = getOrUndefinedCharacterBody(character.character_body_id);
-	if (!characterBody) return false;
+	const { getNextInteractionAction } = useInteraction();
+	const nextInteractionAction = getNextInteractionAction(currentInteractionAction);
+	if (!nextInteractionAction) return undefined;
 
-	const bodyStates = getOrUndefinedCharacterBodyStates(characterBody.id);
-	const bodyState = bodyStates?.find((state) => state.type === bodyStateType);
-	const loop = bodyState?.loop as LoopType | undefined;
+	return InteractionIdUtils.create(nextInteractionAction);
+}
 
-	return loop === 'once' || loop === 'ping-pong-once';
+function getOrUndefinedNextInteractionTargetIdFromQueue(
+	this: WorldCharacterEntityBehavior,
+	currentInteractionTargetId: InteractionTargetId
+): InteractionTargetId | undefined {
+	const currentIndex = this.interactionQueue.interactionTargetIds.indexOf(
+		currentInteractionTargetId
+	);
+	if (currentIndex === -1) return undefined;
+
+	return this.interactionQueue.interactionTargetIds[currentIndex + 1];
+}
+
+function getOrUndefinedInteractionActionByTargetId(
+	this: WorldCharacterEntityBehavior,
+	interactionTargetId: InteractionTargetId
+): InteractionAction | undefined {
+	const { getAllInteractionActions } = useInteraction();
+	const { interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
+	return getAllInteractionActions().find((action) => action.id === interactionActionId);
 }

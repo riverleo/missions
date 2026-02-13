@@ -138,14 +138,26 @@ export type InteractionTargetId =
 	| `character_${CharacterInteractionId}_${CharacterInteractionActionId}`;
 
 // Interaction Queue for sequential interaction execution
-export type InteractionQueueStatus = 'enqueuing' | 'ready' | 'running' | 'completed';
+export type InteractionQueueStatus =
+	// 큐 구성 중. interactionTargetIds를 아직 완성하지 않은 상태
+	| 'enqueuing'
+	// 큐 구성 완료. dequeue에서 currentInteractionTargetId를 할당할 수 있는 상태
+	| 'ready'
+	// 현재 액션 실행 중. 실제 실행/완료 판정은 tick-action-*에서 담당
+	| 'action-running'
+	// 현재 액션 실행 완료 플래그. dequeue에서 다음 액션/완료 상태로 전이
+	| 'action-completed'
+	// 큐의 모든 액션이 종료된 상태
+	| 'completed';
 
 export interface InteractionQueue {
 	status: InteractionQueueStatus;
 	interactionTargetIds: InteractionTargetId[];
 	coreInteractionTargetId?: InteractionTargetId;
-	poppedInteractionTargetId?: InteractionTargetId;
-	poppedAtTick: number;
+	// 현재 실행 중(또는 방금 완료된) 상호작용 타깃 ID
+	currentInteractionTargetId?: InteractionTargetId;
+	// 현재 상호작용의 실제 실행 시작 시각(틱). 시작 전에는 undefined
+	currentInteractionTargetStartedAtTick?: number;
 }
 
 // ============================================================

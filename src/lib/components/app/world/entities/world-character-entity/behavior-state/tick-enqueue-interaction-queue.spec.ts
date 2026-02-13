@@ -46,23 +46,29 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		} as any);
 	});
 
-	it("상호작용 큐 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행한다.", () => {
+	it("상호작용 큐 상태가 '준비완료', '액션 실행중', '액션 완료' 또는 '완료'면 다음 단계로 진행한다.", () => {
 		behavior.interactionQueue.status = 'ready';
 		const result = behavior.tickEnqueueInteractionQueue(0);
 
 		expect(result).toBe(false);
 		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
 
-		behavior.interactionQueue.status = 'running';
+		behavior.interactionQueue.status = 'action-running';
 		const result2 = behavior.tickEnqueueInteractionQueue(0);
 
 		expect(result2).toBe(false);
 		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
 
-		behavior.interactionQueue.status = 'completed';
+		behavior.interactionQueue.status = 'action-completed';
 		const result3 = behavior.tickEnqueueInteractionQueue(0);
 
 		expect(result3).toBe(false);
+		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
+
+		behavior.interactionQueue.status = 'completed';
+		const result4 = behavior.tickEnqueueInteractionQueue(0);
+
+		expect(result4).toBe(false);
 		expect(behavior.interactionQueue.interactionTargetIds).toHaveLength(0);
 	});
 
