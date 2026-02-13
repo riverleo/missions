@@ -3,7 +3,7 @@
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
-	import { getBehaviorActionString } from '$lib/utils/label';
+	import { getBehaviorActionString, getDisplayNameWithId } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -30,6 +30,9 @@
 	} = useBehavior();
 
 	const character = $derived(getCharacter(entity.sourceId));
+	const characterLabel = $derived(
+		getDisplayNameWithId(character?.name, entity.instanceId, '캐릭터')
+	);
 	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
@@ -122,7 +125,7 @@
 	<AccordionTrigger class="gap-3 py-3 text-xs">
 		<div class="flex flex-1 items-center justify-between">
 			<div>
-				{character?.name ?? '캐릭터'} ({entity.id.split('-')[0]})
+				{characterLabel}
 				<Badge variant="secondary">캐릭터</Badge>
 			</div>
 			<Button

@@ -2,6 +2,7 @@
 	import { useBuilding, useWorld } from '$lib/hooks';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
+	import { getDisplayNameWithId } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -21,6 +22,9 @@
 
 	const worldBuilding = $derived(getWorldBuilding(entity.instanceId));
 	const building = $derived(entity.building);
+	const buildingLabel = $derived(
+		getDisplayNameWithId(building?.name, entity.instanceId, '건물')
+	);
 	const conditions = $derived(Object.values(entity.worldBuildingConditions));
 </script>
 
@@ -28,7 +32,7 @@
 	<AccordionTrigger class="gap-3 py-3 text-xs">
 		<div class="flex flex-1 items-center justify-between">
 			<div>
-				{building?.name ?? '건물'} ({entity.id.split('-')[0]})
+				{buildingLabel}
 				<Badge variant="secondary">건물</Badge>
 			</div>
 			<Button

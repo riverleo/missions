@@ -81,89 +81,105 @@ export default function tickFindTargetEntityAndGo(
 		return false;
 	}
 
-	// 3. 타깃이 없는 경우: 대상 후보 필터링
-	let targetEntitySourceIds: EntitySourceId[] = [];
-	let coreInteraction: Interaction | undefined;
-
-	// 타깃 선택 방식에 따라 후보 필터링
-	if (behaviorAction.target_selection_method === 'explicit') {
-		const entitySourceId = getEntitySourceId(behaviorAction);
-		targetEntitySourceIds = [entitySourceId];
-	} else if (behaviorAction.target_selection_method === 'search') {
-		coreInteraction = getAllInteractionsByBehaviorTargetId(
-			this.behaviorTargetId,
-			this.worldCharacterEntity.sourceId
-		)[0];
-		if (coreInteraction) {
-			targetEntitySourceIds = getAllEntitySourcesByInteraction(coreInteraction).map((es) => es.id);
-		}
-	}
-
-	// 아무런 대상 후보도 찾지 못한 경우
-	if (targetEntitySourceIds.length === 0) {
-		return false;
-	}
-
-	// Helper: coreInteractionTargetId 설정
-	const setCoreInteractionTargetId = (): void => {
+	// 3. 타깃이 없는 경우: 대상 후보 탐색
+	const setCoreInteractionTargetId = (coreInteraction: Interaction | undefined): void => {
 		const rootAction = getOrUndefinedRootInteractionAction(coreInteraction);
 		if (!rootAction) return;
 
 		this.interactionQueue.coreInteractionTargetId = InteractionIdUtils.create(rootAction);
 	};
 
-	// 4. 들고 있는 아이템 중 대상 후보가 있는 경우
-	for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
-		const { instanceId, sourceId } = EntityIdUtils.parse(heldItemEntityId);
-		if (targetEntitySourceIds.includes(sourceId)) {
-			// 타깃 엔티티로 설정
-			this.targetEntityId = heldItemEntityId;
-			this.path = [];
+	const trySetTargetEntity = (
+		targetEntitySourceIds: EntitySourceId[],
+		coreInteraction?: Interaction
+	): boolean => {
+		if (targetEntitySourceIds.length === 0) {
+			return false;
+		}
 
-			// 아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정
-			updateWorldItem(instanceId as WorldItemId, {
+		// 4. 들고 있는 아이템 중 대상 후보가 있는 경우
+		for (const heldItemEntityId of this.worldCharacterEntity.heldItemIds) {
+			const { instanceId, sourceId } = EntityIdUtils.parse(heldItemEntityId);
+			if (targetEntitySourceIds.includes(sourceId)) {
+				// 타깃 엔티티로 설정
+				this.targetEntityId = heldItemEntityId;
+				this.path = [];
+
+				// 아이템의 월드 캐릭터 아이디를 현재 캐릭터로 설정
+				updateWorldItem(instanceId as WorldItemId, {
+					world_character_id: this.worldCharacterEntity.instanceId,
+				});
+
+				// InteractionQueue 생성
+				setCoreInteractionTargetId(coreInteraction);
+
+				return true;
+			}
+		}
+
+		// 5. 들고 있는 아이템 중 대상 후보가 없는 경우
+		const entities = Object.values(this.worldCharacterEntity.worldContext.entities);
+
+		// 월드 캐릭터 아이디가 설정된 아이템은 제외
+		const candidateEntities = entities.filter((e) => {
+			if (!targetEntitySourceIds.includes(e.sourceId)) return false;
+			if (e.id === this.worldCharacterEntity.id) return false;
+
+			// 아이템인 경우 캐릭터 ID가 없는 것만
+			const worldItem = getWorldItem(EntityIdUtils.instanceId(e.id));
+			if (
+				worldItem &&
+				worldItem.world_character_id &&
+				worldItem.world_character_id !== this.worldCharacterEntity.instanceId
+			) {
+				return false;
+			}
+
+			return true;
+		});
+
+		// 가장 가까운 엔티티를 타깃으로 설정
+		if (candidateEntities.length > 0) {
+			const sortedCandidates = vectorUtils.sortByDistance(
+				this.worldCharacterEntity,
+				candidateEntities
+			);
+			this.targetEntityId = sortedCandidates[0]!.id;
+
+			// 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정
+			updateWorldItem(EntityIdUtils.instanceId(this.targetEntityId), {
 				world_character_id: this.worldCharacterEntity.instanceId,
 			});
 
 			// InteractionQueue 생성
-			setCoreInteractionTargetId();
+			setCoreInteractionTargetId(coreInteraction);
 
-			return false;
+			return true;
 		}
-	}
-
-	// 5. 들고 있는 아이템 중 대상 후보가 없는 경우
-	const entities = Object.values(this.worldCharacterEntity.worldContext.entities);
-
-	// 월드 캐릭터 아이디가 설정된 아이템은 제외
-	const candidateEntities = entities.filter((e) => {
-		if (!targetEntitySourceIds.includes(e.sourceId)) return false;
-		if (e.id === this.worldCharacterEntity.id) return false;
-
-		// 아이템인 경우 캐릭터 ID가 없는 것만
-		const worldItem = getWorldItem(EntityIdUtils.instanceId(e.id));
-		if (worldItem && worldItem.world_character_id) return false;
-
-		return true;
-	});
-
-	// 가장 가까운 엔티티를 타깃으로 설정
-	if (candidateEntities.length > 0) {
-		const sortedCandidates = vectorUtils.sortByDistance(
-			this.worldCharacterEntity,
-			candidateEntities
-		);
-		this.targetEntityId = sortedCandidates[0]!.id;
-
-		// 스토어에서 월드 아이템의 캐릭터 아이디를 현재 캐릭터로 설정
-		updateWorldItem(EntityIdUtils.instanceId(this.targetEntityId), {
-			world_character_id: this.worldCharacterEntity.instanceId,
-		});
-
-		// InteractionQueue 생성
-		setCoreInteractionTargetId();
 
 		return false;
+	};
+
+	// 타깃 선택 방식이 명시적인 경우
+	if (behaviorAction.target_selection_method === 'explicit') {
+		const entitySourceId = getEntitySourceId(behaviorAction);
+		trySetTargetEntity([entitySourceId]);
+		return false;
+	}
+
+	// 타깃 선택 방식이 검색인 경우
+	if (behaviorAction.target_selection_method === 'search') {
+		const interactions = getAllInteractionsByBehaviorTargetId(
+			this.behaviorTargetId,
+			this.worldCharacterEntity.sourceId
+		);
+
+		for (const coreInteraction of interactions) {
+			const targetEntitySourceIds = getAllEntitySourcesByInteraction(coreInteraction).map((es) => es.id);
+			if (trySetTargetEntity(targetEntitySourceIds, coreInteraction)) {
+				return false;
+			}
+		}
 	}
 
 	// 6. 타깃 엔티티를 찾지 못한 경우
