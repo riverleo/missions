@@ -12,7 +12,7 @@
 	let { label, tooltip, children }: Props = $props();
 </script>
 
-<div class="flex items-start justify-between text-xs">
+<div class="flex items-center justify-between text-xs">
 	{#if tooltip}
 		<Tooltip>
 			<TooltipTrigger>

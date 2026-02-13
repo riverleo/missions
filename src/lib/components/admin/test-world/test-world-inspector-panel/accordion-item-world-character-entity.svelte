@@ -3,7 +3,12 @@
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
-	import { getBehaviorActionString, getDisplayNameWithId } from '$lib/utils/label';
+	import {
+		getBehaviorActionString,
+		getDisplayNameWithId,
+		getInteractionTargetLabelString,
+		getInteractionQueueStatusLabel,
+	} from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -91,20 +96,23 @@
 		}
 	});
 
-	// behaviors 툴팁
-	const behaviorsTooltip = $derived.by(() => {
-		if (!entity.behavior.behaviors || entity.behavior.behaviors.length === 0) {
-			return undefined;
-		}
+	const currentInteractionActionLabel = $derived.by(() => {
+		const { currentInteractionTargetId } = entity.behavior.interactionQueue;
+		return getInteractionTargetLabelString(currentInteractionTargetId);
+	});
 
-		return entity.behavior.behaviors.map((behavior) => {
-			if (behavior.behaviorType === 'need') {
-				const needBehavior = getOrUndefinedNeedBehavior(behavior.id);
-				return needBehavior?.name ?? '행동';
-			} else {
-				const conditionBehavior = getOrUndefinedConditionBehavior(behavior.id);
-				return conditionBehavior?.name ?? '컨디션';
-			}
+	const currentInteractionActionStatusLabel = $derived.by(() => {
+		const { status } = entity.behavior.interactionQueue;
+		return getInteractionQueueStatusLabel(status);
+	});
+
+	// 상호작용 액션 디버그 툴팁 (interactionTargetIds)
+	const interactionTargetIdsTooltip = $derived.by(() => {
+		const { interactionTargetIds, currentInteractionTargetId } = entity.behavior.interactionQueue;
+
+		return interactionTargetIds.map((interactionTargetId) => {
+			const currentMark = interactionTargetId === currentInteractionTargetId ? ' (현재)' : '';
+			return `${getInteractionTargetLabelString(interactionTargetId)}${currentMark}`;
 		});
 	});
 
@@ -145,11 +153,15 @@
 		<AccordionContentItem label="월드 좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
-		<AccordionContentItem label="행동" tooltip={behaviorsTooltip}>
+		<AccordionContentItem label="행동">
 			{currentBehaviorName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="행동 액션">
 			{currentBehaviorActionLabel ?? '없음'}
+		</AccordionContentItem>
+		<AccordionContentItem label="상호작용 액션" tooltip={interactionTargetIdsTooltip}>
+			{currentInteractionActionLabel}
+			<Badge variant="secondary">{currentInteractionActionStatusLabel}</Badge>
 		</AccordionContentItem>
 		<AccordionContentItem label="대상">
 			{currentTargetName ?? '없음'}

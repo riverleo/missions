@@ -14,7 +14,7 @@ export const MAX_TILE_PLACABLE_COUNT = 50; // 최대 타일 배치 가능 갯수
 export const TICK_INTERVAL = 1000; // 1 tick = 1000ms (1초)
 
 // 행동 시스템 설정
-export const TARGET_ARRIVAL_DISTANCE = 50; // 타겟 도착 판정 거리 (픽셀)
+export const TARGET_ARRIVAL_DISTANCE = 1; // 타겟 도착 판정 거리 (픽셀)
 export const DURATION_ZERO_FALLBACK_TICKS = 1; // duration_ticks=0 + non-completable loop 폴백 틱
 
 // 물리 엔진 설정

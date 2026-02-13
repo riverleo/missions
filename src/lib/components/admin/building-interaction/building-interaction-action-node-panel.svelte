@@ -138,7 +138,7 @@
 				character_offset_y: changes.character_offset_y,
 				character_scale: changes.character_scale,
 				character_rotation: changes.character_rotation,
-				duration_ticks: changes.duration_ticks,
+				duration_ticks: Math.max(1, Number(changes.duration_ticks)),
 				root: changes.root,
 			});
 		} catch (error) {
@@ -208,16 +208,15 @@
 										<InputGroupButton>지속 시간(틱)</InputGroupButton>
 									</TooltipTrigger>
 									<TooltipContent>
-										액션이 지속되는 시간입니다. 0인 경우 캐릭터 바디 애니메이션이 종료될 때까지
-										실행됩니다.
+										액션이 지속되는 시간입니다. 최소 1틱 이상이어야 합니다.
 									</TooltipContent>
 								</Tooltip>
 							</InputGroupAddon>
 							<InputGroupInput
 								type="number"
 								step="1"
-								min="0"
-								placeholder="0"
+								min="1"
+								placeholder="1"
 								bind:value={changes.duration_ticks}
 							/>
 						</InputGroup>

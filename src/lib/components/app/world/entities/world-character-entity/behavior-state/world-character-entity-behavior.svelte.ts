@@ -1,7 +1,6 @@
 import type {
 	EntityId,
 	BehaviorTargetId,
-	InteractionTargetId,
 	InteractionQueue,
 	Behavior,
 } from '$lib/types';
@@ -17,6 +16,7 @@ import tickNextOrClear from './tick-next-or-clear';
 import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
 import tickEnqueueInteractionQueue from './tick-enqueue-interaction-queue';
 import tickDequeueInteraction from './tick-dequeue-interaction';
+import tickActionSystemItemPick from './tick-action-system-item-pick';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -35,10 +35,8 @@ export class WorldCharacterEntityBehavior {
 	behaviorTargetStartTick = $state<number | undefined>();
 	interactionQueue = $state<InteractionQueue>({
 		interactionTargetIds: [],
-		poppedAtTick: 0,
 		status: 'enqueuing',
 	});
-	bodyAnimationCompletedInteractionTargetId = $state<InteractionTargetId | undefined>();
 	behaviors = $state<Behavior[]>([]);
 
 	update = update;
@@ -50,26 +48,10 @@ export class WorldCharacterEntityBehavior {
 	tickFindTargetEntityAndGo = tickFindTargetEntityAndGo;
 	tickEnqueueInteractionQueue = tickEnqueueInteractionQueue;
 	tickDequeueInteraction = tickDequeueInteraction;
+	tickActionSystemItemPick = tickActionSystemItemPick;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
-		this.worldCharacterEntity.onBodyAnimationComplete(() => {
-			const interactionTargetId = this.interactionQueue.poppedInteractionTargetId;
-			if (!interactionTargetId) return;
-			this.bodyAnimationCompletedInteractionTargetId = interactionTargetId;
-		});
-	}
-
-	isCurrentInteractionBodyAnimationCompleted(): boolean {
-		return (
-			this.interactionQueue.poppedInteractionTargetId !== undefined &&
-			this.bodyAnimationCompletedInteractionTargetId ===
-				this.interactionQueue.poppedInteractionTargetId
-		);
-	}
-
-	resetCurrentInteractionBodyAnimationCompleted(): void {
-		this.bodyAnimationCompletedInteractionTargetId = undefined;
 	}
 
 	/**
@@ -101,10 +83,8 @@ export class WorldCharacterEntityBehavior {
 	clearInteractionQueue(): void {
 		this.interactionQueue = {
 			interactionTargetIds: [],
-			poppedAtTick: 0,
 			status: 'enqueuing',
 		};
-		this.resetCurrentInteractionBodyAnimationCompleted();
 	}
 
 	/**

@@ -25,10 +25,12 @@ export default function tickEnqueueInteractionQueue(
 	this: WorldCharacterEntityBehavior,
 	tick: number
 ): boolean {
-	// 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행
+	// 상태가 '준비완료', '액션 실행중', '액션 완료' 또는 '완료'면 다음 단계로 진행
 	if (
 		this.interactionQueue.status === 'ready' ||
-		this.interactionQueue.status === 'running' ||
+		this.interactionQueue.status === 'action-ready' ||
+		this.interactionQueue.status === 'action-running' ||
+		this.interactionQueue.status === 'action-completed' ||
 		this.interactionQueue.status === 'completed'
 	) {
 		return false;

@@ -56,7 +56,7 @@ describe('tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number)', ()
 	});
 
 	it('상호작용 큐가 완료되지 않은 경우 클리어하거나 다음 행동 액션으로 넘어가지 않는다', () => {
-		behavior.interactionQueue.status = 'running';
+		behavior.interactionQueue.status = 'action-running';
 		behavior.behaviorTargetId = 'behavior-target-1' as any;
 
 		behavior.tickNextOrClear(currentTick);
