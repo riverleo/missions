@@ -30,16 +30,8 @@ describe('tick-action-system-item-pick', () => {
 	let mockUpdateWorldItem: ReturnType<typeof vi.fn>;
 	let mockGetInteraction: ReturnType<typeof vi.fn>;
 	let mockGetAllInteractionActions: ReturnType<typeof vi.fn>;
-	let emitBodyAnimationComplete: () => void;
 
 	beforeEach(async () => {
-		const listeners = new Set<() => void>();
-		emitBodyAnimationComplete = () => {
-			for (const listener of listeners) {
-				listener();
-			}
-		};
-
 		const mockWorldCharacterEntity: Partial<WorldCharacterEntity> = {
 			id: 'character_world-1_character-1' as any,
 			instanceId: 'world-character-1' as any,
@@ -48,10 +40,7 @@ describe('tick-action-system-item-pick', () => {
 			body: { position: { x: 0, y: 0 } } as any,
 			heldItemIds: [],
 			worldContext: { entities: {} } as any,
-			onBodyAnimationComplete: vi.fn((listener: () => void) => {
-				listeners.add(listener);
-				return () => listeners.delete(listener);
-			}),
+			onBodyAnimationComplete: vi.fn(),
 		};
 
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);
@@ -190,7 +179,7 @@ describe('tick-action-system-item-pick', () => {
 		expect(behavior.interactionQueue.status).toBe('action-completed');
 	});
 
-	it('action-running에서 duration_ticks=0이면 바디 애니메이션 완료 후 action-completed로 전환한다.', () => {
+	it('action-running에서 duration_ticks<=0이면 최소 1틱으로 보정해 완료를 판정한다.', () => {
 		const targetEntityId = 'item_item-source-1_world-item-1' as any;
 		behavior.targetEntityId = targetEntityId;
 		behavior.path = [];
@@ -216,10 +205,6 @@ describe('tick-action-system-item-pick', () => {
 
 		tickActionSystemItemPick.call(behavior, 10);
 		expect(behavior.interactionQueue.status).toBe('action-running');
-		tickActionSystemItemPick.call(behavior, 20);
-		expect(behavior.interactionQueue.status).toBe('action-running');
-
-		emitBodyAnimationComplete();
 		tickActionSystemItemPick.call(behavior, 11);
 		expect(behavior.interactionQueue.status).toBe('action-completed');
 	});

@@ -81,6 +81,7 @@ create table building_interaction_actions (
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 6,
+  constraint chk_building_interaction_actions_duration_ticks_min check (duration_ticks >= 1),
 
   -- 다음 액션
   next_building_interaction_action_id uuid references building_interaction_actions(id) on delete set null,
@@ -192,6 +193,7 @@ create table item_interaction_actions (
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 6,
+  constraint chk_item_interaction_actions_duration_ticks_min check (duration_ticks >= 1),
 
   -- 다음 액션
   next_item_interaction_action_id uuid references item_interaction_actions(id) on delete set null,
@@ -308,6 +310,7 @@ create table character_interaction_actions (
 
   -- 지속 시간 (틱 단위)
   duration_ticks float not null default 6,
+  constraint chk_character_interaction_actions_duration_ticks_min check (duration_ticks >= 1),
 
   -- 다음 액션
   next_character_interaction_action_id uuid references character_interaction_actions(id) on delete set null,

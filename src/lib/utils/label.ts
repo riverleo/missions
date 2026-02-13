@@ -659,17 +659,9 @@ export function getInteractionActionSummaryString(
 	const interactionTypeLabel = interactionType
 		? getBehaviorInteractTypeString(interactionType)
 		: '상호작용';
-	const durationLabel = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
-	const faceLabel = getCharacterFaceStateString(action.character_face_state_type).replace(
-		' 표정',
-		''
-	);
-	const bodyLabel = getCharacterBodyStateString(action.character_body_state_type).replace(
-		' 바디',
-		''
-	);
+	const durationLabel = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '즉시 ';
 
-	return `${durationLabel}${interactionTypeLabel} (${faceLabel}, ${bodyLabel})`;
+	return `${durationLabel}${interactionTypeLabel}`;
 }
 
 export function getInteractionTargetLabelString(

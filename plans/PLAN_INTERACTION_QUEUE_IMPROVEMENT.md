@@ -66,3 +66,11 @@
 - [ ] `pnpm test:unit` 통과
 - [ ] `pnpm check` 통과
 - [ ] 테스트 시나리오에서 "캐릭터 1이 밥을 대상으로 이동 후 줍기 완료" 흐름이 재현된다.
+
+### 7) `duration_ticks` 유효성 정책
+
+- [ ] 상호작용 액션의 `duration_ticks`는 1 이상만 허용하도록 정책을 명세로 확정한다.
+- [x] DB 제약(`CHECK`)으로 `duration_ticks >= 1`을 강제한다.
+- [x] Admin 입력 폼에서 `duration_ticks` 최소값을 1로 제한한다.
+- [x] 기존 데이터 중 `duration_ticks = 0` 레코드를 마이그레이션/정리한다.
+- [x] 런타임에서 `duration_ticks <= 0` 발견 시 처리 정책(에러/보정)을 결정하고 테스트로 고정한다.
