@@ -1,10 +1,16 @@
-import { DURATION_ZERO_FALLBACK_TICKS, TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
+import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
 import { useInteraction, useWorld } from '$lib/hooks';
 import type { InteractionAction, InteractionTargetId, WorldItemId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
+
+const completedAnimationInteractionTargetIdByBehavior = new WeakMap<
+	WorldCharacterEntityBehavior,
+	InteractionTargetId
+>();
+const registeredAnimationListenerBehaviors = new WeakSet<WorldCharacterEntityBehavior>();
 
 /**
  * item_pick 시스템 상호작용 액션 tick
@@ -27,11 +33,13 @@ export default function tickActionSystemItemPick(
 	const { interactionId } = InteractionIdUtils.parse(currentInteractionTargetId);
 	const interaction = getInteraction(interactionId);
 	if (interaction.system_interaction_type !== 'item_pick') return false;
+	ensureBodyAnimationCompleteListener(this);
 
 	if (this.interactionQueue.status === 'action-ready') {
 		if (!canStartSystemItemPick(this)) return false;
 		this.interactionQueue.currentInteractionTargetRunningAtTick = tick;
 		this.interactionQueue.status = 'action-running';
+		clearCompletedAnimationInteractionTarget(this);
 		return false;
 	}
 
@@ -45,14 +53,12 @@ export default function tickActionSystemItemPick(
 	if (startedAtTick === undefined) return false;
 
 	const elapsed = tick - startedAtTick;
-	const completed =
-		currentInteractionAction.duration_ticks > 0
-			? elapsed >= currentInteractionAction.duration_ticks
-			: elapsed >= DURATION_ZERO_FALLBACK_TICKS;
+	const completed = isCompleted(this, currentInteractionAction, currentInteractionTargetId, elapsed);
 	if (!completed) return false;
 
 	applyCompletedSystemItemPick(this);
 	this.interactionQueue.status = 'action-completed';
+	clearCompletedAnimationInteractionTarget(this);
 	return false;
 }
 
@@ -124,4 +130,38 @@ function getCurrentInteractionAction(
 		throw new Error(`InteractionAction not found: ${interactionActionId}`);
 	}
 	return currentInteractionAction;
+}
+
+function isCompleted(
+	behavior: WorldCharacterEntityBehavior,
+	currentInteractionAction: InteractionAction,
+	currentInteractionTargetId: InteractionTargetId,
+	elapsed: number
+): boolean {
+	if (currentInteractionAction.duration_ticks > 0) {
+		return elapsed >= currentInteractionAction.duration_ticks;
+	}
+
+	const completedAnimationInteractionTargetId =
+		completedAnimationInteractionTargetIdByBehavior.get(behavior);
+	if (completedAnimationInteractionTargetId === currentInteractionTargetId) {
+		return true;
+	}
+
+	return false;
+}
+
+function ensureBodyAnimationCompleteListener(behavior: WorldCharacterEntityBehavior): void {
+	if (registeredAnimationListenerBehaviors.has(behavior)) return;
+	registeredAnimationListenerBehaviors.add(behavior);
+
+	behavior.worldCharacterEntity.onBodyAnimationComplete(() => {
+		const currentInteractionTargetId = behavior.interactionQueue.currentInteractionTargetId;
+		if (!currentInteractionTargetId) return;
+		completedAnimationInteractionTargetIdByBehavior.set(behavior, currentInteractionTargetId);
+	});
+}
+
+function clearCompletedAnimationInteractionTarget(behavior: WorldCharacterEntityBehavior): void {
+	completedAnimationInteractionTargetIdByBehavior.delete(behavior);
 }

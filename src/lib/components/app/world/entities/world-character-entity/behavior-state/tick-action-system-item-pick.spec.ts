@@ -30,8 +30,16 @@ describe('tick-action-system-item-pick', () => {
 	let mockUpdateWorldItem: ReturnType<typeof vi.fn>;
 	let mockGetInteraction: ReturnType<typeof vi.fn>;
 	let mockGetAllInteractionActions: ReturnType<typeof vi.fn>;
+	let emitBodyAnimationComplete: () => void;
 
 	beforeEach(async () => {
+		const listeners = new Set<() => void>();
+		emitBodyAnimationComplete = () => {
+			for (const listener of listeners) {
+				listener();
+			}
+		};
+
 		const mockWorldCharacterEntity: Partial<WorldCharacterEntity> = {
 			id: 'character_world-1_character-1' as any,
 			instanceId: 'world-character-1' as any,
@@ -40,7 +48,10 @@ describe('tick-action-system-item-pick', () => {
 			body: { position: { x: 0, y: 0 } } as any,
 			heldItemIds: [],
 			worldContext: { entities: {} } as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
+			onBodyAnimationComplete: vi.fn((listener: () => void) => {
+				listeners.add(listener);
+				return () => listeners.delete(listener);
+			}),
 		};
 
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);
@@ -175,6 +186,40 @@ describe('tick-action-system-item-pick', () => {
 			removeFromWorld: vi.fn(),
 		};
 
+		tickActionSystemItemPick.call(behavior, 11);
+		expect(behavior.interactionQueue.status).toBe('action-completed');
+	});
+
+	it('action-running에서 duration_ticks=0이면 바디 애니메이션 완료 후 action-completed로 전환한다.', () => {
+		const targetEntityId = 'item_item-source-1_world-item-1' as any;
+		behavior.targetEntityId = targetEntityId;
+		behavior.path = [];
+		behavior.interactionQueue.status = 'action-running';
+		behavior.interactionQueue.currentInteractionTargetId =
+			'item_item-interaction-1_item-interaction-action-1' as any;
+		behavior.interactionQueue.currentInteractionTargetRunningAtTick = 10;
+
+		mockGetInteraction.mockReturnValue({ system_interaction_type: 'item_pick' });
+		mockGetAllInteractionActions.mockReturnValue([
+			{
+				id: 'item-interaction-action-1',
+				duration_ticks: 0,
+			},
+		]);
+		mockGetOrUndefinedWorldItem.mockReturnValue({
+			id: 'world-item-1',
+			world_character_id: null,
+		});
+		(behavior.worldCharacterEntity.worldContext as any).entities[targetEntityId] = {
+			removeFromWorld: vi.fn(),
+		};
+
+		tickActionSystemItemPick.call(behavior, 10);
+		expect(behavior.interactionQueue.status).toBe('action-running');
+		tickActionSystemItemPick.call(behavior, 20);
+		expect(behavior.interactionQueue.status).toBe('action-running');
+
+		emitBodyAnimationComplete();
 		tickActionSystemItemPick.call(behavior, 11);
 		expect(behavior.interactionQueue.status).toBe('action-completed');
 	});

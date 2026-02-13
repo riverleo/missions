@@ -41,9 +41,12 @@ import type {
 	ItemId,
 	NeedId,
 	NeedBehaviorId,
+	InteractionTargetId,
 } from '$lib/types';
+import type { InteractionQueueStatus } from '$lib/types/core';
 import { get } from 'svelte/store';
 import { josa } from './josa';
+import { InteractionIdUtils } from './interaction-id';
 import {
 	useCharacter,
 	useBuilding,
@@ -641,11 +644,54 @@ export function getInteractionActionSummaryString(
 ): string {
 	if (!action) return '액션 정보 없음';
 
-	const duration = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
-	const face = `"${getCharacterFaceStateString(action.character_face_state_type)}" 표정으로 `;
-	const body = `"${getCharacterBodyStateString(action.character_body_state_type)}"`;
+	const { getAllInteractions } = useInteraction();
+	const interactionId =
+		('building_interaction_id' in action && action.building_interaction_id) ||
+		('item_interaction_id' in action && action.item_interaction_id) ||
+		('character_interaction_id' in action && action.character_interaction_id);
+	const interaction = interactionId
+		? getAllInteractions().find((value) => value.id === interactionId)
+		: undefined;
+	const interactionType =
+		interaction?.once_interaction_type ||
+		interaction?.fulfill_interaction_type ||
+		interaction?.system_interaction_type;
+	const interactionTypeLabel = interactionType
+		? getBehaviorInteractTypeString(interactionType)
+		: '상호작용';
+	const durationLabel = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
+	const faceLabel = getCharacterFaceStateString(action.character_face_state_type).replace(
+		' 표정',
+		''
+	);
+	const bodyLabel = getCharacterBodyStateString(action.character_body_state_type).replace(
+		' 바디',
+		''
+	);
 
-	return `${duration}${face}${body}`;
+	return `${durationLabel}${interactionTypeLabel} (${faceLabel}, ${bodyLabel})`;
+}
+
+export function getInteractionTargetLabelString(
+	interactionTargetId: InteractionTargetId | undefined
+): string {
+	if (!interactionTargetId) return '없음';
+
+	const { interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
+	const { getAllInteractionActions } = useInteraction();
+	const action = getAllInteractionActions().find((value) => value.id === interactionActionId);
+	if (!action) return `알 수 없는 액션 (${interactionActionId.split('-')[0]})`;
+
+	return getInteractionActionSummaryString(action);
+}
+
+export function getInteractionQueueStatusLabel(status: InteractionQueueStatus): string {
+	if (status === 'enqueuing') return '큐 구성 중';
+	if (status === 'ready') return '대기';
+	if (status === 'action-ready') return '액션 준비됨';
+	if (status === 'action-running') return '액션 실행 중';
+	if (status === 'action-completed') return '액션 완료됨';
+	return '완료';
 }
 
 // ============================================================
