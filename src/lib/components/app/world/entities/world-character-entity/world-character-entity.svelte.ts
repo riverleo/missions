@@ -5,13 +5,12 @@ import type {
 	WorldCharacterId,
 	CharacterBody,
 	CharacterId,
-	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
 	Vector,
 	EntityId,
 } from '$lib/types';
-import { WorldCharacterEntityBehavior } from './behavior-state';
+import { WorldCharacterEntityBehavior } from './behavior';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
