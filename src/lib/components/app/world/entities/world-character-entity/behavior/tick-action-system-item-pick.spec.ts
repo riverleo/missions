@@ -68,6 +68,23 @@ describe('tickActionSystemItemPick(tick: number)', () => {
 		expect(entity.behavior.interactionQueue.status).toBe('action-ready');
 	});
 
+	it('목표 엔티티를 이미 들고 있는 경우 액션 완료로 전환한다.', () => {
+		// 1) action-ready 상태에서 시스템 아이템 줍기 대상을 지정한다.
+		entity.behavior.interactionQueue.status = 'action-ready';
+		entity.behavior.interactionQueue.currentInteractionTargetId = systemItemPickTargetId;
+
+		// 2) 해당 월드 아이템을 현재 캐릭터 소유로 만든다.
+		useWorld().updateWorldItem(targetItemEntity.instanceId, {
+			world_character_id: entity.instanceId,
+		});
+
+		// 3) 시스템 아이템 줍기 틱을 실행한다.
+		entity.behavior.tickActionSystemItemPick(START_TICK);
+
+		// 4) 이미 소지 상태면 즉시 action-completed로 전환한다.
+		expect(entity.behavior.interactionQueue.status).toBe('action-completed');
+	});
+
 	it('액션 준비 상태에서 시작 조건이 충족되면 실행 시작 틱을 기록하고 액션 실행 중으로 전환한다.', () => {
 		// 1) action-ready 상태에서 시스템 아이템 줍기 대상을 지정한다.
 		entity.behavior.interactionQueue.status = 'action-ready';
