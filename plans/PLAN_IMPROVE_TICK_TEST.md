@@ -24,15 +24,15 @@
 
 ## 진행 원칙
 
-- [ ] 파일 순서는 `tick.ts` 파이프라인 순서대로 진행한다.
+- 파일 순서는 `tick.ts` 파이프라인 순서대로 진행한다.
   - `tick-find-behavior-target` -> `tick-find-target-entity-and-go` -> `tick-enqueue-interaction-queue` -> `tick-dequeue-interaction` -> `tick-action-system-item-pick` -> `tick-next-or-clear`
-- [ ] 기존 spec 파일을 유지하고 내부 테스트 구조를 치환한다. (신규 `tick.spec.ts` 추가 금지)
-- [ ] 각 대상 spec 파일은 기존 내용을 완전히 제거한 뒤, 명세 기준으로 처음부터 다시 작성한다.
-- [ ] 전역 유틸/식별자 모듈 모킹(`$lib/utils/entity-id`, `$lib/utils/interaction-id`, `$lib/utils/behavior-id`)은 사용하지 않는다.
-- [ ] 훅 전역 모킹(`vi.mock('$lib/hooks')`)은 기본 금지하고 fixture 기반 데이터 셋업으로 검증한다.
-- [ ] 실제 함수 결과를 상태 전이/스토어 부작용으로 검증한다. (mock 호출 횟수 중심 테스트 지양)
-- [x] 테스트 본문에서 인라인으로 월드 데이터를 조작/생성하지 않는다. 시나리오 데이터는 fixture 생성 시점에 완결 상태로 제공한다.
-- [x] 월드 엔티티 등록은 `worldContext.entities[...] = ...` 직접 할당 대신 `entity.addToWorld()`를 사용한다. (테스트용 최소 스텁 예외)
+- 기존 spec 파일을 유지하고 내부 테스트 구조를 치환한다. (신규 `tick.spec.ts` 추가 금지)
+- 각 대상 spec 파일은 기존 내용을 완전히 제거한 뒤, 명세 기준으로 처음부터 다시 작성한다.
+- 전역 유틸/식별자 모듈 모킹(`$lib/utils/entity-id`, `$lib/utils/interaction-id`, `$lib/utils/behavior-id`)은 사용하지 않는다.
+- 훅 전역 모킹(`vi.mock('$lib/hooks')`)은 기본 금지하고 fixture 기반 데이터 셋업으로 검증한다.
+- 실제 함수 결과를 상태 전이/스토어 부작용으로 검증한다. (mock 호출 횟수 중심 테스트 지양)
+- 테스트 본문에서 인라인으로 월드 데이터를 조작/생성하지 않는다. 시나리오 데이터는 fixture 생성 시점에 완결 상태로 제공한다.
+- 월드 엔티티 등록은 `worldContext.entities[...] = ...` 직접 할당 대신 `entity.addToWorld()`를 사용한다. (테스트용 최소 스텁 예외)
 
 ## 작업 체크리스트
 
@@ -44,18 +44,18 @@
 - [x] `tick-find-target-entity-and-go.ts`: 유효한 대상 탐색 시 `behavior.targetEntityId`와 경로(`behavior.path`)가 반영된다.
 - [x] `tick-find-target-entity-and-go.ts`: 유효한 대상이 없으면 명세된 대기/유지/해제 규칙을 따른다.
 
-- [ ] `tick-enqueue-interaction-queue.ts`: 대상 확정 후 상호작용 큐가 구성되고 `enqueuing -> ready`로 전이된다.
-- [ ] `tick-enqueue-interaction-queue.ts`: 큐 구성 실패 시 잘못된 상태 전이가 발생하지 않는다.
+- [x] `tick-enqueue-interaction-queue.ts`: 대상 확정 후 상호작용 큐가 구성되고 `enqueuing -> ready`로 전이된다.
+- [x] `tick-enqueue-interaction-queue.ts`: 큐 구성 실패 시 잘못된 상태 전이가 발생하지 않는다.
 
-- [ ] `tick-dequeue-interaction.ts`: `ready`에서 `currentInteractionTargetId`를 설정하고 `action-ready`로 전이한다.
-- [ ] `tick-dequeue-interaction.ts`: `action-completed`에서 다음 타깃/다음 상호작용으로 전이하고 없으면 `completed`로 종료한다.
+- [x] `tick-dequeue-interaction.ts`: `ready`에서 `currentInteractionTargetId`를 설정하고 `action-ready`로 전이한다.
+- [x] `tick-dequeue-interaction.ts`: `action-completed`에서 다음 타깃/다음 상호작용으로 전이하고 없으면 `completed`로 종료한다.
 
-- [ ] `tick-action-system-item-pick.ts`: 실행 조건(거리/대상 유효성) 충족 시 `action-ready -> action-running -> action-completed`로 전이한다.
-- [ ] `tick-action-system-item-pick.ts`: 액션 완료 시 아이템 소유/월드 상태가 명세대로 반영된다.
+- [x] `tick-action-system-item-pick.ts`: 실행 조건(거리/대상 유효성) 충족 시 `action-ready -> action-running -> action-completed`로 전이한다.
+- [x] `tick-action-system-item-pick.ts`: 액션 완료 시 아이템 소유/월드 상태가 명세대로 반영된다.
 - [ ] `tick-action-system-item-pick.ts`: 대상 소실/조건 미충족 시 부작용 없이 상태만 명세대로 유지 또는 종료한다.
 
-- [ ] `tick-next-or-clear.ts`: 큐 `completed` 시점에만 next/clear를 수행한다.
-- [ ] `tick-next-or-clear.ts`: 완료 전에는 행동 컨텍스트를 초기화하지 않는다.
+- [x] `tick-next-or-clear.ts`: 큐 `completed` 시점에만 next/clear를 수행한다.
+- [x] `tick-next-or-clear.ts`: 완료 전에는 행동 컨텍스트를 초기화하지 않는다.
 
 ### 1) 테스트 구조 리디자인
 

@@ -24,21 +24,27 @@ describe('tickNextOrClear(tick: number)', () => {
 	});
 
 	it('상호작용 큐가 완료되지 않은 경우 클리어하거나 다음 행동 액션으로 넘어가지 않는다.', () => {
+		// 1) 상호작용 큐를 미완료 상태로 둔다.
 		entity.behavior.interactionQueue.status = 'action-running';
 		entity.behavior.behaviorTargetId = currentBehaviorTargetId as never;
 
+		// 2) 다음 행동 전환 단계를 실행한다.
 		entity.behavior.tickNextOrClear(CURRENT_TICK);
 
+		// 3) 큐가 미완료면 현재 행동 대상을 유지한다.
 		expect(entity.behavior.behaviorTargetId).toBe(currentBehaviorTargetId);
 	});
 
 	it('현재 행동 대상이 없으면 초기화하고 로직을 종료한다.', () => {
+		// 1) 행동 대상을 비우고 이전 상태를 남겨둔다.
 		entity.behavior.behaviorTargetId = undefined;
 		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
+		// 2) 다음 행동 전환 단계를 실행한다.
 		entity.behavior.tickNextOrClear(CURRENT_TICK);
 
+		// 3) 행동 컨텍스트가 초기화되고 종료된다.
 		expect(entity.behavior.behaviorTargetId).toBeUndefined();
 		expect(entity.behavior.targetEntityId).toBeUndefined();
 		expect(entity.behavior.path).toEqual([]);
@@ -46,18 +52,23 @@ describe('tickNextOrClear(tick: number)', () => {
 	});
 
 	it('현재 행동 액션을 찾을 수 없으면 에러가 발생한다.', () => {
+		// 1) 유효하지 않은 행동 대상을 설정한다.
 		entity.behavior.behaviorTargetId = 'need_invalid_invalid' as never;
 
+		// 2) 현재 행동 액션 조회에 실패하면 예외를 던진다.
 		expect(() => entity.behavior.tickNextOrClear(CURRENT_TICK)).toThrow();
 	});
 
 	it('다음 행동 액션이 있으면 모든 상태를 초기화하고 다음 액션으로 전환한다.', () => {
+		// 1) 다음 액션이 존재하는 현재 행동 대상을 설정한다.
 		entity.behavior.behaviorTargetId = currentBehaviorTargetId as never;
 		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
+		// 2) 다음 행동 전환 단계를 실행한다.
 		entity.behavior.tickNextOrClear(CURRENT_TICK);
 
+		// 3) 상태를 초기화한 뒤 다음 행동 액션으로 전환한다.
 		expect(entity.behavior.behaviorTargetId).toBe(nextBehaviorTargetId);
 		expect(entity.behavior.behaviorTargetStartTick).toBe(CURRENT_TICK);
 		expect(entity.behavior.targetEntityId).toBeUndefined();
@@ -66,12 +77,15 @@ describe('tickNextOrClear(tick: number)', () => {
 	});
 
 	it('다음 행동 액션이 없으면 모든 상태를 초기화하여 행동을 종료한다.', () => {
+		// 1) 다음 액션이 없는 마지막 행동 대상을 설정한다.
 		entity.behavior.behaviorTargetId = nextBehaviorTargetId as never;
 		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
+		// 2) 다음 행동 전환 단계를 실행한다.
 		entity.behavior.tickNextOrClear(CURRENT_TICK);
 
+		// 3) 상태를 초기화하고 행동을 종료한다.
 		expect(entity.behavior.behaviorTargetId).toBeUndefined();
 		expect(entity.behavior.targetEntityId).toBeUndefined();
 		expect(entity.behavior.path).toEqual([]);
