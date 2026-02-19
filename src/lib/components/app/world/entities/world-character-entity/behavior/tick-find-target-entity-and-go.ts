@@ -4,7 +4,7 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import type { EntitySourceId, InteractionQueue, Interaction, WorldItemId } from '$lib/types';
+import type { EntitySourceId, Interaction, WorldItemId } from '$lib/types';
 import { getAllInteractionsByBehaviorTargetId } from '$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id';
 import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-all-entity-sources-by-interaction';
 
@@ -184,7 +184,9 @@ export default function tickFindTargetEntityAndGo(
 		);
 
 		for (const coreInteraction of interactions) {
-			const targetEntitySourceIds = getAllEntitySourcesByInteraction(coreInteraction).map((es) => es.id);
+			const targetEntitySourceIds = getAllEntitySourcesByInteraction(coreInteraction).map(
+				(es) => es.id
+			);
 			if (trySetTargetEntity(targetEntitySourceIds, coreInteraction)) {
 				return false;
 			}

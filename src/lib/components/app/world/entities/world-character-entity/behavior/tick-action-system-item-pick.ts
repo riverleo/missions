@@ -19,8 +19,8 @@ const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
  *
  * ## 명세
  * - [x] 상호작용 큐 상태가 `action-ready` 또는 `action-running`이 아니면 아무 작업도 하지 않는다.
- * - [x] 현재 상호작용 타깃이 없으면 아무 작업도 하지 않는다.
- * - [x] 현재 상호작용이 `item_pick`이 아니면 아무 작업도 하지 않는다.
+ * - [x] 상호작용 대상이 없을 경우 아무 작업도 하지 않는다.
+ * - [x] 상호작용이 `item_pick`이 아닐 경우 아무 작업도 하지 않는다.
  * - [x] `action-ready` 상태에서 시작 조건(타깃 5px 이내 근접)이 충족되지 않으면 실행을 시작하지 않는다.
  * - [x] `action-ready` 상태에서 시작 조건이 충족되면 `currentInteractionTargetRunningAtTick`를 기록하고 `action-running`으로 전환한다.
  * - [x] `action-running` 상태에서 현재 상호작용 액션을 조회한다.
@@ -40,7 +40,7 @@ export default function tickActionSystemItemPick(
 		return false;
 	}
 
-	const currentInteractionTargetId = this.interactionQueue.currentInteractionTargetId;
+	const { currentInteractionTargetId } = this.interactionQueue;
 	if (!currentInteractionTargetId) return false;
 
 	const { getInteraction } = useInteraction();
@@ -61,10 +61,10 @@ export default function tickActionSystemItemPick(
 		this.interactionQueue.currentInteractionTargetRunningAtTick = tick;
 	}
 
-	const startedAtTick = this.interactionQueue.currentInteractionTargetRunningAtTick;
-	if (startedAtTick === undefined) return false;
+	const { currentInteractionTargetRunningAtTick } = this.interactionQueue;
+	if (currentInteractionTargetRunningAtTick === undefined) return false;
 
-	const elapsed = tick - startedAtTick;
+	const elapsed = tick - currentInteractionTargetRunningAtTick;
 	const completed = isCompleted(currentInteractionAction, elapsed);
 	if (!completed) return false;
 
