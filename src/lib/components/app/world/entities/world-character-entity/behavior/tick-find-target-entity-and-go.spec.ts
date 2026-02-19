@@ -92,7 +92,6 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
 			sourceId: 'character-source-1' as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 			x: 100,
 			y: 100,
 			body: {

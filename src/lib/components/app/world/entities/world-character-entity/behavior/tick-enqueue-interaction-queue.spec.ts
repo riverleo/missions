@@ -31,7 +31,6 @@ describe('tickEnqueueInteractionQueue(tick: number)', () => {
 		mockWorldCharacterEntity = {
 			id: 'character_world-1_world-character-1' as any,
 			instanceId: 'world-character-1' as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 		};
 
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);

@@ -12,7 +12,6 @@ describe('updateDirection(this: WorldCharacterEntityBehavior)', () => {
 		mockWorldCharacterEntity = {
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 			body: {
 				position: vectorUtils.createVector(100, 100),
 			} as any,

@@ -40,7 +40,6 @@ describe('tick-action-system-item-pick', () => {
 			body: { position: { x: 0, y: 0 } } as any,
 			heldItemIds: [],
 			worldContext: { entities: {} } as any,
-			onBodyAnimationComplete: vi.fn(),
 		};
 
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);

@@ -26,13 +26,12 @@ import type {
 	ConditionBehaviorId,
 	ConditionBehaviorActionId,
 	ScenarioId,
-	WorldCharacterId,
 	BehaviorTargetId,
-	WorldCharacterEntityBehavior,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
 import { getAllEntitySourcesByInteraction } from './get-all-entity-sources-by-interaction';
 import { getAllInteractionsByBehaviorTargetId } from './get-all-interactions-by-behavior-target-id';
+import type { WorldCharacterEntityBehavior } from '$lib/components/app/world/entities/world-character-entity/behavior';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }

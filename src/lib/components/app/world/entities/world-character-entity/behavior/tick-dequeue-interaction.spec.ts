@@ -25,7 +25,6 @@ describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
 			instanceId: 'world-character-1' as any,
 			heldItemIds: [],
 			worldContext: { entities: {} } as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
 		};
 
 		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);

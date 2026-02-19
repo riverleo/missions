@@ -304,9 +304,6 @@ export type {
 	BehaviorInteractionType,
 } from './core';
 
-// Re-export behavior state
-export { WorldCharacterEntityBehavior } from '../components/app/world/entities/world-character-entity/behavior-state/world-character-entity-behavior.svelte';
-
 // Re-export specific Enums for convenience
 export type {
 	PublishStatus,
