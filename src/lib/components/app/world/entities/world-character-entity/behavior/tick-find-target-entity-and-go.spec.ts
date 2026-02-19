@@ -1,733 +1,224 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { WorldCharacterEntity } from '../world-character-entity.svelte';
-import { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import type { BehaviorAction, EntitySourceId, ItemId } from '$lib/types';
+import { Fixture } from '$lib/hooks/fixture';
+import {
+	createCharacterInteraction,
+	createNeedFulfillment,
+	createWorldItem,
+} from '$lib/hooks/fixture/utils';
+import { useBehavior, useCharacter, useInteraction, useItem, useWorld } from '$lib/hooks';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
-import type { Entity } from '../../entity.svelte';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { WorldCharacterEntity } from '../world-character-entity.svelte';
+import { WorldItemEntity } from '../../world-item-entity';
+import type createForTickFindTargetEntityAndGo from '$lib/hooks/fixture/world-character-entity/create-for-tick-find-target-entity-and-go';
 
-// Mock hooks
-vi.mock('$lib/hooks', () => ({
-	useBehavior: vi.fn(),
-	useWorld: vi.fn(),
-	useInteraction: vi.fn(),
-	useFulfillment: vi.fn(),
-}));
+const FIRST_TICK = 10;
 
-// Mock EntityIdUtils
-vi.mock('$lib/utils/entity-id', () => ({
-	EntityIdUtils: {
-		instanceId: vi.fn((id: any) => id),
-		parse: vi.fn((id: any) => ({
-			instanceId: id,
-			sourceId: id.split('_')[0] || id,
-		})),
-		is: vi.fn((type: string, id: string | undefined) => id?.startsWith(`${type}_`) ?? false),
-	},
-}));
+describe('tickFindTargetEntityAndGo(tick: number)', () => {
+	let noBehaviorEntity: WorldCharacterEntity;
+	let idleEntity: WorldCharacterEntity;
+	let holdingEntity: WorldCharacterEntity;
+	let nonHoldingEntity: WorldCharacterEntity;
+	let closestCandidateEntity: WorldCharacterEntity;
+	let searchNoCandidateEntity: WorldCharacterEntity;
+	let heldItemEntity: WorldItemEntity;
+	let droppedItemEntity: WorldItemEntity;
+	let droppedNearItemEntity: WorldItemEntity;
+	let droppedFarItemEntity: WorldItemEntity;
 
-// Mock InteractionIdUtils
-vi.mock('$lib/utils/interaction-id', () => ({
-	InteractionIdUtils: {
-		create: vi.fn(),
-	},
-}));
+	beforeEach(() => {
+		const fixture: ReturnType<typeof createForTickFindTargetEntityAndGo> =
+			Fixture.worldCharacterEntity.createForTickFindTargetEntityAndGo();
+		noBehaviorEntity = fixture.noBehaviorEntity;
+		idleEntity = fixture.idleEntity;
+		holdingEntity = fixture.holdingEntity;
+		nonHoldingEntity = fixture.nonHoldingEntity;
+		closestCandidateEntity = fixture.closestCandidateEntity;
+		searchNoCandidateEntity = fixture.searchNoCandidateEntity;
+		heldItemEntity = fixture.heldItemEntity;
+		droppedItemEntity = fixture.droppedItemEntity;
+		droppedNearItemEntity = fixture.droppedNearItemEntity;
+		droppedFarItemEntity = fixture.droppedFarItemEntity;
+	});
 
-// Mock getAllInteractionsByBehaviorTargetId
-vi.mock('$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id', () => ({
-	getAllInteractionsByBehaviorTargetId: vi.fn(),
-}));
+	afterEach(() => {
+		Fixture.reset();
+	});
 
-// Mock getAllEntitySourcesByInteraction
-vi.mock('$lib/hooks/use-behavior/get-all-entity-sources-by-interaction', () => ({
-	getAllEntitySourcesByInteraction: vi.fn(),
-}));
-
-// Mock constants
-vi.mock('$lib/constants', () => ({
-	TARGET_ARRIVAL_DISTANCE: 50,
-}));
-
-// Mock vectorUtils.sortByDistance
-vi.mock('$lib/utils/vector', async () => {
-	const actual = await vi.importActual<typeof import('$lib/utils/vector')>('$lib/utils/vector');
-	return {
-		...actual,
-		vectorUtils: {
-			...actual.vectorUtils,
-			sortByDistance: vi.fn((source: any, entities: any[]) => {
-				return entities.slice().sort((a, b) => {
-					const distA = Math.sqrt(
-						Math.pow(a.body.position.x - source.body.position.x, 2) +
-							Math.pow(a.body.position.y - source.body.position.y, 2)
-					);
-					const distB = Math.sqrt(
-						Math.pow(b.body.position.x - source.body.position.x, 2) +
-							Math.pow(b.body.position.y - source.body.position.y, 2)
-					);
-					return distA - distB;
-				});
-			}),
-		},
-	};
-});
-
-describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => {
-	let behavior: WorldCharacterEntityBehavior;
-	let mockWorldCharacterEntity: Partial<WorldCharacterEntity>;
-	let mockGetBehaviorAction: ReturnType<typeof vi.fn>;
-	let mockSearchEntitySources: ReturnType<typeof vi.fn>;
-	let mockGetEntitySourceId: ReturnType<typeof vi.fn>;
-	let mockGetWorldItem: ReturnType<typeof vi.fn>;
-	let mockPathfinder: any;
-	let mockGetAllInteractionsByBehaviorTargetId: ReturnType<typeof vi.fn>;
-	let mockGetAllEntitySourcesByInteraction: ReturnType<typeof vi.fn>;
-	let mockGetOrUndefinedRootInteractionAction: ReturnType<typeof vi.fn>;
-
-	beforeEach(async () => {
-		mockPathfinder = {
-			findPath: vi.fn().mockReturnValue([]),
-		};
-
-		mockWorldCharacterEntity = {
-			id: 'character-1' as any,
-			instanceId: 'world-character-1' as any,
-			sourceId: 'character-source-1' as any,
-			onBodyAnimationComplete: vi.fn(() => vi.fn()),
-			x: 100,
-			y: 100,
-			body: {
-				position: vectorUtils.createVector(100, 100),
-			} as any,
-			worldContext: {
-				entities: {},
-				pathfinder: mockPathfinder,
-			} as any,
-			heldItemIds: [],
-		};
-
-		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);
-
-		mockGetBehaviorAction = vi.fn();
-		mockSearchEntitySources = vi.fn();
-		mockGetEntitySourceId = vi.fn();
-		mockGetWorldItem = vi.fn();
-		mockGetOrUndefinedRootInteractionAction = vi.fn();
-
-		const { useBehavior, useWorld, useInteraction, useFulfillment } = await import('$lib/hooks');
-		const { getAllInteractionsByBehaviorTargetId } = await import(
-			'$lib/hooks/use-behavior/get-all-interactions-by-behavior-target-id'
-		);
-		const { getAllEntitySourcesByInteraction } = await import(
-			'$lib/hooks/use-behavior/get-all-entity-sources-by-interaction'
+	it('현재 행동 대상이 없으면 대상 탐색을 하지 않고 계속 진행한다.', () => {
+		// 1) 대상 탐색 단계가 호출되는지 관찰한다.
+		const tickFindTargetEntityAndGoSpy = vi.spyOn(
+			noBehaviorEntity.behavior,
+			'tickFindTargetEntityAndGo'
 		);
 
-		mockGetAllInteractionsByBehaviorTargetId = vi.mocked(getAllInteractionsByBehaviorTargetId);
-		mockGetAllEntitySourcesByInteraction = vi.mocked(getAllEntitySourcesByInteraction);
+		// 2) 행동 대상이 없는지 확인한다.
+		expect(noBehaviorEntity.behavior.behaviorTargetId).toBeUndefined();
 
-		vi.mocked(useBehavior).mockReturnValue({
-			getBehaviorAction: mockGetBehaviorAction,
-			searchEntitySources: mockSearchEntitySources,
-		} as any);
-		vi.mocked(useWorld).mockReturnValue({
-			getEntitySourceId: mockGetEntitySourceId,
-			getWorldItem: mockGetWorldItem,
-		} as any);
-		vi.mocked(useInteraction).mockReturnValue({
-			getOrUndefinedRootInteractionAction: mockGetOrUndefinedRootInteractionAction,
-		} as any);
-		vi.mocked(useFulfillment).mockReturnValue({
-			getAllFulfillmentsByBehaviorAction: vi.fn().mockReturnValue([]),
-		} as any);
+		// 3) 캐릭터 틱을 진행한다.
+		noBehaviorEntity.tick(FIRST_TICK);
+
+		// 4) 행동 대상이 없으면 대상 탐색 단계로 진입하지 않는다.
+		expect(tickFindTargetEntityAndGoSpy).not.toHaveBeenCalled();
 	});
 
-	it('현재 행동 타깃이 없으면 계속 진행한다', () => {
-		behavior.behaviorTargetId = undefined;
+	it('행동 대상이 대기 타입인 경우 대상 탐색을 하지 않고 계속 진행한다.', () => {
+		// 1) 대상 탐색 단계 반환값을 확인하기 위해 spy를 설정한다.
+		const tickFindTargetEntityAndGoSpy = vi.spyOn(idleEntity.behavior, 'tickFindTargetEntityAndGo');
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
+		// 2) 캐릭터 틱을 진행하면 행동 선택 단계에서 행동 대상이 지정된다.
+		idleEntity.tick(FIRST_TICK);
 
-		expect(result).toBe(false);
-		expect(mockGetBehaviorAction).not.toHaveBeenCalled();
+		// 3) 대기 타입이면 대상을 찾지 않고 다음 단계로 계속 진행한다.
+		expect(tickFindTargetEntityAndGoSpy).toHaveBeenCalledWith(FIRST_TICK);
+		expect(tickFindTargetEntityAndGoSpy.mock.results[0]?.value).toBe(false);
 	});
 
-	it('행동 타입이 대기인 경우 타깃 엔티티를 탐색하지 않고 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'idle',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+	it('목표 엔티티를 캐릭터가 들고 있는 경우 경로를 초기화하고 계속 진행한다.', () => {
+		// 1) 소지 아이템 엔티티와 기존 경로를 준비한다.
+		holdingEntity.behavior.path = [vectorUtils.createVector(120, 100)];
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
+		// 2) 캐릭터 틱을 진행하면 대상 탐색에서 소지 아이템이 목표로 선정된다.
+		holdingEntity.tick(FIRST_TICK);
 
-		expect(result).toBe(false);
+		// 3) 소지 아이템이 목표로 선택되면 경로가 비워진다.
+		expect(holdingEntity.behavior.targetEntityId).toBe(heldItemEntity.id);
+		expect(holdingEntity.behavior.path).toEqual([]);
 	});
 
-	it('현재 타깃 엔티티가 들고 있는 아이템인 경우 경로를 초기화하고 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		behavior.targetEntityId = 'held-item-1' as any;
-		mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+	it('목표 엔티티를 캐릭터가 들고 있지 않은 경우 경로를 최신화하여 목표 엔티티로 이동한다.', () => {
+		// 1) 대상 아이템을 도착 거리 밖으로 두고 경로탐색 결과를 고정한다.
+		const nextPath = [vectorUtils.createVector(140, 100), vectorUtils.createVector(180, 100)];
+		const findPathSpy = vi
+			.spyOn(nonHoldingEntity.worldContext.pathfinder, 'findPath')
+			.mockReturnValue(nextPath);
 
-		const mockEntity: Entity = {
-			id: 'held-item-1' as any,
-			x: 100,
-			y: 100,
-			body: { position: vectorUtils.createVector(100, 100) },
-		} as Entity;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['held-item-1' as any]: mockEntity,
-		};
-		behavior.path = [vectorUtils.createVector(120, 100)];
+		// 2) 1틱: 실제 탐색 흐름에서 목표 엔티티가 지정된다.
+		nonHoldingEntity.tick(FIRST_TICK);
+		expect(nonHoldingEntity.behavior.targetEntityId).toBe(droppedItemEntity.id);
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
+		// 3) 2틱: 이미 지정된 목표 엔티티 기준으로 경로를 최신화한다.
+		nonHoldingEntity.tick(FIRST_TICK + 1);
 
-		expect(behavior.path).toEqual([]);
-		expect(result).toBe(false);
+		// 4) 소지하지 않은 대상이면 경로 탐색이 수행된다.
+		expect(findPathSpy).toHaveBeenCalled();
+		expect(nonHoldingEntity.behavior.path).toEqual(nextPath);
 	});
 
-	it('현재 타깃 엔티티가 들고 있는 아이템이 아닌 경우 경로를 최신화하고 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		behavior.targetEntityId = 'entity-1' as any;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+	it('목표 엔티티 후보가 없거나 후보 중 타깃을 확정하지 못하면 계속 진행한다.', () => {
+		// 1) 대상 탐색 단계의 반환값을 관찰한다.
+		const tickFindTargetEntityAndGoSpy = vi.spyOn(
+			searchNoCandidateEntity.behavior,
+			'tickFindTargetEntityAndGo'
+		);
 
-		const mockEntity: Entity = {
-			id: 'entity-1' as any,
-			x: 200,
-			y: 100,
-			body: { position: vectorUtils.createVector(200, 100) },
-		} as Entity;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['entity-1' as any]: mockEntity,
-		};
-		const mockPath = [vectorUtils.createVector(150, 100)];
-		mockPathfinder.findPath.mockReturnValue(mockPath);
+		// 2) 캐릭터 틱을 진행한다.
+		searchNoCandidateEntity.tick(FIRST_TICK);
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		expect(mockPathfinder.findPath).toHaveBeenCalled();
-		expect(behavior.path).toEqual(mockPath);
-		expect(result).toBe(false);
+		// 3) 후보가 없으면 타깃을 설정하지 않고 계속 진행한다.
+		expect(tickFindTargetEntityAndGoSpy).toHaveBeenCalledWith(FIRST_TICK);
+		expect(tickFindTargetEntityAndGoSpy.mock.results[0]?.value).toBe(false);
+		expect(searchNoCandidateEntity.behavior.targetEntityId).toBeUndefined();
 	});
 
-	it('타깃 선택 방식이 명시적인 경우 지정된 상호작용 액션을 기반으로 대상 후보를 필터링한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const entitySourceId = 'source-1' as EntitySourceId;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'explicit',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-		mockGetEntitySourceId.mockReturnValue(entitySourceId);
-		mockGetWorldItem.mockReturnValue({ world_character_id: null });
+	it('타깃 선택 방식에 따라 목표 엔티티 후보를 올바르게 필터링한다.', () => {
+		// 1) explicit 대상 선택용 행동 액션을 준비한다.
+		const firstBehavior = useBehavior().getFirstBehaviorByPriority(nonHoldingEntity);
+		const rootBehaviorAction = useBehavior().getRootBehaviorAction(firstBehavior);
+		const droppedItemInteraction = useInteraction()
+			.getAllItemInteractions()
+			.find((interaction) => interaction.item_id === droppedItemEntity.sourceId)!;
+		rootBehaviorAction.target_selection_method = 'explicit';
+		rootBehaviorAction.item_interaction_id = droppedItemInteraction.id;
 
-		const mockEntity: Entity = {
-			id: 'entity-1' as any,
-			sourceId: entitySourceId,
-			x: 150,
-			y: 100,
-			body: { position: vectorUtils.createVector(150, 100) },
-		} as Entity;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-			['entity-1' as any]: mockEntity,
-		};
+		// 2) 더 가까운 다른 아이템을 추가하더라도 explicit 대상은 유지되어야 한다.
+		const anotherItem = useItem()
+			.getAllItems()
+			.find((item) => item.id !== droppedItemEntity.sourceId)!;
+		const anotherWorldItem = createWorldItem(anotherItem, { x: 105, y: 100 });
+		const anotherItemEntity = new WorldItemEntity(
+			nonHoldingEntity.worldContext,
+			nonHoldingEntity.worldId,
+			anotherWorldItem.id
+		);
+		anotherItemEntity.addToWorld();
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
+		// 3) 캐릭터 틱을 진행한다.
+		nonHoldingEntity.tick(FIRST_TICK);
 
-		expect(behavior.targetEntityId).toBe('entity-1');
-		expect(result).toBe(false);
+		// 4) explicit으로 지정된 source의 엔티티가 타깃으로 선택된다.
+		expect(nonHoldingEntity.behavior.targetEntityId).toBe(droppedItemEntity.id);
 	});
 
-	it('타깃 선택 방식이 검색인 경우 검색(searchEntitySources)으로 대상 후보를 필터링한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const entitySourceId1 = 'source-1' as EntitySourceId;
-		const entitySourceId2 = 'source-2' as EntitySourceId;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-		const mockInteraction = { id: 'interaction-1' } as any;
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-		// Mock getAllEntitySourcesByInteraction to return entity sources
-		mockGetAllEntitySourcesByInteraction.mockReturnValue([
-			{ id: entitySourceId1 },
-			{ id: entitySourceId2 },
-		]);
-
-		mockGetWorldItem.mockReturnValue({ world_character_id: null });
-
-		const mockEntity1: Entity = {
-			id: 'entity-1' as any,
-			sourceId: entitySourceId1,
-			x: 150,
-			y: 100,
-			body: { position: vectorUtils.createVector(150, 100) },
-		} as Entity;
-		const mockEntity2: Entity = {
-			id: 'entity-2' as any,
-			sourceId: entitySourceId2,
-			x: 120,
-			y: 100,
-			body: { position: vectorUtils.createVector(120, 100) },
-		} as Entity;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-			['entity-1' as any]: mockEntity1,
-			['entity-2' as any]: mockEntity2,
-		};
-
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		expect(behavior.targetEntityId).toBe('entity-2');
-		expect(result).toBe(false);
-	});
-
-	it('타깃 선택 방식이 검색인 경우 첫 번째 상호작용에서 찾지 못하면 다음 상호작용을 탐색한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const sourceId1 = 'source-1' as EntitySourceId;
-		const sourceId2 = 'source-2' as EntitySourceId;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-		const interaction1 = { id: 'interaction-1' } as any;
-		const interaction2 = { id: 'interaction-2' } as any;
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([interaction1, interaction2]);
-
-		mockGetAllEntitySourcesByInteraction.mockImplementation((interaction: any) => {
-			if (interaction.id === 'interaction-1') {
-				return [{ id: sourceId1 }];
-			}
-			if (interaction.id === 'interaction-2') {
-				return [{ id: sourceId2 }];
-			}
-			return [];
+	it('자기 자신은 목표 엔티티가 될 수 없다.', () => {
+		// 1) 자기 자신을 대상으로 하는 character 상호작용 회복 데이터를 구성한다.
+		const need = useCharacter().getNeed(Object.values(searchNoCandidateEntity.needs)[0]!.need_id);
+		const selfCharacter = useCharacter().getCharacter(searchNoCandidateEntity.sourceId);
+		const selfInteraction = createCharacterInteraction(selfCharacter, { type: 'fulfill' });
+		createNeedFulfillment(need, {
+			fulfillment_type: 'character',
+			character_interaction_id: selfInteraction.id,
+			increase_per_tick: 999,
 		});
 
-		mockGetWorldItem.mockReturnValue({ world_character_id: null });
+		// 2) 캐릭터 틱을 진행한다.
+		searchNoCandidateEntity.tick(FIRST_TICK);
 
-		const mockEntity: Entity = {
-			id: 'entity-2' as any,
-			sourceId: sourceId2,
-			x: 120,
-			y: 100,
-			body: { position: vectorUtils.createVector(120, 100) },
-		} as Entity;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-			['entity-2' as any]: mockEntity,
-		};
-
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		expect(behavior.targetEntityId).toBe('entity-2');
-		expect(result).toBe(false);
+		// 3) 자기 자신은 후보에서 제외되어 타깃으로 선택되지 않는다.
+		expect(searchNoCandidateEntity.behavior.targetEntityId).toBeUndefined();
 	});
 
-	it('아무런 대상 후보도 찾지 못한 경우 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([]);
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-		};
+	it('다른 캐릭터의 목표 엔티티는 목표 엔티티 후보에서 제외한다.', () => {
+		// 1) 같은 worldContext의 다른 캐릭터가 이미 해당 아이템을 목표로 예약한 상태를 만든다.
+		const reservingCharacterEntityId =
+			`character-reserving-${holdingEntity.instanceId}` as typeof nonHoldingEntity.id;
+		nonHoldingEntity.worldContext.entities[reservingCharacterEntityId] = {
+			id: reservingCharacterEntityId,
+			behavior: {
+				targetEntityId: droppedItemEntity.id,
+			},
+		} as never;
 
-		const result = behavior.tickFindTargetEntityAndGo(0);
+		// 2) 캐릭터 틱을 진행한다.
+		nonHoldingEntity.tick(FIRST_TICK);
 
-		expect(result).toBe(false);
+		// 3) 예약된 아이템은 후보에서 제외되어 타깃이 비어 있어야 한다.
+		expect(nonHoldingEntity.behavior.targetEntityId).toBeUndefined();
 	});
 
-	it('자기 자신은 타깃 엔티티가 될 수 없다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const entitySourceId = 'character-source-1' as EntitySourceId;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+	it('다른 캐릭터 아이디가 기록된 아이템은 목표 엔티티 후보에서 제외한다.', () => {
+		// 1) 아이템이 다른 캐릭터 소유 상태임을 기록한다.
+		useWorld().updateWorldItem(droppedItemEntity.instanceId, {
+			world_character_id: holdingEntity.instanceId,
+		});
 
-		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-		const mockInteraction = { id: 'interaction-1' } as any;
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
+		// 2) 캐릭터 틱을 진행한다.
+		nonHoldingEntity.tick(FIRST_TICK);
 
-		// Mock getAllEntitySourcesByInteraction to return entity sources
-		mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-		mockGetWorldItem.mockReturnValue(null);
-
-		// 캐릭터 자신의 sourceId를 대상 후보로 설정
-		(mockWorldCharacterEntity as any).sourceId = entitySourceId;
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-		};
-
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		// 자기 자신은 타깃이 될 수 없으므로 targetEntityId는 undefined여야 함
-		expect(behavior.targetEntityId).toBeUndefined();
-		expect(result).toBe(false);
+		// 3) 다른 캐릭터 소유 아이템은 후보에서 제외되어 타깃이 비어 있어야 한다.
+		expect(nonHoldingEntity.behavior.targetEntityId).toBeUndefined();
 	});
 
-	describe('들고 있는 아이템 중 대상 후보가 있는 경우', () => {
-		it('대상 후보와 일치하는 첫번째 아이템을 타깃 엔티티로 설정한다', async () => {
-			const { EntityIdUtils } = await import('$lib/utils/entity-id');
+	it('목표 엔티티에 대한 핵심 상호작용을 상호작용 큐에 추가한다.', () => {
+		// 1) 캐릭터 틱을 진행해 소지 아이템을 타깃으로 선택한다.
+		holdingEntity.tick(FIRST_TICK);
 
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'item-source-1' as EntitySourceId;
-			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'explicit',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockGetEntitySourceId.mockReturnValue(entitySourceId);
-			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
+		// 2) 소지 아이템 상호작용의 루트 액션 ID와 큐의 core ID를 비교한다.
+		const heldInteraction = useInteraction()
+			.getAllItemInteractions()
+			.find((interaction) => interaction.item_id === heldItemEntity.sourceId)!;
+		const rootInteractionAction = useInteraction().getRootInteractionAction(heldInteraction);
+		const { coreInteractionTargetId } = holdingEntity.behavior.interactionQueue;
 
-			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
-			vi.mocked(EntityIdUtils.parse).mockReturnValue({
-				instanceId: 'held-item-1' as any,
-				sourceId: entitySourceId,
-			} as any);
-
-			const result = behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.targetEntityId).toBe('held-item-1');
-			expect(behavior.path).toEqual([]);
-			expect(result).toBe(false);
-		});
-
-		it('타깃을 선정할 때는 아이템 소유 상태를 변경하지 않는다', async () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'item-source-1' as EntitySourceId;
-			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'explicit',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockGetEntitySourceId.mockReturnValue(entitySourceId);
-			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
-
-			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
-			const { EntityIdUtils } = await import('$lib/utils/entity-id');
-			vi.mocked(EntityIdUtils.parse).mockReturnValue({
-				instanceId: 'held-item-1' as any,
-				sourceId: entitySourceId,
-			} as any);
-
-			behavior.tickFindTargetEntityAndGo(0);
-
-			expect(mockGetWorldItem).not.toHaveBeenCalled();
-		});
-
-		it('핵심 상호작용 대상을 상호작용 큐에 설정한다', async () => {
-			const { EntityIdUtils } = await import('$lib/utils/entity-id');
-			const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
-
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'item-source-1' as EntitySourceId;
-			mockWorldCharacterEntity.heldItemIds = ['held-item-1' as any];
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'explicit',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-			mockGetEntitySourceId.mockReturnValue(entitySourceId);
-			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
-
-			// Mock EntityIdUtils.parse to return the correct sourceId for held-item-1
-			vi.mocked(EntityIdUtils.parse).mockReturnValue({
-				instanceId: 'held-item-1' as any,
-				sourceId: entitySourceId,
-			} as any);
-
-			const mockRootAction = {
-				id: 'root-action-1',
-				entity_source_type: 'item',
-				interaction_id: 'interaction-1',
-			} as any;
-			mockGetOrUndefinedRootInteractionAction.mockReturnValue(mockRootAction);
-
-			const mockInteractionTargetId = 'item_interaction-1_root-action-1' as any;
-			vi.mocked(InteractionIdUtils.create).mockReturnValue(mockInteractionTargetId);
-
-			behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.interactionQueue.coreInteractionTargetId).toBe(mockInteractionTargetId);
-		});
+		expect(coreInteractionTargetId).toBe(InteractionIdUtils.create(rootInteractionAction));
 	});
 
-	describe('들고 있는 아이템 중 대상 후보가 없는 경우', () => {
-		it('캐릭터와 가장 가까운 엔티티 중 대상 후보와 일치하는 엔티티를 타깃 엔티티로 설정한다', () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'source-1' as EntitySourceId;
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'search',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
+	it('캐릭터와 가장 가까운 엔티티 중 목표 엔티티 후보가 있다면 해당 엔티티를 목표로 설정한다.', () => {
+		// 1) fixture가 제공한 가까운/먼 아이템 후보를 전제로 캐릭터 틱을 진행한다.
+		closestCandidateEntity.tick(FIRST_TICK);
 
-			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-			const mockInteraction = { id: 'interaction-1' } as any;
-			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-			// Mock getAllEntitySourcesByInteraction to return entity sources
-			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
-
-			const mockEntity1: Entity = {
-				id: 'entity-1' as any,
-				sourceId: entitySourceId,
-				x: 200,
-				y: 100,
-				body: { position: vectorUtils.createVector(200, 100) },
-			} as Entity;
-			const mockEntity2: Entity = {
-				id: 'entity-2' as any,
-				sourceId: entitySourceId,
-				x: 120,
-				y: 100,
-				body: { position: vectorUtils.createVector(120, 100) },
-			} as Entity;
-			mockWorldCharacterEntity.worldContext!.entities = {
-				['character-1' as any]: mockWorldCharacterEntity as any,
-				['entity-1' as any]: mockEntity1,
-				['entity-2' as any]: mockEntity2,
-			};
-
-			const result = behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.targetEntityId).toBe('entity-2');
-			expect(result).toBe(false);
-		});
-
-		it('타깃을 선정할 때는 스토어의 월드 아이템 소유 상태를 변경하지 않는다', () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'source-1' as EntitySourceId;
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'search',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-			const mockInteraction = { id: 'interaction-1' } as any;
-			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-			// Mock getAllEntitySourcesByInteraction to return entity sources
-			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-			mockGetWorldItem.mockReturnValue({ id: '1', world_character_id: null });
-
-			const mockEntity: Entity = {
-				id: 'entity-1' as any,
-				sourceId: entitySourceId,
-				x: 150,
-				y: 100,
-				body: { position: vectorUtils.createVector(150, 100) },
-			} as Entity;
-			mockWorldCharacterEntity.worldContext!.entities = {
-				['character-1' as any]: mockWorldCharacterEntity as any,
-				['entity-1' as any]: mockEntity,
-			};
-
-			behavior.tickFindTargetEntityAndGo(0);
-
-			expect(mockGetWorldItem).not.toHaveBeenCalled();
-		});
-
-		it('다른 캐릭터가 이미 타깃으로 지정한 아이템은 대상 후보에서 제외한다', () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'source-1' as EntitySourceId;
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'search',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-			const mockInteraction = { id: 'interaction-1' } as any;
-			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-			mockGetWorldItem
-				.mockReturnValueOnce({ id: '1', world_character_id: null })
-				.mockReturnValueOnce({ id: '2', world_character_id: null });
-
-			const reservedItemEntityId = 'item_entity-1' as any;
-			const mockEntity1: Entity = {
-				id: reservedItemEntityId,
-				sourceId: entitySourceId,
-				x: 110,
-				y: 100,
-				body: { position: vectorUtils.createVector(110, 100) },
-			} as Entity;
-			const mockEntity2: Entity = {
-				id: 'item_entity-2' as any,
-				sourceId: entitySourceId,
-				x: 150,
-				y: 100,
-				body: { position: vectorUtils.createVector(150, 100) },
-			} as Entity;
-
-			const otherCharacterEntity = {
-				id: 'character-2',
-				behavior: {
-					targetEntityId: reservedItemEntityId,
-				},
-			};
-
-			mockWorldCharacterEntity.worldContext!.entities = {
-				['character-1' as any]: mockWorldCharacterEntity as any,
-				['character-2' as any]: otherCharacterEntity as any,
-				['entity-1' as any]: mockEntity1,
-				['entity-2' as any]: mockEntity2,
-			};
-
-			const result = behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.targetEntityId).toBe('item_entity-2');
-			expect(result).toBe(false);
-		});
-
-		it('월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 타깃 엔티티가 될 수 없다', () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'source-1' as EntitySourceId;
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'search',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-			// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-			const mockInteraction = { id: 'interaction-1' } as any;
-			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-			// Mock getAllEntitySourcesByInteraction to return entity sources
-			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-			// entity-1은 이미 캐릭터 ID가 있음 (제외되어야 함)
-			// entity-2는 캐릭터 ID가 없음 (선택되어야 함)
-			mockGetWorldItem
-				.mockReturnValueOnce({ id: '1', world_character_id: 'other-character' })
-				.mockReturnValueOnce({ id: '2', world_character_id: null });
-
-			const mockEntity1: Entity = {
-				id: 'item_entity-1' as any,
-				sourceId: entitySourceId,
-				x: 110,
-				y: 100,
-				body: { position: vectorUtils.createVector(110, 100) },
-			} as Entity;
-			const mockEntity2: Entity = {
-				id: 'item_entity-2' as any,
-				sourceId: entitySourceId,
-				x: 150,
-				y: 100,
-				body: { position: vectorUtils.createVector(150, 100) },
-			} as Entity;
-			mockWorldCharacterEntity.worldContext!.entities = {
-				['character-1' as any]: mockWorldCharacterEntity as any,
-				['entity-1' as any]: mockEntity1,
-				['entity-2' as any]: mockEntity2,
-			};
-
-			const result = behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.targetEntityId).toBe('item_entity-2');
-			expect(result).toBe(false);
-		});
-
-		it('월드 캐릭터 아이디가 자신인 아이템은 캐릭터의 타깃 엔티티가 될 수 있다', () => {
-			behavior.behaviorTargetId = 'behavior-target-1' as any;
-			const entitySourceId = 'source-1' as EntitySourceId;
-			const mockBehaviorAction = {
-				id: 'action-1',
-				type: 'system-item-pick',
-				target_selection_method: 'search',
-			} as any;
-			mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-			const mockInteraction = { id: 'interaction-1' } as any;
-			mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-			mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: entitySourceId }]);
-
-			mockGetWorldItem.mockReturnValue({
-				id: '1',
-				world_character_id: 'world-character-1',
-			});
-
-			const mockEntity: Entity = {
-				id: 'item_entity-1' as any,
-				sourceId: entitySourceId,
-				x: 110,
-				y: 100,
-				body: { position: vectorUtils.createVector(110, 100) },
-			} as Entity;
-			mockWorldCharacterEntity.worldContext!.entities = {
-				['character-1' as any]: mockWorldCharacterEntity as any,
-				['entity-1' as any]: mockEntity,
-			};
-
-			const result = behavior.tickFindTargetEntityAndGo(0);
-
-			expect(behavior.targetEntityId).toBe('item_entity-1');
-			expect(result).toBe(false);
-		});
-	});
-
-	it('현재 행동에 대한 타깃 엔티티를 찾지 못한 경우 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-		const mockInteraction = { id: 'interaction-1' } as any;
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-		// Mock getAllEntitySourcesByInteraction to return entity sources
-		mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: 'source-1' }]);
-
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-		};
-
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		expect(result).toBe(false);
+		// 2) 가장 가까운 droppedNearItemEntity가 타깃으로 선택된다.
+		expect(closestCandidateEntity.behavior.targetEntityId).toBe(droppedNearItemEntity.id);
+		expect(closestCandidateEntity.behavior.targetEntityId).not.toBe(droppedFarItemEntity.id);
 	});
 });

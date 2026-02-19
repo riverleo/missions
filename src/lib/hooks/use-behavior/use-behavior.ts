@@ -26,13 +26,13 @@ import type {
 	ConditionBehaviorId,
 	ConditionBehaviorActionId,
 	ScenarioId,
-	WorldCharacterId,
 	BehaviorTargetId,
-	WorldCharacterEntityBehavior,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
 import { getAllEntitySourcesByInteraction } from './get-all-entity-sources-by-interaction';
 import { getAllInteractionsByBehaviorTargetId } from './get-all-interactions-by-behavior-target-id';
+import type { WorldCharacterEntityBehavior } from '$lib/components/app/world/entities/world-character-entity/behavior';
+import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 
 type BehaviorPriorityDialogState =
 	| { type: 'create' }
@@ -241,7 +241,7 @@ function createBehaviorStore() {
 
 	function getNeedBehaviorAction(id: string): NeedBehaviorAction {
 		const data = getOrUndefinedNeedBehaviorAction(id);
-		if (!data) throw new Error(`NeedBehaviorAction not found: ${id}`);
+		if (!data) throw new Error(`NeedBehaviorAction not found`);
 		return data;
 	}
 
@@ -252,8 +252,20 @@ function createBehaviorStore() {
 	}
 
 	function getConditionBehaviorAction(id: string): ConditionBehaviorAction {
-		const data = get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
-		if (!data) throw new Error(`ConditionBehaviorAction not found: ${id}`);
+		const data = getOrUndefinedConditionBehaviorAction(id);
+		if (!data) throw new Error(`ConditionBehaviorAction not found`);
+		return data;
+	}
+
+	function getRootNeedBehaviorAction(behavior: Behavior): NeedBehaviorAction {
+		const data = getOrUndefinedRootNeedBehaviorAction(behavior);
+		if (!data) throw new Error(`Root NeedBehaviorAction not found`);
+		return data;
+	}
+
+	function getRootConditionBehaviorAction(behavior: Behavior): ConditionBehaviorAction {
+		const data = getOrUndefinedRootConditionBehaviorAction(behavior);
+		if (!data) throw new Error(`Root ConditionBehaviorAction not found`);
 		return data;
 	}
 
@@ -277,6 +289,16 @@ function createBehaviorStore() {
 		return get(needBehaviorActionStore).data[id as NeedBehaviorActionId];
 	}
 
+	function getOrUndefinedRootNeedBehaviorAction(
+		behavior: Behavior | null | undefined
+	): NeedBehaviorAction | undefined {
+		if (!behavior) return undefined;
+		if (behavior.behaviorType !== 'need') return undefined;
+		return getAllNeedBehaviorActions().find(
+			(action) => action.need_behavior_id === behavior.id && action.root
+		);
+	}
+
 	function getOrUndefinedConditionBehavior(
 		id: string | null | undefined
 	): ConditionBehavior | undefined {
@@ -289,6 +311,16 @@ function createBehaviorStore() {
 	): ConditionBehaviorAction | undefined {
 		if (!id) return undefined;
 		return get(conditionBehaviorActionStore).data[id as ConditionBehaviorActionId];
+	}
+
+	function getOrUndefinedRootConditionBehaviorAction(
+		behavior: Behavior | null | undefined
+	): ConditionBehaviorAction | undefined {
+		if (!behavior) return undefined;
+		if (behavior.behaviorType !== 'condition') return undefined;
+		return getAllConditionBehaviorActions().find(
+			(action) => action.condition_behavior_id === behavior.id && action.root
+		);
 	}
 
 	function getBehaviorAction(behaviorTargetId: BehaviorTargetId): BehaviorAction {
@@ -375,7 +407,7 @@ function createBehaviorStore() {
 	function getAllBehaviorsByPriority(
 		worldCharacterEntityBehavior: WorldCharacterEntityBehavior
 	): Behavior[] {
-		const priorities = get(behaviorPriorityStore).data;
+		const priorities = getAllBehaviorPriorities();
 
 		const behaviors = getAllBehaviors().filter((behavior) => {
 			if (behavior.behaviorType === 'need') {
@@ -390,10 +422,10 @@ function createBehaviorStore() {
 		});
 
 		return behaviors.sort((a, b) => {
-			const priorityA = Object.values(priorities).find((p) =>
+			const priorityA = priorities.find((p) =>
 				a.behaviorType === 'need' ? p.need_behavior_id === a.id : p.condition_behavior_id === a.id
 			);
-			const priorityB = Object.values(priorities).find((p) =>
+			const priorityB = priorities.find((p) =>
 				b.behaviorType === 'need' ? p.need_behavior_id === b.id : p.condition_behavior_id === b.id
 			);
 
@@ -403,6 +435,22 @@ function createBehaviorStore() {
 			// 높은 우선순위가 먼저 오도록 내림차순 정렬
 			return valB - valA;
 		});
+	}
+
+	function getAllBehaviorByPriority(worldCharacterEntity: WorldCharacterEntity): Behavior[] {
+		return getAllBehaviorsByPriority(worldCharacterEntity.behavior);
+	}
+
+	function getOrUndefinedFirstBehaviorByPriority(
+		worldCharacterEntity: WorldCharacterEntity
+	): Behavior | undefined {
+		return getAllBehaviorByPriority(worldCharacterEntity)[0];
+	}
+
+	function getFirstBehaviorByPriority(worldCharacterEntity: WorldCharacterEntity): Behavior {
+		const behavior = getOrUndefinedFirstBehaviorByPriority(worldCharacterEntity);
+		if (!behavior) throw new Error('Behavior not found by priority');
+		return behavior;
 	}
 
 	function getRootBehaviorAction(behavior: Behavior): BehaviorAction {
@@ -753,13 +801,17 @@ function createBehaviorStore() {
 		getBehaviorPriority,
 		getNeedBehavior,
 		getNeedBehaviorAction,
+		getRootNeedBehaviorAction,
 		getConditionBehavior,
 		getConditionBehaviorAction,
+		getRootConditionBehaviorAction,
 		getOrUndefinedBehaviorPriority,
 		getOrUndefinedNeedBehavior,
 		getOrUndefinedNeedBehaviorAction,
+		getOrUndefinedRootNeedBehaviorAction,
 		getOrUndefinedConditionBehavior,
 		getOrUndefinedConditionBehaviorAction,
+		getOrUndefinedRootConditionBehaviorAction,
 		getBehaviorAction,
 		getOrUndefinedBehaviorAction,
 		getNextBehaviorAction,
@@ -771,6 +823,9 @@ function createBehaviorStore() {
 		getAllConditionBehaviorActions,
 		getAllBehaviors,
 		getAllBehaviorsByPriority,
+		getAllBehaviorByPriority,
+		getFirstBehaviorByPriority,
+		getOrUndefinedFirstBehaviorByPriority,
 		getRootBehaviorAction,
 		getAllEntitySourcesByInteraction,
 		getAllInteractionsByBehaviorTargetId,

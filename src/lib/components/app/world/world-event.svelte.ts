@@ -1,7 +1,6 @@
 import Matter from 'matter-js';
 import type { WorldContext } from './context';
 import type { Camera } from './camera.svelte';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 
 const { Query, Composite } = Matter;

@@ -2,7 +2,7 @@ import type {
 	EntityId,
 	BehaviorTargetId,
 	InteractionQueue,
-	Behavior,
+	BehaviorId,
 } from '$lib/types';
 import type { Vector } from '$lib/types/vector';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
@@ -37,7 +37,7 @@ export class WorldCharacterEntityBehavior {
 		interactionTargetIds: [],
 		status: 'enqueuing',
 	});
-	behaviors = $state<Behavior[]>([]);
+	behaviorIds = $state<BehaviorId[]>([]);
 
 	update = update;
 	updateMove = updateMove;

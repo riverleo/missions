@@ -9,25 +9,26 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
 
 /**
- * # item_pick 시스템 상호작용 실행 tick 함수
+ * # 아이템 줍기 시스템 상호작용 실행
  *
- * `action-ready` 또는 `action-running` 상태에서 `item_pick` 시스템 상호작용을 진행합니다.
- * 이 함수는 실행 시작 시점/완료 판정/완료 부작용 반영까지 담당합니다.
+ * 상호작용 큐가 액션 준비(`action-ready`) 또는 액션 실행 중(`action-running`)일 때
+ * 아이템 줍기(`item_pick`) 시스템 상호작용을 진행합니다.
+ * 이 함수는 실행 시작 시점, 완료 판정, 완료 후 부작용 반영까지 담당합니다.
  *
  * @param tick - 현재 틱
- * @returns false (항상 다음 단계로 진행)
+ * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
- * - [x] 상호작용 큐 상태가 `action-ready` 또는 `action-running`이 아니면 아무 작업도 하지 않는다.
- * - [x] 현재 상호작용 타깃이 없으면 아무 작업도 하지 않는다.
- * - [x] 현재 상호작용이 `item_pick`이 아니면 아무 작업도 하지 않는다.
- * - [x] `action-ready` 상태에서 시작 조건(타깃 5px 이내 근접)이 충족되지 않으면 실행을 시작하지 않는다.
- * - [x] `action-ready` 상태에서 시작 조건이 충족되면 `currentInteractionTargetRunningAtTick`를 기록하고 `action-running`으로 전환한다.
- * - [x] `action-running` 상태에서 현재 상호작용 액션을 조회한다.
+ * - [x] 상호작용 큐가 액션 준비 또는 액션 실행 중이 아니면 아무 작업도 하지 않는다.
+ * - [x] 현재 상호작용 대상이 없으면 아무 작업도 하지 않는다.
+ * - [x] 현재 상호작용이 아이템 줍기 시스템 상호작용이 아니면 아무 작업도 하지 않는다.
+ * - [x] 액션 준비 상태에서 시작 조건(대상 아이템 근접)이 충족되지 않으면 실행을 시작하지 않는다.
+ * - [x] 액션 준비 상태에서 시작 조건이 충족되면 실행 시작 틱을 기록하고 액션 실행 중으로 전환한다.
+ * - [x] 액션 실행 중 상태에서 현재 상호작용 액션을 조회한다.
  * - [x] 실행 시작 틱이 비어 있으면 현재 틱으로 보정한다.
- * - [x] `duration_ticks` 경과로 완료를 판정한다.
- * - [x] `duration_ticks <= 0`이면 런타임에서 최소 1틱으로 보정해 완료를 판정한다.
- * - [x] 완료 시 `applyCompletedSystemItemPick`을 호출하고 큐 상태를 `action-completed`로 전환한다.
+ * - [x] 액션 지속 시간(`duration_ticks`) 경과로 완료를 판정한다.
+ * - [x] 액션 지속 시간이 0 이하이면 런타임에서 최소 1틱으로 보정해 완료를 판정한다.
+ * - [x] 완료 시 큐 상태가 액션 완료(`action-completed`)로 전환된다.
  */
 export default function tickActionSystemItemPick(
 	this: WorldCharacterEntityBehavior,
@@ -40,7 +41,7 @@ export default function tickActionSystemItemPick(
 		return false;
 	}
 
-	const currentInteractionTargetId = this.interactionQueue.currentInteractionTargetId;
+	const { currentInteractionTargetId } = this.interactionQueue;
 	if (!currentInteractionTargetId) return false;
 
 	const { getInteraction } = useInteraction();
@@ -55,16 +56,16 @@ export default function tickActionSystemItemPick(
 		return false;
 	}
 
-	const currentInteractionAction = getCurrentInteractionAction(this, currentInteractionTargetId);
+	const currentInteractionAction = getCurrentInteractionAction(currentInteractionTargetId);
 
 	if (this.interactionQueue.currentInteractionTargetRunningAtTick === undefined) {
 		this.interactionQueue.currentInteractionTargetRunningAtTick = tick;
 	}
 
-	const startedAtTick = this.interactionQueue.currentInteractionTargetRunningAtTick;
-	if (startedAtTick === undefined) return false;
+	const { currentInteractionTargetRunningAtTick } = this.interactionQueue;
+	if (currentInteractionTargetRunningAtTick === undefined) return false;
 
-	const elapsed = tick - startedAtTick;
+	const elapsed = tick - currentInteractionTargetRunningAtTick;
 	const completed = isCompleted(currentInteractionAction, elapsed);
 	if (!completed) return false;
 
@@ -73,7 +74,7 @@ export default function tickActionSystemItemPick(
 	return false;
 }
 
-export function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): boolean {
+function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): boolean {
 	if (!behavior.targetEntityId || EntityIdUtils.not('item', behavior.targetEntityId)) {
 		return false;
 	}
@@ -88,9 +89,9 @@ export function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): 
 }
 
 /**
- * item_pick 액션 완료 시점의 영속/런타임 상태를 동기화합니다.
+ * 아이템 줍기 액션 완료 시점의 영속/런타임 상태를 동기화합니다.
  */
-export function applyCompletedSystemItemPick(behavior: WorldCharacterEntityBehavior): void {
+function applyCompletedSystemItemPick(behavior: WorldCharacterEntityBehavior): void {
 	if (!behavior.targetEntityId || EntityIdUtils.not('item', behavior.targetEntityId)) {
 		return;
 	}
@@ -125,10 +126,7 @@ export function applyCompletedSystemItemPick(behavior: WorldCharacterEntityBehav
 	}
 }
 
-function getCurrentInteractionAction(
-	behavior: WorldCharacterEntityBehavior,
-	interactionTargetId: InteractionTargetId
-): InteractionAction {
+function getCurrentInteractionAction(interactionTargetId: InteractionTargetId): InteractionAction {
 	const { getAllInteractionActions } = useInteraction();
 	const { interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
 	const currentInteractionAction = getAllInteractionActions().find(

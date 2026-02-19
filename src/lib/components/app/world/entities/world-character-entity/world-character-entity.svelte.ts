@@ -25,7 +25,6 @@ export class WorldCharacterEntity extends Entity {
 	heldItemIds = $state<EntityId[]>([]);
 	needs: Record<NeedId, WorldCharacterNeed> = $state({});
 	behavior: WorldCharacterEntityBehavior;
-	private bodyAnimationCompleteListeners = new Set<() => void>();
 
 	tickDecreaseNeeds = tickDecreaseNeeds;
 
@@ -58,7 +57,7 @@ export class WorldCharacterEntity extends Entity {
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
 		this.heldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
-			.map((item) => EntityIdUtils.createId(EntityIdUtils.to(item)));
+			.map((item) => EntityIdUtils.create(EntityIdUtils.to(item)));
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
@@ -126,25 +125,5 @@ export class WorldCharacterEntity extends Entity {
 			vectorUtils.createVector(this.body.position.x, this.body.position.y),
 			vector
 		);
-	}
-
-	/**
-	 * 바디 애니메이션 완료 콜백을 등록합니다.
-	 * 반환값을 호출하면 등록 해제됩니다.
-	 */
-	onBodyAnimationComplete(listener: () => void): () => void {
-		this.bodyAnimationCompleteListeners.add(listener);
-		return () => {
-			this.bodyAnimationCompleteListeners.delete(listener);
-		};
-	}
-
-	/**
-	 * 현재 등록된 바디 애니메이션 완료 콜백을 실행합니다.
-	 */
-	emitBodyAnimationComplete(): void {
-		for (const listener of this.bodyAnimationCompleteListeners) {
-			listener();
-		}
 	}
 }

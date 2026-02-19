@@ -521,13 +521,21 @@ function createInteractionStore() {
 	/**
 	 * Interaction으로부터 root InteractionAction을 반환 (throw)
 	 */
+	function getRootInteractionAction(interaction: BuildingInteraction): InteractionAction;
+	function getRootInteractionAction(interaction: ItemInteraction): InteractionAction;
+	function getRootInteractionAction(interaction: CharacterInteraction): InteractionAction;
 	function getRootInteractionAction(interaction: Interaction): InteractionAction;
 	function getRootInteractionAction(
 		entityId: EntityId,
 		behaviorInteractionType: BehaviorInteractionType
 	): InteractionAction;
 	function getRootInteractionAction(
-		interactionOrEntityId: Interaction | EntityId,
+		interactionOrEntityId:
+			| BuildingInteraction
+			| ItemInteraction
+			| CharacterInteraction
+			| Interaction
+			| EntityId,
 		behaviorInteractionType?: BehaviorInteractionType
 	): InteractionAction {
 		if (behaviorInteractionType !== undefined) {

@@ -35,15 +35,44 @@ export const BehaviorIdUtils = {
 	 * // behavior와 behaviorAction 객체에서 필요한 정보를 추출하여 생성
 	 */
 	create(
-		typeOrBehaviorOrAction: BehaviorType | Behavior | BehaviorAction,
+		typeOrBehaviorOrAction:
+			| BehaviorType
+			| Behavior
+			| BehaviorAction
+			| NeedBehaviorAction
+			| ConditionBehaviorAction,
 		behaviorIdOrActionIdOrAction?:
 			| NeedBehaviorId
 			| ConditionBehaviorId
 			| NeedBehaviorActionId
 			| ConditionBehaviorActionId
-			| BehaviorAction,
+			| BehaviorAction
+			| NeedBehaviorAction
+			| ConditionBehaviorAction,
 		behaviorActionId?: NeedBehaviorActionId | ConditionBehaviorActionId
 	): BehaviorTargetId {
+		// NeedBehaviorAction 객체만 전달된 경우
+		if (
+			typeof typeOrBehaviorOrAction === 'object' &&
+			'need_behavior_id' in typeOrBehaviorOrAction &&
+			'id' in typeOrBehaviorOrAction &&
+			behaviorIdOrActionIdOrAction === undefined
+		) {
+			const needBehaviorAction = typeOrBehaviorOrAction as NeedBehaviorAction;
+			return `need_${needBehaviorAction.need_behavior_id}_${needBehaviorAction.id}` as BehaviorTargetId;
+		}
+
+		// ConditionBehaviorAction 객체만 전달된 경우
+		if (
+			typeof typeOrBehaviorOrAction === 'object' &&
+			'condition_behavior_id' in typeOrBehaviorOrAction &&
+			'id' in typeOrBehaviorOrAction &&
+			behaviorIdOrActionIdOrAction === undefined
+		) {
+			const conditionBehaviorAction = typeOrBehaviorOrAction as ConditionBehaviorAction;
+			return `condition_${conditionBehaviorAction.condition_behavior_id}_${conditionBehaviorAction.id}` as BehaviorTargetId;
+		}
+
 		// BehaviorAction 객체만 전달된 경우 (가장 간단한 케이스)
 		if (
 			typeof typeOrBehaviorOrAction === 'object' &&
