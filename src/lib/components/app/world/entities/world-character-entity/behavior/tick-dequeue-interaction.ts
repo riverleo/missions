@@ -10,7 +10,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * 실제 상호작용 실행/완료 판정은 각 tick-action-*에서 처리합니다.
  *
  * @param tick - 현재 틱 (dequeue에서는 사용하지 않음)
- * @returns false (항상 다음 단계로 진행)
+ * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
  * - [x] 상호작용 큐 상태가 `ready` 또는 `action-completed`가 아니면 아무 작업도 하지 않는다.
@@ -97,7 +97,9 @@ function getOrUndefinedNextInteractionTargetIdFromQueue(
 	behavior: WorldCharacterEntityBehavior,
 	currentInteractionTargetId: InteractionTargetId
 ): InteractionTargetId | undefined {
-	const currentIndex = behavior.interactionQueue.interactionTargetIds.indexOf(currentInteractionTargetId);
+	const currentIndex = behavior.interactionQueue.interactionTargetIds.indexOf(
+		currentInteractionTargetId
+	);
 	if (currentIndex === -1) return undefined;
 
 	return behavior.interactionQueue.interactionTargetIds[currentIndex + 1];

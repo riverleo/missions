@@ -9,7 +9,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
  * 상호작용 대상 목록을 채웁니다.
  *
  * @param tick - 현재 틱
- * @returns false (항상 다음 단계로 진행)
+ * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
  * - [x] 상호작용 큐 상태가 '준비완료', '실행중' 또는 '완료'면 다음 단계로 진행한다.

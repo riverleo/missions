@@ -15,7 +15,7 @@ const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
  * 이 함수는 실행 시작 시점/완료 판정/완료 부작용 반영까지 담당합니다.
  *
  * @param tick - 현재 틱
- * @returns false (항상 다음 단계로 진행)
+ * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
  * - [x] 상호작용 큐 상태가 `action-ready` 또는 `action-running`이 아니면 아무 작업도 하지 않는다.

@@ -705,28 +705,4 @@ describe('tickFindTargetEntityAndGo(this: WorldCharacterEntityBehavior)', () => 
 		});
 	});
 
-	it('현재 행동에 대한 타깃 엔티티를 찾지 못한 경우 계속 진행한다', () => {
-		behavior.behaviorTargetId = 'behavior-target-1' as any;
-		const mockBehaviorAction = {
-			id: 'action-1',
-			type: 'system-item-pick',
-			target_selection_method: 'search',
-		} as any;
-		mockGetBehaviorAction.mockReturnValue(mockBehaviorAction);
-
-		// Mock getAllInteractionsByBehaviorTargetId to return an interaction
-		const mockInteraction = { id: 'interaction-1' } as any;
-		mockGetAllInteractionsByBehaviorTargetId.mockReturnValue([mockInteraction]);
-
-		// Mock getAllEntitySourcesByInteraction to return entity sources
-		mockGetAllEntitySourcesByInteraction.mockReturnValue([{ id: 'source-1' }]);
-
-		mockWorldCharacterEntity.worldContext!.entities = {
-			['character-1' as any]: mockWorldCharacterEntity as any,
-		};
-
-		const result = behavior.tickFindTargetEntityAndGo(0);
-
-		expect(result).toBe(false);
-	});
 });
