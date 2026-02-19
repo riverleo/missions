@@ -5,19 +5,19 @@ import type {
 	WorldCharacterId,
 	CharacterBody,
 	CharacterId,
-	WorldItemId,
 	WorldCharacterNeed,
 	NeedId,
 	Vector,
 	EntityId,
 } from '$lib/types';
-import { WorldCharacterEntityBehavior } from './behavior-state';
+import { WorldCharacterEntityBehavior } from './behavior';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_CHARACTER } from '$lib/constants';
 import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import tickDecreaseNeeds from './tick-decrease-needs';
+import { objectify } from 'radash';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -64,10 +64,11 @@ export class WorldCharacterEntity extends Entity {
 		const characterNeeds = getAllWorldCharacterNeeds().filter(
 			(need) => need.world_character_id === worldCharacterId
 		);
-		this.needs = {};
-		for (const need of characterNeeds) {
-			this.needs[need.need_id] = { ...need };
-		}
+		this.needs = objectify(
+			characterNeeds,
+			(characterNeed) => characterNeed.need_id,
+			(characterNeed) => ({ ...characterNeed })
+		);
 
 		// 바디 생성 (collider 및 위치 상태도 함께 설정됨)
 		this.body = this.createBody(

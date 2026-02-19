@@ -2,7 +2,7 @@
 	import { useTerrain, useWorld } from '$lib/hooks';
 	import type { WorldTileEntity } from '$lib/components/app/world/entities/world-tile-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import { getDisplayNameWithId } from '$lib/utils/label';
+	import { getNameWithId } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -23,7 +23,7 @@
 	const worldTileMap = $derived(getWorldTileMap(entity.worldId));
 	const tileData = $derived(worldTileMap?.data[entity.instanceId]);
 	const tile = $derived(tileData ? $tileStore.data[tileData.tile_id] : undefined);
-	const tileLabel = $derived(getDisplayNameWithId(tile?.name, entity.instanceId, '타일'));
+	const tileLabel = $derived(getNameWithId(tile?.name, entity.instanceId, '타일'));
 
 	// 타일 좌표 파싱
 	const coords = $derived(entity.instanceId.split(',').map(Number));

@@ -2,7 +2,7 @@
 	import { useBuilding, useWorld } from '$lib/hooks';
 	import type { WorldBuildingEntity } from '$lib/components/app/world/entities/world-building-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import { getDisplayNameWithId } from '$lib/utils/label';
+	import { getNameWithId } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -21,10 +21,7 @@
 	const { getOrUndefinedCondition } = useBuilding();
 
 	const worldBuilding = $derived(getWorldBuilding(entity.instanceId));
-	const building = $derived(entity.building);
-	const buildingLabel = $derived(
-		getDisplayNameWithId(building?.name, entity.instanceId, '건물')
-	);
+	const buildingLabel = $derived(getNameWithId(entity.id));
 	const conditions = $derived(Object.values(entity.worldBuildingConditions));
 </script>
 

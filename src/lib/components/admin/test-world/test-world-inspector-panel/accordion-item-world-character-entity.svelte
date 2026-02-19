@@ -1,15 +1,19 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem } from '$lib/hooks';
+	import { useBehavior, useCharacter } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
-	import { getBehaviorActionString, getDisplayNameWithId } from '$lib/utils/label';
+	import {
+		getBehaviorActionString,
+		getNameWithId,
+		getInteractionTargetLabelString,
+		getInteractionQueueStatusLabel,
+	} from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { IconTrash } from '@tabler/icons-svelte';
-	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import AccordionContentItem from './accordion-content-item.svelte';
 
 	interface Props {
@@ -19,9 +23,7 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { getCharacter, getOrUndefinedNeed } = useCharacter();
-	const { getBuilding } = useBuilding();
-	const { getItem } = useItem();
+	const { getOrUndefinedNeed } = useCharacter();
 	const {
 		getOrUndefinedNeedBehavior,
 		getOrUndefinedNeedBehaviorAction,
@@ -29,31 +31,11 @@
 		getOrUndefinedConditionBehaviorAction,
 	} = useBehavior();
 
-	const character = $derived(getCharacter(entity.sourceId));
-	const characterLabel = $derived(
-		getDisplayNameWithId(character?.name, entity.instanceId, '캐릭터')
-	);
+	const characterLabel = $derived(getNameWithId(entity.id));
 	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
-	const currentTargetName = $derived.by(() => {
-		if (!entity.behavior.targetEntityId) return undefined;
-
-		const { type } = EntityIdUtils.parse(entity.behavior.targetEntityId);
-
-		if (type === 'building') {
-			const buildingId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getBuilding(buildingId).name;
-		} else if (type === 'item') {
-			const itemId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getItem(itemId).name;
-		} else if (type === 'character') {
-			const characterId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getCharacter(characterId).name;
-		}
-
-		return undefined;
-	});
+	const currentTargetName = $derived(getNameWithId(entity.behavior.targetEntityId));
 
 	// 현재 행동 이름
 	const currentBehaviorName = $derived.by(() => {
@@ -91,20 +73,23 @@
 		}
 	});
 
-	// behaviors 툴팁
-	const behaviorsTooltip = $derived.by(() => {
-		if (!entity.behavior.behaviors || entity.behavior.behaviors.length === 0) {
-			return undefined;
-		}
+	const currentInteractionActionLabel = $derived.by(() => {
+		const { currentInteractionTargetId } = entity.behavior.interactionQueue;
+		return getInteractionTargetLabelString(currentInteractionTargetId);
+	});
 
-		return entity.behavior.behaviors.map((behavior) => {
-			if (behavior.behaviorType === 'need') {
-				const needBehavior = getOrUndefinedNeedBehavior(behavior.id);
-				return needBehavior?.name ?? '행동';
-			} else {
-				const conditionBehavior = getOrUndefinedConditionBehavior(behavior.id);
-				return conditionBehavior?.name ?? '컨디션';
-			}
+	const currentInteractionActionStatusLabel = $derived.by(() => {
+		const { status } = entity.behavior.interactionQueue;
+		return getInteractionQueueStatusLabel(status);
+	});
+
+	// 상호작용 액션 디버그 툴팁 (interactionTargetIds)
+	const interactionTargetIdsTooltip = $derived.by(() => {
+		const { interactionTargetIds, currentInteractionTargetId } = entity.behavior.interactionQueue;
+
+		return interactionTargetIds.map((interactionTargetId) => {
+			const currentMark = interactionTargetId === currentInteractionTargetId ? ' (현재)' : '';
+			return `${getInteractionTargetLabelString(interactionTargetId)}${currentMark}`;
 		});
 	});
 
@@ -112,10 +97,8 @@
 	const heldItemsTooltip = $derived.by(() => {
 		if (entity.heldItemIds.length === 0) return undefined;
 
-		const { getOrUndefinedItem } = useItem();
 		return entity.heldItemIds.map((itemId) => {
-			const item = getOrUndefinedItem(EntityIdUtils.sourceId(itemId));
-			return getDisplayNameWithId(item?.name, itemId, '아이템');
+			return getNameWithId(itemId);
 		});
 	});
 </script>
@@ -145,11 +128,15 @@
 		<AccordionContentItem label="월드 좌표">
 			({Math.round(entity.x)}, {Math.round(entity.y)})
 		</AccordionContentItem>
-		<AccordionContentItem label="행동" tooltip={behaviorsTooltip}>
+		<AccordionContentItem label="행동">
 			{currentBehaviorName ?? '없음'}
 		</AccordionContentItem>
 		<AccordionContentItem label="행동 액션">
 			{currentBehaviorActionLabel ?? '없음'}
+		</AccordionContentItem>
+		<AccordionContentItem label="상호작용 액션" tooltip={interactionTargetIdsTooltip}>
+			{currentInteractionActionLabel}
+			<Badge variant="secondary">{currentInteractionActionStatusLabel}</Badge>
 		</AccordionContentItem>
 		<AccordionContentItem label="대상">
 			{currentTargetName ?? '없음'}

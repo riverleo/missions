@@ -41,9 +41,14 @@ import type {
 	ItemId,
 	NeedId,
 	NeedBehaviorId,
+	InteractionTargetId,
+	EntityId,
 } from '$lib/types';
+import type { InteractionQueueStatus } from '$lib/types/core';
 import { get } from 'svelte/store';
 import { josa } from './josa';
+import { InteractionIdUtils } from './interaction-id';
+import { EntityIdUtils } from './entity-id';
 import {
 	useCharacter,
 	useBuilding,
@@ -167,7 +172,7 @@ export function getShortId(id: string): string {
 	return id.split('-')[0] ?? id;
 }
 
-export function getDisplayNameWithId(
+function formatNameWithId(
 	name: string | undefined | null,
 	id: string,
 	fallback: string = FALLBACK_LABELS.unnamed
@@ -181,6 +186,43 @@ export function getDisplayTitle(title: string | undefined | null, id: string): s
 
 export function getDisplayName(name: string | undefined | null, id: string): string {
 	return name || getUnnamedWithId(id);
+}
+
+export function getNameWithId(entityId: EntityId | undefined): string;
+export function getNameWithId(
+	name: string | undefined | null,
+	id: string,
+	fallback?: string
+): string;
+export function getNameWithId(
+	entityIdOrName: EntityId | string | undefined | null,
+	id?: string,
+	fallback: string = FALLBACK_LABELS.unnamed
+): string {
+	if (id !== undefined) {
+		return formatNameWithId(entityIdOrName, id, fallback);
+	}
+
+	if (!entityIdOrName) return '찾을 수 없음';
+
+	const entityId = entityIdOrName as EntityId;
+
+	const { type, sourceId, instanceId } = EntityIdUtils.parse(entityId);
+
+	if (type === 'building') {
+		const { getBuilding } = useBuilding();
+		return formatNameWithId(getBuilding(sourceId).name, instanceId, '건물');
+	}
+	if (type === 'item') {
+		const { getItem } = useItem();
+		return formatNameWithId(getItem(sourceId).name, instanceId, '아이템');
+	}
+	if (type === 'character') {
+		const { getCharacter } = useCharacter();
+		return formatNameWithId(getCharacter(sourceId).name, instanceId, '캐릭터');
+	}
+
+	return formatNameWithId(undefined, instanceId, '찾을 수 없음');
 }
 
 // ============================================================
@@ -641,11 +683,46 @@ export function getInteractionActionSummaryString(
 ): string {
 	if (!action) return '액션 정보 없음';
 
-	const duration = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '';
-	const face = `"${getCharacterFaceStateString(action.character_face_state_type)}" 표정으로 `;
-	const body = `"${getCharacterBodyStateString(action.character_body_state_type)}"`;
+	const { getAllInteractions } = useInteraction();
+	const interactionId =
+		('building_interaction_id' in action && action.building_interaction_id) ||
+		('item_interaction_id' in action && action.item_interaction_id) ||
+		('character_interaction_id' in action && action.character_interaction_id);
+	const interaction = interactionId
+		? getAllInteractions().find((value) => value.id === interactionId)
+		: undefined;
+	const interactionType =
+		interaction?.once_interaction_type ||
+		interaction?.fulfill_interaction_type ||
+		interaction?.system_interaction_type;
+	const interactionTypeLabel = interactionType
+		? getBehaviorInteractTypeString(interactionType)
+		: '상호작용';
+	const durationLabel = action.duration_ticks > 0 ? `${action.duration_ticks}틱 동안 ` : '즉시 ';
 
-	return `${duration}${face}${body}`;
+	return `${durationLabel}${interactionTypeLabel}`;
+}
+
+export function getInteractionTargetLabelString(
+	interactionTargetId: InteractionTargetId | undefined
+): string {
+	if (!interactionTargetId) return '없음';
+
+	const { interactionActionId } = InteractionIdUtils.parse(interactionTargetId);
+	const { getAllInteractionActions } = useInteraction();
+	const action = getAllInteractionActions().find((value) => value.id === interactionActionId);
+	if (!action) return `알 수 없는 액션 (${interactionActionId.split('-')[0]})`;
+
+	return getInteractionActionSummaryString(action);
+}
+
+export function getInteractionQueueStatusLabel(status: InteractionQueueStatus): string {
+	if (status === 'enqueuing') return '큐 구성 중';
+	if (status === 'ready') return '대기';
+	if (status === 'action-ready') return '액션 준비됨';
+	if (status === 'action-running') return '액션 실행 중';
+	if (status === 'action-completed') return '액션 완료됨';
+	return '완료';
 }
 
 // ============================================================
