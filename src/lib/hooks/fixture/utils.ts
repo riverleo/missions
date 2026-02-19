@@ -1,8 +1,11 @@
 import type {
+	Behavior,
 	BehaviorPriority,
 	BehaviorPriorityId,
 	Building,
 	Character,
+	CharacterNeed,
+	CharacterNeedId,
 	CharacterBody,
 	CharacterBodyId,
 	CharacterId,
@@ -85,13 +88,13 @@ let conditionA: Condition | undefined;
 let buildingA: Building | undefined;
 let worldCharacterA: WorldCharacter | undefined;
 
-export function getOrCreateWorld(): World {
+export function createOrGetWorld(): World {
 	const worldStore = useWorld().worldStore;
 	const existingWorld = Object.values(get(worldStore).data)[0];
 	if (existingWorld) return existingWorld;
 
-	const scenario = getOrCreateScenario();
-	const player = getOrCreatePlayer();
+	const scenario = createOrGetScenario();
+	const player = createOrGetPlayer();
 	const createdAt = new Date().toISOString();
 	const worldId = uuidv4() as WorldId;
 	const value: World = {
@@ -108,7 +111,7 @@ export function getOrCreateWorld(): World {
 	return value;
 }
 
-export function getOrCreateScenario(overrides: Partial<Scenario> = {}): Scenario {
+export function createOrGetScenario(overrides: Partial<Scenario> = {}): Scenario {
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const scenarioId = uuidv4() as ScenarioId;
@@ -125,7 +128,7 @@ export function getOrCreateScenario(overrides: Partial<Scenario> = {}): Scenario
 	return value;
 }
 
-export function getOrCreatePlayer(overrides: Partial<Player> = {}): Player {
+export function createOrGetPlayer(overrides: Partial<Player> = {}): Player {
 	const userId = uuidv4() as UserId;
 	const createdAt = new Date().toISOString();
 	const playerId = uuidv4() as PlayerId;
@@ -148,7 +151,7 @@ export function createWorldCharacter(
 	character: Character,
 	overrides: Partial<WorldCharacter> = {}
 ): WorldCharacter {
-	const world = getOrCreateWorld();
+	const world = createOrGetWorld();
 	const worldCharacterStore = useWorld().worldCharacterStore;
 	const existingWorldCharacter = Object.values(get(worldCharacterStore).data).find(
 		(worldCharacter) =>
@@ -180,11 +183,13 @@ export function createWorldCharacterNeed(
 	need: Need,
 	overrides: Partial<WorldCharacterNeed> = {}
 ): WorldCharacterNeed {
+	const character = useCharacter().getCharacter(worldCharacter.character_id);
+	const characterNeed = createOrGetCharacterNeed(character, need);
 	const worldCharacterNeedStore = useWorld().worldCharacterNeedStore;
 	const existingWorldCharacterNeed = Object.values(get(worldCharacterNeedStore).data).find(
 		(worldCharacterNeed) =>
 			worldCharacterNeed.world_character_id === worldCharacter.id &&
-			worldCharacterNeed.need_id === need.id
+			worldCharacterNeed.need_id === characterNeed.need_id
 	);
 	if (existingWorldCharacterNeed) return existingWorldCharacterNeed;
 
@@ -196,7 +201,7 @@ export function createWorldCharacterNeed(
 		world_id: worldCharacter.world_id,
 		world_character_id: worldCharacter.id,
 		character_id: worldCharacter.character_id,
-		need_id: need.id,
+		need_id: characterNeed.need_id,
 		deleted_at: null,
 		value: 0,
 		...overrides,
@@ -205,9 +210,9 @@ export function createWorldCharacterNeed(
 	return value;
 }
 
-export function getOrCreateCharacter(overrides: Partial<Character> = {}): Character {
-	const world = getOrCreateWorld();
-	const characterBody = getOrCreateCharacterBody();
+export function createOrGetCharacter(overrides: Partial<Character> = {}): Character {
+	const world = createOrGetWorld();
+	const characterBody = createOrGetCharacterBody();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const characterId = uuidv4() as CharacterId;
@@ -225,8 +230,8 @@ export function getOrCreateCharacter(overrides: Partial<Character> = {}): Charac
 	return value;
 }
 
-export function getOrCreateCharacterBody(overrides: Partial<CharacterBody> = {}): CharacterBody {
-	const world = getOrCreateWorld();
+export function createOrGetCharacterBody(overrides: Partial<CharacterBody> = {}): CharacterBody {
+	const world = createOrGetWorld();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const characterBodyId = uuidv4() as CharacterBodyId;
@@ -247,8 +252,8 @@ export function getOrCreateCharacterBody(overrides: Partial<CharacterBody> = {})
 	return value;
 }
 
-export function getOrCreateNeed(overrides: Partial<Need> = {}): Need {
-	const world = getOrCreateWorld();
+export function createOrGetNeed(overrides: Partial<Need> = {}): Need {
+	const world = createOrGetWorld();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const needId = uuidv4() as NeedId;
@@ -267,35 +272,77 @@ export function getOrCreateNeed(overrides: Partial<Need> = {}): Need {
 	return value;
 }
 
-export function getOrCreateNeedBehavior(overrides: Partial<NeedBehavior> = {}): NeedBehavior {
-	const world = getOrCreateWorld();
+export function createOrGetCharacterNeed(
+	character: Character,
+	need: Need,
+	overrides: Partial<CharacterNeed> = {}
+): CharacterNeed {
+	const characterNeedStore = useCharacter().characterNeedStore;
+	const existingCharacterNeed = Object.values(get(characterNeedStore).data).find(
+		(characterNeed) => characterNeed.character_id === character.id && characterNeed.need_id === need.id
+	);
+	if (existingCharacterNeed) return existingCharacterNeed;
+
+	const value: CharacterNeed = {
+		id: uuidv4() as CharacterNeedId,
+		scenario_id: character.scenario_id,
+		character_id: character.id,
+		need_id: need.id,
+		decay_multiplier: 1,
+		created_at: new Date().toISOString(),
+		created_by: null,
+		...overrides,
+	};
+	add(characterNeedStore, value);
+	return value;
+}
+
+export function createOrGetNeedBehavior(
+	need: Need,
+	overrides: Partial<NeedBehavior> = {},
+	options: { withRootAction?: boolean } = {}
+): NeedBehavior {
+	const { withRootAction = true } = options;
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const needBehaviorId = uuidv4() as NeedBehaviorId;
 	const value: NeedBehavior = {
 		id: needBehaviorId,
 		name: getIdPrefix('need-behavior', needBehaviorId),
-		scenario_id: world.scenario_id,
-		need_id: uuidv4() as NeedId,
-		character_id: uuidv4() as CharacterId,
+		scenario_id: need.scenario_id,
+		need_id: need.id,
+		character_id: overrides.character_id ?? null,
 		need_threshold: 0,
 		created_at: createdAt,
 		created_by: createdBy,
 		...overrides,
 	};
 	add(useBehavior().needBehaviorStore, value);
+
+	if (withRootAction) {
+		createOrGetNeedBehaviorAction(value, { root: true });
+	}
+
 	return value;
 }
 
-export function getOrCreateNeedBehaviorAction(
+export function createOrGetNeedBehaviorAction(
+	needBehavior: NeedBehavior,
 	overrides: Partial<NeedBehaviorAction> = {}
 ): NeedBehaviorAction {
-	const world = getOrCreateWorld();
+	const root = overrides.root ?? true;
+	if (root) {
+		const existingRootAction = Object.values(get(useBehavior().needBehaviorActionStore).data).find(
+			(action) => action.need_behavior_id === needBehavior.id && action.root
+		);
+		if (existingRootAction) return existingRootAction;
+	}
+
 	const value: NeedBehaviorAction = {
 		id: uuidv4() as NeedBehaviorActionId,
-		scenario_id: world.scenario_id,
-		need_behavior_id: uuidv4() as NeedBehaviorId,
-		need_id: uuidv4() as NeedId,
+		scenario_id: needBehavior.scenario_id,
+		need_behavior_id: needBehavior.id,
+		need_id: needBehavior.need_id,
 		need_fulfillment_id: null,
 		building_interaction_id: null,
 		item_interaction_id: null,
@@ -311,18 +358,27 @@ export function getOrCreateNeedBehaviorAction(
 	return value;
 }
 
-export function getOrCreateBehaviorPriority(
+export function createOrGetBehaviorPriority(
+	behavior: Behavior,
 	overrides: Partial<BehaviorPriority> = {}
 ): BehaviorPriority {
-	const world = getOrCreateWorld();
+	const behaviorPriorityStore = useBehavior().behaviorPriorityStore;
+	const existingBehaviorPriority = Object.values(get(behaviorPriorityStore).data).find(
+		(priority) =>
+			behavior.behaviorType === 'need'
+				? priority.need_behavior_id === behavior.id
+				: priority.condition_behavior_id === behavior.id
+	);
+	if (existingBehaviorPriority) return existingBehaviorPriority;
+
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const value: BehaviorPriority = {
 		id: uuidv4() as BehaviorPriorityId,
 		priority: 1,
-		need_behavior_id: uuidv4() as NeedBehaviorId,
-		condition_behavior_id: null,
-		scenario_id: world.scenario_id,
+		need_behavior_id: behavior.behaviorType === 'need' ? behavior.id : null,
+		condition_behavior_id: behavior.behaviorType === 'condition' ? behavior.id : null,
+		scenario_id: behavior.scenario_id,
 		created_at: createdAt,
 		created_by: createdBy,
 		...overrides,
@@ -331,8 +387,8 @@ export function getOrCreateBehaviorPriority(
 	return value;
 }
 
-export function getOrCreateItem(overrides: Partial<Item> = {}): Item {
-	const world = getOrCreateWorld();
+export function createOrGetItem(overrides: Partial<Item> = {}): Item {
+	const world = createOrGetWorld();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const itemId = uuidv4() as Item['id'];
@@ -355,8 +411,8 @@ export function getOrCreateItem(overrides: Partial<Item> = {}): Item {
 	return value;
 }
 
-export function getOrCreateCondition(overrides: Partial<Condition> = {}): Condition {
-	const world = getOrCreateWorld();
+export function createOrGetCondition(overrides: Partial<Condition> = {}): Condition {
+	const world = createOrGetWorld();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const conditionId = uuidv4() as Condition['id'];
@@ -375,8 +431,8 @@ export function getOrCreateCondition(overrides: Partial<Condition> = {}): Condit
 	return value;
 }
 
-export function getOrCreateBuilding(overrides: Partial<Building> = {}): Building {
-	const world = getOrCreateWorld();
+export function createOrGetBuilding(overrides: Partial<Building> = {}): Building {
+	const world = createOrGetWorld();
 	const createdAt = new Date().toISOString();
 	const createdBy = uuidv4() as UserRoleId;
 	const buildingId = uuidv4() as Building['id'];
@@ -398,57 +454,57 @@ export function getOrCreateBuilding(overrides: Partial<Building> = {}): Building
 	return value;
 }
 
-export function getOrCreateCharacterA(): Character {
+export function createOrGetCharacterA(): Character {
 	if (characterA) {
 		const existing = get(useCharacter().characterStore).data[characterA.id];
 		if (existing) return existing;
 	}
-	characterA = getOrCreateCharacter();
+	characterA = createOrGetCharacter();
 	return characterA;
 }
 
-export function getOrCreateItemA(): Item {
+export function createOrGetItemA(): Item {
 	if (itemA) {
 		const existing = get(useItem().itemStore).data[itemA.id];
 		if (existing) return existing;
 	}
-	itemA = getOrCreateItem();
+	itemA = createOrGetItem();
 	return itemA;
 }
 
-export function getOrCreateNeedA(): Need {
+export function createOrGetNeedA(): Need {
 	if (needA) {
 		const existing = get(useCharacter().needStore).data[needA.id];
 		if (existing) return existing;
 	}
-	needA = getOrCreateNeed();
+	needA = createOrGetNeed();
 	return needA;
 }
 
-export function getOrCreateConditionA(): Condition {
+export function createOrGetConditionA(): Condition {
 	if (conditionA) {
 		const existing = get(useBuilding().conditionStore).data[conditionA.id];
 		if (existing) return existing;
 	}
-	conditionA = getOrCreateCondition();
+	conditionA = createOrGetCondition();
 	return conditionA;
 }
 
-export function getOrCreateBuildingA(): Building {
+export function createOrGetBuildingA(): Building {
 	if (buildingA) {
 		const existing = get(useBuilding().buildingStore).data[buildingA.id];
 		if (existing) return existing;
 	}
-	buildingA = getOrCreateBuilding();
+	buildingA = createOrGetBuilding();
 	return buildingA;
 }
 
-export function getOrCreateWorldCharacterA(): WorldCharacter {
+export function createOrGetWorldCharacterA(): WorldCharacter {
 	if (worldCharacterA) {
 		const existing = get(useWorld().worldCharacterStore).data[worldCharacterA.id];
 		if (existing) return existing;
 	}
-	const character = getOrCreateCharacterA();
+	const character = createOrGetCharacterA();
 	worldCharacterA = createWorldCharacter(character, { x: 100, y: 100 });
 	return worldCharacterA;
 }

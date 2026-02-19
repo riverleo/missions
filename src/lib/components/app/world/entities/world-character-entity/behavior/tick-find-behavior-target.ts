@@ -12,7 +12,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
- * - [x] 행동 목록(우선 순위에 따라 정렬)은 매 틱마다 갱신된다.
+ * - [x] 행동 목록이 우선 순위에 따라 틱마다 갱신된다.
  * - 진행중인 행동 타깃이 있는 경우
  *    - [x] 아무것도 하지 않고 계속 진행한다.
  * - 진행중인 행동 타깃이 없는 경우
@@ -38,10 +38,11 @@ export default function tickFindBehaviorTarget(
 	this.clear();
 
 	// 3. 우선순위 정렬된 행동 목록 가져오기
-	this.behaviors = getAllBehaviorsByPriority(this);
+	const behaviors = getAllBehaviorsByPriority(this);
+	this.behaviorIds = behaviors.map((behavior) => behavior.id);
 
 	// 4. 행동을 찾을 수 없으면 중단 후 처음으로
-	const firstBehavior = this.behaviors[0];
+	const firstBehavior = behaviors[0];
 	if (!firstBehavior) {
 		return true;
 	}

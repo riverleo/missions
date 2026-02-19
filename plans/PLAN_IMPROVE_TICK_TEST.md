@@ -36,8 +36,8 @@
 
 ### 0) behavior 스펙 체크리스트
 
-- [ ] `tick-find-behavior-target.ts`: 욕구 임계 조건에서 행동이 트리거되고 행동 식별자가 반영된다.
-- [ ] `tick-find-behavior-target.ts`: 트리거 조건이 아니면 행동 상태를 유지한다.
+- [x] `tick-find-behavior-target.ts`: 욕구 임계 조건에서 행동이 트리거되고 행동 식별자가 반영된다.
+- [x] `tick-find-behavior-target.ts`: 트리거 조건이 아니면 행동 상태를 유지한다.
 
 - [ ] `tick-find-target-entity-and-go.ts`: 유효한 대상 탐색 시 `behavior.targetEntityId`와 경로(`behavior.path`)가 반영된다.
 - [ ] `tick-find-target-entity-and-go.ts`: 유효한 대상이 없으면 명세된 대기/유지/해제 규칙을 따른다.

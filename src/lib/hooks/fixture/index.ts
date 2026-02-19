@@ -1,4 +1,4 @@
-import * as worldCharacterEntity from './world-character-entity';
+import createForTickFindBehaviorTarget from './world-character-entity/create-for-tick-find-behavior-target';
 import {
 	useBehavior,
 	useBuilding,
@@ -13,9 +13,7 @@ import {
 import type { RecordFetchState } from '$lib/types';
 import type { Readable, Writable } from 'svelte/store';
 
-function resetRecordFetchStateStore<K extends string, T>(
-	store: Readable<RecordFetchState<K, T>>
-) {
+function reset<K extends string, T>(store: Readable<RecordFetchState<K, T>>) {
 	(store as Writable<RecordFetchState<K, T>>).set({
 		status: 'success',
 		data: {} as Record<K, T>,
@@ -23,7 +21,9 @@ function resetRecordFetchStateStore<K extends string, T>(
 }
 
 export const Fixture = {
-	worldCharacterEntity,
+	worldCharacterEntity: {
+		createForTickFindBehaviorTarget,
+	},
 	reset() {
 		const behavior = useBehavior();
 		const building = useBuilding();
@@ -35,49 +35,49 @@ export const Fixture = {
 		const scenario = useScenario();
 		const world = useWorld();
 
-		resetRecordFetchStateStore(behavior.behaviorPriorityStore);
-		resetRecordFetchStateStore(behavior.needBehaviorStore);
-		resetRecordFetchStateStore(behavior.needBehaviorActionStore);
-		resetRecordFetchStateStore(behavior.conditionBehaviorStore);
-		resetRecordFetchStateStore(behavior.conditionBehaviorActionStore);
+		reset(behavior.behaviorPriorityStore);
+		reset(behavior.needBehaviorStore);
+		reset(behavior.needBehaviorActionStore);
+		reset(behavior.conditionBehaviorStore);
+		reset(behavior.conditionBehaviorActionStore);
 
-		resetRecordFetchStateStore(building.buildingStore);
-		resetRecordFetchStateStore(building.buildingItemStore);
-		resetRecordFetchStateStore(building.buildingStateStore);
-		resetRecordFetchStateStore(building.conditionStore);
-		resetRecordFetchStateStore(building.buildingConditionStore);
-		resetRecordFetchStateStore(building.conditionEffectStore);
+		reset(building.buildingStore);
+		reset(building.buildingItemStore);
+		reset(building.buildingStateStore);
+		reset(building.conditionStore);
+		reset(building.buildingConditionStore);
+		reset(building.conditionEffectStore);
 
-		resetRecordFetchStateStore(character.characterStore);
-		resetRecordFetchStateStore(character.characterFaceStateStore);
-		resetRecordFetchStateStore(character.characterBodyStore);
-		resetRecordFetchStateStore(character.characterBodyStateStore);
-		resetRecordFetchStateStore(character.needStore);
-		resetRecordFetchStateStore(character.characterNeedStore);
+		reset(character.characterStore);
+		reset(character.characterFaceStateStore);
+		reset(character.characterBodyStore);
+		reset(character.characterBodyStateStore);
+		reset(character.needStore);
+		reset(character.characterNeedStore);
 
-		resetRecordFetchStateStore(fulfillment.needFulfillmentStore);
-		resetRecordFetchStateStore(fulfillment.conditionFulfillmentStore);
+		reset(fulfillment.needFulfillmentStore);
+		reset(fulfillment.conditionFulfillmentStore);
 
-		resetRecordFetchStateStore(interaction.buildingInteractionStore);
-		resetRecordFetchStateStore(interaction.itemInteractionStore);
-		resetRecordFetchStateStore(interaction.characterInteractionStore);
-		resetRecordFetchStateStore(interaction.buildingInteractionActionStore);
-		resetRecordFetchStateStore(interaction.itemInteractionActionStore);
-		resetRecordFetchStateStore(interaction.characterInteractionActionStore);
+		reset(interaction.buildingInteractionStore);
+		reset(interaction.itemInteractionStore);
+		reset(interaction.characterInteractionStore);
+		reset(interaction.buildingInteractionActionStore);
+		reset(interaction.itemInteractionActionStore);
+		reset(interaction.characterInteractionActionStore);
 
-		resetRecordFetchStateStore(item.itemStore);
-		resetRecordFetchStateStore(item.itemStateStore);
-		resetRecordFetchStateStore(player.playerStore);
-		resetRecordFetchStateStore(player.playerScenarioStore);
-		resetRecordFetchStateStore(scenario.scenarioStore);
-		resetRecordFetchStateStore(scenario.scenarioSnapshotStore);
-		resetRecordFetchStateStore(world.worldStore);
-		resetRecordFetchStateStore(world.worldCharacterStore);
-		resetRecordFetchStateStore(world.worldCharacterNeedStore);
-		resetRecordFetchStateStore(world.worldBuildingStore);
-		resetRecordFetchStateStore(world.worldBuildingConditionStore);
-		resetRecordFetchStateStore(world.worldItemStore);
-		resetRecordFetchStateStore(world.worldTileMapStore);
+		reset(item.itemStore);
+		reset(item.itemStateStore);
+		reset(player.playerStore);
+		reset(player.playerScenarioStore);
+		reset(scenario.scenarioStore);
+		reset(scenario.scenarioSnapshotStore);
+		reset(world.worldStore);
+		reset(world.worldCharacterStore);
+		reset(world.worldCharacterNeedStore);
+		reset(world.worldBuildingStore);
+		reset(world.worldBuildingConditionStore);
+		reset(world.worldItemStore);
+		reset(world.worldTileMapStore);
 		world.selectedEntityIdStore.set({ entityId: undefined });
 	},
 };
