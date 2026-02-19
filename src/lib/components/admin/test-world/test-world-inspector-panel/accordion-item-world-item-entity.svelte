@@ -22,7 +22,7 @@
 
 	const item = $derived(entity.item);
 	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
-	const itemLabel = $derived(getNameWithId(item?.name, entity.instanceId, '아이템'));
+	const itemLabel = $derived(getNameWithId(entity.id));
 
 	const holderCharacterLabel = $derived.by(() => {
 		if (!worldItem?.world_character_id) return undefined;

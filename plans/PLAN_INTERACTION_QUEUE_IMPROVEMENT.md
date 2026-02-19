@@ -90,3 +90,4 @@
 - [x] 공용 유틸 이름을 `getNameWithId` / `getOrUndefinedNameWithId`로 정리한다.
 - [x] `getOrUndefinedNameWithId`를 제거하고 `getNameWithId`가 항상 문자열(`찾을 수 없음` 포함)을 반환하도록 통일한다.
 - [x] `getDisplayNameWithId` 사용처를 모두 `getNameWithId`로 치환하고 구 함수를 제거한다.
+- [x] getNameWithId(entityId)는 sourceId가 아니라 instanceId를 표시하도록 통일한다.

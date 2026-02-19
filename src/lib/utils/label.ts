@@ -207,22 +207,22 @@ export function getNameWithId(
 
 	const entityId = entityIdOrName as EntityId;
 
-	const { type, sourceId } = EntityIdUtils.parse(entityId);
+	const { type, sourceId, instanceId } = EntityIdUtils.parse(entityId);
 
 	if (type === 'building') {
 		const { getBuilding } = useBuilding();
-		return formatNameWithId(getBuilding(sourceId).name, sourceId, '건물');
+		return formatNameWithId(getBuilding(sourceId).name, instanceId, '건물');
 	}
 	if (type === 'item') {
 		const { getItem } = useItem();
-		return formatNameWithId(getItem(sourceId).name, sourceId, '아이템');
+		return formatNameWithId(getItem(sourceId).name, instanceId, '아이템');
 	}
 	if (type === 'character') {
 		const { getCharacter } = useCharacter();
-		return formatNameWithId(getCharacter(sourceId).name, sourceId, '캐릭터');
+		return formatNameWithId(getCharacter(sourceId).name, instanceId, '캐릭터');
 	}
 
-	return formatNameWithId(undefined, sourceId, '찾을 수 없음');
+	return formatNameWithId(undefined, instanceId, '찾을 수 없음');
 }
 
 // ============================================================

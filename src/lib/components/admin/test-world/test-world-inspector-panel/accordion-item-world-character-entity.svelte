@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { useBehavior, useCharacter, useItem } from '$lib/hooks';
+	import { useBehavior, useCharacter } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
@@ -14,7 +14,6 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { IconTrash } from '@tabler/icons-svelte';
-	import { EntityIdUtils } from '$lib/utils/entity-id';
 	import AccordionContentItem from './accordion-content-item.svelte';
 
 	interface Props {
@@ -24,7 +23,7 @@
 
 	let { entity, worldContext }: Props = $props();
 
-	const { getCharacter, getOrUndefinedNeed } = useCharacter();
+	const { getOrUndefinedNeed } = useCharacter();
 	const {
 		getOrUndefinedNeedBehavior,
 		getOrUndefinedNeedBehaviorAction,
@@ -32,7 +31,6 @@
 		getOrUndefinedConditionBehaviorAction,
 	} = useBehavior();
 
-	const character = $derived(getCharacter(entity.sourceId));
 	const characterLabel = $derived(getNameWithId(entity.id));
 	const needs = $derived(Object.values(entity.needs));
 
