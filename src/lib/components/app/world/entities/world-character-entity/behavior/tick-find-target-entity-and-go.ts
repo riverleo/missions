@@ -20,18 +20,20 @@ import { getAllEntitySourcesByInteraction } from '$lib/hooks/use-behavior/get-al
  * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
- * - [x] 행동 타입이 대기인 경우 대상를 탐색하지 않고 계속 진행한다.
- * - [x] 현재 대상가 들고 있는 아이템인 경우 경로를 초기화하고 계속 진행한다.
- * - [x] 현재 대상가 들고 있는 아이템이 아닌 경우 경로를 최신화하고 계속 진행한다.
- * - [x] 타깃 선택 방식(explicit/search)에 따라 대상 후보를 필터링한다.
- * - [x] 대상 후보를 찾지 못하거나 대상를 선정하지 못한 경우 계속 진행한다.
- * - [x] 자기 자신은 대상가 될 수 없다.
- * - 들고 있는 아이템 중 대상 후보가 있는 경우
- *    - [x] 대상 후보와 일치하는 첫번째 아이템을 대상로 설정한다.
- *    - [x] 핵심 상호작용 대상을 상호작용 큐에 설정한다.
- * - 들고 있는 아이템 중 대상 후보가 없는 경우
- *    - [x] 캐릭터와 가장 가까운 엔티티 중 대상 후보와 일치하는 엔티티를 대상로 설정한다.
- *    - [x] 월드 캐릭터 아이디가 설정된 아이템은 캐릭터의 대상가 될 수 없다.
+ * - [x] 현재 행동 대상이 없으면 대상 탐색을 하지 않고 계속 진행한다.
+ * - [x] 행동 대상이 대기 타입인 경우 대상 탐색을 하지 않고 계속 진행한다.
+ * - [x] 목표 엔티티를 캐릭터가 들고 있는 경우 경로를 초기화하고 계속 진행한다.
+ * - [x] 목표 엔티티를 캐릭터가 들고 있지 않은 경우 경로를 최신화하여 목표 엔티티로 이동한다.
+ * - [x] 타깃 선택 방식에 따라 목표 엔티티 후보를 올바르게 필터링한다.
+ * - [x] 목표 엔티티 후보가 없거나 후보 중 타깃을 확정하지 못하면 계속 진행한다.
+ * - [x] 자기 자신은 목표 엔티티가 될 수 없다.
+ * - [x] 다른 캐릭터의 목표 엔티티는 목표 엔티티 후보에서 제외한다.
+ * - [x] 다른 캐릭터 아이디가 기록된 아이템은 목표 엔티티 후보에서 제외한다.
+ * - 들고 있는 아이템 중 목표 엔티티 후보가 있는 경우
+ *    - [x] 해당 후보를 목표 엔티티로 설정한다.
+ *    - [x] 목표 엔티티에 대한 핵심 상호작용을 상호작용 큐에 추가한다.
+ * - 들고 있는 아이템 중 목표 엔티티 후보가 없는 경우
+ *    - [x] 캐릭터와 가장 가까운 엔티티 중 목표 엔티티 후보가 있다면 해당 엔티티를 목표로 설정한다.
  */
 export default function tickFindTargetEntityAndGo(
 	this: WorldCharacterEntityBehavior,
@@ -45,24 +47,23 @@ export default function tickFindTargetEntityAndGo(
 
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
-	// 1. 행동 타입이 대기인 경우 계속 진행
+	// 1. 행동이 대기 타입인 경우 계속 진행
 	if (behaviorAction.type === 'idle') return false;
 
-	// 2. 현재 대상가 있는 경우
+	// 2. 기존 목표 엔티티가 있는 경우
 	if (this.targetEntityId) {
 		const worldCharacterEntity = this.worldCharacterEntity;
 		const targetEntity = worldCharacterEntity.worldContext.entities[this.targetEntityId];
 
 		if (targetEntity === undefined) return false;
 
-		// 들고 있는 아이템인 경우
+		// 캐릭터가 목표 엔티티를 들고 있는 경우
 		const isHeldItem = worldCharacterEntity.heldItemIds.includes(this.targetEntityId);
 		if (isHeldItem) {
 			this.path = [];
 			return false;
 		}
 
-		// 들고 있는 아이템이 아닌 경우
 		const distance = vectorUtils.getDistance(worldCharacterEntity, targetEntity);
 		if (distance < TARGET_ARRIVAL_DISTANCE) {
 			this.path = [];

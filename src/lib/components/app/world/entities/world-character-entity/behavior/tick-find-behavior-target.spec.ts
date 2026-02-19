@@ -42,7 +42,7 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 	});
 
 	describe('진행 중인 행동 대상이 있는 경우', () => {
-		it('아무것도 하지 않고 계속 진행한다.', () => {
+		beforeEach(() => {
 			const firstBehavior = useBehavior().getAllBehaviorsByPriority(entity.behavior)[0]!;
 			const rootBehaviorAction = useBehavior().getRootBehaviorAction(firstBehavior);
 			const behaviorTargetId = BehaviorIdUtils.create(rootBehaviorAction);
@@ -50,6 +50,11 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 			// 진행 중인 행동 대상을 설정한다.
 			entity.behavior.behaviorTargetId = behaviorTargetId;
 
+			// 진행 중인 행동 대상이 없어야 한다.
+			expect(entity.behavior.behaviorTargetId).toBeDefined();
+		});
+
+		it('아무것도 하지 않고 계속 진행한다.', () => {
 			const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
 
 			entity.tick(FIRST_TICK);
