@@ -82,3 +82,11 @@
 - [ ] 아래 런타임 값을 디버그 로그로 함께 확인한다.
   `interactionQueue.status`, `currentInteractionTargetId`, `currentInteractionTargetRunningAtTick`, `targetEntityId`, `path.length`, 캐릭터-아이템 거리
 - [ ] `action-ready`에서 `action-running`으로 전이되지 않는 분기(거리/타깃 조회/상호작용 타입 체크)를 케이스별로 테스트로 고정한다.
+
+### 9) 인스펙터 라벨 일관성
+
+- [x] 테스트월드 캐릭터 인스펙터의 `대상` 라벨을 `label.ts`의 공용 유틸로 `"이름 (아이디)"` 형식으로 표시한다.
+- [x] `EntityId`를 직접 받아 `"이름 (아이디)"`를 반환하는 `label.ts` 공용 유틸을 추가해 패턴 중복을 제거한다.
+- [x] 공용 유틸 이름을 `getNameWithId` / `getOrUndefinedNameWithId`로 정리한다.
+- [x] `getOrUndefinedNameWithId`를 제거하고 `getNameWithId`가 항상 문자열(`찾을 수 없음` 포함)을 반환하도록 통일한다.
+- [x] `getDisplayNameWithId` 사용처를 모두 `getNameWithId`로 치환하고 구 함수를 제거한다.

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { useBehavior, useBuilding, useCharacter, useItem } from '$lib/hooks';
+	import { useBehavior, useCharacter, useItem } from '$lib/hooks';
 	import type { WorldCharacterEntity } from '$lib/components/app/world/entities/world-character-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
 	import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 	import {
 		getBehaviorActionString,
-		getDisplayNameWithId,
+		getNameWithId,
 		getInteractionTargetLabelString,
 		getInteractionQueueStatusLabel,
 	} from '$lib/utils/label';
@@ -25,8 +25,6 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { getCharacter, getOrUndefinedNeed } = useCharacter();
-	const { getBuilding } = useBuilding();
-	const { getItem } = useItem();
 	const {
 		getOrUndefinedNeedBehavior,
 		getOrUndefinedNeedBehaviorAction,
@@ -35,30 +33,11 @@
 	} = useBehavior();
 
 	const character = $derived(getCharacter(entity.sourceId));
-	const characterLabel = $derived(
-		getDisplayNameWithId(character?.name, entity.instanceId, '캐릭터')
-	);
+	const characterLabel = $derived(getNameWithId(entity.id));
 	const needs = $derived(Object.values(entity.needs));
 
 	// 현재 대상 이름
-	const currentTargetName = $derived.by(() => {
-		if (!entity.behavior.targetEntityId) return undefined;
-
-		const { type } = EntityIdUtils.parse(entity.behavior.targetEntityId);
-
-		if (type === 'building') {
-			const buildingId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getBuilding(buildingId).name;
-		} else if (type === 'item') {
-			const itemId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getItem(itemId).name;
-		} else if (type === 'character') {
-			const characterId = EntityIdUtils.sourceId(entity.behavior.targetEntityId);
-			return getCharacter(characterId).name;
-		}
-
-		return undefined;
-	});
+	const currentTargetName = $derived(getNameWithId(entity.behavior.targetEntityId));
 
 	// 현재 행동 이름
 	const currentBehaviorName = $derived.by(() => {
@@ -120,10 +99,8 @@
 	const heldItemsTooltip = $derived.by(() => {
 		if (entity.heldItemIds.length === 0) return undefined;
 
-		const { getOrUndefinedItem } = useItem();
 		return entity.heldItemIds.map((itemId) => {
-			const item = getOrUndefinedItem(EntityIdUtils.sourceId(itemId));
-			return getDisplayNameWithId(item?.name, itemId, '아이템');
+			return getNameWithId(itemId);
 		});
 	});
 </script>

@@ -2,7 +2,7 @@
 	import { useCharacter, useWorld } from '$lib/hooks';
 	import type { WorldItemEntity } from '$lib/components/app/world/entities/world-item-entity';
 	import type { WorldContext } from '$lib/components/app/world/context';
-	import { getDisplayNameWithId } from '$lib/utils/label';
+	import { getNameWithId } from '$lib/utils/label';
 	import { AccordionItem, AccordionTrigger, AccordionContent } from '$lib/components/ui/accordion';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -22,18 +22,18 @@
 
 	const item = $derived(entity.item);
 	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
-	const itemLabel = $derived(getDisplayNameWithId(item?.name, entity.instanceId, '아이템'));
+	const itemLabel = $derived(getNameWithId(item?.name, entity.instanceId, '아이템'));
 
 	const holderCharacterLabel = $derived.by(() => {
 		if (!worldItem?.world_character_id) return undefined;
 
 		const worldCharacter = getOrUndefinedWorldCharacter(worldItem.world_character_id);
 		if (!worldCharacter) {
-			return getDisplayNameWithId(undefined, worldItem.world_character_id, '알 수 없음');
+			return getNameWithId(undefined, worldItem.world_character_id, '알 수 없음');
 		}
 
 		const characterName = getOrUndefinedCharacter(worldCharacter.character_id)?.name;
-		return getDisplayNameWithId(characterName, worldItem.world_character_id, '알 수 없음');
+		return getNameWithId(characterName, worldItem.world_character_id, '알 수 없음');
 	});
 </script>
 

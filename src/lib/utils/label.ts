@@ -42,11 +42,13 @@ import type {
 	NeedId,
 	NeedBehaviorId,
 	InteractionTargetId,
+	EntityId,
 } from '$lib/types';
 import type { InteractionQueueStatus } from '$lib/types/core';
 import { get } from 'svelte/store';
 import { josa } from './josa';
 import { InteractionIdUtils } from './interaction-id';
+import { EntityIdUtils } from './entity-id';
 import {
 	useCharacter,
 	useBuilding,
@@ -170,7 +172,7 @@ export function getShortId(id: string): string {
 	return id.split('-')[0] ?? id;
 }
 
-export function getDisplayNameWithId(
+function formatNameWithId(
 	name: string | undefined | null,
 	id: string,
 	fallback: string = FALLBACK_LABELS.unnamed
@@ -184,6 +186,43 @@ export function getDisplayTitle(title: string | undefined | null, id: string): s
 
 export function getDisplayName(name: string | undefined | null, id: string): string {
 	return name || getUnnamedWithId(id);
+}
+
+export function getNameWithId(entityId: EntityId | undefined): string;
+export function getNameWithId(
+	name: string | undefined | null,
+	id: string,
+	fallback?: string
+): string;
+export function getNameWithId(
+	entityIdOrName: EntityId | string | undefined | null,
+	id?: string,
+	fallback: string = FALLBACK_LABELS.unnamed
+): string {
+	if (id !== undefined) {
+		return formatNameWithId(entityIdOrName, id, fallback);
+	}
+
+	if (!entityIdOrName) return '찾을 수 없음';
+
+	const entityId = entityIdOrName as EntityId;
+
+	const { type, sourceId } = EntityIdUtils.parse(entityId);
+
+	if (type === 'building') {
+		const { getBuilding } = useBuilding();
+		return formatNameWithId(getBuilding(sourceId).name, sourceId, '건물');
+	}
+	if (type === 'item') {
+		const { getItem } = useItem();
+		return formatNameWithId(getItem(sourceId).name, sourceId, '아이템');
+	}
+	if (type === 'character') {
+		const { getCharacter } = useCharacter();
+		return formatNameWithId(getCharacter(sourceId).name, sourceId, '캐릭터');
+	}
+
+	return formatNameWithId(undefined, sourceId, '찾을 수 없음');
 }
 
 // ============================================================
