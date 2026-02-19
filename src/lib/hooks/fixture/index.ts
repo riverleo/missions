@@ -1,5 +1,9 @@
 import createForTickFindBehaviorTarget from './world-character-entity/create-for-tick-find-behavior-target';
 import createForTickFindTargetEntityAndGo from './world-character-entity/create-for-tick-find-target-entity-and-go';
+import createForTickEnqueueInteractionQueue from './world-character-entity/create-for-tick-enqueue-interaction-queue';
+import createForTickDequeueInteraction from './world-character-entity/create-for-tick-dequeue-interaction';
+import createForTickActionSystemItemPick from './world-character-entity/create-for-tick-action-system-item-pick';
+import createForTickNextOrClear from './world-character-entity/create-for-tick-next-or-clear';
 import {
 	useBehavior,
 	useBuilding,
@@ -25,6 +29,10 @@ export const Fixture = {
 	worldCharacterEntity: {
 		createForTickFindBehaviorTarget,
 		createForTickFindTargetEntityAndGo,
+		createForTickEnqueueInteractionQueue,
+		createForTickDequeueInteraction,
+		createForTickActionSystemItemPick,
+		createForTickNextOrClear,
 	},
 	reset() {
 		const behavior = useBehavior();

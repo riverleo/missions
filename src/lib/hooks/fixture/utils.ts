@@ -402,7 +402,11 @@ export function createItemInteraction(
 	const interactionStore = useInteraction().itemInteractionStore;
 	const existingInteraction = Object.values(get(interactionStore).data).find(
 		(interaction) =>
-			interaction.item_id === item.id && interaction.type === (overrides.type ?? 'fulfill')
+			interaction.item_id === item.id &&
+			interaction.type === (overrides.type ?? 'fulfill') &&
+			interaction.once_interaction_type === (overrides.once_interaction_type ?? null) &&
+			interaction.fulfill_interaction_type === (overrides.fulfill_interaction_type ?? null) &&
+			interaction.system_interaction_type === (overrides.system_interaction_type ?? null)
 	);
 	if (existingInteraction) return existingInteraction;
 

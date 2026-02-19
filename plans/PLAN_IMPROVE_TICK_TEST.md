@@ -57,66 +57,57 @@
 - [ ] `tick-next-or-clear.ts`: 큐 `completed` 시점에만 next/clear를 수행한다.
 - [ ] `tick-next-or-clear.ts`: 완료 전에는 행동 컨텍스트를 초기화하지 않는다.
 
-- [ ] `update-move.ts`: `behavior.path`를 따라 이동 벡터가 적용되고 경로 완료 시 정지/종료 규칙을 따른다.
-- [ ] `update-direction.ts`: 이동/타깃 상태에 따라 방향 값이 명세대로 계산된다.
-
 ### 1) 테스트 구조 리디자인
 
-- [ ] 기존 `behavior/*.spec.ts`를 함수 내부 fixture 호출 검증 중심에서 상태 전이/결과 검증 중심으로 전환한다.
-- [ ] 테스트 fixture를 스토어 데이터 기준으로 구성하고, 로직 단위 fixture는 최소화한다.
-- [ ] 테스트에서 사용 중인 하드코딩/중복 fixture 데이터 빌더를 공용 팩토리로 정리한다.
-- [ ] 기존 `describe/it` 이름을 명세 문장과 1:1로 맞춘다.
-- [ ] 테스트는 단계별 틱 진행(`tick(0) -> assert -> tick(1) -> assert`) 형태를 기본으로 한다.
+- [x] 기존 `behavior/*.spec.ts`를 함수 내부 fixture 호출 검증 중심에서 상태 전이/결과 검증 중심으로 전환한다.
+- [x] 테스트 fixture를 스토어 데이터 기준으로 구성하고, 로직 단위 fixture는 최소화한다.
+- [x] 테스트에서 사용 중인 하드코딩/중복 fixture 데이터 빌더를 공용 팩토리로 정리한다.
+- [x] 기존 `describe/it` 이름을 명세 문장과 1:1로 맞춘다.
+- [x] 테스트는 단계별 틱 진행(`tick(0) -> assert -> tick(1) -> assert`) 형태를 기본으로 한다.
 - [x] `tick-find-target-entity-and-go.spec.ts`는 fixture 고정 데이터셋 기반으로 재작성하고, 명세 항목(11개)을 상태 전이/결과 검증으로 커버한다.
 
 ### 2) Hook Fixture 인프라 추가
 
-- [ ] `src/lib/hooks/fixture/index.ts`를 추가한다.
-- [ ] `beforeEach`/`afterEach`에서 스토어 초기화 유틸을 제공한다.
-- [ ] tick 시나리오별 fixture 모듈을 분리한다.
-- [ ] 예시: `src/lib/hooks/fixture/world-character-entity/create-for-tick-action-system-item-pick.ts`.
-- [ ] 호출 패턴은 `Fixture.worldCharacterEntity.createForTickActionSystemItemPick()` 형태로 통일한다.
-- [ ] 공통 정리 API(`Fixture.reset()`)를 제공하고 `afterEach`에서 호출한다.
-- [ ] 기본 사용 패턴을 문서화한다.
+- [x] `src/lib/hooks/fixture/index.ts`를 추가한다.
+- [x] `beforeEach`/`afterEach`에서 스토어 초기화 유틸을 제공한다.
+- [x] tick 시나리오별 fixture 모듈을 분리한다.
+- [x] 예시: `src/lib/hooks/fixture/world-character-entity/create-for-tick-action-system-item-pick.ts`.
+- [x] 호출 패턴은 `Fixture.worldCharacterEntity.createForTickActionSystemItemPick()` 형태로 통일한다.
+- [x] 공통 정리 API(`Fixture.reset()`)를 제공하고 `afterEach`에서 호출한다.
+- [x] 기본 사용 패턴을 문서화한다.
   - `beforeEach`: `worldCharacterEntity = Fixture.worldCharacterEntity.createForTickActionSystemItemPick();`
   - `afterEach`: `Fixture.reset();`
 - [x] `create-for-tick-find-target-entity-and-go.ts`는 테스트 본문의 추가 arrange 호출 없이 실행 가능한 데이터셋을 반환한다.
 
 ### 3) WorldCharacterEntity.tick() 중심 통합 단위 테스트
 
-- [ ] 기존 함수 호출 테스트를 `WorldCharacterEntity.tick()` 수준 호출 테스트로 개선한다.
-- [ ] tick 파이프라인 순서(행동 선정 -> 타깃 탐색 -> 큐 enqueue/dequeue -> 시스템 액션 -> next/clear)를 테스트로 고정한다.
-- [ ] 큐 상태(`enqueuing/ready/action-ready/action-running/action-completed/completed`) 전이 충돌이 없는지 `WorldCharacterEntity.tick()` 기준으로 검증한다.
-- [ ] 틱 단계를 명시적으로 진행하며 중간 상태를 검증한다.
+- [x] 기존 함수 호출 테스트를 `WorldCharacterEntity.tick()` 수준 호출 테스트로 개선한다.
+- [x] tick 파이프라인 순서(행동 선정 -> 타깃 탐색 -> 큐 enqueue/dequeue -> 시스템 액션 -> next/clear)를 테스트로 고정한다.
+- [x] 큐 상태(`enqueuing/ready/action-ready/action-running/action-completed/completed`) 전이 충돌이 없는지 `WorldCharacterEntity.tick()` 기준으로 검증한다.
+- [x] 틱 단계를 명시적으로 진행하며 중간 상태를 검증한다.
   - `worldCharacterEntity.tick(0)` -> assert
   - `worldCharacterEntity.tick(1)` -> assert
   - 필요한 만큼 반복해 전이/결과를 검증
-- [ ] 함수 성공/실패 판정은 호출 여부가 아니라 `behavior` 상태값과 스토어 부작용으로 검증한다.
+- [x] 함수 성공/실패 판정은 호출 여부가 아니라 `behavior` 상태값과 스토어 부작용으로 검증한다.
   - 성공: 상태 전이/결과값이 명세와 일치
   - 실패: 상태 미전이 또는 종료/유지 규칙이 명세와 일치
-- [ ] `moveTo(vector)` 검증을 위해 경로탐색 알고리즘 자체를 테스트하지 않고 `pathfinder.findPath`를 fixture fake/spy로 통제한다.
+- [x] `moveTo(vector)` 검증을 위해 경로탐색 알고리즘 자체를 테스트하지 않고 `pathfinder.findPath`를 fixture fake/spy로 통제한다.
   - `findPath` 호출 인자(`현재 body.position`, `목표 vector`) 검증
   - 반환 경로가 `behavior.path`에 반영되는지 검증
 
-### 4) 기존 spec 회귀 강화
+## 명세-테스트 정합성 규칙
 
-- [ ] `tick-enqueue-interaction-queue.spec.ts` 회귀 케이스를 정리/보강한다.
-- [ ] `tick-dequeue-interaction.spec.ts` 회귀 케이스를 정리/보강한다.
-- [ ] `tick-action-system-item-pick.spec.ts`에서 시작 조건/완료 조건/부작용 경계를 명확히 고정한다.
-
-### 5) 명세-테스트 정합성 정리
-
-- [ ] 각 tick 파일 상단 명세 체크리스트와 spec `it` 이름을 1:1로 맞춘다.
-- [ ] 명세 계층과 describe 계층을 동일하게 정리한다.
-- [ ] 변경된 명세는 해당 테스트가 먼저 추가된 후 구현하도록 절차를 고정한다.
+- 각 tick 파일 상단 명세 체크리스트와 spec `it` 이름을 1:1로 맞춘다.
+- 명세 계층과 describe 계층을 동일하게 정리한다.
+- 변경된 명세는 해당 테스트가 먼저 추가된 후 구현하도록 절차를 고정한다.
 
 ## 완료 기준
 
-- [ ] `world-character-entity/behavior/*.spec.ts`가 결과/상태 전이 중심으로 재구성된다.
-- [ ] `WorldCharacterEntity.tick()` 수준의 파이프라인 테스트가 추가되어 주요 흐름이 보장된다.
-- [ ] hooks fixture 인프라(`hooks/fixture/index.ts` + 시나리오 파일)가 동작한다.
-- [ ] `pnpm test:unit` 통과
-- [ ] `pnpm check` 통과
+- `world-character-entity/behavior/*.spec.ts`가 결과/상태 전이 중심으로 재구성된다.
+- `WorldCharacterEntity.tick()` 수준의 파이프라인 테스트가 추가되어 주요 흐름이 보장된다.
+- hooks fixture 인프라(`hooks/fixture/index.ts` + 시나리오 파일)가 동작한다.
+- `pnpm test:unit` 통과
+- `pnpm check` 통과
 
 ## 참고
 

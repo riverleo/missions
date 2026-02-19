@@ -1,158 +1,84 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Fixture } from '$lib/hooks/fixture';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
-import { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
-import type { InteractionAction, InteractionTargetId } from '$lib/types';
+import type { InteractionTargetId } from '$lib/types';
+import type createForTickDequeueInteraction from '$lib/hooks/fixture/world-character-entity/create-for-tick-dequeue-interaction';
 
-vi.mock('$lib/hooks', () => ({
-	useInteraction: vi.fn(),
-}));
+describe('tickDequeueInteraction(tick: number)', () => {
+	let entity: WorldCharacterEntity;
+	let firstInteractionTargetId: InteractionTargetId;
+	let secondInteractionTargetId: InteractionTargetId;
 
-vi.mock('$lib/utils/interaction-id', () => ({
-	InteractionIdUtils: {
-		parse: vi.fn(),
-		create: vi.fn(),
-	},
-}));
-
-describe('tickDequeueInteraction(this: WorldCharacterEntityBehavior)', () => {
-	let behavior: WorldCharacterEntityBehavior;
-	let mockGetAllInteractionActions: ReturnType<typeof vi.fn>;
-	let mockGetNextInteractionAction: ReturnType<typeof vi.fn>;
-
-	beforeEach(async () => {
-		const mockWorldCharacterEntity: Partial<WorldCharacterEntity> = {
-			id: 'character_world-1_character-1' as any,
-			instanceId: 'world-character-1' as any,
-			heldItemIds: [],
-			worldContext: { entities: {} } as any,
-		};
-
-		behavior = new WorldCharacterEntityBehavior(mockWorldCharacterEntity as WorldCharacterEntity);
-		mockGetAllInteractionActions = vi.fn();
-		mockGetNextInteractionAction = vi.fn();
-
-		const { useInteraction } = await import('$lib/hooks');
-		vi.mocked(useInteraction).mockReturnValue({
-			getAllInteractionActions: mockGetAllInteractionActions,
-			getNextInteractionAction: mockGetNextInteractionAction,
-		} as any);
-
-		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
-		vi.mocked(InteractionIdUtils.parse).mockReturnValue({
-			type: 'item',
-			interactionId: 'item-interaction-1' as any,
-			interactionActionId: 'item-interaction-action-1' as any,
-		});
+	beforeEach(() => {
+		const fixture: ReturnType<typeof createForTickDequeueInteraction> =
+			Fixture.worldCharacterEntity.createForTickDequeueInteraction();
+		entity = fixture.entity;
+		firstInteractionTargetId = fixture.firstInteractionTargetId;
+		secondInteractionTargetId = fixture.secondInteractionTargetId;
 	});
 
-	it('상호작용 큐 상태가 ready 또는 action-completed가 아니면 다음 단계로 진행한다.', () => {
-		behavior.interactionQueue.status = 'enqueuing';
-		const result = behavior.tickDequeueInteraction(10);
+	afterEach(() => {
+		Fixture.reset();
+	});
+
+	it('상호작용 큐 상태가 ready 또는 action-completed가 아니면 아무 작업도 하지 않는다.', () => {
+		entity.behavior.interactionQueue.status = 'enqueuing';
+
+		const result = entity.behavior.tickDequeueInteraction(0);
 
 		expect(result).toBe(false);
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBeUndefined();
+		expect(entity.behavior.interactionQueue.currentInteractionTargetId).toBeUndefined();
 	});
 
-	it('ready 상태에서 첫 번째 상호작용 대상을 currentInteractionTargetId로 설정하고 action-ready로 전환한다.', () => {
-		behavior.interactionQueue.status = 'ready';
-		behavior.interactionQueue.interactionTargetIds = [
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
+	it('ready 상태면 첫 번째 타깃을 currentInteractionTargetId로 설정하고 action-ready로 전환한다.', () => {
+		entity.behavior.interactionQueue.status = 'ready';
+		entity.behavior.interactionQueue.interactionTargetIds = [firstInteractionTargetId];
+
+		entity.behavior.tickDequeueInteraction(0);
+
+		expect(entity.behavior.interactionQueue.currentInteractionTargetId).toBe(
+			firstInteractionTargetId
+		);
+		expect(entity.behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBeUndefined();
+		expect(entity.behavior.interactionQueue.status).toBe('action-ready');
+	});
+
+	it('action-completed 상태면 현재 타깃의 next 액션을 우선 탐색한다.', () => {
+		entity.behavior.interactionQueue.status = 'action-completed';
+		entity.behavior.interactionQueue.interactionTargetIds = [firstInteractionTargetId];
+		entity.behavior.interactionQueue.currentInteractionTargetId = firstInteractionTargetId;
+
+		entity.behavior.tickDequeueInteraction(0);
+
+		expect(entity.behavior.interactionQueue.currentInteractionTargetId).toBe(
+			secondInteractionTargetId
+		);
+		expect(entity.behavior.interactionQueue.status).toBe('action-ready');
+	});
+
+	it('next 액션이 없으면 interactionTargetIds에서 현재 타깃의 다음 인덱스를 탐색한다.', () => {
+		entity.behavior.interactionQueue.status = 'action-completed';
+		entity.behavior.interactionQueue.interactionTargetIds = [
+			secondInteractionTargetId,
+			firstInteractionTargetId,
 		];
+		entity.behavior.interactionQueue.currentInteractionTargetId = secondInteractionTargetId;
 
-		const result = behavior.tickDequeueInteraction(10);
+		entity.behavior.tickDequeueInteraction(0);
 
-		expect(result).toBe(false);
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
-			'item_item-interaction-1_item-interaction-action-1'
+		expect(entity.behavior.interactionQueue.currentInteractionTargetId).toBe(
+			firstInteractionTargetId
 		);
-		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBeUndefined();
-		expect(behavior.interactionQueue.status).toBe('action-ready');
+		expect(entity.behavior.interactionQueue.status).toBe('action-ready');
 	});
 
-	it('ready 상태에서 대상이 없으면 completed로 전환한다.', () => {
-		behavior.interactionQueue.status = 'ready';
-		behavior.interactionQueue.interactionTargetIds = [];
-		behavior.interactionQueue.currentInteractionTargetId =
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.currentInteractionTargetRunningAtTick = 123;
+	it('다음 타깃이 없으면 완료로 전환하고 진행한다.', () => {
+		entity.behavior.interactionQueue.status = 'action-completed';
+		entity.behavior.interactionQueue.interactionTargetIds = [secondInteractionTargetId];
+		entity.behavior.interactionQueue.currentInteractionTargetId = secondInteractionTargetId;
 
-		behavior.tickDequeueInteraction(10);
+		entity.behavior.tickDequeueInteraction(0);
 
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
-			'item_item-interaction-1_item-interaction-action-1'
-		);
-		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBe(123);
-		expect(behavior.interactionQueue.status).toBe('completed');
-	});
-
-	it('action-completed 상태에서 현재 액션의 next 액션이 있으면 next를 currentInteractionTargetId로 설정한다.', async () => {
-		const { InteractionIdUtils } = await import('$lib/utils/interaction-id');
-
-		behavior.interactionQueue.status = 'action-completed';
-		behavior.interactionQueue.currentInteractionTargetId =
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.interactionTargetIds = [
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
-		];
-
-		const currentAction: Partial<InteractionAction> = {
-			id: 'item-interaction-action-1' as any,
-		};
-		const nextAction: Partial<InteractionAction> = {
-			id: 'item-interaction-action-2' as any,
-		};
-		mockGetAllInteractionActions.mockReturnValue([currentAction]);
-		mockGetNextInteractionAction.mockReturnValue(nextAction);
-		vi.mocked(InteractionIdUtils.create).mockReturnValue(
-			'item_item-interaction-1_item-interaction-action-2' as InteractionTargetId
-		);
-
-		behavior.tickDequeueInteraction(10);
-
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
-			'item_item-interaction-1_item-interaction-action-2'
-		);
-		expect(behavior.interactionQueue.status).toBe('action-ready');
-	});
-
-	it('action-completed 상태에서 next 액션이 없으면 interactionTargetIds의 다음 아이템으로 전환한다.', () => {
-		behavior.interactionQueue.status = 'action-completed';
-		behavior.interactionQueue.currentInteractionTargetId =
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.interactionTargetIds = [
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
-			'item_item-interaction-1_item-interaction-action-2' as InteractionTargetId,
-		];
-
-		mockGetAllInteractionActions.mockReturnValue([]);
-		mockGetNextInteractionAction.mockReturnValue(undefined);
-
-		behavior.tickDequeueInteraction(10);
-
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
-			'item_item-interaction-1_item-interaction-action-2'
-		);
-		expect(behavior.interactionQueue.status).toBe('action-ready');
-	});
-
-	it('action-completed 상태에서 다음 대상이 없으면 completed로 종료한다.', () => {
-		behavior.interactionQueue.status = 'action-completed';
-		behavior.interactionQueue.currentInteractionTargetId =
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId;
-		behavior.interactionQueue.currentInteractionTargetRunningAtTick = 77;
-		behavior.interactionQueue.interactionTargetIds = [
-			'item_item-interaction-1_item-interaction-action-1' as InteractionTargetId,
-		];
-
-		mockGetAllInteractionActions.mockReturnValue([]);
-		mockGetNextInteractionAction.mockReturnValue(undefined);
-
-		behavior.tickDequeueInteraction(10);
-
-		expect(behavior.interactionQueue.currentInteractionTargetId).toBe(
-			'item_item-interaction-1_item-interaction-action-1'
-		);
-		expect(behavior.interactionQueue.currentInteractionTargetRunningAtTick).toBe(77);
-		expect(behavior.interactionQueue.status).toBe('completed');
+		expect(entity.behavior.interactionQueue.status).toBe('completed');
 	});
 });
