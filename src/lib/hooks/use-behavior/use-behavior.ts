@@ -374,7 +374,7 @@ function createBehaviorStore() {
 	function getAllBehaviorsByPriority(
 		worldCharacterEntityBehavior: WorldCharacterEntityBehavior
 	): Behavior[] {
-		const priorities = get(behaviorPriorityStore).data;
+		const priorities = getAllBehaviorPriorities();
 
 		const behaviors = getAllBehaviors().filter((behavior) => {
 			if (behavior.behaviorType === 'need') {
@@ -389,10 +389,10 @@ function createBehaviorStore() {
 		});
 
 		return behaviors.sort((a, b) => {
-			const priorityA = Object.values(priorities).find((p) =>
+			const priorityA = priorities.find((p) =>
 				a.behaviorType === 'need' ? p.need_behavior_id === a.id : p.condition_behavior_id === a.id
 			);
-			const priorityB = Object.values(priorities).find((p) =>
+			const priorityB = priorities.find((p) =>
 				b.behaviorType === 'need' ? p.need_behavior_id === b.id : p.condition_behavior_id === b.id
 			);
 

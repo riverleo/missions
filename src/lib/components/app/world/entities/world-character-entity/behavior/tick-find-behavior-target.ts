@@ -5,25 +5,20 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 /**
  * # 행동 타겟 찾기
  *
- * 캐릭터가 현재 수행할 행동이 없을 때, 우선순위가 가장 높은 행동을 선택하여
- * 행동 대상(behaviorTargetId)를 할당합니다. 매 틱마다 호출되며, 행동의 시작점 역할을 합니다.
+ * 캐릭터가 현재 수행하고 있는 행동이 없을 때, 우선순위가 가장 높은 행동 대상을 선택합니다.
+ * 매 틱마다 호출되며, 행동의 시작점 역할을 합니다.
  *
  * @param tick - 현재 게임 틱 번호
  * @returns {boolean} true = 중단 후 처음, false = 계속 진행
  *
  * ## 명세
- * - [x] 행동 목록이 우선 순위에 따라 틱마다 갱신된다.
+ * - [x] 행동 대상 목록이 우선 순위에 따라 틱마다 갱신된다.
  * - 진행 중인 행동 대상이 있는 경우
  *    - [x] 아무것도 하지 않고 계속 진행한다.
  * - 진행 중인 행동 대상이 없는 경우
- *    - [x] 모든 상태를 초기화한다.
- *    - [x] 행동 목록의 첫번째를 새로운 행동 대상으로 설정한다.
- *    - [x] 행동 목록이 비어있는 경우, 중단 후 처음으로 돌아간다.
- *    - [x] 루트 액션이 설정될 때 행동 대상 시작 틱을 현재 틱(useCurrent().getTick())으로 설정한다.
- *    - [x] 새로 지정할 행동에 루트 액션이 없는 경우 에러가 발생한다.
- *    - [x] 행동 대상이 지정되었다면 다음 단계로 진행한다.
- * - [x] 초기화는 현재 행동 대상이 없을 때만 호출된다.
- * - [x] 새로운 행동 대상을 찾을 수 없을 경우 중단 후 처음으로 돌아간다.
+ *    - [x] 우선 순위에 의해 정렬된 행동 대상 목록의 첫번째 행동 대상이 선택된다.
+ *    - [x] 행동 대상 목록이 비어있는 경우, 중단 후 처음으로 돌아간다.
+ *    - [x] 행동 대상이 선택될 때 전달된 틱을 시작 틱으로 설정한다.
  */
 export default function tickFindBehaviorTarget(
 	this: WorldCharacterEntityBehavior,
@@ -34,23 +29,20 @@ export default function tickFindBehaviorTarget(
 	// 1. 이미 behaviorTargetId가 있으면 아무것도 하지 않음
 	if (this.behaviorTargetId) return false;
 
-	// 2. 모든 상태 초기화
-	this.clear();
-
-	// 3. 우선순위 정렬된 행동 목록 가져오기
+	// 2. 우선순위 정렬된 행동 대상 목록 가져오기
 	const behaviors = getAllBehaviorsByPriority(this);
 	this.behaviorIds = behaviors.map((behavior) => behavior.id);
 
-	// 4. 행동을 찾을 수 없으면 중단 후 처음으로
+	// 3. 행동을 찾을 수 없으면 중단 후 처음으로
 	const firstBehavior = behaviors[0];
 	if (!firstBehavior) {
 		return true;
 	}
 
-	// 5. 첫 번째 행동의 root action 가져오기 (없으면 에러 발생)
+	// 4. 첫 번째 행동의 root action 가져오기 (없으면 에러 발생)
 	const behaviorAction = getRootBehaviorAction(firstBehavior);
 
-	// 6. behaviorTargetId 설정
+	// 5. behaviorTargetId 설정
 	this.setBehaviorTarget(BehaviorIdUtils.create(behaviorAction), tick);
 
 	return false;
