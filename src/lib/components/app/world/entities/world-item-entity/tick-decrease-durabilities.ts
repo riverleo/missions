@@ -24,7 +24,7 @@ export default function tickDecreaseDurabilities(this: WorldItemEntity, tick: nu
 				) as WorldCharacterEntity | undefined;
 
 				if (characterEntity) {
-					const itemEntityId = EntityIdUtils.createId(
+					const itemEntityId = EntityIdUtils.create(
 						'item',
 						this.worldContext.worldId,
 						worldItem.item_id,

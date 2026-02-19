@@ -15,7 +15,7 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 	let worldCharacterNeed: WorldCharacterNeed;
 
 	beforeEach(() => {
-		entity = Fixture.worldCharacterEntity.createForTickFindBehaviorTarget();
+		entity = Fixture.worldCharacterEntity.createForTickFindBehaviorTarget().entity;
 		worldCharacterNeed = Object.values(entity.needs)[0]!;
 	});
 

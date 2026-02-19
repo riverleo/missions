@@ -109,15 +109,10 @@ export function createTilesInWorldTileMap(
 	// 모든 엔티티 생성
 	for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
 		const tileId = tiles[tileCellKey]!;
-		const entityId = EntityIdUtils.createId('tile', worldContext.worldId, tileId, tileCellKey);
+		const entityId = EntityIdUtils.create('tile', worldContext.worldId, tileId, tileCellKey);
 		if (!worldContext.entities[entityId]) {
 			try {
-				const entity = new WorldTileEntity(
-					worldContext,
-					worldContext.worldId,
-					tileCellKey,
-					tileId
-				);
+				const entity = new WorldTileEntity(worldContext, worldContext.worldId, tileCellKey, tileId);
 				entity.addToWorld();
 			} catch (error) {
 				console.warn('Skipping tile creation:', error);

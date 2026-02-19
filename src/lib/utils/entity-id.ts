@@ -159,7 +159,7 @@ export const EntityIdUtils = {
 	 * EntityIdUtils.create('building', worldId, buildingId) // "building_{worldId}_{buildingId}"
 	 * EntityIdUtils.create(building) // "building_{building.world_id}_{building.id}"
 	 */
-	createId: createEntityId,
+	create: createEntityId,
 
 	/**
 	 * EntityInstance 데이터를 EntityInstance 타입으로 변환

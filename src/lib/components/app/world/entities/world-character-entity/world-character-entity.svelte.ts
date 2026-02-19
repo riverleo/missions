@@ -57,7 +57,7 @@ export class WorldCharacterEntity extends Entity {
 		// heldWorldItemIds 초기화 (worldItemStore에서 world_character_id가 자신인 아이템들 검색)
 		this.heldItemIds = getAllWorldItems()
 			.filter((item) => item.world_character_id === worldCharacterId)
-			.map((item) => EntityIdUtils.createId(EntityIdUtils.to(item)));
+			.map((item) => EntityIdUtils.create(EntityIdUtils.to(item)));
 
 		// needs 초기화 (스토어와 연결을 끊기 위해 spread로 복사)
 		const characterNeeds = getAllWorldCharacterNeeds().filter(

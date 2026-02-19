@@ -1,4 +1,5 @@
 import createForTickFindBehaviorTarget from './world-character-entity/create-for-tick-find-behavior-target';
+import createForTickFindTargetEntityAndGo from './world-character-entity/create-for-tick-find-target-entity-and-go';
 import {
 	useBehavior,
 	useBuilding,
@@ -23,6 +24,7 @@ function reset<K extends string, T>(store: Readable<RecordFetchState<K, T>>) {
 export const Fixture = {
 	worldCharacterEntity: {
 		createForTickFindBehaviorTarget,
+		createForTickFindTargetEntityAndGo,
 	},
 	reset() {
 		const behavior = useBehavior();

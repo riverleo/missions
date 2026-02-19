@@ -16,7 +16,15 @@ import type {
 	NeedBehaviorAction,
 	NeedBehaviorActionId,
 	NeedBehaviorId,
+	NeedFulfillment,
+	NeedFulfillmentId,
 	NeedId,
+	ItemInteraction,
+	ItemInteractionId,
+	CharacterInteraction,
+	CharacterInteractionId,
+	ItemInteractionAction,
+	ItemInteractionActionId,
 	Player,
 	PlayerId,
 	RecordFetchState,
@@ -29,6 +37,8 @@ import type {
 	WorldCharacterId,
 	WorldCharacterNeed,
 	WorldCharacterNeedId,
+	WorldItem,
+	WorldItemId,
 	WorldId,
 } from '$lib/types';
 import { useBehavior } from '$lib/hooks/use-behavior';
@@ -38,6 +48,8 @@ import { useItem } from '$lib/hooks/use-item';
 import { usePlayer } from '$lib/hooks/use-player';
 import { useScenario } from '$lib/hooks/use-scenario';
 import { useWorld } from '$lib/hooks/use-world';
+import { useInteraction } from '$lib/hooks/use-interaction';
+import { useFulfillment } from '$lib/hooks/use-fulfillment';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'svelte/store';
 import type { Readable, Writable } from 'svelte/store';
@@ -210,6 +222,31 @@ export function createWorldCharacterNeed(
 	return value;
 }
 
+export function createWorldItem(item: Item, overrides: Partial<WorldItem> = {}): WorldItem {
+	const world = createOrGetWorld();
+	const createdAt = new Date().toISOString();
+	const value: WorldItem = {
+		id: uuidv4() as WorldItemId,
+		user_id: world.user_id,
+		player_id: world.player_id,
+		scenario_id: world.scenario_id,
+		world_id: world.id,
+		item_id: item.id,
+		world_building_id: null,
+		world_character_id: null,
+		x: 0,
+		y: 0,
+		rotation: 0,
+		durability_ticks: null,
+		created_at: createdAt,
+		created_at_tick: 0,
+		deleted_at: null,
+		...overrides,
+	};
+	add(useWorld().worldItemStore, value);
+	return value;
+}
+
 export function createOrGetCharacter(overrides: Partial<Character> = {}): Character {
 	const world = createOrGetWorld();
 	const characterBody = createOrGetCharacterBody();
@@ -355,6 +392,136 @@ export function createOrGetNeedBehaviorAction(
 		...overrides,
 	};
 	add(useBehavior().needBehaviorActionStore, value);
+	return value;
+}
+
+export function createItemInteraction(
+	item: Item,
+	overrides: Partial<ItemInteraction> = {}
+): ItemInteraction {
+	const interactionStore = useInteraction().itemInteractionStore;
+	const existingInteraction = Object.values(get(interactionStore).data).find(
+		(interaction) =>
+			interaction.item_id === item.id && interaction.type === (overrides.type ?? 'fulfill')
+	);
+	if (existingInteraction) return existingInteraction;
+
+	const value: ItemInteraction = {
+		id: uuidv4() as ItemInteractionId,
+		scenario_id: item.scenario_id,
+		item_id: item.id,
+		character_id: null,
+		next_item_interaction_id: null,
+		type: 'fulfill',
+		once_interaction_type: null,
+		fulfill_interaction_type: null,
+		system_interaction_type: null,
+		created_at: new Date().toISOString(),
+		created_by: null,
+		...overrides,
+	};
+	add(interactionStore, value);
+	return value;
+}
+
+export function createCharacterInteraction(
+	targetCharacter: Character,
+	overrides: Partial<CharacterInteraction> = {}
+): CharacterInteraction {
+	const interactionStore = useInteraction().characterInteractionStore;
+	const existingInteraction = Object.values(get(interactionStore).data).find(
+		(interaction) =>
+			interaction.target_character_id === targetCharacter.id &&
+			interaction.type === (overrides.type ?? 'fulfill')
+	);
+	if (existingInteraction) return existingInteraction;
+
+	const value: CharacterInteraction = {
+		id: uuidv4() as CharacterInteractionId,
+		scenario_id: targetCharacter.scenario_id,
+		character_id: null,
+		target_character_id: targetCharacter.id,
+		type: 'fulfill',
+		once_interaction_type: null,
+		fulfill_interaction_type: null,
+		system_interaction_type: null,
+		created_at: new Date().toISOString(),
+		created_by: null,
+		...overrides,
+	};
+	add(interactionStore, value);
+	return value;
+}
+
+export function createItemInteractionAction(
+	interaction: ItemInteraction,
+	overrides: Partial<ItemInteractionAction> = {}
+): ItemInteractionAction {
+	const interactionActionStore = useInteraction().itemInteractionActionStore;
+	const existingRootAction = (get(interactionActionStore).data[interaction.id] ?? []).find(
+		(action) => action.root
+	);
+	if ((overrides.root ?? true) && existingRootAction) return existingRootAction;
+
+	const value: ItemInteractionAction = {
+		id: uuidv4() as ItemInteractionActionId,
+		scenario_id: interaction.scenario_id,
+		item_id: interaction.item_id,
+		item_interaction_id: interaction.id,
+		next_item_interaction_action_id: null,
+		root: true,
+		character_face_state_type: 'idle',
+		character_body_state_type: 'idle',
+		item_offset_x: 0,
+		item_offset_y: 0,
+		item_rotation: 0,
+		item_scale: 1,
+		duration_ticks: 1,
+		created_at: new Date().toISOString(),
+		created_by: null,
+		...overrides,
+	};
+	const current = get(interactionActionStore).data;
+	(interactionActionStore as Writable<RecordFetchState<ItemInteractionId, ItemInteractionAction[]>>).set({
+		status: 'success',
+		data: {
+			...current,
+			[interaction.id]: [...(current[interaction.id] ?? []), value],
+		},
+	});
+	return value;
+}
+
+export function createNeedFulfillment(
+	need: Need,
+	overrides: Partial<NeedFulfillment> = {}
+): NeedFulfillment {
+	const fulfillmentStore = useFulfillment().needFulfillmentStore;
+	const existingFulfillment = Object.values(get(fulfillmentStore).data).find(
+		(fulfillment) =>
+			fulfillment.need_id === need.id &&
+			fulfillment.fulfillment_type === (overrides.fulfillment_type ?? 'item') &&
+			fulfillment.item_interaction_id === (overrides.item_interaction_id ?? null)
+	);
+	if (existingFulfillment) return existingFulfillment;
+
+	const value: NeedFulfillment = {
+		id: uuidv4() as NeedFulfillmentId,
+		scenario_id: need.scenario_id,
+		need_id: need.id,
+		fulfillment_type: 'item',
+		building_interaction_id: null,
+		item_interaction_id: null,
+		character_interaction_id: null,
+		task_condition: null,
+		task_count: 1,
+		task_duration_ticks: 1,
+		increase_per_tick: 1,
+		created_at: new Date().toISOString(),
+		created_by: null,
+		...overrides,
+	};
+	add(fulfillmentStore, value);
 	return value;
 }
 

@@ -9,7 +9,11 @@ import {
 } from '../utils';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
 
-export default function (): WorldCharacterEntity {
+type TickFindBehaviorTargetFixture = {
+	entity: WorldCharacterEntity;
+};
+
+export default function (): TickFindBehaviorTargetFixture {
 	const needA = createOrGetNeedA();
 	const worldCharacterA = createOrGetWorldCharacterA();
 	const worldCharacterNeed = createWorldCharacterNeed(worldCharacterA, needA);
@@ -19,9 +23,11 @@ export default function (): WorldCharacterEntity {
 	});
 	createOrGetBehaviorPriority(BehaviorIdUtils.behavior.to(needBehavior), { priority: 100 });
 
-	return new WorldCharacterEntity(
-		new WorldContext(worldCharacterNeed.world_id, false),
-		worldCharacterNeed.world_id,
-		worldCharacterNeed.world_character_id
-	);
+	return {
+		entity: new WorldCharacterEntity(
+			new WorldContext(worldCharacterNeed.world_id, false),
+			worldCharacterNeed.world_id,
+			worldCharacterNeed.world_character_id
+		),
+	};
 }
