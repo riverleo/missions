@@ -28,7 +28,8 @@ const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
  * - [x] 실행 시작 틱이 비어 있으면 현재 틱으로 보정한다.
  * - [x] 액션 지속 시간(`duration_ticks`) 경과로 완료를 판정한다.
  * - [x] 액션 지속 시간이 0 이하이면 런타임에서 최소 1틱으로 보정해 완료를 판정한다.
- * - [x] 완료 시 큐 상태가 액션 완료(`action-completed`)로 전환된다.
+ * - [x] 완료 시 큐 상태가 액션 완료로 전환된다.
+ * - [x] 목표 엔티티를 이미 들고 있는 경우 액션 완료로 전환한다.
  */
 export default function tickActionSystemItemPick(
 	this: WorldCharacterEntityBehavior,
@@ -48,6 +49,10 @@ export default function tickActionSystemItemPick(
 	const { interactionId } = InteractionIdUtils.parse(currentInteractionTargetId);
 	const interaction = getInteraction(interactionId);
 	if (interaction.system_interaction_type !== 'item_pick') return false;
+	if (isAlreadyHoldingTargetItem(this)) {
+		this.interactionQueue.status = 'action-completed';
+		return false;
+	}
 
 	if (this.interactionQueue.status === 'action-ready') {
 		if (!canStartSystemItemPick(this)) return false;
@@ -72,6 +77,23 @@ export default function tickActionSystemItemPick(
 	applyCompletedSystemItemPick(this);
 	this.interactionQueue.status = 'action-completed';
 	return false;
+}
+
+function isAlreadyHoldingTargetItem(behavior: WorldCharacterEntityBehavior): boolean {
+	if (!behavior.targetEntityId || EntityIdUtils.not('item', behavior.targetEntityId)) {
+		return false;
+	}
+
+	if (behavior.worldCharacterEntity.heldItemIds.includes(behavior.targetEntityId)) {
+		return true;
+	}
+
+	const { getOrUndefinedWorldItem } = useWorld();
+	const worldItemId = EntityIdUtils.instanceId<WorldItemId>(behavior.targetEntityId);
+	const worldItem = getOrUndefinedWorldItem(worldItemId);
+	if (!worldItem) return false;
+
+	return worldItem.world_character_id === behavior.worldCharacterEntity.instanceId;
 }
 
 function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): boolean {
