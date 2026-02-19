@@ -6,7 +6,6 @@ import {
 } from '$lib/hooks/fixture/utils';
 import { useBehavior, useCharacter, useInteraction, useItem, useWorld } from '$lib/hooks';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
-import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
@@ -20,9 +19,12 @@ describe('tickFindTargetEntityAndGo(tick: number)', () => {
 	let idleEntity: WorldCharacterEntity;
 	let holdingEntity: WorldCharacterEntity;
 	let nonHoldingEntity: WorldCharacterEntity;
+	let closestCandidateEntity: WorldCharacterEntity;
 	let searchNoCandidateEntity: WorldCharacterEntity;
 	let heldItemEntity: WorldItemEntity;
 	let droppedItemEntity: WorldItemEntity;
+	let droppedNearItemEntity: WorldItemEntity;
+	let droppedFarItemEntity: WorldItemEntity;
 
 	beforeEach(() => {
 		const fixture: ReturnType<typeof createForTickFindTargetEntityAndGo> =
@@ -31,9 +33,12 @@ describe('tickFindTargetEntityAndGo(tick: number)', () => {
 		idleEntity = fixture.idleEntity;
 		holdingEntity = fixture.holdingEntity;
 		nonHoldingEntity = fixture.nonHoldingEntity;
+		closestCandidateEntity = fixture.closestCandidateEntity;
 		searchNoCandidateEntity = fixture.searchNoCandidateEntity;
 		heldItemEntity = fixture.heldItemEntity;
 		droppedItemEntity = fixture.droppedItemEntity;
+		droppedNearItemEntity = fixture.droppedNearItemEntity;
+		droppedFarItemEntity = fixture.droppedFarItemEntity;
 	});
 
 	afterEach(() => {
@@ -202,36 +207,18 @@ describe('tickFindTargetEntityAndGo(tick: number)', () => {
 		const heldInteraction = useInteraction()
 			.getAllItemInteractions()
 			.find((interaction) => interaction.item_id === heldItemEntity.sourceId)!;
-		const rootAction = useInteraction().getRootInteractionAction(heldInteraction);
+		const rootInteractionAction = useInteraction().getRootInteractionAction(heldInteraction);
+		const { coreInteractionTargetId } = holdingEntity.behavior.interactionQueue;
 
-		expect(holdingEntity.behavior.interactionQueue.coreInteractionTargetId).toBe(
-			InteractionIdUtils.create(rootAction)
-		);
+		expect(coreInteractionTargetId).toBe(InteractionIdUtils.create(rootInteractionAction));
 	});
 
 	it('캐릭터와 가장 가까운 엔티티 중 목표 엔티티 후보가 있다면 해당 엔티티를 목표로 설정한다.', () => {
-		// 1) 동일 source의 더 가까운/더 먼 후보 엔티티를 추가한다.
-		const droppedItem = useItem().getItem(droppedItemEntity.sourceId);
-		const nearWorldItem = createWorldItem(droppedItem, { x: 110, y: 100 });
-		const nearItemEntity = new WorldItemEntity(
-			nonHoldingEntity.worldContext,
-			nonHoldingEntity.worldId,
-			nearWorldItem.id
-		);
-		nearItemEntity.addToWorld();
+		// 1) fixture가 제공한 가까운/먼 아이템 후보를 전제로 캐릭터 틱을 진행한다.
+		closestCandidateEntity.tick(FIRST_TICK);
 
-		const farWorldItem = createWorldItem(droppedItem, { x: 500, y: 500 });
-		const farItemEntity = new WorldItemEntity(
-			nonHoldingEntity.worldContext,
-			nonHoldingEntity.worldId,
-			farWorldItem.id
-		);
-		farItemEntity.addToWorld();
-
-		// 2) 캐릭터 틱을 진행한다.
-		nonHoldingEntity.tick(FIRST_TICK);
-
-		// 3) 가장 가까운 nearItemEntity가 타깃으로 선택된다.
-		expect(nonHoldingEntity.behavior.targetEntityId).toBe(nearItemEntity.id);
+		// 2) 가장 가까운 droppedNearItemEntity가 타깃으로 선택된다.
+		expect(closestCandidateEntity.behavior.targetEntityId).toBe(droppedNearItemEntity.id);
+		expect(closestCandidateEntity.behavior.targetEntityId).not.toBe(droppedFarItemEntity.id);
 	});
 });

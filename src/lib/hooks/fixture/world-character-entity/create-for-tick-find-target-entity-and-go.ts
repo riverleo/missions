@@ -25,9 +25,12 @@ type TickFindTargetEntityAndGoFixture = {
 	idleEntity: WorldCharacterEntity;
 	holdingEntity: WorldCharacterEntity;
 	nonHoldingEntity: WorldCharacterEntity;
+	closestCandidateEntity: WorldCharacterEntity;
 	searchNoCandidateEntity: WorldCharacterEntity;
 	heldItemEntity: WorldItemEntity;
 	droppedItemEntity: WorldItemEntity;
+	droppedNearItemEntity: WorldItemEntity;
+	droppedFarItemEntity: WorldItemEntity;
 };
 
 const DROPPED_ITEM_X = 220;
@@ -80,6 +83,10 @@ export default function (): TickFindTargetEntityAndGoFixture {
 		rootActionType: 'fulfill',
 		search: true,
 	});
+	const closestCandidateEntity = createEntityWithBehavior(nonHoldingNeed, {
+		rootActionType: 'fulfill',
+		search: true,
+	});
 	const searchNoCandidateEntity = createEntityWithBehavior(searchNoCandidateNeed, {
 		rootActionType: 'fulfill',
 		search: true,
@@ -111,6 +118,22 @@ export default function (): TickFindTargetEntityAndGoFixture {
 	);
 	droppedItemEntity.addToWorld();
 
+	const droppedNearWorldItem = createWorldItem(droppedItem, { x: 110, y: 100 });
+	const droppedNearItemEntity = new WorldItemEntity(
+		closestCandidateEntity.worldContext,
+		closestCandidateEntity.worldId,
+		droppedNearWorldItem.id
+	);
+	droppedNearItemEntity.addToWorld();
+
+	const droppedFarWorldItem = createWorldItem(droppedItem, { x: 500, y: 500 });
+	const droppedFarItemEntity = new WorldItemEntity(
+		closestCandidateEntity.worldContext,
+		closestCandidateEntity.worldId,
+		droppedFarWorldItem.id
+	);
+	droppedFarItemEntity.addToWorld();
+
 	const heldInteraction = createItemInteraction(heldItem);
 	createItemInteractionAction(heldInteraction, { root: true });
 	createNeedFulfillment(holdingNeed, {
@@ -138,8 +161,11 @@ export default function (): TickFindTargetEntityAndGoFixture {
 		idleEntity,
 		holdingEntity,
 		nonHoldingEntity,
+		closestCandidateEntity,
 		searchNoCandidateEntity,
 		heldItemEntity,
 		droppedItemEntity,
+		droppedNearItemEntity,
+		droppedFarItemEntity,
 	};
 }
