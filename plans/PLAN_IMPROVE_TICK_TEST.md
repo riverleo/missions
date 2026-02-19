@@ -22,12 +22,19 @@
 - E2E 테스트 도입/대체는 이번 플랜 범위에 포함하지 않는다.
 - `World` 컴포넌트/렌더 루프(Matter.js, canvas) 수준 테스트는 이번 플랜 범위에서 제외한다.
 
+## 진행 원칙
+
+- [ ] 파일 순서는 `tick.ts` 파이프라인 순서대로 진행한다.
+  - `tick-find-behavior-target` -> `tick-find-target-entity-and-go` -> `tick-enqueue-interaction-queue` -> `tick-dequeue-interaction` -> `tick-action-system-item-pick` -> `tick-next-or-clear`
+- [ ] 기존 spec 파일을 유지하고 내부 테스트 구조를 치환한다. (신규 `tick.spec.ts` 추가 금지)
+- [ ] 각 대상 spec 파일은 기존 내용을 완전히 제거한 뒤, 명세 기준으로 처음부터 다시 작성한다.
+- [ ] 전역 유틸/식별자 모듈 모킹(`$lib/utils/entity-id`, `$lib/utils/interaction-id`, `$lib/utils/behavior-id`)은 사용하지 않는다.
+- [ ] 훅 전역 모킹(`vi.mock('$lib/hooks')`)은 기본 금지하고 fixture 기반 데이터 셋업으로 검증한다.
+- [ ] 실제 함수 결과를 상태 전이/스토어 부작용으로 검증한다. (mock 호출 횟수 중심 테스트 지양)
+
 ## 작업 체크리스트
 
 ### 0) behavior 스펙 체크리스트
-
-- [ ] `tick.ts`: 파이프라인 순서(행동 선정 -> 타깃 탐색 -> 큐 enqueue/dequeue -> 시스템 액션 -> next/clear)가 보장된다.
-- [ ] `tick.ts`: 동일 tick에서 중복 전이나 순서 역전이 발생하지 않는다.
 
 - [ ] `tick-find-behavior-target.ts`: 욕구 임계 조건에서 행동이 트리거되고 행동 식별자가 반영된다.
 - [ ] `tick-find-behavior-target.ts`: 트리거 조건이 아니면 행동 상태를 유지한다.
@@ -56,6 +63,8 @@
 - [ ] 기존 `behavior/*.spec.ts`를 함수 내부 fixture 호출 검증 중심에서 상태 전이/결과 검증 중심으로 전환한다.
 - [ ] 테스트 fixture를 스토어 데이터 기준으로 구성하고, 로직 단위 fixture는 최소화한다.
 - [ ] 테스트에서 사용 중인 하드코딩/중복 fixture 데이터 빌더를 공용 팩토리로 정리한다.
+- [ ] 기존 `describe/it` 이름을 명세 문장과 1:1로 맞춘다.
+- [ ] 테스트는 단계별 틱 진행(`tick(0) -> assert -> tick(1) -> assert`) 형태를 기본으로 한다.
 
 ### 2) Hook Fixture 인프라 추가
 
@@ -63,10 +72,10 @@
 - [ ] `beforeEach`/`afterEach`에서 스토어 초기화 유틸을 제공한다.
 - [ ] tick 시나리오별 fixture 모듈을 분리한다.
 - [ ] 예시: `src/lib/hooks/fixture/world-character-entity/create-for-tick-action-system-item-pick.ts`.
-- [ ] 호출 패턴은 `Fixture.createForTickActionSystemItemPick()` 형태로 통일한다.
+- [ ] 호출 패턴은 `Fixture.worldCharacterEntity.createForTickActionSystemItemPick()` 형태로 통일한다.
 - [ ] 공통 정리 API(`Fixture.reset()`)를 제공하고 `afterEach`에서 호출한다.
 - [ ] 기본 사용 패턴을 문서화한다.
-  - `beforeEach`: `worldCharacterEntity = Fixture.createForTickActionSystemItemPick();`
+  - `beforeEach`: `worldCharacterEntity = Fixture.worldCharacterEntity.createForTickActionSystemItemPick();`
   - `afterEach`: `Fixture.reset();`
 
 ### 3) WorldCharacterEntity.tick() 중심 통합 단위 테스트
