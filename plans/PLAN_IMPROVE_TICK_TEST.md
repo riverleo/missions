@@ -31,6 +31,8 @@
 - [ ] 전역 유틸/식별자 모듈 모킹(`$lib/utils/entity-id`, `$lib/utils/interaction-id`, `$lib/utils/behavior-id`)은 사용하지 않는다.
 - [ ] 훅 전역 모킹(`vi.mock('$lib/hooks')`)은 기본 금지하고 fixture 기반 데이터 셋업으로 검증한다.
 - [ ] 실제 함수 결과를 상태 전이/스토어 부작용으로 검증한다. (mock 호출 횟수 중심 테스트 지양)
+- [x] 테스트 본문에서 인라인으로 월드 데이터를 조작/생성하지 않는다. 시나리오 데이터는 fixture 생성 시점에 완결 상태로 제공한다.
+- [x] 월드 엔티티 등록은 `worldContext.entities[...] = ...` 직접 할당 대신 `entity.addToWorld()`를 사용한다. (테스트용 최소 스텁 예외)
 
 ## 작업 체크리스트
 
@@ -39,8 +41,8 @@
 - [x] `tick-find-behavior-target.ts`: 욕구 임계 조건에서 행동이 트리거되고 행동 식별자가 반영된다.
 - [x] `tick-find-behavior-target.ts`: 트리거 조건이 아니면 행동 상태를 유지한다.
 
-- [ ] `tick-find-target-entity-and-go.ts`: 유효한 대상 탐색 시 `behavior.targetEntityId`와 경로(`behavior.path`)가 반영된다.
-- [ ] `tick-find-target-entity-and-go.ts`: 유효한 대상이 없으면 명세된 대기/유지/해제 규칙을 따른다.
+- [x] `tick-find-target-entity-and-go.ts`: 유효한 대상 탐색 시 `behavior.targetEntityId`와 경로(`behavior.path`)가 반영된다.
+- [x] `tick-find-target-entity-and-go.ts`: 유효한 대상이 없으면 명세된 대기/유지/해제 규칙을 따른다.
 
 - [ ] `tick-enqueue-interaction-queue.ts`: 대상 확정 후 상호작용 큐가 구성되고 `enqueuing -> ready`로 전이된다.
 - [ ] `tick-enqueue-interaction-queue.ts`: 큐 구성 실패 시 잘못된 상태 전이가 발생하지 않는다.
@@ -65,6 +67,7 @@
 - [ ] 테스트에서 사용 중인 하드코딩/중복 fixture 데이터 빌더를 공용 팩토리로 정리한다.
 - [ ] 기존 `describe/it` 이름을 명세 문장과 1:1로 맞춘다.
 - [ ] 테스트는 단계별 틱 진행(`tick(0) -> assert -> tick(1) -> assert`) 형태를 기본으로 한다.
+- [x] `tick-find-target-entity-and-go.spec.ts`는 fixture 고정 데이터셋 기반으로 재작성하고, 명세 항목(11개)을 상태 전이/결과 검증으로 커버한다.
 
 ### 2) Hook Fixture 인프라 추가
 
@@ -77,6 +80,7 @@
 - [ ] 기본 사용 패턴을 문서화한다.
   - `beforeEach`: `worldCharacterEntity = Fixture.worldCharacterEntity.createForTickActionSystemItemPick();`
   - `afterEach`: `Fixture.reset();`
+- [x] `create-for-tick-find-target-entity-and-go.ts`는 테스트 본문의 추가 arrange 호출 없이 실행 가능한 데이터셋을 반환한다.
 
 ### 3) WorldCharacterEntity.tick() 중심 통합 단위 테스트
 
