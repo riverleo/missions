@@ -36,19 +36,19 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 		);
 		createOrGetBehaviorPriority(nextBehavior, { priority: 1000 });
 
-		// 3) 다음 틱에서 행동 목록이 다시 계산되어야 한다.
 		entity.tick(SECOND_TICK);
 
+		// 3) 다음 틱의 행동 목록에서 높은 우선 순위의 행동이 맨 앞으로 나온다.
 		expect(entity.behavior.behaviorIds).toEqual([nextBehavior.id, ...behaviorIds]);
 	});
 
-	describe('진행중인 행동 타깃이 있는 경우', () => {
+	describe('진행 중인 행동 대상이 있는 경우', () => {
 		it('아무것도 하지 않고 계속 진행한다.', () => {
 			const firstBehavior = useBehavior().getAllBehaviorsByPriority(entity.behavior)[0]!;
 			const rootBehaviorAction = useBehavior().getRootBehaviorAction(firstBehavior);
 			const behaviorTargetId = BehaviorIdUtils.create(rootBehaviorAction);
 
-			// 이미 진행 중인 행동 타깃을 설정한다.
+			// 진행 중인 행동 대상을 설정한다.
 			entity.behavior.behaviorTargetId = behaviorTargetId;
 
 			const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
@@ -59,23 +59,28 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 		});
 	});
 
-	describe('진행중인 행동 타깃이 없는 경우', () => {
+	describe('진행 중인 행동 대상이 없는 경우', () => {
+		beforeEach(() => {
+			// 진행 중인 행동 대상이 없어야 한다.
+			expect(entity.behavior.behaviorTargetId).toBeUndefined();
+		});
+
 		it('모든 상태를 초기화한다.', () => {
 			const clearSpy = vi.spyOn(entity.behavior, 'clear');
 
-			// 행동 타깃이 비어 있으면 새 행동 선정 전에 상태를 초기화한다.
+			// 행동 대상이 비어 있으면 새 행동 선정 전에 상태를 초기화한다.
 			entity.tick(FIRST_TICK);
 
 			expect(clearSpy).toHaveBeenCalled();
 		});
 
-		it('행동 목록의 첫번째를 새로운 행동 타깃으로 설정한다.', () => {
+		it('행동 목록의 첫번째를 새로운 행동 대상으로 설정한다.', () => {
 			const firstBehavior = useBehavior().getAllBehaviorsByPriority(entity.behavior)[0]!;
 			const rootBehaviorAction = useBehavior().getRootBehaviorAction(firstBehavior);
 			const expectedBehaviorTargetId = BehaviorIdUtils.create(rootBehaviorAction);
 			const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
 
-			// 우선순위 1순위 행동의 루트 액션이 행동 타깃으로 설정되어야 한다.
+			// 우선순위 1순위 행동의 루트 액션이 행동 대상으로 설정되어야 한다.
 			entity.tick(FIRST_TICK);
 
 			expect(setBehaviorTargetSpy).toHaveBeenCalledWith(expectedBehaviorTargetId, FIRST_TICK);
@@ -90,9 +95,9 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 			expect(entity.behavior.behaviorTargetId).toBeUndefined();
 		});
 
-		it('루트 액션이 설정될 때 행동 타깃 시작 틱을 현재 틱(useCurrent().getTick())으로 설정한다.', () => {
+		it('루트 액션이 설정될 때 행동 대상 시작 틱을 현재 틱(useCurrent().getTick())으로 설정한다.', () => {
 			const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
-			// 행동 타깃 설정 시점의 현재 틱이 시작 틱으로 전달되어야 한다.
+			// 행동 대상 설정 시점의 현재 틱이 시작 틱으로 전달되어야 한다.
 			entity.tick(FIRST_TICK);
 
 			expect(setBehaviorTargetSpy).toHaveBeenCalledWith(expect.any(String), FIRST_TICK);
@@ -115,25 +120,25 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 			expect(() => entity.tick(FIRST_TICK)).toThrow();
 		});
 
-		it('행동 타깃이 지정되었다면 다음 단계로 진행한다.', () => {
+		it('행동 대상이 지정되었다면 다음 단계로 진행한다.', () => {
 			const tickFindTargetEntityAndGoSpy = vi.spyOn(entity.behavior, 'tickFindTargetEntityAndGo');
-			// 행동 타깃이 설정되면 즉시 다음 단계(대상 탐색)로 넘어간다.
+			// 행동 대상이 설정되면 즉시 다음 단계(대상 탐색)로 넘어간다.
 			entity.tick(FIRST_TICK);
 
 			expect(tickFindTargetEntityAndGoSpy).toHaveBeenCalledWith(FIRST_TICK);
 		});
 	});
 
-	it('초기화는 현재 행동 타깃이 없을 때만 호출된다.', () => {
+	it('초기화는 현재 행동 대상이 없을 때만 호출된다.', () => {
 		const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
-		// 1회차: 행동 타깃이 없으므로 새로 설정된다.
+		// 1회차: 행동 대상이 없으므로 새로 설정된다.
 		entity.tick(FIRST_TICK);
 		expect(setBehaviorTargetSpy).toHaveBeenCalled();
 
 		setBehaviorTargetSpy.mockClear();
 		const firstBehavior = useBehavior().getAllBehaviorsByPriority(entity.behavior)[0]!;
 		const rootBehaviorAction = useBehavior().getRootBehaviorAction(firstBehavior);
-		// 2회차: 진행 중 행동 타깃을 미리 주입해 재선정이 일어나지 않게 만든다.
+		// 2회차: 진행 중 행동 대상을 미리 주입해 재선정이 일어나지 않게 만든다.
 		entity.behavior.behaviorTargetId = BehaviorIdUtils.create(rootBehaviorAction);
 		entity.behavior.behaviorTargetStartTick = PRESET_START_TICK;
 		entity.tick(SECOND_TICK);
@@ -141,7 +146,7 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 		expect(setBehaviorTargetSpy).not.toHaveBeenCalled();
 	});
 
-	it('새로운 행동 타깃을 찾을 수 없을 경우 중단 후 처음으로 돌아간다.', () => {
+	it('새로운 행동 대상을 찾을 수 없을 경우 중단 후 처음으로 돌아간다.', () => {
 		// 모든 행동 트리거를 비활성화해 행동 후보를 없앤다.
 		worldCharacterNeed.value = HIGH_NEED_VALUE;
 
@@ -162,7 +167,7 @@ describe('tickFindBehaviorTarget(tick: number)', () => {
 			BehaviorIdUtils.behavior.to(needBehavior)
 		);
 		const behaviorTargetId = BehaviorIdUtils.create('need', needBehavior.id, rootAction.id);
-		// 이미 선택된 행동 타깃이 있으면 동일 타깃을 유지해야 한다.
+		// 이미 선택된 행동 대상이 있으면 동일 타깃을 유지해야 한다.
 		entity.behavior.behaviorTargetId = behaviorTargetId;
 		entity.behavior.behaviorTargetStartTick = PRESET_START_TICK;
 		const setBehaviorTargetSpy = vi.spyOn(entity.behavior, 'setBehaviorTarget');
