@@ -6,7 +6,7 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
-const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 5);
+const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
 
 /**
  * # item_pick 시스템 상호작용 실행 tick 함수
