@@ -1,0 +1,87 @@
+name: Sync Plan Directory By Label
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: write
+
+jobs:
+  sync-plan:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Resolve source and target
+        id: resolve
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = context.payload.pull_request.head.ref;
+            if (!ref.startsWith('plans/')) {
+              core.info(`Skip: branch is not plans/* (${ref})`);
+              core.setOutput('source', '');
+              core.setOutput('destination', '');
+              return;
+            }
+
+            const stem = ref.slice('plans/'.length);
+            const labels = (context.payload.pull_request.labels || []).map((l) =>
+              String(l.name || '').toLowerCase()
+            );
+
+            const hasFailed = labels.includes('failed') || labels.includes('[failed]');
+            const hasCompleted = labels.includes('completed') || labels.includes('[completed]');
+
+            let targetDir = 'plans';
+            if (hasFailed) {
+              targetDir = 'plans/failed';
+            } else if (hasCompleted) {
+              targetDir = 'plans/completed';
+            }
+
+            const root = `plans/${stem}.md`;
+            const completed = `plans/completed/${stem}.md`;
+            const failed = `plans/failed/${stem}.md`;
+            const destination = `${targetDir}/${stem}.md`;
+
+            const fs = require('fs');
+            const candidates = [failed, completed, root];
+            const source = candidates.find((p) => fs.existsSync(p)) || '';
+
+            core.info(`labels=${labels.join(', ')}`);
+            core.info(`source=${source || '(none)'}`);
+            core.info(`destination=${destination}`);
+
+            core.setOutput('source', source);
+            core.setOutput('destination', destination);
+
+      - name: Move plan file
+        if: steps.resolve.outputs.source != '' && steps.resolve.outputs.source != steps.resolve.outputs.destination
+        run: |
+          set -eu
+          mkdir -p plans/completed
+          mkdir -p plans/failed
+          src='${{ steps.resolve.outputs.source }}'
+          dst='${{ steps.resolve.outputs.destination }}'
+          mv "$src" "$dst"
+          echo "Moved: $src -> $dst"
+
+      - name: Commit and push
+        run: |
+          set -eu
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git config user.name "planner"
+          git config user.email "planner@ooaah.co"
+          git add plans/completed plans
+          git commit -m "chore: sync plan directory by PR labels"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
