@@ -1,5 +1,5 @@
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
-import { useInteraction, useWorld } from '$lib/hooks';
+import { useBehavior, useInteraction, useWorld } from '$lib/hooks';
 import type { InteractionAction, InteractionTargetId, WorldItemId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
@@ -44,11 +44,8 @@ export default function tickActionSystemItemPick(
 
 	const { currentInteractionTargetId } = this.interactionQueue;
 	if (!currentInteractionTargetId) return false;
-
-	const { getInteraction } = useInteraction();
-	const { interactionId } = InteractionIdUtils.parse(currentInteractionTargetId);
-	const interaction = getInteraction(interactionId);
-	if (interaction.system_interaction_type !== 'item_pick') return false;
+	const { isInteractionTargetType } = useBehavior();
+	if (!isInteractionTargetType(currentInteractionTargetId, 'item_pick')) return false;
 	if (isAlreadyHoldingTargetItem(this)) {
 		this.interactionQueue.status = 'action-completed';
 		return false;

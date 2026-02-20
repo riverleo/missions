@@ -17,6 +17,14 @@ import tickFindTargetEntityAndGo from './tick-find-target-entity-and-go';
 import tickEnqueueInteractionQueue from './tick-enqueue-interaction-queue';
 import tickDequeueInteraction from './tick-dequeue-interaction';
 import tickActionSystemItemPick from './tick-action-system-item-pick';
+import tickActionOnceItemUse from './tick-action-once-item-use';
+import tickActionOnceBuildingUse from './tick-action-once-building-use';
+import tickActionOnceBuildingConstruct from './tick-action-once-building-construct';
+import tickActionOnceBuildingDemolish from './tick-action-once-building-demolish';
+import tickActionFulfillBuildingRepair from './tick-action-fulfill-building-repair';
+import tickActionFulfillBuildingClean from './tick-action-fulfill-building-clean';
+import tickActionFulfillBuildingUse from './tick-action-fulfill-building-use';
+import tickActionFulfillCharacterHug from './tick-action-fulfill-character-hug';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -49,6 +57,14 @@ export class WorldCharacterEntityBehavior {
 	tickEnqueueInteractionQueue = tickEnqueueInteractionQueue;
 	tickDequeueInteraction = tickDequeueInteraction;
 	tickActionSystemItemPick = tickActionSystemItemPick;
+	tickActionOnceItemUse = tickActionOnceItemUse;
+	tickActionOnceBuildingUse = tickActionOnceBuildingUse;
+	tickActionOnceBuildingConstruct = tickActionOnceBuildingConstruct;
+	tickActionOnceBuildingDemolish = tickActionOnceBuildingDemolish;
+	tickActionFulfillBuildingRepair = tickActionFulfillBuildingRepair;
+	tickActionFulfillBuildingClean = tickActionFulfillBuildingClean;
+	tickActionFulfillBuildingUse = tickActionFulfillBuildingUse;
+	tickActionFulfillCharacterHug = tickActionFulfillCharacterHug;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;

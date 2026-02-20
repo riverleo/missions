@@ -11,39 +11,39 @@
 
 ## 할 일
 ### 게임 디자이너
-- [ ] `tick-action-*.ts` 파일 골격을 작성한다.
-  - [ ] `tick-action-once-item-use.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-use.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-construct.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-demolish.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-repair.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-clean.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-use.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-character-hug.ts` 파일을 작성한다.
-  - [ ] `tick-action-system-item-pick.ts` 파일 상태를 기준 파일로 점검한다.
+- [x] `tick-action-*.ts` 파일 골격을 작성한다.
+  - [x] `tick-action-once-item-use.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-use.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-construct.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-demolish.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-repair.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-clean.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-use.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-character-hug.ts` 파일을 작성한다.
+  - [x] `tick-action-system-item-pick.ts` 파일 상태를 기준 파일로 점검한다.
 
 ### 테스트 엔지니어
-- [ ] `tick-action-*.spec.ts`와 `create-for-tick-action-*.ts`는 fixture 완결형 패턴으로 작성한다. (`it` 내부 환경 조립 금지, fixture 리턴값만 사용)
-- [ ] 게임 디자이너가 작성한 각 `tick-action-*.ts` 파일에 대응하는 `tick-action-*.spec.ts` 테스트를 작성한다.
-  - [ ] `tick-action-once-item-use.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-use.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-construct.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-once-building-demolish.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-repair.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-clean.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-building-use.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-fulfill-character-hug.spec.ts` 파일을 작성한다.
-  - [ ] `tick-action-system-item-pick.spec.ts` 파일 상태를 기준 파일로 점검한다.
-- [ ] `create-for-tick-action-*.ts` 픽스처 파일 골격을 작성한다.
-  - [ ] `create-for-tick-action-once-item-use.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-once-building-use.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-once-building-construct.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-once-building-demolish.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-fulfill-building-repair.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-fulfill-building-clean.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-fulfill-building-use.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-fulfill-character-hug.ts` 파일을 작성한다.
-  - [ ] `create-for-tick-action-system-item-pick.ts` 파일 상태를 기준 파일로 점검한다.
+- [x] `tick-action-*.spec.ts`와 `create-for-tick-action-*.ts`는 fixture 완결형 패턴으로 작성한다. (`it` 내부 환경 조립 금지, fixture 리턴값만 사용)
+- [x] 게임 디자이너가 작성한 각 `tick-action-*.ts` 파일에 대응하는 `tick-action-*.spec.ts` 테스트를 작성한다.
+  - [x] `tick-action-once-item-use.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-use.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-construct.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-once-building-demolish.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-repair.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-clean.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-building-use.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-fulfill-character-hug.spec.ts` 파일을 작성한다.
+  - [x] `tick-action-system-item-pick.spec.ts` 파일 상태를 기준 파일로 점검한다.
+- [x] `create-for-tick-action-*.ts` 픽스처 파일 골격을 작성한다.
+  - [x] `create-for-tick-action-once-item-use.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-once-building-use.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-once-building-construct.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-once-building-demolish.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-fulfill-building-repair.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-fulfill-building-clean.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-fulfill-building-use.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-fulfill-character-hug.ts` 파일을 작성한다.
+  - [x] `create-for-tick-action-system-item-pick.ts` 파일 상태를 기준 파일로 점검한다.
 
 ## 노트
 ### 2026-02-20
