@@ -1,6 +1,12 @@
 import { get, writable, derived, type Readable } from 'svelte/store';
 import { produce } from 'immer';
 import { BehaviorIdUtils } from '$lib/utils/behavior-id';
+import { InteractionIdUtils } from '$lib/utils/interaction-id';
+import {
+	isFulfillInteractionType,
+	isOnceInteractionType,
+	isSystemInteractionType,
+} from '$lib/utils/label';
 import type {
 	RecordFetchState,
 	BehaviorPriority,
@@ -27,8 +33,11 @@ import type {
 	ConditionBehaviorActionId,
 	ScenarioId,
 	BehaviorTargetId,
+	BehaviorInteractionType,
+	InteractionTargetId,
 } from '$lib/types';
 import { useApp } from '../use-app.svelte';
+import { useInteraction } from '../use-interaction';
 import { getAllEntitySourcesByInteraction } from './get-all-entity-sources-by-interaction';
 import { getAllInteractionsByBehaviorTargetId } from './get-all-interactions-by-behavior-target-id';
 import type { WorldCharacterEntityBehavior } from '$lib/components/app/world/entities/world-character-entity/behavior';
@@ -349,6 +358,31 @@ function createBehaviorStore() {
 				: getOrUndefinedConditionBehaviorAction(behaviorActionId);
 
 		return plainAction ? BehaviorIdUtils.to(plainAction) : undefined;
+	}
+
+	function isInteractionTargetType(
+		interactionTargetId: InteractionTargetId | undefined,
+		behaviorInteractionType: BehaviorInteractionType
+	): boolean {
+		if (!interactionTargetId) return false;
+
+		const { interactionId } = InteractionIdUtils.parse(interactionTargetId);
+		const { getInteraction } = useInteraction();
+		const interaction = getInteraction(interactionId);
+
+		if (isOnceInteractionType(behaviorInteractionType)) {
+			return interaction.once_interaction_type === behaviorInteractionType;
+		}
+
+		if (isFulfillInteractionType(behaviorInteractionType)) {
+			return interaction.fulfill_interaction_type === behaviorInteractionType;
+		}
+
+		if (isSystemInteractionType(behaviorInteractionType)) {
+			return interaction.system_interaction_type === behaviorInteractionType;
+		}
+
+		return false;
 	}
 
 	function getNextBehaviorAction(behaviorAction: BehaviorAction): BehaviorAction {
@@ -814,6 +848,7 @@ function createBehaviorStore() {
 		getOrUndefinedRootConditionBehaviorAction,
 		getBehaviorAction,
 		getOrUndefinedBehaviorAction,
+		isInteractionTargetType,
 		getNextBehaviorAction,
 		getOrUndefinedNextBehaviorAction,
 		getAllBehaviorPriorities,

@@ -3,6 +3,14 @@ import createForTickFindTargetEntityAndGo from './world-character-entity/create-
 import createForTickEnqueueInteractionQueue from './world-character-entity/create-for-tick-enqueue-interaction-queue';
 import createForTickDequeueInteraction from './world-character-entity/create-for-tick-dequeue-interaction';
 import createForTickActionSystemItemPick from './world-character-entity/create-for-tick-action-system-item-pick';
+import createForTickActionOnceItemUse from './world-character-entity/create-for-tick-action-once-item-use';
+import createForTickActionOnceBuildingUse from './world-character-entity/create-for-tick-action-once-building-use';
+import createForTickActionOnceBuildingConstruct from './world-character-entity/create-for-tick-action-once-building-construct';
+import createForTickActionOnceBuildingDemolish from './world-character-entity/create-for-tick-action-once-building-demolish';
+import createForTickActionFulfillBuildingRepair from './world-character-entity/create-for-tick-action-fulfill-building-repair';
+import createForTickActionFulfillBuildingClean from './world-character-entity/create-for-tick-action-fulfill-building-clean';
+import createForTickActionFulfillBuildingUse from './world-character-entity/create-for-tick-action-fulfill-building-use';
+import createForTickActionFulfillCharacterHug from './world-character-entity/create-for-tick-action-fulfill-character-hug';
 import createForTickNextOrClear from './world-character-entity/create-for-tick-next-or-clear';
 import {
 	useBehavior,
@@ -32,6 +40,14 @@ export const Fixture = {
 		createForTickEnqueueInteractionQueue,
 		createForTickDequeueInteraction,
 		createForTickActionSystemItemPick,
+		createForTickActionOnceItemUse,
+		createForTickActionOnceBuildingUse,
+		createForTickActionOnceBuildingConstruct,
+		createForTickActionOnceBuildingDemolish,
+		createForTickActionFulfillBuildingRepair,
+		createForTickActionFulfillBuildingClean,
+		createForTickActionFulfillBuildingUse,
+		createForTickActionFulfillCharacterHug,
 		createForTickNextOrClear,
 	},
 	reset() {
