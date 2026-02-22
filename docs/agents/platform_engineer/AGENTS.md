@@ -21,6 +21,11 @@
 	- `pnpm supabase gen types --lang=typescript --local > src/lib/types/supabase.generated.ts`
 - 패키지 매니저는 pnpm만 사용한다. (npm/yarn 금지)
 
+## 구현 진행 기본 플로우
+- 구현 착수 전 대상 함수 상단에 역할/명세 주석을 먼저 작성한다.
+- 함수 내부에 주요 플로우(대략 단계)를 주석으로 먼저 작성한다.
+- 사용자 확인으로 의도 일치 여부를 검증한 뒤 구현을 시작한다.
+
 ## Code Style & Naming
 - Imports:
 	- named import만 사용 (`import * as` 금지)

@@ -73,15 +73,13 @@
 		}
 	});
 
-	const currentInteractionActionLabel = $derived.by(() => {
-		const { currentInteractionTargetId } = entity.behavior.interactionQueue;
-		return getInteractionTargetLabelString(currentInteractionTargetId);
-	});
+	const currentInteractionActionLabel = $derived(
+		getInteractionTargetLabelString(entity.behavior.interactionQueue.currentInteractionTargetId)
+	);
 
-	const currentInteractionActionStatusLabel = $derived.by(() => {
-		const { status } = entity.behavior.interactionQueue;
-		return getInteractionQueueStatusLabel(status);
-	});
+	const currentInteractionActionStatusLabel = $derived(
+		getInteractionQueueStatusLabel(entity.behavior.interactionQueue.status)
+	);
 
 	// 상호작용 액션 디버그 툴팁 (interactionTargetIds)
 	const interactionTargetIdsTooltip = $derived.by(() => {
