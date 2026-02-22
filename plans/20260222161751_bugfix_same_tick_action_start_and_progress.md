@@ -60,5 +60,6 @@
 - 진행 메모: `tick-action-system-item-pick.ts`에서 `action-ready` 이후 조기 반환을 제거해 같은 틱 진행 판정을 허용했고, 시작 거리 기준을 `TARGET_ARRIVAL_DISTANCE`로 단순화했다.
 - 진행 메모: `need/condition fulfillment` 패널에 `increase_per_tick > 0` 입력/저장 차단(min=0.1, 저장 버튼 비활성화, submit 가드)을 반영했다.
 - 진행 메모: `AccordionContentItem`에서 tooltip 배열이 비어 있거나 공백만 있을 때 툴팁을 렌더하지 않도록 분기했다.
-- 진행 메모: `supabase/migrations/20260222175235_enforce_positive_increase_per_tick.sql`를 추가해 `need_fulfillments`/`condition_fulfillments`의 `increase_per_tick > 0` 제약과 기본값(0.1)을 강제했다.
+- 진행 메모: `increase_per_tick` DB 제약 마이그레이션은 현재 단계에서 보류하고 파일을 제거했다. (런칭 전 단계 정책 반영)
 - 테스트 메모: `tick-action-system-item-pick.spec.ts`, `tick-action-once-item-use.spec.ts` 실행 통과. `pnpm check`는 공개 Supabase env 미설정으로 기존 오류 4건 발생.
+- 작업 규칙 메모: 각 작업 단위가 끝날 때마다 플랜 체크박스/노트를 즉시 갱신한 뒤 다음 작업으로 진행한다.
