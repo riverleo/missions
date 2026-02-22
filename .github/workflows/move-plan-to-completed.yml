@@ -23,14 +23,18 @@ jobs:
         with:
           script: |
             const ref = context.payload.pull_request.head.ref;
-            if (!ref.startsWith('plans/')) {
-              core.info(`Skip: branch is not plans/* (${ref})`);
+            const stem = ref.startsWith('plans/')
+              ? ref.slice('plans/'.length)
+              : ref.startsWith('codex/plans/')
+                ? ref.slice('codex/plans/'.length)
+                : '';
+
+            if (!stem) {
+              core.info(`Skip: branch is not plans/* or codex/plans/* (${ref})`);
               core.setOutput('source', '');
               core.setOutput('destination', '');
               return;
             }
-
-            const stem = ref.slice('plans/'.length);
             const labels = (context.payload.pull_request.labels || []).map((l) =>
               String(l.name || '').toLowerCase()
             );
@@ -38,16 +42,16 @@ jobs:
             const hasFailed = labels.includes('failed') || labels.includes('[failed]');
             const hasCompleted = labels.includes('completed') || labels.includes('[completed]');
 
-            let targetDir = 'plans';
+            let targetDir = 'docs/plans';
             if (hasFailed) {
-              targetDir = 'plans/failed';
+              targetDir = 'docs/plans/failed';
             } else if (hasCompleted) {
-              targetDir = 'plans/completed';
+              targetDir = 'docs/plans/completed';
             }
 
-            const root = `plans/${stem}.md`;
-            const completed = `plans/completed/${stem}.md`;
-            const failed = `plans/failed/${stem}.md`;
+            const root = `docs/plans/${stem}.md`;
+            const completed = `docs/plans/completed/${stem}.md`;
+            const failed = `docs/plans/failed/${stem}.md`;
             const destination = `${targetDir}/${stem}.md`;
 
             const fs = require('fs');
@@ -65,8 +69,8 @@ jobs:
         if: steps.resolve.outputs.source != '' && steps.resolve.outputs.source != steps.resolve.outputs.destination
         run: |
           set -eu
-          mkdir -p plans/completed
-          mkdir -p plans/failed
+          mkdir -p docs/plans/completed
+          mkdir -p docs/plans/failed
           src='${{ steps.resolve.outputs.source }}'
           dst='${{ steps.resolve.outputs.destination }}'
           mv "$src" "$dst"
@@ -82,6 +86,6 @@ jobs:
 
           git config user.name "planner"
           git config user.email "planner@ooaah.co"
-          git add plans/completed plans
+          git add docs/plans
           git commit -m "chore: sync plan directory by PR labels"
           git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
