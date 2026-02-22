@@ -22,27 +22,27 @@
 
 ## 할 일
 ### 플래너
-- [ ] 본 플랜에 버그 정의(같은 틱 시작+진행 허용)와 완료 기준을 노트에 고정한다.
-- [ ] 본 플랜에 충족 노드 패널 `틱당 증가` 0 금지 요구사항과 완료 기준을 노트에 고정한다.
-- [ ] 구현 역할 호출 템플릿으로 게임 디자이너와 테스트 엔지니어에게 본 플랜 구현 시작을 요청한다.
+- [x] 본 플랜에 버그 정의(같은 틱 시작+진행 허용)와 완료 기준을 노트에 고정한다.
+- [x] 본 플랜에 충족 노드 패널 `틱당 증가` 0 금지 요구사항과 완료 기준을 노트에 고정한다.
+- [x] 구현 역할 호출 템플릿으로 게임 디자이너와 테스트 엔지니어에게 본 플랜 구현 시작을 요청한다.
 
 ### 게임 디자이너
-- [ ] `tick-action-system-item-pick.ts`에서 `action-ready` 시작 처리 후 같은 틱 진행 판정이 가능하도록 조기 반환 분기를 제거 또는 재구성한다.
-- [ ] `tick-action-system-item-pick.ts`의 `ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10)` 상수 필요성을 검증하고, 불필요하면 제거/대체 기준(`TARGET_ARRIVAL_DISTANCE`)으로 정리한다.
+- [x] `tick-action-system-item-pick.ts`에서 `action-ready` 시작 처리 후 같은 틱 진행 판정이 가능하도록 조기 반환 분기를 제거 또는 재구성한다.
+- [x] `tick-action-system-item-pick.ts`의 `ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10)` 상수 필요성을 검증하고, 불필요하면 제거/대체 기준(`TARGET_ARRIVAL_DISTANCE`)으로 정리한다.
 - [ ] 동일 패턴을 사용하는 `tick-action-once-*` / `tick-action-fulfill-*` 액션 함수에 적용 범위를 점검하고, 필요한 파일에 같은 틱 시작+진행 규칙을 일관되게 반영한다.
-- [ ] `duration_ticks` 판정과 상태 전이(`action-ready`/`action-running`/`action-completed`)가 같은 틱 진행 허용 규칙과 충돌하지 않도록 정리한다.
-- [ ] 관리자 시나리오 편집의 충족 노드 패널에서 `틱당 증가` 값이 0으로 입력/저장되지 않도록 UI 제약(최소값/유효성 메시지/저장 차단 중 현재 구조에 맞는 방식)을 구현한다.
-- [ ] `AccordionContentItem`에서 툴팁 콘텐츠가 비어 있을 때 툴팁을 사용하지 않도록 분기 처리해 빈 툴팁 UI가 노출되지 않게 한다.
+- [x] `duration_ticks` 판정과 상태 전이(`action-ready`/`action-running`/`action-completed`)가 같은 틱 진행 허용 규칙과 충돌하지 않도록 정리한다.
+- [x] 관리자 시나리오 편집의 충족 노드 패널에서 `틱당 증가` 값이 0으로 입력/저장되지 않도록 UI 제약(최소값/유효성 메시지/저장 차단 중 현재 구조에 맞는 방식)을 구현한다.
+- [x] `AccordionContentItem`에서 툴팁 콘텐츠가 비어 있을 때 툴팁을 사용하지 않도록 분기 처리해 빈 툴팁 UI가 노출되지 않게 한다.
 
 ### 플랫폼 엔지니어
 - [ ] 공통 상태 판정 헬퍼(예: action-ready/action-running 가드)의 도입 필요성을 검토하고, 도입 시 중복 조건을 줄이는 범위를 노트에 기록한다.
-- [ ] 충족 노드 데이터 스키마/타입/서버 저장 경로에서 `틱당 증가` 0 값이 유입되지 않도록 검증 지점을 정리하고, 필요한 경우 최소 허용값 규칙을 명시적으로 추가한다.
+- [x] 충족 노드 데이터 스키마/타입/서버 저장 경로에서 `틱당 증가` 0 값이 유입되지 않도록 검증 지점을 정리하고, 필요한 경우 최소 허용값 규칙을 명시적으로 추가한다.
 
 ### 테스트 엔지니어
-- [ ] `tick-action-system-item-pick.spec.ts`에 같은 틱에서 시작과 진행이 함께 처리되는 케이스를 추가한다.
-- [ ] 규칙 변경으로 인한 회귀(기존 완료/미완료 판정, 상태 전이)를 검증하는 테스트를 보강한다.
+- [x] `tick-action-system-item-pick.spec.ts`에 같은 틱에서 시작과 진행이 함께 처리되는 케이스를 추가한다.
+- [x] 규칙 변경으로 인한 회귀(기존 완료/미완료 판정, 상태 전이)를 검증하는 테스트를 보강한다.
 - [ ] 충족 노드 패널 `틱당 증가` 필드에 0 입력 시 유효성 실패 또는 저장 차단이 발생하는 테스트(컴포넌트/통합 중 기존 테스트 구조에 맞는 레벨)를 추가한다.
-- [ ] 관련 테스트를 실행해 통과를 확인하고 실패 시 원인을 플랜 노트에 기록한다.
+- [x] 관련 테스트를 실행해 통과를 확인하고 실패 시 원인을 플랜 노트에 기록한다.
 
 ## 노트
 ### 2026-02-22
@@ -57,3 +57,8 @@
 - 점검 대상(신규): 충족 노드 패널 입력 컴포넌트, 저장 직전 검증 로직, `틱당 증가`를 소비하는 타입/스키마/DB write 경로.
 - 점검 대상(신규): `AccordionContentItem` 툴팁 props 전달부와 툴팁 렌더 분기(빈 문자열/undefined/null).
 - 구현 전 원칙: 새 요구사항은 플랜에 먼저 기록하고, 명시적 구현 시작 요청 후 코드 변경을 진행한다.
+- 진행 메모: `tick-action-system-item-pick.ts`에서 `action-ready` 이후 조기 반환을 제거해 같은 틱 진행 판정을 허용했고, 시작 거리 기준을 `TARGET_ARRIVAL_DISTANCE`로 단순화했다.
+- 진행 메모: `need/condition fulfillment` 패널에 `increase_per_tick > 0` 입력/저장 차단(min=0.1, 저장 버튼 비활성화, submit 가드)을 반영했다.
+- 진행 메모: `AccordionContentItem`에서 tooltip 배열이 비어 있거나 공백만 있을 때 툴팁을 렌더하지 않도록 분기했다.
+- 진행 메모: `supabase/migrations/20260222175235_enforce_positive_increase_per_tick.sql`를 추가해 `need_fulfillments`/`condition_fulfillments`의 `increase_per_tick > 0` 제약과 기본값(0.1)을 강제했다.
+- 테스트 메모: `tick-action-system-item-pick.spec.ts`, `tick-action-once-item-use.spec.ts` 실행 통과. `pnpm check`는 공개 Supabase env 미설정으로 기존 오류 4건 발생.

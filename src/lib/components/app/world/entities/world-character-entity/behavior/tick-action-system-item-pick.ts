@@ -6,8 +6,6 @@ import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { vectorUtils } from '$lib/utils/vector';
 import type { WorldCharacterEntityBehavior } from './world-character-entity-behavior.svelte';
 
-const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
-
 /**
  * # 아이템 줍기 시스템 상호작용 실행
  *
@@ -27,7 +25,6 @@ const ITEM_PICK_START_DISTANCE = Math.max(TARGET_ARRIVAL_DISTANCE, 10);
  * - [x] 액션 실행 중 상태에서 현재 상호작용 액션을 조회한다.
  * - [x] 실행 시작 틱이 비어 있으면 현재 틱으로 보정한다.
  * - [x] 액션 지속 시간(`duration_ticks`) 경과로 완료를 판정한다.
- * - [x] 액션 지속 시간이 0 이하이면 런타임에서 최소 1틱으로 보정해 완료를 판정한다.
  * - [x] 완료 시 큐 상태가 액션 완료로 전환된다.
  * - [x] 목표 엔티티를 이미 들고 있는 경우 액션 완료로 전환한다.
  */
@@ -55,7 +52,6 @@ export default function tickActionSystemItemPick(
 		if (!canStartSystemItemPick(this)) return false;
 		this.interactionQueue.currentInteractionTargetRunningAtTick = tick;
 		this.interactionQueue.status = 'action-running';
-		return false;
 	}
 
 	const currentInteractionAction = getCurrentInteractionAction(currentInteractionTargetId);
@@ -104,7 +100,7 @@ function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): boolean
 	}
 
 	const distance = vectorUtils.getDistance(behavior.worldCharacterEntity, targetEntity);
-	return distance <= ITEM_PICK_START_DISTANCE;
+	return distance <= TARGET_ARRIVAL_DISTANCE;
 }
 
 /**
@@ -158,10 +154,5 @@ function getCurrentInteractionAction(interactionTargetId: InteractionTargetId): 
 }
 
 function isCompleted(currentInteractionAction: InteractionAction, elapsed: number): boolean {
-	const normalizedDurationTicks = normalizeDurationTicks(currentInteractionAction.duration_ticks);
-	return elapsed >= normalizedDurationTicks;
-}
-
-function normalizeDurationTicks(durationTicks: number): number {
-	return durationTicks > 0 ? durationTicks : 1;
+	return elapsed >= currentInteractionAction.duration_ticks;
 }
