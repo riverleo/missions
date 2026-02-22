@@ -10,10 +10,12 @@
 	}
 
 	let { label, tooltip, children }: Props = $props();
+	const tooltipItems = $derived((tooltip ?? []).map((item) => item.trim()).filter(Boolean));
+	const hasTooltip = $derived(tooltipItems.length > 0);
 </script>
 
 <div class="flex items-center justify-between text-xs">
-	{#if tooltip}
+	{#if hasTooltip}
 		<Tooltip>
 			<TooltipTrigger>
 				{#snippet child({ props })}
@@ -29,7 +31,7 @@
 			</TooltipTrigger>
 			<TooltipContent side="left">
 				<div class="flex flex-col gap-1">
-					{#each tooltip as item, index}
+					{#each tooltipItems as item, index}
 						<div>{index + 1}. {item}</div>
 					{/each}
 				</div>

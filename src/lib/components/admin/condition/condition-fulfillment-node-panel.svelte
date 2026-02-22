@@ -50,6 +50,9 @@
 	let isUpdating = $state(false);
 	let changes = $state<ConditionFulfillment | undefined>(undefined);
 	let currentFulfillmentId = $state<string | undefined>(undefined);
+	const isValidIncreasePerTick = $derived(
+		changes ? Number.isFinite(changes.increase_per_tick) && changes.increase_per_tick > 0 : false
+	);
 
 	$effect(() => {
 		if (fulfillment && fulfillment.id !== currentFulfillmentId) {
@@ -61,6 +64,7 @@
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!changes || isUpdating) return;
+		if (!isValidIncreasePerTick) return;
 
 		const fulfillmentId = changes.id;
 		isUpdating = true;
@@ -190,14 +194,19 @@
 									</TooltipContent>
 								</Tooltip>
 							</InputGroupAddon>
-							<InputGroupInput type="number" step="0.1" bind:value={changes.increase_per_tick} />
+							<InputGroupInput
+								type="number"
+								step="0.1"
+								min="0.1"
+								bind:value={changes.increase_per_tick}
+							/>
 						</InputGroup>
 					</div>
 					<div class="flex justify-end gap-2">
 						<Button type="button" variant="outline" onclick={onclickCancel} disabled={isUpdating}>
 							취소
 						</Button>
-						<Button type="submit" disabled={isUpdating}>
+						<Button type="submit" disabled={isUpdating || !isValidIncreasePerTick}>
 							{isUpdating ? getActionString('saving') : getActionString('save')}
 						</Button>
 					</div>
