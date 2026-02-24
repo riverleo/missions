@@ -18,6 +18,7 @@ import { Entity } from '../entity.svelte';
 import type { BeforeUpdateEvent, WorldContext } from '../../context';
 import tickDecreaseNeeds from './tick-decrease-needs';
 import { objectify } from 'radash';
+import { createWorldCharacterNeedDelta } from './world-character-need-delta';
 
 export class WorldCharacterEntity extends Entity {
 	readonly type = 'character' as const;
@@ -115,8 +116,9 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	tick(tick: number): void {
-		this.tickDecreaseNeeds(tick);
-		this.behavior.tick(tick);
+		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
+		this.tickDecreaseNeeds(tick, worldCharacterNeedDelta);
+		this.behavior.tick(tick, worldCharacterNeedDelta);
 	}
 
 	moveTo(vector: Vector): void {
