@@ -34,10 +34,13 @@
 
 ## 문서 목차
 
+### 디렉터
+
+- [트럼프](directors/trump.md)
+
 ### 캐릭터
 
 - [플레이어 — 9급 공무원](characters/player.md)
-- [트럼프](characters/trump.md)
 
 ## TODO
 

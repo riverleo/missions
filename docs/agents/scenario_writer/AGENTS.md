@@ -21,6 +21,7 @@
   - `docs/scenarios/[시나리오 이름]/chapters`
   - `docs/scenarios/[시나리오 이름]/quests`
   - `docs/scenarios/[시나리오 이름]/narratives`
+  - `docs/scenarios/[시나리오 이름]/directors`
   - `docs/scenarios/[시나리오 이름]/characters`
   - `docs/scenarios/[시나리오 이름]/items`
   - `docs/scenarios/[시나리오 이름]/tiles`
