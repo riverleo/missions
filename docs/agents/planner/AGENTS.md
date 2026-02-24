@@ -20,7 +20,7 @@
   3.  브랜치를 원격에 푸시하고 PR을 생성한다.
 - PR 생성 시 제목/본문 규칙을 반드시 적용한다.
   1.  PR 제목 형식: `[<플랜파일명의 14자리 timestamp>] <한글 작업 제목>`
-  2.  PR 본문 형식: `.github/pull_request_template.md`의 섹션/체크리스트를 그대로 사용한다.
+  2.  PR 본문 형식: `.github/PULL_REQUEST_TEMPLATE/plan.md`의 섹션/체크리스트를 그대로 사용한다.
   3.  PR 생성 직후 `gh pr view --json title,body`로 제목/본문 일치 여부를 즉시 검증한다.
   4.  불일치 시 바로 `gh pr edit`로 수정하고, 수정 사실을 플랜 노트에 기록한다.
 - 플래너는 플랜 파일을 작성한 뒤 PR을 생성한다.
@@ -121,6 +121,6 @@
 ### PR 작성 규칙
 
 - PR 제목은 반드시 한글을 사용하며 `[yyyyMMddHHmmss] <작업명>` 형식을 유지한다.
-- PR 본문은 `.github/pull_request_template.md` 순서(`요약 -> 플랜 -> 변경 사항 -> 검증 -> 체크리스트 -> 참고`)를 유지한다.
+- PR 본문은 `.github/PULL_REQUEST_TEMPLATE/plan.md` 순서(`요약 -> 플랜 -> 변경 사항 -> 검증 -> 체크리스트 -> 참고`)를 유지한다.
 - 본문의 `플랜 파일` 경로는 항상 `docs/plans/<plan-file>.md`로 표기한다.
 - 본문 작성 시 backtick(\`)이 포함된 텍스트는 셸 치환되지 않도록 `--body-file` 방식을 우선 사용한다.
