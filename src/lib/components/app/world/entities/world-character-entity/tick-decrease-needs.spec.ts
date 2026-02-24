@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { WorldCharacterEntity } from './world-character-entity.svelte';
 import type { Need, CharacterNeed, CharacterId, NeedId } from '$lib/types';
+import { createWorldCharacterNeedDelta } from './world-character-need-delta';
 
 // Mock useCharacter hook
 vi.mock('$lib/hooks', () => ({
 	useCharacter: vi.fn(),
 }));
 
-describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
+describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number, worldCharacterNeedDelta: WorldCharacterNeedDelta)', () => {
 	let mockWorldCharacterEntity: Partial<WorldCharacterEntity>;
 	let mockGetNeed: ReturnType<typeof vi.fn>;
 	let mockGetCharacterNeed: ReturnType<typeof vi.fn>;
@@ -60,7 +61,11 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 		} as CharacterNeed);
 
 		// When
-		tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+		tickDecreaseNeeds.call(
+			mockWorldCharacterEntity as WorldCharacterEntity,
+			0,
+			createWorldCharacterNeedDelta()
+		);
 
 		// Then: 모든 욕구가 처리됨
 		expect(mockGetNeed).toHaveBeenCalledTimes(2);
@@ -87,7 +92,11 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 
 		// When & Then: 에러 발생
 		expect(() => {
-			tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+			tickDecreaseNeeds.call(
+				mockWorldCharacterEntity as WorldCharacterEntity,
+				0,
+				createWorldCharacterNeedDelta()
+			);
 		}).toThrow('Need not found');
 	});
 
@@ -116,7 +125,11 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 
 		// When & Then: 에러 발생
 		expect(() => {
-			tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+			tickDecreaseNeeds.call(
+				mockWorldCharacterEntity as WorldCharacterEntity,
+				0,
+				createWorldCharacterNeedDelta()
+			);
 		}).toThrow('CharacterNeed not found');
 	});
 
@@ -144,13 +157,20 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 		} as CharacterNeed);
 
 		// When
-		tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
+		tickDecreaseNeeds.call(
+			mockWorldCharacterEntity as WorldCharacterEntity,
+			0,
+			worldCharacterNeedDelta
+		);
 
-		// Then: 100 - (2 * 3) = 94
-		expect((mockWorldCharacterEntity.needs as any)['world-need-1']!.value).toBe(94);
+		// Then: delta에 0 - (2 * 3) = -6이 기록된다.
+		expect(worldCharacterNeedDelta[needId]?.total).toBe(-6);
+		expect(worldCharacterNeedDelta[needId]?.tickDecreaseNeeds).toBe(-6);
+		expect((mockWorldCharacterEntity.needs as any)['world-need-1']!.value).toBe(100);
 	});
 
-	it('욕구 값은 최소 0으로 제한된다', async () => {
+	it('계산된 감소량은 WorldCharacterNeedDelta에 음수 delta로 기록된다', async () => {
 		// Given: 감소량이 현재 값보다 큼
 		const tickDecreaseNeeds = (await import('./tick-decrease-needs')).default;
 		const characterId = 'char-1' as CharacterId;
@@ -173,10 +193,17 @@ describe('tickDecreaseNeeds(this: WorldCharacterEntity, tick: number)', () => {
 			decay_multiplier: 2,
 		} as CharacterNeed);
 
-		// When: 5 - (10 * 2) = -15 -> 0으로 제한
-		tickDecreaseNeeds.call(mockWorldCharacterEntity as WorldCharacterEntity, 0);
+		// When: delta에 0 - (10 * 2) = -20 기록
+		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
+		tickDecreaseNeeds.call(
+			mockWorldCharacterEntity as WorldCharacterEntity,
+			0,
+			worldCharacterNeedDelta
+		);
 
 		// Then
-		expect((mockWorldCharacterEntity.needs as any)['world-need-1']!.value).toBe(0);
+		expect(worldCharacterNeedDelta[needId]?.total).toBe(-20);
+		expect(worldCharacterNeedDelta[needId]?.tickDecreaseNeeds).toBe(-20);
+		expect((mockWorldCharacterEntity.needs as any)['world-need-1']!.value).toBe(5);
 	});
 });
