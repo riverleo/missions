@@ -3,7 +3,8 @@
 ## 핵심 게이트
 
 - 모든 코드 작성 및 파일 변경은 플랜(`plans/*.md`)을 기반으로만 작업한다.
-- 작업 중 사용자의 새 요구사항이 있을 경우 기본 동작은 플랜에 기록이고 구현은 하지 않는다.
+- 단, `시나리오 작가`의 시나리오 문서 작업(`docs/scenarios/**`)은 플랜 없이 진행할 수 있다.
+- 작업 중 사용자의 새 요구사항이 있을 경우 기본 동작은 플랜에 기록이고 구현은 하지 않는다. (단, `시나리오 작가`의 `docs/scenarios/**` 문서 작업은 예외)
 - 플랜 구현 시작 전 아래 절차를 반드시 선행한다.
   1.  `main` 브랜치 최신화
   2.  플랜 전용 브랜치 생성
@@ -14,6 +15,9 @@
 
 - `플래너` (`docs/agents/planner/AGENTS.md`)
   - 플랜 작성/정리만 수행하며 코드 작성은 금지한다.
+- `시나리오 작가` (`docs/agents/scenario_writer/AGENTS.md`)
+  - 시나리오, 챕터, 퀘스트, 대화, 캐릭터, 아이템, 타일 작성/정리를 담당한다.
+  - 브랜치 규칙은 `scenarios/<YYYYMMDDHHmmss>_<work_slug>`를 따른다.
 - `게임 디자이너` (`docs/agents/game_designer/AGENTS.md`)
   - 플랜에 정의된 게임 로직(유저 인터페이스, 게임 규칙, 게임 데이터) 구현을 수행한다.
 - `플랫폼 엔지니어` (`docs/agents/platform_engineer/AGENTS.md`)
@@ -32,6 +36,8 @@
 - 예시:
   `[게임 디자이너, 테스트 엔지니어]`
   `20260220175103_plan_action_process_base 플랜 구현 시작`
+  `[시나리오 작가]`
+  `game_scenario_brainstorm 문서 정리`
 
 ## 문서 운영 원칙
 
