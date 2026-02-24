@@ -65,4 +65,16 @@ describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharact
 
 		expect(need.value).toBe(before + 2);
 	});
+
+	it('같은 틱에 동일 need의 상승 delta가 있으면 tick-decrease-needs delta를 무시한다.', () => {
+		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
+		const need = entity.needs[fixture.needId]!;
+		const before = need.value;
+
+		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 3);
+		addTickDecreaseNeedsWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 10);
+		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+
+		expect(need.value).toBe(before + 3);
+	});
 });

@@ -14,7 +14,8 @@ export default function tickApplyWorkdCharacterNeedDelta(
 	worldCharacterNeedDelta: WorldCharacterNeedDelta
 ): void {
 	const { getNeed } = useCharacter();
-	const ignoreTickDecreaseNeedsInput = shouldIgnoreTickDecreaseNeedsInput(this);
+	const ignoreTickDecreaseNeedsInputByActionState =
+		shouldIgnoreTickDecreaseNeedsInputByActionState(this);
 
 	for (const [needId, deltaValue] of Object.entries(worldCharacterNeedDelta) as [
 		NeedId,
@@ -29,9 +30,11 @@ export default function tickApplyWorkdCharacterNeedDelta(
 			continue;
 		}
 
-		const appliedDelta = ignoreTickDecreaseNeedsInput
-			? deltaValue.total - deltaValue.tickDecreaseNeeds
-			: deltaValue.total;
+		const appliedDelta = getAppliedDelta(
+			deltaValue.total,
+			deltaValue.tickDecreaseNeeds,
+			ignoreTickDecreaseNeedsInputByActionState
+		);
 
 		if (appliedDelta === 0) {
 			continue;
@@ -43,7 +46,26 @@ export default function tickApplyWorkdCharacterNeedDelta(
 	}
 }
 
-function shouldIgnoreTickDecreaseNeedsInput(behavior: WorldCharacterEntityBehavior): boolean {
+function getAppliedDelta(
+	total: number,
+	tickDecreaseNeeds: number,
+	ignoreTickDecreaseNeedsInputByActionState: boolean
+): number {
+	if (ignoreTickDecreaseNeedsInputByActionState) {
+		return total - tickDecreaseNeeds;
+	}
+
+	const increaseDelta = total - tickDecreaseNeeds;
+	if (increaseDelta > 0) {
+		return increaseDelta;
+	}
+
+	return total;
+}
+
+function shouldIgnoreTickDecreaseNeedsInputByActionState(
+	behavior: WorldCharacterEntityBehavior
+): boolean {
 	if (behavior.interactionQueue.status !== 'action-running') {
 		return false;
 	}
