@@ -39,8 +39,8 @@
 
 ### 디렉터
 
-- [트럼프](directors/trump.md)
-- [캐릭터 조합](directors/combination.md)
+- [트럼프 시스템](directors/trump_system.md)
+- [캐릭터 시스템](directors/character_system.md)
 
 ### 캐릭터
 
