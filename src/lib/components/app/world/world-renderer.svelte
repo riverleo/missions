@@ -93,7 +93,12 @@
 		"
 	>
 		{#if terrainAssetUrl}
-			<img src={terrainAssetUrl} class="absolute inset-0 h-full w-full" alt={terrain?.title} />
+			<img
+				src={terrainAssetUrl}
+				class="absolute inset-0 h-full w-full"
+				alt={terrain?.title}
+				style:opacity={world.debug ? 0.3 : 1}
+			/>
 		{/if}
 		<WorldPathfinderDebug />
 
