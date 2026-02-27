@@ -185,8 +185,9 @@
 	});
 
 	// Transform 스타일 계산 (위치 + 페이스 스케일)
+	// 컨테이너에 bodyScale이 적용되어 있으므로 faceScale / bodyScale로 상쇄하여 독립적 스케일 적용
 	const faceTransform = $derived(
-		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale})`
+		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale / bodyScale})`
 	);
 
 	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
