@@ -16,7 +16,7 @@
 - `플래너` (`docs/agents/planner/AGENTS.md`)
   - 플랜 작성/정리만 수행하며 코드 작성은 금지한다.
 - `시나리오 작가` (`docs/agents/scenario_writer/AGENTS.md`)
-  - 시나리오, 챕터, 퀘스트, 대화, 캐릭터, 아이템, 타일 작성/정리를 담당한다.
+  - 시나리오, 챕터, 퀘스트, 대화, 캐릭터, 자원, 아이템, 타일 작성/정리를 담당한다.
   - 브랜치 규칙은 `scenarios/<YYYYMMDDHHmmss>_<work_slug>`를 따른다.
 - `게임 디자이너` (`docs/agents/game_designer/AGENTS.md`)
   - 플랜에 정의된 게임 로직(유저 인터페이스, 게임 규칙, 게임 데이터) 구현을 수행한다.
