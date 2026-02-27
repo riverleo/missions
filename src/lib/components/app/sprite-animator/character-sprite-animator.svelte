@@ -71,9 +71,6 @@
 		faceStateType ? faceStates.find((s) => s.type === faceStateType) : undefined
 	);
 
-	// Body가 앞에 렌더링되는지
-	const isBodyInFront = $derived(bodyState?.in_front ?? false);
-
 	let bodyAnimator = $state<SpriteAnimator | undefined>(undefined);
 	let faceAnimator = $state<SpriteAnimator | undefined>(undefined);
 	let heldItemAnimator = $state<SpriteAnimator | undefined>(undefined);
@@ -212,29 +209,16 @@
 	class={cn('relative flex items-center justify-center', className)}
 	style:transform={flip ? 'scaleX(-1)' : undefined}
 >
-	<!-- 실제 캐릭터 -->
-	{#if isBodyInFront}
-		{#if faceAnimator}
-			<div class="absolute" style:transform={faceTransform}>
-				<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-			</div>
-		{/if}
-		{#if bodyAnimator}
-			<div style:transform="scale({bodyScale})">
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-			</div>
-		{/if}
-	{:else}
-		{#if bodyAnimator}
-			<div style:transform="scale({bodyScale})">
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-			</div>
-		{/if}
-		{#if faceAnimator}
-			<div class="absolute" style:transform={faceTransform}>
-				<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-			</div>
-		{/if}
+	<!-- 실제 캐릭터: 항상 바디 → 페이스 순서 -->
+	{#if bodyAnimator}
+		<div style:transform="scale({bodyScale})">
+			<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+		</div>
+	{/if}
+	{#if faceAnimator}
+		<div class="absolute" style:transform={faceTransform}>
+			<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
+		</div>
 	{/if}
 	{#if heldItemAnimator}
 		<div class="absolute" style:transform={handTransform}>

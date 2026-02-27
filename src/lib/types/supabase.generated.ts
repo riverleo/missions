@@ -601,42 +601,30 @@ export type Database = {
         Row: {
           atlas_name: string
           body_id: string
-          character_face_state:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
           fps: number | null
           frame_from: number | null
           frame_to: number | null
           id: string
-          in_front: boolean
           loop: Database["public"]["Enums"]["loop_type"]
           type: Database["public"]["Enums"]["character_body_state_type"]
         }
         Insert: {
           atlas_name: string
           body_id: string
-          character_face_state?:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
           fps?: number | null
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          in_front?: boolean
           loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["character_body_state_type"]
         }
         Update: {
           atlas_name?: string
           body_id?: string
-          character_face_state?:
-            | Database["public"]["Enums"]["character_face_state_type"]
-            | null
           fps?: number | null
           frame_from?: number | null
           frame_to?: number | null
           id?: string
-          in_front?: boolean
           loop?: Database["public"]["Enums"]["loop_type"]
           type?: Database["public"]["Enums"]["character_body_state_type"]
         }
