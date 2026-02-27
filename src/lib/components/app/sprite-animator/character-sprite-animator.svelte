@@ -181,8 +181,9 @@
 	});
 
 	// Transform 스타일 계산 (위치 + 페이스 스케일)
+	// faceOffset은 atlas 원본 픽셀 좌표이므로 bodyScale을 곱하여 바디 크기에 맞게 보정
 	const faceTransform = $derived(
-		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale})`
+		`translate(${(faceOffset.x * bodyScale) / resolution}px, ${(faceOffset.y * bodyScale) / resolution}px) scale(${faceScale})`
 	);
 
 	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
@@ -200,8 +201,9 @@
 	});
 
 	// Transform 스타일 계산 (translate, scale, rotate 순서)
+	// handOffset은 atlas 원본 픽셀 좌표이므로 bodyScale을 곱하여 바디 크기에 맞게 보정
 	const handTransform = $derived(
-		`translate(${handOffset.x / resolution}px, ${handOffset.y / resolution}px) scale(${heldItemScale}) rotate(${heldItemRotation}deg)`
+		`translate(${(handOffset.x * bodyScale) / resolution}px, ${(handOffset.y * bodyScale) / resolution}px) scale(${heldItemScale}) rotate(${heldItemRotation}deg)`
 	);
 </script>
 
