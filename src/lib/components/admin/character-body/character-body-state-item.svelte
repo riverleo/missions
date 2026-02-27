@@ -171,7 +171,9 @@
 	{/snippet}
 	{#snippet preview()}
 		{#if animator}
-			<SpriteAnimatorRenderer {animator} resolution={2} />
+			<div style:transform="scale({body?.scale ?? 1})">
+				<SpriteAnimatorRenderer {animator} resolution={2} />
+			</div>
 		{/if}
 	{/snippet}
 	{#snippet collider()}

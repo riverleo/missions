@@ -13,8 +13,6 @@
 	import Self from './character-sprite-animator.svelte';
 	import { cn } from '$lib/utils';
 
-	const OUTLINE_WIDTH = 10;
-
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		characterId: CharacterId;
 		bodyStateType: CharacterBodyStateType;
@@ -31,7 +29,6 @@
 		interactCharacterRotation?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
-		selected?: boolean;
 	}
 
 	let {
@@ -50,7 +47,6 @@
 		interactCharacterRotation = 0,
 		resolution = 2,
 		flip = false,
-		selected = false,
 		class: className,
 		...restProps
 	}: Props = $props();
@@ -59,7 +55,7 @@
 		useCharacter();
 
 	const character = $derived($characterStore.data[characterId]);
-	const scale = $derived(character?.scale ?? 1);
+	const faceScale = $derived(character?.face_scale ?? 1);
 
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
@@ -67,6 +63,7 @@
 	const bodyStates = $derived(
 		characterBody ? ($characterBodyStateStore.data[characterBody.id] ?? []) : []
 	);
+	const bodyScale = $derived(characterBody?.scale ?? 1);
 	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
 
 	const faceStates = $derived($characterFaceStateStore.data[characterId] ?? []);
@@ -183,9 +180,9 @@
 		return { x, y };
 	});
 
-	// Transform 스타일 계산
+	// Transform 스타일 계산 (위치 + 페이스 스케일)
 	const faceTransform = $derived(
-		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px)`
+		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale})`
 	);
 
 	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
@@ -211,38 +208,8 @@
 <div
 	{...restProps}
 	class={cn('relative flex items-center justify-center', className)}
-	style:transform={flip ? `scale(${-scale}, ${scale})` : `scale(${scale})`}
+	style:transform={flip ? 'scaleX(-1)' : undefined}
 >
-	<!-- 선택 시 외곽선 레이어 -->
-	{#if selected && bodyAnimator}
-		<div
-			class="absolute -z-10"
-			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
-			style:filter="brightness(0) invert(1)"
-		>
-			{#if isBodyInFront}
-				{#if faceAnimator}
-					<div class="absolute top-0 left-0" style:transform={faceTransform}>
-						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-					</div>
-				{/if}
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-			{:else}
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-				{#if faceAnimator}
-					<div class="absolute top-0 left-0" style:transform={faceTransform}>
-						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-					</div>
-				{/if}
-			{/if}
-			{#if heldItemAnimator}
-				<div class="absolute top-0 left-0" style:transform={handTransform}>
-					<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
-				</div>
-			{/if}
-		</div>
-	{/if}
-
 	<!-- 실제 캐릭터 -->
 	{#if isBodyInFront}
 		{#if faceAnimator}
@@ -251,11 +218,15 @@
 			</div>
 		{/if}
 		{#if bodyAnimator}
-			<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			<div style:transform="scale({bodyScale})">
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			</div>
 		{/if}
 	{:else}
 		{#if bodyAnimator}
-			<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			<div style:transform="scale({bodyScale})">
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			</div>
 		{/if}
 		{#if faceAnimator}
 			<div class="absolute" style:transform={faceTransform}>

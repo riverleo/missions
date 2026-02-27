@@ -24,17 +24,41 @@ export class Pathfinder {
 	}
 
 	/**
-	 * 월드 픽셀 좌표로 경로 탐색 (결과도 월드 픽셀 좌표)
+	 * # 월드 픽셀 좌표로 경로 탐색
+	 *
+	 * 시작/끝 위치가 walkable이 아닌 경우(예: 큰 캐릭터의 바디 중심이
+	 * walkable 영역 밖에 위치) 가장 가까운 walkable 셀로 스냅한 후 탐색한다.
+	 *
+	 * ## 명세
+	 * - [x] 시작 위치가 walkable이 아니면 가장 가까운 walkable 셀로 스냅한다.
+	 * - [x] 끝 위치가 walkable이 아니면 가장 가까운 walkable 셀로 스냅한다.
+	 * - [x] walkable 셀을 찾지 못하면 빈 배열을 반환한다.
 	 */
 	findPath(from: Vector, to: Vector): Vector[] {
-		const startCol = vectorUtils.pixelToCellIndex(from.x);
-		const startRow = vectorUtils.pixelToCellIndex(from.y);
-		const endCol = vectorUtils.pixelToCellIndex(to.x);
-		const endRow = vectorUtils.pixelToCellIndex(to.y);
+		let startCol = vectorUtils.pixelToCellIndex(from.x);
+		let startRow = vectorUtils.pixelToCellIndex(from.y);
+		let endCol = vectorUtils.pixelToCellIndex(to.x);
+		let endRow = vectorUtils.pixelToCellIndex(to.y);
+
+		// 시작 위치가 walkable이 아니면 가장 가까운 walkable 셀로 스냅
+		if (!this.grid.isWalkableAt(startCol, startRow)) {
+			const nearest = this.findNearestWalkableCell(from);
+			if (!nearest) return [];
+			startCol = vectorUtils.pixelToCellIndex(nearest.x);
+			startRow = vectorUtils.pixelToCellIndex(nearest.y);
+		}
+
+		// 끝 위치가 walkable이 아니면 가장 가까운 walkable 셀로 스냅
+		if (!this.grid.isWalkableAt(endCol, endRow)) {
+			const nearest = this.findNearestWalkableCell(to);
+			if (!nearest) return [];
+			endCol = vectorUtils.pixelToCellIndex(nearest.x);
+			endRow = vectorUtils.pixelToCellIndex(nearest.y);
+		}
 
 		const path = this.finder.findPath(startCol, startRow, endCol, endRow, this.grid.clone());
 
-		// 그리드 좌표를 월드 픽셀 좌표(타일 중심)로 변환
+		// 그리드 좌표를 월드 픽셀 좌표(셀 중심)로 변환
 		return path.map((point) =>
 			vectorUtils.createVector(
 				vectorUtils.cellIndexToPixel(point[0] as number),

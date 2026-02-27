@@ -42,13 +42,18 @@ export default function updateMove(
 		return;
 	}
 
-	const currentVector = this.worldCharacterEntity.body.position;
+	// 경로는 바닥 접점(groundVector) 기준이므로 바닥 접점으로 거리 계산
+	const groundOffset = this.worldCharacterEntity.colliderHeight / 2;
+	const bodyPos = this.worldCharacterEntity.body.position;
+	const currentGroundX = bodyPos.x;
+	const currentGroundY = bodyPos.y + groundOffset;
+
 	const delta = event.delta;
 	const deltaSeconds = delta / 1000;
 
-	// 목표 지점까지의 거리 계산
-	const dx = targetPoint.x - currentVector.x;
-	const dy = targetPoint.y - currentVector.y;
+	// 목표 지점까지의 거리 계산 (바닥 접점 기준)
+	const dx = targetPoint.x - currentGroundX;
+	const dy = targetPoint.y - currentGroundY;
 
 	// 도착 판정 거리
 	const arrivalThreshold = 5;
@@ -61,31 +66,35 @@ export default function updateMove(
 	// 속도 설정
 	const speed = 200;
 
-	let newX = currentVector.x;
-	let newY = currentVector.y;
+	let newGroundX = currentGroundX;
+	let newGroundY = currentGroundY;
 
 	// X축 우선 이동
 	if (Math.abs(dx) > arrivalThreshold) {
 		const moveDistance = speed * deltaSeconds;
 		if (Math.abs(dx) <= moveDistance) {
-			newX = targetPoint.x;
+			newGroundX = targetPoint.x;
 		} else {
-			newX = currentVector.x + Math.sign(dx) * moveDistance;
+			newGroundX = currentGroundX + Math.sign(dx) * moveDistance;
 		}
 		// X축 이동 중에는 Y축 고정
-		newY = currentVector.y;
+		newGroundY = currentGroundY;
 	}
 	// X축 이동이 완료되면 Y축 이동
 	else if (Math.abs(dy) > arrivalThreshold) {
-		newX = targetPoint.x;
+		newGroundX = targetPoint.x;
 
 		const moveDistance = speed * deltaSeconds;
 		if (Math.abs(dy) <= moveDistance) {
-			newY = targetPoint.y;
+			newGroundY = targetPoint.y;
 		} else {
-			newY = currentVector.y + Math.sign(dy) * moveDistance;
+			newGroundY = currentGroundY + Math.sign(dy) * moveDistance;
 		}
 	}
 
-	Body.setPosition(this.worldCharacterEntity.body, { x: newX, y: newY });
+	// 바닥 접점 → 바디 중심으로 변환하여 위치 설정
+	Body.setPosition(this.worldCharacterEntity.body, {
+		x: newGroundX,
+		y: newGroundY - groundOffset,
+	});
 }

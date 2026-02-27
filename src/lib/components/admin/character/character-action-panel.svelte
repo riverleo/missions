@@ -26,23 +26,23 @@
 	const previewBodyStateType = $derived($uiStore.previewBodyStateType);
 	const selectedBodyStateLabel = $derived(getCharacterBodyStateString(previewBodyStateType));
 
-	let scale = $state(character.scale.toString());
+	let faceScale = $state(character.face_scale.toString());
 
 	// character prop 변경 시 상태 동기화
 	$effect(() => {
-		scale = character.scale.toString();
+		faceScale = character.face_scale.toString();
 	});
 
-	async function updateScale() {
-		const newScale = parseFloat(scale) || 1.0;
-		if (newScale === character.scale) return;
-		await admin.updateCharacter(character.id, { scale: newScale });
+	async function updateFaceScale() {
+		const newFaceScale = parseFloat(faceScale) || 1.0;
+		if (newFaceScale === character.face_scale) return;
+		await admin.updateCharacter(character.id, { face_scale: newFaceScale });
 	}
 
-	function onkeydownScale(e: KeyboardEvent) {
+	function onkeydownFaceScale(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
-			updateScale();
+			updateFaceScale();
 		}
 	}
 
@@ -71,20 +71,20 @@
 	</ButtonGroup>
 	<InputGroup>
 		<InputGroupAddon align="inline-start">
-			<InputGroupText>스케일</InputGroupText>
+			<InputGroupText>페이스 스케일</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupInput
-			bind:value={scale}
+			bind:value={faceScale}
 			type="number"
 			step="0.01"
 			min="0"
-			onkeydown={onkeydownScale}
+			onkeydown={onkeydownFaceScale}
 		/>
 		<InputGroupAddon align="inline-end">
 			<InputGroupText>배</InputGroupText>
 		</InputGroupAddon>
 		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
+			<InputGroupButton onclick={updateFaceScale} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

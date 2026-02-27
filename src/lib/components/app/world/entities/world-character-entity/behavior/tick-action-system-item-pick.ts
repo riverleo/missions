@@ -99,7 +99,7 @@ function canStartSystemItemPick(behavior: WorldCharacterEntityBehavior): boolean
 		return false;
 	}
 
-	const distance = vectorUtils.getDistance(behavior.worldCharacterEntity, targetEntity);
+	const distance = vectorUtils.getDistance(behavior.worldCharacterEntity.groundVector, targetEntity.groundVector);
 	return distance <= TARGET_ARRIVAL_DISTANCE;
 }
 

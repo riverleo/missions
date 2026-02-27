@@ -10,6 +10,7 @@ import type {
 	EntitySourceId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
+import { vectorUtils } from '$lib/utils/vector';
 
 const { Composite, Bodies } = Matter;
 
@@ -53,6 +54,11 @@ export abstract class Entity {
 	}
 
 	abstract get sourceId(): EntitySourceId;
+
+	/** 콜라이더 바닥 중심 좌표 (walkable 셀과 만나는 지점) */
+	get groundVector(): Vector {
+		return vectorUtils.createVector(this.x, this.y + this.colliderHeight / 2);
+	}
 
 	updatePosition(): void {
 		const newX = this.body.position.x;

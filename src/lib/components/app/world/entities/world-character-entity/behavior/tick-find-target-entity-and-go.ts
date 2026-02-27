@@ -64,16 +64,16 @@ export default function tickFindTargetEntityAndGo(
 			return false;
 		}
 
-		const distance = vectorUtils.getDistance(worldCharacterEntity, targetEntity);
+		const distance = vectorUtils.getDistance(worldCharacterEntity.groundVector, targetEntity.groundVector);
 		if (distance < TARGET_ARRIVAL_DISTANCE) {
 			this.path = [];
 			return false;
 		}
 
-		// 경로 최신화
+		// 경로 최신화 (바닥 접점 기준)
 		this.path = worldCharacterEntity.worldContext.pathfinder.findPath(
-			worldCharacterEntity,
-			targetEntity
+			worldCharacterEntity.groundVector,
+			targetEntity.groundVector
 		);
 		return false;
 	}
@@ -151,12 +151,14 @@ export default function tickFindTargetEntityAndGo(
 			return true;
 		});
 
-		// 가장 가까운 엔티티를 타깃으로 설정
+		// 가장 가까운 엔티티를 타깃으로 설정 (바닥 접점 기준 거리)
 		if (candidateEntities.length > 0) {
-			const sortedCandidates = vectorUtils.sortByDistance(
-				this.worldCharacterEntity,
-				candidateEntities
-			);
+			const fromGround = this.worldCharacterEntity.groundVector;
+			const sortedCandidates = [...candidateEntities].sort((a, b) => {
+				const distA = vectorUtils.getDistance(fromGround, a.groundVector);
+				const distB = vectorUtils.getDistance(fromGround, b.groundVector);
+				return distA - distB;
+			});
 			this.targetEntityId = sortedCandidates[0]!.id;
 
 			// InteractionQueue 생성

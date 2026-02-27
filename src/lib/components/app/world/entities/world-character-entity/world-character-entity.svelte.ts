@@ -122,9 +122,9 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	moveTo(vector: Vector): void {
-		// pathfinder로 경로 계산
+		// pathfinder로 경로 계산 (바닥 접점 기준)
 		this.behavior.path = this.worldContext.pathfinder.findPath(
-			vectorUtils.createVector(this.body.position.x, this.body.position.y),
+			this.groundVector,
 			vector
 		);
 	}

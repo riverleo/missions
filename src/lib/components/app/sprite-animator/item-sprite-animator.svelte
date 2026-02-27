@@ -6,20 +6,16 @@
 	import SpriteAnimatorRenderer from './sprite-animator-renderer.svelte';
 	import { cn } from '$lib/utils';
 
-	const OUTLINE_WIDTH = 10;
-
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		itemId: ItemId;
 		stateType: ItemStateType;
 		resolution?: 1 | 2 | 3;
-		selected?: boolean;
 	}
 
 	let {
 		itemId,
 		stateType,
 		resolution = 1,
-		selected = false,
 		class: className,
 		...restProps
 	}: Props = $props();
@@ -62,17 +58,6 @@
 	class={cn('relative flex items-center justify-center', className)}
 	style:transform={`scale(${scale})`}
 >
-	<!-- 선택 시 외곽선 레이어 -->
-	{#if selected && animator}
-		<div
-			class="absolute -z-10"
-			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
-			style:filter="brightness(0) invert(1)"
-		>
-			<SpriteAnimatorRenderer {animator} {resolution} />
-		</div>
-	{/if}
-
 	<!-- 실제 아이템 -->
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />

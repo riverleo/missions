@@ -25,7 +25,6 @@
 		characterRotation?: number;
 		scale?: number;
 		resolution?: 1 | 2 | 3;
-		selected?: boolean;
 	}
 
 	let {
@@ -39,7 +38,6 @@
 		characterRotation = 0,
 		scale = 1,
 		resolution = 2,
-		selected = false,
 		class: className,
 		...restProps
 	}: Props = $props();
@@ -47,8 +45,6 @@
 	const { buildingStateStore: stateStore } = useBuilding();
 	const buildingStates = $derived($stateStore.data[buildingId] ?? []);
 	const buildingState = $derived(buildingStates.find((s) => s.type === stateType));
-
-	const OUTLINE_WIDTH = 8;
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -83,17 +79,6 @@
 	class={cn('relative flex items-center justify-center', className)}
 	style:transform={`scale(${scale})`}
 >
-	<!-- 선택 시 외곽선 -->
-	{#if selected && animator}
-		<div
-			class="absolute -z-10"
-			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
-			style:filter="brightness(0) invert(1)"
-		>
-			<SpriteAnimatorRenderer {animator} {resolution} />
-		</div>
-	{/if}
-
 	{#if animator}
 		<SpriteAnimatorRenderer {animator} {resolution} />
 	{/if}
