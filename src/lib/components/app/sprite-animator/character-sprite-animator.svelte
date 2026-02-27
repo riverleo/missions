@@ -185,9 +185,8 @@
 	});
 
 	// Transform 스타일 계산 (위치 + 페이스 스케일)
-	// 컨테이너에 bodyScale이 적용되어 있으므로 faceScale / bodyScale로 상쇄하여 독립적 스케일 적용
 	const faceTransform = $derived(
-		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale / bodyScale})`
+		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale})`
 	);
 
 	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
@@ -213,7 +212,7 @@
 <div
 	{...restProps}
 	class={cn('relative flex items-center justify-center', className)}
-	style:transform={flip ? `scale(${-bodyScale}, ${bodyScale})` : `scale(${bodyScale})`}
+	style:transform={flip ? 'scaleX(-1)' : undefined}
 >
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && bodyAnimator}
@@ -228,9 +227,13 @@
 						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
 					</div>
 				{/if}
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+				<div style:transform="scale({bodyScale})">
+					<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+				</div>
 			{:else}
-				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+				<div style:transform="scale({bodyScale})">
+					<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+				</div>
 				{#if faceAnimator}
 					<div class="absolute top-0 left-0" style:transform={faceTransform}>
 						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
@@ -253,11 +256,15 @@
 			</div>
 		{/if}
 		{#if bodyAnimator}
-			<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			<div style:transform="scale({bodyScale})">
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			</div>
 		{/if}
 	{:else}
 		{#if bodyAnimator}
-			<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			<div style:transform="scale({bodyScale})">
+				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
+			</div>
 		{/if}
 		{#if faceAnimator}
 			<div class="absolute" style:transform={faceTransform}>
