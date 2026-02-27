@@ -69,12 +69,14 @@
 		const newColliderHeight = parseFloat(colliderHeight) || 0;
 		const newColliderOffsetX = parseFloat(colliderOffsetX) || 0;
 		const newColliderOffsetY = parseFloat(colliderOffsetY) || 0;
+		const newScale = parseFloat(scale) || 1.0;
 
 		if (
 			newColliderWidth === body.collider_width &&
 			newColliderHeight === body.collider_height &&
 			newColliderOffsetX === body.collider_offset_x &&
-			newColliderOffsetY === body.collider_offset_y
+			newColliderOffsetY === body.collider_offset_y &&
+			newScale === body.scale
 		)
 			return;
 
@@ -83,6 +85,7 @@
 			collider_height: newColliderHeight,
 			collider_offset_x: newColliderOffsetX,
 			collider_offset_y: newColliderOffsetY,
+			scale: newScale,
 		});
 	}
 
@@ -97,19 +100,6 @@
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
 			updateCollider();
-		}
-	}
-
-	async function updateScale() {
-		const newScale = parseFloat(scale) || 1.0;
-		if (newScale === body.scale) return;
-		await admin.updateCharacterBody(body.id, { scale: newScale });
-	}
-
-	function onkeydownScale(e: KeyboardEvent) {
-		if (e.key === 'Enter') {
-			(e.target as HTMLInputElement).blur();
-			updateScale();
 		}
 	}
 
@@ -134,18 +124,6 @@
 		<InputGroupInput bind:value={name} placeholder="바디 이름" onkeydown={onkeydownName} />
 		<InputGroupAddon align="inline-end">
 			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
-		</InputGroupAddon>
-		<InputGroupText>스케일</InputGroupText>
-		<InputGroupInput
-			bind:value={scale}
-			type="number"
-			step="0.01"
-			min="0"
-			class="w-16"
-			onkeydown={onkeydownScale}
-		/>
-		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 	<InputGroup>
@@ -205,6 +183,15 @@
 			type="number"
 			class="w-16"
 			placeholder="Y"
+			onkeydown={onkeydownCollider}
+		/>
+		<InputGroupText>스케일</InputGroupText>
+		<InputGroupInput
+			bind:value={scale}
+			type="number"
+			step="0.01"
+			min="0"
+			class="w-16"
 			onkeydown={onkeydownCollider}
 		/>
 		<InputGroupAddon align="inline-end">
