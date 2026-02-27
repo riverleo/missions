@@ -66,6 +66,13 @@
 - [ ] `use-character.ts`에서 관련 업데이트 로직이 있다면 정리
 - [ ] 빌드(`svelte-check`) 에러 없는지 확인
 
+## 구현 시작
+
+```
+[플랫폼 엔지니어, 게임 디자이너]
+20260227183536_remove_body_state_in_front_and_face_state 플랜을 구현 시작
+```
+
 ## 노트
 
 ### 2026-02-27
