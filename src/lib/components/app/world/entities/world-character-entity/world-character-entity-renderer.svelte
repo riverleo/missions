@@ -77,15 +77,6 @@
 		return { offset: { x: 0, y: 0 }, scale: 1, rotation: 0 };
 	});
 
-	// 경로를 SVG path 문자열로 변환 (현재 위치에서 시작)
-	const pathString = $derived.by(() => {
-		if (entity.behavior.path.length === 0) return '';
-
-		// 현재 캐릭터 위치에서 시작
-		const points = [{ x: entity.x, y: entity.y }, ...entity.behavior.path];
-		return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-	});
-
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);
 
@@ -118,13 +109,6 @@
 </script>
 
 {#if character}
-	<!-- 경로 시각화는 월드 레벨에서 렌더링 -->
-	{#if entity.behavior.path.length > 0}
-		<svg class="absolute top-0 left-0 opacity-30" style="width: 100%; height: 100%;">
-			<path d={pathString} stroke="white" stroke-width="1" fill="none" />
-		</svg>
-	{/if}
-
 	<!-- 캐릭터 스프라이트 -->
 	<CharacterSpriteAnimator
 		characterId={character.id}
