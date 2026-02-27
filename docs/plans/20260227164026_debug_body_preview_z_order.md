@@ -2,11 +2,11 @@
 
 ## 목표
 
-월드에서 디버그 모드 활성 시 엔티티의 물리 바디 미리보기(Matter.js canvas)가 스프라이트 SVG/div 뒤로 가려지는 현상을 수정한다.
+월드에서 디버그 모드 활성 시 엔티티의 물리 바디 미리보기(Matter.js canvas)가 terrain 배경 이미지에 가려지는 현상을 수정한다.
 
-원인: `world-context.svelte.ts`에서 `Render.create({ element })`로 생성한 Matter.js `<canvas>`는 `world-container` div의 마지막 자식으로 추가된다. 그러나 `world-renderer.svelte`의 카메라 레이어 `<div class="pointer-events-none absolute">`가 `position: absolute`로 렌더링되어 canvas 위에 쌓인다. 결과적으로 디버그 바디 윤곽선이 스프라이트 div/svg 아래에 그려진다.
+원인: 카메라 레이어 div에 `transform: scale() translate()`가 적용되어 있어 새로운 stacking context가 생성된다. CSS 규칙상 stacking context를 가진 요소는 그렇지 않은 요소(Matter.js canvas) 위에 쌓인다. terrain 이미지가 이 카메라 레이어 내부에서 전체 영역을 덮으므로 canvas의 디버그 바디가 보이지 않는다.
 
-수정 방향: Matter.js canvas에 `position: absolute`, `z-index`, `pointer-events: none` 스타일을 적용하여 카메라 레이어 위에 오버레이되도록 한다. 마우스 이벤트는 canvas가 아닌 world-container div에서 이미 처리하므로 `pointer-events: none`을 적용해도 기능에 영향 없다. 단, `MouseConstraint`에 연결된 canvas 마우스 이벤트 리스너가 정상 동작하는지 검증이 필요하다.
+수정 방향: 디버그 모드 활성 시 terrain 이미지의 opacity를 낮춰 canvas의 바디 윤곽선이 투과되어 보이도록 한다. DOM 구조나 Matter.js 코드는 수정하지 않는다.
 
 ## 담당자
 
@@ -17,20 +17,17 @@
 
 ### 플래너
 
-- [ ] 본 플랜 작성 및 PR 생성
+- [x] 본 플랜 작성 및 PR 생성
 
 ### 게임 디자이너
 
-- [ ] `world-context.svelte.ts`의 `load()` 메서드에서 `Render.run()` 호출 후 canvas에 `position: absolute; top: 0; left: 0; z-index: 9999; pointer-events: none;` 스타일을 적용한다.
-- [ ] canvas에 `pointer-events: none`을 적용한 뒤 기존 canvas 마우스 이벤트 리스너(`handleCanvasMouseDown` 등)가 동작하지 않게 되므로, 해당 리스너를 canvas 대신 world-container element에 바인딩하도록 변경한다.
-- [ ] 디버그 모드 ON/OFF 시 엔티티 바디 윤곽선이 스프라이트 위에 정상 표시되는지 확인한다.
-- [ ] 엔티티 드래그(MouseConstraint)가 정상 동작하는지 확인한다.
+- [x] `world-renderer.svelte`에서 terrain `<img>`에 디버그 모드일 때 opacity를 낮추는 스타일을 적용한다. (`world.debug` 상태를 사용)
+- [ ] 디버그 모드 ON/OFF 시 terrain 투명도가 변경되어 바디 윤곽선이 잘 보이는지 확인한다.
 
 ## 노트
 
 ### 2026-02-27
 
-- DOM 구조: `world-container` > `카메라 레이어 div(absolute)` + `canvas(static)`. canvas가 static이라 absolute 레이어 아래로 밀림.
-- 수정 대상 파일: `src/lib/components/app/world/context/world-context.svelte.ts`
-- Matter.js `Mouse.create(canvas)`는 canvas에 이벤트 리스너를 바인딩하는데, `pointer-events: none` 적용 시 이벤트가 도달하지 않음. `Mouse.create` 후 `mouse.element`를 world-container element로 교체하거나, `MouseConstraint`의 마우스 소스를 element로 변경하는 방식을 검토해야 함.
-- 대안: canvas를 카메라 레이어 내부로 이동시키는 방법도 있으나, Matter.js Render가 자체 viewport/bounds를 관리하므로 카메라 레이어의 CSS transform과 충돌할 수 있어 권장하지 않음.
+- 근본 원인: 카메라 레이어 div의 `transform: scale() translate()`가 stacking context를 생성하여 내부 요소(terrain img 포함) 전체가 canvas 위에 쌓임.
+- 디버그 모드는 개발/테스트 용도이므로, 게임 주요 로직(DOM 구조, Matter.js 이벤트)을 수정하지 않고 terrain opacity 조절로 간단히 해결한다.
+- 수정 대상 파일: `src/lib/components/app/world/world-renderer.svelte`
