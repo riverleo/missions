@@ -56,7 +56,7 @@ export abstract class Entity {
 	abstract get sourceId(): EntitySourceId;
 
 	/** 콜라이더 바닥 중심 좌표 (walkable 셀과 만나는 지점) */
-	get groundPoint(): Vector {
+	get groundVector(): Vector {
 		return vectorUtils.createVector(this.x, this.y + this.colliderHeight / 2);
 	}
 

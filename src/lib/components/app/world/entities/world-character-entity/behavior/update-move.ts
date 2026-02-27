@@ -42,7 +42,7 @@ export default function updateMove(
 		return;
 	}
 
-	// 경로는 바닥 접점(groundPoint) 기준이므로 바닥 접점으로 거리 계산
+	// 경로는 바닥 접점(groundVector) 기준이므로 바닥 접점으로 거리 계산
 	const groundOffset = this.worldCharacterEntity.colliderHeight / 2;
 	const bodyPos = this.worldCharacterEntity.body.position;
 	const currentGroundX = bodyPos.x;
