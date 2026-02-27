@@ -34,6 +34,7 @@ describe('updateMove(this: WorldCharacterEntityBehavior, event: BeforeUpdateEven
 			id: 'character-1' as any,
 			instanceId: 'world-character-1' as any,
 			body: mockBody,
+			colliderHeight: 0,
 		};
 
 		// Create behavior instance
