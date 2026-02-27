@@ -135,6 +135,18 @@
 		<InputGroupAddon align="inline-end">
 			<InputGroupButton onclick={updateName} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
+		<InputGroupText>스케일</InputGroupText>
+		<InputGroupInput
+			bind:value={scale}
+			type="number"
+			step="0.01"
+			min="0"
+			class="w-16"
+			onkeydown={onkeydownScale}
+		/>
+		<InputGroupAddon align="inline-end">
+			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
+		</InputGroupAddon>
 	</InputGroup>
 	<InputGroup>
 		<InputGroupAddon>
@@ -212,24 +224,6 @@
 				<TooltipContent>크기 확인하기</TooltipContent>
 			</Tooltip>
 			<InputGroupButton onclick={updateCollider} variant="ghost">저장</InputGroupButton>
-		</InputGroupAddon>
-	</InputGroup>
-	<InputGroup>
-		<InputGroupAddon align="inline-start">
-			<InputGroupText>스케일</InputGroupText>
-		</InputGroupAddon>
-		<InputGroupInput
-			bind:value={scale}
-			type="number"
-			step="0.01"
-			min="0"
-			onkeydown={onkeydownScale}
-		/>
-		<InputGroupAddon align="inline-end">
-			<InputGroupText>배</InputGroupText>
-		</InputGroupAddon>
-		<InputGroupAddon align="inline-end">
-			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>
