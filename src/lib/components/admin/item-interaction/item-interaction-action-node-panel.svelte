@@ -266,7 +266,6 @@
 							<div class="flex flex-col gap-2">
 								<div
 									class="relative flex items-end justify-center overflow-hidden rounded-md border bg-neutral-100 dark:bg-neutral-900"
-									style:height="120px"
 								>
 									<CharacterSpriteAnimator
 										characterId={previewCharacter.id}
