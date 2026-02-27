@@ -218,13 +218,13 @@
 			</div>
 		{/if}
 		{#if bodyAnimator}
-			<div style:transform="scale({bodyScale})">
+			<div style:transform="scale({bodyScale})" style:transform-origin="center bottom">
 				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
 			</div>
 		{/if}
 	{:else}
 		{#if bodyAnimator}
-			<div style:transform="scale({bodyScale})">
+			<div style:transform="scale({bodyScale})" style:transform-origin="center bottom">
 				<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
 			</div>
 		{/if}
