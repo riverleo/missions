@@ -13,8 +13,6 @@
 	import Self from './character-sprite-animator.svelte';
 	import { cn } from '$lib/utils';
 
-	const OUTLINE_WIDTH = 10;
-
 	interface Props extends HTMLAttributes<HTMLDivElement> {
 		characterId: CharacterId;
 		bodyStateType: CharacterBodyStateType;
@@ -31,7 +29,6 @@
 		interactCharacterRotation?: number;
 		resolution?: 1 | 2 | 3;
 		flip?: boolean;
-		selected?: boolean;
 	}
 
 	let {
@@ -50,7 +47,6 @@
 		interactCharacterRotation = 0,
 		resolution = 2,
 		flip = false,
-		selected = false,
 		class: className,
 		...restProps
 	}: Props = $props();
@@ -214,40 +210,6 @@
 	class={cn('relative flex items-center justify-center', className)}
 	style:transform={flip ? 'scaleX(-1)' : undefined}
 >
-	<!-- 선택 시 외곽선 레이어 -->
-	{#if selected && bodyAnimator}
-		<div
-			class="absolute -z-10"
-			style:transform="scale({1 + OUTLINE_WIDTH / 100})"
-			style:filter="brightness(0) invert(1)"
-		>
-			{#if isBodyInFront}
-				{#if faceAnimator}
-					<div class="absolute top-0 left-0" style:transform={faceTransform}>
-						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-					</div>
-				{/if}
-				<div style:transform="scale({bodyScale})">
-					<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-				</div>
-			{:else}
-				<div style:transform="scale({bodyScale})">
-					<SpriteAnimatorRenderer animator={bodyAnimator} {resolution} />
-				</div>
-				{#if faceAnimator}
-					<div class="absolute top-0 left-0" style:transform={faceTransform}>
-						<SpriteAnimatorRenderer animator={faceAnimator} {resolution} />
-					</div>
-				{/if}
-			{/if}
-			{#if heldItemAnimator}
-				<div class="absolute top-0 left-0" style:transform={handTransform}>
-					<SpriteAnimatorRenderer animator={heldItemAnimator} {resolution} />
-				</div>
-			{/if}
-		</div>
-	{/if}
-
 	<!-- 실제 캐릭터 -->
 	{#if isBodyInFront}
 		{#if faceAnimator}

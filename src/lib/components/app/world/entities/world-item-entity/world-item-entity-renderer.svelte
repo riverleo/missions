@@ -10,12 +10,10 @@
 	let { entity }: Props = $props();
 
 	const { itemStore } = useItem();
-	const { worldItemStore, selectedEntityIdStore } = useWorld();
+	const { worldItemStore } = useWorld();
 
 	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
-	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
-
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);
 </script>
@@ -26,7 +24,6 @@
 		itemId={item.id}
 		stateType="idle"
 		resolution={2}
-		{selected}
 		class="absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x + (item?.collider_offset_x ?? 0)}px; top: {entity.y +
 			(item?.collider_offset_y ?? 0)}px; opacity: {opacity}; rotate: {entity.angle}rad;"

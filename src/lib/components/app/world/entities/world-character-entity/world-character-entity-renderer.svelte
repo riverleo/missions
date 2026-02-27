@@ -18,7 +18,7 @@
 	let { entity }: Props = $props();
 
 	const { characterStore, characterBodyStore } = useCharacter();
-	const { worldCharacterStore, worldItemStore, selectedEntityIdStore } = useWorld();
+	const { worldCharacterStore, worldItemStore } = useWorld();
 	const { itemStore, itemStateStore } = useItem();
 	const { itemInteractionActionStore } = useInteraction();
 
@@ -29,8 +29,6 @@
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
 	);
-	const selected = $derived($selectedEntityIdStore.entityId === entity.id);
-
 	// 캐릭터가 들고 있는 마지막 아이템의 상태 가져오기
 	const heldItemState = $derived.by(() => {
 		if (entity.heldItemIds.length === 0) return undefined;
@@ -137,7 +135,6 @@
 		heldItemScale={heldItemTransform.scale}
 		heldItemRotation={heldItemTransform.rotation}
 		flip={entity.behavior.direction === 'right'}
-		{selected}
 		class="absolute -translate-x-1/2 -translate-y-1/2"
 		style="left: {entity.x + (characterBody?.collider_offset_x ?? 0)}px; top: {entity.y +
 			(characterBody?.collider_offset_y ?? 0)}px; opacity: {opacity};"
