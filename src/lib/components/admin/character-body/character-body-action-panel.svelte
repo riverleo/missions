@@ -36,6 +36,7 @@
 	let colliderHeight = $state(body.collider_height === 0 ? '' : body.collider_height.toString());
 	let colliderOffsetX = $state(body.collider_offset_x.toString());
 	let colliderOffsetY = $state(body.collider_offset_y.toString());
+	let scale = $state(body.scale.toString());
 
 	// body prop 변경 시 상태 동기화
 	$effect(() => {
@@ -52,6 +53,9 @@
 	});
 	$effect(() => {
 		selectedColliderType = body.collider_type;
+	});
+	$effect(() => {
+		scale = body.scale.toString();
 	});
 
 	async function updateName() {
@@ -93,6 +97,19 @@
 		if (e.key === 'Enter') {
 			(e.target as HTMLInputElement).blur();
 			updateCollider();
+		}
+	}
+
+	async function updateScale() {
+		const newScale = parseFloat(scale) || 1.0;
+		if (newScale === body.scale) return;
+		await admin.updateCharacterBody(body.id, { scale: newScale });
+	}
+
+	function onkeydownScale(e: KeyboardEvent) {
+		if (e.key === 'Enter') {
+			(e.target as HTMLInputElement).blur();
+			updateScale();
 		}
 	}
 
@@ -195,6 +212,24 @@
 				<TooltipContent>크기 확인하기</TooltipContent>
 			</Tooltip>
 			<InputGroupButton onclick={updateCollider} variant="ghost">저장</InputGroupButton>
+		</InputGroupAddon>
+	</InputGroup>
+	<InputGroup>
+		<InputGroupAddon align="inline-start">
+			<InputGroupText>스케일</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupInput
+			bind:value={scale}
+			type="number"
+			step="0.01"
+			min="0"
+			onkeydown={onkeydownScale}
+		/>
+		<InputGroupAddon align="inline-end">
+			<InputGroupText>배</InputGroupText>
+		</InputGroupAddon>
+		<InputGroupAddon align="inline-end">
+			<InputGroupButton onclick={updateScale} variant="ghost">저장</InputGroupButton>
 		</InputGroupAddon>
 	</InputGroup>
 </div>

@@ -551,6 +551,7 @@ export type Database = {
           created_by: string | null
           id: string
           name: string
+          scale: number
           scenario_id: string
         }
         Insert: {
@@ -563,6 +564,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+          scale?: number
           scenario_id: string
         }
         Update: {
@@ -575,6 +577,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           name?: string
+          scale?: number
           scenario_id?: string
         }
         Relationships: [
@@ -950,27 +953,27 @@ export type Database = {
           character_body_id: string
           created_at: string
           created_by: string | null
+          face_scale: number
           id: string
           name: string
-          scale: number
           scenario_id: string
         }
         Insert: {
           character_body_id: string
           created_at?: string
           created_by?: string | null
+          face_scale?: number
           id?: string
           name?: string
-          scale?: number
           scenario_id: string
         }
         Update: {
           character_body_id?: string
           created_at?: string
           created_by?: string | null
+          face_scale?: number
           id?: string
           name?: string
-          scale?: number
           scenario_id?: string
         }
         Relationships: [

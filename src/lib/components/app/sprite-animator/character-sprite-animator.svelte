@@ -59,7 +59,7 @@
 		useCharacter();
 
 	const character = $derived($characterStore.data[characterId]);
-	const scale = $derived(character?.scale ?? 1);
+	const faceScale = $derived(character?.face_scale ?? 1);
 
 	const characterBody = $derived(
 		character ? $characterBodyStore.data[character.character_body_id] : undefined
@@ -67,6 +67,7 @@
 	const bodyStates = $derived(
 		characterBody ? ($characterBodyStateStore.data[characterBody.id] ?? []) : []
 	);
+	const bodyScale = $derived(characterBody?.scale ?? 1);
 	const bodyState = $derived(bodyStates.find((s) => s.type === bodyStateType));
 
 	const faceStates = $derived($characterFaceStateStore.data[characterId] ?? []);
@@ -183,9 +184,9 @@
 		return { x, y };
 	});
 
-	// Transform 스타일 계산
+	// Transform 스타일 계산 (위치 + 페이스 스케일)
 	const faceTransform = $derived(
-		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px)`
+		`translate(${faceOffset.x / resolution}px, ${faceOffset.y / resolution}px) scale(${faceScale})`
 	);
 
 	// 현재 프레임의 handOffset 계산 (atlas 메타데이터 + DB offset)
@@ -211,7 +212,7 @@
 <div
 	{...restProps}
 	class={cn('relative flex items-center justify-center', className)}
-	style:transform={flip ? `scale(${-scale}, ${scale})` : `scale(${scale})`}
+	style:transform={flip ? `scale(${-bodyScale}, ${bodyScale})` : `scale(${bodyScale})`}
 >
 	<!-- 선택 시 외곽선 레이어 -->
 	{#if selected && bodyAnimator}

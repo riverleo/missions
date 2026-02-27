@@ -39,6 +39,7 @@ create table character_bodies (
   collider_height real not null default 0,
   collider_offset_x real not null default 0,
   collider_offset_y real not null default 0,
+  scale real not null default 1.0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
@@ -120,7 +121,7 @@ create table characters (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   character_body_id uuid not null references character_bodies(id) on delete restrict,
   name text not null default '',
-  scale real not null default 1.0,
+  face_scale real not null default 1.0,
   created_at timestamptz not null default now(),
   created_by uuid default current_user_role_id() references user_roles(id) on delete set null,
 
