@@ -49,7 +49,8 @@
 
 #### 컬럼 제거
 
-- [ ] 마이그레이션 파일 생성: `character_body_states`에서 `in_front`, `character_face_state` 컬럼 DROP
+- [ ] 기존 마이그레이션(`20251216000000_create_characters.sql`)에서 `in_front`, `character_face_state` 컬럼 정의 제거
+- [ ] 로컬 데이터베이스에서 `psql`로 직접 컬럼 DROP (`ALTER TABLE character_body_states DROP COLUMN in_front, DROP COLUMN character_face_state;`)
 - [ ] `supabase.generated.ts` 타입 재생성
 
 #### face_state 오프셋 다이얼로그 구현
