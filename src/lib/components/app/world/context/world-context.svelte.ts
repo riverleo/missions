@@ -19,7 +19,6 @@ import { EntityIdUtils } from '$lib/utils/entity-id';
 import { vectorUtils } from '$lib/utils/vector';
 import { Camera } from '../camera.svelte';
 import { WorldEvent } from '../world-event.svelte';
-import { WorldCharacterEntity } from '../entities/world-character-entity';
 import { Entity } from '../entities/entity.svelte';
 import type { BeforeUpdateEvent } from './index';
 import { WorldContextBlueprint } from './world-context-blueprint.svelte';
@@ -135,7 +134,7 @@ export class WorldContext {
 
 	// canvas mouseup 처리
 	private handleCanvasMouseUp = (e: MouseEvent) => {
-		const { setSelectedEntityId, selectedEntityIdStore, getWorld } = useWorld();
+		const { setSelectedEntityId, getWorld } = useWorld();
 
 		if (!this.mouseDownScreenPosition) return;
 
@@ -148,22 +147,14 @@ export class WorldContext {
 		// 드래그 가능한 엔티티를 드래그했으면 클릭 처리 안 함
 		const wasEntityDragged = this.draggedEntityId !== undefined;
 
-		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 또는 캐릭터 이동 처리
+		// 클릭이고 엔티티 드래그가 없었으면 엔티티 배치 처리
 		if (isClick && !wasEntityDragged) {
 			const worldPos = this.camera.screenToWorld(
 				vectorUtils.createScreenVector(e.clientX, e.clientY)
 			);
 			if (worldPos) {
-				// 캐릭터 이동 우선 처리 (selectedEntityId가 character면)
-				const selectedEntityId = get(selectedEntityIdStore).entityId;
-				if (EntityIdUtils.is('character', selectedEntityId)) {
-					const entity = this.entities[selectedEntityId!];
-					if (entity && entity.type === 'character') {
-						(entity as WorldCharacterEntity).moveTo(worldPos);
-					}
-				}
 				// 엔티티 배치 (cursor가 있으면)
-				else if (this.blueprint.cursor) {
+				if (this.blueprint.cursor) {
 					const { entitySourceTargetId } = this.blueprint.cursor;
 
 					// 타일 배치는 두 번의 클릭 필요

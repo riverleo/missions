@@ -7,7 +7,6 @@ import type {
 	CharacterId,
 	WorldCharacterNeed,
 	NeedId,
-	Vector,
 	EntityId,
 } from '$lib/types';
 import { WorldCharacterEntityBehavior } from './behavior';
@@ -119,13 +118,5 @@ export class WorldCharacterEntity extends Entity {
 		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
 		this.tickDecreaseNeeds(tick, worldCharacterNeedDelta);
 		this.behavior.tick(tick, worldCharacterNeedDelta);
-	}
-
-	moveTo(vector: Vector): void {
-		// pathfinder로 경로 계산 (바닥 접점 기준)
-		this.behavior.path = this.worldContext.pathfinder.findPath(
-			this.groundVector,
-			vector
-		);
 	}
 }

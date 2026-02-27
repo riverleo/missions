@@ -22,14 +22,14 @@ pathfinder 자체는 AI 행동(`tick-find-target-entity-and-go.ts`)에서 사용
 
 ### 플래너
 
-- [ ] 본 플랜 작성 및 PR 생성
+- [x] 본 플랜 작성 및 PR 생성
 
 ### 게임 디자이너
 
-- [ ] `world-context.svelte.ts`의 `handleCanvasMouseUp`에서 캐릭터 이동 분기(`if (EntityIdUtils.is('character', selectedEntityId))` 블록, lines 157-164)를 제거한다. 제거 후 `else if (this.blueprint.cursor)` 분기가 빈 공간 클릭의 첫 번째 조건이 되도록 정리한다.
-- [ ] `world-character-entity.svelte.ts`의 `moveTo()` 메서드를 제거한다.
-- [ ] `world-character-entity-renderer.svelte`에서 이동 경로 SVG 시각화 관련 코드(`entity.behavior.path`를 사용하는 `<svg>` 블록)를 제거한다.
-- [ ] 빈 공간 클릭 시 캐릭터가 이동하지 않고, 엔티티 배치·선택 해제 등 나머지 클릭 동작은 정상 동작하는지 확인한다.
+- [x] `world-context.svelte.ts`의 `handleCanvasMouseUp`에서 캐릭터 이동 분기(`if (EntityIdUtils.is('character', selectedEntityId))` 블록, lines 157-164)를 제거한다. 제거 후 `else if (this.blueprint.cursor)` 분기가 빈 공간 클릭의 첫 번째 조건이 되도록 정리한다.
+- [x] `world-character-entity.svelte.ts`의 `moveTo()` 메서드를 제거한다.
+- [x] `world-character-entity-renderer.svelte`에서 이동 경로 SVG 시각화 관련 코드(`entity.behavior.path`를 사용하는 `<svg>` 블록)를 제거한다.
+- [x] 빈 공간 클릭 시 캐릭터가 이동하지 않고, 엔티티 배치·선택 해제 등 나머지 클릭 동작은 정상 동작하는지 확인한다.
 
 ## 노트
 
