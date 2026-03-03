@@ -82,9 +82,6 @@ create table character_body_states (
   frame_to integer,
   fps integer,
   loop loop_type not null default 'loop',
-  -- 얼굴 렌더링 설정
-  character_face_state character_face_state_type,  -- 이 body state일 때 강제할 face state (null이면 현재 감정 따라감)
-  in_front boolean not null default false,         -- true면 몸이 앞, 얼굴이 뒤에 렌더링
 
   constraint uq_character_body_states_body_id_type unique (body_id, type)
 );

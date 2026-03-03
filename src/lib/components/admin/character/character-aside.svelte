@@ -11,6 +11,7 @@
 	import CharacterCreateDialog from './character-create-dialog.svelte';
 	import CharacterUpdateDialog from './character-update-dialog.svelte';
 	import CharacterDeleteDialog from './character-delete-dialog.svelte';
+	import CharacterFaceStateDialog from './character-face-state-dialog.svelte';
 
 	const { openCharacterDialog } = useCharacter();
 	const currentCharacterId = $derived(page.params.characterId);
@@ -105,3 +106,4 @@
 <CharacterCreateDialog />
 <CharacterUpdateDialog />
 <CharacterDeleteDialog />
+<CharacterFaceStateDialog />

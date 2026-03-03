@@ -2,7 +2,6 @@
 	import { useCharacter } from '$lib/hooks';
 	import type {
 		CharacterBodyStateType,
-		CharacterFaceStateType,
 		CharacterBodyId,
 		CharacterBodyState,
 		LoopType,
@@ -13,17 +12,7 @@
 	import { SpriteAnimator } from '$lib/components/app/sprite-animator/sprite-animator.svelte';
 	import SpriteAnimatorRenderer from '$lib/components/app/sprite-animator/sprite-animator-renderer.svelte';
 	import { atlases } from '$lib/components/app/sprite-animator';
-	import { getCharacterBodyStateString, getCharacterFaceStateString } from '$lib/utils/label';
-	import { InputGroup, InputGroupAddon, InputGroupButton } from '$lib/components/ui/input-group';
-	import {
-		DropdownMenu,
-		DropdownMenuTrigger,
-		DropdownMenuContent,
-		DropdownMenuRadioGroup,
-		DropdownMenuRadioItem,
-	} from '$lib/components/ui/dropdown-menu';
-	import { Tooltip, TooltipTrigger, TooltipContent } from '$lib/components/ui/tooltip';
-	import { IconChevronDown } from '@tabler/icons-svelte';
+	import { getCharacterBodyStateString } from '$lib/utils/label';
 
 	interface Props {
 		bodyId: CharacterBodyId;
@@ -38,8 +27,6 @@
 	const body = $derived($characterBodyStore.data[bodyId]);
 	const bodyStates = $derived($characterBodyStateStore.data[bodyId] ?? []);
 	const bodyState = $derived(bodyStates.find((s: CharacterBodyState) => s.type === type));
-
-	const faceStateOptions: CharacterFaceStateType[] = ['idle', 'happy', 'sad', 'angry'];
 
 	let animator = $state<SpriteAnimator | undefined>(undefined);
 
@@ -95,22 +82,6 @@
 		}
 	}
 
-	async function onInFrontChange(pressed: boolean) {
-		if (bodyState) {
-			await admin.updateCharacterBodyState(bodyState.id, bodyId, {
-				in_front: pressed,
-			});
-		}
-	}
-
-	async function onFaceStateChange(value: string) {
-		if (bodyState) {
-			const faceState = value === '' ? null : (value as CharacterFaceStateType);
-			await admin.updateCharacterBodyState(bodyState.id, bodyId, {
-				character_face_state: faceState,
-			});
-		}
-	}
 </script>
 
 <SpriteStateItem
@@ -120,55 +91,6 @@
 	{onchange}
 	{ondelete}
 >
-	{#snippet action()}
-		{#if bodyState}
-			<InputGroup>
-				<InputGroupAddon align="inline-start">
-					<Tooltip>
-						<TooltipTrigger>
-							{#snippet child({ props })}
-								<InputGroupButton
-									{...props}
-									variant={bodyState.in_front ? 'secondary' : 'ghost'}
-									onclick={() => onInFrontChange(!bodyState.in_front)}
-								>
-									프론트 바디
-								</InputGroupButton>
-							{/snippet}
-						</TooltipTrigger>
-						<TooltipContent>활성화 시 바디가 얼굴 앞에 렌더링됩니다.</TooltipContent>
-					</Tooltip>
-				</InputGroupAddon>
-				<InputGroupAddon align="inline-end">
-					<DropdownMenu>
-						<DropdownMenuTrigger>
-							{#snippet child({ props })}
-								<InputGroupButton {...props} variant="ghost">
-									{bodyState.character_face_state
-										? getCharacterFaceStateString(bodyState.character_face_state)
-										: '시스템'}
-									<IconChevronDown class="ml-1 size-3" />
-								</InputGroupButton>
-							{/snippet}
-						</DropdownMenuTrigger>
-						<DropdownMenuContent align="start">
-							<DropdownMenuRadioGroup
-								value={bodyState.character_face_state ?? ''}
-								onValueChange={onFaceStateChange}
-							>
-								<DropdownMenuRadioItem value="">시스템</DropdownMenuRadioItem>
-								{#each faceStateOptions as faceType (faceType)}
-									<DropdownMenuRadioItem value={faceType}>
-										{getCharacterFaceStateString(faceType)}
-									</DropdownMenuRadioItem>
-								{/each}
-							</DropdownMenuRadioGroup>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</InputGroupAddon>
-			</InputGroup>
-		{/if}
-	{/snippet}
 	{#snippet preview()}
 		{#if animator}
 			<div style:transform="scale({body?.scale ?? 1})">
