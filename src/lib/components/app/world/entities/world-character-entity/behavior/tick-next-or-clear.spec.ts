@@ -23,6 +23,22 @@ describe('tickNextOrClear(tick: number)', () => {
 		Fixture.reset();
 	});
 
+	it('타겟 엔티티가 월드와 소지 아이템에 존재하지 않으면 초기화한다.', () => {
+		// 1) 월드와 소지 아이템 어디에도 없는 엔티티를 타겟으로 설정한다.
+		entity.behavior.targetEntityId = 'item_nonexistent_nonexistent_nonexistent' as never;
+		entity.behavior.behaviorTargetId = currentBehaviorTargetId as never;
+		entity.behavior.interactionQueue.status = 'action-running';
+
+		// 2) 다음 행동 전환 단계를 실행한다.
+		entity.behavior.tickNextOrClear(CURRENT_TICK);
+
+		// 3) 상호작용 큐 상태와 무관하게 모든 상태가 초기화된다.
+		expect(entity.behavior.targetEntityId).toBeUndefined();
+		expect(entity.behavior.behaviorTargetId).toBeUndefined();
+		expect(entity.behavior.path).toEqual([]);
+		expect(entity.behavior.interactionQueue.status).toBe('enqueuing');
+	});
+
 	it('상호작용 큐가 완료되지 않은 경우 클리어하거나 다음 행동 액션으로 넘어가지 않는다.', () => {
 		// 1) 상호작용 큐를 미완료 상태로 둔다.
 		entity.behavior.interactionQueue.status = 'action-running';
@@ -38,7 +54,6 @@ describe('tickNextOrClear(tick: number)', () => {
 	it('현재 행동 대상이 없으면 초기화하고 로직을 종료한다.', () => {
 		// 1) 행동 대상을 비우고 이전 상태를 남겨둔다.
 		entity.behavior.behaviorTargetId = undefined;
-		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
 		// 2) 다음 행동 전환 단계를 실행한다.
@@ -62,7 +77,6 @@ describe('tickNextOrClear(tick: number)', () => {
 	it('다음 행동 액션이 있으면 모든 상태를 초기화하고 다음 액션으로 전환한다.', () => {
 		// 1) 다음 액션이 존재하는 현재 행동 대상을 설정한다.
 		entity.behavior.behaviorTargetId = currentBehaviorTargetId as never;
-		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
 		// 2) 다음 행동 전환 단계를 실행한다.
@@ -79,7 +93,6 @@ describe('tickNextOrClear(tick: number)', () => {
 	it('다음 행동 액션이 없으면 모든 상태를 초기화하여 행동을 종료한다.', () => {
 		// 1) 다음 액션이 없는 마지막 행동 대상을 설정한다.
 		entity.behavior.behaviorTargetId = nextBehaviorTargetId as never;
-		entity.behavior.targetEntityId = 'item_dummy_dummy_dummy' as never;
 		entity.behavior.path = [{ x: 1, y: 1 } as never];
 
 		// 2) 다음 행동 전환 단계를 실행한다.

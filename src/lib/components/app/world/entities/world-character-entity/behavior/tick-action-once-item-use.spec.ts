@@ -73,7 +73,7 @@ describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldChar
 
 		// 2) 실행 틱을 한 번 진행한다.
 		entity.behavior.tickActionOnceItemUse(fixture.runningTick, worldCharacterNeedDelta);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		// 3) 증가량이 increase_per_tick 만큼 반영된다.
 		expect(need.value).toBe(before + fixture.increasePerTick);
@@ -92,7 +92,7 @@ describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldChar
 
 		// 2) 실행 틱을 진행한다.
 		entity.behavior.tickActionOnceItemUse(fixture.runningTick, worldCharacterNeedDelta);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		// 3) 최대치를 초과하지 않고 clamp 된다.
 		expect(need.value).toBe(needData.max_value);

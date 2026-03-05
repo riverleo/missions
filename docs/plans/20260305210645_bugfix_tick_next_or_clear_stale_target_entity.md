@@ -31,17 +31,17 @@
 
 ### 게임 디자이너
 
-- [ ] `tick-next-or-clear.ts`에서 `interactionQueue.status` 가드(현재 step 0) 이전에 타겟 엔티티 유효성 검사 로직을 추가한다. `targetEntityId`가 설정되어 있으나 `worldContext.entities`와 `heldItemIds` 모두에 존재하지 않으면 `this.clear()`를 호출하고 종료한다.
-- [ ] `tick-next-or-clear.ts`의 함수 JSDoc 명세에 새 규칙(타겟 엔티티가 월드와 소지 아이템에 존재하지 않으면 초기화한다)을 추가한다.
-- [ ] `tick-apply-workd-character-need-delta.ts`를 `tick-apply-world-character-need-delta.ts`로 파일명을 변경한다.
-- [ ] `tick-apply-workd-character-need-delta.spec.ts`를 `tick-apply-world-character-need-delta.spec.ts`로 파일명을 변경한다.
-- [ ] 함수명 `tickApplyWorkdCharacterNeedDelta`를 `tickApplyWorldCharacterNeedDelta`로 변경한다.
-- [ ] 파일명/함수명 변경에 따른 모든 import 및 참조를 수정한다.
+- [x] `tick-next-or-clear.ts`에서 `interactionQueue.status` 가드(현재 step 0) 이전에 타겟 엔티티 유효성 검사 로직을 추가한다. `targetEntityId`가 설정되어 있으나 `worldContext.entities`와 `heldItemIds` 모두에 존재하지 않으면 `this.clear()`를 호출하고 종료한다.
+- [x] `tick-next-or-clear.ts`의 함수 JSDoc 명세에 새 규칙(타겟 엔티티가 월드와 소지 아이템에 존재하지 않으면 초기화한다)을 추가한다.
+- [x] `tick-apply-workd-character-need-delta.ts`를 `tick-apply-world-character-need-delta.ts`로 파일명을 변경한다.
+- [x] `tick-apply-workd-character-need-delta.spec.ts`를 `tick-apply-world-character-need-delta.spec.ts`로 파일명을 변경한다.
+- [x] 함수명 `tickApplyWorkdCharacterNeedDelta`를 `tickApplyWorldCharacterNeedDelta`로 변경한다.
+- [x] 파일명/함수명 변경에 따른 모든 import 및 참조를 수정한다.
 
 ### 테스트 엔지니어
 
-- [ ] `tick-next-or-clear.spec.ts`에 테스트 케이스를 추가한다: `targetEntityId`가 설정되어 있으나 `worldContext.entities`와 `heldItemIds` 모두에 존재하지 않으면 `clear()`가 호출된다.
-- [ ] 오타 수정 후 기존 테스트가 회귀 없이 통과하는지 확인한다.
+- [x] `tick-next-or-clear.spec.ts`에 테스트 케이스를 추가한다: `targetEntityId`가 설정되어 있으나 `worldContext.entities`와 `heldItemIds` 모두에 존재하지 않으면 `clear()`가 호출된다.
+- [x] 오타 수정 후 기존 테스트가 회귀 없이 통과하는지 확인한다.
 
 ## 노트
 

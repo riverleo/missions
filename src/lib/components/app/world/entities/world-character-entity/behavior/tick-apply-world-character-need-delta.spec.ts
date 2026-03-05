@@ -9,7 +9,7 @@ import {
 import type createForTickAction from '$lib/hooks/fixture/world-character-entity/create-for-tick-action-once-item-use';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 
-describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharacterNeedDelta)', () => {
+describe('tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta: WorldCharacterNeedDelta)', () => {
 	let fixture: ReturnType<typeof createForTickAction>;
 	let entity: WorldCharacterEntity;
 
@@ -30,7 +30,7 @@ describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharact
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 2);
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 3);
 
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		expect(need.value).toBe(before + 5);
 	});
@@ -42,12 +42,12 @@ describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharact
 
 		need.value = needData.max_value - 1;
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 1000);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 		expect(need.value).toBe(needData.max_value);
 
 		const worldCharacterNeedDelta2 = createWorldCharacterNeedDelta();
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta2, fixture.needId, -1000);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta2);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta2);
 		expect(need.value).toBe(0);
 	});
 
@@ -61,7 +61,7 @@ describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharact
 
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 2);
 		addTickDecreaseNeedsWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 10);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		expect(need.value).toBe(before + 2);
 	});
@@ -73,7 +73,7 @@ describe('tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta: WorldCharact
 
 		addWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 3);
 		addTickDecreaseNeedsWorldCharacterNeedDelta(worldCharacterNeedDelta, fixture.needId, 10);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		expect(need.value).toBe(before + 3);
 	});

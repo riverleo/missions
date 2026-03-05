@@ -35,6 +35,6 @@ export default function tick(
 		if (this.tickActionFulfillCharacterHug(tick)) return; // 7. fulfill:character_hug 액션 실행
 		this.tickNextOrClear(tick); // 8. 다음 행동 전환/종료
 	} finally {
-		this.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		this.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 	}
 }

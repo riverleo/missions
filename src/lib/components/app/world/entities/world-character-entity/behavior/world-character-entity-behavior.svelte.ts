@@ -20,7 +20,7 @@ import tickActionFulfillBuildingRepair from './tick-action-fulfill-building-repa
 import tickActionFulfillBuildingClean from './tick-action-fulfill-building-clean';
 import tickActionFulfillBuildingUse from './tick-action-fulfill-building-use';
 import tickActionFulfillCharacterHug from './tick-action-fulfill-character-hug';
-import tickApplyWorkdCharacterNeedDelta from './tick-apply-workd-character-need-delta';
+import tickApplyWorldCharacterNeedDelta from './tick-apply-world-character-need-delta';
 
 /**
  * 현재 실행 중인 행동의 상태를 나타냅니다.
@@ -61,7 +61,7 @@ export class WorldCharacterEntityBehavior {
 	tickActionFulfillBuildingClean = tickActionFulfillBuildingClean;
 	tickActionFulfillBuildingUse = tickActionFulfillBuildingUse;
 	tickActionFulfillCharacterHug = tickActionFulfillCharacterHug;
-	tickApplyWorkdCharacterNeedDelta = tickApplyWorkdCharacterNeedDelta;
+	tickApplyWorldCharacterNeedDelta = tickApplyWorldCharacterNeedDelta;
 
 	constructor(worldCharacterEntity: WorldCharacterEntity) {
 		this.worldCharacterEntity = worldCharacterEntity;
