@@ -109,6 +109,16 @@
       }
     ]
   },
+  "test3": {
+    "name": "test3",
+    "type": "sprite",
+    "frameWidth": 298,
+    "frameHeight": 677,
+    "columns": 2,
+    "rows": 2,
+    "frameCount": 3,
+    "step": 1
+  },
   "tile-sample": {
     "name": "tile-sample",
     "type": "tileset",
