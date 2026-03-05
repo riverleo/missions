@@ -1,20 +1,34 @@
-# tickNextOrClear 버그 수정 및 workd 오타 수정
+# tickNextOrClear 버그 수정, workd 오타 수정, 아이템 사용 후 소유권 미해제 버그 수정
 
 ## 목표
 
 1. `tickNextOrClear`에서 `targetEntityId`가 가리키는 엔티티가 월드(`worldContext.entities`)와 소지 아이템(`heldItemIds`) 양쪽 모두에 존재하지 않는 상태임에도 행동 상태가 초기화되지 않는 버그를 수정한다.
 2. `tickApplyWorkdCharacterNeedDelta` 함수명과 파일명의 `workd` 오타를 `world`로 수정한다.
+3. 아이템 사용 완료 시 `world_character_id`가 초기화되지 않아 저장 후 새로고침하면 소지 아이템이 누적되는 버그를 수정한다.
 
-### 버그 시나리오
+### 버그 시나리오 (목표 1)
 
 1. 캐릭터에 `targetEntityId`가 설정된 상태에서 해당 엔티티가 월드에서 제거된다(예: 다른 캐릭터가 줍거나 철거됨).
 2. `tickFindTargetEntityAndGo`(step 2)에서 `worldContext.entities[targetEntityId]`가 `undefined`이면 `return false`만 하고 `targetEntityId`를 초기화하지 않는다.
 3. 이후 단계(step 3~7)가 유효하지 않은 `targetEntityId`를 기반으로 실행되며, 상호작용 큐가 정상 완료(`completed`)에 도달하지 못할 수 있다.
 4. `tickNextOrClear`(step 8)는 `interactionQueue.status !== 'completed'` 가드에 의해 조기 반환하여 행동 상태를 영원히 초기화하지 못한다.
 
-### 수정 방향
+### 수정 방향 (목표 1)
 
 `tickNextOrClear`에서 `interactionQueue.status` 가드 이전에 타겟 엔티티 유효성 검사를 추가한다. `targetEntityId`가 설정되어 있으나 월드 엔티티와 소지 아이템 어디에도 존재하지 않으면 `this.clear()`를 호출하여 행동을 종료한다.
+
+### 버그 시나리오 (목표 3)
+
+1. 캐릭터가 아이템을 줍는다(`tickActionSystemItemPick`). `updateWorldItem(worldItemId, { world_character_id: characterId })`로 WorldItem 레코드에 소유권을 기록하고, 런타임 `heldItemIds` 배열에도 추가한다.
+2. 캐릭터가 아이템을 사용한다(`tickActionOnceItemUse`). 사용 완료 시 `applyCompletedOnceItemUse`에서 `heldItemIds`에서만 제거하고, WorldItem 레코드의 `world_character_id`는 초기화하지 않는다.
+3. 월드 상태가 `localStorage`(`test-world-state`)에 저장된다. WorldItem의 `world_character_id`가 여전히 캐릭터 ID를 가리키고 있다.
+4. 새로고침 후 월드를 다시 로드하면, `WorldCharacterEntity` 생성자에서 `getAllWorldItems().filter(item => item.world_character_id === worldCharacterId)`로 `heldItemIds`를 초기화한다.
+5. 이미 사용 완료된 아이템이 `world_character_id`를 유지하고 있으므로 다시 `heldItemIds`에 포함된다.
+6. 이 과정이 반복되면 사용 완료된 아이템이 계속 누적되어 소지 아이템이 40개 이상으로 쌓인다.
+
+### 수정 방향 (목표 3)
+
+`tick-action-once-item-use.ts`의 `applyCompletedOnceItemUse`에서 `heldItemIds` 제거 후 `updateWorldItem(worldItemId, { world_character_id: null })`을 호출하여 WorldItem 레코드의 소유권도 해제한다. 이미 `tick-action-system-item-pick.ts`에서 동일한 `updateWorldItem` 패턴을 사용하고 있으므로 대칭적으로 처리한다.
 
 ## 담당자
 
@@ -37,11 +51,14 @@
 - [x] `tick-apply-workd-character-need-delta.spec.ts`를 `tick-apply-world-character-need-delta.spec.ts`로 파일명을 변경한다.
 - [x] 함수명 `tickApplyWorkdCharacterNeedDelta`를 `tickApplyWorldCharacterNeedDelta`로 변경한다.
 - [x] 파일명/함수명 변경에 따른 모든 import 및 참조를 수정한다.
+- [x] `tick-action-once-item-use.ts`의 `applyCompletedOnceItemUse`에서 `heldItemIds` 제거 후 `updateWorldItem(worldItemId, { world_character_id: null })`을 호출하여 WorldItem 레코드의 소유권을 해제한다.
+- [x] `tick-action-once-item-use.ts`의 함수 JSDoc 명세에 새 규칙(아이템 사용 완료 시 WorldItem의 `world_character_id`를 초기화한다)을 추가한다.
 
 ### 테스트 엔지니어
 
 - [x] `tick-next-or-clear.spec.ts`에 테스트 케이스를 추가한다: `targetEntityId`가 설정되어 있으나 `worldContext.entities`와 `heldItemIds` 모두에 존재하지 않으면 `clear()`가 호출된다.
 - [x] 오타 수정 후 기존 테스트가 회귀 없이 통과하는지 확인한다.
+- [x] `tick-action-once-item-use.spec.ts`에 테스트 케이스를 추가한다: 아이템 사용 완료 시 해당 WorldItem의 `world_character_id`가 `null`로 초기화된다.
 
 ## 노트
 
@@ -62,3 +79,10 @@
   - 참조 수정: `tick-action-once-item-use.spec.ts` (메서드 호출)
   - 참조 수정: `tick-apply-world-character-need-delta.spec.ts` (describe + 메서드 호출)
   - 완료된 플랜 문서(`docs/plans/completed/`)는 이력이므로 수정하지 않는다.
+- 아이템 사용 후 소유권 미해제 버그 관련 파일:
+  - 구현: `src/lib/components/app/world/entities/world-character-entity/behavior/tick-action-once-item-use.ts` (`applyCompletedOnceItemUse` 함수)
+  - 테스트: `src/lib/components/app/world/entities/world-character-entity/behavior/tick-action-once-item-use.spec.ts`
+  - 참고(소유권 설정 패턴): `src/lib/components/app/world/entities/world-character-entity/behavior/tick-action-system-item-pick.ts` (`applyCompletedSystemItemPick` 함수)
+  - 참고(heldItemIds 초기화): `src/lib/components/app/world/entities/world-character-entity/world-character-entity.svelte.ts` (생성자에서 `world_character_id` 기준 필터)
+  - 참고(월드 아이템 업데이트): `src/lib/hooks/use-world/use-world.ts` (`updateWorldItem` 함수)
+  - `EntityIdUtils.instanceId<WorldItemId>(targetEntityId)`로 엔티티 ID에서 월드 아이템 ID를 추출하고, `useWorld().updateWorldItem`으로 레코드를 갱신한다. `tick-action-system-item-pick.ts`의 `applyCompletedSystemItemPick`에서 동일 패턴을 사용한다.
