@@ -9,7 +9,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * 조건부 입력 무시(예: item_use 실행 중 tick-decrease-needs 무시)와
  * min/max 경계 보정을 이 함수에서 일괄 처리합니다.
  */
-export default function tickApplyWorkdCharacterNeedDelta(
+export default function tickApplyWorldCharacterNeedDelta(
 	this: WorldCharacterEntityBehavior,
 	worldCharacterNeedDelta: WorldCharacterNeedDelta
 ): void {

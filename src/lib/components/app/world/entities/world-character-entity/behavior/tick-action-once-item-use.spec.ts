@@ -1,9 +1,11 @@
 import { Fixture } from '$lib/hooks/fixture';
-import { useCharacter } from '$lib/hooks';
+import { useCharacter, useWorld } from '$lib/hooks';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { WorldCharacterEntity } from '../world-character-entity.svelte';
 import type createForTickAction from '$lib/hooks/fixture/world-character-entity/create-for-tick-action-once-item-use';
 import { createWorldCharacterNeedDelta } from '../world-character-need-delta';
+import type { WorldItemId } from '$lib/types';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 
 describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldCharacterNeedDelta)', () => {
 	let fixture: ReturnType<typeof createForTickAction>;
@@ -73,7 +75,7 @@ describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldChar
 
 		// 2) 실행 틱을 한 번 진행한다.
 		entity.behavior.tickActionOnceItemUse(fixture.runningTick, worldCharacterNeedDelta);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		// 3) 증가량이 increase_per_tick 만큼 반영된다.
 		expect(need.value).toBe(before + fixture.increasePerTick);
@@ -92,7 +94,7 @@ describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldChar
 
 		// 2) 실행 틱을 진행한다.
 		entity.behavior.tickActionOnceItemUse(fixture.runningTick, worldCharacterNeedDelta);
-		entity.behavior.tickApplyWorkdCharacterNeedDelta(worldCharacterNeedDelta);
+		entity.behavior.tickApplyWorldCharacterNeedDelta(worldCharacterNeedDelta);
 
 		// 3) 최대치를 초과하지 않고 clamp 된다.
 		expect(need.value).toBe(needData.max_value);
@@ -128,5 +130,23 @@ describe('tickActionOnceItemUse(tick: number, worldCharacterNeedDelta: WorldChar
 		// 3) 완료 후 소지 목록에서 대상 아이템이 제거된다.
 		expect(entity.behavior.interactionQueue.status).toBe('action-completed');
 		expect(entity.heldItemIds).not.toContain(fixture.holdingTargetEntityId);
+	});
+
+	it('액션 실행이 완료되면 WorldItem의 world_character_id를 초기화한다.', () => {
+		// 1) action-running 상태와 완료 시점 조건을 만든다.
+		entity.behavior.interactionQueue.status = 'action-running';
+		entity.behavior.interactionQueue.currentInteractionTargetId = fixture.matchingTargetId;
+		entity.behavior.interactionQueue.currentInteractionTargetRunningAtTick = fixture.startTick;
+		entity.behavior.targetEntityId = fixture.holdingTargetEntityId;
+		const worldItemId = EntityIdUtils.instanceId<WorldItemId>(fixture.holdingTargetEntityId);
+		const { getOrUndefinedWorldItem } = useWorld();
+		expect(getOrUndefinedWorldItem(worldItemId)?.world_character_id).not.toBeNull();
+		const worldCharacterNeedDelta = createWorldCharacterNeedDelta();
+
+		// 2) 완료 시점 틱을 실행한다.
+		entity.behavior.tickActionOnceItemUse(fixture.completedTick, worldCharacterNeedDelta);
+
+		// 3) 완료 후 WorldItem의 소유권이 해제된다.
+		expect(getOrUndefinedWorldItem(worldItemId)?.world_character_id).toBeNull();
 	});
 });

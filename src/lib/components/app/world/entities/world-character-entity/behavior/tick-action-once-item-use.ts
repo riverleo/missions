@@ -1,5 +1,6 @@
-import { useBehavior, useFulfillment, useInteraction } from '$lib/hooks';
-import type { InteractionAction, InteractionTargetId } from '$lib/types';
+import { useBehavior, useFulfillment, useInteraction, useWorld } from '$lib/hooks';
+import type { InteractionAction, InteractionTargetId, WorldItemId } from '$lib/types';
+import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import {
 	addWorldCharacterNeedDelta,
@@ -25,6 +26,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * - [x] 액션 실행 중 상태에서 상호작용 액션의 `duration_ticks` 경과로 완료를 판정한다.
  * - [x] 아이템 사용 충족 조건 값을 `WorldCharacterNeedDelta`에 틱마다 누적한다.
  * - [x] 액션 실행이 완료되면 소지 아이템을 제거한다.
+ * - [x] 액션 실행이 완료되면 WorldItem의 `world_character_id`를 초기화한다.
  */
 export default function tickActionOnceItemUse(
 	this: WorldCharacterEntityBehavior,
@@ -142,6 +144,15 @@ function applyCompletedOnceItemUse(behavior: WorldCharacterEntityBehavior): void
 	behavior.worldCharacterEntity.heldItemIds = behavior.worldCharacterEntity.heldItemIds.filter(
 		(heldItemId) => heldItemId !== targetEntityId
 	);
+
+	if (EntityIdUtils.is('item', targetEntityId)) {
+		const worldItemId = EntityIdUtils.instanceId<WorldItemId>(targetEntityId);
+		const { getOrUndefinedWorldItem, updateWorldItem } = useWorld();
+		const worldItem = getOrUndefinedWorldItem(worldItemId);
+		if (worldItem) {
+			updateWorldItem(worldItemId, { world_character_id: null });
+		}
+	}
 }
 
 function isCompleted(currentInteractionAction: InteractionAction, elapsed: number): boolean {

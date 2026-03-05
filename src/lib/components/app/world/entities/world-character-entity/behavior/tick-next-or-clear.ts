@@ -12,6 +12,7 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
  * @param tick - 현재 게임 틱 번호
  *
  * ## 명세
+ * - [x] 타겟 엔티티가 월드와 소지 아이템에 존재하지 않으면 초기화한다.
  * - [x] 현재 행동 대상이 없으면 초기화하고 로직을 종료한다.
  * - [x] 현재 행동 액션을 찾을 수 없으면 에러가 발생한다.
  * - [x] 다음 행동 액션이 있으면 모든 상태를 초기화하고 다음 액션으로 전환한다.
@@ -21,28 +22,37 @@ import type { WorldCharacterEntityBehavior } from './world-character-entity-beha
 export default function tickNextOrClear(this: WorldCharacterEntityBehavior, tick: number) {
 	const { getBehaviorAction, getOrUndefinedNextBehaviorAction } = useBehavior();
 
-	// 0. 상호작용 큐가 완료되지 않은 경우 로직을 종료
+	// 0. 타겟 엔티티가 월드와 소지 아이템에 존재하지 않으면 초기화
+	if (this.targetEntityId) {
+		const inWorld = this.worldCharacterEntity.worldContext.entities[this.targetEntityId] !== undefined;
+		const inHeldItems = this.worldCharacterEntity.heldItemIds.includes(this.targetEntityId);
+		if (!inWorld && !inHeldItems) {
+			return this.clear();
+		}
+	}
+
+	// 1. 상호작용 큐가 완료되지 않은 경우 로직을 종료
 	if (this.interactionQueue.status !== 'completed') {
 		return;
 	}
 
-	// 1. 현재 행동 대상이 없으면 초기화하고 종료
+	// 2. 현재 행동 대상이 없으면 초기화하고 종료
 	if (!this.behaviorTargetId) {
 		return this.clear();
 	}
 
-	// 2. 현재 행동 액션 조회 (없으면 에러 발생)
+	// 3. 현재 행동 액션 조회 (없으면 에러 발생)
 	const behaviorAction = getBehaviorAction(this.behaviorTargetId);
 
-	// 3. 다음 행동 액션 조회
+	// 4. 다음 행동 액션 조회
 	const nextBehaviorAction = getOrUndefinedNextBehaviorAction(behaviorAction);
 
 	if (nextBehaviorAction) {
-		// 4. 다음 행동 액션이 있으면 모든 상태 초기화 후 전환
+		// 5. 다음 행동 액션이 있으면 모든 상태 초기화 후 전환
 		this.clear();
 		this.setBehaviorTarget(BehaviorIdUtils.create(nextBehaviorAction), tick);
 	} else {
-		// 5. 다음 행동 액션이 없으면 모든 상태 초기화 (행동 종료)
+		// 6. 다음 행동 액션이 없으면 모든 상태 초기화 (행동 종료)
 		this.clear();
 	}
 }
