@@ -291,7 +291,6 @@ export type {
 	WorldItem,
 	WorldTileMap,
 	WorldCharacterNeed,
-	WorldData,
 	WorldSnapshot,
 } from './core';
 

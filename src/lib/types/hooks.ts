@@ -7,7 +7,9 @@ import type {
 	NarrativeNodeChoice,
 	NarrativeNodeChoiceId,
 	NarrativeNodeId,
+	Player,
 	PlayerRolledDice,
+	PlayerScenario,
 	RecordFetchState,
 	TerrainId,
 	ScreenVector,
@@ -48,8 +50,11 @@ export interface PlayStoreState {
 }
 export type PlayStore = Writable<PlayStoreState>;
 
-// World Test
+// World Test — WorldSnapshot(단일 월드 스냅샷)을 확장하여 테스트 전용 필드 추가.
+// player/playerScenario는 테스트 환경에서 로그인 없이 사용하기 위한 필드.
 export interface TestWorldSnapshot extends WorldSnapshot {
+	player: Player;
+	playerScenario: PlayerScenario;
 	open: boolean;
 	openPanel: boolean;
 	selectedTerrainId?: TerrainId;

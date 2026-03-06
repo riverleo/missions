@@ -346,24 +346,15 @@ export interface WorldCharacterNeed {
 }
 
 // ============================================================
-// WorldData: World + 엔티티 데이터를 하나의 객체로 합친 런타임 타입
-// DB의 snapshot 필드를 제외하고 엔티티 데이터를 직접 포함한다.
+// WorldSnapshot: 단일 월드의 전체 데이터 (World 메타 + 엔티티)
+// DB worlds.snapshot 컬럼, localStorage, 런타임 스토어에서 공용으로 사용한다.
+// player/playerScenario는 포함하지 않는다 (각각의 스토어/테이블이 단일 출처).
 // ============================================================
-export interface WorldData extends Omit<World, 'snapshot'> {
+export interface WorldSnapshot {
 	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
 	worldCharacterNeeds: Record<WorldCharacterNeedId, WorldCharacterNeed>;
 	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
 	worldBuildingConditions: Record<WorldBuildingConditionId, WorldBuildingCondition>;
 	worldItems: Record<WorldItemId, WorldItem>;
-	worldTileMap: WorldTileMap | undefined;
-}
-
-// ============================================================
-// World Snapshot (DB & localStorage 공용 스냅샷 인터페이스)
-// 엔티티 데이터는 각 World(WorldData) 안에 포함된다.
-// ============================================================
-export interface WorldSnapshot {
-	worlds: Record<WorldId, WorldData>;
-	player: Player;
-	playerScenario: PlayerScenario;
+	worldTileMap?: WorldTileMap;
 }
