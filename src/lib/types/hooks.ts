@@ -9,23 +9,9 @@ import type {
 	NarrativeNodeId,
 	PlayerRolledDice,
 	RecordFetchState,
-	World,
-	WorldCharacter,
-	WorldCharacterNeed,
-	WorldCharacterNeedId,
-	WorldBuilding,
-	WorldBuildingCondition,
-	WorldBuildingConditionId,
-	WorldItem,
-	WorldTileMap,
-	WorldId,
-	WorldCharacterId,
-	WorldBuildingId,
-	WorldItemId,
 	TerrainId,
-	Player,
-	PlayerScenario,
 	ScreenVector,
+	WorldSnapshot,
 } from '$lib/types';
 import type { Writable } from 'svelte/store';
 
@@ -63,19 +49,10 @@ export interface PlayStoreState {
 export type PlayStore = Writable<PlayStoreState>;
 
 // World Test
-export interface StoredState {
+export interface TestWorldSnapshot extends WorldSnapshot {
 	open: boolean;
 	openPanel: boolean;
 	selectedTerrainId?: TerrainId;
 	modalScreenVector: ScreenVector;
 	debug: boolean;
-	worlds?: Record<WorldId, World>;
-	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
-	worldCharacterNeeds?: Record<WorldCharacterNeedId, WorldCharacterNeed>;
-	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
-	worldBuildingConditions?: Record<WorldBuildingConditionId, WorldBuildingCondition>;
-	worldItems?: Record<WorldItemId, WorldItem>;
-	worldTileMaps?: Record<WorldId, WorldTileMap>;
-	player: Player;
-	playerScenario: PlayerScenario;
 }

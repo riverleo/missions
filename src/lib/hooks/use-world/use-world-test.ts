@@ -3,7 +3,7 @@ import { produce } from 'immer';
 import { browser } from '$app/environment';
 import type { TerrainId, ScreenVector } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
-import type { StoredState } from '$lib/types/hooks';
+import type { TestWorldSnapshot } from '$lib/types/hooks';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
@@ -17,7 +17,7 @@ let instance: ReturnType<typeof createTestWorldStore> | undefined;
 function createTestWorldStore() {
 	const stored = load();
 
-	const store = writable<StoredState>(stored);
+	const store = writable<TestWorldSnapshot>(stored);
 
 	function setSelectedTerrainId(terrainId: TerrainId) {
 		const { terrainStore } = useTerrain();

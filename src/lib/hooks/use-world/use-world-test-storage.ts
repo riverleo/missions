@@ -16,7 +16,7 @@ import type {
 	PlayerScenario,
 	PlayerScenarioId,
 } from '$lib/types';
-import type { StoredState } from '$lib/types/hooks';
+import type { TestWorldSnapshot } from '$lib/types/hooks';
 import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useCurrent } from '../use-current';
@@ -30,7 +30,7 @@ import {
 	TEST_WORLD_STATE_STORAGE_KEY,
 } from '$lib/constants';
 
-export const defaultState: StoredState = {
+export const defaultState: TestWorldSnapshot = {
 	open: false,
 	openPanel: true,
 	selectedTerrainId: undefined,
@@ -58,13 +58,13 @@ export const defaultState: StoredState = {
 	},
 };
 
-export function load(): StoredState {
+export function load(): TestWorldSnapshot {
 	if (!browser) return defaultState;
 
 	try {
 		const saved = localStorage.getItem(TEST_WORLD_STATE_STORAGE_KEY);
 		if (saved) {
-			const stored: StoredState = JSON.parse(saved);
+			const stored: TestWorldSnapshot = JSON.parse(saved);
 			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
 			const world = stored.worlds?.[TEST_WORLD_ID];
 			return {
@@ -90,7 +90,7 @@ export function load(): StoredState {
 	return defaultState;
 }
 
-export function save(state: StoredState) {
+export function save(state: TestWorldSnapshot) {
 	if (!browser) return;
 	try {
 		// useWorld 스토어에서 TEST_WORLD_ID와 관련된 데이터만 필터링
@@ -172,7 +172,7 @@ export function save(state: StoredState) {
 			? { ...testPlayerScenario, current_tick: currentTick }
 			: { ...defaultState.playerScenario, current_tick: currentTick };
 
-		const stored: StoredState = {
+		const stored: TestWorldSnapshot = {
 			...state,
 			worlds: testWorld ? { [TEST_WORLD_ID]: testWorld } : {},
 			worldCharacters: testWorldCharacters,

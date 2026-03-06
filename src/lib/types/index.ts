@@ -297,6 +297,7 @@ export type {
 	WorldTileMapInsert,
 	WorldCharacterNeed,
 	WorldCharacterNeedInsert,
+	WorldSnapshot,
 } from './core';
 
 // Re-export specific Enums for convenience
@@ -318,4 +319,5 @@ export type {
 	NarrativeNodeChoiceStore,
 	PlayStoreState,
 	PlayStore,
+	TestWorldSnapshot,
 } from './hooks';

@@ -51,6 +51,9 @@ import type {
 	OnceInteractionType,
 	FulfillInteractionType,
 	SystemInteractionType,
+	World,
+	Player,
+	PlayerScenario,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -421,3 +424,18 @@ export type WorldCharacterNeedInsert = {
 	deleted_at?: string | null;
 	value: number;
 };
+
+// ============================================================
+// World Snapshot (DB & localStorage 공용 스냅샷 인터페이스)
+// ============================================================
+export interface WorldSnapshot {
+	worlds?: Record<WorldId, World>;
+	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
+	worldCharacterNeeds?: Record<WorldCharacterNeedId, WorldCharacterNeed>;
+	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
+	worldBuildingConditions?: Record<WorldBuildingConditionId, WorldBuildingCondition>;
+	worldItems?: Record<WorldItemId, WorldItem>;
+	worldTileMaps?: Record<WorldId, WorldTileMap>;
+	player: Player;
+	playerScenario: PlayerScenario;
+}
