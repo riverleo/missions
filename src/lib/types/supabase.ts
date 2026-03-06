@@ -1,5 +1,5 @@
 import type { Database } from './supabase.generated';
-import type { Brand } from './core';
+import type { Brand, WorldSnapshot } from './core';
 import type { VectorKey, TileCellKey } from './vector';
 
 // ============================================================
@@ -745,13 +745,14 @@ export type CharacterUpdate = Omit<
 type WorldRow = Tables<'worlds'>;
 export type World = Omit<
 	WorldRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'deleted_at'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'snapshot' | 'deleted_at'
 > & {
 	id: WorldId;
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId | null;
+	snapshot: WorldSnapshot;
 	deleted_at: string | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;

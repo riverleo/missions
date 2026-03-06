@@ -18,7 +18,11 @@ export const defaultState: TestWorldSnapshot = {
 	selectedTerrainId: undefined,
 	modalScreenVector: vectorUtils.createScreenVector(0, 0),
 	debug: false,
-	worlds: {},
+	worldCharacters: {},
+	worldCharacterNeeds: {},
+	worldBuildings: {},
+	worldBuildingConditions: {},
+	worldItems: {},
 	player: {
 		id: TEST_PLAYER_ID,
 		user_id: TEST_USER_ID,
@@ -48,15 +52,18 @@ export function load(): TestWorldSnapshot {
 		const saved = localStorage.getItem(TEST_WORLD_SNAPSHOT_KEY);
 		if (saved) {
 			const stored: TestWorldSnapshot = JSON.parse(saved);
-			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
-			const world = stored.worlds?.[TEST_WORLD_ID];
 			return {
 				open: stored.open ?? defaultState.open,
 				openPanel: stored.openPanel ?? defaultState.openPanel,
-				selectedTerrainId: world?.terrain_id ?? undefined,
+				selectedTerrainId: stored.selectedTerrainId ?? defaultState.selectedTerrainId,
 				modalScreenVector: stored.modalScreenVector ?? defaultState.modalScreenVector,
 				debug: stored.debug ?? defaultState.debug,
-				worlds: stored.worlds ?? {},
+				worldCharacters: stored.worldCharacters ?? {},
+				worldCharacterNeeds: stored.worldCharacterNeeds ?? {},
+				worldBuildings: stored.worldBuildings ?? {},
+				worldBuildingConditions: stored.worldBuildingConditions ?? {},
+				worldItems: stored.worldItems ?? {},
+				worldTileMap: stored.worldTileMap,
 				player: stored.player ?? defaultState.player,
 				playerScenario: stored.playerScenario ?? defaultState.playerScenario,
 			};
@@ -70,9 +77,9 @@ export function load(): TestWorldSnapshot {
 export function save(state: TestWorldSnapshot) {
 	if (!browser) return;
 	try {
-		// buildSnapshot으로 현재 스토어 상태를 WorldSnapshot으로 빌드
-		const { buildSnapshot } = useWorld();
-		const snapshot = buildSnapshot(TEST_WORLD_ID);
+		// worldStore에서 엔티티 데이터를 직접 추출
+		const { createWorldSnapshot } = useWorld();
+		const snapshot = createWorldSnapshot(TEST_WORLD_ID);
 
 		const stored: TestWorldSnapshot = {
 			...state,

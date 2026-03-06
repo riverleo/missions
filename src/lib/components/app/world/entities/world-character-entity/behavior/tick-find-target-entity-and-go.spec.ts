@@ -194,7 +194,7 @@ describe('tickFindTargetEntityAndGo(tick: number)', () => {
 			produce(state, (draft) => {
 				const world = draft.data[worldItem.world_id];
 				if (world) {
-					const wi = world.worldItems[droppedItemEntity.instanceId];
+					const wi = world.snapshot.worldItems[droppedItemEntity.instanceId];
 					if (wi) wi.world_character_id = holdingEntity.instanceId;
 				}
 			})

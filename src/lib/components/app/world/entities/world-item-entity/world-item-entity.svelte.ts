@@ -70,7 +70,7 @@ export class WorldItemEntity extends Entity {
 			produce(state, (draft) => {
 				const world = draft.data[this.worldId];
 				if (!world) return;
-				const wi = world.worldItems[this.instanceId];
+				const wi = world.snapshot.worldItems[this.instanceId];
 				if (wi) {
 					wi.x = this.x;
 					wi.y = this.y;

@@ -12,7 +12,7 @@
 	const { buildingStore: buildingStore } = useBuilding();
 	const { worldStore } = useWorld();
 
-	const worldBuilding = $derived($worldStore.data[entity.worldId]?.worldBuildings[entity.instanceId]);
+	const worldBuilding = $derived($worldStore.data[entity.worldId]?.snapshot.worldBuildings[entity.instanceId]);
 	const building = $derived(
 		worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined
 	);

@@ -122,8 +122,8 @@ export class WorldContextBlueprint {
 
 		const buildingStoreData = get(buildingStore).data;
 		const worldData = get(worldStore).data[this.context.worldId];
-		const worldBuildingStoreData = worldData?.worldBuildings ?? {};
-		const worldTileMapData = worldData?.worldTileMap;
+		const worldBuildingStoreData = worldData?.snapshot.worldBuildings ?? {};
+		const worldTileMapData = worldData?.snapshot.worldTileMap;
 
 		// 배치하려는 셀의 범위 계산 (객체 생성 대신 범위만)
 		let targetMinCol: number;

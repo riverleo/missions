@@ -103,13 +103,13 @@ export class WorldCharacterEntity extends Entity {
 			produce(state, (draft) => {
 				const world = draft.data[this.worldId];
 				if (!world) return;
-				const wc = world.worldCharacters[this.instanceId];
+				const wc = world.snapshot.worldCharacters[this.instanceId];
 				if (wc) {
 					wc.x = this.x;
 					wc.y = this.y;
 				}
 				for (const need of Object.values(this.needs)) {
-					const wn = world.worldCharacterNeeds[need.id as WorldCharacterNeedId];
+					const wn = world.snapshot.worldCharacterNeeds[need.id as WorldCharacterNeedId];
 					if (wn) {
 						wn.value = need.value;
 					}

@@ -7,7 +7,7 @@ import { WorldItemEntity } from '../entities/world-item-entity';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export function initializeEntities(worldContext: WorldContext) {
-	const { getAllWorldBuildings, getAllWorldCharacters, getAllWorldItems, getWorldTileMap } =
+	const { getAllWorldBuildings, getAllWorldCharacters, getAllWorldItems, getOrUndefinedWorldTileMap } =
 		useWorld();
 
 	// 현재 worldId에 해당하는 데이터만 필터링
@@ -19,7 +19,7 @@ export function initializeEntities(worldContext: WorldContext) {
 			i.world_building_id === null &&
 			i.world_character_id === null
 	);
-	const worldTileMap = getWorldTileMap(worldContext.worldId);
+	const worldTileMap = getOrUndefinedWorldTileMap(worldContext.worldId);
 
 	// 캐릭터 엔티티 생성
 	for (const character of characters) {

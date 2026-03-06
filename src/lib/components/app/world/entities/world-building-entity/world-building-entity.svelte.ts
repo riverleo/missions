@@ -88,7 +88,7 @@ export class WorldBuildingEntity extends Entity {
 				const world = draft.data[this.worldId];
 				if (!world) return;
 				for (const condition of Object.values(this.worldBuildingConditions)) {
-					const wbc = world.worldBuildingConditions[condition.id as WorldBuildingConditionId];
+					const wbc = world.snapshot.worldBuildingConditions[condition.id as WorldBuildingConditionId];
 					if (wbc) {
 						wbc.value = condition.value;
 					}

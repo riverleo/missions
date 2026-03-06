@@ -10,7 +10,6 @@ import type {
 	WorldBuildingCondition,
 	WorldItem,
 	WorldTileMap,
-	WorldData,
 	WorldSnapshot,
 	WorldId,
 	WorldCharacterId,
@@ -22,8 +21,6 @@ import type {
 	EntityInstance,
 	EntitySourceId,
 	BehaviorAction,
-	PlayerScenario,
-	Player,
 	PlayerId,
 	UserId,
 	ScenarioId,
@@ -31,7 +28,6 @@ import type {
 	TileId,
 	FetchStatus,
 } from '$lib/types';
-import { usePlayer } from '../use-player';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
 
@@ -44,7 +40,7 @@ function createWorldStore() {
 
 	const worldStore = writable({
 		status: 'idle' as FetchStatus,
-		data: {} as Record<WorldId, WorldData>,
+		data: {} as Record<WorldId, World>,
 		error: undefined as Error | undefined,
 	});
 
@@ -63,7 +59,7 @@ function createWorldStore() {
 	// ============================================================
 	// Getter functions - throw if not found
 	// ============================================================
-	function getWorld(id: string): WorldData {
+	function getWorld(id: string): World {
 		const data = get(worldStore).data[id as WorldId];
 		if (!data) throw new Error(`World not found: ${id}`);
 		return data;
@@ -100,15 +96,15 @@ function createWorldStore() {
 	}
 
 	function getWorldTileMap(worldId: string): WorldTileMap {
-		const worldData = get(worldStore).data[worldId as WorldId];
-		if (!worldData?.worldTileMap) throw new Error(`WorldTileMap not found: ${worldId}`);
-		return worldData.worldTileMap;
+		const world = get(worldStore).data[worldId as WorldId];
+		if (!world?.snapshot.worldTileMap) throw new Error(`WorldTileMap not found: ${worldId}`);
+		return world.snapshot.worldTileMap;
 	}
 
 	// ============================================================
 	// Getter functions - return undefined if not found
 	// ============================================================
-	function getOrUndefinedWorld(id: string | null | undefined): WorldData | undefined {
+	function getOrUndefinedWorld(id: string | null | undefined): World | undefined {
 		if (!id) return undefined;
 		return get(worldStore).data[id as WorldId];
 	}
@@ -116,7 +112,7 @@ function createWorldStore() {
 	function getOrUndefinedWorldCharacter(id: string | null | undefined): WorldCharacter | undefined {
 		if (!id) return undefined;
 		for (const world of Object.values(get(worldStore).data)) {
-			const char = world.worldCharacters[id as WorldCharacterId];
+			const char = world.snapshot.worldCharacters[id as WorldCharacterId];
 			if (char) return char;
 		}
 		return undefined;
@@ -127,7 +123,7 @@ function createWorldStore() {
 	): WorldCharacterNeed | undefined {
 		if (!id) return undefined;
 		for (const world of Object.values(get(worldStore).data)) {
-			const need = world.worldCharacterNeeds[id as WorldCharacterNeedId];
+			const need = world.snapshot.worldCharacterNeeds[id as WorldCharacterNeedId];
 			if (need) return need;
 		}
 		return undefined;
@@ -136,7 +132,7 @@ function createWorldStore() {
 	function getOrUndefinedWorldBuilding(id: string | null | undefined): WorldBuilding | undefined {
 		if (!id) return undefined;
 		for (const world of Object.values(get(worldStore).data)) {
-			const building = world.worldBuildings[id as WorldBuildingId];
+			const building = world.snapshot.worldBuildings[id as WorldBuildingId];
 			if (building) return building;
 		}
 		return undefined;
@@ -147,7 +143,7 @@ function createWorldStore() {
 	): WorldBuildingCondition | undefined {
 		if (!id) return undefined;
 		for (const world of Object.values(get(worldStore).data)) {
-			const condition = world.worldBuildingConditions[id as WorldBuildingConditionId];
+			const condition = world.snapshot.worldBuildingConditions[id as WorldBuildingConditionId];
 			if (condition) return condition;
 		}
 		return undefined;
@@ -156,7 +152,7 @@ function createWorldStore() {
 	function getOrUndefinedWorldItem(id: string | null | undefined): WorldItem | undefined {
 		if (!id) return undefined;
 		for (const world of Object.values(get(worldStore).data)) {
-			const item = world.worldItems[id as WorldItemId];
+			const item = world.snapshot.worldItems[id as WorldItemId];
 			if (item) return item;
 		}
 		return undefined;
@@ -166,47 +162,49 @@ function createWorldStore() {
 		worldId: string | null | undefined
 	): WorldTileMap | undefined {
 		if (!worldId) return undefined;
-		return get(worldStore).data[worldId as WorldId]?.worldTileMap;
+		return get(worldStore).data[worldId as WorldId]?.snapshot.worldTileMap;
 	}
 
 	// ============================================================
 	// GetAll functions
 	// ============================================================
-	function getAllWorlds(): WorldData[] {
+	function getAllWorlds(): World[] {
 		return Object.values(get(worldStore).data);
 	}
 
 	function getAllWorldCharacters(): WorldCharacter[] {
 		return Object.values(get(worldStore).data).flatMap((w) =>
-			Object.values(w.worldCharacters)
+			Object.values(w.snapshot.worldCharacters)
 		);
 	}
 
 	function getAllWorldCharacterNeeds(): WorldCharacterNeed[] {
 		return Object.values(get(worldStore).data).flatMap((w) =>
-			Object.values(w.worldCharacterNeeds)
+			Object.values(w.snapshot.worldCharacterNeeds)
 		);
 	}
 
 	function getAllWorldBuildings(): WorldBuilding[] {
 		return Object.values(get(worldStore).data).flatMap((w) =>
-			Object.values(w.worldBuildings)
+			Object.values(w.snapshot.worldBuildings)
 		);
 	}
 
 	function getAllWorldBuildingConditions(): WorldBuildingCondition[] {
 		return Object.values(get(worldStore).data).flatMap((w) =>
-			Object.values(w.worldBuildingConditions)
+			Object.values(w.snapshot.worldBuildingConditions)
 		);
 	}
 
 	function getAllWorldItems(): WorldItem[] {
-		return Object.values(get(worldStore).data).flatMap((w) => Object.values(w.worldItems));
+		return Object.values(get(worldStore).data).flatMap((w) =>
+			Object.values(w.snapshot.worldItems)
+		);
 	}
 
 	function getAllWorldTileMaps(): WorldTileMap[] {
 		return Object.values(get(worldStore).data)
-			.map((w) => w.worldTileMap)
+			.map((w) => w.snapshot.worldTileMap)
 			.filter((tm): tm is WorldTileMap => tm !== undefined);
 	}
 
@@ -233,18 +231,22 @@ function createWorldStore() {
 	// Store CRUD - Create
 	// ============================================================
 	function createWorld(
-		pick: Pick<WorldData, 'name' | 'terrain_id'> &
-			Partial<Pick<WorldData, 'id' | 'user_id' | 'player_id' | 'scenario_id'>>
-	): WorldData {
+		pick: Pick<World, 'name' | 'terrain_id'> &
+			Partial<Pick<World, 'id' | 'user_id' | 'player_id' | 'scenario_id'>>
+	): World {
 		let ctx: EntityContext;
 		if (pick.user_id && pick.player_id && pick.scenario_id) {
 			ctx = { user_id: pick.user_id, player_id: pick.player_id, scenario_id: pick.scenario_id };
 		} else {
 			const { player, playerScenario } = requireCurrentContext();
-			ctx = { user_id: player.user_id, player_id: player.id, scenario_id: playerScenario.scenario_id };
+			ctx = {
+				user_id: player.user_id,
+				player_id: player.id,
+				scenario_id: playerScenario.scenario_id,
+			};
 		}
 
-		const worldData: WorldData = {
+		const world: World = {
 			id: pick.id ?? (crypto.randomUUID() as WorldId),
 			user_id: ctx.user_id,
 			player_id: ctx.player_id,
@@ -254,25 +256,26 @@ function createWorldStore() {
 			created_at: new Date().toISOString(),
 			deleted_at: null,
 			updated_at: null,
-			worldCharacters: {},
-			worldCharacterNeeds: {},
-			worldBuildings: {},
-			worldBuildingConditions: {},
-			worldItems: {},
-			worldTileMap: undefined,
+			snapshot: {
+				worldCharacters: {},
+				worldCharacterNeeds: {},
+				worldBuildings: {},
+				worldBuildingConditions: {},
+				worldItems: {},
+			},
 		};
 
 		worldStore.update((state) => ({
 			...state,
-			data: { ...state.data, [worldData.id]: worldData },
+			data: { ...state.data, [world.id]: world },
 		}));
 
 		// terrain_id가 있으면 worldTileMap 자동 생성
-		if (worldData.terrain_id) {
-			createWorldTileMap({ world_id: worldData.id, terrain_id: worldData.terrain_id }, ctx);
+		if (world.terrain_id) {
+			createWorldTileMap({ world_id: world.id, terrain_id: world.terrain_id }, ctx);
 		}
 
-		return worldData;
+		return world;
 	}
 
 	function createWorldCharacter(
@@ -299,7 +302,7 @@ function createWorldStore() {
 			produce(state, (draft) => {
 				const world = draft.data[pick.world_id];
 				if (world) {
-					world.worldCharacters[worldCharacter.id] = worldCharacter;
+					world.snapshot.worldCharacters[worldCharacter.id] = worldCharacter;
 				}
 			})
 		);
@@ -331,7 +334,7 @@ function createWorldStore() {
 				const world = draft.data[pick.world_id];
 				if (world) {
 					for (const need of worldCharacterNeeds) {
-						world.worldCharacterNeeds[need.id] = need;
+						world.snapshot.worldCharacterNeeds[need.id] = need;
 					}
 				}
 			})
@@ -364,7 +367,7 @@ function createWorldStore() {
 			produce(state, (draft) => {
 				const world = draft.data[pick.world_id];
 				if (world) {
-					world.worldBuildings[worldBuilding.id] = worldBuilding;
+					world.snapshot.worldBuildings[worldBuilding.id] = worldBuilding;
 				}
 			})
 		);
@@ -398,7 +401,7 @@ function createWorldStore() {
 				const world = draft.data[pick.world_id];
 				if (world) {
 					for (const condition of worldBuildingConditions) {
-						world.worldBuildingConditions[condition.id] = condition;
+						world.snapshot.worldBuildingConditions[condition.id] = condition;
 					}
 				}
 			})
@@ -445,7 +448,7 @@ function createWorldStore() {
 			produce(state, (draft) => {
 				const world = draft.data[pick.world_id];
 				if (world) {
-					world.worldItems[worldItem.id] = worldItem;
+					world.snapshot.worldItems[worldItem.id] = worldItem;
 				}
 			})
 		);
@@ -462,7 +465,11 @@ function createWorldStore() {
 			ctx = ctxOverride;
 		} else {
 			const { player, playerScenario } = requireCurrentContext();
-			ctx = { user_id: player.user_id, player_id: player.id, scenario_id: playerScenario.scenario_id };
+			ctx = {
+				user_id: player.user_id,
+				player_id: player.id,
+				scenario_id: playerScenario.scenario_id,
+			};
 		}
 
 		const worldTileMap: WorldTileMap = {
@@ -481,7 +488,7 @@ function createWorldStore() {
 			produce(state, (draft) => {
 				const world = draft.data[pick.world_id];
 				if (world) {
-					world.worldTileMap = worldTileMap;
+					world.snapshot.worldTileMap = worldTileMap;
 				}
 			})
 		);
@@ -504,8 +511,8 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				for (const world of Object.values(draft.data)) {
-					if (world.worldCharacters[id]) {
-						delete world.worldCharacters[id];
+					if (world.snapshot.worldCharacters[id]) {
+						delete world.snapshot.worldCharacters[id];
 						return;
 					}
 				}
@@ -517,9 +524,9 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				for (const world of Object.values(draft.data)) {
-					for (const [id, need] of Object.entries(world.worldCharacterNeeds)) {
+					for (const [id, need] of Object.entries(world.snapshot.worldCharacterNeeds)) {
 						if (need?.world_character_id === worldCharacterId) {
-							delete world.worldCharacterNeeds[id as WorldCharacterNeedId];
+							delete world.snapshot.worldCharacterNeeds[id as WorldCharacterNeedId];
 						}
 					}
 				}
@@ -531,8 +538,8 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				for (const world of Object.values(draft.data)) {
-					if (world.worldBuildings[id]) {
-						delete world.worldBuildings[id];
+					if (world.snapshot.worldBuildings[id]) {
+						delete world.snapshot.worldBuildings[id];
 						return;
 					}
 				}
@@ -544,9 +551,13 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				for (const world of Object.values(draft.data)) {
-					for (const [id, condition] of Object.entries(world.worldBuildingConditions)) {
+					for (const [id, condition] of Object.entries(
+						world.snapshot.worldBuildingConditions
+					)) {
 						if (condition?.world_building_id === worldBuildingId) {
-							delete world.worldBuildingConditions[id as WorldBuildingConditionId];
+							delete world.snapshot.worldBuildingConditions[
+								id as WorldBuildingConditionId
+							];
 						}
 					}
 				}
@@ -558,8 +569,8 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				for (const world of Object.values(draft.data)) {
-					if (world.worldItems[id]) {
-						delete world.worldItems[id];
+					if (world.snapshot.worldItems[id]) {
+						delete world.snapshot.worldItems[id];
 						return;
 					}
 				}
@@ -572,7 +583,7 @@ function createWorldStore() {
 			produce(state, (draft) => {
 				const world = draft.data[worldId];
 				if (world) {
-					world.worldTileMap = undefined;
+					world.snapshot.worldTileMap = undefined;
 				}
 			})
 		);
@@ -588,9 +599,9 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				const world = draft.data[worldId];
-				if (world?.worldTileMap) {
+				if (world?.snapshot.worldTileMap) {
 					for (const [tileCellKey, data] of Object.entries(tiles)) {
-						world.worldTileMap.data[tileCellKey as TileCellKey] = data;
+						world.snapshot.worldTileMap.data[tileCellKey as TileCellKey] = data;
 					}
 				}
 			})
@@ -601,8 +612,8 @@ function createWorldStore() {
 		worldStore.update((state) =>
 			produce(state, (draft) => {
 				const world = draft.data[worldId];
-				if (world?.worldTileMap) {
-					delete world.worldTileMap.data[tileCellKey];
+				if (world?.snapshot.worldTileMap) {
+					delete world.snapshot.worldTileMap.data[tileCellKey];
 				}
 			})
 		);
@@ -724,32 +735,18 @@ function createWorldStore() {
 			if (!player) return;
 
 			// worlds 테이블에서 조회 (snapshot 포함)
-			const { data: worldData, error: worldError } = await supabase
+			const { data: worlds, error: worldError } = await supabase
 				.from('worlds')
 				.select('*')
 				.eq('player_id', player.id);
 
 			if (worldError) throw worldError;
 
-			const dataRecord: Record<WorldId, WorldData> = {};
+			const dataRecord: Record<WorldId, World> = {};
 
-			for (const world of worldData ?? []) {
-				const snapshot = world.snapshot as WorldSnapshot | null;
-				const snapshotWorld = snapshot?.worlds?.[world.id as WorldId];
-				// DB의 snapshot 필드를 제외하고 WorldData 구성
-				const { snapshot: _snapshot, ...worldWithoutSnapshot } = world as World;
-
-				const worldDataEntry: WorldData = {
-					...worldWithoutSnapshot,
-					worldCharacters: snapshotWorld?.worldCharacters ?? {},
-					worldCharacterNeeds: snapshotWorld?.worldCharacterNeeds ?? {},
-					worldBuildings: snapshotWorld?.worldBuildings ?? {},
-					worldBuildingConditions: snapshotWorld?.worldBuildingConditions ?? {},
-					worldItems: snapshotWorld?.worldItems ?? {},
-					worldTileMap: snapshotWorld?.worldTileMap ?? undefined,
-				};
-
-				dataRecord[world.id as WorldId] = worldDataEntry;
+			for (const row of worlds ?? []) {
+				const world = row as unknown as World;
+				dataRecord[world.id] = world;
 			}
 
 			worldStore.set({
@@ -768,48 +765,27 @@ function createWorldStore() {
 	}
 
 	/**
-	 * 특정 월드의 현재 스토어 상태를 WorldSnapshot으로 빌드
+	 * 특정 월드의 현재 스토어 상태에서 WorldSnapshot을 추출
 	 */
-	function buildSnapshot(worldId: WorldId): WorldSnapshot {
-		const state = get(worldStore);
-		const worldData = state.data[worldId];
-
-		const { playerStore, tickStore } = useCurrent();
-		const player = get(playerStore);
-		const { playerScenarioStore: playerScenarioAllStore } = usePlayer();
-		const currentTick = get(tickStore);
-
-		// Player/PlayerScenario 가져오기
-		const playerScenarios = get(playerScenarioAllStore).data;
-		let playerScenario: PlayerScenario | undefined;
-		for (const ps of Object.values(playerScenarios)) {
-			if (ps.player_id === player?.id) {
-				playerScenario = ps;
-				break;
-			}
+	function createWorldSnapshot(worldId: WorldId): WorldSnapshot {
+		const world = get(worldStore).data[worldId];
+		if (!world) {
+			return {
+				worldCharacters: {},
+				worldCharacterNeeds: {},
+				worldBuildings: {},
+				worldBuildingConditions: {},
+				worldItems: {},
+			};
 		}
-
-		// playerScenario의 current_tick을 현재 tick으로 업데이트
-		const finalPlayerScenario: PlayerScenario = playerScenario
-			? { ...playerScenario, current_tick: currentTick }
-			: ({} as PlayerScenario);
-
-		if (!player) {
-			throw new Error('buildSnapshot: player가 초기화되지 않았습니다.');
-		}
-
-		return {
-			worlds: worldData ? { [worldId]: worldData } : {},
-			player,
-			playerScenario: finalPlayerScenario,
-		};
+		return { ...world.snapshot };
 	}
 
 	/**
-	 * 월드 스냅샷을 빌드하여 DB에 저장한다.
+	 * 월드 스냅샷을 DB에 저장한다.
 	 */
 	async function updateWorld(worldId: WorldId): Promise<void> {
-		const snapshot = buildSnapshot(worldId);
+		const snapshot = createWorldSnapshot(worldId);
 
 		const { error } = await supabase
 			.from('worlds')
@@ -830,7 +806,7 @@ function createWorldStore() {
 		selectedEntityIdStore,
 		init,
 		fetch,
-		buildSnapshot,
+		createWorldSnapshot,
 		updateWorld,
 		setSelectedEntityId,
 		getWorld,

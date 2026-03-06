@@ -32,7 +32,7 @@ import type {
 	ScenarioId,
 	UserId,
 	UserRoleId,
-	WorldData,
+	World,
 	WorldCharacter,
 	WorldCharacterId,
 	WorldCharacterNeed,
@@ -99,7 +99,7 @@ let conditionA: Condition | undefined;
 let buildingA: Building | undefined;
 let worldCharacterA: WorldCharacter | undefined;
 
-export function createOrGetWorld(): WorldData {
+export function createOrGetWorld(): World {
 	const worldStore = useWorld().worldStore;
 	const existingWorld = Object.values(get(worldStore).data)[0];
 	if (existingWorld) return existingWorld;
@@ -108,7 +108,7 @@ export function createOrGetWorld(): WorldData {
 	const player = createOrGetPlayer();
 	const createdAt = new Date().toISOString();
 	const worldId = uuidv4() as WorldId;
-	const value: WorldData = {
+	const value: World = {
 		id: worldId,
 		user_id: player.user_id,
 		player_id: player.id,
@@ -118,12 +118,13 @@ export function createOrGetWorld(): WorldData {
 		deleted_at: null,
 		created_at: createdAt,
 		updated_at: null,
-		worldCharacters: {},
-		worldCharacterNeeds: {},
-		worldBuildings: {},
-		worldBuildingConditions: {},
-		worldItems: {},
-		worldTileMap: undefined,
+		snapshot: {
+			worldCharacters: {},
+			worldCharacterNeeds: {},
+			worldBuildings: {},
+			worldBuildingConditions: {},
+			worldItems: {},
+		},
 	};
 	useWorld().worldStore.update((state) => ({
 		...state,
@@ -202,7 +203,7 @@ export function createWorldCharacter(
 	worldStore.update((state) =>
 		produce(state, (draft) => {
 			const w = draft.data[value.world_id];
-			if (w) w.worldCharacters[value.id] = value;
+			if (w) w.snapshot.worldCharacters[value.id] = value;
 		})
 	);
 	return value;
@@ -239,7 +240,7 @@ export function createWorldCharacterNeed(
 	worldStore.update((state) =>
 		produce(state, (draft) => {
 			const w = draft.data[value.world_id];
-			if (w) w.worldCharacterNeeds[value.id] = value;
+			if (w) w.snapshot.worldCharacterNeeds[value.id] = value;
 		})
 	);
 	return value;
@@ -269,7 +270,7 @@ export function createWorldItem(item: Item, overrides: Partial<WorldItem> = {}):
 	useWorld().worldStore.update((state) =>
 		produce(state, (draft) => {
 			const w = draft.data[value.world_id];
-			if (w) w.worldItems[value.id] = value;
+			if (w) w.snapshot.worldItems[value.id] = value;
 		})
 	);
 	return value;

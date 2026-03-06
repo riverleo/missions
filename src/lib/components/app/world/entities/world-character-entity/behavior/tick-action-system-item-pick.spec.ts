@@ -80,7 +80,7 @@ describe('tickActionSystemItemPick(tick: number)', () => {
 			produce(state, (draft) => {
 				const world = draft.data[worldItem.world_id];
 				if (world) {
-					const wi = world.worldItems[targetItemEntity.instanceId];
+					const wi = world.snapshot.worldItems[targetItemEntity.instanceId];
 					if (wi) wi.world_character_id = entity.instanceId;
 				}
 			})

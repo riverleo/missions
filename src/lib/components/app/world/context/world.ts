@@ -1,12 +1,12 @@
 import { useWorld } from '$lib/hooks';
-import type { WorldData, WorldId } from '$lib/types';
+import type { World, WorldId } from '$lib/types';
 import type { WorldContext } from './world-context.svelte';
 import { deleteWorldCharacter } from './world-character';
 import { deleteWorldBuilding } from './world-building';
 import { deleteWorldItem } from './world-item';
 
 export function createWorld(
-	insert: Pick<WorldData, 'name' | 'terrain_id'> & Partial<Pick<WorldData, 'id'>>
+	insert: Pick<World, 'name' | 'terrain_id'> & Partial<Pick<World, 'id'>>
 ) {
 	const world = useWorld();
 	return world.createWorld(insert);

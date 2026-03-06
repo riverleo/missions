@@ -21,7 +21,7 @@
 	const { worldStore, getOrUndefinedWorldCharacter } = useWorld();
 
 	const item = $derived(entity.item);
-	const worldItem = $derived($worldStore.data[entity.worldId]?.worldItems[entity.instanceId]);
+	const worldItem = $derived($worldStore.data[entity.worldId]?.snapshot.worldItems[entity.instanceId]);
 	const itemLabel = $derived(getNameWithId(entity.id));
 
 	const holderCharacterLabel = $derived.by(() => {

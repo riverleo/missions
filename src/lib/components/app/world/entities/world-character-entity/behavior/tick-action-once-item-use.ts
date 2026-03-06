@@ -155,7 +155,7 @@ function applyCompletedOnceItemUse(behavior: WorldCharacterEntityBehavior): void
 				produce(state, (draft) => {
 					const world = draft.data[worldItem.world_id];
 					if (world) {
-						const wi = world.worldItems[worldItemId];
+						const wi = world.snapshot.worldItems[worldItemId];
 						if (wi) wi.world_character_id = null;
 					}
 				})

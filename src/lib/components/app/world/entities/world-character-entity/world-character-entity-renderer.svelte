@@ -22,7 +22,7 @@
 	const { itemStore, itemStateStore } = useItem();
 	const { itemInteractionActionStore } = useInteraction();
 
-	const worldCharacter = $derived($worldStore.data[entity.worldId]?.worldCharacters[entity.instanceId]);
+	const worldCharacter = $derived($worldStore.data[entity.worldId]?.snapshot.worldCharacters[entity.instanceId]);
 	const character = $derived(
 		worldCharacter ? $characterStore.data[worldCharacter.character_id] : undefined
 	);
@@ -37,7 +37,7 @@
 		if (!lastHeldEntityId) return undefined;
 
 		const { instanceId } = EntityIdUtils.parse(lastHeldEntityId);
-		const worldItem = $worldStore.data[entity.worldId]?.worldItems[instanceId as WorldItemId];
+		const worldItem = $worldStore.data[entity.worldId]?.snapshot.worldItems[instanceId as WorldItemId];
 		if (!worldItem) return undefined;
 
 		const item = $itemStore.data[worldItem.item_id];

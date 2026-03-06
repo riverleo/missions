@@ -1,7 +1,7 @@
 import { writable, get } from 'svelte/store';
 import { produce } from 'immer';
 import { browser } from '$app/environment';
-import type { TerrainId, ScreenVector } from '$lib/types';
+import type { TerrainId, ScreenVector, World, WorldId } from '$lib/types';
 import type { WorldContext } from '$lib/components/app/world/context';
 import type { TestWorldSnapshot } from '$lib/types/hooks';
 import { useWorld } from './use-world';
@@ -136,11 +136,30 @@ function createTestWorldStore() {
 		// 플레이어/시나리오 컨텍스트를 먼저 설정 (selectPlayer 포함)
 		ensureContext();
 
-		// 스냅샷의 worlds를 그대로 worldStore에 복원
+		// TestWorldSnapshot의 엔티티 데이터를 World 객체로 조립하여 worldStore에 복원
 		const { worldStore } = useWorld();
+		const world: World = {
+			id: TEST_WORLD_ID,
+			user_id: stored.player.user_id,
+			player_id: stored.player.id,
+			scenario_id: stored.playerScenario.scenario_id,
+			terrain_id: stored.selectedTerrainId ?? null,
+			name: 'Test World',
+			created_at: new Date().toISOString(),
+			deleted_at: null,
+			updated_at: null,
+			snapshot: {
+				worldCharacters: stored.worldCharacters ?? {},
+				worldCharacterNeeds: stored.worldCharacterNeeds ?? {},
+				worldBuildings: stored.worldBuildings ?? {},
+				worldBuildingConditions: stored.worldBuildingConditions ?? {},
+				worldItems: stored.worldItems ?? {},
+				worldTileMap: stored.worldTileMap,
+			},
+		};
 		worldStore.set({
 			status: 'success',
-			data: stored.worlds ?? {},
+			data: { [TEST_WORLD_ID]: world } as Record<WorldId, World>,
 			error: undefined,
 		});
 	}
