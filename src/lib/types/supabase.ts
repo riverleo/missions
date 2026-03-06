@@ -1,5 +1,5 @@
 import type { Database } from './supabase.generated';
-import type { Brand } from './core';
+import type { Brand, WorldSnapshot } from './core';
 import type { VectorKey, TileCellKey } from './vector';
 
 // ============================================================
@@ -745,13 +745,14 @@ export type CharacterUpdate = Omit<
 type WorldRow = Tables<'worlds'>;
 export type World = Omit<
 	WorldRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'deleted_at'
+	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'terrain_id' | 'snapshot' | 'deleted_at'
 > & {
 	id: WorldId;
 	user_id: UserId;
 	player_id: PlayerId;
 	scenario_id: ScenarioId;
 	terrain_id: TerrainId | null;
+	snapshot: WorldSnapshot;
 	deleted_at: string | null;
 };
 type WorldInsertRow = TablesInsert<'worlds'>;
@@ -778,79 +779,8 @@ export type WorldUpdate = Omit<
 	deleted_at?: string | null;
 };
 
-// World Character types
-type WorldCharacterRow = Tables<'world_characters'>;
-export type WorldCharacter = Omit<
-	WorldCharacterRow,
-	'id' | 'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
-> & {
-	id: WorldCharacterId;
-	user_id: UserId;
-	world_id: WorldId;
-	character_id: CharacterId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldCharacterInsertRow = TablesInsert<'world_characters'>;
-export type WorldCharacterInsert = Omit<
-	WorldCharacterInsertRow,
-	'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
-> & {
-	user_id: UserId;
-	world_id: WorldId;
-	character_id: CharacterId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldCharacterUpdateRow = TablesUpdate<'world_characters'>;
-export type WorldCharacterUpdate = Omit<
-	WorldCharacterUpdateRow,
-	'id' | 'user_id' | 'world_id' | 'character_id' | 'player_id' | 'scenario_id'
-> & {
-	id?: WorldCharacterId;
-	user_id?: UserId;
-	world_id?: WorldId;
-	character_id?: CharacterId;
-	player_id?: PlayerId;
-	scenario_id?: ScenarioId;
-};
-
-// World Building types
-type WorldBuildingRow = Tables<'world_buildings'>;
-export type WorldBuilding = Omit<
-	WorldBuildingRow,
-	'id' | 'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
-> & {
-	id: WorldBuildingId;
-	user_id: UserId;
-	world_id: WorldId;
-	building_id: BuildingId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldBuildingInsertRow = TablesInsert<'world_buildings'>;
-export type WorldBuildingInsert = Omit<
-	WorldBuildingInsertRow,
-	'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
-> & {
-	user_id: UserId;
-	world_id: WorldId;
-	building_id: BuildingId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldBuildingUpdateRow = TablesUpdate<'world_buildings'>;
-export type WorldBuildingUpdate = Omit<
-	WorldBuildingUpdateRow,
-	'id' | 'user_id' | 'world_id' | 'building_id' | 'player_id' | 'scenario_id'
-> & {
-	id?: WorldBuildingId;
-	user_id?: UserId;
-	world_id?: WorldId;
-	building_id?: BuildingId;
-	player_id?: PlayerId;
-	scenario_id?: ScenarioId;
-};
+// World Character types → moved to core.ts
+// World Building types → moved to core.ts
 
 // Building types
 type BuildingRow = Tables<'buildings'>;
@@ -1179,74 +1109,7 @@ export type BuildingConditionUpdate = Omit<
 	created_by?: UserRoleId | null;
 };
 
-// World Building Condition types
-type WorldBuildingConditionRow = Tables<'world_building_conditions'>;
-export type WorldBuildingCondition = Omit<
-	WorldBuildingConditionRow,
-	| 'id'
-	| 'scenario_id'
-	| 'user_id'
-	| 'player_id'
-	| 'world_id'
-	| 'world_building_id'
-	| 'building_id'
-	| 'building_condition_id'
-	| 'condition_id'
-> & {
-	id: WorldBuildingConditionId;
-	scenario_id: ScenarioId;
-	user_id: UserId;
-	player_id: PlayerId;
-	world_id: WorldId;
-	world_building_id: WorldBuildingId;
-	building_id: BuildingId;
-	building_condition_id: BuildingConditionId;
-	condition_id: ConditionId;
-};
-type WorldBuildingConditionInsertRow = TablesInsert<'world_building_conditions'>;
-export type WorldBuildingConditionInsert = Omit<
-	WorldBuildingConditionInsertRow,
-	| 'scenario_id'
-	| 'user_id'
-	| 'player_id'
-	| 'world_id'
-	| 'world_building_id'
-	| 'building_id'
-	| 'building_condition_id'
-	| 'condition_id'
-> & {
-	scenario_id: ScenarioId;
-	user_id: UserId;
-	player_id: PlayerId;
-	world_id: WorldId;
-	world_building_id: WorldBuildingId;
-	building_id: BuildingId;
-	building_condition_id: BuildingConditionId;
-	condition_id: ConditionId;
-};
-type WorldBuildingConditionUpdateRow = TablesUpdate<'world_building_conditions'>;
-export type WorldBuildingConditionUpdate = Omit<
-	WorldBuildingConditionUpdateRow,
-	| 'id'
-	| 'scenario_id'
-	| 'user_id'
-	| 'player_id'
-	| 'world_id'
-	| 'world_building_id'
-	| 'building_id'
-	| 'building_condition_id'
-	| 'condition_id'
-> & {
-	id?: WorldBuildingConditionId;
-	scenario_id?: ScenarioId;
-	user_id?: UserId;
-	player_id?: PlayerId;
-	world_id?: WorldId;
-	world_building_id?: WorldBuildingId;
-	building_id?: BuildingId;
-	building_condition_id?: BuildingConditionId;
-	condition_id?: ConditionId;
-};
+// World Building Condition types → moved to core.ts
 
 // Need types
 type NeedRow = Tables<'needs'>;
@@ -1800,68 +1663,7 @@ export type ItemStateUpdate = Omit<ItemStateUpdateRow, 'id' | 'item_id'> & {
 	item_id?: ItemId;
 };
 
-// World Item types
-type WorldItemRow = Tables<'world_items'>;
-export type WorldItem = Omit<
-	WorldItemRow,
-	| 'id'
-	| 'user_id'
-	| 'world_id'
-	| 'item_id'
-	| 'player_id'
-	| 'scenario_id'
-	| 'world_building_id'
-	| 'world_character_id'
-> & {
-	id: WorldItemId;
-	user_id: UserId;
-	world_id: WorldId;
-	item_id: ItemId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	world_building_id: WorldBuildingId | null;
-	world_character_id: WorldCharacterId | null;
-};
-type WorldItemInsertRow = TablesInsert<'world_items'>;
-export type WorldItemInsert = Omit<
-	WorldItemInsertRow,
-	| 'user_id'
-	| 'world_id'
-	| 'item_id'
-	| 'player_id'
-	| 'scenario_id'
-	| 'world_building_id'
-	| 'world_character_id'
-> & {
-	user_id: UserId;
-	world_id: WorldId;
-	item_id: ItemId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	world_building_id?: WorldBuildingId | null;
-	world_character_id?: WorldCharacterId | null;
-};
-type WorldItemUpdateRow = TablesUpdate<'world_items'>;
-export type WorldItemUpdate = Omit<
-	WorldItemUpdateRow,
-	| 'id'
-	| 'user_id'
-	| 'world_id'
-	| 'item_id'
-	| 'player_id'
-	| 'scenario_id'
-	| 'world_building_id'
-	| 'world_character_id'
-> & {
-	id?: WorldItemId;
-	user_id?: UserId;
-	world_id?: WorldId;
-	item_id?: ItemId;
-	player_id?: PlayerId;
-	scenario_id?: ScenarioId;
-	world_building_id?: WorldBuildingId | null;
-	world_character_id?: WorldCharacterId | null;
-};
+// World Item types → moved to core.ts
 
 // Tile types
 type TileRow = Tables<'tiles'>;
@@ -1935,107 +1737,8 @@ export type TerrainTileUpdate = Omit<
 	created_by?: UserRoleId | null;
 };
 
-// World Tile Map types
-type WorldTileMapRow = Tables<'world_tile_maps'>;
-export type WorldTileMap = Omit<
-	WorldTileMapRow,
-	'scenario_id' | 'user_id' | 'player_id' | 'world_id' | 'terrain_id' | 'data'
-> & {
-	scenario_id: ScenarioId;
-	user_id: UserId;
-	player_id: PlayerId;
-	world_id: WorldId;
-	terrain_id: TerrainId;
-	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
-};
-type WorldTileMapInsertRow = TablesInsert<'world_tile_maps'>;
-export type WorldTileMapInsert = Omit<
-	WorldTileMapInsertRow,
-	'user_id' | 'player_id' | 'scenario_id' | 'world_id' | 'terrain_id' | 'data'
-> & {
-	user_id?: UserId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	world_id: WorldId;
-	terrain_id: TerrainId;
-	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
-};
-type WorldTileMapUpdateRow = TablesUpdate<'world_tile_maps'>;
-export type WorldTileMapUpdate = Omit<
-	WorldTileMapUpdateRow,
-	'id' | 'user_id' | 'player_id' | 'scenario_id' | 'world_id' | 'terrain_id' | 'data'
-> & {
-	id?: WorldTileMapId;
-	user_id?: UserId;
-	player_id?: PlayerId;
-	scenario_id?: ScenarioId;
-	world_id?: WorldId;
-	terrain_id?: TerrainId;
-	data?: Record<TileCellKey, { tile_id: TileId; durability: number }>;
-};
-
-// World Character Need types
-type WorldCharacterNeedRow = Tables<'world_character_needs'>;
-export type WorldCharacterNeed = Omit<
-	WorldCharacterNeedRow,
-	| 'id'
-	| 'user_id'
-	| 'world_id'
-	| 'world_character_id'
-	| 'character_id'
-	| 'need_id'
-	| 'player_id'
-	| 'scenario_id'
-> & {
-	id: WorldCharacterNeedId;
-	user_id: UserId;
-	world_id: WorldId;
-	world_character_id: WorldCharacterId;
-	character_id: CharacterId;
-	need_id: NeedId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldCharacterNeedInsertRow = TablesInsert<'world_character_needs'>;
-export type WorldCharacterNeedInsert = Omit<
-	WorldCharacterNeedInsertRow,
-	| 'user_id'
-	| 'world_id'
-	| 'world_character_id'
-	| 'character_id'
-	| 'need_id'
-	| 'player_id'
-	| 'scenario_id'
-> & {
-	user_id: UserId;
-	world_id: WorldId;
-	world_character_id: WorldCharacterId;
-	character_id: CharacterId;
-	need_id: NeedId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-};
-type WorldCharacterNeedUpdateRow = TablesUpdate<'world_character_needs'>;
-export type WorldCharacterNeedUpdate = Omit<
-	WorldCharacterNeedUpdateRow,
-	| 'id'
-	| 'user_id'
-	| 'world_id'
-	| 'world_character_id'
-	| 'character_id'
-	| 'need_id'
-	| 'player_id'
-	| 'scenario_id'
-> & {
-	id?: WorldCharacterNeedId;
-	user_id?: UserId;
-	world_id?: WorldId;
-	world_character_id?: WorldCharacterId;
-	character_id?: CharacterId;
-	need_id?: NeedId;
-	player_id?: PlayerId;
-	scenario_id?: ScenarioId;
-};
+// World Tile Map types → moved to core.ts
+// World Character Need types → moved to core.ts
 
 // ============================================================
 // ScenarioSnapshot

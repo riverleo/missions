@@ -1,5 +1,6 @@
 import { useItem, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
+import { produce } from 'immer';
 import type { WorldItemId, Item, ItemId, WorldId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { CATEGORY_BOUNDARY, CATEGORY_TILE, CATEGORY_ITEM } from '$lib/constants';
@@ -63,14 +64,21 @@ export class WorldItemEntity extends Entity {
 	}
 
 	save(): void {
-		const { updateWorldItem } = useWorld();
+		const { worldStore } = useWorld();
 
-		updateWorldItem(this.instanceId, {
-			x: this.x,
-			y: this.y,
-			rotation: this.angle,
-			durability_ticks: this.durabilityTicks ?? null,
-		});
+		worldStore.update((state) =>
+			produce(state, (draft) => {
+				const world = draft.data[this.worldId];
+				if (!world) return;
+				const wi = world.snapshot.worldItems[this.instanceId];
+				if (wi) {
+					wi.x = this.x;
+					wi.y = this.y;
+					wi.rotation = this.angle;
+					wi.durability_ticks = this.durabilityTicks ?? null;
+				}
+			})
+		);
 	}
 
 	update(_: BeforeUpdateEvent): void {

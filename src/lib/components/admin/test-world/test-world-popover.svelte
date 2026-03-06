@@ -12,7 +12,7 @@
 	import { WORLD_WIDTH, WORLD_HEIGHT, TEST_WORLD_ID } from '$lib/constants';
 	import type { WorldContext } from '$lib/components/app/world/context';
 
-	const { store, setOpen, setModalScreenVector, init } = useWorldTest();
+	const { store, setOpen, setModalScreenVector, save, init } = useWorldTest();
 	const { fetchAllStatus } = useScenario();
 
 	let worldContext = $state<WorldContext | undefined>(undefined);
@@ -21,6 +21,13 @@
 	$effect(() => {
 		if ($fetchAllStatus === 'success') {
 			init();
+		}
+	});
+
+	// 틱 완료 후 자동 저장 (localStorage)
+	$effect(() => {
+		if (worldContext) {
+			worldContext.ontickend = save;
 		}
 	});
 

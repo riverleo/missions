@@ -118,11 +118,12 @@ export class WorldContextBlueprint {
 
 		// 스토어 값들을 한 번만 조회
 		const { buildingStore, getBuilding } = useBuilding();
-		const { worldBuildingStore, worldTileMapStore } = useWorld();
+		const { worldStore } = useWorld();
 
 		const buildingStoreData = get(buildingStore).data;
-		const worldBuildingStoreData = get(worldBuildingStore).data;
-		const worldTileMapStoreData = get(worldTileMapStore).data;
+		const worldData = get(worldStore).data[this.context.worldId];
+		const worldBuildingStoreData = worldData?.snapshot.worldBuildings ?? {};
+		const worldTileMapData = worldData?.snapshot.worldTileMap;
 
 		// 배치하려는 셀의 범위 계산 (객체 생성 대신 범위만)
 		let targetMinCol: number;
@@ -177,7 +178,7 @@ export class WorldContextBlueprint {
 		}
 
 		// 기존 타일들이 차지하는 셀 수집 (1 tile = 2x2 cells)
-		const worldTileMap = worldTileMapStoreData[this.context.worldId];
+		const worldTileMap = worldTileMapData;
 		if (worldTileMap) {
 			for (const vector of Object.keys(worldTileMap.data)) {
 				const [tileXStr, tileYStr] = vector.split(',');

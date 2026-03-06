@@ -10,9 +10,9 @@
 	let { entity }: Props = $props();
 
 	const { buildingStore: buildingStore } = useBuilding();
-	const { worldBuildingStore } = useWorld();
+	const { worldStore } = useWorld();
 
-	const worldBuilding = $derived($worldBuildingStore.data[entity.instanceId]);
+	const worldBuilding = $derived($worldStore.data[entity.worldId]?.snapshot.worldBuildings[entity.instanceId]);
 	const building = $derived(
 		worldBuilding ? $buildingStore.data[worldBuilding.building_id] : undefined
 	);

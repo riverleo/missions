@@ -50,6 +50,7 @@ export class WorldContext {
 	render: Matter.Render | undefined = $state.raw(undefined);
 	mouseConstraint: Matter.MouseConstraint | undefined = $state.raw(undefined);
 	oncamerachange: ((camera: Camera) => void) | undefined;
+	ontickend: (() => void) | undefined;
 
 	private respawningEntityIds = new Set<EntityId>();
 	private mouseDownScreenPosition: { x: number; y: number } | undefined;
@@ -308,9 +309,12 @@ export class WorldContext {
 
 		Runner.run(this.runner, this.engine);
 
-		// 틱 구독 (틱이 변경될 때마다 모든 엔티티의 tick 메서드 호출)
+		// 틱 구독 (틱이 변경될 때마다 모든 엔티티의 tick 메서드 호출 → 자동 저장)
 		this.tickUnsubscriber = useCurrent().tickStore.subscribe((currentTick) => {
 			this.tickEntities(currentTick);
+			// 틱 완료 후 런타임 상태를 스토어에 반영 → localStorage 저장
+			this.saveAllEntities();
+			this.ontickend?.();
 		});
 
 		return () => {

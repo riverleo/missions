@@ -35,4 +35,5 @@ export const TEST_PLAYER_ID = 'test-player-id' as PlayerId;
 export const TEST_SCENARIO_ID = 'test-scenario-id' as ScenarioId;
 export const TEST_SCENARIO_SNAPSHOT_ID = 'test-scenario-snapshot-id' as ScenarioSnapshotId;
 
-export const TEST_WORLD_STATE_STORAGE_KEY = 'test-world-state';
+export const TEST_WORLD_SNAPSHOT_KEY = 'test-world-snapshot';
+export const WORLD_SNAPSHOT_KEY = 'world-snapshot';

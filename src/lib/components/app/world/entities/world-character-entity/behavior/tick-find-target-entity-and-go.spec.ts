@@ -1,4 +1,5 @@
 import { Fixture } from '$lib/hooks/fixture';
+import { produce } from 'immer';
 import {
 	createCharacterInteraction,
 	createNeedFulfillment,
@@ -188,9 +189,16 @@ describe('tickFindTargetEntityAndGo(tick: number)', () => {
 
 	it('다른 캐릭터 아이디가 기록된 아이템은 목표 엔티티 후보에서 제외한다.', () => {
 		// 1) 아이템이 다른 캐릭터 소유 상태임을 기록한다.
-		useWorld().updateWorldItem(droppedItemEntity.instanceId, {
-			world_character_id: holdingEntity.instanceId,
-		});
+		const worldItem = useWorld().getWorldItem(droppedItemEntity.instanceId);
+		useWorld().worldStore.update((state) =>
+			produce(state, (draft) => {
+				const world = draft.data[worldItem.world_id];
+				if (world) {
+					const wi = world.snapshot.worldItems[droppedItemEntity.instanceId];
+					if (wi) wi.world_character_id = holdingEntity.instanceId;
+				}
+			})
+		);
 
 		// 2) 캐릭터 틱을 진행한다.
 		nonHoldingEntity.tick(FIRST_TICK);

@@ -6,7 +6,9 @@ create table worlds (
   scenario_id uuid not null references scenarios(id) on delete cascade,
   terrain_id uuid references terrains(id) on delete set null,
   name text not null,
+  snapshot jsonb,
   created_at timestamptz not null default now(),
+  updated_at timestamptz,
   deleted_at timestamptz
 );
 

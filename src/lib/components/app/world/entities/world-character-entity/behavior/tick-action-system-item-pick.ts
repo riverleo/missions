@@ -1,5 +1,6 @@
 import { TARGET_ARRIVAL_DISTANCE } from '$lib/constants';
 import { useBehavior, useInteraction, useWorld } from '$lib/hooks';
+import { produce } from 'immer';
 import type { InteractionAction, InteractionTargetId, WorldItemId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
@@ -112,7 +113,7 @@ function applyCompletedSystemItemPick(behavior: WorldCharacterEntityBehavior): v
 	}
 
 	const worldItemId = EntityIdUtils.instanceId<WorldItemId>(behavior.targetEntityId);
-	const { getOrUndefinedWorldItem, updateWorldItem } = useWorld();
+	const { worldStore, getOrUndefinedWorldItem } = useWorld();
 	const worldItem = getOrUndefinedWorldItem(worldItemId);
 	if (!worldItem) return;
 
@@ -123,9 +124,15 @@ function applyCompletedSystemItemPick(behavior: WorldCharacterEntityBehavior): v
 		return;
 	}
 
-	updateWorldItem(worldItemId, {
-		world_character_id: behavior.worldCharacterEntity.instanceId,
-	});
+	worldStore.update((state) =>
+		produce(state, (draft) => {
+			const world = draft.data[worldItem.world_id];
+			if (world) {
+				const wi = world.snapshot.worldItems[worldItemId];
+				if (wi) wi.world_character_id = behavior.worldCharacterEntity.instanceId;
+			}
+		})
+	);
 
 	if (!behavior.worldCharacterEntity.heldItemIds.includes(behavior.targetEntityId)) {
 		behavior.worldCharacterEntity.heldItemIds = [

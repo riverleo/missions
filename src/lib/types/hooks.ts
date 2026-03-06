@@ -7,25 +7,13 @@ import type {
 	NarrativeNodeChoice,
 	NarrativeNodeChoiceId,
 	NarrativeNodeId,
-	PlayerRolledDice,
-	RecordFetchState,
-	World,
-	WorldCharacter,
-	WorldCharacterNeed,
-	WorldCharacterNeedId,
-	WorldBuilding,
-	WorldBuildingCondition,
-	WorldBuildingConditionId,
-	WorldItem,
-	WorldTileMap,
-	WorldId,
-	WorldCharacterId,
-	WorldBuildingId,
-	WorldItemId,
-	TerrainId,
 	Player,
+	PlayerRolledDice,
 	PlayerScenario,
+	RecordFetchState,
+	TerrainId,
 	ScreenVector,
+	WorldSnapshot,
 } from '$lib/types';
 import type { Writable } from 'svelte/store';
 
@@ -62,20 +50,14 @@ export interface PlayStoreState {
 }
 export type PlayStore = Writable<PlayStoreState>;
 
-// World Test
-export interface StoredState {
+// World Test — WorldSnapshot(단일 월드 스냅샷)을 확장하여 테스트 전용 필드 추가.
+// player/playerScenario는 테스트 환경에서 로그인 없이 사용하기 위한 필드.
+export interface TestWorldSnapshot extends WorldSnapshot {
+	player: Player;
+	playerScenario: PlayerScenario;
 	open: boolean;
 	openPanel: boolean;
 	selectedTerrainId?: TerrainId;
 	modalScreenVector: ScreenVector;
 	debug: boolean;
-	worlds?: Record<WorldId, World>;
-	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
-	worldCharacterNeeds?: Record<WorldCharacterNeedId, WorldCharacterNeed>;
-	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
-	worldBuildingConditions?: Record<WorldBuildingConditionId, WorldBuildingCondition>;
-	worldItems?: Record<WorldItemId, WorldItem>;
-	worldTileMaps?: Record<WorldId, WorldTileMap>;
-	player: Player;
-	playerScenario: PlayerScenario;
 }

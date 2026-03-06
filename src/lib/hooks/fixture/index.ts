@@ -97,13 +97,11 @@ export const Fixture = {
 		reset(player.playerScenarioStore);
 		reset(scenario.scenarioStore);
 		reset(scenario.scenarioSnapshotStore);
-		reset(world.worldStore);
-		reset(world.worldCharacterStore);
-		reset(world.worldCharacterNeedStore);
-		reset(world.worldBuildingStore);
-		reset(world.worldBuildingConditionStore);
-		reset(world.worldItemStore);
-		reset(world.worldTileMapStore);
+		world.worldStore.set({
+			status: 'success',
+			data: {},
+			error: undefined,
+		});
 		world.selectedEntityIdStore.set({ entityId: undefined });
 	},
 };

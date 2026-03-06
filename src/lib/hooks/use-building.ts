@@ -15,7 +15,6 @@ import type {
 	Condition,
 	ConditionInsert,
 	ConditionUpdate,
-	ConditionFulfillment,
 	BuildingCondition,
 	BuildingConditionInsert,
 	BuildingConditionUpdate,
@@ -28,16 +27,13 @@ import type {
 	BuildingInteractionId,
 	BuildingInteractionActionId,
 	ConditionId,
-	ConditionFulfillmentId,
 	BuildingConditionId,
 	ConditionEffectId,
 	ScenarioId,
-	WorldBuildingId,
 } from '$lib/types';
 import { useApp } from './use-app.svelte';
 import { useFulfillment } from './use-fulfillment';
 import { useInteraction } from './use-interaction';
-import { useWorld } from './use-world';
 
 type BuildingDialogState =
 	| { type: 'create' }
@@ -250,7 +246,9 @@ function createBuildingStore() {
 		return get(buildingItemStore).data[id as BuildingItemId];
 	}
 
-	function getOrUndefinedBuildingStates(buildingId: string | null | undefined): BuildingState[] | undefined {
+	function getOrUndefinedBuildingStates(
+		buildingId: string | null | undefined
+	): BuildingState[] | undefined {
 		if (!buildingId) return undefined;
 		return get(buildingStateStore).data[buildingId as BuildingId];
 	}
@@ -260,13 +258,16 @@ function createBuildingStore() {
 		return get(conditionStore).data[id as ConditionId];
 	}
 
-
-	function getOrUndefinedBuildingCondition(id: string | null | undefined): BuildingCondition | undefined {
+	function getOrUndefinedBuildingCondition(
+		id: string | null | undefined
+	): BuildingCondition | undefined {
 		if (!id) return undefined;
 		return get(buildingConditionStore).data[id as BuildingConditionId];
 	}
 
-	function getOrUndefinedConditionEffect(id: string | null | undefined): ConditionEffect | undefined {
+	function getOrUndefinedConditionEffect(
+		id: string | null | undefined
+	): ConditionEffect | undefined {
 		if (!id) return undefined;
 		return get(conditionEffectStore).data[id as ConditionEffectId];
 	}
@@ -287,7 +288,6 @@ function createBuildingStore() {
 	function getAllConditions(): Condition[] {
 		return get(allConditionsStore);
 	}
-
 
 	function getAllBuildingConditions(): BuildingCondition[] {
 		return get(allBuildingConditionsStore);

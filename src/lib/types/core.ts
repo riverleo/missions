@@ -8,17 +8,24 @@ import type {
 	NeedBehaviorActionId,
 	NeedFulfillmentId,
 	ConditionFulfillmentId,
+	UserId,
+	PlayerId,
+	ScenarioId,
+	TerrainId,
+	CharacterId,
+	NeedId,
+	ConditionId,
+	BuildingConditionId,
 	WorldId,
 	WorldBuildingId,
+	WorldBuildingConditionId,
 	WorldCharacterId,
+	WorldCharacterNeedId,
 	WorldItemId,
+	WorldTileMapId,
 	BuildingId,
-	CharacterId,
 	ItemId,
 	TileId,
-	WorldBuilding,
-	WorldCharacter,
-	WorldItem,
 	Tile,
 	Item,
 	Character,
@@ -44,6 +51,9 @@ import type {
 	OnceInteractionType,
 	FulfillInteractionType,
 	SystemInteractionType,
+	World,
+	Player,
+	PlayerScenario,
 } from './supabase';
 import type { Vector, Cell, TileCell, TileCellKey, VectorKey } from './vector';
 
@@ -243,3 +253,108 @@ export type BehaviorInteractionType =
 	| OnceInteractionType
 	| FulfillInteractionType
 	| SystemInteractionType;
+
+// ============================================================
+// World Entity Types (standalone, no Supabase dependency)
+// ============================================================
+
+// --- WorldCharacter ---
+export interface WorldCharacter {
+	id: WorldCharacterId;
+	user_id: UserId;
+	world_id: WorldId;
+	character_id: CharacterId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	created_at: string;
+	created_at_tick: number;
+	deleted_at: string | null;
+	x: number;
+	y: number;
+}
+// --- WorldBuilding ---
+export interface WorldBuilding {
+	id: WorldBuildingId;
+	user_id: UserId;
+	world_id: WorldId;
+	building_id: BuildingId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	cell_x: number;
+	cell_y: number;
+	created_at: string;
+	created_at_tick: number;
+	deleted_at: string | null;
+}
+// --- WorldBuildingCondition ---
+export interface WorldBuildingCondition {
+	id: WorldBuildingConditionId;
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	world_building_id: WorldBuildingId;
+	building_id: BuildingId;
+	building_condition_id: BuildingConditionId;
+	condition_id: ConditionId;
+	created_at: string;
+	deleted_at: string | null;
+	value: number;
+}
+// --- WorldItem ---
+export interface WorldItem {
+	id: WorldItemId;
+	user_id: UserId;
+	world_id: WorldId;
+	item_id: ItemId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	world_building_id: WorldBuildingId | null;
+	world_character_id: WorldCharacterId | null;
+	created_at: string;
+	created_at_tick: number;
+	deleted_at: string | null;
+	durability_ticks: number | null;
+	rotation: number;
+	x: number;
+	y: number;
+}
+// --- WorldTileMap ---
+export interface WorldTileMap {
+	id: string;
+	scenario_id: ScenarioId;
+	user_id: UserId;
+	player_id: PlayerId;
+	world_id: WorldId;
+	terrain_id: TerrainId;
+	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
+	created_at: string;
+	deleted_at: string | null;
+}
+// --- WorldCharacterNeed ---
+export interface WorldCharacterNeed {
+	id: WorldCharacterNeedId;
+	user_id: UserId;
+	world_id: WorldId;
+	world_character_id: WorldCharacterId;
+	character_id: CharacterId;
+	need_id: NeedId;
+	player_id: PlayerId;
+	scenario_id: ScenarioId;
+	deleted_at: string | null;
+	value: number;
+}
+
+// ============================================================
+// WorldSnapshot: 단일 월드의 전체 데이터 (World 메타 + 엔티티)
+// DB worlds.snapshot 컬럼, localStorage, 런타임 스토어에서 공용으로 사용한다.
+// player/playerScenario는 포함하지 않는다 (각각의 스토어/테이블이 단일 출처).
+// ============================================================
+export interface WorldSnapshot {
+	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
+	worldCharacterNeeds: Record<WorldCharacterNeedId, WorldCharacterNeed>;
+	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
+	worldBuildingConditions: Record<WorldBuildingConditionId, WorldBuildingCondition>;
+	worldItems: Record<WorldItemId, WorldItem>;
+	worldTileMap?: WorldTileMap;
+}

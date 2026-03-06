@@ -1,11 +1,13 @@
 import { useCharacter, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
+import { produce } from 'immer';
 import type {
 	WorldId,
 	WorldCharacterId,
 	CharacterBody,
 	CharacterId,
 	WorldCharacterNeed,
+	WorldCharacterNeedId,
 	NeedId,
 	EntityId,
 } from '$lib/types';
@@ -95,19 +97,25 @@ export class WorldCharacterEntity extends Entity {
 	}
 
 	override save(): void {
-		const { updateWorldCharacter, updateWorldCharacterNeed } = useWorld();
+		const { worldStore } = useWorld();
 
-		updateWorldCharacter(this.instanceId, {
-			x: this.x,
-			y: this.y,
-		});
-
-		// needs 저장
-		for (const need of Object.values(this.needs)) {
-			updateWorldCharacterNeed(need.id, {
-				value: need.value,
-			});
-		}
+		worldStore.update((state) =>
+			produce(state, (draft) => {
+				const world = draft.data[this.worldId];
+				if (!world) return;
+				const wc = world.snapshot.worldCharacters[this.instanceId];
+				if (wc) {
+					wc.x = this.x;
+					wc.y = this.y;
+				}
+				for (const need of Object.values(this.needs)) {
+					const wn = world.snapshot.worldCharacterNeeds[need.id as WorldCharacterNeedId];
+					if (wn) {
+						wn.value = need.value;
+					}
+				}
+			})
+		);
 	}
 
 	override update(event: BeforeUpdateEvent): void {
