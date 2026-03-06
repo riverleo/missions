@@ -24,7 +24,10 @@ import type {
 	BehaviorAction,
 	Interaction,
 	InteractionAction,
+	Player,
+	PlayerScenario,
 } from '$lib/types';
+import { usePlayer } from '../use-player';
 import { useApp } from '$lib/hooks/use-app.svelte';
 import { useCurrent } from '../use-current';
 
@@ -463,6 +466,198 @@ function createWorldStore() {
 		}
 	}
 
+	/**
+	 * 특정 월드의 현재 스토어 상태를 WorldSnapshot으로 빌드
+	 */
+	function buildSnapshot(worldId: WorldId): WorldSnapshot {
+		const worldCharacters = get(worldCharacterStore).data;
+		const worldCharacterNeeds = get(worldCharacterNeedStore).data;
+		const worldBuildings = get(worldBuildingStore).data;
+		const worldBuildingConditions = get(worldBuildingConditionStore).data;
+		const worldItems = get(worldItemStore).data;
+		const worldTileMaps = get(worldTileMapStore).data;
+		const worlds = get(worldStore).data;
+
+		const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+		const player = get(playerStore);
+		const { playerScenarioStore: playerScenarioAllStore } = usePlayer();
+		const currentTick = get(tickStore);
+
+		// 해당 worldId에 속하는 데이터만 필터링
+		const filteredCharacters: Record<WorldCharacterId, WorldCharacter> = {};
+		for (const [id, c] of Object.entries(worldCharacters)) {
+			if (c.world_id === worldId) filteredCharacters[id as WorldCharacterId] = c;
+		}
+
+		const filteredCharacterNeeds: Record<WorldCharacterNeedId, WorldCharacterNeed> = {};
+		for (const [id, n] of Object.entries(worldCharacterNeeds)) {
+			if (n.world_id === worldId) filteredCharacterNeeds[id as WorldCharacterNeedId] = n;
+		}
+
+		const filteredBuildings: Record<WorldBuildingId, WorldBuilding> = {};
+		for (const [id, b] of Object.entries(worldBuildings)) {
+			if (b.world_id === worldId) filteredBuildings[id as WorldBuildingId] = b;
+		}
+
+		const filteredBuildingConditions: Record<WorldBuildingConditionId, WorldBuildingCondition> = {};
+		for (const [id, bc] of Object.entries(worldBuildingConditions)) {
+			if (bc.world_id === worldId) filteredBuildingConditions[id as WorldBuildingConditionId] = bc;
+		}
+
+		const filteredItems: Record<WorldItemId, WorldItem> = {};
+		for (const [id, item] of Object.entries(worldItems)) {
+			if (item.world_id === worldId) filteredItems[id as WorldItemId] = item;
+		}
+
+		const filteredTileMaps: Record<WorldId, WorldTileMap> = {};
+		const tileMap = worldTileMaps[worldId];
+		if (tileMap) filteredTileMaps[worldId] = tileMap;
+
+		// Player/PlayerScenario 가져오기
+		const playerScenarios = get(playerScenarioAllStore).data;
+		let playerScenario: PlayerScenario | undefined;
+		for (const ps of Object.values(playerScenarios)) {
+			if (ps.player_id === player?.id) {
+				playerScenario = ps;
+				break;
+			}
+		}
+
+		// playerScenario의 current_tick을 현재 tick으로 업데이트
+		const finalPlayerScenario: PlayerScenario = playerScenario
+			? { ...playerScenario, current_tick: currentTick }
+			: ({} as PlayerScenario);
+
+		return {
+			worlds: worlds[worldId] ? { [worldId]: worlds[worldId] } : {},
+			worldCharacters: filteredCharacters,
+			worldCharacterNeeds: filteredCharacterNeeds,
+			worldBuildings: filteredBuildings,
+			worldBuildingConditions: filteredBuildingConditions,
+			worldItems: filteredItems,
+			worldTileMaps: filteredTileMaps,
+			player: player!,
+			playerScenario: finalPlayerScenario,
+		};
+	}
+
+	/**
+	 * 월드 상태를 worlds.snapshot 컬럼에 저장
+	 */
+	async function saveSnapshot(worldId: WorldId): Promise<void> {
+		const snapshot = buildSnapshot(worldId);
+
+		const { error } = await supabase
+			.from('worlds')
+			.update({
+				snapshot: JSON.parse(JSON.stringify(snapshot)),
+				updated_at: new Date().toISOString(),
+			})
+			.eq('id', worldId);
+
+		if (error) {
+			console.error('Failed to save snapshot:', error);
+			throw error;
+		}
+	}
+
+	/**
+	 * DB의 worlds.snapshot에서 스냅샷을 로드하여 스토어 복원
+	 */
+	async function loadSnapshot(worldId: WorldId): Promise<void> {
+		const { data, error } = await supabase
+			.from('worlds')
+			.select('*')
+			.eq('id', worldId)
+			.single();
+
+		if (error || !data) {
+			console.error('Failed to load snapshot:', error);
+			throw error;
+		}
+
+		const world = data as World;
+		const snapshot = data.snapshot as WorldSnapshot | null;
+
+		// World 스토어 업데이트
+		worldStore.update((state) => ({
+			...state,
+			status: 'success' as const,
+			data: { ...state.data, [worldId]: world },
+		}));
+
+		if (!snapshot) return;
+
+		// 스냅샷에서 엔티티 데이터 복원
+		if (snapshot.worldCharacters) {
+			worldCharacterStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldCharacters },
+			}));
+		}
+
+		if (snapshot.worldCharacterNeeds) {
+			worldCharacterNeedStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldCharacterNeeds },
+			}));
+		}
+
+		if (snapshot.worldBuildings) {
+			worldBuildingStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldBuildings },
+			}));
+		}
+
+		if (snapshot.worldBuildingConditions) {
+			worldBuildingConditionStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldBuildingConditions },
+			}));
+		}
+
+		if (snapshot.worldItems) {
+			worldItemStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldItems },
+			}));
+		}
+
+		if (snapshot.worldTileMaps) {
+			worldTileMapStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldTileMaps },
+			}));
+		}
+
+		// Player/PlayerScenario 복원
+		if (snapshot.player) {
+			const { playerStore: pStore, playerScenarioStore: psStore } = usePlayer();
+			pStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[snapshot.player.id] = snapshot.player;
+					draft.status = 'success';
+				})
+			);
+
+			if (snapshot.playerScenario) {
+				psStore.update((state) =>
+					produce(state, (draft) => {
+						draft.data[snapshot.playerScenario.id] = snapshot.playerScenario;
+						draft.status = 'success';
+					})
+				);
+			}
+		}
+	}
+
 	return {
 		worldStore,
 		worldCharacterStore,
@@ -474,6 +669,9 @@ function createWorldStore() {
 		selectedEntityIdStore,
 		init,
 		fetch,
+		buildSnapshot,
+		saveSnapshot,
+		loadSnapshot,
 		setSelectedEntityId,
 		getWorld,
 		getWorldCharacter,
