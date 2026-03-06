@@ -25,6 +25,7 @@ import type {
 	PlayerScenario,
 	TileCellKey,
 	TileId,
+	TerrainId,
 } from '$lib/types';
 import { usePlayer } from '../use-player';
 import { useApp } from '$lib/hooks/use-app.svelte';
@@ -252,66 +253,234 @@ function createWorldStore() {
 		);
 	}
 
-	// Store CRUD - Set
-	function setWorld(world: World): void {
+	// Store CRUD - Create
+	function createWorld(
+		pick: Pick<World, 'name' | 'terrain_id'> & Partial<Pick<World, 'id'>>
+	): World {
+		const { playerStore, playerScenarioStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const world: World = {
+			id: pick.id ?? (crypto.randomUUID() as WorldId),
+			user_id: player!.user_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			terrain_id: pick.terrain_id,
+			name: pick.name,
+			created_at: new Date().toISOString(),
+			deleted_at: null,
+		} as World;
+
 		worldStore.update((state) => ({
 			...state,
 			data: { ...state.data, [world.id]: world },
 		}));
+
+		// terrain_id가 있으면 worldTileMap 자동 생성
+		if (world.terrain_id) {
+			createWorldTileMap({ world_id: world.id, terrain_id: world.terrain_id });
+		}
+
+		return world;
 	}
 
-	function setWorldCharacter(character: WorldCharacter): void {
+	function createWorldCharacter(
+		pick: Pick<WorldCharacter, 'world_id' | 'character_id' | 'x' | 'y'> &
+			Partial<Pick<WorldCharacter, 'id' | 'created_at' | 'created_at_tick'>>
+	): WorldCharacter {
+		const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldCharacter: WorldCharacter = {
+			id: pick.id ?? (crypto.randomUUID() as WorldCharacterId),
+			world_id: pick.world_id,
+			character_id: pick.character_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			user_id: player!.user_id,
+			x: pick.x,
+			y: pick.y,
+			created_at: pick.created_at ?? new Date().toISOString(),
+			created_at_tick: pick.created_at_tick ?? get(tickStore),
+			deleted_at: null,
+		};
+
 		worldCharacterStore.update((state) =>
 			produce(state, (draft) => {
-				draft.data[character.id] = character;
+				draft.data[worldCharacter.id] = worldCharacter;
 			})
 		);
+
+		return worldCharacter;
 	}
 
-	function setWorldCharacterNeeds(needs: WorldCharacterNeed[]): void {
+	function createWorldCharacterNeeds(
+		pick: Pick<WorldCharacterNeed, 'world_id' | 'world_character_id' | 'character_id'>,
+		needs: Pick<WorldCharacterNeed, 'need_id' | 'value'>[]
+	): WorldCharacterNeed[] {
+		const { playerStore, playerScenarioStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldCharacterNeeds: WorldCharacterNeed[] = needs.map((n) => ({
+			id: crypto.randomUUID() as WorldCharacterNeedId,
+			scenario_id: playerScenario!.scenario_id,
+			user_id: player!.user_id,
+			player_id: player!.id,
+			world_id: pick.world_id,
+			character_id: pick.character_id,
+			world_character_id: pick.world_character_id,
+			need_id: n.need_id,
+			value: n.value,
+			deleted_at: null,
+		}));
+
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
-				for (const need of needs) {
+				for (const need of worldCharacterNeeds) {
 					draft.data[need.id] = need;
 				}
 			})
 		);
+
+		return worldCharacterNeeds;
 	}
 
-	function setWorldBuilding(building: WorldBuilding): void {
+	function createWorldBuilding(
+		pick: Pick<WorldBuilding, 'world_id' | 'building_id' | 'cell_x' | 'cell_y'> &
+			Partial<Pick<WorldBuilding, 'id' | 'created_at' | 'created_at_tick'>>
+	): WorldBuilding {
+		const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldBuilding: WorldBuilding = {
+			id: pick.id ?? (crypto.randomUUID() as WorldBuildingId),
+			world_id: pick.world_id,
+			building_id: pick.building_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			user_id: player!.user_id,
+			cell_x: pick.cell_x,
+			cell_y: pick.cell_y,
+			created_at: pick.created_at ?? new Date().toISOString(),
+			created_at_tick: pick.created_at_tick ?? get(tickStore),
+			deleted_at: null,
+		};
+
 		worldBuildingStore.update((state) =>
 			produce(state, (draft) => {
-				draft.data[building.id] = building;
+				draft.data[worldBuilding.id] = worldBuilding;
 			})
 		);
+
+		return worldBuilding;
 	}
 
-	function setWorldBuildingConditions(conditions: WorldBuildingCondition[]): void {
+	function createWorldBuildingConditions(
+		pick: Pick<WorldBuildingCondition, 'world_id' | 'world_building_id' | 'building_id'>,
+		conditions: Pick<WorldBuildingCondition, 'building_condition_id' | 'condition_id' | 'value'>[]
+	): WorldBuildingCondition[] {
+		const { playerStore, playerScenarioStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldBuildingConditions: WorldBuildingCondition[] = conditions.map((c) => ({
+			id: crypto.randomUUID() as WorldBuildingConditionId,
+			user_id: player!.user_id,
+			world_id: pick.world_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			building_id: pick.building_id,
+			world_building_id: pick.world_building_id,
+			building_condition_id: c.building_condition_id,
+			condition_id: c.condition_id,
+			value: c.value,
+			created_at: new Date().toISOString(),
+			deleted_at: null,
+		}));
+
 		worldBuildingConditionStore.update((state) => {
 			const newData = { ...state.data };
-			for (const condition of conditions) {
+			for (const condition of worldBuildingConditions) {
 				newData[condition.id] = condition;
 			}
 			return { ...state, data: newData };
 		});
+
+		return worldBuildingConditions;
 	}
 
-	function setWorldItem(item: WorldItem): void {
+	function createWorldItem(
+		pick: Pick<WorldItem, 'world_id' | 'item_id' | 'world_character_id' | 'x' | 'y'> &
+			Partial<
+				Pick<
+					WorldItem,
+					'id' | 'created_at' | 'created_at_tick' | 'world_building_id' | 'durability_ticks' | 'rotation'
+				>
+			>
+	): WorldItem {
+		const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldItem: WorldItem = {
+			id: pick.id ?? (crypto.randomUUID() as WorldItemId),
+			world_id: pick.world_id,
+			item_id: pick.item_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			user_id: player!.user_id,
+			world_building_id: pick.world_building_id ?? null,
+			world_character_id: pick.world_character_id,
+			durability_ticks: pick.durability_ticks ?? null,
+			rotation: pick.rotation ?? 0,
+			x: pick.x,
+			y: pick.y,
+			created_at: pick.created_at ?? new Date().toISOString(),
+			created_at_tick: pick.created_at_tick ?? get(tickStore),
+			deleted_at: null,
+		};
+
 		worldItemStore.update((state) => ({
 			...state,
-			data: { ...state.data, [item.id]: item },
+			data: { ...state.data, [worldItem.id]: worldItem },
 		}));
+
+		return worldItem;
 	}
 
-	function setWorldTileMap(tileMap: WorldTileMap): void {
+	function createWorldTileMap(
+		pick: Pick<WorldTileMap, 'world_id' | 'terrain_id'> & Partial<Pick<WorldTileMap, 'data'>>
+	): WorldTileMap {
+		const { playerStore, playerScenarioStore } = useCurrent();
+		const player = get(playerStore);
+		const playerScenario = get(playerScenarioStore);
+
+		const worldTileMap: WorldTileMap = {
+			id: crypto.randomUUID(),
+			world_id: pick.world_id,
+			terrain_id: pick.terrain_id,
+			player_id: player!.id,
+			scenario_id: playerScenario!.scenario_id,
+			user_id: player!.user_id,
+			data: pick.data ?? {},
+			created_at: new Date().toISOString(),
+			deleted_at: null,
+		};
+
 		worldTileMapStore.update((state) => ({
 			...state,
-			data: { ...state.data, [tileMap.world_id]: tileMap },
+			data: { ...state.data, [worldTileMap.world_id]: worldTileMap },
 		}));
+
+		return worldTileMap;
 	}
 
-	// Store CRUD - Remove
-	function removeWorld(worldId: WorldId): void {
+	// Store CRUD - Delete
+	function deleteWorld(worldId: WorldId): void {
 		worldStore.update((state) => {
 			const newData = { ...state.data };
 			delete newData[worldId];
@@ -319,7 +488,7 @@ function createWorldStore() {
 		});
 	}
 
-	function removeWorldCharacter(id: WorldCharacterId): void {
+	function deleteWorldCharacter(id: WorldCharacterId): void {
 		worldCharacterStore.update((state) => {
 			const newData = { ...state.data };
 			delete newData[id];
@@ -327,7 +496,7 @@ function createWorldStore() {
 		});
 	}
 
-	function removeWorldCharacterNeedsByCharacter(worldCharacterId: WorldCharacterId): void {
+	function deleteWorldCharacterNeedsByCharacter(worldCharacterId: WorldCharacterId): void {
 		worldCharacterNeedStore.update((state) =>
 			produce(state, (draft) => {
 				for (const [id, need] of Object.entries(draft.data)) {
@@ -339,7 +508,7 @@ function createWorldStore() {
 		);
 	}
 
-	function removeWorldBuilding(id: WorldBuildingId): void {
+	function deleteWorldBuilding(id: WorldBuildingId): void {
 		worldBuildingStore.update((state) => {
 			const newData = { ...state.data };
 			delete newData[id];
@@ -347,7 +516,7 @@ function createWorldStore() {
 		});
 	}
 
-	function removeWorldBuildingConditionsByBuilding(worldBuildingId: WorldBuildingId): void {
+	function deleteWorldBuildingConditionsByBuilding(worldBuildingId: WorldBuildingId): void {
 		worldBuildingConditionStore.update((state) =>
 			produce(state, (draft) => {
 				for (const [id, condition] of Object.entries(draft.data)) {
@@ -359,7 +528,7 @@ function createWorldStore() {
 		);
 	}
 
-	function removeWorldItem(id: WorldItemId): void {
+	function deleteWorldItem(id: WorldItemId): void {
 		worldItemStore.update((state) => {
 			const newData = { ...state.data };
 			delete newData[id];
@@ -367,7 +536,7 @@ function createWorldStore() {
 		});
 	}
 
-	function removeWorldTileMap(worldId: WorldId): void {
+	function deleteWorldTileMap(worldId: WorldId): void {
 		worldTileMapStore.update((state) => {
 			const newData = { ...state.data };
 			delete newData[worldId];
@@ -392,7 +561,7 @@ function createWorldStore() {
 		);
 	}
 
-	function removeTileFromWorldTileMapData(worldId: WorldId, tileCellKey: TileCellKey): void {
+	function deleteTileFromWorldTileMapData(worldId: WorldId, tileCellKey: TileCellKey): void {
 		worldTileMapStore.update((state) =>
 			produce(state, (draft) => {
 				const tileMap = draft.data[worldId];
@@ -864,22 +1033,22 @@ function createWorldStore() {
 		updateWorldCharacterNeed,
 		updateWorldBuildingCondition,
 		updateWorldItem,
-		setWorld,
-		setWorldCharacter,
-		setWorldCharacterNeeds,
-		setWorldBuilding,
-		setWorldBuildingConditions,
-		setWorldItem,
-		setWorldTileMap,
-		removeWorld,
-		removeWorldCharacter,
-		removeWorldCharacterNeedsByCharacter,
-		removeWorldBuilding,
-		removeWorldBuildingConditionsByBuilding,
-		removeWorldItem,
-		removeWorldTileMap,
+		createWorld,
+		createWorldCharacter,
+		createWorldCharacterNeeds,
+		createWorldBuilding,
+		createWorldBuildingConditions,
+		createWorldItem,
+		createWorldTileMap,
+		deleteWorld,
+		deleteWorldCharacter,
+		deleteWorldCharacterNeedsByCharacter,
+		deleteWorldBuilding,
+		deleteWorldBuildingConditionsByBuilding,
+		deleteWorldItem,
+		deleteWorldTileMap,
 		addTilesToWorldTileMap,
-		removeTileFromWorldTileMapData,
+		deleteTileFromWorldTileMapData,
 		getEntityInstance,
 		getEntitySourceId,
 		getOrUndefinedEntitySourceId,

@@ -1,65 +1,17 @@
-import { useCurrent, useWorld } from '$lib/hooks';
-import { get } from 'svelte/store';
+import { useWorld } from '$lib/hooks';
 import type { WorldContext } from './world-context.svelte';
-import type { WorldItem, WorldItemId, WorldItemInsert } from '$lib/types';
+import type { WorldItemId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldItemEntity } from '../entities/world-item-entity';
 
 export function createWorldItem(
 	worldContext: WorldContext,
-	insert: Required<
-		Omit<
-			WorldItemInsert,
-			| 'id'
-			| 'world_id'
-			| 'player_id'
-			| 'scenario_id'
-			| 'user_id'
-			| 'created_at'
-			| 'created_at_tick'
-			| 'world_building_id'
-			| 'durability_ticks'
-			| 'rotation'
-			| 'deleted_at'
-		>
-	> &
-		Pick<
-			WorldItemInsert,
-			| 'id'
-			| 'created_at'
-			| 'created_at_tick'
-			| 'world_building_id'
-			| 'durability_ticks'
-			| 'rotation'
-		>
+	insert: Omit<Parameters<ReturnType<typeof useWorld>['createWorldItem']>[0], 'world_id'>
 ) {
-	const { setWorldItem } = useWorld();
-	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+	const world = useWorld();
 
-	const player = get(playerStore);
-	const playerScenario = get(playerScenarioStore);
-	const player_id = player!.id;
-	const scenario_id = playerScenario!.scenario_id;
-	const user_id = player!.user_id;
-
-	// 클라이언트에서 UUID 생성
-	const worldItem: WorldItem = {
-		...insert,
-		id: crypto.randomUUID() as WorldItemId,
-		world_id: worldContext.worldId,
-		player_id,
-		scenario_id,
-		user_id,
-		world_building_id: insert.world_building_id ?? null,
-		durability_ticks: insert.durability_ticks ?? null,
-		rotation: insert.rotation ?? 0,
-		created_at: new Date().toISOString(),
-		created_at_tick: get(tickStore),
-		deleted_at: null,
-	};
-
-	// 스토어 업데이트 (useWorld CRUD)
-	setWorldItem(worldItem);
+	// useWorld CRUD로 데이터 생성
+	const worldItem = world.createWorldItem({ ...insert, world_id: worldContext.worldId });
 
 	// 엔티티 생성 (world_building_id와 world_character_id가 모두 null일 때만 월드에 추가)
 	const entity = new WorldItemEntity(worldContext, worldContext.worldId, worldItem.id);
@@ -69,7 +21,7 @@ export function createWorldItem(
 }
 
 export function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
-	const { getWorldItem, removeWorldItem } = useWorld();
+	const { getWorldItem, deleteWorldItem: hookDelete } = useWorld();
 	const worldItem = getWorldItem(worldItemId);
 	if (!worldItem) return;
 
@@ -88,5 +40,5 @@ export function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldCo
 	}
 
 	// 스토어에서 제거 (useWorld CRUD)
-	removeWorldItem(worldItemId);
+	hookDelete(worldItemId);
 }

@@ -1,92 +1,44 @@
-import { useBuilding, useCurrent, useWorld } from '$lib/hooks';
+import { useBuilding, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
-import type {
-	WorldBuilding,
-	WorldBuildingId,
-	WorldBuildingInsert,
-	WorldBuildingCondition,
-	WorldBuildingConditionId,
-} from '$lib/types';
+import type { WorldBuildingId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 
 export function createWorldBuilding(
 	worldContext: WorldContext,
-	insert: Required<
-		Omit<
-			WorldBuildingInsert,
-			| 'id'
-			| 'world_id'
-			| 'player_id'
-			| 'scenario_id'
-			| 'user_id'
-			| 'created_at'
-			| 'created_at_tick'
-			| 'deleted_at'
-		>
-	> &
-		Pick<WorldBuildingInsert, 'id' | 'created_at' | 'created_at_tick'>
+	insert: Omit<Parameters<ReturnType<typeof useWorld>['createWorldBuilding']>[0], 'world_id'>
 ) {
-	const { setWorldBuilding, setWorldBuildingConditions, getAllWorldBuildingConditions } =
-		useWorld();
-
-	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
-	const player = get(playerStore);
-	const playerScenario = get(playerScenarioStore);
-	const player_id = player!.id;
-	const scenario_id = playerScenario!.scenario_id;
-	const user_id = player!.user_id;
-
-	// 클라이언트에서 UUID 생성
-	const worldBuildingId = crypto.randomUUID() as WorldBuildingId;
+	const world = useWorld();
 	const { conditionStore, getAllBuildingConditions } = useBuilding();
+
+	// useWorld CRUD로 데이터 생성
+	const worldBuilding = world.createWorldBuilding({ ...insert, world_id: worldContext.worldId });
+
+	// BuildingCondition 템플릿에서 conditions 조회 후 WorldBuildingConditions 생성
 	const buildingConditions = getAllBuildingConditions().filter(
 		(bc) => bc.building_id === insert.building_id
 	);
 	const conditions = get(conditionStore).data;
-
-	const worldBuilding: WorldBuilding = {
-		...insert,
-		id: worldBuildingId,
-		user_id,
-		world_id: worldContext.worldId,
-		player_id,
-		scenario_id,
-		created_at: new Date().toISOString(),
-		created_at_tick: get(tickStore),
-		deleted_at: null,
-	};
-
-	// WorldBuildingCondition 생성
-	const worldBuildingConditions: WorldBuildingCondition[] = buildingConditions.map((bc) => ({
-		id: crypto.randomUUID() as WorldBuildingConditionId,
-		user_id,
-		world_id: worldContext.worldId,
-		player_id,
-		scenario_id,
-		building_id: insert.building_id,
-		world_building_id: worldBuildingId,
-		building_condition_id: bc.id,
-		condition_id: bc.condition_id,
-		value: conditions[bc.condition_id]?.initial_value ?? 100,
-		created_at: new Date().toISOString(),
-		deleted_at: null,
-	}));
-
-	// 스토어 업데이트 (useWorld CRUD)
-	setWorldBuildingConditions(worldBuildingConditions);
-	setWorldBuilding(worldBuilding);
+	const worldBuildingConditions = world.createWorldBuildingConditions(
+		{
+			world_id: worldContext.worldId,
+			world_building_id: worldBuilding.id,
+			building_id: insert.building_id,
+		},
+		buildingConditions.map((bc) => ({
+			building_condition_id: bc.id,
+			condition_id: bc.condition_id,
+			value: conditions[bc.condition_id]?.initial_value ?? 100,
+		}))
+	);
 
 	// 엔티티 생성
 	const entity = new WorldBuildingEntity(worldContext, worldContext.worldId, worldBuilding.id);
 
-	// 스토어에서 conditions를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
-	const entityBuildingConditions = getAllWorldBuildingConditions().filter(
-		(condition) => condition.world_building_id === worldBuilding.id
-	);
+	// conditions를 엔티티에 설정 (spread로 복사하여 프록시 해제)
 	entity.worldBuildingConditions = {};
-	for (const condition of entityBuildingConditions) {
+	for (const condition of worldBuildingConditions) {
 		entity.worldBuildingConditions[condition.condition_id] = { ...condition };
 	}
 
@@ -97,7 +49,7 @@ export function deleteWorldBuilding(
 	worldBuildingId: WorldBuildingId,
 	worldContext?: WorldContext
 ) {
-	const { getWorldBuilding, removeWorldBuilding, removeWorldBuildingConditionsByBuilding } =
+	const { getWorldBuilding, deleteWorldBuilding: hookDelete, deleteWorldBuildingConditionsByBuilding } =
 		useWorld();
 	const worldBuilding = getWorldBuilding(worldBuildingId);
 	if (!worldBuilding) return;
@@ -117,6 +69,6 @@ export function deleteWorldBuilding(
 	}
 
 	// 스토어에서 제거 (useWorld CRUD)
-	removeWorldBuildingConditionsByBuilding(worldBuildingId);
-	removeWorldBuilding(worldBuildingId);
+	deleteWorldBuildingConditionsByBuilding(worldBuildingId);
+	hookDelete(worldBuildingId);
 }

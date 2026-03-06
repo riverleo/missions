@@ -7,16 +7,8 @@ import { WorldItemEntity } from '../entities/world-item-entity';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export function initializeEntities(worldContext: WorldContext) {
-	const {
-		worldTileMapStore,
-		worldBuildingStore,
-		worldCharacterStore,
-		worldItemStore,
-		getAllWorldBuildings,
-		getAllWorldCharacters,
-		getAllWorldItems,
-		getWorldTileMap,
-	} = useWorld();
+	const { getAllWorldBuildings, getAllWorldCharacters, getAllWorldItems, getWorldTileMap } =
+		useWorld();
 
 	// 현재 worldId에 해당하는 데이터만 필터링
 	const characters = getAllWorldCharacters().filter((c) => c.world_id === worldContext.worldId);

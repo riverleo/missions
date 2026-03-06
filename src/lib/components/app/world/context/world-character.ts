@@ -1,90 +1,43 @@
-import { useCharacter, useCurrent, useWorld } from '$lib/hooks';
+import { useCharacter, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
 import type { WorldContext } from './world-context.svelte';
-import type {
-	WorldCharacter,
-	WorldCharacterId,
-	WorldCharacterInsert,
-	WorldCharacterNeed,
-	WorldCharacterNeedId,
-	UserId,
-} from '$lib/types';
+import type { WorldCharacterId } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 
 export function createWorldCharacter(
 	worldContext: WorldContext,
-	insert: Required<
-		Omit<
-			WorldCharacterInsert,
-			| 'id'
-			| 'world_id'
-			| 'player_id'
-			| 'scenario_id'
-			| 'user_id'
-			| 'created_at'
-			| 'created_at_tick'
-			| 'deleted_at'
-		>
-	> &
-		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
+	insert: Omit<Parameters<ReturnType<typeof useWorld>['createWorldCharacter']>[0], 'world_id'>
 ) {
-	const { setWorldCharacter, setWorldCharacterNeeds, getAllWorldCharacterNeeds } = useWorld();
-	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
-
-	const player = get(playerStore);
-	const playerScenario = get(playerScenarioStore);
-	const player_id = player!.id;
-	const scenario_id = playerScenario!.scenario_id;
-	const user_id = player!.user_id;
-
-	// 클라이언트에서 UUID 생성, DB 영속화는 스냅샷으로 처리
-	const worldCharacterId = crypto.randomUUID() as WorldCharacterId;
+	const world = useWorld();
 	const { needStore, getAllCharacterNeeds } = useCharacter();
+
+	// useWorld CRUD로 데이터 생성
+	const worldCharacter = world.createWorldCharacter({ ...insert, world_id: worldContext.worldId });
+
+	// CharacterNeed 템플릿에서 needs 조회 후 WorldCharacterNeeds 생성
 	const characterNeeds = getAllCharacterNeeds().filter(
 		(cn) => cn.character_id === insert.character_id
 	);
 	const needs = get(needStore).data;
-
-	const worldCharacter: WorldCharacter = {
-		...insert,
-		id: worldCharacterId,
-		world_id: worldContext.worldId,
-		player_id,
-		scenario_id,
-		user_id,
-		created_at: new Date().toISOString(),
-		created_at_tick: get(tickStore),
-		deleted_at: null,
-	};
-
-	// WorldCharacterNeed 생성
-	const worldCharacterNeeds: WorldCharacterNeed[] = characterNeeds.map((cn) => ({
-		id: crypto.randomUUID() as WorldCharacterNeedId,
-		scenario_id,
-		user_id,
-		player_id,
-		world_id: worldContext.worldId,
-		character_id: insert.character_id,
-		world_character_id: worldCharacterId,
-		need_id: cn.need_id,
-		value: needs[cn.need_id]?.initial_value ?? 50,
-		deleted_at: null,
-	}));
-
-	// 스토어 업데이트 (useWorld CRUD)
-	setWorldCharacterNeeds(worldCharacterNeeds);
-	setWorldCharacter(worldCharacter);
+	const worldCharacterNeeds = world.createWorldCharacterNeeds(
+		{
+			world_id: worldContext.worldId,
+			world_character_id: worldCharacter.id,
+			character_id: insert.character_id,
+		},
+		characterNeeds.map((cn) => ({
+			need_id: cn.need_id,
+			value: needs[cn.need_id]?.initial_value ?? 50,
+		}))
+	);
 
 	// 엔티티 생성
 	const entity = new WorldCharacterEntity(worldContext, worldContext.worldId, worldCharacter.id);
 
-	// 스토어에서 needs를 불러와서 설정 (spread로 복사하여 프록시 해제)
-	const loadedNeeds = getAllWorldCharacterNeeds().filter(
-		(need) => need.world_character_id === worldCharacter.id
-	);
+	// needs를 엔티티에 설정 (spread로 복사하여 프록시 해제)
 	entity.needs = {};
-	for (const need of loadedNeeds) {
+	for (const need of worldCharacterNeeds) {
 		entity.needs[need.need_id] = { ...need };
 	}
 
@@ -95,7 +48,7 @@ export function deleteWorldCharacter(
 	worldCharacterId: WorldCharacterId,
 	worldContext?: WorldContext
 ) {
-	const { getWorldCharacter, removeWorldCharacter, removeWorldCharacterNeedsByCharacter } =
+	const { getWorldCharacter, deleteWorldCharacter: hookDelete, deleteWorldCharacterNeedsByCharacter } =
 		useWorld();
 	const worldCharacter = getWorldCharacter(worldCharacterId);
 	if (!worldCharacter) return;
@@ -115,6 +68,6 @@ export function deleteWorldCharacter(
 	}
 
 	// 스토어에서 제거 (useWorld CRUD)
-	removeWorldCharacterNeedsByCharacter(worldCharacterId);
-	removeWorldCharacter(worldCharacterId);
+	deleteWorldCharacterNeedsByCharacter(worldCharacterId);
+	hookDelete(worldCharacterId);
 }
