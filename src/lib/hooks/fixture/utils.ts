@@ -116,8 +116,10 @@ export function createOrGetWorld(): World {
 		scenario_id: scenario.id,
 		name: getIdPrefix('world', worldId),
 		terrain_id: null,
+		snapshot: null,
 		deleted_at: null,
 		created_at: createdAt,
+		updated_at: null,
 	};
 	set(useWorld().worldStore, value);
 	return value;

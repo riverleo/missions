@@ -122,46 +122,4 @@ create policy "admins can delete terrains_tiles"
   to authenticated
   using (is_admin());
 
--- world_tile_maps: 월드별 타일맵 (sparse storage)
-create table world_tile_maps (
-  id uuid primary key default gen_random_uuid(),
-  scenario_id uuid not null references scenarios(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  player_id uuid not null references players(id) on delete cascade,
-  world_id uuid not null references worlds(id) on delete cascade,
-  terrain_id uuid not null references terrains(id) on delete cascade,
-
-  -- 타일이 배치된 위치만 저장
-  -- 구조: {"x,y": {"tile_id": "...", "durability": 100}, ...}
-  data jsonb not null default '{}',
-
-  -- Audit
-  created_at timestamptz not null default now(),
-  deleted_at timestamptz,
-
-  constraint uq_world_tile_maps_world_id unique (world_id)
-);
-
-alter table world_tile_maps enable row level security;
-
-create policy "anyone can view world_tile_maps"
-  on world_tile_maps for select
-  using (deleted_at is null);
-
-create policy "owner or admin can insert world_tile_maps"
-  on world_tile_maps for insert
-  to authenticated
-  with check (is_world_owner(world_id) or is_admin());
-
-create policy "owner or admin can update world_tile_maps"
-  on world_tile_maps for update
-  to authenticated
-  using (
-    (is_world_owner(world_id) or is_admin())
-    and (deleted_at is null or is_admin())
-  );
-
-create policy "admin can delete world_tile_maps"
-  on world_tile_maps for delete
-  to authenticated
-  using (is_admin());
+-- world_tile_maps 테이블은 snapshot 방식으로 전환되어 삭제됨 (20260305220000_sync_strategy)

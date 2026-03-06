@@ -11,6 +11,7 @@ import type {
 	WorldBuildingCondition,
 	WorldItem,
 	WorldTileMap,
+	WorldSnapshot,
 	WorldId,
 	WorldCharacterId,
 	WorldCharacterNeedId,
@@ -353,52 +354,57 @@ function createWorldStore() {
 			const player = get(playerStore);
 			if (!player) return;
 
-			// 모든 데이터를 병렬로 조회
-			const [
-				{ data: worldData, error: worldError },
-				{ data: characterData, error: characterError },
-				{ data: characterNeedData, error: characterNeedError },
-				{ data: buildingData, error: buildingError },
-				{ data: buildingConditionData, error: buildingConditionError },
-				{ data: itemData, error: itemError },
-				{ data: tileMapData, error: tileMapError },
-			] = await Promise.all([
-				supabase.from('worlds').select('*').eq('player_id', player.id),
-				supabase.from('world_characters').select('*').eq('player_id', player.id),
-				supabase.from('world_character_needs').select('*').eq('player_id', player.id),
-				supabase.from('world_buildings').select('*').eq('player_id', player.id),
-				supabase.from('world_building_conditions').select('*').eq('player_id', player.id),
-				supabase.from('world_items').select('*').eq('player_id', player.id),
-				supabase.from('world_tile_maps').select('*').eq('player_id', player.id),
-			]);
+			// worlds 테이블에서 조회 (snapshot 포함)
+			const { data: worldData, error: worldError } = await supabase
+				.from('worlds')
+				.select('*')
+				.eq('player_id', player.id);
 
 			if (worldError) throw worldError;
-			if (characterError) throw characterError;
-			if (characterNeedError) throw characterNeedError;
-			if (buildingError) throw buildingError;
-			if (buildingConditionError) throw buildingConditionError;
-			if (itemError) throw itemError;
-			if (tileMapError) throw tileMapError;
 
 			// World 데이터 변환
 			const worldRecord: Record<WorldId, World> = {};
+			// 스냅샷에서 엔티티 데이터 병합
+			const characterRecord: Record<WorldCharacterId, WorldCharacter> = {};
+			const characterNeedRecord: Record<WorldCharacterNeedId, WorldCharacterNeed> = {};
+			const buildingRecord: Record<WorldBuildingId, WorldBuilding> = {};
+			const buildingConditionRecord: Record<WorldBuildingConditionId, WorldBuildingCondition> = {};
+			const itemRecord: Record<WorldItemId, WorldItem> = {};
+			const tileMapRecord: Record<WorldId, WorldTileMap> = {};
+
 			for (const world of worldData ?? []) {
 				worldRecord[world.id as WorldId] = world as World;
+
+				// snapshot이 있으면 엔티티 데이터를 파싱하여 스토어에 병합
+				const snapshot = world.snapshot as WorldSnapshot | null;
+				if (snapshot) {
+					if (snapshot.worldCharacters) {
+						Object.assign(characterRecord, snapshot.worldCharacters);
+					}
+					if (snapshot.worldCharacterNeeds) {
+						Object.assign(characterNeedRecord, snapshot.worldCharacterNeeds);
+					}
+					if (snapshot.worldBuildings) {
+						Object.assign(buildingRecord, snapshot.worldBuildings);
+					}
+					if (snapshot.worldBuildingConditions) {
+						Object.assign(buildingConditionRecord, snapshot.worldBuildingConditions);
+					}
+					if (snapshot.worldItems) {
+						Object.assign(itemRecord, snapshot.worldItems);
+					}
+					if (snapshot.worldTileMaps) {
+						Object.assign(tileMapRecord, snapshot.worldTileMaps);
+					}
+				}
 			}
 
-			worldStore.update((state) =>
-				produce(state, (draft) => {
-					draft.status = 'success';
-					draft.data = worldRecord;
-					draft.error = undefined;
-				})
-			);
-
-			// WorldCharacter 데이터 변환
-			const characterRecord: Record<WorldCharacterId, WorldCharacter> = {};
-			for (const character of characterData ?? []) {
-				characterRecord[character.id as WorldCharacterId] = character as WorldCharacter;
-			}
+			worldStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: worldRecord,
+				error: undefined,
+			}));
 
 			worldCharacterStore.update((state) =>
 				produce(state, (draft) => {
@@ -408,12 +414,6 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldCharacterNeed 데이터 변환
-			const characterNeedRecord: Record<WorldCharacterNeedId, WorldCharacterNeed> = {};
-			for (const need of characterNeedData ?? []) {
-				characterNeedRecord[need.id as WorldCharacterNeedId] = need as WorldCharacterNeed;
-			}
-
 			worldCharacterNeedStore.update((state) =>
 				produce(state, (draft) => {
 					draft.status = 'success';
@@ -421,12 +421,6 @@ function createWorldStore() {
 					draft.error = undefined;
 				})
 			);
-
-			// WorldBuilding 데이터 변환
-			const buildingRecord: Record<WorldBuildingId, WorldBuilding> = {};
-			for (const building of buildingData ?? []) {
-				buildingRecord[building.id as WorldBuildingId] = building as WorldBuilding;
-			}
 
 			worldBuildingStore.update((state) =>
 				produce(state, (draft) => {
@@ -436,13 +430,6 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldBuildingCondition 데이터 변환
-			const buildingConditionRecord: Record<WorldBuildingConditionId, WorldBuildingCondition> = {};
-			for (const condition of buildingConditionData ?? []) {
-				buildingConditionRecord[condition.id as WorldBuildingConditionId] =
-					condition as WorldBuildingCondition;
-			}
-
 			worldBuildingConditionStore.update((state) =>
 				produce(state, (draft) => {
 					draft.status = 'success';
@@ -451,12 +438,6 @@ function createWorldStore() {
 				})
 			);
 
-			// WorldItem 데이터 변환
-			const itemRecord: Record<WorldItemId, WorldItem> = {};
-			for (const item of itemData ?? []) {
-				itemRecord[item.id as WorldItemId] = item as WorldItem;
-			}
-
 			worldItemStore.update((state) =>
 				produce(state, (draft) => {
 					draft.status = 'success';
@@ -464,12 +445,6 @@ function createWorldStore() {
 					draft.error = undefined;
 				})
 			);
-
-			// WorldTileMap 데이터 변환
-			const tileMapRecord: Record<WorldId, WorldTileMap> = {};
-			for (const tileMap of tileMapData ?? []) {
-				tileMapRecord[tileMap.world_id as WorldId] = tileMap as WorldTileMap;
-			}
 
 			worldTileMapStore.update((state) =>
 				produce(state, (draft) => {

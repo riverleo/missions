@@ -3,8 +3,6 @@ import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type { TileId, WorldId, WorldTileMap, WorldTileMapInsert, TileCellKey } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
-import { useApp } from '$lib/hooks';
-import { TEST_WORLD_ID } from '$lib/constants';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
 export async function createWorldTileMap(
@@ -12,36 +10,16 @@ export async function createWorldTileMap(
 		data?: WorldTileMapInsert['data'];
 	}
 ) {
-	const { worldTileMapStore, getWorldTileMap } = useWorld();
-	const isTestWorld = insert.world_id === TEST_WORLD_ID;
+	const { worldTileMapStore } = useWorld();
 
-	let worldTileMap: WorldTileMap;
-
-	if (isTestWorld) {
-		// TEST 환경: 클라이언트에서 UUID 생성
-		worldTileMap = {
-			id: crypto.randomUUID(),
-			...insert,
-			data: insert.data ?? {},
-			created_at: new Date().toISOString(),
-			deleted_at: null,
-		} as WorldTileMap;
-	} else {
-		// 프로덕션 환경: 서버에 저장하고 반환된 데이터 사용
-		const { supabase } = useApp();
-		const { data, error } = await supabase
-			.from('world_tile_maps')
-			.insert(insert)
-			.select()
-			.single<WorldTileMap>();
-
-		if (error || !data) {
-			console.error('Failed to create world tile map:', error);
-			throw error;
-		}
-
-		worldTileMap = data;
-	}
+	// 클라이언트에서 UUID 생성
+	const worldTileMap: WorldTileMap = {
+		id: crypto.randomUUID(),
+		...insert,
+		data: insert.data ?? {},
+		created_at: new Date().toISOString(),
+		deleted_at: null,
+	} as WorldTileMap;
 
 	// 스토어 업데이트
 	worldTileMapStore.update((state) => ({
@@ -53,22 +31,7 @@ export async function createWorldTileMap(
 }
 
 export async function deleteWorldTileMap(worldId: WorldId) {
-	const { worldTileMapStore, getWorldTileMap } = useWorld();
-	const isTestWorld = worldId === TEST_WORLD_ID;
-
-	// 프로덕션 환경이면 서버에서 soft delete
-	if (!isTestWorld) {
-		const { supabase } = useApp();
-		const { error } = await supabase
-			.from('world_tile_maps')
-			.update({ deleted_at: new Date().toISOString() })
-			.eq('world_id', worldId);
-
-		if (error) {
-			console.error('Failed to delete world tile map:', error);
-			throw error;
-		}
-	}
+	const { worldTileMapStore } = useWorld();
 
 	// 스토어 업데이트
 	worldTileMapStore.update((state) => {

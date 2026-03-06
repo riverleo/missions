@@ -137,7 +137,6 @@ export const cell = {
 		// 바닥 위로 2번째 셀
 		const bottomCells: Cell[] = [];
 		for (let x = 0; x < pathfinder.cols; x++) {
-			bottomCells.push(vectorUtils.createCell(x, bottomTopRow - 2));
 			bottomCells.push(vectorUtils.createCell(x, bottomTopRow - 1));
 		}
 		safeSetWalkableAt(pathfinder, true, ...bottomCells);

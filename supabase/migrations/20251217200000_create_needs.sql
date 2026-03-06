@@ -138,48 +138,4 @@ create policy "admins can delete character_needs"
   to authenticated
   using (is_admin());
 
--- world_character_needs 테이블 (월드 캐릭터의 실제 욕구 값)
-create table world_character_needs (
-  id uuid primary key default gen_random_uuid(),
-  scenario_id uuid not null references scenarios(id) on delete cascade,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  player_id uuid not null references players(id) on delete cascade,
-  world_id uuid not null references worlds(id) on delete cascade,
-  character_id uuid not null references characters(id) on delete cascade,
-  world_character_id uuid not null references world_characters(id) on delete cascade,
-  need_id uuid not null references needs(id) on delete cascade,
-
-  value float not null,
-  deleted_at timestamptz,
-
-  constraint uq_world_character_needs_world_character_id_need_id unique (world_character_id, need_id)
-);
-
-alter table world_character_needs enable row level security;
-
-create policy "anyone can view world_character_needs"
-  on world_character_needs
-  for select
-  to public
-  using (deleted_at is null);
-
-create policy "owner or admin can insert world_character_needs"
-  on world_character_needs
-  for insert
-  to authenticated
-  with check (is_world_owner(world_id) or is_admin());
-
-create policy "owner or admin can update world_character_needs"
-  on world_character_needs
-  for update
-  to authenticated
-  using (
-    (is_world_owner(world_id) or is_admin())
-    and (deleted_at is null or is_admin())
-  );
-
-create policy "admin can delete world_character_needs"
-  on world_character_needs
-  for delete
-  to authenticated
-  using (is_admin());
+-- world_character_needs 테이블은 snapshot 방식으로 전환되어 삭제됨 (20260305220000_sync_strategy)
