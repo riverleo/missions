@@ -22,9 +22,6 @@ import type {
 	EntityInstance,
 	EntitySourceId,
 	BehaviorAction,
-	Interaction,
-	InteractionAction,
-	Player,
 	PlayerScenario,
 } from '$lib/types';
 import { usePlayer } from '../use-player';
@@ -143,7 +140,9 @@ function createWorldStore() {
 		return get(worldCharacterStore).data[id as WorldCharacterId];
 	}
 
-	function getOrUndefinedWorldCharacterNeed(id: string | null | undefined): WorldCharacterNeed | undefined {
+	function getOrUndefinedWorldCharacterNeed(
+		id: string | null | undefined
+	): WorldCharacterNeed | undefined {
 		if (!id) return undefined;
 		return get(worldCharacterNeedStore).data[id as WorldCharacterNeedId];
 	}
@@ -153,7 +152,9 @@ function createWorldStore() {
 		return get(worldBuildingStore).data[id as WorldBuildingId];
 	}
 
-	function getOrUndefinedWorldBuildingCondition(id: string | null | undefined): WorldBuildingCondition | undefined {
+	function getOrUndefinedWorldBuildingCondition(
+		id: string | null | undefined
+	): WorldBuildingCondition | undefined {
 		if (!id) return undefined;
 		return get(worldBuildingConditionStore).data[id as WorldBuildingConditionId];
 	}
@@ -163,7 +164,9 @@ function createWorldStore() {
 		return get(worldItemStore).data[id as WorldItemId];
 	}
 
-	function getOrUndefinedWorldTileMap(worldId: string | null | undefined): WorldTileMap | undefined {
+	function getOrUndefinedWorldTileMap(
+		worldId: string | null | undefined
+	): WorldTileMap | undefined {
 		if (!worldId) return undefined;
 		return get(worldTileMapStore).data[worldId as WorldId];
 	}
@@ -279,9 +282,7 @@ function createWorldStore() {
 	function getEntitySourceId(entityId: EntityId): EntitySourceId;
 	function getEntitySourceId(entityInstance: EntityInstance): EntitySourceId;
 	function getEntitySourceId(behaviorAction: BehaviorAction): EntitySourceId;
-	function getEntitySourceId(
-		data: EntityId | EntityInstance | BehaviorAction
-	): EntitySourceId {
+	function getEntitySourceId(data: EntityId | EntityInstance | BehaviorAction): EntitySourceId {
 		let result: EntitySourceId | undefined;
 
 		// EntityId인 경우
@@ -478,7 +479,7 @@ function createWorldStore() {
 		const worldTileMaps = get(worldTileMapStore).data;
 		const worlds = get(worldStore).data;
 
-		const { playerStore, playerScenarioStore, tickStore } = useCurrent();
+		const { playerStore, tickStore } = useCurrent();
 		const player = get(playerStore);
 		const { playerScenarioStore: playerScenarioAllStore } = usePlayer();
 		const currentTick = get(tickStore);
@@ -565,11 +566,7 @@ function createWorldStore() {
 	 * DB의 worlds.snapshot에서 스냅샷을 로드하여 스토어 복원
 	 */
 	async function loadSnapshot(worldId: WorldId): Promise<void> {
-		const { data, error } = await supabase
-			.from('worlds')
-			.select('*')
-			.eq('id', worldId)
-			.single();
+		const { data, error } = await supabase.from('worlds').select('*').eq('id', worldId).single();
 
 		if (error || !data) {
 			console.error('Failed to load snapshot:', error);
