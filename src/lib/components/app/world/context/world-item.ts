@@ -5,7 +5,7 @@ import type { WorldItem, WorldItemId, WorldItemInsert } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldItemEntity } from '../entities/world-item-entity';
 
-export async function createWorldItem(
+export function createWorldItem(
 	worldContext: WorldContext,
 	insert: Required<
 		Omit<
@@ -33,7 +33,7 @@ export async function createWorldItem(
 			| 'rotation'
 		>
 ) {
-	const { worldItemStore } = useWorld();
+	const { setWorldItem } = useWorld();
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 
 	const player = get(playerStore);
@@ -58,11 +58,8 @@ export async function createWorldItem(
 		deleted_at: null,
 	};
 
-	// 스토어 업데이트
-	worldItemStore.update((state) => ({
-		...state,
-		data: { ...state.data, [worldItem.id]: worldItem },
-	}));
+	// 스토어 업데이트 (useWorld CRUD)
+	setWorldItem(worldItem);
 
 	// 엔티티 생성 (world_building_id와 world_character_id가 모두 null일 때만 월드에 추가)
 	const entity = new WorldItemEntity(worldContext, worldContext.worldId, worldItem.id);
@@ -71,8 +68,8 @@ export async function createWorldItem(
 	}
 }
 
-export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
-	const { worldItemStore, getWorldItem } = useWorld();
+export function deleteWorldItem(worldItemId: WorldItemId, worldContext?: WorldContext) {
+	const { getWorldItem, removeWorldItem } = useWorld();
 	const worldItem = getWorldItem(worldItemId);
 	if (!worldItem) return;
 
@@ -90,10 +87,6 @@ export async function deleteWorldItem(worldItemId: WorldItemId, worldContext?: W
 		}
 	}
 
-	// 스토어 업데이트
-	worldItemStore.update((state) => {
-		const newData = { ...state.data };
-		delete newData[worldItemId];
-		return { ...state, data: newData };
-	});
+	// 스토어에서 제거 (useWorld CRUD)
+	removeWorldItem(worldItemId);
 }

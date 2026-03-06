@@ -23,6 +23,8 @@ import type {
 	EntitySourceId,
 	BehaviorAction,
 	PlayerScenario,
+	TileCellKey,
+	TileId,
 } from '$lib/types';
 import { usePlayer } from '../use-player';
 import { useApp } from '$lib/hooks/use-app.svelte';
@@ -248,6 +250,239 @@ function createWorldStore() {
 				}
 			})
 		);
+	}
+
+	// Store CRUD - Set
+	function setWorld(world: World): void {
+		worldStore.update((state) => ({
+			...state,
+			data: { ...state.data, [world.id]: world },
+		}));
+	}
+
+	function setWorldCharacter(character: WorldCharacter): void {
+		worldCharacterStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[character.id] = character;
+			})
+		);
+	}
+
+	function setWorldCharacterNeeds(needs: WorldCharacterNeed[]): void {
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				for (const need of needs) {
+					draft.data[need.id] = need;
+				}
+			})
+		);
+	}
+
+	function setWorldBuilding(building: WorldBuilding): void {
+		worldBuildingStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[building.id] = building;
+			})
+		);
+	}
+
+	function setWorldBuildingConditions(conditions: WorldBuildingCondition[]): void {
+		worldBuildingConditionStore.update((state) => {
+			const newData = { ...state.data };
+			for (const condition of conditions) {
+				newData[condition.id] = condition;
+			}
+			return { ...state, data: newData };
+		});
+	}
+
+	function setWorldItem(item: WorldItem): void {
+		worldItemStore.update((state) => ({
+			...state,
+			data: { ...state.data, [item.id]: item },
+		}));
+	}
+
+	function setWorldTileMap(tileMap: WorldTileMap): void {
+		worldTileMapStore.update((state) => ({
+			...state,
+			data: { ...state.data, [tileMap.world_id]: tileMap },
+		}));
+	}
+
+	// Store CRUD - Remove
+	function removeWorld(worldId: WorldId): void {
+		worldStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[worldId];
+			return { ...state, data: newData };
+		});
+	}
+
+	function removeWorldCharacter(id: WorldCharacterId): void {
+		worldCharacterStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[id];
+			return { ...state, data: newData };
+		});
+	}
+
+	function removeWorldCharacterNeedsByCharacter(worldCharacterId: WorldCharacterId): void {
+		worldCharacterNeedStore.update((state) =>
+			produce(state, (draft) => {
+				for (const [id, need] of Object.entries(draft.data)) {
+					if (need?.world_character_id === worldCharacterId) {
+						delete draft.data[id as WorldCharacterNeedId];
+					}
+				}
+			})
+		);
+	}
+
+	function removeWorldBuilding(id: WorldBuildingId): void {
+		worldBuildingStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[id];
+			return { ...state, data: newData };
+		});
+	}
+
+	function removeWorldBuildingConditionsByBuilding(worldBuildingId: WorldBuildingId): void {
+		worldBuildingConditionStore.update((state) =>
+			produce(state, (draft) => {
+				for (const [id, condition] of Object.entries(draft.data)) {
+					if (condition?.world_building_id === worldBuildingId) {
+						delete draft.data[id as WorldBuildingConditionId];
+					}
+				}
+			})
+		);
+	}
+
+	function removeWorldItem(id: WorldItemId): void {
+		worldItemStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[id];
+			return { ...state, data: newData };
+		});
+	}
+
+	function removeWorldTileMap(worldId: WorldId): void {
+		worldTileMapStore.update((state) => {
+			const newData = { ...state.data };
+			delete newData[worldId];
+			return { ...state, data: newData };
+		});
+	}
+
+	// Store CRUD - Tile data operations
+	function addTilesToWorldTileMap(
+		worldId: WorldId,
+		tiles: Record<TileCellKey, { tile_id: TileId; durability: number }>
+	): void {
+		worldTileMapStore.update((state) =>
+			produce(state, (draft) => {
+				const tileMap = draft.data[worldId];
+				if (tileMap) {
+					for (const [tileCellKey, data] of Object.entries(tiles)) {
+						tileMap.data[tileCellKey as TileCellKey] = data;
+					}
+				}
+			})
+		);
+	}
+
+	function removeTileFromWorldTileMapData(worldId: WorldId, tileCellKey: TileCellKey): void {
+		worldTileMapStore.update((state) =>
+			produce(state, (draft) => {
+				const tileMap = draft.data[worldId];
+				if (tileMap) {
+					delete tileMap.data[tileCellKey];
+				}
+			})
+		);
+	}
+
+	/**
+	 * WorldSnapshot으로부터 모든 스토어를 복원한다.
+	 * loadSnapshot()과 use-world-test.ts init()에서 공용으로 사용한다.
+	 */
+	function restoreSnapshot(snapshot: WorldSnapshot): void {
+		if (snapshot.worlds) {
+			worldStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worlds },
+			}));
+		}
+
+		if (snapshot.worldCharacters) {
+			worldCharacterStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldCharacters },
+			}));
+		}
+
+		if (snapshot.worldCharacterNeeds) {
+			worldCharacterNeedStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldCharacterNeeds },
+			}));
+		}
+
+		if (snapshot.worldBuildings) {
+			worldBuildingStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldBuildings },
+			}));
+		}
+
+		if (snapshot.worldBuildingConditions) {
+			worldBuildingConditionStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldBuildingConditions },
+			}));
+		}
+
+		if (snapshot.worldItems) {
+			worldItemStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldItems },
+			}));
+		}
+
+		if (snapshot.worldTileMaps) {
+			worldTileMapStore.update((state) => ({
+				...state,
+				status: 'success' as const,
+				data: { ...state.data, ...snapshot.worldTileMaps },
+			}));
+		}
+
+		// Player/PlayerScenario 복원
+		if (snapshot.player) {
+			const { playerStore: pStore, playerScenarioStore: psStore } = usePlayer();
+			pStore.update((state) =>
+				produce(state, (draft) => {
+					draft.data[snapshot.player.id] = snapshot.player;
+					draft.status = 'success';
+				})
+			);
+
+			if (snapshot.playerScenario) {
+				psStore.update((state) =>
+					produce(state, (draft) => {
+						draft.data[snapshot.playerScenario.id] = snapshot.playerScenario;
+						draft.status = 'success';
+					})
+				);
+			}
+		}
 	}
 
 	/**
@@ -543,9 +778,9 @@ function createWorldStore() {
 	}
 
 	/**
-	 * 월드 상태를 worlds.snapshot 컬럼에 저장
+	 * 월드 스냅샷을 빌드하여 DB에 저장한다. (saveSnapshot 대체)
 	 */
-	async function saveSnapshot(worldId: WorldId): Promise<void> {
+	async function updateWorld(worldId: WorldId): Promise<void> {
 		const snapshot = buildSnapshot(worldId);
 
 		const { error } = await supabase
@@ -557,7 +792,7 @@ function createWorldStore() {
 			.eq('id', worldId);
 
 		if (error) {
-			console.error('Failed to save snapshot:', error);
+			console.error('Failed to update world:', error);
 			throw error;
 		}
 	}
@@ -583,75 +818,8 @@ function createWorldStore() {
 			data: { ...state.data, [worldId]: world },
 		}));
 
-		if (!snapshot) return;
-
-		// 스냅샷에서 엔티티 데이터 복원
-		if (snapshot.worldCharacters) {
-			worldCharacterStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldCharacters },
-			}));
-		}
-
-		if (snapshot.worldCharacterNeeds) {
-			worldCharacterNeedStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldCharacterNeeds },
-			}));
-		}
-
-		if (snapshot.worldBuildings) {
-			worldBuildingStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldBuildings },
-			}));
-		}
-
-		if (snapshot.worldBuildingConditions) {
-			worldBuildingConditionStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldBuildingConditions },
-			}));
-		}
-
-		if (snapshot.worldItems) {
-			worldItemStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldItems },
-			}));
-		}
-
-		if (snapshot.worldTileMaps) {
-			worldTileMapStore.update((state) => ({
-				...state,
-				status: 'success' as const,
-				data: { ...state.data, ...snapshot.worldTileMaps },
-			}));
-		}
-
-		// Player/PlayerScenario 복원
-		if (snapshot.player) {
-			const { playerStore: pStore, playerScenarioStore: psStore } = usePlayer();
-			pStore.update((state) =>
-				produce(state, (draft) => {
-					draft.data[snapshot.player.id] = snapshot.player;
-					draft.status = 'success';
-				})
-			);
-
-			if (snapshot.playerScenario) {
-				psStore.update((state) =>
-					produce(state, (draft) => {
-						draft.data[snapshot.playerScenario.id] = snapshot.playerScenario;
-						draft.status = 'success';
-					})
-				);
-			}
+		if (snapshot) {
+			restoreSnapshot(snapshot);
 		}
 	}
 
@@ -667,8 +835,9 @@ function createWorldStore() {
 		init,
 		fetch,
 		buildSnapshot,
-		saveSnapshot,
+		updateWorld,
 		loadSnapshot,
+		restoreSnapshot,
 		setSelectedEntityId,
 		getWorld,
 		getWorldCharacter,
@@ -695,6 +864,22 @@ function createWorldStore() {
 		updateWorldCharacterNeed,
 		updateWorldBuildingCondition,
 		updateWorldItem,
+		setWorld,
+		setWorldCharacter,
+		setWorldCharacterNeeds,
+		setWorldBuilding,
+		setWorldBuildingConditions,
+		setWorldItem,
+		setWorldTileMap,
+		removeWorld,
+		removeWorldCharacter,
+		removeWorldCharacterNeedsByCharacter,
+		removeWorldBuilding,
+		removeWorldBuildingConditionsByBuilding,
+		removeWorldItem,
+		removeWorldTileMap,
+		addTilesToWorldTileMap,
+		removeTileFromWorldTileMapData,
 		getEntityInstance,
 		getEntitySourceId,
 		getOrUndefinedEntitySourceId,

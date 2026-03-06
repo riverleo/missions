@@ -1,16 +1,15 @@
 import { useWorld } from '$lib/hooks';
-import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type { TileId, WorldId, WorldTileMap, WorldTileMapInsert, TileCellKey } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldTileEntity } from '../entities/world-tile-entity';
 
-export async function createWorldTileMap(
+export function createWorldTileMap(
 	insert: Required<Omit<WorldTileMapInsert, 'id' | 'created_at' | 'data' | 'deleted_at'>> & {
 		data?: WorldTileMapInsert['data'];
 	}
 ) {
-	const { worldTileMapStore } = useWorld();
+	const { setWorldTileMap } = useWorld();
 
 	// 클라이언트에서 UUID 생성
 	const worldTileMap: WorldTileMap = {
@@ -21,31 +20,24 @@ export async function createWorldTileMap(
 		deleted_at: null,
 	} as WorldTileMap;
 
-	// 스토어 업데이트
-	worldTileMapStore.update((state) => ({
-		...state,
-		data: { ...state.data, [worldTileMap.world_id]: worldTileMap },
-	}));
+	// 스토어 업데이트 (useWorld CRUD)
+	setWorldTileMap(worldTileMap);
 
 	return worldTileMap;
 }
 
-export async function deleteWorldTileMap(worldId: WorldId) {
-	const { worldTileMapStore } = useWorld();
+export function deleteWorldTileMap(worldId: WorldId) {
+	const { removeWorldTileMap } = useWorld();
 
-	// 스토어 업데이트
-	worldTileMapStore.update((state) => {
-		const newData = { ...state.data };
-		delete newData[worldId];
-		return { ...state, data: newData };
-	});
+	// 스토어에서 제거 (useWorld CRUD)
+	removeWorldTileMap(worldId);
 }
 
 export function createTilesInWorldTileMap(
 	worldContext: WorldContext,
 	tiles: Record<TileCellKey, TileId>
 ) {
-	const { worldTileMapStore, getWorldTileMap } = useWorld();
+	const { getWorldTileMap, addTilesToWorldTileMap } = useWorld();
 
 	const worldTileMap = getWorldTileMap(worldContext.worldId);
 
@@ -54,20 +46,12 @@ export function createTilesInWorldTileMap(
 		throw new Error(`WorldTileMap not found for world ${worldContext.worldId}`);
 	}
 
-	// 모든 타일을 한 번에 스토어에 추가
-	worldTileMapStore.update((state) =>
-		produce(state, (draft) => {
-			const tileMap = draft.data[worldContext.worldId];
-			if (tileMap) {
-				for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
-					tileMap.data[tileCellKey] = {
-						tile_id: tiles[tileCellKey]!,
-						durability: 100,
-					};
-				}
-			}
-		})
-	);
+	// 타일 데이터 변환 후 스토어에 추가 (useWorld CRUD)
+	const tileData: Record<TileCellKey, { tile_id: TileId; durability: number }> = {};
+	for (const [tileCellKey, tileId] of Object.entries(tiles)) {
+		tileData[tileCellKey as TileCellKey] = { tile_id: tileId, durability: 100 };
+	}
+	addTilesToWorldTileMap(worldContext.worldId, tileData);
 
 	// 모든 엔티티 생성
 	for (const tileCellKey of Object.keys(tiles) as TileCellKey[]) {
@@ -85,7 +69,7 @@ export function createTilesInWorldTileMap(
 }
 
 export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileCellKey: TileCellKey) {
-	const { worldTileMapStore, getWorldTileMap } = useWorld();
+	const { removeTileFromWorldTileMapData } = useWorld();
 
 	// 엔티티 찾기 (tileCellKey로 instanceId가 일치하는 tile 엔티티 검색)
 	const entity = Object.values(worldContext.entities).find(
@@ -95,13 +79,6 @@ export function deleteTileFromWorldTileMap(worldContext: WorldContext, tileCellK
 		entity.removeFromWorld();
 	}
 
-	// 스토어 업데이트
-	worldTileMapStore.update((state) =>
-		produce(state, (draft) => {
-			const tileMap = draft.data[worldContext.worldId];
-			if (tileMap) {
-				delete tileMap.data[tileCellKey];
-			}
-		})
-	);
+	// 스토어에서 제거 (useWorld CRUD)
+	removeTileFromWorldTileMapData(worldContext.worldId, tileCellKey);
 }

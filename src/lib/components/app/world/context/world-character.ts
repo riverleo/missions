@@ -1,6 +1,5 @@
 import { useCharacter, useCurrent, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
-import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	WorldCharacter,
@@ -13,7 +12,7 @@ import type {
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldCharacterEntity } from '../entities/world-character-entity';
 
-export async function createWorldCharacter(
+export function createWorldCharacter(
 	worldContext: WorldContext,
 	insert: Required<
 		Omit<
@@ -30,7 +29,7 @@ export async function createWorldCharacter(
 	> &
 		Pick<WorldCharacterInsert, 'id' | 'created_at' | 'created_at_tick'>
 ) {
-	const { worldCharacterStore, worldCharacterNeedStore } = useWorld();
+	const { setWorldCharacter, setWorldCharacterNeeds, getAllWorldCharacterNeeds } = useWorld();
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 
 	const player = get(playerStore);
@@ -59,8 +58,8 @@ export async function createWorldCharacter(
 		deleted_at: null,
 	};
 
-	// WorldCharacterNeed를 별도 스토어에 저장
-	const worldCharacterNeeds = characterNeeds.map((cn) => ({
+	// WorldCharacterNeed 생성
+	const worldCharacterNeeds: WorldCharacterNeed[] = characterNeeds.map((cn) => ({
 		id: crypto.randomUUID() as WorldCharacterNeedId,
 		scenario_id,
 		user_id,
@@ -73,26 +72,14 @@ export async function createWorldCharacter(
 		deleted_at: null,
 	}));
 
-	worldCharacterNeedStore.update((state) =>
-		produce(state, (draft) => {
-			for (const worldCharacterNeed of worldCharacterNeeds) {
-				draft.data[worldCharacterNeed.id] = worldCharacterNeed;
-			}
-		})
-	);
-
-	// 스토어 업데이트
-	worldCharacterStore.update((state) =>
-		produce(state, (draft) => {
-			draft.data[worldCharacter.id] = worldCharacter;
-		})
-	);
+	// 스토어 업데이트 (useWorld CRUD)
+	setWorldCharacterNeeds(worldCharacterNeeds);
+	setWorldCharacter(worldCharacter);
 
 	// 엔티티 생성
 	const entity = new WorldCharacterEntity(worldContext, worldContext.worldId, worldCharacter.id);
 
 	// 스토어에서 needs를 불러와서 설정 (spread로 복사하여 프록시 해제)
-	const { getAllWorldCharacterNeeds } = useWorld();
 	const loadedNeeds = getAllWorldCharacterNeeds().filter(
 		(need) => need.world_character_id === worldCharacter.id
 	);
@@ -104,11 +91,12 @@ export async function createWorldCharacter(
 	entity.addToWorld();
 }
 
-export async function deleteWorldCharacter(
+export function deleteWorldCharacter(
 	worldCharacterId: WorldCharacterId,
 	worldContext?: WorldContext
 ) {
-	const { worldCharacterStore, worldCharacterNeedStore, getWorldCharacter } = useWorld();
+	const { getWorldCharacter, removeWorldCharacter, removeWorldCharacterNeedsByCharacter } =
+		useWorld();
 	const worldCharacter = getWorldCharacter(worldCharacterId);
 	if (!worldCharacter) return;
 
@@ -126,21 +114,7 @@ export async function deleteWorldCharacter(
 		}
 	}
 
-	// WorldCharacterNeed 제거
-	worldCharacterNeedStore.update((state) =>
-		produce(state, (draft) => {
-			for (const [id, need] of Object.entries(draft.data)) {
-				if (need?.world_character_id === worldCharacterId) {
-					delete draft.data[id as WorldCharacterNeedId];
-				}
-			}
-		})
-	);
-
-	// 스토어 업데이트
-	worldCharacterStore.update((state) => {
-		const newData = { ...state.data };
-		delete newData[worldCharacterId];
-		return { ...state, data: newData };
-	});
+	// 스토어에서 제거 (useWorld CRUD)
+	removeWorldCharacterNeedsByCharacter(worldCharacterId);
+	removeWorldCharacter(worldCharacterId);
 }

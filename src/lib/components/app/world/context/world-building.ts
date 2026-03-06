@@ -1,17 +1,17 @@
 import { useBuilding, useCurrent, useWorld } from '$lib/hooks';
 import { get } from 'svelte/store';
-import { produce } from 'immer';
 import type { WorldContext } from './world-context.svelte';
 import type {
 	WorldBuilding,
 	WorldBuildingId,
 	WorldBuildingInsert,
+	WorldBuildingCondition,
 	WorldBuildingConditionId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
 import { WorldBuildingEntity } from '../entities/world-building-entity';
 
-export async function createWorldBuilding(
+export function createWorldBuilding(
 	worldContext: WorldContext,
 	insert: Required<
 		Omit<
@@ -28,7 +28,8 @@ export async function createWorldBuilding(
 	> &
 		Pick<WorldBuildingInsert, 'id' | 'created_at' | 'created_at_tick'>
 ) {
-	const { worldBuildingStore, worldBuildingConditionStore } = useWorld();
+	const { setWorldBuilding, setWorldBuildingConditions, getAllWorldBuildingConditions } =
+		useWorld();
 
 	const { playerStore, playerScenarioStore, tickStore } = useCurrent();
 	const player = get(playerStore);
@@ -57,8 +58,8 @@ export async function createWorldBuilding(
 		deleted_at: null,
 	};
 
-	// WorldBuildingCondition을 별도 스토어에 저장
-	const worldBuildingConditions = buildingConditions.map((bc) => ({
+	// WorldBuildingCondition 생성
+	const worldBuildingConditions: WorldBuildingCondition[] = buildingConditions.map((bc) => ({
 		id: crypto.randomUUID() as WorldBuildingConditionId,
 		user_id,
 		world_id: worldContext.worldId,
@@ -73,26 +74,14 @@ export async function createWorldBuilding(
 		deleted_at: null,
 	}));
 
-	worldBuildingConditionStore.update((state) => {
-		const newData = { ...state.data };
-		for (const condition of worldBuildingConditions) {
-			newData[condition.id] = condition;
-		}
-		return { ...state, data: newData };
-	});
-
-	// 스토어 업데이트
-	worldBuildingStore.update((state) =>
-		produce(state, (draft) => {
-			draft.data[worldBuilding.id] = worldBuilding;
-		})
-	);
+	// 스토어 업데이트 (useWorld CRUD)
+	setWorldBuildingConditions(worldBuildingConditions);
+	setWorldBuilding(worldBuilding);
 
 	// 엔티티 생성
 	const entity = new WorldBuildingEntity(worldContext, worldContext.worldId, worldBuilding.id);
 
 	// 스토어에서 conditions를 다시 불러와서 설정 (spread로 복사하여 프록시 해제)
-	const { getAllWorldBuildingConditions } = useWorld();
 	const entityBuildingConditions = getAllWorldBuildingConditions().filter(
 		(condition) => condition.world_building_id === worldBuilding.id
 	);
@@ -104,11 +93,12 @@ export async function createWorldBuilding(
 	entity.addToWorld();
 }
 
-export async function deleteWorldBuilding(
+export function deleteWorldBuilding(
 	worldBuildingId: WorldBuildingId,
 	worldContext?: WorldContext
 ) {
-	const { worldBuildingStore, worldBuildingConditionStore, getWorldBuilding } = useWorld();
+	const { getWorldBuilding, removeWorldBuilding, removeWorldBuildingConditionsByBuilding } =
+		useWorld();
 	const worldBuilding = getWorldBuilding(worldBuildingId);
 	if (!worldBuilding) return;
 
@@ -126,21 +116,7 @@ export async function deleteWorldBuilding(
 		}
 	}
 
-	// WorldBuildingCondition 제거
-	worldBuildingConditionStore.update((state) =>
-		produce(state, (draft) => {
-			for (const [id, condition] of Object.entries(draft.data)) {
-				if (condition?.world_building_id === worldBuildingId) {
-					delete draft.data[id as WorldBuildingConditionId];
-				}
-			}
-		})
-	);
-
-	// 스토어 업데이트
-	worldBuildingStore.update((state) => {
-		const newData = { ...state.data };
-		delete newData[worldBuildingId];
-		return { ...state, data: newData };
-	});
+	// 스토어에서 제거 (useWorld CRUD)
+	removeWorldBuildingConditionsByBuilding(worldBuildingId);
+	removeWorldBuilding(worldBuildingId);
 }

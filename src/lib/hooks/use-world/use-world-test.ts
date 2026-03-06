@@ -118,92 +118,14 @@ function createTestWorldStore() {
 	}
 
 	function init() {
-		// localStorage에서 world 데이터 로드하여 use-world 스토어에 추가
-		const world = useWorld();
-		const player = usePlayer();
+		const { restoreSnapshot } = useWorld();
 		const { selectPlayer } = useCurrent();
 
 		// 테스트 플레이어 자동 선택 (테스트 월드 사용을 위해)
 		selectPlayer(TEST_PLAYER_ID);
 
-		if (stored.worlds) {
-			world.worldStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worlds);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldCharacters) {
-			world.worldCharacterStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldCharacters);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldCharacterNeeds) {
-			world.worldCharacterNeedStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldCharacterNeeds);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldBuildings) {
-			world.worldBuildingStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldBuildings);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldBuildingConditions) {
-			world.worldBuildingConditionStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldBuildingConditions);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldItems) {
-			world.worldItemStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldItems);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		if (stored.worldTileMaps) {
-			world.worldTileMapStore.update((state) =>
-				produce(state, (draft) => {
-					Object.assign(draft.data, stored.worldTileMaps);
-					draft.status = 'success';
-				})
-			);
-		}
-
-		// Player 로드
-		player.playerStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[stored.player.id] = stored.player;
-				draft.status = 'success';
-			})
-		);
-
-		// PlayerScenario 로드 (current_tick이 저장된 tick 값으로 업데이트되어 있음)
-		player.playerScenarioStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[stored.playerScenario.id] = stored.playerScenario;
-				draft.status = 'success';
-			})
-		);
+		// restoreSnapshot으로 모든 스토어를 한번에 복원
+		restoreSnapshot(stored);
 	}
 
 	return {
