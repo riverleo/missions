@@ -10,9 +10,9 @@
 	let { entity }: Props = $props();
 
 	const { itemStore } = useItem();
-	const { worldItemStore } = useWorld();
+	const { worldStore } = useWorld();
 
-	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
+	const worldItem = $derived($worldStore.data[entity.worldId]?.worldItems[entity.instanceId]);
 	const item = $derived(worldItem ? $itemStore.data[worldItem.item_id] : undefined);
 	// 디버그 모드일 때 opacity 낮춤
 	const opacity = $derived(entity.debug ? 0.6 : 1);

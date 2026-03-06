@@ -1,4 +1,5 @@
 import { Fixture } from '$lib/hooks/fixture';
+import { produce } from 'immer';
 import { useInteraction, useWorld } from '$lib/hooks';
 import { InteractionIdUtils } from '$lib/utils/interaction-id';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -74,9 +75,16 @@ describe('tickActionSystemItemPick(tick: number)', () => {
 		entity.behavior.interactionQueue.currentInteractionTargetId = systemItemPickTargetId;
 
 		// 2) 해당 월드 아이템을 현재 캐릭터 소유로 만든다.
-		useWorld().updateWorldItem(targetItemEntity.instanceId, {
-			world_character_id: entity.instanceId,
-		});
+		const worldItem = useWorld().getWorldItem(targetItemEntity.instanceId);
+		useWorld().worldStore.update((state) =>
+			produce(state, (draft) => {
+				const world = draft.data[worldItem.world_id];
+				if (world) {
+					const wi = world.worldItems[targetItemEntity.instanceId];
+					if (wi) wi.world_character_id = entity.instanceId;
+				}
+			})
+		);
 
 		// 3) 시스템 아이템 줍기 틱을 실행한다.
 		entity.behavior.tickActionSystemItemPick(START_TICK);

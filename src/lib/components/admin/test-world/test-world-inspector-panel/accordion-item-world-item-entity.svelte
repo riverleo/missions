@@ -18,10 +18,10 @@
 	let { entity, worldContext }: Props = $props();
 
 	const { getOrUndefinedCharacter } = useCharacter();
-	const { worldItemStore, getOrUndefinedWorldCharacter } = useWorld();
+	const { worldStore, getOrUndefinedWorldCharacter } = useWorld();
 
 	const item = $derived(entity.item);
-	const worldItem = $derived($worldItemStore.data[entity.instanceId]);
+	const worldItem = $derived($worldStore.data[entity.worldId]?.worldItems[entity.instanceId]);
 	const itemLabel = $derived(getNameWithId(entity.id));
 
 	const holderCharacterLabel = $derived.by(() => {

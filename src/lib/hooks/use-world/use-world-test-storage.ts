@@ -9,7 +9,7 @@ import {
 	TEST_PLAYER_ID,
 	TEST_SCENARIO_ID,
 	TEST_SCENARIO_SNAPSHOT_ID,
-	TEST_WORLD_STATE_STORAGE_KEY,
+	TEST_WORLD_SNAPSHOT_KEY,
 } from '$lib/constants';
 
 export const defaultState: TestWorldSnapshot = {
@@ -18,6 +18,7 @@ export const defaultState: TestWorldSnapshot = {
 	selectedTerrainId: undefined,
 	modalScreenVector: vectorUtils.createScreenVector(0, 0),
 	debug: false,
+	worlds: {},
 	player: {
 		id: TEST_PLAYER_ID,
 		user_id: TEST_USER_ID,
@@ -44,7 +45,7 @@ export function load(): TestWorldSnapshot {
 	if (!browser) return defaultState;
 
 	try {
-		const saved = localStorage.getItem(TEST_WORLD_STATE_STORAGE_KEY);
+		const saved = localStorage.getItem(TEST_WORLD_SNAPSHOT_KEY);
 		if (saved) {
 			const stored: TestWorldSnapshot = JSON.parse(saved);
 			// worlds에서 terrain ID 찾아 selectedTerrainId 설정
@@ -55,13 +56,7 @@ export function load(): TestWorldSnapshot {
 				selectedTerrainId: world?.terrain_id ?? undefined,
 				modalScreenVector: stored.modalScreenVector ?? defaultState.modalScreenVector,
 				debug: stored.debug ?? defaultState.debug,
-				worlds: stored.worlds,
-				worldCharacters: stored.worldCharacters,
-				worldCharacterNeeds: stored.worldCharacterNeeds,
-				worldBuildings: stored.worldBuildings,
-				worldBuildingConditions: stored.worldBuildingConditions,
-				worldItems: stored.worldItems,
-				worldTileMaps: stored.worldTileMaps,
+				worlds: stored.worlds ?? {},
 				player: stored.player ?? defaultState.player,
 				playerScenario: stored.playerScenario ?? defaultState.playerScenario,
 			};
@@ -83,7 +78,7 @@ export function save(state: TestWorldSnapshot) {
 			...state,
 			...snapshot,
 		};
-		localStorage.setItem(TEST_WORLD_STATE_STORAGE_KEY, JSON.stringify(stored));
+		localStorage.setItem(TEST_WORLD_SNAPSHOT_KEY, JSON.stringify(stored));
 	} catch (e) {
 		console.error(e);
 	}

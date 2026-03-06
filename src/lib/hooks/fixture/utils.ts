@@ -32,7 +32,7 @@ import type {
 	ScenarioId,
 	UserId,
 	UserRoleId,
-	World,
+	WorldData,
 	WorldCharacter,
 	WorldCharacterId,
 	WorldCharacterNeed,
@@ -51,6 +51,7 @@ import { useWorld } from '$lib/hooks/use-world';
 import { useInteraction } from '$lib/hooks/use-interaction';
 import { useFulfillment } from '$lib/hooks/use-fulfillment';
 import { v4 as uuidv4 } from 'uuid';
+import { produce } from 'immer';
 import { get } from 'svelte/store';
 import type { Readable, Writable } from 'svelte/store';
 
@@ -65,10 +66,11 @@ function set<K extends string, T extends { id: K }>(
 		nextData[item.id] = item;
 	}
 
-	(store as Writable<RecordFetchState<K, T>>).set({
-		status: 'success',
+	(store as Writable<RecordFetchState<K, T>>).update((state) => ({
+		...state,
+		status: 'success' as const,
 		data: nextData,
-	});
+	}));
 }
 
 function add<K extends string, T extends { id: K }>(
@@ -76,16 +78,13 @@ function add<K extends string, T extends { id: K }>(
 	value: T | T[]
 ): void {
 	const values = Array.isArray(value) ? value : [value];
-	const currentState = get(store);
-	const nextData = { ...currentState.data };
 
-	for (const item of values) {
-		nextData[item.id] = item;
-	}
-
-	(store as Writable<RecordFetchState<K, T>>).set({
-		status: 'success',
-		data: nextData,
+	(store as Writable<RecordFetchState<K, T>>).update((state) => {
+		const nextData = { ...state.data };
+		for (const item of values) {
+			nextData[item.id] = item;
+		}
+		return { ...state, status: 'success' as const, data: nextData };
 	});
 }
 
@@ -100,7 +99,7 @@ let conditionA: Condition | undefined;
 let buildingA: Building | undefined;
 let worldCharacterA: WorldCharacter | undefined;
 
-export function createOrGetWorld(): World {
+export function createOrGetWorld(): WorldData {
 	const worldStore = useWorld().worldStore;
 	const existingWorld = Object.values(get(worldStore).data)[0];
 	if (existingWorld) return existingWorld;
@@ -109,19 +108,31 @@ export function createOrGetWorld(): World {
 	const player = createOrGetPlayer();
 	const createdAt = new Date().toISOString();
 	const worldId = uuidv4() as WorldId;
-	const value: World = {
+	const value: WorldData = {
 		id: worldId,
 		user_id: player.user_id,
 		player_id: player.id,
 		scenario_id: scenario.id,
 		name: getIdPrefix('world', worldId),
 		terrain_id: null,
-		snapshot: null,
 		deleted_at: null,
 		created_at: createdAt,
 		updated_at: null,
+		worldCharacters: {},
+		worldCharacterNeeds: {},
+		worldBuildings: {},
+		worldBuildingConditions: {},
+		worldItems: {},
+		worldTileMap: undefined,
 	};
-	set(useWorld().worldStore, value);
+	useWorld().worldStore.update((state) => ({
+		...state,
+		status: 'success' as const,
+		data: {
+			...state.data,
+			[value.id]: value,
+		},
+	}));
 	return value;
 }
 
@@ -166,8 +177,8 @@ export function createWorldCharacter(
 	overrides: Partial<WorldCharacter> = {}
 ): WorldCharacter {
 	const world = createOrGetWorld();
-	const worldCharacterStore = useWorld().worldCharacterStore;
-	const existingWorldCharacter = Object.values(get(worldCharacterStore).data).find(
+	const { getAllWorldCharacters, worldStore } = useWorld();
+	const existingWorldCharacter = getAllWorldCharacters().find(
 		(worldCharacter) =>
 			worldCharacter.world_id === world.id && worldCharacter.character_id === character.id
 	);
@@ -188,7 +199,12 @@ export function createWorldCharacter(
 		deleted_at: null,
 		...overrides,
 	};
-	add(useWorld().worldCharacterStore, value);
+	worldStore.update((state) =>
+		produce(state, (draft) => {
+			const w = draft.data[value.world_id];
+			if (w) w.worldCharacters[value.id] = value;
+		})
+	);
 	return value;
 }
 
@@ -199,8 +215,8 @@ export function createWorldCharacterNeed(
 ): WorldCharacterNeed {
 	const character = useCharacter().getCharacter(worldCharacter.character_id);
 	const characterNeed = createOrGetCharacterNeed(character, need);
-	const worldCharacterNeedStore = useWorld().worldCharacterNeedStore;
-	const existingWorldCharacterNeed = Object.values(get(worldCharacterNeedStore).data).find(
+	const { getAllWorldCharacterNeeds, worldStore } = useWorld();
+	const existingWorldCharacterNeed = getAllWorldCharacterNeeds().find(
 		(worldCharacterNeed) =>
 			worldCharacterNeed.world_character_id === worldCharacter.id &&
 			worldCharacterNeed.need_id === characterNeed.need_id
@@ -220,7 +236,12 @@ export function createWorldCharacterNeed(
 		value: 0,
 		...overrides,
 	};
-	add(useWorld().worldCharacterNeedStore, value);
+	worldStore.update((state) =>
+		produce(state, (draft) => {
+			const w = draft.data[value.world_id];
+			if (w) w.worldCharacterNeeds[value.id] = value;
+		})
+	);
 	return value;
 }
 
@@ -245,7 +266,12 @@ export function createWorldItem(item: Item, overrides: Partial<WorldItem> = {}):
 		deleted_at: null,
 		...overrides,
 	};
-	add(useWorld().worldItemStore, value);
+	useWorld().worldStore.update((state) =>
+		produce(state, (draft) => {
+			const w = draft.data[value.world_id];
+			if (w) w.worldItems[value.id] = value;
+		})
+	);
 	return value;
 }
 
@@ -675,7 +701,7 @@ export function createOrGetBuildingA(): Building {
 
 export function createOrGetWorldCharacterA(): WorldCharacter {
 	if (worldCharacterA) {
-		const existing = get(useWorld().worldCharacterStore).data[worldCharacterA.id];
+		const existing = useWorld().getOrUndefinedWorldCharacter(worldCharacterA.id);
 		if (existing) return existing;
 	}
 	const character = createOrGetCharacterA();

@@ -52,6 +52,9 @@ function createCurrentStore() {
 	// 틱 스토어 (playerScenario의 current_tick으로 초기화)
 	const tickStore = writable<number>(0);
 
+	// 틱 인터벌 ID (틱 시스템 제어용) — subscribe보다 먼저 선언해야 TDZ 방지
+	let tickIntervalId: ReturnType<typeof setInterval> | undefined;
+
 	// playerScenario가 변경되면 tickStore 초기화
 	playerScenarioStore.subscribe(($playerScenario) => {
 		if ($playerScenario) {
@@ -107,9 +110,6 @@ function createCurrentStore() {
 			roleStore.set(undefined);
 		}
 	}
-
-	// 틱 인터벌 ID (틱 시스템 제어용)
-	let tickIntervalId: ReturnType<typeof setInterval> | undefined;
 
 	/**
 	 * 틱 시스템 시작 (1초마다 current_tick 증가)

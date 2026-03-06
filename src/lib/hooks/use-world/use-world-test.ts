@@ -8,8 +8,8 @@ import { useWorld } from './use-world';
 import { usePlayer } from '../use-player';
 import { useTerrain } from '../use-terrain';
 import { load, save, defaultState } from './use-world-test-storage';
-import { createWorld, deleteWorld } from '$lib/components/app/world/context/world';
-import { TEST_PLAYER_ID, TEST_WORLD_ID, TEST_WORLD_STATE_STORAGE_KEY } from '$lib/constants';
+import { deleteWorld } from '$lib/components/app/world/context/world';
+import { TEST_PLAYER_ID, TEST_WORLD_ID, TEST_WORLD_SNAPSHOT_KEY } from '$lib/constants';
 import { useCurrent } from '../use-current';
 
 let instance: ReturnType<typeof createTestWorldStore> | undefined;
@@ -18,6 +18,32 @@ function createTestWorldStore() {
 	const stored = load();
 
 	const store = writable<TestWorldSnapshot>(stored);
+
+	/**
+	 * 테스트 플레이어/시나리오가 useCurrent 컨텍스트에 있는지 보장한다.
+	 */
+	function ensureContext() {
+		const player = usePlayer();
+		const { selectPlayer } = useCurrent();
+		const playerData = stored.player;
+		const scenarioData = stored.playerScenario;
+
+		player.playerStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[playerData.id] = playerData;
+				draft.status = 'success';
+			})
+		);
+
+		player.playerScenarioStore.update((state) =>
+			produce(state, (draft) => {
+				draft.data[scenarioData.id] = scenarioData;
+				draft.status = 'success';
+			})
+		);
+
+		selectPlayer(playerData.id);
+	}
 
 	function setSelectedTerrainId(terrainId: TerrainId) {
 		const { terrainStore } = useTerrain();
@@ -40,11 +66,14 @@ function createTestWorldStore() {
 			const terrain = get(terrainStore).data[terrainId];
 			if (!terrain) return state;
 
-			// world 생성 (worldTileMap 자동 생성됨)
-			createWorld({
+			// context를 직접 전달하여 requireCurrentContext() 의존 제거
+			useWorld().createWorld({
 				id: TEST_WORLD_ID,
 				terrain_id: terrain.id,
 				name: 'Test World',
+				user_id: stored.player.user_id,
+				player_id: stored.player.id,
+				scenario_id: stored.playerScenario.scenario_id,
 			});
 
 			return {
@@ -89,7 +118,7 @@ function createTestWorldStore() {
 	async function reset(worldContext?: WorldContext) {
 		// localStorage 클리어
 		if (browser) {
-			localStorage.removeItem(TEST_WORLD_STATE_STORAGE_KEY);
+			localStorage.removeItem(TEST_WORLD_SNAPSHOT_KEY);
 		}
 
 		// 현재 월드 삭제 (모든 엔티티 포함)
@@ -99,33 +128,21 @@ function createTestWorldStore() {
 		const { open, modalScreenVector } = get(store);
 		store.set({ ...defaultState, open, modalScreenVector });
 
-		// 기본 플레이어/시나리오 데이터 로드
-		const player = usePlayer();
-
-		player.playerStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[defaultState.player.id] = defaultState.player;
-				draft.status = 'success';
-			})
-		);
-
-		player.playerScenarioStore.update((state) =>
-			produce(state, (draft) => {
-				draft.data[defaultState.playerScenario.id] = defaultState.playerScenario;
-				draft.status = 'success';
-			})
-		);
+		// 기본 플레이어/시나리오 컨텍스트 복원
+		ensureContext();
 	}
 
 	function init() {
-		const { restoreSnapshot } = useWorld();
-		const { selectPlayer } = useCurrent();
+		// 플레이어/시나리오 컨텍스트를 먼저 설정 (selectPlayer 포함)
+		ensureContext();
 
-		// 테스트 플레이어 자동 선택 (테스트 월드 사용을 위해)
-		selectPlayer(TEST_PLAYER_ID);
-
-		// restoreSnapshot으로 모든 스토어를 한번에 복원
-		restoreSnapshot(stored);
+		// 스냅샷의 worlds를 그대로 worldStore에 복원
+		const { worldStore } = useWorld();
+		worldStore.set({
+			status: 'success',
+			data: stored.worlds ?? {},
+			error: undefined,
+		});
 	}
 
 	return {

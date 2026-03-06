@@ -286,17 +286,12 @@ export type {
 	BehaviorInteractionType,
 	// World Entity Types (moved from supabase.ts)
 	WorldCharacter,
-	WorldCharacterInsert,
 	WorldBuilding,
-	WorldBuildingInsert,
 	WorldBuildingCondition,
-	WorldBuildingConditionInsert,
 	WorldItem,
-	WorldItemInsert,
 	WorldTileMap,
-	WorldTileMapInsert,
 	WorldCharacterNeed,
-	WorldCharacterNeedInsert,
+	WorldData,
 	WorldSnapshot,
 } from './core';
 

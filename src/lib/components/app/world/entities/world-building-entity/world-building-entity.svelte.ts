@@ -1,11 +1,13 @@
 import { useBuilding, useWorld } from '$lib/hooks';
 import Matter from 'matter-js';
+import { produce } from 'immer';
 import type {
 	WorldBuildingId,
 	Building,
 	BuildingId,
 	WorldId,
 	WorldBuildingCondition,
+	WorldBuildingConditionId,
 	ConditionId,
 } from '$lib/types';
 import { EntityIdUtils } from '$lib/utils/entity-id';
@@ -79,13 +81,20 @@ export class WorldBuildingEntity extends Entity {
 	save(): void {
 		// 건물은 static이므로 위치가 변경되지 않음
 		// conditions 저장
-		const { updateWorldBuildingCondition } = useWorld();
+		const { worldStore } = useWorld();
 
-		for (const condition of Object.values(this.worldBuildingConditions)) {
-			updateWorldBuildingCondition(condition.id, {
-				value: condition.value,
-			});
-		}
+		worldStore.update((state) =>
+			produce(state, (draft) => {
+				const world = draft.data[this.worldId];
+				if (!world) return;
+				for (const condition of Object.values(this.worldBuildingConditions)) {
+					const wbc = world.worldBuildingConditions[condition.id as WorldBuildingConditionId];
+					if (wbc) {
+						wbc.value = condition.value;
+					}
+				}
+			})
+		);
 	}
 
 	update(_: BeforeUpdateEvent): void {

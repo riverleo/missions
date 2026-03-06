@@ -13,7 +13,7 @@ export default function tickDecreaseDurabilities(this: WorldItemEntity, tick: nu
 
 		// durability가 0이 되면 아이템 삭제
 		if (this.durabilityTicks === 0) {
-			const { worldItemStore, getWorldItem } = useWorld();
+			const { getWorldItem } = useWorld();
 			const worldItem = getWorldItem(this.instanceId);
 
 			// 캐릭터가 들고 있다면 heldWorldItemIds에서 제거

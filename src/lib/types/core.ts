@@ -272,19 +272,6 @@ export interface WorldCharacter {
 	x: number;
 	y: number;
 }
-export type WorldCharacterInsert = {
-	id?: string;
-	user_id: UserId;
-	world_id: WorldId;
-	character_id: CharacterId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	created_at?: string;
-	created_at_tick?: number;
-	deleted_at?: string | null;
-	x?: number;
-	y?: number;
-};
 // --- WorldBuilding ---
 export interface WorldBuilding {
 	id: WorldBuildingId;
@@ -299,19 +286,6 @@ export interface WorldBuilding {
 	created_at_tick: number;
 	deleted_at: string | null;
 }
-export type WorldBuildingInsert = {
-	id?: string;
-	user_id: UserId;
-	world_id: WorldId;
-	building_id: BuildingId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	cell_x?: number;
-	cell_y?: number;
-	created_at?: string;
-	created_at_tick?: number;
-	deleted_at?: string | null;
-};
 // --- WorldBuildingCondition ---
 export interface WorldBuildingCondition {
 	id: WorldBuildingConditionId;
@@ -327,20 +301,6 @@ export interface WorldBuildingCondition {
 	deleted_at: string | null;
 	value: number;
 }
-export type WorldBuildingConditionInsert = {
-	id?: string;
-	scenario_id: ScenarioId;
-	user_id: UserId;
-	player_id: PlayerId;
-	world_id: WorldId;
-	world_building_id: WorldBuildingId;
-	building_id: BuildingId;
-	building_condition_id: BuildingConditionId;
-	condition_id: ConditionId;
-	created_at?: string;
-	deleted_at?: string | null;
-	value?: number;
-};
 // --- WorldItem ---
 export interface WorldItem {
 	id: WorldItemId;
@@ -359,23 +319,6 @@ export interface WorldItem {
 	x: number;
 	y: number;
 }
-export type WorldItemInsert = {
-	id?: string;
-	user_id: UserId;
-	world_id: WorldId;
-	item_id: ItemId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	world_building_id?: WorldBuildingId | null;
-	world_character_id?: WorldCharacterId | null;
-	created_at?: string;
-	created_at_tick?: number;
-	deleted_at?: string | null;
-	durability_ticks?: number | null;
-	rotation?: number;
-	x?: number;
-	y?: number;
-};
 // --- WorldTileMap ---
 export interface WorldTileMap {
 	id: string;
@@ -388,17 +331,6 @@ export interface WorldTileMap {
 	created_at: string;
 	deleted_at: string | null;
 }
-export type WorldTileMapInsert = {
-	id?: string;
-	user_id?: UserId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	world_id: WorldId;
-	terrain_id: TerrainId;
-	data: Record<TileCellKey, { tile_id: TileId; durability: number }>;
-	created_at?: string;
-	deleted_at?: string | null;
-};
 // --- WorldCharacterNeed ---
 export interface WorldCharacterNeed {
 	id: WorldCharacterNeedId;
@@ -412,30 +344,26 @@ export interface WorldCharacterNeed {
 	deleted_at: string | null;
 	value: number;
 }
-export type WorldCharacterNeedInsert = {
-	id?: string;
-	user_id: UserId;
-	world_id: WorldId;
-	world_character_id: WorldCharacterId;
-	character_id: CharacterId;
-	need_id: NeedId;
-	player_id: PlayerId;
-	scenario_id: ScenarioId;
-	deleted_at?: string | null;
-	value: number;
-};
+
+// ============================================================
+// WorldData: World + 엔티티 데이터를 하나의 객체로 합친 런타임 타입
+// DB의 snapshot 필드를 제외하고 엔티티 데이터를 직접 포함한다.
+// ============================================================
+export interface WorldData extends Omit<World, 'snapshot'> {
+	worldCharacters: Record<WorldCharacterId, WorldCharacter>;
+	worldCharacterNeeds: Record<WorldCharacterNeedId, WorldCharacterNeed>;
+	worldBuildings: Record<WorldBuildingId, WorldBuilding>;
+	worldBuildingConditions: Record<WorldBuildingConditionId, WorldBuildingCondition>;
+	worldItems: Record<WorldItemId, WorldItem>;
+	worldTileMap: WorldTileMap | undefined;
+}
 
 // ============================================================
 // World Snapshot (DB & localStorage 공용 스냅샷 인터페이스)
+// 엔티티 데이터는 각 World(WorldData) 안에 포함된다.
 // ============================================================
 export interface WorldSnapshot {
-	worlds?: Record<WorldId, World>;
-	worldCharacters?: Record<WorldCharacterId, WorldCharacter>;
-	worldCharacterNeeds?: Record<WorldCharacterNeedId, WorldCharacterNeed>;
-	worldBuildings?: Record<WorldBuildingId, WorldBuilding>;
-	worldBuildingConditions?: Record<WorldBuildingConditionId, WorldBuildingCondition>;
-	worldItems?: Record<WorldItemId, WorldItem>;
-	worldTileMaps?: Record<WorldId, WorldTileMap>;
+	worlds: Record<WorldId, WorldData>;
 	player: Player;
 	playerScenario: PlayerScenario;
 }
