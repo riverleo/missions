@@ -50,7 +50,6 @@ function setWalkableAt(pathfinder: Pathfinder) {
 		// 타일 너비만큼 walkable 설정
 		for (let dx = 0; dx < TILE_CELL_RATIO; dx++) {
 			if (!hasTopTile) {
-				safeSetWalkableAt(pathfinder, true, vectorUtils.createCell(cellX + dx, cellY - 2));
 				safeSetWalkableAt(pathfinder, true, vectorUtils.createCell(cellX + dx, cellY - 1));
 			}
 
@@ -67,7 +66,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 							safeSetWalkableAt(
 								pathfinder,
 								true,
-								vectorUtils.createCell(cellX + dx - offset, cellY - 2)
+								vectorUtils.createCell(cellX + dx - offset, cellY - 1)
 							);
 						}
 
@@ -84,7 +83,7 @@ function setWalkableAt(pathfinder: Pathfinder) {
 							safeSetWalkableAt(
 								pathfinder,
 								true,
-								vectorUtils.createCell(cellX + dx + offset, cellY - 2)
+								vectorUtils.createCell(cellX + dx + offset, cellY - 1)
 							);
 						}
 
