@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { createServer } from 'node:http';
+import { handleWorkflowEvent } from './linear-webhook-workflow.js';
 
 const PORT = 3000;
 const WEBHOOK_PATH = '/linear/webhook';
@@ -142,6 +143,14 @@ const server = createServer(async (request, response) => {
 				path: WEBHOOK_PATH,
 			}),
 		);
+
+		handleWorkflowEvent(jsonBody).catch((automationError) => {
+			console.error(
+				`[linear-webhook] automation failed: ${
+					automationError instanceof Error ? automationError.message : String(automationError)
+				}`,
+			);
+		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Unknown error';
 
