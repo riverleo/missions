@@ -35,6 +35,8 @@ Linear 웹훅 이벤트를 로컬 개발 환경에서 수신할 수 있도록 No
 - [x] Linear `Issue`/`Comment` 웹훅 payload에서 상태 전이와 이슈 식별자를 파싱하는 자동화 엔트리 포인트를 설계하고 구현한다.
 - [x] `Todo` 전환 시 플래너 플랜 작성, PR 생성, 상태를 `In Progress`로 갱신하는 자동 실행 흐름을 구현한다.
 - [x] `Done` 전환 시 연결된 PR 머지를 수행하는 자동 실행 흐름을 구현한다.
+- [x] 플래너 완료 후 구현 역할(`플랫폼 엔지니어`, `테스트 엔지니어`) 자동 실행과 `In Review` 상태 전환 흐름을 구현한다.
+- [x] `Canceled` 전환 시 연결된 열린 PR을 닫는 자동 실행 흐름을 구현한다.
 
 ### 테스트 엔지니어
 - [x] 로컬에서 웹훅 서버 실행 후 `POST` 요청으로 `200` 응답이 반환되는지 검증한다.
@@ -81,3 +83,10 @@ Linear 웹훅 이벤트를 로컬 개발 환경에서 수신할 수 있도록 No
 - 구현: `Done` 상태 전환 시 `[이슈코드]` 형식의 열린 PR을 찾아 `gh pr merge`로 머지하도록 연결.
 - 환경 변수 구조 확장: `.env.example`에 `LINEAR_API_KEY`, `GITHUB_PR_MERGE_METHOD` 추가.
 - 실행 스크립트: `pnpm webhook:linear`가 Node `--env-file-if-exists=.env` 옵션으로 루트 `.env`를 자동 로드하도록 구성.
+- 버그 수정: 외부 터미널의 `PATH`에 `codex`가 없어도 `CODEX_BIN` 또는 기본 앱 번들 경로(`/Applications/Codex.app/Contents/Resources/codex`)로 플래너 세션을 실행하도록 보정.
+- 구현 확장: 플래너 세션 성공 시 같은 이슈 worktree에서 `[플랫폼 엔지니어, 테스트 엔지니어]` 구현 세션을 자동 시작하고 완료 후 Linear 상태를 `In Review`로 갱신.
+- 구현 확장: `Canceled` 상태 전환 시 `[이슈코드]` 형식의 열린 PR을 `gh pr close --delete-branch`로 종료.
+- 구현 확장: `Issue remove` 이벤트 수신 시에도 `[이슈코드]` 형식의 열린 PR을 `gh pr close --delete-branch`로 종료.
+- 구현 확장: 같은 이슈 코드의 열린 PR이 이미 있으면 플래너 단계에서 중단하지 않고, 기존 worktree의 플랜 파일을 찾아 구현 자동화를 이어서 시작.
+- 구현 보강: 구현 자동화 프롬프트에 커밋/푸시 완료를 명시하고, 종료 후 worktree가 clean이며 원격과 동기화되었는지 검증한 뒤에만 성공 처리와 `In Review` 전환을 수행.
+- 구현 보강: Linear 코멘트는 긴 경로/PR/PID 대신 단계별 한 줄 상태 메시지 중심으로 축약.
