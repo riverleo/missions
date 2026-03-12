@@ -1,5 +1,5 @@
 이슈: OOA-8
-링크: https://linear.app/ooaah/issue/OOA-8/%EC%9B%B9%ED%9B%85-%EC%9D%B4%EC%8A%88-%ED%85%8C%EC%8A%A4%ED%8A%B8-2
+링크: https://linear.app/ooaah/issue/OOA-8/웹훅-이슈-테스트-2
 
 # 웹훅 이슈 테스트 2
 
@@ -20,9 +20,9 @@
 ### 플래너
 
 - [x] OOA-8 이슈 요구사항을 기준으로 `README.md` 추가 범위와 완료 조건을 플랜에 문서화한다.
-- [x] 플랜 전용 브랜치 생성, 원격 푸시, PR 생성 절차를 진행할 준비를 완료한다.
-- [ ] 생성된 PR 제목/본문이 규칙과 일치하는지 검증하고 필요한 경우 즉시 수정한다.
-- [ ] Linear API 사용 가능 시 이슈 상태를 `In Progress`로 변경하고 구현 역할 호출 문구를 남긴다.
+- [x] 플랜 전용 브랜치 생성, 원격 푸시, PR 생성을 완료한다.
+- [x] 생성된 PR 제목/본문이 규칙과 일치하는지 검증하고 필요한 경우 즉시 수정한다.
+- [x] Linear API 사용 가능 시 이슈 상태를 `In Progress`로 변경하고 구현 역할 호출 문구를 남긴다.
 
 ### 플랫폼 엔지니어
 
@@ -41,6 +41,9 @@
 - 사용자 요청: Linear 이슈 `OOA-8`의 `Todo` 전환에 따라 플래너가 즉시 플랜 문서를 작성하고 브랜치, 커밋, PR, 상태 전환까지 수행.
 - 플랜 파일: `docs/plans/20260313012036_webhook_issue_test_2.md`
 - 플랜 브랜치: `plans/20260313012036_webhook_issue_test_2`
+- PR: `https://github.com/riverleo/missions/pull/27`
+- PR 제목/본문을 `.github/PULL_REQUEST_TEMPLATE/plan.md` 기준으로 검증했고 수정은 필요하지 않았다.
+- `LINEAR_API_KEY` 확인 후 Linear 이슈 `OOA-8` 상태를 `In Progress`로 반영했다.
 - 역할 호출 문구:
 - `[플랫폼 엔지니어, 테스트 엔지니어]`
 - `20260313012036_webhook_issue_test_2 플랜 구현 시작`
