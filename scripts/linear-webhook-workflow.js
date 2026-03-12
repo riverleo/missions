@@ -7,22 +7,36 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 const processedEvents = new Set();
 const activeAutomations = new Map();
+const pendingReplans = new Map();
 const DEFAULT_CODEX_BIN = '/Applications/Codex.app/Contents/Resources/codex';
+const AUTOMATION_COMMENT_MARKER = '<!-- linear-webhook:automation -->';
 
 function getIssueCode(payload) {
-	return payload?.data?.identifier;
+	return payload?.data?.identifier ?? payload?.data?.issue?.identifier;
 }
 
 function getIssueTitle(payload) {
-	return payload?.data?.title ?? '제목 없음';
+	return payload?.data?.title ?? payload?.data?.issue?.title ?? '제목 없음';
 }
 
 function getIssueUrl(payload) {
-	return payload?.url ?? payload?.data?.url ?? '';
+	return payload?.data?.issue?.url ?? payload?.url ?? payload?.data?.url ?? '';
 }
 
 function getIssueDescription(payload) {
 	return payload?.data?.description ?? '설명 없음';
+}
+
+function getIssueId(payload) {
+	return payload?.data?.id && payload?.type === 'Issue' ? payload.data.id : payload?.data?.issueId;
+}
+
+function getIssueTeamId(payload) {
+	return payload?.data?.team?.id ?? payload?.data?.issue?.team?.id;
+}
+
+function getCommentBody(payload) {
+	return payload?.data?.body ?? '';
 }
 
 function isIssueStateTransition(payload, stateName) {
@@ -51,8 +65,26 @@ function isIssueRemoved(payload) {
 	return payload?.type === 'Issue' && payload?.action === 'remove';
 }
 
+function isCommentEvent(payload) {
+	return payload?.type === 'Comment' && ['create', 'update'].includes(payload?.action);
+}
+
+function isAutomationComment(payload) {
+	return getCommentBody(payload).includes(AUTOMATION_COMMENT_MARKER);
+}
+
+function isUserReplanComment(payload) {
+	return isCommentEvent(payload) && Boolean(getIssueCode(payload)) && !isAutomationComment(payload);
+}
+
 function getProcessedEventKey(payload) {
-	return [payload.webhookId, payload.type, payload.action, payload.data?.id, payload.data?.updatedAt]
+	return [
+		payload.webhookId,
+		payload.type,
+		payload.action,
+		payload.data?.id,
+		payload.data?.updatedAt,
+	]
 		.filter(Boolean)
 		.join(':');
 }
@@ -216,7 +248,7 @@ async function findOpenPullRequestForIssue(repoRoot, issueCode) {
 	const { stdout } = await runCommand(
 		'gh',
 		['pr', 'list', '--state', 'open', '--json', 'number,title,url', '--limit', '100'],
-		{ cwd: repoRoot },
+		{ cwd: repoRoot }
 	);
 
 	return JSON.parse(stdout).find((pullRequest) => pullRequest.title.startsWith(`[${issueCode}] `));
@@ -268,7 +300,9 @@ function getRunPaths(repoRoot, issueCode, stage) {
 }
 
 async function getGitStatusSummary(worktreePath) {
-	const { stdout } = await runCommand('git', ['status', '--short', '--branch'], { cwd: worktreePath });
+	const { stdout } = await runCommand('git', ['status', '--short', '--branch'], {
+		cwd: worktreePath,
+	});
 	return stdout;
 }
 
@@ -280,12 +314,14 @@ async function ensureWorkerCompletionCommitted(worktreePath) {
 
 	if (changeLines.length > 0) {
 		throw new Error(
-			`구현 세션이 종료되었지만 커밋되지 않은 변경이 남아 있습니다.\n${changeLines.join('\n')}`,
+			`구현 세션이 종료되었지만 커밋되지 않은 변경이 남아 있습니다.\n${changeLines.join('\n')}`
 		);
 	}
 
 	if (branchLine.includes('[ahead ')) {
-		throw new Error(`구현 세션이 종료되었지만 원격에 푸시되지 않은 커밋이 남아 있습니다.\n${branchLine}`);
+		throw new Error(
+			`구현 세션이 종료되었지만 원격에 푸시되지 않은 커밋이 남아 있습니다.\n${branchLine}`
+		);
 	}
 
 	if (!branchLine.includes('...origin/')) {
@@ -294,29 +330,68 @@ async function ensureWorkerCompletionCommitted(worktreePath) {
 }
 
 function getStageLabel(stage) {
-	return stage === 'planner' ? '플래너' : '테스트 엔지니어';
+	return stage === 'planner' ? '플래너' : '플랫폼 엔지니어, 테스트 엔지니어';
 }
 
-function buildStartStatusComment(stage) {
-	if (stage === 'planner') {
-		return '플래너가 플랜 작성을 시작했어요.';
+function formatAutomationComment(role, message, detail) {
+	const lines = [AUTOMATION_COMMENT_MARKER, `[${role}] ${message}`];
+	if (detail) {
+		lines.push(detail);
 	}
 
-	return '테스트 엔지니어가 개발을 시작했어요.';
+	return lines.join('\n');
 }
 
-function buildCompletionStatusComment(stage, code, completionError) {
-	const actor = getStageLabel(stage);
+function buildStartStatusComment(stage, mode = 'default') {
+	if (stage === 'planner') {
+		return formatAutomationComment(
+			getStageLabel(stage),
+			mode === 'replan'
+				? '수정 요청 반영을 위한 플랜 갱신을 시작했습니다.'
+				: '플랜 작성을 시작했습니다.'
+		);
+	}
+
+	return formatAutomationComment(
+		getStageLabel(stage),
+		mode === 'replan' ? '수정 사항 반영 작업을 시작했습니다.' : '플랜 구현을 시작했습니다.'
+	);
+}
+
+function buildCompletionStatusComment(stage, code, completionError, mode = 'default') {
+	const role = getStageLabel(stage);
 
 	if (code === 0) {
-		return stage === 'planner' ? '플래너가 플랜을 작성했어요.' : '테스트 엔지니어가 개발을 완료했어요.';
+		if (stage === 'planner') {
+			return formatAutomationComment(
+				role,
+				mode === 'replan'
+					? '수정 요청 반영을 위한 플랜 갱신을 완료했습니다.'
+					: '플랜 작성을 완료했습니다.'
+			);
+		}
+
+		return formatAutomationComment(
+			role,
+			mode === 'replan' ? '수정 사항 반영 작업을 완료했습니다.' : '플랜 구현을 완료했습니다.'
+		);
 	}
 
 	if (completionError) {
-		return `${actor} 작업이 실패했어요.\n${completionError}`;
+		return formatAutomationComment(role, '작업이 실패했습니다.', completionError);
 	}
 
-	return `${actor} 작업이 실패했어요.`;
+	return formatAutomationComment(role, '작업이 실패했습니다.');
+}
+
+function hasActiveAutomationForIssue(issueCode) {
+	for (const automation of activeAutomations.values()) {
+		if (automation.issueCode === issueCode) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 async function startCodexSession({
@@ -343,8 +418,12 @@ async function startCodexSession({
 	const stdoutStream = createWriteStream(runPaths.stdoutPath, { flags: 'a' });
 	const stderrStream = createWriteStream(runPaths.stderrPath, { flags: 'a' });
 
-	stdoutStream.write(`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`);
-	stderrStream.write(`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`);
+	stdoutStream.write(
+		`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`
+	);
+	stderrStream.write(
+		`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`
+	);
 
 	const child = spawn(
 		codexBinary,
@@ -361,7 +440,7 @@ async function startCodexSession({
 			cwd: repoRoot,
 			env: process.env,
 			stdio: ['ignore', 'pipe', 'pipe'],
-		},
+		}
 	);
 
 	child.stdout.pipe(stdoutStream);
@@ -389,15 +468,23 @@ async function startCodexSession({
 				issueId,
 				`${getStageLabel(stage)} 작업을 시작하지 못했어요.\n${
 					error instanceof Error ? error.message : String(error)
-				}`,
+				}`
 			);
 		} catch (commentError) {
 			console.error(
 				`[linear-webhook] failed to publish ${stage} start error for ${issueCode}: ${
 					commentError instanceof Error ? commentError.message : String(commentError)
-				}`,
+				}`
 			);
 		}
+
+		await flushPendingReplan(issueCode).catch((flushError) => {
+			console.error(
+				`[linear-webhook] failed to flush queued replan for ${issueCode}: ${
+					flushError instanceof Error ? flushError.message : String(flushError)
+				}`
+			);
+		});
 	});
 
 	child.once('exit', async (code) => {
@@ -420,19 +507,29 @@ async function startCodexSession({
 			if (completeComment) {
 				await createLinearIssueComment(
 					issueId,
-					completeComment(completionError ? 1 : (code ?? null), finalMessage, completionError),
+					completeComment(completionError ? 1 : (code ?? null), finalMessage, completionError)
 				);
 			}
 		} catch (error) {
 			console.error(
 				`[linear-webhook] failed to publish ${stage} result for ${issueCode}: ${
 					error instanceof Error ? error.message : String(error)
-				}`,
+				}`
 			);
+		} finally {
+			await flushPendingReplan(issueCode).catch((flushError) => {
+				console.error(
+					`[linear-webhook] failed to flush queued replan for ${issueCode}: ${
+						flushError instanceof Error ? flushError.message : String(flushError)
+					}`
+				);
+			});
 		}
 	});
 
-	console.log(`[linear-webhook] ${stage} session started for ${issueCode} (pid: ${child.pid ?? 'unknown'})`);
+	console.log(
+		`[linear-webhook] ${stage} session started for ${issueCode} (pid: ${child.pid ?? 'unknown'})`
+	);
 }
 
 function buildPlannerPrompt(payload, worktreePath) {
@@ -494,6 +591,56 @@ ${planInfo.planStem} 플랜 구현 시작
 - ${worktreePath}`;
 }
 
+function buildReplanPrompt({ payload, planInfo, worktreePath, pullRequestUrl }) {
+	const issueCode = getIssueCode(payload);
+	const issueTitle = getIssueTitle(payload);
+	const issueUrl = getIssueUrl(payload);
+	const commentBody = getCommentBody(payload);
+
+	return `[플래너]
+${issueCode} 이슈에 사용자 수정 요청 코멘트가 추가되었다. 기존 플랜을 갱신하고 구현 역할을 다시 지시하라.
+
+이슈 정보
+- 코드: ${issueCode}
+- 제목: ${issueTitle}
+- 링크: ${issueUrl}
+- 플랜: ${planInfo.relativePath}
+- PR: ${pullRequestUrl}
+
+사용자 코멘트
+${commentBody}
+
+수행할 일
+1. AGENTS.md와 docs/agents/planner/AGENTS.md 규칙을 따른다.
+2. 새 플랜을 만들지 말고 기존 플랜 파일 ${planInfo.relativePath}를 갱신한다.
+3. 사용자 코멘트에서 요구한 변경 사항을 플랜의 목표, 할 일, 노트에 반영한다.
+4. 기존 브랜치와 PR을 유지한 채 플랜 변경을 커밋하고 푸시한다.
+5. 플랜 갱신 후 [플랫폼 엔지니어, 테스트 엔지니어] 역할 호출 문구를 남긴다.
+6. LINEAR_API_KEY가 있으면 Linear 이슈 상태를 In Progress로 변경한다.
+
+작업 디렉토리
+- ${worktreePath}
+
+작업을 끝낸 뒤 최종 응답에는 아래만 간결히 포함하라.
+- 갱신한 플랜 파일 경로
+- 반영한 사용자 코멘트 요약
+- 재지시 여부`;
+}
+
+async function flushPendingReplan(issueCode) {
+	if (!issueCode || hasActiveAutomationForIssue(issueCode)) {
+		return;
+	}
+
+	const queuedPayload = pendingReplans.get(issueCode);
+	if (!queuedPayload) {
+		return;
+	}
+
+	pendingReplans.delete(issueCode);
+	await startReplanSession(queuedPayload);
+}
+
 async function startPlannerSession(payload) {
 	const repoRoot = await getRepoRoot();
 	const issueCode = getIssueCode(payload);
@@ -513,13 +660,13 @@ async function startPlannerSession(payload) {
 		const planInfo = await findPlanPathForIssue(worktreePath, issueCode);
 		if (!planInfo) {
 			console.warn(
-				`[linear-webhook] open PR exists for ${issueCode} but no plan file was found in ${worktreePath}`,
+				`[linear-webhook] open PR exists for ${issueCode} but no plan file was found in ${worktreePath}`
 			);
 			return;
 		}
 
 		console.log(
-			`[linear-webhook] open PR already exists for ${issueCode}, continuing with worker stage: ${existingPullRequest.url}`,
+			`[linear-webhook] open PR already exists for ${issueCode}, continuing with worker stage: ${existingPullRequest.url}`
 		);
 
 		const workerPrompt = buildWorkerPrompt({
@@ -601,6 +748,92 @@ async function startPlannerSession(payload) {
 	});
 }
 
+async function startReplanSession(payload) {
+	const repoRoot = await getRepoRoot();
+	const issueCode = getIssueCode(payload);
+	if (!issueCode) {
+		return;
+	}
+
+	if (hasActiveAutomationForIssue(issueCode)) {
+		pendingReplans.set(issueCode, payload);
+		console.log(
+			`[linear-webhook] queued replan for ${issueCode} while another automation is running`
+		);
+		return;
+	}
+
+	const worktreePath = await ensureIssueWorktree(repoRoot, issueCode);
+	const existingPullRequest = await findOpenPullRequestForIssue(repoRoot, issueCode);
+	if (!existingPullRequest) {
+		console.warn(`[linear-webhook] no open PR found for ${issueCode}, skipping replan`);
+		return;
+	}
+
+	const planInfo = await findPlanPathForIssue(worktreePath, issueCode);
+	if (!planInfo) {
+		console.warn(`[linear-webhook] no existing plan found for ${issueCode}, skipping replan`);
+		return;
+	}
+
+	const codexBinary = await resolveCodexBinary();
+	const issueId = getIssueId(payload);
+	const teamId = getIssueTeamId(payload);
+	const issueTitle = getIssueTitle(payload);
+	const replanPrompt = buildReplanPrompt({
+		payload,
+		planInfo,
+		worktreePath,
+		pullRequestUrl: existingPullRequest.url,
+	});
+
+	await updateLinearIssueState(issueId, teamId, 'In Progress').catch(() => undefined);
+
+	await startCodexSession({
+		codexBinary,
+		repoRoot,
+		issueCode,
+		issueId,
+		stage: 'planner',
+		worktreePath,
+		prompt: replanPrompt,
+		startComment: () => buildStartStatusComment('planner', 'replan'),
+		completeComment: (code, _finalMessage, completionError) =>
+			buildCompletionStatusComment('planner', code, completionError, 'replan'),
+		onSuccess: async () => {
+			const refreshedPlanInfo = await findPlanPathForIssue(worktreePath, issueCode);
+			if (!refreshedPlanInfo) {
+				throw new Error(`Replanner completed but no plan file was found for ${issueCode}`);
+			}
+
+			const workerPrompt = buildWorkerPrompt({
+				issueCode,
+				issueTitle,
+				planInfo: refreshedPlanInfo,
+				worktreePath,
+				pullRequestUrl: existingPullRequest.url,
+			});
+
+			await startCodexSession({
+				codexBinary,
+				repoRoot,
+				issueCode,
+				issueId,
+				stage: 'worker',
+				worktreePath,
+				prompt: workerPrompt,
+				startComment: () => buildStartStatusComment('worker', 'replan'),
+				completeComment: (code, _finalMessage, completionError) =>
+					buildCompletionStatusComment('worker', code, completionError, 'replan'),
+				onSuccess: async () => {
+					await ensureWorkerCompletionCommitted(worktreePath);
+					await updateLinearIssueState(issueId, teamId, 'In Review');
+				},
+			});
+		},
+	});
+}
+
 async function mergePullRequestForIssue(payload) {
 	const repoRoot = await getRepoRoot();
 	const issueCode = getIssueCode(payload);
@@ -618,7 +851,7 @@ async function mergePullRequestForIssue(payload) {
 	await runCommand(
 		'gh',
 		['pr', 'merge', String(matchingPullRequest.number), mergeFlag, '--delete-branch'],
-		{ cwd: repoRoot },
+		{ cwd: repoRoot }
 	);
 
 	console.log(`[linear-webhook] merged PR for ${issueCode}: ${matchingPullRequest.url}`);
@@ -655,9 +888,16 @@ export async function handleWorkflowEvent(payload) {
 			return;
 		}
 
+		if (isUserReplanComment(payload)) {
+			await startReplanSession(payload);
+			return;
+		}
+
 		if (isIssueDone(payload)) {
 			await mergePullRequestForIssue(payload);
-			await updateLinearIssueState(payload.data.id, payload.data.team.id, 'Done').catch(() => undefined);
+			await updateLinearIssueState(payload.data.id, payload.data.team.id, 'Done').catch(
+				() => undefined
+			);
 			return;
 		}
 
@@ -673,3 +913,19 @@ export async function handleWorkflowEvent(payload) {
 		setTimeout(() => processedEvents.delete(processedEventKey), 5 * 60 * 1000).unref?.();
 	}
 }
+
+export const __test__ = {
+	AUTOMATION_COMMENT_MARKER,
+	buildCompletionStatusComment,
+	buildReplanPrompt,
+	buildStartStatusComment,
+	formatAutomationComment,
+	getCommentBody,
+	getIssueCode,
+	getIssueId,
+	getIssueTeamId,
+	getIssueTitle,
+	getIssueUrl,
+	isAutomationComment,
+	isUserReplanComment,
+};
