@@ -263,7 +263,7 @@ function createScenarioStore() {
 
 		async createScenarioSnapshot(scenarioId: ScenarioId, name: string, description: string = '') {
 			// Collect all master data for the scenario
-			const { terrainStore, tileStore, tileStateStore, terrainTileStore } = useTerrain();
+			const { terrainStore, tileStore, tileStateStore } = useTerrain();
 			const {
 				getAllCharacterBodies,
 				getAllCharacterNeeds,
@@ -312,9 +312,6 @@ function createScenarioStore() {
 			);
 			const tiles = Object.values(get(tileStore).data).filter((t) => t.scenario_id === scenarioId);
 			const tileStates = Object.values(get(tileStateStore).data);
-			const terrainTiles = Object.values(get(terrainTileStore).data).filter((tt) =>
-				terrains.some((t) => t.id === tt.terrain_id)
-			);
 
 			// Character related
 			const characters = getAllCharacters().filter((c) => c.scenario_id === scenarioId);
@@ -427,7 +424,6 @@ function createScenarioStore() {
 				terrains,
 				tiles,
 				tileStates,
-				terrainTiles,
 				// Character
 				characters,
 				characterNeeds,
