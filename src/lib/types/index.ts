@@ -60,7 +60,6 @@ export type {
 	CharacterInteractionActionId,
 	TileId,
 	TileStateId,
-	TerrainTileId,
 	WorldTileMapId,
 	// Table Types
 	Scenario,
@@ -111,7 +110,6 @@ export type {
 	CharacterInteractionAction,
 	Tile,
 	TileState,
-	TerrainTile,
 	// Insert Types
 	ScenarioInsert,
 	ScenarioSnapshotInsert,
@@ -161,7 +159,6 @@ export type {
 	CharacterInteractionActionInsert,
 	TileInsert,
 	TileStateInsert,
-	TerrainTileInsert,
 	// Update Types
 	ScenarioUpdate,
 	ScenarioSnapshotUpdate,
@@ -211,7 +208,6 @@ export type {
 	CharacterInteractionActionUpdate,
 	TileUpdate,
 	TileStateUpdate,
-	TerrainTileUpdate,
 	// Enum Types
 	LoopType,
 	ColliderType,

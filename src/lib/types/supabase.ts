@@ -69,7 +69,6 @@ export type CharacterInteractionId = Brand<string, 'CharacterInteractionId'>;
 export type CharacterInteractionActionId = Brand<string, 'CharacterInteractionActionId'>;
 export type TileId = Brand<string, 'TileId'>;
 export type TileStateId = Brand<string, 'TileStateId'>;
-export type TerrainTileId = Brand<string, 'TerrainTileId'>;
 export type WorldTileMapId = Brand<string, 'WorldTileMapId'>;
 export type ScenarioSnapshotId = Brand<string, 'ScenarioSnapshotId'>;
 
@@ -1701,40 +1700,6 @@ export type TileStateUpdate = Omit<TileStateUpdateRow, 'id' | 'scenario_id' | 't
 	id?: TileStateId;
 	scenario_id?: ScenarioId;
 	tile_id?: TileId;
-};
-
-// Terrain Tile types
-type TerrainTileRow = Tables<'terrains_tiles'>;
-export type TerrainTile = Omit<
-	TerrainTileRow,
-	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
-> & {
-	id: TerrainTileId;
-	scenario_id: ScenarioId;
-	terrain_id: TerrainId;
-	tile_id: TileId;
-	created_by: UserRoleId | null;
-};
-type TerrainTileInsertRow = TablesInsert<'terrains_tiles'>;
-export type TerrainTileInsert = Omit<
-	TerrainTileInsertRow,
-	'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
-> & {
-	scenario_id: ScenarioId;
-	terrain_id: TerrainId;
-	tile_id: TileId;
-	created_by?: UserRoleId | null;
-};
-type TerrainTileUpdateRow = TablesUpdate<'terrains_tiles'>;
-export type TerrainTileUpdate = Omit<
-	TerrainTileUpdateRow,
-	'id' | 'scenario_id' | 'terrain_id' | 'tile_id' | 'created_by'
-> & {
-	id?: TerrainTileId;
-	scenario_id?: ScenarioId;
-	terrain_id?: TerrainId;
-	tile_id?: TileId;
-	created_by?: UserRoleId | null;
 };
 
 // World Tile Map types → moved to core.ts
