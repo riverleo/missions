@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 const processedEvents = new Set();
 const activeAutomations = new Map();
+const DEFAULT_CODEX_BIN = '/Applications/Codex.app/Contents/Resources/codex';
 
 function getIssueCode(payload) {
 	return payload?.data?.identifier;
@@ -42,6 +43,14 @@ function isIssueDone(payload) {
 	return isIssueStateTransition(payload, 'Done');
 }
 
+function isIssueCanceled(payload) {
+	return isIssueStateTransition(payload, 'Canceled');
+}
+
+function isIssueRemoved(payload) {
+	return payload?.type === 'Issue' && payload?.action === 'remove';
+}
+
 function getProcessedEventKey(payload) {
 	return [payload.webhookId, payload.type, payload.action, payload.data?.id, payload.data?.updatedAt]
 		.filter(Boolean)
@@ -73,6 +82,24 @@ async function pathExists(path) {
 	} catch {
 		return false;
 	}
+}
+
+async function resolveCodexBinary() {
+	const configuredBinary = process.env.CODEX_BIN;
+	if (configuredBinary) {
+		return configuredBinary;
+	}
+
+	try {
+		const { stdout } = await runCommand('which', ['codex']);
+		if (stdout) {
+			return stdout;
+		}
+	} catch {
+		// Fall through to the bundled app binary path.
+	}
+
+	return DEFAULT_CODEX_BIN;
 }
 
 async function createLinearIssueComment(issueId, body) {
@@ -195,6 +222,219 @@ async function findOpenPullRequestForIssue(repoRoot, issueCode) {
 	return JSON.parse(stdout).find((pullRequest) => pullRequest.title.startsWith(`[${issueCode}] `));
 }
 
+async function findPlanPathForIssue(worktreePath, issueCode) {
+	const plansDirectory = join(worktreePath, 'docs', 'plans');
+	const entries = await readdir(plansDirectory, { withFileTypes: true });
+	const planFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('.md'));
+
+	for (const planFile of planFiles) {
+		const absolutePath = join(plansDirectory, planFile.name);
+		const contents = await readFile(absolutePath, 'utf8');
+
+		if (contents.includes(`이슈: ${issueCode}`)) {
+			return {
+				absolutePath,
+				relativePath: `docs/plans/${planFile.name}`,
+				planStem: planFile.name.replace(/\.md$/, ''),
+			};
+		}
+	}
+
+	return undefined;
+}
+
+async function ensureIssueWorktree(repoRoot, issueCode) {
+	const worktreeRoot = dirname(repoRoot);
+	const worktreePath = join(worktreeRoot, `${basename(repoRoot)}-${issueCode.toLowerCase()}`);
+
+	if (!(await pathExists(worktreePath))) {
+		await runCommand('git', ['fetch', 'origin', 'main'], { cwd: repoRoot });
+		await runCommand('git', ['worktree', 'add', '--detach', worktreePath, 'origin/main'], {
+			cwd: repoRoot,
+		});
+	}
+
+	return worktreePath;
+}
+
+function getRunPaths(repoRoot, issueCode, stage) {
+	const runDirectory = join(repoRoot, '.codex', 'linear-runs', issueCode.toLowerCase(), stage);
+	return {
+		runDirectory,
+		outputPath: join(runDirectory, 'last-message.txt'),
+		stdoutPath: join(runDirectory, 'stdout.log'),
+		stderrPath: join(runDirectory, 'stderr.log'),
+	};
+}
+
+async function getGitStatusSummary(worktreePath) {
+	const { stdout } = await runCommand('git', ['status', '--short', '--branch'], { cwd: worktreePath });
+	return stdout;
+}
+
+async function ensureWorkerCompletionCommitted(worktreePath) {
+	const statusSummary = await getGitStatusSummary(worktreePath);
+	const statusLines = statusSummary.split('\n').filter(Boolean);
+	const branchLine = statusLines[0] ?? '';
+	const changeLines = statusLines.slice(1);
+
+	if (changeLines.length > 0) {
+		throw new Error(
+			`구현 세션이 종료되었지만 커밋되지 않은 변경이 남아 있습니다.\n${changeLines.join('\n')}`,
+		);
+	}
+
+	if (branchLine.includes('[ahead ')) {
+		throw new Error(`구현 세션이 종료되었지만 원격에 푸시되지 않은 커밋이 남아 있습니다.\n${branchLine}`);
+	}
+
+	if (!branchLine.includes('...origin/')) {
+		throw new Error(`구현 브랜치의 원격 추적 정보가 없습니다.\n${branchLine}`);
+	}
+}
+
+function getStageLabel(stage) {
+	return stage === 'planner' ? '플래너' : '테스트 엔지니어';
+}
+
+function buildStartStatusComment(stage) {
+	if (stage === 'planner') {
+		return '플래너가 플랜 작성을 시작했어요.';
+	}
+
+	return '테스트 엔지니어가 개발을 시작했어요.';
+}
+
+function buildCompletionStatusComment(stage, code, completionError) {
+	const actor = getStageLabel(stage);
+
+	if (code === 0) {
+		return stage === 'planner' ? '플래너가 플랜을 작성했어요.' : '테스트 엔지니어가 개발을 완료했어요.';
+	}
+
+	if (completionError) {
+		return `${actor} 작업이 실패했어요.\n${completionError}`;
+	}
+
+	return `${actor} 작업이 실패했어요.`;
+}
+
+async function startCodexSession({
+	codexBinary,
+	repoRoot,
+	issueCode,
+	issueId,
+	stage,
+	worktreePath,
+	prompt,
+	startComment,
+	completeComment,
+	onSuccess,
+}) {
+	const lockKey = `${issueCode}:${stage}`;
+	if (activeAutomations.has(lockKey)) {
+		console.log(`[linear-webhook] ${stage} workflow already running for ${issueCode}`);
+		return;
+	}
+
+	const runPaths = getRunPaths(repoRoot, issueCode, stage);
+	await mkdir(runPaths.runDirectory, { recursive: true });
+
+	const stdoutStream = createWriteStream(runPaths.stdoutPath, { flags: 'a' });
+	const stderrStream = createWriteStream(runPaths.stderrPath, { flags: 'a' });
+
+	stdoutStream.write(`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`);
+	stderrStream.write(`\n=== ${new Date().toISOString()} ${stage} session start: ${issueCode} ===\n`);
+
+	const child = spawn(
+		codexBinary,
+		[
+			'exec',
+			'--dangerously-bypass-approvals-and-sandbox',
+			'-C',
+			worktreePath,
+			'-o',
+			runPaths.outputPath,
+			prompt,
+		],
+		{
+			cwd: repoRoot,
+			env: process.env,
+			stdio: ['ignore', 'pipe', 'pipe'],
+		},
+	);
+
+	child.stdout.pipe(stdoutStream);
+	child.stderr.pipe(stderrStream);
+
+	activeAutomations.set(lockKey, {
+		issueCode,
+		stage,
+		pid: child.pid ?? -1,
+		worktreePath,
+		outputPath: runPaths.outputPath,
+	});
+
+	if (startComment) {
+		await createLinearIssueComment(issueId, startComment(child.pid ?? 'unknown', worktreePath));
+	}
+
+	child.once('error', async (error) => {
+		activeAutomations.delete(lockKey);
+		stdoutStream.end();
+		stderrStream.end();
+
+		try {
+			await createLinearIssueComment(
+				issueId,
+				`${getStageLabel(stage)} 작업을 시작하지 못했어요.\n${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			);
+		} catch (commentError) {
+			console.error(
+				`[linear-webhook] failed to publish ${stage} start error for ${issueCode}: ${
+					commentError instanceof Error ? commentError.message : String(commentError)
+				}`,
+			);
+		}
+	});
+
+	child.once('exit', async (code) => {
+		stdoutStream.end();
+		stderrStream.end();
+		activeAutomations.delete(lockKey);
+
+		try {
+			const finalMessage = await readFile(runPaths.outputPath, 'utf8').catch(() => '');
+			let completionError;
+
+			if (code === 0 && onSuccess) {
+				try {
+					await onSuccess(finalMessage);
+				} catch (error) {
+					completionError = error instanceof Error ? error.message : String(error);
+				}
+			}
+
+			if (completeComment) {
+				await createLinearIssueComment(
+					issueId,
+					completeComment(completionError ? 1 : (code ?? null), finalMessage, completionError),
+				);
+			}
+		} catch (error) {
+			console.error(
+				`[linear-webhook] failed to publish ${stage} result for ${issueCode}: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
+			);
+		}
+	});
+
+	console.log(`[linear-webhook] ${stage} session started for ${issueCode} (pid: ${child.pid ?? 'unknown'})`);
+}
+
 function buildPlannerPrompt(payload, worktreePath) {
 	const issueCode = getIssueCode(payload);
 	const issueTitle = getIssueTitle(payload);
@@ -233,6 +473,27 @@ ${issueDescription}
 - Linear 상태 변경 여부`;
 }
 
+function buildWorkerPrompt({ issueCode, issueTitle, planInfo, worktreePath, pullRequestUrl }) {
+	return `[플랫폼 엔지니어, 테스트 엔지니어]
+${planInfo.planStem} 플랜 구현 시작
+
+이슈 정보
+- 코드: ${issueCode}
+- 제목: ${issueTitle}
+- 플랜: ${planInfo.relativePath}
+- PR: ${pullRequestUrl}
+
+수행할 일
+1. AGENTS.md와 역할별 지침을 따른다.
+2. 플랜 체크리스트 기준으로 필요한 구현과 검증을 완료한다.
+3. 변경 파일을 모두 커밋하고 현재 PR 브랜치에 반드시 푸시한다.
+4. 작업 종료 시 worktree에 미커밋 변경이 남아 있으면 안 된다.
+5. 최종 응답에는 변경 파일, 검증 내용, 커밋/푸시 완료 여부를 간결히 적는다.
+
+작업 디렉토리
+- ${worktreePath}`;
+}
+
 async function startPlannerSession(payload) {
 	const repoRoot = await getRepoRoot();
 	const issueCode = getIssueCode(payload);
@@ -245,89 +506,99 @@ async function startPlannerSession(payload) {
 	}
 
 	const existingPullRequest = await findOpenPullRequestForIssue(repoRoot, issueCode);
+	const worktreePath = await ensureIssueWorktree(repoRoot, issueCode);
+	const codexBinary = await resolveCodexBinary();
+
 	if (existingPullRequest) {
-		console.log(`[linear-webhook] open PR already exists for ${issueCode}: ${existingPullRequest.url}`);
+		const planInfo = await findPlanPathForIssue(worktreePath, issueCode);
+		if (!planInfo) {
+			console.warn(
+				`[linear-webhook] open PR exists for ${issueCode} but no plan file was found in ${worktreePath}`,
+			);
+			return;
+		}
+
+		console.log(
+			`[linear-webhook] open PR already exists for ${issueCode}, continuing with worker stage: ${existingPullRequest.url}`,
+		);
+
+		const workerPrompt = buildWorkerPrompt({
+			issueCode,
+			issueTitle,
+			planInfo,
+			worktreePath,
+			pullRequestUrl: existingPullRequest.url,
+		});
+
+		await updateLinearIssueState(payload.data.id, payload.data.team.id, 'In Progress');
+
+		await startCodexSession({
+			codexBinary,
+			repoRoot,
+			issueCode,
+			issueId: payload.data.id,
+			stage: 'worker',
+			worktreePath,
+			prompt: workerPrompt,
+			startComment: () => buildStartStatusComment('worker'),
+			completeComment: (code, _finalMessage, completionError) =>
+				buildCompletionStatusComment('worker', code, completionError),
+			onSuccess: async () => {
+				await ensureWorkerCompletionCommitted(worktreePath);
+				await updateLinearIssueState(payload.data.id, payload.data.team.id, 'In Review');
+			},
+		});
 		return;
 	}
 
-	const worktreeRoot = dirname(repoRoot);
-	const worktreePath = join(worktreeRoot, `${basename(repoRoot)}-${issueCode.toLowerCase()}`);
-	const runDirectory = join(repoRoot, '.codex', 'linear-runs', issueCode.toLowerCase());
-	const outputPath = join(runDirectory, 'last-message.txt');
-	const stdoutPath = join(runDirectory, 'stdout.log');
-	const stderrPath = join(runDirectory, 'stderr.log');
-
-	await mkdir(runDirectory, { recursive: true });
-
-	if (!(await pathExists(worktreePath))) {
-		await runCommand('git', ['fetch', 'origin', 'main'], { cwd: repoRoot });
-		await runCommand('git', ['worktree', 'add', '--detach', worktreePath, 'origin/main'], {
-			cwd: repoRoot,
-		});
-	}
-
 	const plannerPrompt = buildPlannerPrompt(payload, worktreePath);
-	const stdoutStream = createWriteStream(stdoutPath, { flags: 'a' });
-	const stderrStream = createWriteStream(stderrPath, { flags: 'a' });
-
-	stdoutStream.write(`\n=== ${new Date().toISOString()} planner session start: ${issueCode} ===\n`);
-	stderrStream.write(`\n=== ${new Date().toISOString()} planner session start: ${issueCode} ===\n`);
-
-	const child = spawn(
-		'codex',
-		[
-			'exec',
-			'--dangerously-bypass-approvals-and-sandbox',
-			'-C',
-			worktreePath,
-			'-o',
-			outputPath,
-			plannerPrompt,
-		],
-		{
-			cwd: repoRoot,
-			env: process.env,
-			stdio: ['ignore', 'pipe', 'pipe'],
-		},
-	);
-
-	child.stdout.pipe(stdoutStream);
-	child.stderr.pipe(stderrStream);
-
-	activeAutomations.set(issueLockKey, {
+	await startCodexSession({
+		codexBinary,
+		repoRoot,
 		issueCode,
-		pid: child.pid ?? -1,
+		issueId: payload.data.id,
+		stage: 'planner',
 		worktreePath,
-		outputPath,
+		prompt: plannerPrompt,
+		startComment: () => buildStartStatusComment('planner'),
+		completeComment: (code, _finalMessage, completionError) =>
+			buildCompletionStatusComment('planner', code, completionError),
+		onSuccess: async () => {
+			const planInfo = await findPlanPathForIssue(worktreePath, issueCode);
+			if (!planInfo) {
+				throw new Error(`Planner completed but no plan file was found for ${issueCode}`);
+			}
+
+			const pullRequest = await findOpenPullRequestForIssue(repoRoot, issueCode);
+
+			const workerPrompt = buildWorkerPrompt({
+				issueCode,
+				issueTitle,
+				planInfo,
+				worktreePath,
+				pullRequestUrl:
+					pullRequest?.url ??
+					`https://github.com/riverleo/missions/pulls?q=is%3Apr+is%3Aopen+%5B${issueCode}%5D`,
+			});
+
+			await startCodexSession({
+				codexBinary,
+				repoRoot,
+				issueCode,
+				issueId: payload.data.id,
+				stage: 'worker',
+				worktreePath,
+				prompt: workerPrompt,
+				startComment: () => buildStartStatusComment('worker'),
+				completeComment: (code, _finalMessage, completionError) =>
+					buildCompletionStatusComment('worker', code, completionError),
+				onSuccess: async () => {
+					await ensureWorkerCompletionCommitted(worktreePath);
+					await updateLinearIssueState(payload.data.id, payload.data.team.id, 'In Review');
+				},
+			});
+		},
 	});
-
-	await createLinearIssueComment(
-		payload.data.id,
-		`플래너 자동화를 시작했습니다.\n\n- 이슈: ${issueCode}\n- 제목: ${issueTitle}\n- 작업 디렉토리: \`${worktreePath}\`\n- PID: ${child.pid ?? 'unknown'}`,
-	);
-
-	child.once('exit', async (code) => {
-		stdoutStream.end();
-		stderrStream.end();
-		activeAutomations.delete(issueLockKey);
-
-		try {
-			const finalMessage = await readFile(outputPath, 'utf8').catch(() => '');
-			const statusLine = code === 0 ? '플래너 자동화가 완료되었습니다.' : `플래너 자동화가 실패했습니다. (exit: ${code ?? 'null'})`;
-			await createLinearIssueComment(
-				payload.data.id,
-				`${statusLine}\n\n${finalMessage || '최종 메시지를 읽지 못했습니다.'}`,
-			);
-		} catch (error) {
-			console.error(
-				`[linear-webhook] failed to publish planner result for ${issueCode}: ${
-					error instanceof Error ? error.message : String(error)
-				}`,
-			);
-		}
-	});
-
-	console.log(`[linear-webhook] planner session started for ${issueCode} (pid: ${child.pid ?? 'unknown'})`);
 }
 
 async function mergePullRequestForIssue(payload) {
@@ -353,6 +624,23 @@ async function mergePullRequestForIssue(payload) {
 	console.log(`[linear-webhook] merged PR for ${issueCode}: ${matchingPullRequest.url}`);
 }
 
+async function closePullRequestForIssue(payload) {
+	const repoRoot = await getRepoRoot();
+	const issueCode = getIssueCode(payload);
+	const matchingPullRequest = await findOpenPullRequestForIssue(repoRoot, issueCode);
+
+	if (!matchingPullRequest) {
+		console.warn(`[linear-webhook] no open PR found for ${issueCode}, skipping close`);
+		return;
+	}
+
+	await runCommand('gh', ['pr', 'close', String(matchingPullRequest.number), '--delete-branch'], {
+		cwd: repoRoot,
+	});
+
+	console.log(`[linear-webhook] closed PR for ${issueCode}: ${matchingPullRequest.url}`);
+}
+
 export async function handleWorkflowEvent(payload) {
 	const processedEventKey = getProcessedEventKey(payload);
 	if (processedEvents.has(processedEventKey)) {
@@ -370,6 +658,16 @@ export async function handleWorkflowEvent(payload) {
 		if (isIssueDone(payload)) {
 			await mergePullRequestForIssue(payload);
 			await updateLinearIssueState(payload.data.id, payload.data.team.id, 'Done').catch(() => undefined);
+			return;
+		}
+
+		if (isIssueCanceled(payload)) {
+			await closePullRequestForIssue(payload);
+			return;
+		}
+
+		if (isIssueRemoved(payload)) {
+			await closePullRequestForIssue(payload);
 		}
 	} finally {
 		setTimeout(() => processedEvents.delete(processedEventKey), 5 * 60 * 1000).unref?.();
