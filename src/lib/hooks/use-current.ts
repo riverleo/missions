@@ -8,7 +8,7 @@ import { TICK_INTERVAL } from '$lib/constants';
 let instance: ReturnType<typeof createCurrentStore> | undefined = undefined;
 
 function createCurrentStore() {
-	const { supabase, user: serverUser } = useApp();
+	const { supabase } = useApp();
 
 	const userStore = writable<User | undefined>(undefined);
 	const roleStore = writable<UserRole | undefined>(undefined);
@@ -68,12 +68,14 @@ function createCurrentStore() {
 	function init() {
 		if (initialized) return;
 		initialized = true;
-		fetchUser();
+		void refreshUser();
 	}
 
-	async function fetchUser() {
+	async function refreshUser() {
+		// 최신 layout context와 auth 세션을 기준으로 사용자/역할 스토어를 다시 맞춘다.
 		try {
 			let user: User | null = null;
+			const serverUser = useApp().user;
 
 			// 서버에서 전달받은 user가 있으면 사용
 			if (serverUser) {
@@ -91,7 +93,10 @@ function createCurrentStore() {
 			if (!user) {
 				userStore.set(undefined);
 				roleStore.set(undefined);
-				return;
+				return {
+					user: undefined,
+					role: undefined,
+				};
 			}
 
 			userStore.set(user);
@@ -103,11 +108,21 @@ function createCurrentStore() {
 				.eq('user_id', user.id)
 				.maybeSingle();
 
-			roleStore.set((role ?? undefined) as UserRole | undefined);
+			const nextRole = (role ?? undefined) as UserRole | undefined;
+			roleStore.set(nextRole);
+
+			return {
+				user,
+				role: nextRole,
+			};
 		} catch (error) {
 			console.error('Failed to fetch user:', error);
 			userStore.set(undefined);
 			roleStore.set(undefined);
+			return {
+				user: undefined,
+				role: undefined,
+			};
 		}
 	}
 
@@ -163,6 +178,7 @@ function createCurrentStore() {
 		playerScenarioStore: playerScenarioStore as Readable<PlayerScenario | undefined>,
 		tickStore: tickStore as Readable<number>,
 		init,
+		refreshUser,
 		stopTick,
 		selectPlayer,
 		getTick,
