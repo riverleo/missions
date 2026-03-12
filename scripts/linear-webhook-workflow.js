@@ -9,7 +9,7 @@ const processedEvents = new Set();
 const activeAutomations = new Map();
 const pendingReplans = new Map();
 const DEFAULT_CODEX_BIN = '/Applications/Codex.app/Contents/Resources/codex';
-const AUTOMATION_COMMENT_MARKER = '<!-- linear-webhook:automation -->';
+const AUTOMATION_COMMENT_PREFIXES = ['[플래너] ', '[플랫폼 엔지니어, 테스트 엔지니어] '];
 
 function getIssueCode(payload) {
 	return payload?.data?.identifier ?? payload?.data?.issue?.identifier;
@@ -70,7 +70,8 @@ function isCommentEvent(payload) {
 }
 
 function isAutomationComment(payload) {
-	return getCommentBody(payload).includes(AUTOMATION_COMMENT_MARKER);
+	const body = getCommentBody(payload);
+	return AUTOMATION_COMMENT_PREFIXES.some((prefix) => body.startsWith(prefix));
 }
 
 function isUserReplanComment(payload) {
@@ -334,7 +335,7 @@ function getStageLabel(stage) {
 }
 
 function formatAutomationComment(role, message, detail) {
-	const lines = [AUTOMATION_COMMENT_MARKER, `[${role}] ${message}`];
+	const lines = [`[${role}] ${message}`];
 	if (detail) {
 		lines.push(detail);
 	}
@@ -915,7 +916,7 @@ export async function handleWorkflowEvent(payload) {
 }
 
 export const __test__ = {
-	AUTOMATION_COMMENT_MARKER,
+	AUTOMATION_COMMENT_PREFIXES,
 	buildCompletionStatusComment,
 	buildReplanPrompt,
 	buildStartStatusComment,

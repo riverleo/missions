@@ -2,17 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { __test__ } from '../../scripts/linear-webhook-workflow.js';
 
 describe('linear webhook workflow comment formatting', () => {
-	it('자동화 코멘트는 숨김 마커와 역할 프리픽스를 함께 포함한다.', () => {
+	it('자동화 코멘트는 역할 프리픽스로 시작한다.', () => {
 		const comment = __test__.buildStartStatusComment('planner');
 
-		expect(comment).toContain(__test__.AUTOMATION_COMMENT_MARKER);
+		expect(comment.startsWith('[플래너] ')).toBe(true);
 		expect(comment).toContain('[플래너] 플랜 작성을 시작했습니다.');
 	});
 
 	it('재플래닝 완료 코멘트는 역할 프리픽스를 유지한다.', () => {
 		const comment = __test__.buildCompletionStatusComment('worker', 0, undefined, 'replan');
 
-		expect(comment).toContain(__test__.AUTOMATION_COMMENT_MARKER);
 		expect(comment).toContain(
 			'[플랫폼 엔지니어, 테스트 엔지니어] 수정 사항 반영 작업을 완료했습니다.'
 		);
@@ -54,7 +53,7 @@ describe('linear webhook workflow replan comment detection', () => {
 			type: 'Comment',
 			action: 'create',
 			data: {
-				body: `${__test__.AUTOMATION_COMMENT_MARKER}\n[플래너] 플랜 작성을 완료했습니다.`,
+				body: '[플래너] 플랜 작성을 완료했습니다.',
 				issue: {
 					identifier: 'OOA-11',
 				},
