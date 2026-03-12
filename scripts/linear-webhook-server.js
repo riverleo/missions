@@ -1,7 +1,55 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { createServer } from 'node:http';
 
 const PORT = 3000;
 const WEBHOOK_PATH = '/linear/webhook';
+const LINEAR_SIGNATURE_HEADER = 'linear-signature';
+const DEFAULT_WEBHOOK_MAX_AGE_MS = 60 * 1000;
+
+function getWebhookSecret() {
+	return process.env.LINEAR_WEBHOOK_SECRET;
+}
+
+function getWebhookMaxAgeMs() {
+	const value = Number(process.env.LINEAR_WEBHOOK_MAX_AGE_MS ?? DEFAULT_WEBHOOK_MAX_AGE_MS);
+	return Number.isFinite(value) && value > 0 ? value : DEFAULT_WEBHOOK_MAX_AGE_MS;
+}
+
+/**
+ * Platform engineer spec:
+ * Verify the Linear HMAC signature against the exact raw body bytes.
+ */
+function verifySignature(headerSignatureString, rawBody) {
+	const webhookSecret = getWebhookSecret();
+	if (!webhookSecret) {
+		return false;
+	}
+
+	if (typeof headerSignatureString !== 'string' || !headerSignatureString.length) {
+		return false;
+	}
+
+	const computedSignature = createHmac('sha256', webhookSecret).update(rawBody).digest();
+	const headerSignature = Buffer.from(headerSignatureString, 'hex');
+
+	if (headerSignature.length !== computedSignature.length) {
+		return false;
+	}
+
+	return timingSafeEqual(computedSignature, headerSignature);
+}
+
+/**
+ * Platform engineer spec:
+ * Reject webhook payloads that fall outside Linear's recommended replay window.
+ */
+function isTimestampCurrent(jsonBody) {
+	if (!jsonBody || typeof jsonBody !== 'object' || typeof jsonBody.webhookTimestamp !== 'number') {
+		return false;
+	}
+
+	return Math.abs(Date.now() - jsonBody.webhookTimestamp) <= getWebhookMaxAgeMs();
+}
 
 /**
  * Platform engineer spec:
@@ -15,7 +63,7 @@ function getRequestSummary(request, rawBody) {
 		headers: {
 			'user-agent': request.headers['user-agent'],
 			'content-type': request.headers['content-type'],
-			'linear-signature': request.headers['linear-signature'],
+			'linear-signature': request.headers[LINEAR_SIGNATURE_HEADER],
 		},
 		body: rawBody,
 	};
@@ -44,6 +92,7 @@ async function readJsonBody(request) {
 	// Parse JSON only when the payload is present; invalid JSON is reported to the client.
 	return {
 		rawBody,
+		rawBodyBuffer: Buffer.concat(chunks),
 		jsonBody: JSON.parse(rawBody),
 	};
 }
@@ -62,7 +111,24 @@ const server = createServer(async (request, response) => {
 	}
 
 	try {
-		const { rawBody, jsonBody } = await readJsonBody(request);
+		const { rawBody, rawBodyBuffer, jsonBody } = await readJsonBody(request);
+
+		if (getWebhookSecret()) {
+			if (!verifySignature(request.headers[LINEAR_SIGNATURE_HEADER], rawBodyBuffer)) {
+				response.writeHead(401, { 'content-type': 'application/json' });
+				response.end(JSON.stringify({ ok: false, message: 'Invalid Linear signature' }));
+				return;
+			}
+
+			if (!isTimestampCurrent(jsonBody)) {
+				response.writeHead(401, { 'content-type': 'application/json' });
+				response.end(JSON.stringify({ ok: false, message: 'Expired webhook timestamp' }));
+				return;
+			}
+		} else {
+			console.warn('[linear-webhook] LINEAR_WEBHOOK_SECRET not set, skipping signature verification');
+		}
+
 		const summary = getRequestSummary(request, jsonBody ?? rawBody);
 
 		console.log('[linear-webhook] request received');
