@@ -32,9 +32,9 @@ Linear 웹훅 이벤트를 로컬 개발 환경에서 수신할 수 있도록 No
 - [x] Linear `signing secret`을 환경 변수로 주입받고 raw body 기준 `Linear-Signature` 검증을 수행하도록 서버를 확장한다.
 - [x] `webhookTimestamp`를 활용한 허용 시간 검증을 추가하고 검증 실패 시 `401` 또는 `403` 응답으로 거부하도록 처리한다.
 - [x] 로컬 개발용 우회 동작이 필요하다면 조건과 기본값을 코드 및 환경 변수 기준으로 명확히 정리한다.
-- [ ] Linear `Issue`/`Comment` 웹훅 payload에서 상태 전이와 이슈 식별자를 파싱하는 자동화 엔트리 포인트를 설계하고 구현한다.
-- [ ] `Todo` 전환 시 플래너 플랜 작성, PR 생성, 상태를 `In Progress`로 갱신하는 자동 실행 흐름을 구현한다.
-- [ ] `Done` 전환 시 연결된 PR 머지를 수행하는 자동 실행 흐름을 구현한다.
+- [x] Linear `Issue`/`Comment` 웹훅 payload에서 상태 전이와 이슈 식별자를 파싱하는 자동화 엔트리 포인트를 설계하고 구현한다.
+- [x] `Todo` 전환 시 플래너 플랜 작성, PR 생성, 상태를 `In Progress`로 갱신하는 자동 실행 흐름을 구현한다.
+- [x] `Done` 전환 시 연결된 PR 머지를 수행하는 자동 실행 흐름을 구현한다.
 
 ### 테스트 엔지니어
 - [x] 로컬에서 웹훅 서버 실행 후 `POST` 요청으로 `200` 응답이 반환되는지 검증한다.
@@ -76,3 +76,8 @@ Linear 웹훅 이벤트를 로컬 개발 환경에서 수신할 수 있도록 No
 - `Done`: 사용자가 승인 후 에이전트가 PR 머지 수행.
 - 사용자 요구사항: PR 제목은 `[이슈코드] 제목` 형식을 사용.
 - 사용자 요구사항: 플랜 파일 최상단에 이슈 코드와 링크를 명시.
+- 구현: `scripts/linear-webhook-workflow.js`를 추가해 `Todo` 상태 전환 시 전용 worktree와 `codex exec` 플래너 세션을 자동 기동.
+- 구현: 자동 플래너 세션 로그와 마지막 응답을 `.codex/linear-runs/<issue-code>/`에 기록.
+- 구현: `Done` 상태 전환 시 `[이슈코드]` 형식의 열린 PR을 찾아 `gh pr merge`로 머지하도록 연결.
+- 환경 변수 구조 확장: `.env.example`에 `LINEAR_API_KEY`, `GITHUB_PR_MERGE_METHOD` 추가.
+- 실행 스크립트: `pnpm webhook:linear`가 Node `--env-file-if-exists=.env` 옵션으로 루트 `.env`를 자동 로드하도록 구성.

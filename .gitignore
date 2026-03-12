@@ -20,6 +20,9 @@ Thumbs.db
 !.env.example
 !.env.test
 
+# Local automation runtime artifacts
+.codex/linear-runs
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
