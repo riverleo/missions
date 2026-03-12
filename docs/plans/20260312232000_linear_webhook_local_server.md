@@ -80,3 +80,4 @@ Linear 웹훅 이벤트를 로컬 개발 환경에서 수신할 수 있도록 No
 - 구현: 자동 플래너 세션 로그와 마지막 응답을 `.codex/linear-runs/<issue-code>/`에 기록.
 - 구현: `Done` 상태 전환 시 `[이슈코드]` 형식의 열린 PR을 찾아 `gh pr merge`로 머지하도록 연결.
 - 환경 변수 구조 확장: `.env.example`에 `LINEAR_API_KEY`, `GITHUB_PR_MERGE_METHOD` 추가.
+- 실행 스크립트: `pnpm webhook:linear`가 Node `--env-file-if-exists=.env` 옵션으로 루트 `.env`를 자동 로드하도록 구성.
