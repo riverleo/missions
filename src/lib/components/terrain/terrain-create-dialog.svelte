@@ -1,0 +1,78 @@
+<script lang="ts">
+	import { useTerrain } from '$lib/hooks';
+	import { Button } from '$lib/components/ui/button';
+	import {
+		Dialog,
+		DialogContent,
+		DialogFooter,
+		DialogHeader,
+		DialogTitle,
+	} from '$lib/components/ui/dialog';
+	import { InputGroup, InputGroupInput, InputGroupAddon } from '$lib/components/ui/input-group';
+	import { IconHeading } from '@tabler/icons-svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import type { ScenarioId } from '$lib/types';
+	import { getActionString, getFormString } from '$lib/utils/label';
+
+	const { admin, terrainDialogStore, closeTerrainDialog } = useTerrain();
+	const scenarioId = $derived(page.params.scenarioId as ScenarioId);
+
+	const open = $derived($terrainDialogStore?.type === 'create');
+
+	let title = $state('');
+	let isSubmitting = $state(false);
+
+	$effect(() => {
+		if (open) {
+			title = '';
+		}
+	});
+
+	function onOpenChange(value: boolean) {
+		if (!value) {
+			closeTerrainDialog();
+		}
+	}
+
+	function onsubmit(e: SubmitEvent) {
+		e.preventDefault();
+		if (!title.trim() || isSubmitting) return;
+
+		isSubmitting = true;
+
+		admin
+			.createTerrain(scenarioId, { title: title.trim() })
+			.then((terrain) => {
+				closeTerrainDialog();
+				goto(`/scenarios/${scenarioId}/terrains/${terrain.id}`);
+			})
+			.catch((error) => {
+				console.error('Failed to create terrain:', error);
+			})
+			.finally(() => {
+				isSubmitting = false;
+			});
+	}
+</script>
+
+<Dialog {open} {onOpenChange}>
+	<DialogContent>
+		<DialogHeader>
+			<DialogTitle>새로운 지형 생성</DialogTitle>
+		</DialogHeader>
+		<form {onsubmit} class="space-y-6">
+			<InputGroup>
+				<InputGroupAddon align="inline-start">
+					<IconHeading class="size-4" />
+				</InputGroupAddon>
+				<InputGroupInput placeholder={getFormString("title")} bind:value={title} />
+			</InputGroup>
+			<DialogFooter>
+				<Button type="submit" disabled={isSubmitting}>
+					{isSubmitting ? getActionString('creating') : getActionString('createAction')}
+				</Button>
+			</DialogFooter>
+		</form>
+	</DialogContent>
+</Dialog>
